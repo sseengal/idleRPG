@@ -76,7 +76,7 @@ namespace IdleRPG.EditorTools
                 .Set("normalWavesPerStage", 10)
                 .Set("enemiesPerWave", 1)
                 .Set("gemsPerBossKill", 1)
-                .Set("waveTransitionDelaySec", 0.35f)
+                .Set("waveTransitionDelaySec", 0.6f)
                 .Set("minDamageRatio", 0.15f)
                 .Set("criticalChance", 0.05f)
                 .Set("criticalDamageMultiplier", 2f)
@@ -88,6 +88,7 @@ namespace IdleRPG.EditorTools
                 .Set("resetAutoRetryOnDefeat", true)
                 .Set("scaleEnemyDefenseWithStage", false)
                 .Set("logCombatToConsole", true)
+                .Set("combatPaceMultiplier", 1.6f)
                 .Set("upgradeCostGrowth", 1.07f)
                 .Set("upgradeStatGainPerLevel", 0.1f)
                 .Set("prestigeStageDivisor", 10f)
@@ -164,8 +165,8 @@ namespace IdleRPG.EditorTools
             enemies.Add(CreateEnemy("Enemy_Bat", "Bat", 90f, 9f, 1f, 12f, 1.6f, false, 1f, 1f, new Color(0.6f, 0.4f, 0.3f, 1f)));
             enemies.Add(CreateEnemy("Enemy_Goblin", "Goblin", 130f, 12f, 3f, 18f, 1.8f, false, 1f, 1f, new Color(0.4f, 0.75f, 0.35f, 1f)));
 
-            // Stage-1 boss: 100 x5 = 500 HP (~35s) and ~150 gold (about half a stage income).
-            enemies.Add(CreateEnemy("Boss_Ogre", "Ogre Chieftain", 100f, 20f, 5f, 25f, 2.5f, true, 5f, 6f, new Color(0.85f, 0.25f, 0.2f, 1f)));
+            // Stage-1 boss: 100 x4 = 400 HP (about a third of the stage) and ~150 gold.
+            enemies.Add(CreateEnemy("Boss_Ogre", "Ogre Chieftain", 100f, 20f, 5f, 25f, 2.5f, true, 4f, 6f, new Color(0.85f, 0.25f, 0.2f, 1f)));
 
             return enemies;
         }

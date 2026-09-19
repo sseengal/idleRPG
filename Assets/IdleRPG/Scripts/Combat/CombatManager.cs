@@ -211,6 +211,7 @@ namespace IdleRPG.Combat
             scaling.MinDamageRatio = balanceConfig.MinDamageRatio;
             scaling.CriticalChance = balanceConfig.CriticalChance;
             scaling.CriticalDamageMultiplier = balanceConfig.CriticalDamageMultiplier;
+            scaling.PaceMultiplier = balanceConfig.CombatPaceMultiplier;
 
             return scaling.Sanitized();
         }

@@ -112,7 +112,7 @@ namespace IdleRPG.Combat
                     statProvider.GetMaxHealth(data, index),
                     statProvider.GetAttack(data, index),
                     statProvider.GetDefense(data, index),
-                    statProvider.GetAttackInterval(data, index));
+                    ScaledInterval(statProvider.GetAttackInterval(data, index)));
 
                 index++;
             }
@@ -141,7 +141,7 @@ namespace IdleRPG.Combat
                     statProvider.GetMaxHealth(hero.Data, hero.Index),
                     statProvider.GetAttack(hero.Data, hero.Index),
                     statProvider.GetDefense(hero.Data, hero.Index),
-                    statProvider.GetAttackInterval(hero.Data, hero.Index));
+                    ScaledInterval(statProvider.GetAttackInterval(hero.Data, hero.Index)));
             }
         }
 
@@ -330,6 +330,13 @@ namespace IdleRPG.Combat
             }
 
             return best;
+        }
+
+        /// <summary>Applies the game-pace multiplier to an attack interval.</summary>
+        private double ScaledInterval(double baseIntervalSec)
+        {
+            double scaled = baseIntervalSec * scaling.PaceMultiplier;
+            return scaled < 0.1d ? 0.1d : scaled;
         }
 
         private void RecountAliveHeroes()

@@ -20,6 +20,6 @@ MonoBehaviour:
   baseGoldDrop: 25
   isBoss: 1
   attackIntervalSec: 2.5
-  bossHealthMultiplier: 5
+  bossHealthMultiplier: 4
   bossGoldMultiplier: 6
   placeholderTint: {r: 0.85, g: 0.25, b: 0.2, a: 1}

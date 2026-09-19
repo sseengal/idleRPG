@@ -28,10 +28,10 @@ namespace IdleRPG.UI
         [SerializeField] private int poolSize = 24;
 
         [Tooltip("New lines allowed per second; extras are summarised.")]
-        [SerializeField] private int maxLinesPerSecond = 6;
+        [SerializeField] private int maxLinesPerSecond = 3;
 
         [Tooltip("Repeated hits from the same attacker within this window merge into one line.")]
-        [SerializeField] private float aggregateWindowSec = 0.25f;
+        [SerializeField] private float aggregateWindowSec = 0.35f;
 
         [Tooltip("Line height in reference pixels.")]
         [SerializeField] private float lineHeight = 34f;

@@ -18,7 +18,7 @@ MonoBehaviour:
   normalWavesPerStage: 10
   enemiesPerWave: 1
   gemsPerBossKill: 1
-  waveTransitionDelaySec: 0.35
+  waveTransitionDelaySec: 0.6
   minDamageRatio: 0.15
   criticalChance: 0.05
   criticalDamageMultiplier: 2
@@ -30,6 +30,7 @@ MonoBehaviour:
   resetAutoRetryOnDefeat: 1
   scaleEnemyDefenseWithStage: 0
   logCombatToConsole: 1
+  combatPaceMultiplier: 1.6
   resetHeroLevelsOnAscension: 1
   upgradeCostGrowth: 1.07
   upgradeStatGainPerLevel: 0.1

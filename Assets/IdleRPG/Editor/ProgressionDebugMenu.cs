@@ -15,6 +15,8 @@ namespace IdleRPG.EditorTools
     public static class ProgressionDebugMenu
     {
         private const string ConfigFolder = "Assets/IdleRPG/Data/Config";
+        private const string HeroFolder = "Assets/IdleRPG/Data/Heroes";
+        private const string EnemyFolder = "Assets/IdleRPG/Data/Enemies";
 
         [MenuItem("Tools/Idle RPG/Debug/Log Balance Summary", priority = 40)]
         public static void LogBalanceSummary()
@@ -76,6 +78,9 @@ namespace IdleRPG.EditorTools
                                    $"~{NumberFormatter.Format(total)} tokens for x{goldPrestige.GetMultiplier(goldPrestige.MaxLevel):0.00}");
             }
 
+            builder.AppendLine("-- Pace (knob: BalanceConfig.combatPaceMultiplier) --");
+            AppendPaceSummary(builder, balance);
+
             builder.Append("  Token yield by highest stage: ");
 
             for (int stage = 10; stage <= 100; stage += 10)
@@ -85,6 +90,107 @@ namespace IdleRPG.EditorTools
 
             builder.AppendLine();
             Debug.Log(builder.ToString());
+        }
+
+        /// <summary>
+        /// Estimates a full stage at the current pace. This is the number to watch while tuning:
+        /// pace changes wall-clock time only, damage/health/gold ratios stay untouched.
+        /// </summary>
+        private static void AppendPaceSummary(StringBuilder builder, BalanceConfig balance)
+        {
+            PartyConfig party = AssetDatabase.LoadAssetAtPath<PartyConfig>(ConfigFolder + "/PartyConfig.asset");
+            WaveConfig waves = AssetDatabase.LoadAssetAtPath<WaveConfig>(ConfigFolder + "/WaveConfig.asset");
+
+            if (party == null || waves == null)
+            {
+                builder.AppendLine("  party/wave config missing");
+                return;
+            }
+
+            double pace = balance.CombatPaceMultiplier;
+            double critFactor = 1d + balance.CriticalChance * (balance.CriticalDamageMultiplier - 1d);
+            int normalWaves = balance.NormalWavesPerStage;
+            int poolSize = Mathf.Max(1, waves.NormalEnemyCount);
+            double wavesPerEnemy = normalWaves / (double)poolSize;
+
+            builder.AppendLine(string.Format("  pace x{0:0.##} -> attacks per hero are {1:0}% slower | crit factor x{2:0.###}",
+                pace, (pace - 1f) * 100f, critFactor));
+
+            double stageSeconds = 0d;
+
+            for (int i = 0; i < poolSize; i++)
+            {
+                EnemyData enemy = waves.GetEnemyFor(1, i + 1, normalWaves);
+                if (enemy == null)
+                {
+                    continue;
+                }
+
+                double dps = PartyDpsAgainst(enemy.BaseDefense, party, balance) * critFactor;
+                double health = FormulaUtility.EnemyMaxHealth(enemy.BaseHealth, 1, balance.EnemyHealthGrowth);
+                double ttk = dps <= 0d ? 0d : health / dps;
+                stageSeconds += ttk * wavesPerEnemy;
+
+                builder.AppendLine(string.Format("  {0,-16} {1,7:0} HP  TTK {2,6:0.0}s  x{3:0.#} waves",
+                    enemy.EnemyName, health, ttk, wavesPerEnemy));
+            }
+
+            EnemyData boss = waves.GetEnemyFor(1, normalWaves + 1, normalWaves);
+            if (boss != null)
+            {
+                double bossDps = PartyDpsAgainst(boss.BaseDefense, party, balance) * critFactor;
+                double bossHealth = FormulaUtility.EnemyMaxHealth(boss.BaseHealth, 1, balance.EnemyHealthGrowth) * boss.BossHealthMultiplier;
+                double bossTtk = bossDps <= 0d ? 0d : bossHealth / bossDps;
+                stageSeconds += bossTtk;
+                builder.AppendLine(string.Format("  {0,-16} {1,7:0} HP  TTK {2,6:0.0}s  (boss)",
+                    boss.EnemyName, bossHealth, bossTtk));
+            }
+
+            stageSeconds += (normalWaves + 1) * balance.WaveTransitionDelaySec;
+            double seconds = Mathf.Max(1f, (float)stageSeconds);
+
+            builder.AppendLine(string.Format("  full stage estimate: {0:0}s ({1:0.0} min)", stageSeconds, stageSeconds / 60d));
+
+            double goldPerStage = 0d;
+            for (int i = 0; i < poolSize; i++)
+            {
+                EnemyData enemy = waves.GetEnemyFor(1, i + 1, normalWaves);
+                if (enemy != null)
+                {
+                    goldPerStage += FormulaUtility.EnemyGoldDrop(enemy.BaseGoldDrop, 1, balance.EnemyGoldGrowth) * wavesPerEnemy;
+                }
+            }
+
+            if (boss != null)
+            {
+                goldPerStage += FormulaUtility.EnemyGoldDrop(boss.BaseGoldDrop, 1, balance.EnemyGoldGrowth) * boss.BossGoldMultiplier;
+            }
+
+            double goldPerSecond = goldPerStage / seconds;
+            double firstUpgrade = FormulaUtility.StatUpgradeCost(10d, 0, balance.UpgradeCostGrowth);
+
+            builder.AppendLine(string.Format("  gold/stage {0} -> {1:0.0} gold/s -> first ATK level every {2:0.0}s",
+                NumberFormatter.Format(goldPerStage), goldPerSecond, firstUpgrade / Mathf.Max(0.01f, (float)goldPerSecond)));
+        }
+
+        private static double PartyDpsAgainst(double enemyDefense, PartyConfig party, BalanceConfig balance)
+        {
+            double pace = balance.CombatPaceMultiplier;
+            double dps = 0d;
+
+            for (int i = 0; i < PartyConfig.DesiredPartySize; i++)
+            {
+                HeroData hero = party.GetHero(i);
+                if (hero == null)
+                {
+                    continue;
+                }
+
+                double interval = Mathf.Max(0.1f, hero.AttackIntervalSec * (float)pace);
+                dps += FormulaUtility.Damage(hero.BaseAttack, enemyDefense, balance.MinDamageRatio) / interval;
+            }
+
+            return dps;
         }
 
         [MenuItem("Tools/Idle RPG/Debug/Grant 100K Gold (Play Mode)", priority = 41)]

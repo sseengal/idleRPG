@@ -159,10 +159,16 @@ Headless logic only (views moved to Step 4, matching Phase 2 = "debug logs").
       `CombatSimulator.Step` + `CombatLogUI.Update` via reflection)
 - [ ] **user test**: focus the Editor, Play, read the feed under the battle screen
 
-### Step 4c — Page split + full scrolling  `[PENDING]`
-- [ ] `ScreenController`: BattlePage / ManagementPage + bottom nav (Upgrades / Ascend / Shop)
-- [ ] ScrollRect on upgrades + prestige lists
-- [ ] user test: scroll both pages, switch tabs
+### Step 4c — Page split + full scrolling  `[DONE 2026-09-19]`
+- [x] `ScreenController` — BattlePage / ManagementPage + 4-button nav bar (BATTLE / UPGRADES / ASCEND / SHOP)
+      with active highlight; nav jumps straight to a tab; combat keeps running while browsing
+- [x] page shell: header 88-100% | pages 12-88% | nav bar 0-12%
+- [x] battle page: viewport 38-100% of the page, combat log 0-38%
+- [x] management page: tab bar 90-100%, panels 0-90%
+- [x] `ScrollRect` + `RectMask2D` on the upgrades list, the prestige list and the combat log
+      (uGUI mouse-wheel + drag both work; EventSystem already present)
+- [x] verified: page switching, 4 nav buttons, 3 scroll views, live attack intervals x1.6
+- [ ] **user test**: focus the Editor, Play, switch pages, scroll the lists
 
 ### Step 5 — Persistence (Phase 5)  `[PENDING]`
 - [ ] `SaveSystem.cs` (JsonUtility, version, atomic write, persistentDataPath/savegame.json)
@@ -301,6 +307,52 @@ Bugs found and fixed on the way:
 
 ---
 
+## 11. Pacing & Balance Knobs (single source of truth)
+
+**`BalanceConfig.combatPaceMultiplier` is THE game-pace knob.** It multiplies every unit's attack
+interval (heroes *and* enemies), so it stretches wall-clock time while leaving every ratio intact:
+
+| Untouched by pace | Stretched by pace |
+|---|---|
+| damage per hit, HP, DEF mitigation, crit rate | attacks per second |
+| gold per kill, upgrade costs, token yield | seconds per wave / stage / boss |
+| healing, defeat pressure (damage taken per kill) | how fast the log scrolls |
+
+So difficulty tuning never needs a re-rebalance: change enemy HP/gold/attack growth for difficulty,
+change `combatPaceMultiplier` for feel. Shipped value: **1.6** (was effectively 1.0).
+
+**Watch it with `Tools > Idle RPG > Debug > Log Balance Summary`** (now prints a Pace block):
+```
+-- Pace (knob: BalanceConfig.combatPaceMultiplier) --
+  pace x1.6 -> attacks per hero are 60% slower | crit factor x1.05
+  Slime                 60 HP  TTK    3.8s  x3.3 waves
+  Bat                   90 HP  TTK    6.3s  x3.3 waves
+  Goblin               130 HP  TTK   11.3s  x3.3 waves
+  Ogre Chieftain       400 HP  TTK   46.3s  (boss)
+  full stage estimate: 124s (2.1 min)
+  gold/stage 276 -> 2.2 gold/s -> first ATK level every 4.5s
+```
+Other knobs that shape pacing (all in `BalanceConfig`): `normalWavesPerStage` (10),
+`waveTransitionDelaySec` (0.6), `enemyHealthGrowth` 1.15, `enemyGoldGrowth` 1.12,
+`enemyAttackGrowth` 1.08, `upgradeCostGrowth` 1.07, `minDamageRatio` 0.15.
+Boss multipliers live on `Boss_Ogre` (`BossHealthMultiplier` 4, `BossGoldMultiplier` 6).
+
+---
+
+## 12. Step 4c Verification Results
+```
+[S1] rows=3 upgradeContent=748 | prestigeRows=3 prestigeContent=372 | navButtons=4
+[S2] after ShowManagement(1): battleActive=False managementActive=True isManagementOpen=True
+[S3] after ShowBattle(): battleActive=True managementActive=False
+[T1] pace=1.60 | Knight interval=2.40 | Archer interval=1.60 | Mage interval=3.20 | enemy interval=3.20
+[T2] battlePageActive=True managementVisible=False scrollViews=3
+```
+Scene contains `BattlePage`, `ManagementPage`, `NavBar`, `UpgradeScroll`, `PrestigeScroll`, `CombatLog`.
+Scroll content heights exceed their viewports, so both lists scroll (and fit entirely on a 1080x1920
+portrait screen, which is why the old fixed dock felt broken only in landscape).
+
+---
+
 ## 4. Open Risks / Watch Items
 - Unity **6000.6.0f1** (not 2022.3 LTS) — APIs used are version-stable.
 - New Input System only (`activeInputHandler = 1`) -> EventSystem needs `InputSystemUIInputModule`.
@@ -341,3 +393,8 @@ Bugs found and fixed on the way:
 - **Step 4b** (2026-09-19): Combat log landed (`CombatLogUI`, `AttackerIndex` payload field,
   `UiFactory.CreateScrollView`). Scene builder ordering bug fixed (stale asset refs -> unwired scene).
   Log verified headlessly with real formatted output.
+
+- **Step 4c + pacing** (2026-09-19): Two-page shell (`ScreenController` + nav bar), ScrollRect/RectMask2D
+  on upgrades, prestige and the combat log. New single-knob game pace `combatPaceMultiplier` = 1.6
+  (stage 124s vs 88s before), boss trimmed x5 -> x4, transition 0.6s, log rate 3/s. Balance summary
+  tool now prints per-enemy TTK, full-stage estimate and gold/sec so pacing stays measurable.

@@ -75,7 +75,7 @@ namespace IdleRPG.Combat
                 MaxHealth = FormulaUtility.Sanitize(maxHealth, 1d),
                 Attack = FormulaUtility.Sanitize(FormulaUtility.EnemyAttack(data.BaseAttack, safeStage, scaling.EnemyAttackGrowth)),
                 Defense = FormulaUtility.Sanitize(defense),
-                AttackIntervalSec = data.AttackIntervalSec,
+                AttackIntervalSec = data.AttackIntervalSec * scaling.PaceMultiplier,
                 GoldReward = CombatRewardCalculator.CalculateGold(data, safeStage, isBoss, scaling, externalGoldMultiplier)
             };
 

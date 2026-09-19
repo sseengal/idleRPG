@@ -81,6 +81,12 @@ namespace IdleRPG.Data
         [Tooltip("Print combat and wave events to the console.")]
         [SerializeField] private bool logCombatToConsole = true;
 
+        [Tooltip("GAME PACE. Multiplies every unit's attack interval (heroes AND enemies). " +
+                 "1 = shipped speeds, 1.6 = ~60% slower. Wall-clock only: damage, health, gold and " +
+                 "upgrade ratios are untouched, so raising difficulty never needs a rebalance.")]
+        [Range(0.25f, 10f)]
+        [SerializeField] private float combatPaceMultiplier = 1.6f;
+
         // ------------------------------------------------------------------
         // Ascension
         // ------------------------------------------------------------------
@@ -167,6 +173,9 @@ namespace IdleRPG.Data
         public bool ScaleEnemyDefenseWithStage => scaleEnemyDefenseWithStage;
 
         public bool LogCombatToConsole => logCombatToConsole;
+
+        /// <summary>Wall-clock speed of combat. 1 = fastest, higher = slower.</summary>
+        public float CombatPaceMultiplier => Mathf.Clamp(combatPaceMultiplier, 0.25f, 10f);
 
         public bool HealHeroesOnStageAdvance => healHeroesOnStageAdvance;
 

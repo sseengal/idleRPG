@@ -15,6 +15,9 @@ namespace IdleRPG.Combat
         public double CriticalChance;
         public double CriticalDamageMultiplier;
 
+        /// <summary>Multiplies every attack interval. Wall-clock pacing only (1 = fastest).</summary>
+        public double PaceMultiplier;
+
         /// <summary>Safe fallback matching the BalanceConfig defaults.</summary>
         public static CombatScaling Default
         {
@@ -28,7 +31,8 @@ namespace IdleRPG.Combat
                     ScaleEnemyDefenseWithStage = false,
                     MinDamageRatio = 0.15d,
                     CriticalChance = 0.05d,
-                    CriticalDamageMultiplier = 2d
+                    CriticalDamageMultiplier = 2d,
+                    PaceMultiplier = 1d
                 };
             }
         }
@@ -74,6 +78,15 @@ namespace IdleRPG.Combat
             if (safe.CriticalDamageMultiplier < 1d)
             {
                 safe.CriticalDamageMultiplier = 1d;
+            }
+
+            if (safe.PaceMultiplier < 0.25d)
+            {
+                safe.PaceMultiplier = 0.25d;
+            }
+            else if (safe.PaceMultiplier > 10d)
+            {
+                safe.PaceMultiplier = 10d;
             }
 
             return safe;
