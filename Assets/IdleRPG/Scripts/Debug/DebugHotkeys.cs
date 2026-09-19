@@ -15,6 +15,7 @@ namespace IdleRPG.Debugging
     /// G = +100K gold            T = +10 tokens   B = ad gold boost
     /// A = ascend                R = retry after defeat             S = skip one stage
     /// Tab = cycle pages (Battle / Upgrades / Ascend / Shop)      L = log status
+    /// F5 = save now            F9 = delete save            F10 = rewind logout by 3h
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class DebugHotkeys : MonoBehaviour
@@ -120,6 +121,25 @@ namespace IdleRPG.Debugging
             if (keyboard.lKey.wasPressedThisFrame)
             {
                 LogStatus();
+            }
+
+            if (keyboard.f5Key.wasPressedThisFrame)
+            {
+                bool saved = gameManager.SaveNow();
+                Log(saved ? "Save written (F5)." : "Save failed (F5).");
+            }
+
+            if (keyboard.f9Key.wasPressedThisFrame)
+            {
+                gameManager.DeleteSave();
+                Log("Save deleted (F9). Progress stays in memory until the next save.");
+            }
+
+            if (keyboard.f10Key.wasPressedThisFrame)
+            {
+                double binary = IdleRPG.Core.GameClock.UtcNow.AddHours(-3).ToBinary();
+                gameManager.Save?.DebugSetLastLogoutBinary(binary);
+                Log("Logout timestamp rewound by 3h (F10). Offline progress will fire on the next load/claim.");
             }
         }
 

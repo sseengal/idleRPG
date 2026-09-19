@@ -6,6 +6,7 @@ using IdleRPG.Combat;
 using IdleRPG.Data;
 using IdleRPG.Economy;
 using IdleRPG.Progression;
+using IdleRPG.Save;
 using IdleRPG.Services;
 
 namespace IdleRPG.Core
@@ -107,6 +108,27 @@ namespace IdleRPG.Core
         /// <summary>True once the player has reached the minimum stage for an ascension.</summary>
         public bool CanAscend => balanceConfig != null && HighestStageReached >= balanceConfig.MinStageToAscend;
 
+        /// <summary>Save orchestration (autosave cadence, lifecycle hooks, manual saves).</summary>
+        public SaveManager Save { get; private set; }
+
+        /// <summary>Measures live gold income so offline progress pays the real rate.</summary>
+        public EconomyRateTracker RateTracker { get; private set; }
+
+        /// <summary>True when the current run was restored from disk.</summary>
+        public bool LoadedFromSave { get; private set; }
+
+        /// <summary>Wave restored from the save (used to resume mid-stage).</summary>
+        public int RestoredWave { get; private set; } = 1;
+
+        // Lifetime stats (persisted; no UI yet).
+        public int TotalKills { get; private set; }
+
+        public double TotalGoldEarned { get; private set; }
+
+        public int AscensionCount { get; private set; }
+
+        public int LastPageIndex { get; private set; }
+
         // ------------------------------------------------------------------
         // Lifecycle
         // ------------------------------------------------------------------
@@ -127,15 +149,51 @@ namespace IdleRPG.Core
                 return;
             }
 
-            if (autoStartRun)
+            if (LoadedFromSave)
+            {
+                // Resume: the stage/wave were restored in WireUp, so just start the ticker.
+                combatManager.StartRun();
+                SetState(State, combatManager.IsBossWave ? GameState.Boss : GameState.Combat);
+                RaiseStageChanged();
+                LogFlow($"Resumed save: stage {CurrentStage} wave {RestoredWave} (auto-retry {AutoRetryEnabled}).");
+            }
+            else if (autoStartRun)
             {
                 StartRun(startingStage);
+                Save?.SaveNow("first-run");
             }
+        }
+
+        private void OnApplicationPause(bool paused)
+        {
+            if (paused)
+            {
+                Save?.SaveNow("pause");
+            }
+        }
+
+        private void OnApplicationFocus(bool focused)
+        {
+            if (!focused)
+            {
+                Save?.SaveNow("blur");
+            }
+        }
+
+        private void OnApplicationQuit()
+        {
+            Save?.SaveNow("quit");
         }
 
         private void OnDestroy()
         {
             UnsubscribeCombat();
+            UnsubscribeProgression();
+
+            if (RateTracker != null)
+            {
+                RateTracker.Detach();
+            }
 
             if (Resolver != null)
             {
@@ -173,6 +231,23 @@ namespace IdleRPG.Core
             Boost = new BoostManager(balanceConfig);
             Ads = new MockAdService(this, 3f, true);
 
+            RateTracker = new EconomyRateTracker(balanceConfig);
+            RateTracker.Attach(Economy);
+
+            Save = new SaveManager(new SaveSystem(), balanceConfig, CaptureSnapshot);
+            LoadedFromSave = Save.TryLoad(out SaveData loaded);
+
+            if (LoadedFromSave)
+            {
+                ApplySnapshot(loaded);
+
+                if (Save.RecoveredFromBackup)
+                {
+                    // Rewrite straight away so the damaged file is replaced by good data.
+                    Save.SaveNow("recovery");
+                }
+            }
+
             if (!combatManager.Initialize(balanceConfig, waveConfig, partyConfig))
             {
                 Debug.LogError("[GameManager] CombatManager failed to initialise (check PartyConfig heroes).");
@@ -180,8 +255,22 @@ namespace IdleRPG.Core
             }
 
             combatManager.SetStatProvider(Resolver);
+
+            if (LoadedFromSave)
+            {
+                // Resume exactly where the player left off, healing the party like a retry would.
+                combatManager.SetProgress(CurrentStage, RestoredWave, healParty: true);
+            }
+            else
+            {
+                combatManager.SetStage(CurrentStage, healParty: true);
+            }
+
             SubscribeCombat();
+            SubscribeProgression();
             SetState(GameState.Boot, GameState.Combat);
+
+            Debug.Log($"[GameManager] Save load: {Save.LastLoadSource} | stage {CurrentStage} wave {RestoredWave} | {Economy}");
 
             slowTickRoutine = StartCoroutine(SlowTickLoop());
 
@@ -294,6 +383,29 @@ namespace IdleRPG.Core
         // ------------------------------------------------------------------
         // Combat event handling
         // ------------------------------------------------------------------
+        private void SubscribeProgression()
+        {
+            GameEvents.UpgradePurchased += OnUpgradePurchasedForSave;
+            GameEvents.AscensionCompleted += OnAscensionCompletedForSave;
+        }
+
+        private void UnsubscribeProgression()
+        {
+            GameEvents.UpgradePurchased -= OnUpgradePurchasedForSave;
+            GameEvents.AscensionCompleted -= OnAscensionCompletedForSave;
+        }
+
+        private void OnUpgradePurchasedForSave(int heroIndex, HeroStatType statType, int newLevel, double goldCost)
+        {
+            Save?.MarkDirty("upgrade");
+        }
+
+        private void OnAscensionCompletedForSave(double tokens, int highestStage)
+        {
+            AscensionCount++;
+            Save?.MarkDirty("ascension");
+        }
+
         private void SubscribeCombat()
         {
             combatManager.EnemyKilled += OnEnemyKilled;
@@ -327,7 +439,12 @@ namespace IdleRPG.Core
                 return;
             }
 
-            Economy.AddGold(ResolveGoldReward(goldReward));
+            double awarded = ResolveGoldReward(goldReward);
+            Economy.AddGold(awarded);
+
+            TotalKills++;
+            TotalGoldEarned += awarded;
+            Save?.MarkDirty("kill");
         }
 
         private void OnWaveCleared(int stage, int wave)
@@ -361,6 +478,7 @@ namespace IdleRPG.Core
             combatManager.SetStage(CurrentStage, healParty: balanceConfig != null && balanceConfig.HealHeroesOnStageAdvance);
             RaiseStageChanged();
 
+            Save?.MarkDirty("stage");
             LogFlow($"Stage {stage} complete -> now stage {CurrentStage} | {Economy}");
         }
 
@@ -436,6 +554,84 @@ namespace IdleRPG.Core
         }
 
         // ------------------------------------------------------------------
+        // Save API
+        // ------------------------------------------------------------------
+        /// <summary>Writes the save right now (F5, menus, tests).</summary>
+        public bool SaveNow()
+        {
+            return Save != null && Save.SaveNow("manual");
+        }
+
+        /// <summary>Wipes the save (debug tooling / future reset button).</summary>
+        public void DeleteSave()
+        {
+            Save?.DeleteSave();
+        }
+
+        /// <summary>Remembers which management tab the player was on.</summary>
+        public void SetLastPageIndex(int index)
+        {
+            LastPageIndex = Mathf.Max(0, index);
+            Save?.MarkDirty("page");
+        }
+
+        /// <summary>Builds the payload written to disk. Called by <see cref="SaveManager"/>.</summary>
+        private SaveData CaptureSnapshot()
+        {
+            SaveData data = SaveData.CreateDefault();
+
+            data.currentStage = CurrentStage;
+            data.currentWave = combatManager != null ? combatManager.CurrentWave : 1;
+            data.highestStageReached = HighestStageReached;
+            data.autoRetryEnabled = AutoRetryEnabled;
+
+            data.gold = Economy != null ? Economy.Gold : 0d;
+            data.gems = Economy != null ? Economy.Gems : 0d;
+            data.prestigeTokens = Economy != null ? Economy.PrestigeTokens : 0d;
+
+            Resolver?.WriteToSave(data, partyConfig);
+            Boost?.WriteToSave(data);
+            RateTracker?.WriteToSave(data);
+
+            data.totalKills = TotalKills;
+            data.totalGoldEarned = TotalGoldEarned;
+            data.ascensionCount = AscensionCount;
+            data.lastPageIndex = LastPageIndex;
+
+            return data;
+        }
+
+        /// <summary>Pushes a loaded payload into the live systems (before combat starts).</summary>
+        private void ApplySnapshot(SaveData data)
+        {
+            if (data == null)
+            {
+                return;
+            }
+
+            CurrentStage = Mathf.Max(1, data.currentStage);
+            RestoredWave = Mathf.Max(1, data.currentWave);
+            HighestStageReached = Mathf.Max(1, data.highestStageReached, CurrentStage);
+            AutoRetryEnabled = data.autoRetryEnabled;
+
+            TotalKills = data.totalKills;
+            TotalGoldEarned = data.totalGoldEarned;
+            AscensionCount = data.ascensionCount;
+            LastPageIndex = data.lastPageIndex;
+
+            Economy?.Restore(data.gold, data.gems, data.prestigeTokens);
+            Resolver?.FillFromSave(data, partyConfig);
+            Boost?.Restore(data.goldBoostActive, data.goldBoostExpiresAtBinary);
+            RateTracker?.SeedFromSave(data.lastGoldPerSecond);
+
+            // Give the loaded values to combat (Initialize() would reset the stage to 1).
+            combatManager.SetProgress(CurrentStage, RestoredWave, healParty: true);
+
+            GameEvents.RaiseSaveLoaded();
+            LogFlow($"Loaded save: stage {CurrentStage} wave {RestoredWave} best {HighestStageReached} | {Economy}");
+        }
+
+        // ------------------------------------------------------------------
         // Rewards, boosts and progression hooks
         // ------------------------------------------------------------------
         /// <summary>
@@ -498,6 +694,8 @@ namespace IdleRPG.Core
                 {
                     LogFlow("Ad gold boost expired.");
                 }
+
+                Save?.Tick(1f);
             }
         }
 

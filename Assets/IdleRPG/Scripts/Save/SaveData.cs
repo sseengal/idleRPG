@@ -84,8 +84,8 @@ namespace IdleRPG.Save
     [Serializable]
     public class SaveData
     {
-        /// <summary>Bumped whenever the schema changes; drives migration.</summary>
-        public const int CurrentVersion = 1;
+        /// <summary>Bumped whenever the schema changes; drives migration (see SaveMigrations).</summary>
+        public const int CurrentVersion = 2;
 
         public int schemaVersion = CurrentVersion;
 
@@ -109,6 +109,14 @@ namespace IdleRPG.Save
         // --- Boosts ---
         public bool goldBoostActive;
         public double goldBoostExpiresAtBinary;
+
+        // --- Lifetime stats (schema v2, additive: old files simply default to 0) ---
+        public int totalKills;
+        public double totalGoldEarned;
+        public double playTimeSeconds;
+        public int ascensionCount;
+        public int saveCount;
+        public int lastPageIndex;
 
         // --- Meta ---
         public double lastGoldPerSecond;
@@ -164,6 +172,28 @@ namespace IdleRPG.Save
                 prestigeUpgrades = new List<PrestigeUpgradeRecord>();
             }
 
+            if (totalKills < 0)
+            {
+                totalKills = 0;
+            }
+
+            if (ascensionCount < 0)
+            {
+                ascensionCount = 0;
+            }
+
+            if (saveCount < 0)
+            {
+                saveCount = 0;
+            }
+
+            if (lastPageIndex < 0)
+            {
+                lastPageIndex = 0;
+            }
+
+            totalGoldEarned = Progression.FormulaUtility.Sanitize(totalGoldEarned);
+            playTimeSeconds = Progression.FormulaUtility.Sanitize(playTimeSeconds);
             gold = Progression.FormulaUtility.Sanitize(gold);
             gems = Progression.FormulaUtility.Sanitize(gems);
             prestigeTokens = Progression.FormulaUtility.Sanitize(prestigeTokens);
@@ -239,7 +269,8 @@ namespace IdleRPG.Save
             int prestigeCount = prestigeUpgrades == null ? 0 : prestigeUpgrades.Count;
 
             return $"[SaveData v{schemaVersion}] Stage {currentStage} (best {highestStageReached}) wave {currentWave}, " +
-                   $"gold={gold}, gems={gems}, tokens={prestigeTokens}, heroes={heroCount}, prestige={prestigeCount}";
+                   $"gold={gold}, gems={gems}, tokens={prestigeTokens}, heroes={heroCount}, prestige={prestigeCount}, " +
+                   $"kills={totalKills}, play={playTimeSeconds:0}s, ascensions={ascensionCount}";
         }
     }
 }

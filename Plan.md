@@ -170,11 +170,30 @@ Headless logic only (views moved to Step 4, matching Phase 2 = "debug logs").
 - [x] verified: page switching, 4 nav buttons, 3 scroll views, live attack intervals x1.6
 - [ ] **user test**: focus the Editor, Play, switch pages, scroll the lists
 
-### Step 5 — Persistence (Phase 5)  `[PENDING]`
-- [ ] `SaveSystem.cs` (JsonUtility, version, atomic write, persistentDataPath/savegame.json)
-- [ ] `OfflineProgressManager.cs` (PlayerPrefs binary ts, 28800s cap, x0.7)
-- [ ] autosave (interval + pause/quit), offline popup claim flow
-- [ ] -> **user tests quit/relaunch** -> commit
+### Step 5a — Persistence core  `[DONE 2026-09-19]`
+- [x] `SaveSystem` — atomic write (tmp -> replace), rolling `.bak`, corrupt-file quarantine,
+      version stamping (`persistentDataPath/savegame.json`)
+- [x] `SaveMigrations` — v1 -> v2 additive (lifetime stats); newer-version files load best-effort
+- [x] `SaveManager` — autosave (15s), debounced dirty saves (>=5s apart), lifecycle saves
+      (pause / focus loss / quit), `SaveNow()`, play-time accrual, PlayerPrefs logout timestamp,
+      `RecoveredFromBackup` re-save
+- [x] `EconomyRateTracker` — rolling 60s gold/sec from `CurrencyChanged`, external grants excluded,
+      persisted as `lastGoldPerSecond`
+- [x] `SaveData` v2: `totalKills`, `totalGoldEarned`, `playTimeSeconds`, `ascensionCount`,
+      `saveCount`, `lastPageIndex`
+- [x] `CombatManager.SetProgress(stage, wave, heal)` so a mid-stage save resumes where it left off
+- [x] `GameManager` wiring: `CaptureSnapshot` / `ApplySnapshot`, counters, `SaveNow`, `DeleteSave`,
+      `SetLastPageIndex`, dirty marks on kill / stage clear / upgrade / ascension / page change
+- [x] `SaveDebugMenu` (open folder, log contents, delete, fake 3h offline) + hotkeys `F5` save,
+      `F9` wipe, `F10` rewind logout by 3h
+- [x] verified: first-run save, reload restores everything, corrupt file -> `.bak` recovery + quarantine
+- [ ] **user test**: play, buy upgrades, stop, play again -> progress restored
+
+### Step 5b — Offline progress  `[PENDING]`
+- [ ] `OfflineProgressManager`: PlayerPrefs/`SaveData` timestamp, clamp, rate, equivalent-time cap,
+      pending-claim guard, offline payout table in the balance summary
+- [ ] popup wiring: time away, gold, rate, cap note, claim, optional x2 ad
+- [ ] -> **user tests** with `F10` -> commit
 
 ### Step 6 — Mobile polish  `[PENDING]`
 - [ ] `SafeAreaFitter` for notches, iOS/Android build settings sanity
@@ -405,6 +424,42 @@ portrait screen, which is why the old fixed dock felt broken only in landscape).
 
 ---
 
+## 15. Offline Earnings Model (locked)
+
+Knobs (all in `BalanceConfig`): `offlineEfficiency` **0.7**, `offlineCapSeconds` **28800**,
+**`offlineMaxEquivalentSeconds` 7200** (new: pays at most 2h of battle income).
+```
+awaySeconds = clamp(now - lastLogout, 0, 28800)      // spec wall-clock cap
+paidSeconds = min(awaySeconds, 7200)                 // economy cap
+gold        = paidSeconds * goldPerSecond * 0.7
+```
+Measured at stage 1 (2.2 gold/s): 1h -> 5,544 gold (~20 stages) | **2h -> 11,088 (~40 stages, ceiling)**
+| 9h away -> still 11,088. Both caps stay in place so raising the equivalent cap can never bypass the
+8h spec limit. The balance summary prints this table so the numbers stay checkable.
+
+---
+
+## 16. Step 5a Verification Results
+```
+[T1] saved=True saveCount=3 stage=7 best=7 gold=24661 tokens=4.6 atkLvl=12 hpLvl=4 dmgMul=1.20 page=1
+--- play session stopped, restarted ---
+[GameManager] Loaded save: stage 7 wave 1 best 7 | [Economy] Gold=24.7K Gems=0 Tokens=4.6
+[GameManager] Save load: file | stage 7 wave 1
+[GameManager] Resumed save: stage 7 wave 1 (auto-retry True)
+[U1] loadSource=file loaded=True
+[U2] stage=7 wave=1 best=7 autoRetry=True page=1
+[U3] gold=24661 tokens=4.60 atkLvl=12 hpLvl=4 dmgMul=1.20
+[U4] combatStage=7 combatWave=1 simKnightAtk=31.7
+--- primary save replaced with garbage ---
+[SaveSystem] Quarantined the unreadable save as savegame.corrupt-20260919-201022.json
+[SaveSystem] Primary save unusable; recovered the backup.
+[C1] loadSource=file loaded=True stage=7 gold=24661 atkLvl=12
+```
+Files on disk: `savegame.json` + `savegame.json.bak` in `Application.persistentDataPath`
+(`~/Library/Application Support/DefaultCompany/Idle RPG/` on macOS).
+
+---
+
 ## 4. Open Risks / Watch Items
 - Unity **6000.6.0f1** (not 2022.3 LTS) — APIs used are version-stable.
 - New Input System only (`activeInputHandler = 1`) -> EventSystem needs `InputSystemUIInputModule`.
@@ -428,6 +483,11 @@ portrait screen, which is why the old fixed dock felt broken only in landscape).
 - **`Object.FindAnyObjectByType` skips inactive objects.** The management page is inactive while the
   battle page is shown, so its components (e.g. `TabController`) are invisible to that lookup —
   use `FindObjectsByType(..., FindObjectsInactive.Include, ...)` in probes/tools.
+- **Open `Assets/IdleRPG/Scenes/Main.unity` before pressing Play.** The Editor reopened `SampleScene`
+  after a restart, so an early Step 5 probe ran in a scene with no `GameManager` at all
+  (`gmNull=True`, and no save log lines) - not a code fault.
+- Debug gold grants (`Economy.AddGold` from `eval`/hotkeys) count as income for `EconomyRateTracker`.
+  Real income comes from kills; use `BeginExternalGrant()` when granting programmatically.
 - **Driving play-mode logic from `eval` while the Editor is unfocused**: call `CombatSimulator.Step(dt)`
   and invoke private `Update()` via reflection. Note `Time.deltaTime` is stale then, so rate-limited
   systems (like the log budget) must have their budget field set directly for bulk tests.
@@ -471,3 +531,8 @@ portrait screen, which is why the old fixed dock felt broken only in landscape).
 - **UI fixes round 2** (2026-09-19): single navigation (removed the management tab bar), damage numbers
   hidden while browsing, and panel buttons fixed via lazy binding + one-time listener wiring
   (upgrade +1/+10, watch ad, prestige buy and the two-tap ascend all verified with real pointer clicks).
+
+- **Step 5a** (2026-09-19): Persistence core landed (`SaveSystem`, `SaveMigrations`, `SaveManager`,
+  `EconomyRateTracker`, `SaveData` v2, `CombatManager.SetProgress`, `SaveDebugMenu`, F5/F9/F10).
+  Verified: first-run save, full restore after a play-session restart, corrupt-file quarantine +
+  backup recovery (with an immediate clean re-save).

@@ -107,6 +107,12 @@ namespace IdleRPG.UI
                 tabs.Show(tabIndex);
             }
 
+            HudController hud = HudController.Instance;
+            if (hud != null && hud.GameManager != null)
+            {
+                hud.GameManager.SetLastPageIndex(Mathf.Clamp(tabIndex, 0, 2));
+            }
+
             RefreshNav(Mathf.Clamp(tabIndex, 0, 2) + 1);
         }
 

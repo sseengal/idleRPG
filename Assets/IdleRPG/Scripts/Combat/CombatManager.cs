@@ -133,6 +133,27 @@ namespace IdleRPG.Combat
             return true;
         }
 
+        /// <summary>
+        /// Restores saved progress: a stage *and* the wave inside it. Used on load so a player who
+        /// saved mid-stage resumes there instead of replaying the stage from wave 1.
+        /// </summary>
+        public void SetProgress(int stage, int wave, bool healParty)
+        {
+            currentStage = Mathf.Max(1, stage);
+            currentWave = Mathf.Clamp(wave, 1, WavesPerStage);
+            IsBossWave = WaveConfig.IsBossWave(currentWave, balanceConfig != null ? balanceConfig.NormalWavesPerStage : 10);
+
+            if (healParty && simulator != null)
+            {
+                simulator.HealParty();
+            }
+
+            if (running)
+            {
+                BeginWave();
+            }
+        }
+
         /// <summary>Points the run at a stage and optionally heals the party.</summary>
         public void SetStage(int stage, bool healParty)
         {
