@@ -14,12 +14,15 @@ namespace IdleRPG.Debugging
     /// 1 = +1 ATK (all heroes)   2 = +10 ATK      3 = +10 HP       4 = +10 DEF
     /// G = +100K gold            T = +10 tokens   B = ad gold boost
     /// A = ascend                R = retry after defeat             S = skip one stage
-    /// L = log status
+    /// Tab = cycle pages (Battle / Upgrades / Ascend / Shop)      L = log status
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class DebugHotkeys : MonoBehaviour
     {
         [SerializeField] private GameManager gameManager;
+
+        [Tooltip("Screen controller used by the Tab key (page cycling). Found automatically when empty.")]
+        [SerializeField] private IdleRPG.UI.ScreenController screenController;
 
         [Tooltip("Gold granted by the G key.")]
         [SerializeField] private double goldGrantAmount = 100000d;
@@ -32,12 +35,31 @@ namespace IdleRPG.Debugging
             gameManager = manager;
         }
 
+        private void Start()
+        {
+            if (screenController == null)
+            {
+                screenController = FindAnyObjectByType<IdleRPG.UI.ScreenController>();
+            }
+
+            if (screenController == null)
+            {
+                Debug.LogWarning("[DebugHotkeys] No ScreenController found; Tab page cycling is disabled.");
+            }
+        }
+
         private void Update()
         {
             Keyboard keyboard = Keyboard.current;
             if (keyboard == null || gameManager == null)
             {
                 return;
+            }
+
+            if (keyboard.tabKey.wasPressedThisFrame && screenController != null)
+            {
+                screenController.CyclePage();
+                Log("page -> " + (screenController.IsManagementOpen ? "management" : "battle"));
             }
 
             if (keyboard.digit1Key.wasPressedThisFrame)

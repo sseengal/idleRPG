@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -217,9 +218,33 @@ namespace IdleRPG.EditorTools
 
             InputSystemUIInputModule module = eventSystemObject.AddComponent<InputSystemUIInputModule>();
 
-            // The project uses the new Input System exclusively, so the UI module needs its
-            // own action asset; generated defaults are enough for buttons.
+            // The project uses the new Input System exclusively, so the UI module needs its own
+            // action asset. Generated defaults are fine, but they MUST be persisted as a real asset:
+            // an in-memory asset serializes as a dangling reference and silently kills all clicks.
             module.AssignDefaultActions();
+            PersistUiActionsAsset(module);
+
+            // Runtime safety net for the same failure mode.
+            eventSystemObject.AddComponent<IdleRPG.UI.UiInputBootstrap>();
+        }
+
+        /// <summary>Saves the generated UI action asset so the EventSystem reference survives.</summary>
+        private static void PersistUiActionsAsset(InputSystemUIInputModule module)
+        {
+            if (module == null || module.actionsAsset == null || EditorUtility.IsPersistent(module.actionsAsset))
+            {
+                return;
+            }
+
+            const string actionsPath = "Assets/IdleRPG/Settings/UiInputActions.inputactions";
+            EnsureFolder("Assets/IdleRPG/Settings");
+
+            if (AssetDatabase.LoadAssetAtPath<InputActionAsset>(actionsPath) == null)
+            {
+                AssetDatabase.CreateAsset(module.actionsAsset, actionsPath);
+                AssetDatabase.SaveAssets();
+                Debug.Log($"[MvpSceneBuilder] Saved UI input actions to {actionsPath}");
+            }
         }
 
         private static void EnsureFolder(string folderPath)

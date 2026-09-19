@@ -42,6 +42,16 @@ namespace IdleRPG.UI
         [Tooltip("Padding above and below the list.")]
         [SerializeField] private float contentPadding = 12f;
 
+        [Header("Bottom follow")]
+        [Tooltip("Slide new lines in smoothly instead of snapping to the bottom.")]
+        [SerializeField] private bool smoothFollow = true;
+
+        [Tooltip("How quickly the feed settles on the newest line.")]
+        [SerializeField] private float followSpeed = 10f;
+
+        [Tooltip("Distance from the bottom (px) at which auto-follow re-engages.")]
+        [SerializeField] private float reengageDistance = 32f;
+
         [Header("Colours")]
         [SerializeField] private Color heroHitColor = new Color(0.95f, 0.95f, 1f, 1f);
         [SerializeField] private Color criticalColor = new Color(1f, 0.85f, 0.3f, 1f);
@@ -60,6 +70,10 @@ namespace IdleRPG.UI
         private int aggregateCount;
         private float aggregateAge;
         private TextMeshProUGUI aggregateLabel;
+        private bool pinnedToBottom = true;
+
+        /// <summary>Scroll position we wrote last: anything else moving the content is the player.</summary>
+        private float lastAppliedY = -1f;
 
         private void Awake()
         {
@@ -98,6 +112,71 @@ namespace IdleRPG.UI
                 droppedLines = 0;
                 Append(string.Format("... {0} more hit{1}", summarized, summarized == 1 ? string.Empty : "s"), eventColor);
             }
+
+            FollowNewest(Time.deltaTime);
+        }
+
+        /// <summary>
+        /// Keeps the newest line in view. Auto-follow pauses while the player scrolls back through
+        /// history and re-engages as soon as they return to the bottom.
+        /// </summary>
+        /// <summary>
+        /// Keeps the newest line in view. The content grows every time a line is added, so growth
+        /// must NOT be mistaken for the player scrolling: only a position we did not write counts as
+        /// user input. Scrolling up pauses the follow until they come back to the bottom.
+        /// </summary>
+        private void FollowNewest(float deltaTime)
+        {
+            if (scrollRect == null || content == null)
+            {
+                return;
+            }
+
+            float target = OverflowY();
+            float currentY = content.anchoredPosition.y;
+
+            if (lastAppliedY >= 0f && Mathf.Abs(currentY - lastAppliedY) > 0.5f)
+            {
+                // Something other than us moved the feed: a drag, a wheel scroll or the scrollbar.
+                pinnedToBottom = target - currentY <= reengageDistance;
+            }
+
+            if (!pinnedToBottom)
+            {
+                if (target - currentY <= reengageDistance)
+                {
+                    pinnedToBottom = true;
+                }
+                else
+                {
+                    lastAppliedY = currentY;
+                    return;
+                }
+            }
+
+            float y = smoothFollow
+                ? Mathf.Lerp(currentY, target, Mathf.Clamp01(followSpeed * deltaTime))
+                : target;
+
+            if (Mathf.Abs(target - y) < 0.5f)
+            {
+                y = target;
+            }
+
+            content.anchoredPosition = new Vector2(content.anchoredPosition.x, y);
+            lastAppliedY = y;
+        }
+
+        /// <summary>How far the content can scroll; 0 when everything already fits.</summary>
+        private float OverflowY()
+        {
+            if (scrollRect == null || scrollRect.viewport == null)
+            {
+                return 0f;
+            }
+
+            float overflow = content.rect.height - scrollRect.viewport.rect.height;
+            return overflow > 0f ? overflow : 0f;
         }
 
         // ------------------------------------------------------------------
@@ -234,7 +313,7 @@ namespace IdleRPG.UI
             liveLines.Add(label);
 
             TrimToMax();
-            ScrollToBottom();
+            RefreshContentSize();
         }
 
         /// <summary>
@@ -249,7 +328,6 @@ namespace IdleRPG.UI
                 aggregateDamage += damage;
                 aggregateAge = 0f;
                 aggregateLabel.SetText(format(aggregateCount));
-                ScrollToBottom();
                 return;
             }
 
@@ -275,7 +353,7 @@ namespace IdleRPG.UI
             aggregateLabel = label;
 
             TrimToMax();
-            ScrollToBottom();
+            RefreshContentSize();
         }
 
         private void CloseAggregate()
@@ -344,20 +422,19 @@ namespace IdleRPG.UI
             return label;
         }
 
-        private void ScrollToBottom()
+        /// <summary>
+        /// Height is computed explicitly: the list grows line by line and a ContentSizeFitter would
+        /// need an extra layout pass to keep up. The scroll position is handled by FollowNewest().
+        /// </summary>
+        private void RefreshContentSize()
         {
-            if (scrollRect == null || content == null)
+            if (content == null)
             {
                 return;
             }
 
-            // Height is computed explicitly: the list grows line by line and a
-            // ContentSizeFitter would need an extra layout pass to keep up.
             float height = contentPadding * 2f + liveLines.Count * (lineHeight + lineSpacing);
             content.sizeDelta = new Vector2(content.sizeDelta.x, Mathf.Max(1f, height));
-
-            // 0 = bottom for a top-pivoted content rect.
-            scrollRect.verticalNormalizedPosition = 0f;
         }
 
         // ------------------------------------------------------------------

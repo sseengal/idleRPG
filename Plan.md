@@ -339,6 +339,30 @@ Boss multipliers live on `Boss_Ogre` (`BossHealthMultiplier` 4, `BossGoldMultipl
 
 ---
 
+## 13. Combat Log + Navigation Fixes (2026-09-19)
+
+Reported by the user: the log did not visibly update and pages could not be changed by clicking.
+
+**1. Log follow (newest line was never reached).** The old code treated *content growth* as the player
+scrolling up, so auto-follow switched itself off (`contentY=4` with `overflow=1318`). Rewritten to
+compare the scroll position against the position **we** last wrote; only a foreign move counts as user
+input. Verified:
+```
+[Q1] contentH=1500 overflow=958 contentY=958 distanceFromNewest=0.0 pinned=True
+[Q2] after one more line: contentY=994 distanceFromNewest=0.0 pinned=True
+[Q3] newest child='NEWEST LINE'
+```
+Also: `smoothFollow` (lerp) instead of snapping, auto-follow pauses when the player scrolls up and
+re-engages within `reengageDistance` px of the bottom, and the strip shows ~15 lines at 1080x1920
+(viewport 542 px) so with the new pace the feed is calm (~1 line/second).
+
+**2. Navigation was dead to the mouse** (see the *Watch items* entry on the input asset). Code path was
+fine all along: `[G0..G3] invoke ok` for all four nav buttons. After persisting the input action asset,
+real clicks reach the UI. Verified page switching: `ShowManagement(1)` -> battle off/management on,
+`ShowBattle()` -> back. New `Tab` key cycles pages for keyboard testing.
+
+---
+
 ## 12. Step 4c Verification Results
 ```
 [S1] rows=3 upgradeContent=748 | prestigeRows=3 prestigeContent=372 | navButtons=4
@@ -367,6 +391,18 @@ portrait screen, which is why the old fixed dock felt broken only in landscape).
   same tick -> load data assets *after* the scene swap (the builder does this now).
 - Editor **menu items** are the reliable way to run authoring code; `eval` runs in a throwaway assembly
   and can hit the 5s main-thread timeout on long operations.
+- **UI clicks die if the EventSystem's input action asset is not a real asset.** `AssignDefaultActions()`
+  called from editor tooling produces an *in-memory* `InputActionAsset`; serialized into the scene it
+  becomes a dangling reference (`actionsAsset == null` while the individual action refs are non-null).
+  Symptom: navigation/every button ignores the mouse, while `button.onClick.Invoke()` still works.
+  Fixed twice over: the builder persists it to `Assets/IdleRPG/Settings/UiInputActions.inputactions`,
+  and `UiInputBootstrap` re-creates the default actions at runtime if they are ever missing.
+- **`Object.FindAnyObjectByType` skips inactive objects.** The management page is inactive while the
+  battle page is shown, so its components (e.g. `TabController`) are invisible to that lookup —
+  use `FindObjectsByType(..., FindObjectsInactive.Include, ...)` in probes/tools.
+- **Driving play-mode logic from `eval` while the Editor is unfocused**: call `CombatSimulator.Step(dt)`
+  and invoke private `Update()` via reflection. Note `Time.deltaTime` is stale then, so rate-limited
+  systems (like the log budget) must have their budget field set directly for bulk tests.
 
 ## 5. Change Log
 - **Step 0** (2026-09-19): MCP bridge fixed (stdio `unity` server; stale `unityMCP` @ :8080 removed), `origin` remote added, `Plan.md` created, folder tree in place, both asmdefs added, portrait lock applied, recompile clean.
@@ -398,3 +434,8 @@ portrait screen, which is why the old fixed dock felt broken only in landscape).
   on upgrades, prestige and the combat log. New single-knob game pace `combatPaceMultiplier` = 1.6
   (stage 124s vs 88s before), boss trimmed x5 -> x4, transition 0.6s, log rate 3/s. Balance summary
   tool now prints per-enemy TTK, full-stage estimate and gold/sec so pacing stays measurable.
+
+- **Log + nav fixes** (2026-09-19): Combat log now pins to the newest line (smooth follow, pauses while
+  the player reads history); nav-bar clicks fixed by persisting the EventSystem's UI action asset
+  (`Assets/IdleRPG/Settings/UiInputActions.inputactions`) plus a runtime `UiInputBootstrap` safety net;
+  `Tab` cycles pages.

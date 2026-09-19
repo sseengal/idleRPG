@@ -29,20 +29,44 @@ namespace IdleRPG.UI
         /// <summary>True while the management page is on screen.</summary>
         public bool IsManagementOpen => managementPage != null && managementPage.activeSelf;
 
-        private void Start()
+        private void Awake()
         {
-            WireNavButton(0, ShowBattle);
-
-            if (navButtons != null)
+            if (battlePage == null || managementPage == null || navButtons == null || navButtons.Length == 0)
             {
-                for (int i = 1; i < navButtons.Length; i++)
-                {
-                    int tabIndex = i - 1;
-                    WireNavButton(i, () => ShowManagement(tabIndex));
-                }
+                Debug.LogError("[ScreenController] Pages or nav buttons are not wired; navigation will not work.");
+                enabled = false;
+                return;
             }
 
+            WireNavButton(0, ShowBattle);
+
+            for (int i = 1; i < navButtons.Length; i++)
+            {
+                int tabIndex = i - 1;
+                WireNavButton(i, () => ShowManagement(tabIndex));
+            }
+
+            // Start on the battle page so the management page never covers the fight.
             ShowBattle();
+        }
+
+        /// <summary>Cycles Battle -> Upgrades -> Ascend -> Shop -> Battle (keyboard/tests).</summary>
+        public void CyclePage()
+        {
+            if (!IsManagementOpen)
+            {
+                ShowManagement(0);
+                return;
+            }
+
+            int next = tabs != null ? tabs.ActiveIndex + 1 : 1;
+            if (next > 2)
+            {
+                ShowBattle();
+                return;
+            }
+
+            ShowManagement(next);
         }
 
         private void WireNavButton(int index, UnityEngine.Events.UnityAction action)
