@@ -127,6 +127,12 @@ namespace IdleRPG.Data
         [Range(0f, 1f)]
         [SerializeField] private float offlineEfficiency = 0.7f;
 
+        [Tooltip("Economy cap: offline pays for at most this many seconds of battle income.")]
+        [SerializeField] private float offlineMaxEquivalentSeconds = 7200f;
+
+        [Tooltip("Fallback kill time (seconds) used to estimate gold/sec before any live sample exists.")]
+        [SerializeField] private float offlineEstimatedSecondsPerKill = 3.6f;
+
         [Tooltip("Seconds to ignore. Prevents instant popups after a quick app switch.")]
         [SerializeField] private float minOfflineSecondsForPopup = 30f;
 
@@ -210,6 +216,10 @@ namespace IdleRPG.Data
         public float OfflineCapSeconds => Mathf.Max(0f, offlineCapSeconds);
 
         public double OfflineEfficiency => Mathf.Clamp(offlineEfficiency, 0f, 1f);
+
+        public float OfflineMaxEquivalentSeconds => Mathf.Max(0f, offlineMaxEquivalentSeconds);
+
+        public float OfflineEstimatedSecondsPerKill => Mathf.Max(0.1f, offlineEstimatedSecondsPerKill);
 
         public float MinOfflineSecondsForPopup => Mathf.Max(0f, minOfflineSecondsForPopup);
 

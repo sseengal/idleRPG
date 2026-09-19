@@ -98,6 +98,8 @@ namespace IdleRPG.EditorTools
                 .Set("offlineCapSeconds", 28800f)
                 .Set("offlineEfficiency", 0.7f)
                 .Set("minOfflineSecondsForPopup", 30f)
+                .Set("offlineMaxEquivalentSeconds", 7200f)
+                .Set("offlineEstimatedSecondsPerKill", 3.6f)
                 .Set("startingGold", 0d)
                 .Set("startingGems", 0d)
                 .Set("goldPerSecondSampleWindowSec", 60f)

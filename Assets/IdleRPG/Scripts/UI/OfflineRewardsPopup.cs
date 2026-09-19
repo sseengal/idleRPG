@@ -72,10 +72,12 @@ namespace IdleRPG.UI
 
             if (capNoteLabel != null)
             {
-                capNoteLabel.SetText(string.Format(
-                    result.WasCapped ? "Offline earnings are capped at {0}." : "Earned at {1}/s offline rate.",
-                    NumberFormatter.FormatDuration(result.CappedSeconds),
-                    NumberFormatter.Format(result.GoldPerSecond)));
+                capNoteLabel.SetText(result.WasCapped
+                    ? string.Format("Capped at {0} of battle income (8h max away).",
+                        NumberFormatter.FormatDuration(result.CappedSeconds))
+                    : string.Format("Earned at {0}/s for {1}.",
+                        NumberFormatter.Format(result.GoldPerSecond),
+                        NumberFormatter.FormatDuration(result.CappedSeconds)));
             }
 
             if (root != null)

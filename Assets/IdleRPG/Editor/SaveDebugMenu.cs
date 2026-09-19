@@ -78,10 +78,20 @@ namespace IdleRPG.EditorTools
             if (Application.isPlaying)
             {
                 GameManager manager = UnityEngine.Object.FindAnyObjectByType<GameManager>();
-                manager?.Save?.DebugSetLastLogoutBinary(binary);
+
+                if (manager != null)
+                {
+                    manager.Save?.DebugSetLastLogoutBinary(binary);
+                    OfflineRewardResult result = manager.EvaluateOffline();
+
+                    Debug.Log(result.HasReward
+                        ? $"[SaveDebugMenu] Offline claims offered: {result.CappedSeconds:0}s paid -> {result.Gold:0.#} gold."
+                        : "[SaveDebugMenu] Offline evaluated: nothing to claim.");
+                    return;
+                }
             }
 
-            Debug.Log("[SaveDebugMenu] Logout time set to 3h ago. Re-enter Play mode (or press F10) to see offline earnings.");
+            Debug.Log("[SaveDebugMenu] Logout time set to 3h ago. Re-enter Play mode to see offline earnings.");
         }
     }
 }

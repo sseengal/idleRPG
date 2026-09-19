@@ -2,7 +2,7 @@
 
 > 2D Mobile Idle RPG (Unity 6000.6.0f1, URP 2D). iOS + Android.
 > Repo: https://github.com/sseengal/idleRPG.git
-> Last updated: Step 0
+> Last updated: Step 5b (persistence + offline progress complete)
 
 ---
 
@@ -187,13 +187,43 @@ Headless logic only (views moved to Step 4, matching Phase 2 = "debug logs").
 - [x] `SaveDebugMenu` (open folder, log contents, delete, fake 3h offline) + hotkeys `F5` save,
       `F9` wipe, `F10` rewind logout by 3h
 - [x] verified: first-run save, reload restores everything, corrupt file -> `.bak` recovery + quarantine
-- [ ] **user test**: play, buy upgrades, stop, play again -> progress restored
+      (see section 16)
 
-### Step 5b — Offline progress  `[PENDING]`
-- [ ] `OfflineProgressManager`: PlayerPrefs/`SaveData` timestamp, clamp, rate, equivalent-time cap,
-      pending-claim guard, offline payout table in the balance summary
-- [ ] popup wiring: time away, gold, rate, cap note, claim, optional x2 ad
-- [ ] -> **user tests** with `F10` -> commit
+### Step 5b — Offline progress  `[DONE 2026-09-19]`
+- [x] `OfflineProgressManager` — wall cap + equivalent cap, efficiency x0.7, rate resolution
+      (measured -> saved -> formula), pending-claim guard, negative-delta tamper guard,
+      pays through `ResolveGoldReward` so prestige/boost are included, excludes the payout from the
+      live rate measurement
+- [x] `BalanceConfig` knobs: `offlineMaxEquivalentSeconds` 7200, `offlineEstimatedSecondsPerKill` 3.6
+      (calibrated so the fallback rate matches the measured stage-1 rate of ~2.2 gold/s)
+- [x] `GameManager` wiring: `EvaluateOffline()` on start (uses the newer of the save file and
+      PlayerPrefs timestamps), `DeleteSave` clears pending, lifetime gold + dirty mark on payout
+- [x] popup: time away / gold / cap note ("Capped at 2h 00m of battle income (8h max away)."), claim
+- [x] debug: F10 now rewinds 3h **and** re-evaluates; `SaveDebugMenu > Fake 3h Offline` evaluates in
+      Play mode; balance summary prints the offline payout table
+- [ ] **user test (step 5)**: see section 17
+
+### Step 5 — how to test (manual, 5 minutes)  `[TODO: user]`
+**A. Persistence (5a)**
+1. Open `Assets/IdleRPG/Scenes/Main.unity`, press Play.
+2. Buy a few upgrades, let the stage climb a level or two, note gold + stage.
+3. Stop, Play again -> same gold/stage/hero levels, console shows `Save load: file`.
+4. Press `F5` (save now), `F9` (wipe save -> progress stays until the next save), `L` (status log).
+5. Optional: corrupt `savegame.json` (path in section 18) -> next Play logs
+   `recovered the backup` and quarantines the bad file, progress intact.
+
+**B. Offline progress (5b)**
+1. In Play, note gold, press **`F10`** (rewind the logout clock by 3h and re-evaluate).
+2. Expect the popup: `You were away for 3h 00m`, `+N gold`, `Capped at 2h 00m of battle income`.
+3. Click **CLAIM** -> gold rises by exactly the shown amount; clicking again pays nothing
+   (`Ignored a claim with no pending reward`).
+4. Optional: `Tools > Idle RPG > Save > Fake 3h Offline`, then restart Play -> popup appears on load.
+5. Optional: edit the save file's `lastLogoutTimestampBinary` forward a few hours -> clock-rewind guard
+   pays 0 (console: `Non-positive offline delta`).
+
+**C. Real app-switch (best test)**
+Play for a minute, then stop Play (or background the build), wait ~1 minute, Play again -> a small
+"welcome back" popup appears instead of being ignored (min offline window is 30s).
 
 ### Step 6 — Mobile polish  `[PENDING]`
 - [ ] `SafeAreaFitter` for notches, iOS/Android build settings sanity
@@ -460,6 +490,53 @@ Files on disk: `savegame.json` + `savegame.json.bak` in `Application.persistentD
 
 ---
 
+## 17. Step 5b Verification Results
+
+**Offline payout table** (`Tools > Idle RPG > Debug > Log Balance Summary`):
+```
+-- Offline earnings (caps: wall 8h, equivalent 2h | efficiency 70%) --
+  stage 1   rate     2.22 gold/s  (formula fallback)
+    away    1h -> paid   1.0h ->       5.6K gold  (~20.2 stage-incomes)
+    away    2h -> paid   2.0h ->      11.2K gold  (~40.5 stage-incomes)
+    away    8h -> paid   2.0h ->      11.2K gold  (~40.5 stage-incomes)  [capped]
+    away    9h -> paid   2.0h ->      11.2K gold  (~40.5 stage-incomes)  [capped]
+  stage 10  rate     6.16 gold/s  (formula fallback)
+    away    2h -> paid   2.0h ->      31.1K gold  (~40.5 stage-incomes)
+```
+The stage-1 fallback rate 2.22 gold/s matches the pace summary's measured 2.2 gold/s and the locked
+model (1h ~20 stages, 2h ~40 stages, 8h+ still capped at 2h).
+
+**Live Play-mode run** (stage 5, save-seeded rate):
+```
+[GameManager] Offline: 10800s away -> 7200s paid, 124292836.3 gold at 24661.28/s (saved)
+[O1] tamper(clock +1h) = False, gold 0                 <- clock-rewind guard
+[O2] 3h away: raw=10800s paid=7200s rate=24661.3 gold=124292836 capped=True pending=True src=saved
+[O5] popup root 'Dialog' active=True, claim button found
+[O6] timeLabel='You were away for 3h 00m'  goldLabel='+124M gold'
+     capNoteLabel='Capped at 2h 00m of battle income (8h max away).'
+[O7] gold 24661 -> 124317498 (delta = shown amount); second claim paid 0, pendingNow=False
+[O8] rate before=24661.3 after=24661.3 (payout excluded), totalGoldEarned=124292836, popup hidden
+[R1] 20s away = no reward | 9h away = paid 7200s, capped=True
+```
+The inflated rate is a test artefact: an `eval` gold grant of 25K is counted as income (real income
+comes from kills). A clean session measures ~2.2 gold/s at stage 1.
+
+---
+
+## 18. Save File Location
+| Platform | Path |
+|---|---|
+| macOS (Editor) | `~/Library/Application Support/DefaultCompany/Idle RPG/savegame.json` |
+| Windows (Editor) | `%USERPROFILE%\AppData\LocalLow\DefaultCompany\Idle RPG\savegame.json` |
+| iOS / Android | `Application.persistentDataPath` (sandboxed app data) |
+
+Files: `savegame.json`, `savegame.json.bak`, `savegame.json.tmp` (only mid-write) and
+`savegame.corrupt-<timestamp>.json` after a failed load. Wipe everything with `F9` in Play mode or
+`Tools > Idle RPG > Save > Delete Save`. The PlayerPrefs key `IdleRPG.lastLogout` holds a copy of the
+logout timestamp.
+
+---
+
 ## 4. Open Risks / Watch Items
 - Unity **6000.6.0f1** (not 2022.3 LTS) — APIs used are version-stable.
 - New Input System only (`activeInputHandler = 1`) -> EventSystem needs `InputSystemUIInputModule`.
@@ -483,6 +560,9 @@ Files on disk: `savegame.json` + `savegame.json.bak` in `Application.persistentD
 - **`Object.FindAnyObjectByType` skips inactive objects.** The management page is inactive while the
   battle page is shown, so its components (e.g. `TabController`) are invisible to that lookup —
   use `FindObjectsByType(..., FindObjectsInactive.Include, ...)` in probes/tools.
+- **Do not recompile while in Play mode.** Unity reloads scripts mid-session and the reloaded
+  `GameManager` can come back with `Save`/`Offline` unset (`saveNull=True` in a probe) because `Awake`
+  ran against a half-loaded scene. Exit Play, recompile, then Play again.
 - **Open `Assets/IdleRPG/Scenes/Main.unity` before pressing Play.** The Editor reopened `SampleScene`
   after a restart, so an early Step 5 probe ran in a scene with no `GameManager` at all
   (`gmNull=True`, and no save log lines) - not a code fault.
@@ -536,3 +616,9 @@ Files on disk: `savegame.json` + `savegame.json.bak` in `Application.persistentD
   `EconomyRateTracker`, `SaveData` v2, `CombatManager.SetProgress`, `SaveDebugMenu`, F5/F9/F10).
   Verified: first-run save, full restore after a play-session restart, corrupt-file quarantine +
   backup recovery (with an immediate clean re-save).
+
+- **Step 5b** (2026-09-19): Offline progress landed (`OfflineProgressManager`, popup wiring, two caps
+  with the equivalent-time guard, rate resolution measured -> saved -> formula, tamper + double-claim
+  guards, `offlineMaxEquivalentSeconds` / `offlineEstimatedSecondsPerKill` knobs, F10 re-evaluation,
+  offline payout table in the balance summary). Verified live: caps, tamper, exact payout, second-click
+  guard and rate-tracker isolation all behave. Section 17 documents how to test Step 5 by hand.

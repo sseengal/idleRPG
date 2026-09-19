@@ -137,9 +137,13 @@ namespace IdleRPG.Debugging
 
             if (keyboard.f10Key.wasPressedThisFrame)
             {
+                // Rewind the logout clock and immediately re-run the offline calculation (3h away).
                 double binary = IdleRPG.Core.GameClock.UtcNow.AddHours(-3).ToBinary();
                 gameManager.Save?.DebugSetLastLogoutBinary(binary);
-                Log("Logout timestamp rewound by 3h (F10). Offline progress will fire on the next load/claim.");
+                IdleRPG.Save.OfflineRewardResult result = gameManager.EvaluateOffline();
+                Log(result.HasReward
+                    ? $"Offline (F10, 3h): paid {result.CappedSeconds:0}s -> {result.Gold:0.#} gold at {result.GoldPerSecond:0.##}/s"
+                    : "Offline (F10): nothing to claim.");
             }
         }
 

@@ -1,9 +1,11 @@
+using System;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
 using IdleRPG.Core;
 using IdleRPG.Data;
 using IdleRPG.Progression;
+using IdleRPG.Save;
 using IdleRPG.Utils;
 
 namespace IdleRPG.EditorTools
@@ -80,6 +82,7 @@ namespace IdleRPG.EditorTools
 
             builder.AppendLine("-- Pace (knob: BalanceConfig.combatPaceMultiplier) --");
             AppendPaceSummary(builder, balance);
+            AppendOfflineSummary(builder, balance);
 
             builder.Append("  Token yield by highest stage: ");
 
@@ -96,6 +99,81 @@ namespace IdleRPG.EditorTools
         /// Estimates a full stage at the current pace. This is the number to watch while tuning:
         /// pace changes wall-clock time only, damage/health/gold ratios stay untouched.
         /// </summary>
+        /// <summary>
+        /// Prints the offline payout model: both caps, the rate per stage and what 1h / 2h / 8h / 9h
+        /// of absence is worth. Stage length is assumed constant so the numbers stay comparable.
+        /// </summary>
+        private static void AppendOfflineSummary(StringBuilder builder, BalanceConfig balance)
+        {
+            WaveConfig waves = AssetDatabase.LoadAssetAtPath<WaveConfig>(ConfigFolder + "/WaveConfig.asset");
+
+            if (waves == null)
+            {
+                builder.AppendLine("  wave config missing");
+                return;
+            }
+
+            double wallCap = balance.OfflineCapSeconds;
+            double equivalentCap = balance.OfflineMaxEquivalentSeconds;
+            double efficiency = balance.OfflineEfficiency;
+            builder.AppendLine("");
+            builder.AppendLine(string.Format(
+                "-- Offline earnings (caps: wall {0:0}h, equivalent {1:0}h | efficiency {2:0}%) --",
+                wallCap / 3600d, equivalentCap / 3600d, efficiency * 100d));
+
+            double[] awayList = { 3600d, 7200d, 28800d, 32400d };
+            int[] stageList = { 1, 10, 30 };
+
+            foreach (int stage in stageList)
+            {
+                double rate = OfflineProgressManager.EstimateGoldPerSecond(balance, waves, stage);
+                builder.AppendLine(string.Format("  stage {0,-3} rate {1,8:0.00} gold/s  (formula fallback)", stage, rate));
+
+                foreach (double away in awayList)
+                {
+                    double wall = Math.Min(away, wallCap);
+                    double paid = Math.Min(wall, equivalentCap);
+                    double gold = paid * rate * efficiency;
+                    double goldPerStage = EstimateStageGold(balance, waves, stage);
+                    double stageIncomes = gold / Mathf.Max(1f, (float)goldPerStage);
+
+                    builder.AppendLine(string.Format(
+                        "    away {0,4:0.#}h -> paid {1,5:0.0}h -> {2,10} gold  (~{3:0.#} stage-incomes){4}",
+                        away / 3600d, paid / 3600d, NumberFormatter.Format(gold), stageIncomes,
+                        away > paid + 0.5d ? "  [capped]" : string.Empty));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gold for one clear of a stage: the rotating normal pool plus the boss,
+        /// scaled to that stage. Used for the offline "stage-incomes" column.
+        /// </summary>
+        private static double EstimateStageGold(BalanceConfig balance, WaveConfig waves, int stage)
+        {
+            int normalWaves = balance.NormalWavesPerStage;
+            int poolSize = Mathf.Max(1, waves.NormalEnemyCount);
+            double wavesPerEnemy = normalWaves / (double)poolSize;
+            double gold = 0d;
+
+            for (int i = 0; i < poolSize; i++)
+            {
+                EnemyData enemy = waves.GetEnemyFor(stage, i + 1, normalWaves);
+                if (enemy != null)
+                {
+                    gold += FormulaUtility.EnemyGoldDrop(enemy.BaseGoldDrop, stage, balance.EnemyGoldGrowth) * wavesPerEnemy;
+                }
+            }
+
+            EnemyData boss = waves.GetEnemyFor(stage, normalWaves + 1, normalWaves);
+            if (boss != null)
+            {
+                gold += FormulaUtility.EnemyGoldDrop(boss.BaseGoldDrop, stage, balance.EnemyGoldGrowth) * boss.BossGoldMultiplier;
+            }
+
+            return gold;
+        }
+
         private static void AppendPaceSummary(StringBuilder builder, BalanceConfig balance)
         {
             PartyConfig party = AssetDatabase.LoadAssetAtPath<PartyConfig>(ConfigFolder + "/PartyConfig.asset");
@@ -260,7 +338,7 @@ namespace IdleRPG.EditorTools
                 return null;
             }
 
-            GameManager manager = Object.FindAnyObjectByType<GameManager>();
+            GameManager manager = UnityEngine.Object.FindAnyObjectByType<GameManager>();
             if (manager == null)
             {
                 Debug.LogWarning("[ProgressionDebugMenu] No GameManager found in the loaded scene.");

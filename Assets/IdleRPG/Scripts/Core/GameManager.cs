@@ -114,6 +114,9 @@ namespace IdleRPG.Core
         /// <summary>Measures live gold income so offline progress pays the real rate.</summary>
         public EconomyRateTracker RateTracker { get; private set; }
 
+        /// <summary>Offline earnings: caps, rate and the claim guard.</summary>
+        public OfflineProgressManager Offline { get; private set; }
+
         /// <summary>True when the current run was restored from disk.</summary>
         public bool LoadedFromSave { get; private set; }
 
@@ -162,6 +165,9 @@ namespace IdleRPG.Core
                 StartRun(startingStage);
                 Save?.SaveNow("first-run");
             }
+
+            // Offer offline earnings (no-op on a fresh install or a very short absence).
+            EvaluateOffline();
         }
 
         private void OnApplicationPause(bool paused)
@@ -193,6 +199,12 @@ namespace IdleRPG.Core
             if (RateTracker != null)
             {
                 RateTracker.Detach();
+            }
+
+            if (Offline != null)
+            {
+                Offline.RewardPaid -= OnOfflineRewardPaid;
+                Offline.Detach();
             }
 
             if (Resolver != null)
@@ -265,6 +277,10 @@ namespace IdleRPG.Core
             {
                 combatManager.SetStage(CurrentStage, healParty: true);
             }
+
+            Offline = new OfflineProgressManager(balanceConfig, waveConfig, Economy, RateTracker, ResolveGoldReward);
+            Offline.Attach();
+            Offline.RewardPaid += OnOfflineRewardPaid;
 
             SubscribeCombat();
             SubscribeProgression();
@@ -565,7 +581,66 @@ namespace IdleRPG.Core
         /// <summary>Wipes the save (debug tooling / future reset button).</summary>
         public void DeleteSave()
         {
+            Offline?.ClearPending();
             Save?.DeleteSave();
+        }
+
+        /// <summary>
+        /// Offers the offline reward for the time since the last session ended.
+        /// Called once on start; also used by the debug tooling to re-run the calculation.
+        /// </summary>
+        public OfflineRewardResult EvaluateOffline()
+        {
+            if (Offline == null)
+            {
+                return OfflineRewardResult.None;
+            }
+
+            double lastLogout = ResolveLastLogoutBinary();
+
+            if (lastLogout <= 0d)
+            {
+                return OfflineRewardResult.None;
+            }
+
+            double savedRate = RateTracker != null ? RateTracker.GoldPerSecond : 0d;
+            OfflineRewardResult result = Offline.Evaluate(lastLogout, CurrentStage, savedRate);
+
+            if (result.HasReward)
+            {
+                LogFlow($"Offline: {result.RawSeconds:0}s away -> {result.CappedSeconds:0}s paid, " +
+                        $"{result.Gold:0.#} gold at {result.GoldPerSecond:0.##}/s ({Offline.LastRateSource})");
+
+                // Consume the window straight away so a kill before claiming cannot pay twice.
+                Save?.SaveNow("offline");
+                GameEvents.RaiseOfflineRewardsReady(result);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Most recent of the two logout timestamps (save file and PlayerPrefs). Taking the newer one
+        /// means a hard process kill can never inflate the offline window.
+        /// </summary>
+        private double ResolveLastLogoutBinary()
+        {
+            double fromSave = Save != null ? Save.LastLogoutBinary : 0d;
+            double fromPrefs = 0d;
+            bool hasPrefs = SaveManager.TryReadPlayerPrefsLogout(out fromPrefs);
+
+            if (hasPrefs && fromPrefs > fromSave)
+            {
+                return fromPrefs;
+            }
+
+            return fromSave;
+        }
+
+        private void OnOfflineRewardPaid(double gold)
+        {
+            TotalGoldEarned += gold;
+            Save?.MarkDirty("offline-claim");
         }
 
         /// <summary>Remembers which management tab the player was on.</summary>
