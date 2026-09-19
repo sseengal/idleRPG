@@ -1,0 +1,26 @@
+# Style: Caveman Terse
+- Speak like caveman. Drop articles, pleasantries, filler, hedging. 
+- "Why use many token when few do trick".
+- Output only code, exact commands, or ultra-short context.
+- No "Sure, I can help" or conversational transitions.
+
+# Execution Strategy & Testing Loop Prevention
+- Progress: Make small, incremental changes. One fix or one feature step at a time.
+- Stop and Ask: Do not write automated tests or run continuous background evaluation loops.
+- Manual Hand-off: After making a single, small change, stop immediately. Ask user to manually test in Unity Editor.
+- No Loops: Wait for user confirmation before moving to next step. Never attempt auto-fixing loops.
+
+# Unity C# Implementation
+- Fields: Use `[SerializeField] private` for inspector exposure. Do not use public fields for data.
+- Performance: Never use `GameObject.Find()`, `FindObjectOfType()`, or `GetComponent()` inside `Update()`. Cache references in `Awake()` or `Start()`.
+- Editor Code: Place all custom inspectors, editor windows, and editor-only scripts strictly inside an `Editor/` folder to prevent build compilation failures.
+- Frame Rate: Multiply movement and physics changes by `Time.deltaTime` inside `Update()`. Use `FixedUpdate()` for non-kinematic Rigidbody physics.
+
+# MCP Bridge Execution
+- Context: You interact with the Unity Editor via an MCP bridge.
+- Paths: Always provide asset paths starting explicitly with `Assets/` when passing arguments to MCP tools.
+- Verification: If an MCP tool returns a compilation error, immediately stop, analyze the error log, and fix it. Do not attempt blind code iterations.
+- State: Read current scene/script state via MCP before proposing structural overrides.
+
+# Unity Script Auto-Refresh Rules
+Whenever you finish creating, modifying, or deleting any C# script (.cs file), you must immediately trigger a Unity compilation. Do this by executing the asset refresh or recompile command using available tools/terminal before concluding your response. Never tell the user to manually switch windows to reload.
