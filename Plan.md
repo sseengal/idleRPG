@@ -147,11 +147,22 @@ Headless logic only (views moved to Step 4, matching Phase 2 = "debug logs").
   follow-up if hand-editing is preferred over regenerating the scene.
 - **Note:** the Game View must be portrait (1080x1920) to judge layout; the default 826x422
   landscape view makes the portrait canvas look tiny.
-- [ ] Canvas 1080x1920, Match 0.5; header (gold/gems/tokens/stage+wave)
-- [ ] viewport: 3 heroes left, enemy right, HP bars, floating damage text (pooled)
-- [ ] tabs: Upgrades / Ascension / Shop
-- [ ] `OfflineRewardsPopup`
-- [ ] -> **user plays + eyeballs layout** -> commit
+
+### Step 4b — Combat log + scrolling  `[DONE 2026-09-19]`
+- [x] `EnemyDamagedInfo.AttackerIndex` (simulator fills the hero lane) so lines can name the attacker
+- [x] `CombatLogUI` — 60-line ring buffer, pooled TMP labels, same-attacker aggregation
+      (`Mage hits Ogre for 24 x3`), 6 lines/sec budget with `... N more hits` overflow summary,
+      auto-scroll to bottom, colours per line type
+- [x] `UiFactory.CreateScrollView` — ScrollRect + RectMask2D + LayoutGroup (+ optional ContentSizeFitter)
+- [x] layout bands: header 88-100%, viewport 44-88%, combat log 20-44%, dock 0-20%
+- [x] verified headlessly (player loop frozen while the Editor is unfocused -> drove
+      `CombatSimulator.Step` + `CombatLogUI.Update` via reflection)
+- [ ] **user test**: focus the Editor, Play, read the feed under the battle screen
+
+### Step 4c — Page split + full scrolling  `[PENDING]`
+- [ ] `ScreenController`: BattlePage / ManagementPage + bottom nav (Upgrades / Ascend / Shop)
+- [ ] ScrollRect on upgrades + prestige lists
+- [ ] user test: scroll both pages, switch tabs
 
 ### Step 5 — Persistence (Phase 5)  `[PENDING]`
 - [ ] `SaveSystem.cs` (JsonUtility, version, atomic write, persistentDataPath/savegame.json)
@@ -262,6 +273,34 @@ rendered as untextured tinted boxes -> the generator now assigns art by asset-na
 
 ---
 
+## 10. Step 4b Verification Results
+
+The Editor throttles the player loop while unfocused (`frameCount=2` after 15s), so the log was
+verified headlessly by driving the simulation and the view directly:
+```
+[L] lines=10 height=372 enemyHp=0
+   ... 1 more hit
+   Archer hits Slime for 8
+   Knight hits Slime for 12
+   Mage hits Slime for 16
+   Slime hits Knight for 0.9  (239/240)
+   Archer hits Slime for 8
+   Knight hits Slime for 12
+   Archer hits Slime for 8
+   Slime defeated  +8 gold
+   Stage 1 wave 1 cleared
+```
+Bugs found and fixed on the way:
+1. **`MvpSceneBuilder` loaded the data assets before `EditorSceneManager.NewScene`** -> the reimport
+   in the same tick invalidated them and the scene saved with an **unwired GameManager**
+   (`[SceneWiringUtility] GameManager wiring verification failed`). Loads now happen after the scene
+   swap and the build aborts (without overwriting the scene) if wiring fails.
+2. `ContentSizeFitter` on the log content reported height 12 (extra layout pass needed) -> the log
+   computes its content height explicitly (`count * (lineHeight + spacing) + padding`).
+3. `ShopPanelUI.Refresh` threw when `Economy` was null (unwired build) -> now guards.
+
+---
+
 ## 4. Open Risks / Watch Items
 - Unity **6000.6.0f1** (not 2022.3 LTS) — APIs used are version-stable.
 - New Input System only (`activeInputHandler = 1`) -> EventSystem needs `InputSystemUIInputModule`.
@@ -298,3 +337,7 @@ rendered as untextured tinted boxes -> the generator now assigns art by asset-na
   UiFactory/SceneWiringUtility/MvpSceneBuilder). `Main.unity` generated and verified live.
   Fixed: unit sprites were unassigned in the data assets. Deprecation warnings cleaned up
   (`FindAnyObjectByType`).
+
+- **Step 4b** (2026-09-19): Combat log landed (`CombatLogUI`, `AttackerIndex` payload field,
+  `UiFactory.CreateScrollView`). Scene builder ordering bug fixed (stale asset refs -> unwired scene).
+  Log verified headlessly with real formatted output.

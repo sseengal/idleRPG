@@ -179,5 +179,54 @@ namespace IdleRPG.EditorTools
 
             return sprite;
         }
+
+        /// <summary>
+        /// A vertically scrolling list: RectMask2D viewport (cheap, no stencil) + content with a
+        /// LayoutGroup and a ContentSizeFitter so rows can grow without manual sizing.
+        /// </summary>
+        public static ScrollRect CreateScrollView(Transform parent, string name, float spacing,
+            RectOffset padding, out RectTransform content, float scrollSensitivity = 25f,
+            bool autoSizeContent = true)
+        {
+            GameObject root = Node(name, parent);
+            ScrollRect scrollRect = root.AddComponent<ScrollRect>();
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+            scrollRect.movementType = ScrollRect.MovementType.Elastic;
+            scrollRect.elasticity = 0.08f;
+            scrollRect.inertia = true;
+            scrollRect.decelerationRate = 0.12f;
+            scrollRect.scrollSensitivity = scrollSensitivity;
+
+            Stretch(root.GetComponent<RectTransform>());
+
+            GameObject viewport = Node("Viewport", root.transform);
+            RectTransform viewportRect = viewport.GetComponent<RectTransform>();
+            Stretch(viewportRect);
+            viewportRect.pivot = new Vector2(0.5f, 1f);
+            viewport.AddComponent<RectMask2D>();
+
+            GameObject contentObject = Node("Content", viewport.transform);
+            content = contentObject.GetComponent<RectTransform>();
+            content.anchorMin = new Vector2(0f, 1f);
+            content.anchorMax = new Vector2(1f, 1f);
+            content.pivot = new Vector2(0.5f, 1f);
+            content.offsetMin = new Vector2(0f, 0f);
+            content.offsetMax = new Vector2(0f, 0f);
+            content.sizeDelta = new Vector2(0f, 0f);
+
+            VerticalStack(contentObject, spacing, padding);
+
+            if (autoSizeContent)
+            {
+                ContentSizeFitter fitter = contentObject.AddComponent<ContentSizeFitter>();
+                fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+                fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            }
+
+            scrollRect.viewport = viewportRect;
+            scrollRect.content = content;
+            return scrollRect;
+        }
     }
 }

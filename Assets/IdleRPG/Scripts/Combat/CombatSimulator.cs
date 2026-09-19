@@ -222,7 +222,7 @@ namespace IdleRPG.Combat
                 }
 
                 Enemy.TakeDamage(damage);
-                EnemyDamaged?.Invoke(new EnemyDamagedInfo(damage, Enemy.CurrentHealth, Enemy.MaxHealth, isCritical));
+                EnemyDamaged?.Invoke(new EnemyDamagedInfo(damage, Enemy.CurrentHealth, Enemy.MaxHealth, isCritical, hero.Index));
 
                 if (!Enemy.IsAlive)
                 {

@@ -108,7 +108,7 @@ namespace IdleRPG.UI
                 }
             }
 
-            if (gemsLabel != null)
+            if (gemsLabel != null && manager.Economy != null)
             {
                 gemsLabel.SetText(string.Format("{0} gems", NumberFormatter.Format(manager.Economy.Gems)));
             }

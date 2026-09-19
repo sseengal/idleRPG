@@ -13,12 +13,16 @@ namespace IdleRPG.Core
         public double MaxHealth;
         public bool IsCritical;
 
-        public EnemyDamagedInfo(double damage, double currentHealth, double maxHealth, bool isCritical = false)
+        /// <summary>Party lane of the hero that dealt the damage (-1 when unknown).</summary>
+        public int AttackerIndex;
+
+        public EnemyDamagedInfo(double damage, double currentHealth, double maxHealth, bool isCritical = false, int attackerIndex = -1)
         {
             Damage = damage;
             CurrentHealth = currentHealth;
             MaxHealth = maxHealth;
             IsCritical = isCritical;
+            AttackerIndex = attackerIndex;
         }
 
         /// <summary>Remaining health as 0..1.</summary>

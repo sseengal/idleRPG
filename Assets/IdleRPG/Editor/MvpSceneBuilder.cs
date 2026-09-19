@@ -31,8 +31,10 @@ namespace IdleRPG.EditorTools
         private const float ReferenceHeight = 1920f;
 
         // Layout bands, as fractions of screen height.
-        private const float HeaderBottom = 0.88f;
-        private const float ViewportBottom = 0.38f;
+        private const float HeaderBottom = 0.88f;   // header:  HeaderBottom .. 1
+        private const float ViewportBottom = 0.44f; // battle viewport: ViewportBottom .. HeaderBottom
+        private const float LogBottom = 0.20f;      // combat log: LogBottom .. ViewportBottom
+        private const float DockTop = 0.20f;        // control dock: 0 .. DockTop
 
         private static readonly Color TextColor = new Color(0.94f, 0.96f, 1f, 1f);
         private static readonly Color DimTextColor = new Color(0.75f, 0.78f, 0.86f, 1f);
@@ -49,6 +51,11 @@ namespace IdleRPG.EditorTools
             PlaceholderSpriteGenerator.GenerateAll();
             DataAssetGenerator.GenerateAll();
 
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+            PrepareCamera();
+
+            // Loaded *after* the scene swap: a reimport in the same tick destroys asset
+            // instances loaded earlier, which silently produced an unwired scene before.
             BalanceConfig balance = SceneWiringUtility.LoadBalance();
             WaveConfig waveConfig = SceneWiringUtility.LoadWaveConfig();
             PartyConfig partyConfig = SceneWiringUtility.LoadPartyConfig();
@@ -61,12 +68,15 @@ namespace IdleRPG.EditorTools
                 return;
             }
 
-            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
-            PrepareCamera();
-
             GameManager gameManager = SceneWiringUtility.CreateGameManagerObject(
                 balance, waveConfig, partyConfig, statTracks, prestigeUpgrades,
                 enableDebugLogger: false, enableHotkeys: true);
+
+            if (gameManager.Balance == null || gameManager.Combat == null || gameManager.Party == null)
+            {
+                Debug.LogError("[MvpSceneBuilder] GameManager wiring failed - aborting build so the existing scene is not overwritten.");
+                return;
+            }
 
             GameObject hudRoot = new GameObject("HUD");
             HudController hud = hudRoot.AddComponent<HudController>();
@@ -78,6 +88,7 @@ namespace IdleRPG.EditorTools
             HudHeaderUI header = BuildHeader(safeArea);
             BuildViewport(safeArea, damageRoot, out HeroUnitView[] heroViews, out EnemyUnitView enemyView,
                 out FloatingDamageTextPool damagePool, out RectTransform enemyAnchor, out RectTransform[] heroAnchors);
+            CombatLogUI combatLog = BuildCombatLog(safeArea);
             TabController tabs = BuildDock(safeArea, partyConfig, prestigeUpgrades);
             OfflineRewardsPopup offlinePopup = BuildOfflinePopup(canvasRoot);
             ToastUI toast = BuildToast(canvasRoot);
@@ -91,6 +102,7 @@ namespace IdleRPG.EditorTools
             SceneWiringUtility.SetField(damagePool, "heroAnchors", heroAnchors);
 
             EditorUtility.SetDirty(hud);
+            EditorUtility.SetDirty(combatLog);
             EditorUtility.SetDirty(header);
             EditorUtility.SetDirty(tabs);
             EditorUtility.SetDirty(offlinePopup);
@@ -422,7 +434,7 @@ namespace IdleRPG.EditorTools
             List<PrestigeUpgradeData> prestigeUpgrades)
         {
             Image dock = UiFactory.Panel("Dock", safeArea, "ui_panel_light", new Color(1f, 1f, 1f, 0.98f));
-            UiFactory.Anchor(dock.rectTransform, Vector2.zero, new Vector2(1f, ViewportBottom), 14f, 14f, 14f, 6f);
+            UiFactory.Anchor(dock.rectTransform, Vector2.zero, new Vector2(1f, DockTop), 14f, 14f, 14f, 6f);
             TabController tabs = dock.gameObject.AddComponent<TabController>();
 
             GameObject panelsRoot = UiFactory.Node("Panels", dock.transform);
@@ -728,6 +740,28 @@ namespace IdleRPG.EditorTools
             ToastUI ui = host.AddComponent<ToastUI>();
             SceneWiringUtility.SetField(ui, "canvasGroup", group);
             SceneWiringUtility.SetField(ui, "label", label);
+            return ui;
+        }
+
+        /// <summary>Combat feed strip between the viewport and the control dock.</summary>
+        private static CombatLogUI BuildCombatLog(RectTransform safeArea)
+        {
+            Image strip = UiFactory.Panel("CombatLog", safeArea, "ui_panel", new Color(1f, 1f, 1f, 0.95f), raycast: true);
+            UiFactory.Anchor(strip.rectTransform, new Vector2(0f, LogBottom), new Vector2(1f, ViewportBottom), 14f, 6f, 14f, 6f);
+            CombatLogUI ui = strip.gameObject.AddComponent<CombatLogUI>();
+
+            ScrollRect scroll = UiFactory.CreateScrollView(strip.transform, "Scroll", 2f, new RectOffset(10, 10, 6, 6), out RectTransform content, autoSizeContent: false);
+
+            TextMeshProUGUI template = UiFactory.Text("LineTemplate", content, "line", 22f,
+                TextAlignmentOptions.MidlineLeft, TextColor);
+            LayoutElement element = template.gameObject.AddComponent<LayoutElement>();
+            element.minHeight = 34f;
+            element.preferredHeight = 34f;
+            template.gameObject.SetActive(false);
+
+            SceneWiringUtility.SetField(ui, "scrollRect", scroll);
+            SceneWiringUtility.SetField(ui, "content", content);
+            SceneWiringUtility.SetField(ui, "lineTemplate", template);
             return ui;
         }
 
