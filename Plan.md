@@ -242,8 +242,10 @@ Play for a minute, then stop Play (or background the build), wait ~1 minute, Pla
       build dry-run validates with no errors
 - [x] `README.md` written (quick start, menu map, architecture, systems, save/offline model, hotkeys,
       test pass, build steps, status table)
-- [ ] **user test**: run `Verify Settings`, then make a real device build and confirm the offline popup
-      + save round-trip on hardware
+- [x] verified: desktop player build boots, loads the save, pays offline earnings and runs combat
+      (log above)
+- [ ] **user test**: run `Verify Settings`, then make a real iOS/Android build and confirm the offline
+      popup, touch UI and safe-area insets on hardware
 
 ---
 
@@ -573,6 +575,19 @@ RESULT: all good.
 ```
 Plus `build dry_run` on StandaloneOSX: `{"valid": true, "validationErrors": []}`.
 
+**Player build run (strongest check):** `StandaloneOSX` -> `Builds/IdleRPG-mac.app` (91 MB) built and
+launched, and the player's own `Player.log` proves the whole stack works outside the Editor:
+```
+[MobileRuntimeBootstrap] MacBookAir10,1 | Mac OS X 14.8.3 | 2880x1800 @ 255dpi | 8192MB RAM | 8 cores
+    | target 60fps | safeArea (x:0.00, y:0.00, width:2880.00, height:1800.00)
+[GameManager] Save load: file | stage 5 wave 1 | [Economy] Gold=24.7K Gems=0 Tokens=4.6
+[GameManager] Resumed save: stage 5 wave 1 (auto-retry True).
+[GameManager] Offline: 784s away -> 784s paid, 13535876.6 gold at 24661.28/s (saved)
+[GameManager] Wave 1 cleared (stage 5).
+```
+So: the device policy applies in a real player (not just the Editor), the same save file round-trips
+Editor -> player, offline earnings fire with the capped math, combat runs, and there are no exceptions.
+
 **Still to do before a store build (user decisions):** set a real `companyName` (it moves
 `Application.persistentDataPath`, so wiping the dev save is expected), add icons/splash art and a
 release-signing identity. Bundle ids can be changed at any time before the first store upload.
@@ -602,6 +617,8 @@ release-signing identity. Bundle ids can be changed at any time before the first
 - **`Object.FindAnyObjectByType` skips inactive objects.** The management page is inactive while the
   battle page is shown, so its components (e.g. `TabController`) are invisible to that lookup —
   use `FindObjectsByType(..., FindObjectsInactive.Include, ...)` in probes/tools.
+- **`/Builds/` is gitignored** (local player builds are ~90 MB). Rebuild with MCP `build` or
+  `File > Build Settings`.
 - **Do not recompile while in Play mode.** Unity reloads scripts mid-session and the reloaded
   `GameManager` can come back with `Save`/`Offline` unset (`saveNull=True` in a probe) because `Awake`
   ran against a half-loaded scene. Exit Play, recompile, then Play again.
@@ -669,3 +686,7 @@ release-signing identity. Bundle ids can be changed at any time before the first
   README). Player settings audited and fixed: autorotate was still enabled, bundle ids were still the
   Unity URP template values, and `SampleScene` was still enabled in the build list. Verify Settings now
   reports all 12 checks OK; a StandaloneOSX build dry-run validates.
+
+- **Step 6 verified on a player** (2026-09-19): `Builds/IdleRPG-mac.app` built and launched; its log
+  shows the runtime bootstrap, the save file loading from disk, capped offline earnings and combat
+  running, with no exceptions.

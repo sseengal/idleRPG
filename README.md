@@ -136,6 +136,8 @@ debug menus, the console log and the Unity MCP bridge. A manual pass takes ~5 mi
 4. Bundle identifiers are `com.siddharth.idlerpg` on both platforms — change them if you fork.
 5. `MobileRuntimeBootstrap` applies the device policy on launch (60 fps target, vSync off, screen kept
    awake, run-in-background off) and logs a one-line device summary. It is skipped inside the Editor.
+6. A macOS player build was verified: it logs the device summary, loads the save file, pays capped
+   offline earnings and runs combat with no exceptions. Local builds land in `Builds/` (gitignored).
 
 ## Status
 
