@@ -39,6 +39,8 @@ MonoBehaviour:
   minStageToAscend: 10
   offlineCapSeconds: 28800
   offlineEfficiency: 0.7
+  offlineMaxEquivalentSeconds: 7200
+  offlineEstimatedSecondsPerKill: 3.6
   minOfflineSecondsForPopup: 30
   startingGold: 0
   startingGems: 0

@@ -2,7 +2,7 @@
 
 > 2D Mobile Idle RPG (Unity 6000.6.0f1, URP 2D). iOS + Android.
 > Repo: https://github.com/sseengal/idleRPG.git
-> Last updated: Step 5b (persistence + offline progress complete)
+> Last updated: Step 6 (mobile polish) - MVP complete; pending device test
 
 ---
 
@@ -225,9 +225,25 @@ Headless logic only (views moved to Step 4, matching Phase 2 = "debug logs").
 Play for a minute, then stop Play (or background the build), wait ~1 minute, Play again -> a small
 "welcome back" popup appears instead of being ignored (min offline window is 30s).
 
-### Step 6 — Mobile polish  `[PENDING]`
-- [ ] `SafeAreaFitter` for notches, iOS/Android build settings sanity
-- [ ] README, final `git push -u origin main`
+### Step 6 — Mobile polish  `[DONE 2026-09-19]`
+- [x] `SafeAreaFitter` already fits the Canvas root to `Screen.safeArea` (recomputes only when the
+      safe area or screen size changes)
+- [x] `MobileRuntimeBootstrap` — applies the device policy before the first scene loads:
+      60 fps target, vSync off, screen kept awake, run-in-background off, one-line device summary.
+      Skipped inside the Editor so play-mode feel and profiling are untouched.
+- [x] `MobileBuildSettingsUtility` (Editor) — `Tools > Idle RPG > Mobile > Verify Settings` audits 12
+      items and `Apply Recommended Settings` fixes the fixable ones (portrait lock, autorotate off,
+      IL2CPP both platforms, ARM64, min API 26, iOS 15, incremental GC, strip engine code, build scene
+      list = Main.unity only). `ApplyNow()` exists for unattended tooling (no modal dialog).
+- [x] Player settings corrected: autorotate flags were still ON (Step 0 only set the orientation enum),
+      bundle ids were the Unity URP template ids -> both set to `com.siddharth.idlerpg`,
+      `SampleScene` + `CombatDebug` disabled in the build list (Main.unity first)
+- [x] verified: `Verify Settings` reports `RESULT: all good.` (all 12 checks OK) and a StandaloneOSX
+      build dry-run validates with no errors
+- [x] `README.md` written (quick start, menu map, architecture, systems, save/offline model, hotkeys,
+      test pass, build steps, status table)
+- [ ] **user test**: run `Verify Settings`, then make a real device build and confirm the offline popup
+      + save round-trip on hardware
 
 ---
 
@@ -537,6 +553,32 @@ logout timestamp.
 
 ---
 
+## 19. Step 6 Verification (mobile settings audit)
+```
+=== Idle RPG mobile settings ===
+product        : Idle RPG 0.1.0 (DefaultCompany)
+  OK orientation     : Portrait (want Portrait)
+  OK autorotate      : all auto-rotate flags should be off      <- was broken before Apply
+  OK color space     : Linear
+  OK android backend : IL2CPP
+  OK ios backend     : IL2CPP
+  OK android arch    : ARM64
+  OK android min sdk : AndroidApiLevel26
+  OK ios device      : iPhoneAndiPad
+  OK gc incremental  : should be ON on mobile
+  OK android bundle id: com.siddharth.idlerpg                  <- was the URP template id
+  OK ios bundle id   : com.siddharth.idlerpg                   <- was the URP template id
+  OK build scenes    : Main.unity only, first                  <- SampleScene was enabled
+RESULT: all good.
+```
+Plus `build dry_run` on StandaloneOSX: `{"valid": true, "validationErrors": []}`.
+
+**Still to do before a store build (user decisions):** set a real `companyName` (it moves
+`Application.persistentDataPath`, so wiping the dev save is expected), add icons/splash art and a
+release-signing identity. Bundle ids can be changed at any time before the first store upload.
+
+---
+
 ## 4. Open Risks / Watch Items
 - Unity **6000.6.0f1** (not 2022.3 LTS) — APIs used are version-stable.
 - New Input System only (`activeInputHandler = 1`) -> EventSystem needs `InputSystemUIInputModule`.
@@ -622,3 +664,8 @@ logout timestamp.
   guards, `offlineMaxEquivalentSeconds` / `offlineEstimatedSecondsPerKill` knobs, F10 re-evaluation,
   offline payout table in the balance summary). Verified live: caps, tamper, exact payout, second-click
   guard and rate-tracker isolation all behave. Section 17 documents how to test Step 5 by hand.
+
+- **Step 6** (2026-09-19): Mobile polish landed (`MobileRuntimeBootstrap`, `MobileBuildSettingsUtility`,
+  README). Player settings audited and fixed: autorotate was still enabled, bundle ids were still the
+  Unity URP template values, and `SampleScene` was still enabled in the build list. Verify Settings now
+  reports all 12 checks OK; a StandaloneOSX build dry-run validates.
