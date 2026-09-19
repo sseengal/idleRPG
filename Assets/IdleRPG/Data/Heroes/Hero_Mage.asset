@@ -15,8 +15,8 @@ MonoBehaviour:
   heroID: hero_mage
   heroName: Mage
   heroIcon: {fileID: 0}
-  baseHealth: 100
-  baseAttack: 24
-  baseDefense: 2
+  baseHealth: 130
+  baseAttack: 16
+  baseDefense: 5
   attackIntervalSec: 2
   placeholderTint: {r: 0.75, g: 0.4, b: 0.95, a: 1}

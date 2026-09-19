@@ -104,13 +104,18 @@ Design rules:
 - [x] commit
 - **Note:** SO *assets* (Hero/Enemy/Config) are generated in Step 4 by `DataAssetGenerator`; this step is code only.
 
-### Step 2 — Combat (Phase 2)  `[PENDING]`
-- [ ] `CombatSimulator.cs` (pure, no MonoBehaviour)
-- [ ] `HeroUnit.cs`, `EnemyUnit.cs`, `HpBar.cs`
-- [ ] `CombatManager.cs` (10 waves + boss, ticker coroutine, events)
-- [ ] `GameManager.cs` FSM: CombatState / BossState / DefeatState / AscensionState
-- [ ] debug-log auto battle, 30s boss timer, defeat -> stage-1 + auto-retry off
-- [ ] -> **user plays empty scene, reads Console** -> commit
+### Step 2 — Combat core (Phase 2)  `[DONE 2026-09-19]`
+Headless logic only (views moved to Step 4, matching Phase 2 = "debug logs").
+- [x] `CombatScaling.cs`, `EnemyTargetingMode.cs`
+- [x] `ICombatStatProvider.cs` + `DefaultStatProvider.cs` (Step 3 swaps in upgrades/prestige)
+- [x] `HeroCombatant.cs`, `EnemyCombatant.cs`, `CombatRewardCalculator.cs` (pure runtime state)
+- [x] `CombatSimulator.cs` (pure, seeded RNG, targeting, crits, events)
+- [x] `CombatManager.cs` (fixed-step ticker coroutine, 10 waves + boss, mirrors to GameEvents)
+- [x] `GameManager.cs` FSM: Boot / Combat / Boss / Defeat / Ascension + economy + stage progression
+- [x] `CombatEventLogger.cs`, `CombatDebugSceneBuilder.cs` (editor menu tools)
+- [x] **BOSS TIMER REMOVED** (user decision): defeat only via party wipe; `BossTimerTick` deleted
+- [x] Crits ON: 5% chance, x2 damage (`IsCritical` in payload, logged as CRIT)
+- [x] Balance review applied + verified (sections 6 and 7) -> commit
 
 ### Step 3 — Progression (Phase 3)  `[PENDING]`
 - [ ] `StatResolver.cs` (base + levels + prestige -> final stats)
@@ -147,12 +152,63 @@ Design rules:
 
 ---
 
+## 6. Balance Review (Step 2, user-approved)
+
+| Item | Before | Now | Reason |
+|---|---|---|---|
+| Hero DPS | 8 / 15 / 12 | **8 / 8 / 8** | one shared upgrade cost curve -> all 3 viable |
+| Knight | HP 200 DEF 10 | HP 240 DEF 12 | front-lane tank |
+| Archer | HP 120 ATK 18 @1.2s | HP 110 ATK 8 @1.0s | equal DPS, fast cadence |
+| Mage | HP 100 ATK 24 @2.0s | HP 130 ATK 16 @2.0s | equal DPS, slow cadence |
+| Boss (stage 1) | 600 x10 = 6000 HP (~171s) | 120 x5 = **600 HP (~45s)** | was unfightable |
+| Boss gold | 60 x5 = 300 | 25 x6 = **150** | ~half a stage income, not a jackpot |
+| Stage-1 income | ~142 | **~292/stage** | funds ~20 ATK levels after stage 1 |
+| Enemy DEF scaling | n/a | **off** | 1.08^S DEF vs 0.15 floor -> late DPS collapse |
+| minDamageRatio | 0.10 | **0.15** | floor less punishing |
+| Hero healing | full revive every wave | **damage carries across the 10 waves; heal on stage advance** | only defeat source now that timers are gone |
+| Crit | off | **5% x2.0** (~+5% DPS) | visible in damage text |
+| Wave transition | 0.50s | **0.35s** | snappier |
+
+**Known weak spot for Step 3:** DEF upgrades are minor (Knight +1.2 DEF/level vs enemy ATK x1.08/stage) -> tune DEF `statGainPerLevelFraction` or add a damage-reduction curve.
+
+---
+
+## 7. Step 2 Verification Results
+
+Headless deterministic run (seed 12345, `DefaultStatProvider`, no upgrades/heals):
+`wiped=True at stage=2 wave=11 t=185.3s | kills=21 gold=413 crits=22 | stage1ClearTime=87.8s`
+- Stage-1 clear **87.8s** vs 60-90s target -> on target (hand-calc predicted 89s).
+- Crit rate 22/~355 hits = ~6% (expected 5%) -> OK.
+- Wipe triggers correctly when out-scaled.
+
+Live play test (CombatDebug scene, temporary waves=1 / boss x1 for speed):
+```
+[State] Combat -> Boss
+[CombatManager] Stage 1 | Wave 2/2 (BOSS) -> Ogre Chieftain HP 120 ATK 20 gold 150
+[CombatManager] Ogre Chieftain killed -> +150 gold
+[State] Boss -> Combat
+[CombatManager] Stage 2 | Wave 1/2 -> Bat HP 103 ATK 10 gold 13
+[GameManager] Stage 1 complete -> now stage 2 | [Economy] Gold=158 Gems=1 Tokens=0
+```
+- Wave FSM, boss wave, stage advance, heal-on-advance, gems +1, gold math, stage scaling
+  (Bat 90->103 = x1.15, ATK 9->10 = x1.08, gold 12->13 = x1.12) confirmed.
+
+---
+
 ## 4. Open Risks / Watch Items
 - Unity **6000.6.0f1** (not 2022.3 LTS) — APIs used are version-stable.
 - New Input System only (`activeInputHandler = 1`) -> EventSystem needs `InputSystemUIInputModule`.
 - `.clinerules` forbids automated tests -> no EditMode tests for formulas unless user asks.
 - `SampleScene` untouched until `Main.unity` proven; then swap build settings scene.
 - `.meta` files ARE tracked by git (verified) — must commit them.
+- **MCP: Editor throttles the player loop when unfocused** (20 wall-seconds produced `frameCount=2`).
+  Focus the Editor or verify headlessly via `eval`; never trust a Play test on a minimised Editor.
+- **MCP: `SerializedObject` asset writes during Play mode PERSIST** (not reverted on stop).
+  Re-run `Tools > Idle RPG > Generate Data Assets` after such a test.
+- **MCP: asset refs loaded before `EditorSceneManager.NewScene` go stale** if a reimport lands in the
+  same tick -> load data assets *after* the scene swap (the builder does this now).
+- Editor **menu items** are the reliable way to run authoring code; `eval` runs in a throwaway assembly
+  and can hit the 5s main-thread timeout on long operations.
 
 ## 5. Change Log
 - **Step 0** (2026-09-19): MCP bridge fixed (stdio `unity` server; stale `unityMCP` @ :8080 removed), `origin` remote added, `Plan.md` created, folder tree in place, both asmdefs added, portrait lock applied, recompile clean.
@@ -162,3 +218,7 @@ Design rules:
   - `MCP note`: `recompile` may report `up_to_date` after filesystem writes → call `AssetDatabase.Refresh()` + `CompilationPipeline.RequestScriptCompilation()` via `eval`, then poll `recompile_status`.
   - `MCP note`: `recompile`/`eval` must not be issued in the same response as the file edit that they depend on.
 
+
+- **Step 2** (2026-09-19): Combat core landed (12 new files) + reviewed balance written through
+  `DataAssetGenerator.ApplyBalance`. Boss timer removed per user decision; crits enabled (5% x2).
+  Verified headless (87.8s stage-1 clear, wipe path) and live in the Editor (boss -> stage advance -> gems).

@@ -15,8 +15,8 @@ MonoBehaviour:
   heroID: hero_archer
   heroName: Archer
   heroIcon: {fileID: 0}
-  baseHealth: 120
-  baseAttack: 18
+  baseHealth: 110
+  baseAttack: 8
   baseDefense: 4
-  attackIntervalSec: 1.2
+  attackIntervalSec: 1
   placeholderTint: {r: 0.35, g: 0.85, b: 0.45, a: 1}

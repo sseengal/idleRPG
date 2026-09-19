@@ -47,6 +47,7 @@ namespace IdleRPG.EditorTools
                     .SetObjectList("heroes", new List<Object> { heroes[0], heroes[1], heroes[2] })
                     .Apply();
 
+                ApplyBalance(balance);
                 CreateStatUpgrades();
                 CreatePrestigeUpgrades();
 
@@ -64,6 +65,45 @@ namespace IdleRPG.EditorTools
             }
         }
 
+        /// <summary>Explicitly writes the reviewed MVP balance values into BalanceConfig.</summary>
+        private static void ApplyBalance(BalanceConfig balance)
+        {
+            new Editable(balance)
+                .Set("enemyHealthGrowth", 1.15f)
+                .Set("enemyGoldGrowth", 1.12f)
+                .Set("enemyAttackGrowth", 1.08f)
+                .Set("normalWavesPerStage", 10)
+                .Set("enemiesPerWave", 1)
+                .Set("gemsPerBossKill", 1)
+                .Set("waveTransitionDelaySec", 0.35f)
+                .Set("minDamageRatio", 0.15f)
+                .Set("criticalChance", 0.05f)
+                .Set("criticalDamageMultiplier", 2f)
+                .Set("healHeroesOnStageAdvance", true)
+                .Set("reviveHeroesEachWave", false)
+                .Set("enemyTargeting", (int)EnemyTargetingMode.FrontMost)
+                .Set("combatTickIntervalSec", 0.05f)
+                .Set("stageRollbackOnDefeat", 1)
+                .Set("resetAutoRetryOnDefeat", true)
+                .Set("scaleEnemyDefenseWithStage", false)
+                .Set("logCombatToConsole", true)
+                .Set("upgradeCostGrowth", 1.07f)
+                .Set("upgradeStatGainPerLevel", 0.1f)
+                .Set("prestigeStageDivisor", 10f)
+                .Set("prestigeExponent", 1.5f)
+                .Set("minStageToAscend", 10)
+                .Set("offlineCapSeconds", 28800f)
+                .Set("offlineEfficiency", 0.7f)
+                .Set("minOfflineSecondsForPopup", 30f)
+                .Set("startingGold", 0d)
+                .Set("startingGems", 0d)
+                .Set("goldPerSecondSampleWindowSec", 60f)
+                .Set("adGoldBoostMultiplier", 2d)
+                .Set("adGoldBoostDurationSec", 3600f)
+                .Set("autosaveIntervalSec", 15f)
+                .Apply();
+        }
+
         // ------------------------------------------------------------------
         // Content definitions
         // ------------------------------------------------------------------
@@ -75,9 +115,9 @@ namespace IdleRPG.EditorTools
             new Editable(knight)
                 .Set("heroID", "hero_knight")
                 .Set("heroName", "Knight")
-                .Set("baseHealth", 200f)
+                .Set("baseHealth", 240f)
                 .Set("baseAttack", 12f)
-                .Set("baseDefense", 10f)
+                .Set("baseDefense", 12f)
                 .Set("attackIntervalSec", 1.5f)
                 .SetColor("placeholderTint", new Color(0.35f, 0.55f, 0.95f, 1f))
                 .Apply();
@@ -87,10 +127,10 @@ namespace IdleRPG.EditorTools
             new Editable(archer)
                 .Set("heroID", "hero_archer")
                 .Set("heroName", "Archer")
-                .Set("baseHealth", 120f)
-                .Set("baseAttack", 18f)
+                .Set("baseHealth", 110f)
+                .Set("baseAttack", 8f)
                 .Set("baseDefense", 4f)
-                .Set("attackIntervalSec", 1.2f)
+                .Set("attackIntervalSec", 1f)
                 .SetColor("placeholderTint", new Color(0.35f, 0.85f, 0.45f, 1f))
                 .Apply();
             heroes.Add(archer);
@@ -99,9 +139,9 @@ namespace IdleRPG.EditorTools
             new Editable(mage)
                 .Set("heroID", "hero_mage")
                 .Set("heroName", "Mage")
-                .Set("baseHealth", 100f)
-                .Set("baseAttack", 24f)
-                .Set("baseDefense", 2f)
+                .Set("baseHealth", 130f)
+                .Set("baseAttack", 16f)
+                .Set("baseDefense", 5f)
                 .Set("attackIntervalSec", 2f)
                 .SetColor("placeholderTint", new Color(0.75f, 0.4f, 0.95f, 1f))
                 .Apply();
@@ -114,16 +154,20 @@ namespace IdleRPG.EditorTools
         {
             List<EnemyData> enemies = new List<EnemyData>();
 
-            enemies.Add(CreateEnemy("Enemy_Slime", "Slime", 60f, 6f, 0f, 8f, 2f, false, new Color(0.5f, 0.9f, 0.4f, 1f)));
-            enemies.Add(CreateEnemy("Enemy_Bat", "Bat", 90f, 9f, 1f, 12f, 1.6f, false, new Color(0.6f, 0.4f, 0.3f, 1f)));
-            enemies.Add(CreateEnemy("Enemy_Goblin", "Goblin", 130f, 12f, 3f, 18f, 1.8f, false, new Color(0.4f, 0.75f, 0.35f, 1f)));
-            enemies.Add(CreateEnemy("Boss_Ogre", "Ogre Chieftain", 600f, 20f, 5f, 60f, 2.5f, true, new Color(0.85f, 0.25f, 0.2f, 1f)));
+            // Baseline: a fresh party (8 DPS) clears a wave in ~8s and a stage in ~90s.
+            enemies.Add(CreateEnemy("Enemy_Slime", "Slime", 60f, 6f, 0f, 8f, 2f, false, 1f, 1f, new Color(0.5f, 0.9f, 0.4f, 1f)));
+            enemies.Add(CreateEnemy("Enemy_Bat", "Bat", 90f, 9f, 1f, 12f, 1.6f, false, 1f, 1f, new Color(0.6f, 0.4f, 0.3f, 1f)));
+            enemies.Add(CreateEnemy("Enemy_Goblin", "Goblin", 130f, 12f, 3f, 18f, 1.8f, false, 1f, 1f, new Color(0.4f, 0.75f, 0.35f, 1f)));
+
+            // Stage-1 boss: 120 x5 = 600 HP (~25s) and ~150 gold (about half a stage income).
+            enemies.Add(CreateEnemy("Boss_Ogre", "Ogre Chieftain", 120f, 20f, 5f, 25f, 2.5f, true, 5f, 6f, new Color(0.85f, 0.25f, 0.2f, 1f)));
 
             return enemies;
         }
 
         private static EnemyData CreateEnemy(string fileName, string displayName, float health, float attack,
-            float defense, float gold, float interval, bool isBoss, Color tint)
+            float defense, float gold, float interval, bool isBoss, float bossHealthMultiplier,
+            float bossGoldMultiplier, Color tint)
         {
             EnemyData enemy = CreateOrLoad<EnemyData>(EnemyFolder + "/" + fileName + ".asset");
             new Editable(enemy)
@@ -134,6 +178,8 @@ namespace IdleRPG.EditorTools
                 .Set("baseGoldDrop", gold)
                 .Set("attackIntervalSec", interval)
                 .Set("isBoss", isBoss)
+                .Set("bossHealthMultiplier", bossHealthMultiplier)
+                .Set("bossGoldMultiplier", bossGoldMultiplier)
                 .SetColor("placeholderTint", tint)
                 .Apply();
 

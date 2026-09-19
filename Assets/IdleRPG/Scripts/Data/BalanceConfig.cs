@@ -29,9 +29,6 @@ namespace IdleRPG.Data
         [Tooltip("Normal waves before a boss wave (design: 10 -> 1).")]
         [SerializeField] private int normalWavesPerStage = 10;
 
-        [Tooltip("Countdown for the boss encounter, in seconds.")]
-        [SerializeField] private float bossTimeLimitSec = 30f;
-
         [Tooltip("Number of enemies spawned per normal wave. MVP uses 1 for lane clarity.")]
         [SerializeField] private int enemiesPerWave = 1;
 
@@ -47,16 +44,42 @@ namespace IdleRPG.Data
         [Header("Combat Maths")]
         [Tooltip("Damage = Max(attack - defense, attack * this). Prevents '0 damage' stalemates.")]
         [Range(0f, 1f)]
-        [SerializeField] private float minDamageRatio = 0.1f;
+        [SerializeField] private float minDamageRatio = 0.15f;
 
-        [Tooltip("Critical hit chance for heroes (0 = disabled, MVP default).")]
+        [Tooltip("Critical hit chance for hero attacks. MVP: 5%.")]
         [Range(0f, 1f)]
-        [SerializeField] private float criticalChance = 0f;
+        [SerializeField] private float criticalChance = 0.05f;
 
-        [SerializeField] private float criticalDamageMultiplier = 1.5f;
+        [Tooltip("Damage multiplier applied on a critical hit. MVP: x2.")]
+        [SerializeField] private float criticalDamageMultiplier = 2f;
 
-        [Tooltip("Heroes revive at full HP when a wave starts.")]
-        [SerializeField] private bool reviveHeroesEachWave = true;
+        [Tooltip("Heal heroes to full HP whenever a new stage begins.")]
+        [SerializeField] private bool healHeroesOnStageAdvance = true;
+
+        [Tooltip("Also heal heroes at the start of every wave. Off: damage carries across the stage.")]
+        [SerializeField] private bool reviveHeroesEachWave = false;
+
+        // ------------------------------------------------------------------
+        // Encounter flow
+        // ------------------------------------------------------------------
+        [Header("Encounter Flow")]
+        [Tooltip("Which hero the current enemy attacks.")]
+        [SerializeField] private EnemyTargetingMode enemyTargeting = EnemyTargetingMode.FrontMost;
+
+        [Tooltip("Fixed simulation step of the combat ticker, in seconds.")]
+        [SerializeField] private float combatTickIntervalSec = 0.05f;
+
+        [Tooltip("Stages lost when the party wipes. Design spec: drop back 1 stage.")]
+        [SerializeField] private int stageRollbackOnDefeat = 1;
+
+        [Tooltip("Turn auto-retry off after a defeat (design spec).")]
+        [SerializeField] private bool resetAutoRetryOnDefeat = true;
+
+        [Tooltip("Also scale enemy defence with the stage.")]
+        [SerializeField] private bool scaleEnemyDefenseWithStage = false;
+
+        [Tooltip("Print combat and wave events to the console.")]
+        [SerializeField] private bool logCombatToConsole = true;
 
         // ------------------------------------------------------------------
         // Stat upgrades
@@ -126,9 +149,21 @@ namespace IdleRPG.Data
 
         public float EnemyAttackGrowth => Mathf.Max(1f, enemyAttackGrowth);
 
-        public int NormalWavesPerStage => Mathf.Max(1, normalWavesPerStage);
+        public EnemyTargetingMode EnemyTargeting => enemyTargeting;
 
-        public float BossTimeLimitSec => Mathf.Max(1f, bossTimeLimitSec);
+        public float CombatTickIntervalSec => Mathf.Clamp(combatTickIntervalSec, 0.01f, 0.5f);
+
+        public int StageRollbackOnDefeat => Mathf.Max(0, stageRollbackOnDefeat);
+
+        public bool ResetAutoRetryOnDefeat => resetAutoRetryOnDefeat;
+
+        public bool ScaleEnemyDefenseWithStage => scaleEnemyDefenseWithStage;
+
+        public bool LogCombatToConsole => logCombatToConsole;
+
+        public bool HealHeroesOnStageAdvance => healHeroesOnStageAdvance;
+
+        public int NormalWavesPerStage => Mathf.Max(1, normalWavesPerStage);
 
         public int EnemiesPerWave => Mathf.Max(1, enemiesPerWave);
 

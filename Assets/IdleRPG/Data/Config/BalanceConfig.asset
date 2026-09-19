@@ -16,14 +16,20 @@ MonoBehaviour:
   enemyGoldGrowth: 1.12
   enemyAttackGrowth: 1.08
   normalWavesPerStage: 10
-  bossTimeLimitSec: 30
   enemiesPerWave: 1
   gemsPerBossKill: 1
-  waveTransitionDelaySec: 0.5
-  minDamageRatio: 0.1
-  criticalChance: 0
-  criticalDamageMultiplier: 1.5
-  reviveHeroesEachWave: 1
+  waveTransitionDelaySec: 0.35
+  minDamageRatio: 0.15
+  criticalChance: 0.05
+  criticalDamageMultiplier: 2
+  healHeroesOnStageAdvance: 1
+  reviveHeroesEachWave: 0
+  enemyTargeting: 0
+  combatTickIntervalSec: 0.05
+  stageRollbackOnDefeat: 1
+  resetAutoRetryOnDefeat: 1
+  scaleEnemyDefenseWithStage: 0
+  logCombatToConsole: 1
   upgradeCostGrowth: 1.07
   upgradeStatGainPerLevel: 0.1
   prestigeStageDivisor: 10

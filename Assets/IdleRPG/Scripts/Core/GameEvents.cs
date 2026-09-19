@@ -38,9 +38,6 @@ namespace IdleRPG.Core
         /// <summary>(stage, wave, isBossWave).</summary>
         public static event Action<int, int, bool> StageChanged;
 
-        /// <summary>(remainingSeconds, totalSeconds).</summary>
-        public static event Action<float, float> BossTimerTick;
-
         /// <summary>Raised when the party wipes or the boss timer expires.</summary>
         public static event Action BossFailed;
 
@@ -117,7 +114,6 @@ namespace IdleRPG.Core
             ToastRequested = null;
             GameStateChanged = null;
             StageChanged = null;
-            BossTimerTick = null;
             BossFailed = null;
             PartyWiped = null;
             WaveCompleted = null;
@@ -168,11 +164,6 @@ namespace IdleRPG.Core
         internal static void RaiseStageChanged(int stage, int wave, bool isBossWave)
         {
             SafeInvoke(StageChanged, stage, wave, isBossWave, nameof(StageChanged));
-        }
-
-        internal static void RaiseBossTimerTick(float remainingSeconds, float totalSeconds)
-        {
-            SafeInvoke(BossTimerTick, remainingSeconds, totalSeconds, nameof(BossTimerTick));
         }
 
         internal static void RaiseBossFailed()

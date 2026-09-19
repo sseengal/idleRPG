@@ -15,8 +15,8 @@ MonoBehaviour:
   heroID: hero_knight
   heroName: Knight
   heroIcon: {fileID: 0}
-  baseHealth: 200
+  baseHealth: 240
   baseAttack: 12
-  baseDefense: 10
+  baseDefense: 12
   attackIntervalSec: 1.5
   placeholderTint: {r: 0.35, g: 0.55, b: 0.95, a: 1}
