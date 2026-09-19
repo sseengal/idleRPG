@@ -93,12 +93,16 @@ Design rules:
 - [x] recompile clean (0 errors; only "asmdef has no scripts yet" warnings)
 - [x] commit
 
-### Step 1 — Phase 1 data + economy  `[PENDING]`
-- [ ] `HeroData.cs`, `EnemyData.cs`, `BalanceConfig.cs`, `WaveConfig.cs`, `PartyConfig.cs`
-- [ ] `StatUpgradeData.cs`, `PrestigeUpgradeData.cs`
-- [ ] `FormulaUtility.cs`, `NumberFormatter.cs`
-- [ ] `CurrencyType.cs`, `EconomyManager.cs`, `GameEvents.cs`, `SaveData.cs`
-- [ ] recompile clean -> **user tests in Inspector** -> commit
+### Step 1 — Phase 1 data + economy  `[DONE 2026-09-19]`
+- [x] `HeroData.cs`, `EnemyData.cs`, `BalanceConfig.cs`, `WaveConfig.cs`, `PartyConfig.cs`
+- [x] `StatUpgradeData.cs` (+ `HeroStatType`), `PrestigeUpgradeData.cs` (+ `PrestigeEffectType`)
+- [x] `FormulaUtility.cs`, `NumberFormatter.cs`
+- [x] `CurrencyType.cs`, `EconomyManager.cs`, `GameEvents.cs`, `GameEventPayloads.cs`, `GameState.cs`
+- [x] `SaveData.cs`, `OfflineRewardResult.cs`
+- [x] recompile clean (0 errors) — formula sanity check logged:
+      hp10=175.89, gold10=27.73, cost5=14.03, bulk10=138.16, tokens(100)=31, offline=2,419,200, dmg(100,95)=10
+- [x] commit
+- **Note:** SO *assets* (Hero/Enemy/Config) are generated in Step 4 by `DataAssetGenerator`; this step is code only.
 
 ### Step 2 — Combat (Phase 2)  `[PENDING]`
 - [ ] `CombatSimulator.cs` (pure, no MonoBehaviour)
@@ -147,4 +151,8 @@ Design rules:
 ## 5. Change Log
 - **Step 0** (2026-09-19): MCP bridge fixed (stdio `unity` server; stale `unityMCP` @ :8080 removed), `origin` remote added, `Plan.md` created, folder tree in place, both asmdefs added, portrait lock applied, recompile clean.
 - Note: `set_player_settings` MCP command only exposes companyName/productName/bundleVersion/scriptingBackend/apiCompatibilityLevel → orientation set via `eval` + `PlayerSettings` API instead.
+- **Step 1** (2026-09-19): Phase 1 code complete (16 scripts). Verified formulas via single `eval` sanity log. Compile clean.
+  - `MCP note`: large file writes via the `editor` tool can time out; keep each edit under ~6000 chars and append in chunks.
+  - `MCP note`: `recompile` may report `up_to_date` after filesystem writes → call `AssetDatabase.Refresh()` + `CompilationPipeline.RequestScriptCompilation()` via `eval`, then poll `recompile_status`.
+  - `MCP note`: `recompile`/`eval` must not be issued in the same response as the file edit that they depend on.
 
