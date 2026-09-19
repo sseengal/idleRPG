@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d938df610b484bbc8cb55fedd2a183b, type: 3}
+  m_Name: BalanceConfig
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.BalanceConfig
+  enemyHealthGrowth: 1.15
+  enemyGoldGrowth: 1.12
+  enemyAttackGrowth: 1.08
+  normalWavesPerStage: 10
+  bossTimeLimitSec: 30
+  enemiesPerWave: 1
+  gemsPerBossKill: 1
+  waveTransitionDelaySec: 0.5
+  minDamageRatio: 0.1
+  criticalChance: 0
+  criticalDamageMultiplier: 1.5
+  reviveHeroesEachWave: 1
+  upgradeCostGrowth: 1.07
+  upgradeStatGainPerLevel: 0.1
+  prestigeStageDivisor: 10
+  prestigeExponent: 1.5
+  minStageToAscend: 10
+  offlineCapSeconds: 28800
+  offlineEfficiency: 0.7
+  minOfflineSecondsForPopup: 30
+  startingGold: 0
+  startingGems: 0
+  goldPerSecondSampleWindowSec: 60
+  adGoldBoostMultiplier: 2
+  adGoldBoostDurationSec: 3600
+  autosaveIntervalSec: 15

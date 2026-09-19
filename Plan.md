@@ -119,10 +119,16 @@ Design rules:
 - [ ] `BoostManager.cs` (2x gold 1h, persists), `IAdService`/`MockAdService`
 - [ ] -> **user tests** -> commit
 
-### Step 4 — UI + Scene (Phase 4)  `[PENDING]`
+### Step 4 — UI + Scene (Phase 4)  `[IN PROGRESS]`
 - [ ] `PlaceholderSpriteGenerator` (procedural PNG hero/enemy/boss/icon)
-- [ ] `DataAssetGenerator` (SO assets for heroes/enemies/config)
+- [x] `DataAssetGenerator` (`Tools > Idle RPG > Generate Data Assets`) — idempotent; 16 SO assets generated
+      (BalanceConfig, WaveConfig, PartyConfig, 3 StatUpgrade, 3 PrestigeUpgrade, 3 HeroData, 4 EnemyData incl. Boss_Ogre)
 - [ ] `MvpSceneBuilder` (menu: Tools/Idle RPG/Build MVP Scene)
+- [ ] Canvas 1080x1920, Match 0.5; header (gold/gems/tokens/stage+wave)
+- [ ] viewport: 3 heroes left, enemy right, HP bars, floating damage text (pooled)
+- [ ] tabs: Upgrades / Ascension / Shop
+- [ ] `OfflineRewardsPopup`
+- [ ] -> **user plays + eyeballs layout** -> commit
 - [ ] Canvas 1080x1920, Match 0.5; header (gold/gems/tokens/stage+wave)
 - [ ] viewport: 3 heroes left, enemy right, HP bars, floating damage text (pooled)
 - [ ] tabs: Upgrades / Ascension / Shop

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec2cfe7cf2cb64fa9b4fa3c722078478, type: 3}
+  m_Name: Enemy_Slime
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.EnemyData
+  enemyName: Slime
+  enemySprite: {fileID: 0}
+  baseHealth: 60
+  baseAttack: 6
+  baseDefense: 0
+  baseGoldDrop: 8
+  isBoss: 0
+  attackIntervalSec: 2
+  bossHealthMultiplier: 10
+  bossGoldMultiplier: 5
+  placeholderTint: {r: 0.5, g: 0.9, b: 0.4, a: 1}
