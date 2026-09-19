@@ -92,6 +92,7 @@ namespace IdleRPG.EditorTools
                 .Set("prestigeStageDivisor", 10f)
                 .Set("prestigeExponent", 1.5f)
                 .Set("minStageToAscend", 10)
+                .Set("resetHeroLevelsOnAscension", true)
                 .Set("offlineCapSeconds", 28800f)
                 .Set("offlineEfficiency", 0.7f)
                 .Set("minOfflineSecondsForPopup", 30f)
@@ -159,8 +160,8 @@ namespace IdleRPG.EditorTools
             enemies.Add(CreateEnemy("Enemy_Bat", "Bat", 90f, 9f, 1f, 12f, 1.6f, false, 1f, 1f, new Color(0.6f, 0.4f, 0.3f, 1f)));
             enemies.Add(CreateEnemy("Enemy_Goblin", "Goblin", 130f, 12f, 3f, 18f, 1.8f, false, 1f, 1f, new Color(0.4f, 0.75f, 0.35f, 1f)));
 
-            // Stage-1 boss: 120 x5 = 600 HP (~25s) and ~150 gold (about half a stage income).
-            enemies.Add(CreateEnemy("Boss_Ogre", "Ogre Chieftain", 120f, 20f, 5f, 25f, 2.5f, true, 5f, 6f, new Color(0.85f, 0.25f, 0.2f, 1f)));
+            // Stage-1 boss: 100 x5 = 500 HP (~35s) and ~150 gold (about half a stage income).
+            enemies.Add(CreateEnemy("Boss_Ogre", "Ogre Chieftain", 100f, 20f, 5f, 25f, 2.5f, true, 5f, 6f, new Color(0.85f, 0.25f, 0.2f, 1f)));
 
             return enemies;
         }
@@ -188,12 +189,15 @@ namespace IdleRPG.EditorTools
 
         private static void CreateStatUpgrades()
         {
-            CreateStatUpgrade("StatUpgrade_ATK", HeroStatType.Attack, 10d, "+10% of base ATK per level.");
-            CreateStatUpgrade("StatUpgrade_HP", HeroStatType.Health, 12d, "+10% of base HP per level.");
-            CreateStatUpgrade("StatUpgrade_DEF", HeroStatType.Defense, 15d, "+10% of base DEF per level.");
+            // DEF gets a bigger per-level fraction: defence is additive (ATK - DEF), so a flat
+            // +10% of base is negligible once stage scaling multiplies enemy attack by 1.08^S.
+            CreateStatUpgrade("StatUpgrade_ATK", HeroStatType.Attack, 10d, 0.10f, "+10% of base ATK per level.");
+            CreateStatUpgrade("StatUpgrade_HP", HeroStatType.Health, 12d, 0.10f, "+10% of base HP per level.");
+            CreateStatUpgrade("StatUpgrade_DEF", HeroStatType.Defense, 15d, 0.15f, "+15% of base DEF per level.");
         }
 
-        private static void CreateStatUpgrade(string fileName, HeroStatType statType, double baseCost, string description)
+        private static void CreateStatUpgrade(string fileName, HeroStatType statType, double baseCost,
+            float gainPerLevelFraction, string description)
         {
             StatUpgradeData upgrade = CreateOrLoad<StatUpgradeData>(ConfigFolder + "/" + fileName + ".asset");
             new Editable(upgrade)
@@ -202,16 +206,17 @@ namespace IdleRPG.EditorTools
                 .Set("description", description)
                 .Set("baseCost", baseCost)
                 .Set("costGrowthMultiplier", 1.07f)
-                .Set("statGainPerLevelFraction", 0.1f)
+                .Set("statGainPerLevelFraction", gainPerLevelFraction)
                 .Set("maxLevel", 0)
                 .Apply();
         }
 
         private static void CreatePrestigeUpgrades()
         {
-            CreatePrestigeUpgrade("Prestige_Gold", "Gold Mastery", PrestigeEffectType.GoldPercent, "+5% Gold per level.");
-            CreatePrestigeUpgrade("Prestige_Damage", "War Mastery", PrestigeEffectType.DamagePercent, "+5% Damage per level.");
-            CreatePrestigeUpgrade("Prestige_Health", "Vitality Mastery", PrestigeEffectType.HealthPercent, "+5% HP per level.");
+            // +10% per level, 10 levels = +100%. Cost growth 1.4 -> ~70 tokens to max one tree.
+            CreatePrestigeUpgrade("Prestige_Gold", "Gold Mastery", PrestigeEffectType.GoldPercent, "+10% Gold per level.");
+            CreatePrestigeUpgrade("Prestige_Damage", "War Mastery", PrestigeEffectType.DamagePercent, "+10% Damage per level.");
+            CreatePrestigeUpgrade("Prestige_Health", "Vitality Mastery", PrestigeEffectType.HealthPercent, "+10% HP per level.");
         }
 
         private static void CreatePrestigeUpgrade(string fileName, string displayName, PrestigeEffectType effectType, string description)
@@ -223,9 +228,9 @@ namespace IdleRPG.EditorTools
                 .Set("description", description)
                 .Set("effectType", (int)effectType)
                 .Set("baseCostTokens", 1d)
-                .Set("costGrowth", 1.5f)
+                .Set("costGrowth", 1.4f)
                 .Set("maxLevel", 10)
-                .Set("effectPerLevel", 0.05f)
+                .Set("effectPerLevel", 0.10f)
                 .Apply();
         }
 

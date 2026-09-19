@@ -117,12 +117,19 @@ Headless logic only (views moved to Step 4, matching Phase 2 = "debug logs").
 - [x] Crits ON: 5% chance, x2 damage (`IsCritical` in payload, logged as CRIT)
 - [x] Balance review applied + verified (sections 6 and 7) -> commit
 
-### Step 3 — Progression (Phase 3)  `[PENDING]`
-- [ ] `StatResolver.cs` (base + levels + prestige -> final stats)
-- [ ] `UpgradeManager.cs` (+1 / +10 ATK/HP/DEF, cost check via EconomyManager)
-- [ ] `AscensionManager.cs` (+3 permanent upgrades: %Gold, %Damage, %HP)
-- [ ] `BoostManager.cs` (2x gold 1h, persists), `IAdService`/`MockAdService`
-- [ ] -> **user tests** -> commit
+### Step 3 — Progression (Phase 3)  `[DONE 2026-09-19]`
+- [x] `StatResolver.cs` — implements `ICombatStatProvider`; owns hero levels + prestige levels;
+      `FillFromSave` / `WriteToSave` hooks ready for Step 5
+- [x] `UpgradeManager.cs` — `TryUpgrade(hero, stat, levels)`, `TryUpgradeAll`, `MaxAffordableLevels`
+      (closed-form: `n = log_r(1 + gold*(r-1)/(base*r^L))`, no purchase loops)
+- [x] `AscensionManager.cs` — token yield, `TryAscend`, prestige tree purchases, cost queries
+- [x] `BoostManager.cs` (2x gold 1h, ad-extendable, expiry persisted), `GameClock.cs` (single time source)
+- [x] `IAdService.cs` + `MockAdService.cs` (3s simulated ad, SDK-ready)
+- [x] `DebugHotkeys.cs` (Play-mode keys 1/2/3/4/G/T/B/A/R/S/L) + `ProgressionDebugMenu.cs`
+      (Tools > Idle RPG > Debug: balance summary, grants, jump to stage 10, live state)
+- [x] `GameManager` wiring: resolver injected into `CombatManager.SetStatProvider`, `ResolveGoldReward`
+      (prestige x boost, single funnel), 1s slow tick for boost expiry, `WatchAdForGoldBoost`
+- [x] Verified headless + live (see section 8) -> commit
 
 ### Step 4 — UI + Scene (Phase 4)  `[IN PROGRESS]`
 - [ ] `PlaceholderSpriteGenerator` (procedural PNG hero/enemy/boss/icon)
@@ -168,6 +175,11 @@ Headless logic only (views moved to Step 4, matching Phase 2 = "debug logs").
 | Hero healing | full revive every wave | **damage carries across the 10 waves; heal on stage advance** | only defeat source now that timers are gone |
 | Crit | off | **5% x2.0** (~+5% DPS) | visible in damage text |
 | Wave transition | 0.50s | **0.35s** | snappier |
+| Boss (stage 1) v2 | 120 x5 = 600 HP (~45s) | **100 x5 = 500 HP (~35s)** | tighter first boss |
+| DEF upgrade gain | +10% of base/level | **+15%** | additive DEF was negligible vs 1.08^S enemy ATK |
+| Prestige effect | +5%/level (x1.50 max) | **+10%/level (x2.00 max)** | +50% was a weak payoff for ~30 ascensions |
+| Prestige cost growth | 1.5 (~113 tokens/tree) | **1.4 (~70 tokens/tree)** | a tree must be reachable |
+| Ascension reset | spec: gold + stage only | **also resets hero levels** (`resetHeroLevelsOnAscension` knob) | without it, re-climbing at kept levels = infinite token farm |
 
 **Known weak spot for Step 3:** DEF upgrades are minor (Knight +1.2 DEF/level vs enemy ATK x1.08/stage) -> tune DEF `statGainPerLevelFraction` or add a damage-reduction curve.
 
@@ -192,6 +204,33 @@ Live play test (CombatDebug scene, temporary waves=1 / boss x1 for speed):
 ```
 - Wave FSM, boss wave, stage advance, heal-on-advance, gems +1, gold math, stage scaling
   (Bat 90->103 = x1.15, ATK 9->10 = x1.08, gold 12->13 = x1.12) confirmed.
+
+---
+
+## 8. Step 3 Verification Results
+
+Headless (`StatResolver` + `UpgradeManager` + `AscensionManager` + `BoostManager` with real assets):
+```
+R1 gains ATK=0.1 HP=0.1 DEF=0.15 | resetHeroLevels=True | cost10=138.16
+R2 buy10=True level=10 gold=861.84 knightAtk=24.0            (12 x 2.0)
+R3 knightDef=30.0                                             (12 + 10 x 15%)
+R4 ascend tokens=1 gold=0 heroLevels=0                        (prestige levels kept)
+R5 dmg buy=True cost=1.40 dmgMul=1.10 knightAtk=13.2         (12 x 1.10)
+R6 goldPrestige levels=10 goldMul=2.00 nextCost=28.93 maxed=True
+```
+Live in the debug scene (bugs found and fixed by these checks):
+```
+N1 atkBought=3 knightAtkInSim=24.0 mageAtkInSim=32.0
+N2 hpBought=3 knightMaxHpInSim=360 currentHp=360 healthPctPreserved=True
+N3 defBought=3 knightDefInSim=21.0
+N4 dmgMul=1.10 knightAtkInSim=26.4
+N5 boost x2 resolveReward(100)=200
+L3 ascend=True tokens=1 gold=0 stage=1 best=10 yield=1
+```
+Two real bugs caught and fixed:
+1. `StatResolver.SetHeroLevel` never raised `StatsChanged` -> combat never refreshed after a purchase.
+2. `CombatSimulator` kept the provider reference from construction, so `SetStatProvider` updated only
+   the manager -> sim read base stats forever. The simulator now owns a swappable provider.
 
 ---
 
@@ -222,3 +261,7 @@ Live play test (CombatDebug scene, temporary waves=1 / boss x1 for speed):
 - **Step 2** (2026-09-19): Combat core landed (12 new files) + reviewed balance written through
   `DataAssetGenerator.ApplyBalance`. Boss timer removed per user decision; crits enabled (5% x2).
   Verified headless (87.8s stage-1 clear, wipe path) and live in the Editor (boss -> stage advance -> gems).
+
+- **Step 3** (2026-09-19): Progression landed (9 new files). Balance v2 applied through
+  `DataAssetGenerator.ApplyBalance` (DEF +15%/level, prestige +10%/level @1.4 growth, boss 500 HP,
+  ascension also resets hero levels). Verified headless + live; two wiring bugs found and fixed.

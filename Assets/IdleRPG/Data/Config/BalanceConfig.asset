@@ -30,6 +30,7 @@ MonoBehaviour:
   resetAutoRetryOnDefeat: 1
   scaleEnemyDefenseWithStage: 0
   logCombatToConsole: 1
+  resetHeroLevelsOnAscension: 1
   upgradeCostGrowth: 1.07
   upgradeStatGainPerLevel: 0.1
   prestigeStageDivisor: 10

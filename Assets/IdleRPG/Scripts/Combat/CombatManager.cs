@@ -92,7 +92,9 @@ namespace IdleRPG.Combat
 
             if (simulator != null)
             {
-                simulator.RefreshHeroStats();
+                // The simulator holds its own provider reference, so hand it over too —
+                // otherwise it would keep reading base stats from the default provider.
+                simulator.SetStatProvider(statProvider);
             }
         }
 

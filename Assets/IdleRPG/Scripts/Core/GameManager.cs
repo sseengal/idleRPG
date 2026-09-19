@@ -1,9 +1,12 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using IdleRPG.Combat;
 using IdleRPG.Data;
 using IdleRPG.Economy;
 using IdleRPG.Progression;
+using IdleRPG.Services;
 
 namespace IdleRPG.Core
 {
@@ -24,6 +27,10 @@ namespace IdleRPG.Core
         [SerializeField] private BalanceConfig balanceConfig;
         [SerializeField] private WaveConfig waveConfig;
         [SerializeField] private PartyConfig partyConfig;
+        [Tooltip("The three hero stat tracks (ATK / HP / DEF).")]
+        [SerializeField] private List<StatUpgradeData> statUpgrades = new List<StatUpgradeData>();
+        [Tooltip("The permanent upgrade tree (+% Gold, +% Damage, +% HP).")]
+        [SerializeField] private List<PrestigeUpgradeData> prestigeUpgrades = new List<PrestigeUpgradeData>();
 
         [Header("Scene References")]
         [Tooltip("Wave/encounter driver living on the same GameObject.")]
@@ -40,6 +47,7 @@ namespace IdleRPG.Core
         [SerializeField] private bool logFlowToConsole = true;
 
         private bool isWired;
+        private Coroutine slowTickRoutine;
 
         /// <summary>(previous, next) state transitions for interested systems/UI.</summary>
         public event Action<GameState, GameState> StateChanged;
@@ -63,6 +71,21 @@ namespace IdleRPG.Core
         public PartyConfig Party => partyConfig;
 
         public BalanceConfig Balance => balanceConfig;
+
+        /// <summary>Final hero stats (base + levels + prestige).</summary>
+        public StatResolver Resolver { get; private set; }
+
+        /// <summary>Hero stat purchases (+1 / +10 ATK, HP, DEF).</summary>
+        public UpgradeManager Upgrade { get; private set; }
+
+        /// <summary>Token yield, ascension reset and the permanent upgrade tree.</summary>
+        public AscensionManager Ascension { get; private set; }
+
+        /// <summary>Timed gold multiplier from rewarded ads.</summary>
+        public BoostManager Boost { get; private set; }
+
+        /// <summary>Rewarded-ad provider (mock until a real SDK is added).</summary>
+        public IAdService Ads { get; private set; }
 
         /// <summary>Tokens the player would receive by ascending right now.</summary>
         public double PrestigeTokenYield
@@ -113,6 +136,17 @@ namespace IdleRPG.Core
         private void OnDestroy()
         {
             UnsubscribeCombat();
+
+            if (Resolver != null)
+            {
+                Resolver.StatsChanged -= OnStatsChanged;
+            }
+
+            if (slowTickRoutine != null)
+            {
+                StopCoroutine(slowTickRoutine);
+                slowTickRoutine = null;
+            }
         }
 
         private bool WireUp()
@@ -132,14 +166,24 @@ namespace IdleRPG.Core
             Economy = new EconomyManager(balanceConfig);
             Economy.ApplyStartingBalances();
 
+            Resolver = new StatResolver(balanceConfig, statUpgrades, prestigeUpgrades);
+            Resolver.StatsChanged += OnStatsChanged;
+            Upgrade = new UpgradeManager(Economy, Resolver, partyConfig);
+            Ascension = new AscensionManager(balanceConfig, Economy, Resolver, prestigeUpgrades);
+            Boost = new BoostManager(balanceConfig);
+            Ads = new MockAdService(this, 3f, true);
+
             if (!combatManager.Initialize(balanceConfig, waveConfig, partyConfig))
             {
                 Debug.LogError("[GameManager] CombatManager failed to initialise (check PartyConfig heroes).");
                 return false;
             }
 
+            combatManager.SetStatProvider(Resolver);
             SubscribeCombat();
             SetState(GameState.Boot, GameState.Combat);
+
+            slowTickRoutine = StartCoroutine(SlowTickLoop());
 
             return true;
         }
@@ -218,21 +262,17 @@ namespace IdleRPG.Core
                 return false;
             }
 
-            double tokens = PrestigeTokenYield;
             combatManager.StopRun();
             SetState(State, GameState.Ascension);
 
-            if (tokens <= 0d)
+            if (!Ascension.TryAscend(HighestStageReached, out double tokens))
             {
                 Debug.LogWarning("[GameManager] Ascension requested but the token yield is 0.");
                 return false;
             }
 
-            // Step 3 adds permanent-upgrade spending; the reset itself is final here.
-            Economy.AddTokens(tokens);
-            Economy.ResetGold();
             GameEvents.RaiseAscensionCompleted(tokens, HighestStageReached);
-            LogFlow($"Ascended for {tokens:0} token(s); highest stage kept at {HighestStageReached}.");
+            LogFlow($"Ascended for {tokens:0} token(s) | {Ascension.DescribeMultipliers()} | {Economy}");
 
             ResetProgressForAscension(HighestStageReached);
             return true;
@@ -287,8 +327,7 @@ namespace IdleRPG.Core
                 return;
             }
 
-            double multiplier = combatManager.StatProvider != null ? combatManager.StatProvider.GlobalGoldMultiplier : 1d;
-            Economy.AddGold(goldReward * multiplier);
+            Economy.AddGold(ResolveGoldReward(goldReward));
         }
 
         private void OnWaveCleared(int stage, int wave)
@@ -395,5 +434,80 @@ namespace IdleRPG.Core
                 Debug.Log($"[GameManager] {message}");
             }
         }
+
+        // ------------------------------------------------------------------
+        // Rewards, boosts and progression hooks
+        // ------------------------------------------------------------------
+        /// <summary>
+        /// Single funnel for gold: raw combat/offline reward x prestige gold% x ad boost.
+        /// Step 5's offline calculation uses this too, so live and offline earnings agree.
+        /// </summary>
+        public double ResolveGoldReward(double rawGold)
+        {
+            double prestige = Resolver != null ? Resolver.GlobalGoldMultiplier : 1d;
+            double boost = Boost != null ? Boost.GoldMultiplier : 1d;
+            return rawGold * prestige * boost;
+        }
+
+        /// <summary>Shows a rewarded ad, then grants the 2x gold boost on success (Shop panel).</summary>
+        public void WatchAdForGoldBoost()
+        {
+            if (Ads == null || Boost == null)
+            {
+                return;
+            }
+
+            if (!Ads.IsRewardedAdReady)
+            {
+                GameEvents.RaiseToast("Ad not ready yet.");
+                return;
+            }
+
+            Ads.ShowRewardedAd(success =>
+            {
+                if (!success)
+                {
+                    GameEvents.RaiseToast("Ad skipped - no reward.");
+                    return;
+                }
+
+                Boost.ActivateFromAd();
+                LogFlow($"Ad boost active: x{Boost.GoldMultiplier:0.#} gold for {Boost.RemainingSeconds / 60f:0.#} min.");
+            });
+        }
+
+        /// <summary>Called by the resolver after any level or multiplier change.</summary>
+        private void OnStatsChanged()
+        {
+            if (combatManager != null && combatManager.Simulator != null)
+            {
+                combatManager.Simulator.RefreshHeroStats();
+            }
+        }
+
+        /// <summary>One-second tick for time-based systems (boost expiry; autosave joins in Step 5).</summary>
+        private IEnumerator SlowTickLoop()
+        {
+            WaitForSeconds wait = new WaitForSeconds(1f);
+
+            while (true)
+            {
+                yield return wait;
+
+                if (Boost != null && Boost.Refresh())
+                {
+                    LogFlow("Ad gold boost expired.");
+                }
+            }
+        }
+
+#if UNITY_EDITOR
+        /// <summary>Editor-only wiring for progression assets (used by the scene builder tools).</summary>
+        public void EditorInitializeProgression(List<StatUpgradeData> statTracks, List<PrestigeUpgradeData> permanentUpgrades)
+        {
+            statUpgrades = statTracks ?? new List<StatUpgradeData>();
+            prestigeUpgrades = permanentUpgrades ?? new List<PrestigeUpgradeData>();
+        }
+#endif
     }
 }

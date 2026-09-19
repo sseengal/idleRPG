@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.PrestigeUpgradeData
   upgradeID: Prestige_Gold
   displayName: Gold Mastery
-  description: +5% Gold per level.
+  description: +10% Gold per level.
   effectType: 0
   baseCostTokens: 1
-  costGrowth: 1.5
+  costGrowth: 1.4
   maxLevel: 10
-  effectPerLevel: 0.05
+  effectPerLevel: 0.1

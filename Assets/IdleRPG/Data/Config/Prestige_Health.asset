@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.PrestigeUpgradeData
   upgradeID: Prestige_Health
   displayName: Vitality Mastery
-  description: +5% HP per level.
+  description: +10% HP per level.
   effectType: 2
   baseCostTokens: 1
-  costGrowth: 1.5
+  costGrowth: 1.4
   maxLevel: 10
-  effectPerLevel: 0.05
+  effectPerLevel: 0.1

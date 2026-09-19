@@ -52,9 +52,13 @@ namespace IdleRPG.EditorTools
             CombatManager combatManager = root.AddComponent<CombatManager>();
             GameManager gameManager = root.AddComponent<GameManager>();
             root.AddComponent<CombatEventLogger>();
+            DebugHotkeys hotkeys = root.AddComponent<DebugHotkeys>();
 
             gameManager.EditorInitialize(balance, waveConfig, partyConfig, combatManager);
+            gameManager.EditorInitializeProgression(LoadStatTracks(), LoadPrestigeUpgrades());
+            hotkeys.EditorInitialize(gameManager);
             EditorUtility.SetDirty(gameManager);
+            EditorUtility.SetDirty(hotkeys);
 
             if (gameManager.Balance == null || gameManager.WaveData == null || gameManager.Combat == null)
             {
@@ -95,6 +99,46 @@ namespace IdleRPG.EditorTools
         // ------------------------------------------------------------------
         // Helpers
         // ------------------------------------------------------------------
+        /// <summary>The three hero stat tracks, in ATK / HP / DEF order.</summary>
+        private static List<StatUpgradeData> LoadStatTracks()
+        {
+            List<StatUpgradeData> tracks = new List<StatUpgradeData>();
+
+            foreach (string fileName in new[] { "StatUpgrade_ATK", "StatUpgrade_HP", "StatUpgrade_DEF" })
+            {
+                StatUpgradeData track = AssetDatabase.LoadAssetAtPath<StatUpgradeData>(ConfigFolder + "/" + fileName + ".asset");
+                if (track == null)
+                {
+                    Debug.LogWarning($"[CombatDebugSceneBuilder] Missing stat track: {fileName}");
+                    continue;
+                }
+
+                tracks.Add(track);
+            }
+
+            return tracks;
+        }
+
+        /// <summary>The permanent upgrade tree, in panel order.</summary>
+        private static List<PrestigeUpgradeData> LoadPrestigeUpgrades()
+        {
+            List<PrestigeUpgradeData> upgrades = new List<PrestigeUpgradeData>();
+
+            foreach (string fileName in new[] { "Prestige_Gold", "Prestige_Damage", "Prestige_Health" })
+            {
+                PrestigeUpgradeData upgrade = AssetDatabase.LoadAssetAtPath<PrestigeUpgradeData>(ConfigFolder + "/" + fileName + ".asset");
+                if (upgrade == null)
+                {
+                    Debug.LogWarning($"[CombatDebugSceneBuilder] Missing prestige upgrade: {fileName}");
+                    continue;
+                }
+
+                upgrades.Add(upgrade);
+            }
+
+            return upgrades;
+        }
+
         /// <summary>True when every data asset the debug scene needs already exists.</summary>
         private static bool HasDataAssets()
         {

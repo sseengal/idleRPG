@@ -15,7 +15,7 @@ namespace IdleRPG.Combat
     /// </summary>
     public sealed class CombatSimulator
     {
-        private readonly ICombatStatProvider statProvider;
+        private ICombatStatProvider statProvider;
         private readonly EnemyTargetingMode targetingMode;
 
         private CombatScaling scaling;
@@ -64,6 +64,16 @@ namespace IdleRPG.Combat
         public void ApplyScaling(CombatScaling newScaling)
         {
             scaling = newScaling.Sanitized();
+        }
+
+        /// <summary>
+        /// Swaps the stat source (Step 3 injects the upgrade/prestige aware resolver).
+        /// Recomputes party stats immediately so a live fight picks up the new numbers.
+        /// </summary>
+        public void SetStatProvider(ICombatStatProvider provider)
+        {
+            statProvider = provider ?? DefaultStatProvider.Instance;
+            RefreshHeroStats();
         }
 
         /// <summary>

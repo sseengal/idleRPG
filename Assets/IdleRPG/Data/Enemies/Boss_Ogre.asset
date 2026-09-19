@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.EnemyData
   enemyName: Ogre Chieftain
   enemySprite: {fileID: 0}
-  baseHealth: 120
+  baseHealth: 100
   baseAttack: 20
   baseDefense: 5
   baseGoldDrop: 25

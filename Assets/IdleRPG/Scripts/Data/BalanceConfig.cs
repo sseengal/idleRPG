@@ -82,6 +82,13 @@ namespace IdleRPG.Data
         [SerializeField] private bool logCombatToConsole = true;
 
         // ------------------------------------------------------------------
+        // Ascension
+        // ------------------------------------------------------------------
+        [Tooltip("Classic prestige loop: hero ATK/HP/DEF levels reset to 0 on ascension. " +
+                 "Off = hero levels are permanent (tokens become a pure bonus layer).")]
+        [SerializeField] private bool resetHeroLevelsOnAscension = true;
+
+        // ------------------------------------------------------------------
         // Stat upgrades
         // ------------------------------------------------------------------
         [Header("Stat Upgrades")]
@@ -162,6 +169,8 @@ namespace IdleRPG.Data
         public bool LogCombatToConsole => logCombatToConsole;
 
         public bool HealHeroesOnStageAdvance => healHeroesOnStageAdvance;
+
+        public bool ResetHeroLevelsOnAscension => resetHeroLevelsOnAscension;
 
         public int NormalWavesPerStage => Mathf.Max(1, normalWavesPerStage);
 
