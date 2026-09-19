@@ -22,18 +22,29 @@ namespace IdleRPG.UI
 
         private void Start()
         {
+            EnsureBound();
+        }
+
+        /// <summary>Binds lazily: this panel lives on a page that starts hidden.</summary>
+        private void EnsureBound()
+        {
+            if (manager != null)
+            {
+                return;
+            }
+
             HudController hud = HudController.Instance;
             manager = hud != null ? hud.GameManager : null;
 
             if (manager == null)
             {
-                Debug.LogError("[ShopPanelUI] GameManager unavailable; shop panel disabled.");
-                enabled = false;
+                Debug.LogWarning("[ShopPanelUI] GameManager not ready yet; will bind on next open.");
                 return;
             }
 
             if (watchAdButton != null)
             {
+                watchAdButton.onClick.RemoveAllListeners();
                 watchAdButton.onClick.AddListener(OnWatchAdClicked);
             }
 
@@ -42,6 +53,7 @@ namespace IdleRPG.UI
 
         private void OnEnable()
         {
+            EnsureBound();
             GameEvents.GoldBoostChanged += OnGoldBoostChanged;
             GameEvents.CurrencyChanged += OnCurrencyChanged;
         }

@@ -18,13 +18,26 @@ namespace IdleRPG.UI
 
         private void Start()
         {
+            EnsureBound();
+        }
+
+        /// <summary>
+        /// Binds to the game systems the first time it can. Called from Start *and* OnEnable because
+        /// this panel lives on a page that starts hidden, so activation order is not guaranteed.
+        /// </summary>
+        private void EnsureBound()
+        {
+            if (manager != null)
+            {
+                return;
+            }
+
             HudController hud = HudController.Instance;
             manager = hud != null ? hud.GameManager : null;
 
             if (manager == null)
             {
-                Debug.LogError("[UpgradePanelUI] GameManager unavailable; upgrades panel disabled.");
-                enabled = false;
+                Debug.LogWarning("[UpgradePanelUI] GameManager not ready yet; will bind on next open.");
                 return;
             }
 
@@ -34,6 +47,7 @@ namespace IdleRPG.UI
 
         private void OnEnable()
         {
+            EnsureBound();
             GameEvents.CurrencyChanged += OnCurrencyChanged;
             GameEvents.UpgradePurchased += OnUpgradePurchased;
             GameEvents.HeroStatsChanged += OnHeroStatsChanged;

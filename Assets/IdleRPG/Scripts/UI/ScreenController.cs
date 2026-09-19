@@ -19,6 +19,9 @@ namespace IdleRPG.UI
         [Header("Management tabs")]
         [SerializeField] private TabController tabs;
 
+        [Tooltip("Layers that only belong to the battle page (e.g. the damage-number canvas).")]
+        [SerializeField] private GameObject[] hideWhileBrowsing;
+
         [Header("Bottom navigation (Battle, Upgrades, Ascend, Shop)")]
         [SerializeField] private Button[] navButtons;
         [SerializeField] private Image[] navButtonBackgrounds;
@@ -117,6 +120,21 @@ namespace IdleRPG.UI
             if (managementPage != null && managementPage.activeSelf == battle)
             {
                 managementPage.SetActive(!battle);
+            }
+
+            if (hideWhileBrowsing == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < hideWhileBrowsing.Length; i++)
+            {
+                GameObject layer = hideWhileBrowsing[i];
+
+                if (layer != null && layer.activeSelf != battle)
+                {
+                    layer.SetActive(battle);
+                }
             }
         }
 

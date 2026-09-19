@@ -41,15 +41,16 @@ namespace IdleRPG.UI
 
         public int HeroIndex => heroIndex;
 
+        /// <summary>
+        /// Binds the row. Wiring the buttons here (and clearing first) keeps them working no matter
+        /// which order the page is activated in — Awake only fires on first activation.
+        /// </summary>
         public void Configure(int index, UpgradeManager upgradeManager, StatResolver statResolver)
         {
             heroIndex = index;
             upgrades = upgradeManager;
             resolver = statResolver;
-        }
 
-        private void Awake()
-        {
             for (int i = 0; i < blocks.Length; i++)
             {
                 StatBlock block = blocks[i];
@@ -63,11 +64,13 @@ namespace IdleRPG.UI
 
                 if (block.plusOneButton != null)
                 {
+                    block.plusOneButton.onClick.RemoveAllListeners();
                     block.plusOneButton.onClick.AddListener(() => Buy(statType, 1));
                 }
 
                 if (block.plusTenButton != null)
                 {
+                    block.plusTenButton.onClick.RemoveAllListeners();
                     block.plusTenButton.onClick.AddListener(() => Buy(statType, 10));
                 }
 

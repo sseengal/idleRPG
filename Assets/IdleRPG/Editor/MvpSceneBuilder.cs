@@ -101,7 +101,7 @@ namespace IdleRPG.EditorTools
                 out FloatingDamageTextPool damagePool, out RectTransform enemyAnchor, out RectTransform[] heroAnchors);
             CombatLogUI combatLog = BuildCombatLog(battlePage.GetComponent<RectTransform>());
             TabController tabs = BuildManagementPage(managementPage.GetComponent<RectTransform>(), partyConfig, prestigeUpgrades);
-            ScreenController screens = BuildNavBar(safeArea, battlePage, managementPage, tabs);
+            ScreenController screens = BuildNavBar(safeArea, battlePage, managementPage, tabs, damageRoot.gameObject);
             OfflineRewardsPopup offlinePopup = BuildOfflinePopup(canvasRoot);
             ToastUI toast = BuildToast(canvasRoot);
             EnsureEventSystem();
@@ -484,21 +484,19 @@ namespace IdleRPG.EditorTools
             TabController tabs = shell.gameObject.AddComponent<TabController>();
 
             GameObject panelsRoot = UiFactory.Node("Panels", shell.transform);
-            UiFactory.Anchor(panelsRoot.GetComponent<RectTransform>(), Vector2.zero, new Vector2(1f, ManagementTabBarBottom), 10f, 6f, 10f, 4f);
+            UiFactory.Anchor(panelsRoot.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, 10f, 10f, 10f, 10f);
 
             GameObject upgradePanel = BuildUpgradePanel(panelsRoot.transform, partyConfig);
             GameObject ascensionPanel = BuildAscensionPanel(panelsRoot.transform, prestigeUpgrades);
             GameObject shopPanel = BuildShopPanel(panelsRoot.transform);
 
-            // Tab bar on top: the content underneath owns the rest of the page and scrolls.
-            GameObject tabBar = UiFactory.Node("TabBar", shell.transform);
-            UiFactory.Anchor(tabBar.GetComponent<RectTransform>(), new Vector2(0f, ManagementTabBarBottom), Vector2.one, 10f, 4f, 10f, 6f);
-
+            // No tab bar here on purpose: the bottom nav bar is the single navigation, and
+            // ScreenController drives these panels through the TabController below.
             List<TabController.TabDefinition> definitions = new List<TabController.TabDefinition>
             {
-                CreateTab(tabBar.transform, "Upgrades", 0, upgradePanel),
-                CreateTab(tabBar.transform, "Ascension", 1, ascensionPanel),
-                CreateTab(tabBar.transform, "Shop", 2, shopPanel)
+                CreatePanelTab(upgradePanel),
+                CreatePanelTab(ascensionPanel),
+                CreatePanelTab(shopPanel)
             };
 
             SetTabs(tabs, definitions);
@@ -507,7 +505,7 @@ namespace IdleRPG.EditorTools
 
         /// <summary>Bottom nav: Battle + the three management tabs, with active highlighting.</summary>
         private static ScreenController BuildNavBar(RectTransform safeArea, GameObject battlePage,
-            GameObject managementPage, TabController tabs)
+            GameObject managementPage, TabController tabs, GameObject damageCanvas)
         {
             Image bar = UiFactory.Panel("NavBar", safeArea, "ui_panel_light", new Color(1f, 1f, 1f, 0.98f));
             UiFactory.Anchor(bar.rectTransform, Vector2.zero, new Vector2(1f, NavBarTop), 14f, 10f, 14f, 6f);
@@ -537,6 +535,7 @@ namespace IdleRPG.EditorTools
             SceneWiringUtility.SetField(controller, "navButtons", buttons);
             SceneWiringUtility.SetField(controller, "navButtonBackgrounds", backgrounds);
             SceneWiringUtility.SetField(controller, "navButtonLabels", buttonLabels);
+            SceneWiringUtility.SetField(controller, "hideWhileBrowsing", new[] { damageCanvas });
             return controller;
         }
 
@@ -545,6 +544,19 @@ namespace IdleRPG.EditorTools
             SceneWiringUtility.SetField(tabs, "tabs", definitions);
             SceneWiringUtility.SetField(tabs, "activeTabSprite", UiFactory.LoadSprite("ui_tab_on"), required: false);
             SceneWiringUtility.SetField(tabs, "inactiveTabSprite", UiFactory.LoadSprite("ui_tab_off"), required: false);
+        }
+
+        /// <summary>A tab whose only job is toggling a panel: navigation lives in the bottom bar.</summary>
+        private static TabController.TabDefinition CreatePanelTab(GameObject panel)
+        {
+            return new TabController.TabDefinition
+            {
+                tabName = panel != null ? panel.name : "Panel",
+                button = null,
+                buttonBackground = null,
+                buttonLabel = null,
+                panel = panel
+            };
         }
 
         private static TabController.TabDefinition CreateTab(Transform parent, string label, int index, GameObject panel)

@@ -339,6 +339,34 @@ Boss multipliers live on `Boss_Ogre` (`BossHealthMultiplier` 4, `BossGoldMultipl
 
 ---
 
+## 14. UI Fixes Round 2 (2026-09-19)
+
+Reported: duplicate navigation, damage numbers on non-battle pages, and dead buttons on the new pages.
+
+1. **Duplicate navigation removed.** The management page had its own tab bar (Upgrades/Ascension/Shop)
+   *plus* the bottom nav bar. The bottom bar is now the single navigation; `TabController` keeps only
+   its panel-toggling job (definitions are created with no button). Verified `tabBarStillPresent=False`.
+2. **Damage numbers no longer appear off the battle page.** `ScreenController.hideWhileBrowsing[]`
+   deactivates the DamageCanvas while browsing (the pool also stops ticking, so nothing spawns).
+   Verified `damageCanvasActive=False` while browsing, `True` back on the battle page.
+3. **Buttons on the new pages were dead.** The panels live on a page that starts hidden, so their
+   `Start()` ran only on first activation and their guard *disabled the component* when the manager was
+   not ready yet; row listeners were also added in `Awake` (first activation only). Now every panel
+   binds lazily through `EnsureBound()` (called from `Start` **and** `OnEnable`) and every button
+   listener is wired exactly once inside `Configure()`/`EnsureBound()` after `RemoveAllListeners()`.
+   Verified with real pointer clicks through the EventSystem:
+```
+[X2] atkLevel before=0 afterInvoke=1 afterRealPointerClick=2 gold=49979
+[Z2] watchAd clicked  -> [MockAdService] Simulating a 3s rewarded ad...
+[Z4] prestige buy -> level=1 tokensLeft=19
+[A2] first tap -> label='CONFIRM?' tokens=19
+[A3] second tap -> tokens=20 stage=1 best=10 gold=0 heroLevels=0 label='ASCEND'
+```
+Lesson for future screens: **anything living on a page that starts inactive must bind lazily and must
+never disable itself when a dependency is late.**
+
+---
+
 ## 13. Combat Log + Navigation Fixes (2026-09-19)
 
 Reported by the user: the log did not visibly update and pages could not be changed by clicking.
@@ -439,3 +467,7 @@ portrait screen, which is why the old fixed dock felt broken only in landscape).
   the player reads history); nav-bar clicks fixed by persisting the EventSystem's UI action asset
   (`Assets/IdleRPG/Settings/UiInputActions.inputactions`) plus a runtime `UiInputBootstrap` safety net;
   `Tab` cycles pages.
+
+- **UI fixes round 2** (2026-09-19): single navigation (removed the management tab bar), damage numbers
+  hidden while browsing, and panel buttons fixed via lazy binding + one-time listener wiring
+  (upgrade +1/+10, watch ad, prestige buy and the two-tap ascend all verified with real pointer clicks).

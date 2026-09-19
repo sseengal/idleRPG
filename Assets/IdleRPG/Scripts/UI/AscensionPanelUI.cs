@@ -31,18 +31,29 @@ namespace IdleRPG.UI
 
         private void Start()
         {
+            EnsureBound();
+        }
+
+        /// <summary>Binds lazily: this panel lives on a page that starts hidden.</summary>
+        private void EnsureBound()
+        {
+            if (manager != null)
+            {
+                return;
+            }
+
             HudController hud = HudController.Instance;
             manager = hud != null ? hud.GameManager : null;
 
             if (manager == null)
             {
-                Debug.LogError("[AscensionPanelUI] GameManager unavailable; ascension panel disabled.");
-                enabled = false;
+                Debug.LogWarning("[AscensionPanelUI] GameManager not ready yet; will bind on next open.");
                 return;
             }
 
             if (ascendButton != null)
             {
+                ascendButton.onClick.RemoveAllListeners();
                 ascendButton.onClick.AddListener(OnAscendClicked);
             }
 
@@ -52,6 +63,7 @@ namespace IdleRPG.UI
 
         private void OnEnable()
         {
+            EnsureBound();
             GameEvents.CurrencyChanged += OnCurrencyChanged;
             GameEvents.PrestigeYieldChanged += OnPrestigeYieldChanged;
             GameEvents.AscensionCompleted += OnAscensionCompleted;
