@@ -19,6 +19,7 @@ namespace IdleRPG.EditorTools
         private const string ConfigFolder = DataRoot + "/Config";
         private const string HeroFolder = DataRoot + "/Heroes";
         private const string EnemyFolder = DataRoot + "/Enemies";
+        private const string ArtFolder = PlaceholderSpriteGenerator.ArtFolder;
 
         [MenuItem("Tools/Idle RPG/Generate Data Assets")]
         public static void GenerateAll()
@@ -120,6 +121,7 @@ namespace IdleRPG.EditorTools
                 .Set("baseAttack", 12f)
                 .Set("baseDefense", 12f)
                 .Set("attackIntervalSec", 1.5f)
+                .SetSprite("heroIcon", "hero_knight")
                 .SetColor("placeholderTint", new Color(0.35f, 0.55f, 0.95f, 1f))
                 .Apply();
             heroes.Add(knight);
@@ -132,6 +134,7 @@ namespace IdleRPG.EditorTools
                 .Set("baseAttack", 8f)
                 .Set("baseDefense", 4f)
                 .Set("attackIntervalSec", 1f)
+                .SetSprite("heroIcon", "hero_archer")
                 .SetColor("placeholderTint", new Color(0.35f, 0.85f, 0.45f, 1f))
                 .Apply();
             heroes.Add(archer);
@@ -144,6 +147,7 @@ namespace IdleRPG.EditorTools
                 .Set("baseAttack", 16f)
                 .Set("baseDefense", 5f)
                 .Set("attackIntervalSec", 2f)
+                .SetSprite("heroIcon", "hero_mage")
                 .SetColor("placeholderTint", new Color(0.75f, 0.4f, 0.95f, 1f))
                 .Apply();
             heroes.Add(mage);
@@ -171,6 +175,7 @@ namespace IdleRPG.EditorTools
             float bossGoldMultiplier, Color tint)
         {
             EnemyData enemy = CreateOrLoad<EnemyData>(EnemyFolder + "/" + fileName + ".asset");
+            string spriteName = fileName.ToLowerInvariant();
             new Editable(enemy)
                 .Set("enemyName", displayName)
                 .Set("baseHealth", health)
@@ -181,6 +186,7 @@ namespace IdleRPG.EditorTools
                 .Set("isBoss", isBoss)
                 .Set("bossHealthMultiplier", bossHealthMultiplier)
                 .Set("bossGoldMultiplier", bossGoldMultiplier)
+                .SetSprite("enemySprite", spriteName)
                 .SetColor("placeholderTint", tint)
                 .Apply();
 
@@ -331,6 +337,25 @@ namespace IdleRPG.EditorTools
                     property.stringValue = value;
                 }
 
+                return this;
+            }
+
+            /// <summary>Assigns a generated placeholder sprite by art file name (optional).</summary>
+            public Editable SetSprite(string fieldName, string spriteName)
+            {
+                SerializedProperty property = Find(fieldName);
+                if (property == null)
+                {
+                    return this;
+                }
+
+                Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(ArtFolder + "/" + spriteName + ".png");
+                if (sprite == null)
+                {
+                    Debug.LogWarning($"[DataAssetGenerator] No art for '{spriteName}'; run Tools > Idle RPG > Art > Generate Placeholder Sprites.");
+                }
+
+                property.objectReferenceValue = sprite;
                 return this;
             }
 

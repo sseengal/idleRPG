@@ -131,16 +131,22 @@ Headless logic only (views moved to Step 4, matching Phase 2 = "debug logs").
       (prestige x boost, single funnel), 1s slow tick for boost expiry, `WatchAdForGoldBoost`
 - [x] Verified headless + live (see section 8) -> commit
 
-### Step 4 — UI + Scene (Phase 4)  `[IN PROGRESS]`
-- [ ] `PlaceholderSpriteGenerator` (procedural PNG hero/enemy/boss/icon)
-- [x] `DataAssetGenerator` (`Tools > Idle RPG > Generate Data Assets`) — idempotent; 16 SO assets generated
-      (BalanceConfig, WaveConfig, PartyConfig, 3 StatUpgrade, 3 PrestigeUpgrade, 3 HeroData, 4 EnemyData incl. Boss_Ogre)
-- [ ] `MvpSceneBuilder` (menu: Tools/Idle RPG/Build MVP Scene)
-- [ ] Canvas 1080x1920, Match 0.5; header (gold/gems/tokens/stage+wave)
-- [ ] viewport: 3 heroes left, enemy right, HP bars, floating damage text (pooled)
-- [ ] tabs: Upgrades / Ascension / Shop
-- [ ] `OfflineRewardsPopup`
-- [ ] -> **user plays + eyeballs layout** -> commit
+### Step 4 — UI + Scene (Phase 4)  `[DONE 2026-09-19]`
+- [x] `TmpBootstrapper` — auto-imports TMP Essential Resources via `AssetDatabase.ImportPackage`
+- [x] `PlaceholderSpriteGenerator` — 19 procedural PNGs (7 units, 7 panels, 4 icons, 1 background)
+- [x] `DataAssetGenerator` — 16 SO assets + assigns `heroIcon` / `enemySprite` from the art folder
+- [x] 14 UI view scripts: SafeAreaFitter, HudHeaderUI, TabController, UpgradePanelUI,
+      HeroUpgradeRowUI, AscensionPanelUI, PrestigeUpgradeRowUI, ShopPanelUI, OfflineRewardsPopup,
+      ToastUI, HpBarView, HeroUnitView, EnemyUnitView, FloatingDamageTextView/Pool, HudController
+- [x] `UiFactory` + `SceneWiringUtility` + `MvpSceneBuilder` (menu) — builds `Main.unity`:
+      Canvas 1080x1920 match 0.5, SafeArea, Header (gold/gems/tokens/stage/yield/boost chip),
+      Viewport (3 hero lanes + enemy slot + HP bars), Dock (3 tabs + panels), DamageCanvas
+      (separate overlay canvas + pooled numbers), OfflineRewardsPopup, Toast, EventSystem
+- [x] verified live: correct sprites/tints, HP labels, tabs, pools, 0 console errors
+- **Deviation:** UI is built directly into the scene (no prefabs yet). Prefabs are the planned
+  follow-up if hand-editing is preferred over regenerating the scene.
+- **Note:** the Game View must be portrait (1080x1920) to judge layout; the default 826x422
+  landscape view makes the portrait canvas look tiny.
 - [ ] Canvas 1080x1920, Match 0.5; header (gold/gems/tokens/stage+wave)
 - [ ] viewport: 3 heroes left, enemy right, HP bars, floating damage text (pooled)
 - [ ] tabs: Upgrades / Ascension / Shop
@@ -234,6 +240,28 @@ Two real bugs caught and fixed:
 
 ---
 
+## 9. Step 4 Verification Results
+
+Built via `Tools > Idle RPG > Build MVP Scene`; hierarchy verified through the MCP bridge
+(GameManager + HUD/Canvas/SafeArea + Header/Viewport/Dock + DamageCanvas + EventSystem).
+Runtime dump during Play (all values read from the live scene):
+```
+[UI1] hud.gameManager=True state=Combat stage=1
+  header GoldChip/Value='0'  GemChip/Value='0'  TokenChip/Value='0'
+  StageLabel='Stage 1  wave 1'   YieldLabel='Ascend: 0'
+[UI2] tabs activeIndex=0 | UpgradesPanel:active=True AscensionPanel:False ShopPanel:False
+[UI5] damage pool prewarmed children=8
+[V1] enemy sprite=enemy_slime enabled=True
+[V2] HeroLane0 sprite=hero_knight hpFill=1.00 label='240 / 240'
+[V2] HeroLane1 sprite=hero_archer hpFill=1.00 label='110 / 110'
+[V2] HeroLane2 sprite=hero_mage  hpFill=1.00 label='130 / 130'
+[V3] sim enemy=Slime hp=60/60 hero0atk=12
+```
+Bug found and fixed: `DataAssetGenerator` never assigned `heroIcon`/`enemySprite`, so the units
+rendered as untextured tinted boxes -> the generator now assigns art by asset-name convention.
+
+---
+
 ## 4. Open Risks / Watch Items
 - Unity **6000.6.0f1** (not 2022.3 LTS) — APIs used are version-stable.
 - New Input System only (`activeInputHandler = 1`) -> EventSystem needs `InputSystemUIInputModule`.
@@ -265,3 +293,8 @@ Two real bugs caught and fixed:
 - **Step 3** (2026-09-19): Progression landed (9 new files). Balance v2 applied through
   `DataAssetGenerator.ApplyBalance` (DEF +15%/level, prestige +10%/level @1.4 growth, boss 500 HP,
   ascension also resets hero levels). Verified headless + live; two wiring bugs found and fixed.
+
+- **Step 4** (2026-09-19): UI + scene landed (TMP bootstrap, 19 placeholder sprites, 14 UI scripts,
+  UiFactory/SceneWiringUtility/MvpSceneBuilder). `Main.unity` generated and verified live.
+  Fixed: unit sprites were unassigned in the data assets. Deprecation warnings cleaned up
+  (`FindAnyObjectByType`).

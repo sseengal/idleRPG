@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Boss_Ogre
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.EnemyData
   enemyName: Ogre Chieftain
-  enemySprite: {fileID: 0}
+  enemySprite: {fileID: 21300000, guid: e63472581bb6f41658cc4e0fbefa9605, type: 3}
   baseHealth: 100
   baseAttack: 20
   baseDefense: 5

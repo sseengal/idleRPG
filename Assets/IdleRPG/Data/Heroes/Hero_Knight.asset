@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.HeroData
   heroID: hero_knight
   heroName: Knight
-  heroIcon: {fileID: 0}
+  heroIcon: {fileID: 21300000, guid: 3d2fceccda6fd479081a5f74d6adde38, type: 3}
   baseHealth: 240
   baseAttack: 12
   baseDefense: 12

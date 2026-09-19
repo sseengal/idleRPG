@@ -154,7 +154,7 @@ namespace IdleRPG.EditorTools
                 return null;
             }
 
-            GameManager manager = Object.FindFirstObjectByType<GameManager>();
+            GameManager manager = Object.FindAnyObjectByType<GameManager>();
             if (manager == null)
             {
                 Debug.LogWarning("[ProgressionDebugMenu] No GameManager found in the loaded scene.");

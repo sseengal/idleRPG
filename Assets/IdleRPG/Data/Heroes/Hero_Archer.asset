@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.HeroData
   heroID: hero_archer
   heroName: Archer
-  heroIcon: {fileID: 0}
+  heroIcon: {fileID: 21300000, guid: e6ade3addd7674bafba2a131098a9250, type: 3}
   baseHealth: 110
   baseAttack: 8
   baseDefense: 4
