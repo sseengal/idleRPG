@@ -201,7 +201,7 @@ Headless logic only (views moved to Step 4, matching Phase 2 = "debug logs").
 - [x] popup: time away / gold / cap note ("Capped at 2h 00m of battle income (8h max away)."), claim
 - [x] debug: F10 now rewinds 3h **and** re-evaluates; `SaveDebugMenu > Fake 3h Offline` evaluates in
       Play mode; balance summary prints the offline payout table
-- [ ] **user test (step 5)**: see section 17
+- [ ] **user test (step 5)**: follow the 'Step 5 - how to test' block below
 
 ### Step 5 — how to test (manual, 5 minutes)  `[TODO: user]`
 **A. Persistence (5a)**
