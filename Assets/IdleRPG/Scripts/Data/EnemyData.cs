@@ -13,6 +13,9 @@ namespace IdleRPG.Data
 
         [Header("Identity")]
         [SerializeField] private string enemyName = "";
+        [Tooltip("Stable id used by saves and content specs. Empty = asset name.")]
+        [SerializeField] private string enemyID = "";
+
         [SerializeField] private Sprite enemySprite;
 
         [Header("Base Stats (stage 1)")]
@@ -35,6 +38,9 @@ namespace IdleRPG.Data
         [SerializeField] private Color placeholderTint = new Color(0.85f, 0.3f, 0.3f, 1f);
 
         public string EnemyName => string.IsNullOrEmpty(enemyName) ? name : enemyName;
+
+        /// <summary>Stable string id (save keys, encounter specs). Falls back to the asset name.</summary>
+        public string EnemyID => string.IsNullOrEmpty(enemyID) ? name : enemyID;
 
         public Sprite EnemySprite => enemySprite;
 
@@ -77,6 +83,11 @@ namespace IdleRPG.Data
             if (string.IsNullOrEmpty(enemyName))
             {
                 enemyName = name;
+            }
+
+            if (string.IsNullOrEmpty(enemyID))
+            {
+                enemyID = name;
             }
         }
     }

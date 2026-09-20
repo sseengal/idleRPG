@@ -29,10 +29,17 @@
   baseline); stage 1 at pace 1.0 = 74s, which reconciles to the MVP's 87.8s once the old 600 HP boss is
   accounted for; unupgraded party wipes from stage 5 (expected). Compile clean.
 
-### Step 7b — Unified combatant + encounter (still 1 enemy)  `TODO`
-- Deliverables: `Combatant`, `Encounter` + `EncounterFactory`, `DeterministicRng` (replaces `System.Random`),
-  indexed event payloads, `EncounterSimulator` rename.
-- Acceptance: re-recorded golden baseline matches the live game; offline table unchanged.
+### Step 7b — Unified combatant + encounter  `DONE`
+- Delivered: `Sim/Combatant.cs` (one sheet for both sides: side, row/column, stat block, hp, shield, threat,
+  timers), `Sim/Encounter.cs` (referee: party vs 1..N, target rules, indexed `DamageEvent`/`DeathEvent`),
+  `Sim/DeterministicRng.cs` (splitmix64 + `Fork` sub-streams + persistable state), `HeroCombatant` /
+  `EnemyCombatant` became thin subclasses, `CombatSimulator` is a facade over `Encounter` with an unchanged
+  public surface, `EnemyData.EnemyID`, `FormulaUtility` moved into `Sim/`.
+- Verified: Balance Lab baseline re-recorded after the RNG swap (stage 1: 74s @x1.0, 120s @x1.6, 272 gold,
+  2.26 gold/s); live probe shows `Encounter(party 3/3, enemies 0/1)`, party/enemy keys and a live
+  `DeterministicRng`; gold/kills unchanged, only crit sequences shifted.
+- Note: the `EncounterSimulator` rename was dropped - `CombatSimulator` stays as the runtime facade name so no
+  caller churn; the pure engine is `Encounter` inside `Sim/`.
 
 ### Step 7c — Director + RunController + GameManager split  `TODO`
 - Deliverables: `CombatDirector` accumulator flow, `RunController.Tick`, `GameContext`, `GameManager` < 150 lines.

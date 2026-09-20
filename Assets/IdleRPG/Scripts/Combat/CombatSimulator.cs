@@ -7,12 +7,12 @@ using IdleRPG.Sim;
 namespace IdleRPG.Combat
 {
     /// <summary>
-    /// Deterministic, Unity-free auto-battle simulation for one encounter at a time:
-    /// three heroes attack one enemy, the enemy attacks back. Only <see cref="Step"/>
-    /// advances time, so the exact same code can power live combat, a fast-forward,
-    /// or an offline estimate.
+    /// The runtime's window onto a fight.
     ///
-    /// Order inside one step: all living heroes swing first, then the enemy swings.
+    /// ELI5: the referee (<see cref="Encounter"/>) does all the fighting; this class is the shop counter
+    /// between the referee and the rest of the game. It builds the two teams from your data assets, passes
+    /// your upgrades in, and translates the referee's shouts into the game events the UI already listens to.
+    /// Nothing else in the game had to change.
     /// </summary>
     public sealed class CombatSimulator
     {
@@ -20,11 +20,11 @@ namespace IdleRPG.Combat
         private readonly EnemyTargetingMode targetingMode;
 
         private SimContext context;
-        private Random random;
+        private Encounter encounter;
         private HeroCombatant[] heroes = Array.Empty<HeroCombatant>();
-        private int aliveHeroCount;
-        private bool partyWipeRaised;
+        private EnemyCombatant[] enemies = Array.Empty<EnemyCombatant>();
 
+        // --- Constructors ---
         /// <summary>Legacy entry point (Step 2-6 callers): converts the scaling snapshot into a context.</summary>
         public CombatSimulator(ICombatStatProvider statProvider, EnemyTargetingMode targetingMode, CombatScaling scaling, int randomSeed)
             : this(statProvider, targetingMode, SimContext.CreateDefault(), randomSeed)
@@ -32,21 +32,24 @@ namespace IdleRPG.Combat
             ApplyScaling(scaling);
         }
 
-        /// <summary>
-        /// Preferred constructor (Step 7a+): the caller owns the frozen rules, the mode and the caps.
-        /// The seed still comes from the caller so live and headless runs can share a sequence.
-        /// </summary>
+        /// <summary>Preferred constructor: the caller owns the frozen rules, the mode and the caps.</summary>
         public CombatSimulator(ICombatStatProvider statProvider, EnemyTargetingMode targetingMode, SimContext context, int randomSeed)
         {
             this.statProvider = statProvider ?? DefaultStatProvider.Instance;
             this.targetingMode = targetingMode;
             this.context = context ?? SimContext.CreateDefault();
-            random = new Random(randomSeed);
+
+            // The seed lives in the context's rng so live, fast-forward and offline runs share one sequence.
+            if (!(this.context.Rng is DeterministicRng))
+            {
+                this.context = new SimContext(this.context.Rules, randomSeed, this.context.Mode);
+            }
+
+            encounter = new Encounter(this.context) { EnemyTargetRule = MapTargeting(targetingMode) };
+            WireEncounterEvents();
         }
 
-        // ------------------------------------------------------------------
-        // Events (mirrors of the global GameEvents, raised per simulation step)
-        // ------------------------------------------------------------------
+        // --- Events (mirrors the old API so UI/log keep working) ---
         public event Action<EnemyDamagedInfo> EnemyDamaged;
 
         public event Action<double> EnemyKilled;
@@ -57,20 +60,28 @@ namespace IdleRPG.Combat
 
         public event Action PartyWiped;
 
-        // ------------------------------------------------------------------
-        // State
-        // ------------------------------------------------------------------
-        public EnemyCombatant Enemy { get; private set; }
+        // --- State ---
+        public SimContext Context => context;
+
+        public Encounter CurrentEncounter => encounter;
+
+        /// <summary>The enemy being fought (index 0). Multi-enemy waves expose <see cref="Enemies"/>.</summary>
+        public EnemyCombatant Enemy => enemies.Length > 0 ? enemies[0] : null;
+
+        /// <summary>Every enemy in the current wave (1 today; up to the cap from Step 11 on).</summary>
+        public EnemyCombatant[] Enemies => enemies;
+
+        public int EnemyCount => enemies.Length;
 
         public int HeroCount => heroes.Length;
 
-        public int AliveHeroCount => aliveHeroCount;
+        public int AliveHeroCount => encounter.AlivePartyCount;
 
         public HeroCombatant[] Heroes => heroes;
 
-        public bool IsEncounterActive => Enemy != null && Enemy.IsAlive && aliveHeroCount > 0;
+        public bool IsEncounterActive => Enemy != null && Enemy.IsAlive && AliveHeroCount > 0;
 
-        public double EnemyHealthPercent => Enemy == null ? 0d : Enemy.HealthPercent;
+        public double EnemyHealthPercent => encounter.TotalEnemyHealthPercent;
 
         /// <summary>Updates the tuning snapshot (called when BalanceConfig changes).</summary>
         public void ApplyScaling(CombatScaling newScaling)
@@ -78,21 +89,27 @@ namespace IdleRPG.Combat
             context.ApplyRules(SimRulesFactory.FromScaling(newScaling));
         }
 
-        /// <summary>Replaces the whole context (rules + mode + caps) - used by fast-forward and offline runs.</summary>
+        /// <summary>Replaces the whole context (rules + rng + mode + caps) - fast-forward and offline runs.</summary>
         public void ApplyContext(SimContext newContext)
         {
-            if (newContext != null)
+            if (newContext == null)
             {
-                context = newContext;
+                return;
+            }
+
+            context = newContext;
+            encounter = new Encounter(context) { EnemyTargetRule = MapTargeting(targetingMode) };
+            WireEncounterEvents();
+
+            if (heroes.Length > 0)
+            {
+                encounter.SetParty(heroes);
             }
         }
 
-        /// <summary>The context this simulation is running with (read-only for callers).</summary>
-        public SimContext Context => context;
-
         /// <summary>
-        /// Swaps the stat source (Step 3 injects the upgrade/prestige aware resolver).
-        /// Recomputes party stats immediately so a live fight picks up the new numbers.
+        /// Swaps the stat source (the upgrade/prestige resolver). Recomputes party stats immediately so a
+        /// live fight picks up the new numbers.
         /// </summary>
         public void SetStatProvider(ICombatStatProvider provider)
         {
@@ -100,22 +117,23 @@ namespace IdleRPG.Combat
             RefreshHeroStats();
         }
 
+        // --- Party ---
         /// <summary>
-        /// Builds the party from a PartyConfig. Returns false (and logs) when the party is
-        /// unusable, so the caller can abort the run instead of fighting imaginary heroes.
+        /// Builds the party from a PartyConfig. Returns false (and logs) when the party is unusable, so the
+        /// caller can abort the run instead of fighting imaginary heroes.
         /// </summary>
         public bool SetupParty(PartyConfig party)
         {
             if (party == null)
             {
-                UnityEngine.Debug.LogError("[CombatSimulator] PartyConfig is null; cannot build a party.");
+                SimLog.LogError("[CombatSimulator] PartyConfig is null; cannot build a party.");
                 return false;
             }
 
             int count = party.ValidHeroCount;
             if (count == 0)
             {
-                UnityEngine.Debug.LogError("[CombatSimulator] PartyConfig has no heroes assigned.");
+                SimLog.LogError("[CombatSimulator] PartyConfig has no heroes assigned.");
                 return false;
             }
 
@@ -141,16 +159,11 @@ namespace IdleRPG.Combat
                 index++;
             }
 
-            RecountAliveHeroes();
-            partyWipeRaised = false;
-
+            encounter.SetParty(heroes);
             return true;
         }
 
-        /// <summary>
-        /// Re-reads derived stats from the provider (after an upgrade purchase) while
-        /// preserving each hero's current health percentage.
-        /// </summary>
+        /// <summary>Re-reads derived stats from the provider while preserving each hero's health percentage.</summary>
         public void RefreshHeroStats()
         {
             for (int i = 0; i < heroes.Length; i++)
@@ -172,188 +185,81 @@ namespace IdleRPG.Combat
         /// <summary>Heals the whole party to full (stage advance, retry, new run).</summary>
         public void HealParty()
         {
-            for (int i = 0; i < heroes.Length; i++)
-            {
-                heroes[i]?.RestoreFullHealth();
-            }
-
-            RecountAliveHeroes();
-            partyWipeRaised = false;
+            encounter.HealParty();
         }
 
-        // ------------------------------------------------------------------
-        // Encounter lifecycle
-        // ------------------------------------------------------------------
+        // --- Encounter lifecycle ---
         /// <summary>Spawns a fresh enemy. Returns false when the enemy could not be built.</summary>
         public bool StartEncounter(EnemyData enemyData, int stage, bool isBoss, double externalGoldMultiplier = 1d)
         {
-            Enemy = EnemyCombatant.Create(enemyData, stage, isBoss, context.Rules, externalGoldMultiplier);
-            partyWipeRaised = false;
-            RecountAliveHeroes();
+            EnemyCombatant enemy = EnemyCombatant.Create(enemyData, stage, isBoss, context.Rules, externalGoldMultiplier);
 
-            return Enemy != null;
+            if (enemy == null)
+            {
+                return false;
+            }
+
+            enemies = new[] { enemy };
+            encounter.SpawnEnemies(enemies);
+            encounter.PartyTargetRule = TargetRule.FrontMost;
+            return true;
+        }
+
+        /// <summary>Spawns a whole enemy team (multi-enemy waves arrive in Step 11).</summary>
+        public bool StartEncounter(EnemyCombatant[] team)
+        {
+            if (team == null || team.Length == 0)
+            {
+                return false;
+            }
+
+            enemies = team;
+            encounter.SpawnEnemies(enemies);
+            return true;
         }
 
         /// <summary>Clears the current enemy without raising a kill event.</summary>
         public void AbortEncounter()
         {
-            Enemy = null;
+            encounter.Clear();
+            enemies = Array.Empty<EnemyCombatant>();
         }
 
-        // ------------------------------------------------------------------
-        // Simulation
-        // ------------------------------------------------------------------
         /// <summary>Advances the fight by <paramref name="deltaTime"/> seconds.</summary>
         public void Step(double deltaTime)
         {
-            if (deltaTime <= 0d || Enemy == null)
-            {
-                return;
-            }
-
-            if (!Enemy.IsAlive || aliveHeroCount == 0)
-            {
-                return;
-            }
-
-            if (ResolveHeroAttacks(deltaTime))
-            {
-                // Enemy died this step: skip its turn entirely.
-                return;
-            }
-
-            ResolveEnemyAttack(deltaTime);
+            encounter.Step(deltaTime);
         }
 
-        /// <summary>Runs every living hero's swing. Returns true when the enemy died.</summary>
-        private bool ResolveHeroAttacks(double deltaTime)
+        // ------------------------------------------------------------------
+        // Internals
+        // ------------------------------------------------------------------
+        private void WireEncounterEvents()
         {
-            for (int i = 0; i < heroes.Length; i++)
-            {
-                HeroCombatant hero = heroes[i];
-                if (hero == null || !hero.IsAlive || !hero.Tick(deltaTime))
-                {
-                    continue;
-                }
-
-                bool isCritical = context.Rules.CriticalChance > 0d && random.NextDouble() < context.Rules.CriticalChance;
-                double multiplier = (isCritical ? context.Rules.CriticalDamageMultiplier : 1d) * statProvider.GlobalDamageMultiplier;
-                double damage = FormulaUtility.Damage(hero.Attack, Enemy.Defense, context.Rules.MinDamageRatio, multiplier);
-
-                if (damage <= 0d)
-                {
-                    continue;
-                }
-
-                Enemy.TakeDamage(damage);
-                EnemyDamaged?.Invoke(new EnemyDamagedInfo(damage, Enemy.CurrentHealth, Enemy.MaxHealth, isCritical, hero.Index));
-
-                if (!Enemy.IsAlive)
-                {
-                    EnemyKilled?.Invoke(Enemy.GoldReward);
-                    return true;
-                }
-            }
-
-            return false;
+            encounter.Damaged += OnEncounterDamaged;
+            encounter.Died += OnEncounterDied;
+            encounter.EnemyKilled += gold => EnemyKilled?.Invoke(gold);
+            encounter.PartyWiped += () => PartyWiped?.Invoke();
         }
 
-        /// <summary>Runs the enemy's swing against the selected hero.</summary>
-        private void ResolveEnemyAttack(double deltaTime)
+        private void OnEncounterDamaged(DamageEvent damage)
         {
-            if (!Enemy.Tick(deltaTime))
+            if (damage.TargetSide == CombatantSide.Enemy)
             {
+                EnemyDamaged?.Invoke(new EnemyDamagedInfo(
+                    damage.Damage, damage.TargetHealth, damage.TargetMaxHealth, damage.IsCritical, damage.AttackerIndex));
                 return;
             }
 
-            HeroCombatant target = SelectTarget();
-            if (target == null)
-            {
-                return;
-            }
-
-            double damage = FormulaUtility.Damage(Enemy.Attack, target.Defense, context.Rules.MinDamageRatio);
-            if (damage <= 0d)
-            {
-                return;
-            }
-
-            double applied = target.TakeDamage(damage);
-            HeroDamaged?.Invoke(target.Index, applied, target.CurrentHealth, target.MaxHealth);
-
-            if (target.IsAlive)
-            {
-                return;
-            }
-
-            HeroDied?.Invoke(target.Index);
-            RecountAliveHeroes();
-
-            if (aliveHeroCount == 0 && !partyWipeRaised)
-            {
-                partyWipeRaised = true;
-                PartyWiped?.Invoke();
-            }
+            HeroDamaged?.Invoke(damage.TargetIndex, damage.Damage, damage.TargetHealth, damage.TargetMaxHealth);
         }
 
-        /// <summary>Picks the hero the enemy attacks, per the configured targeting mode.</summary>
-        private HeroCombatant SelectTarget()
+        private void OnEncounterDied(DeathEvent death)
         {
-            HeroCombatant best = null;
-
-            for (int i = 0; i < heroes.Length; i++)
+            if (death.Side == CombatantSide.Party)
             {
-                HeroCombatant hero = heroes[i];
-                if (hero == null || !hero.IsAlive)
-                {
-                    continue;
-                }
-
-                if (best == null)
-                {
-                    best = hero;
-
-                    if (targetingMode == EnemyTargetingMode.FrontMost)
-                    {
-                        // Lowest index wins, so the first alive hero is the tank.
-                        return best;
-                    }
-
-                    continue;
-                }
-
-                if (targetingMode == EnemyTargetingMode.LowestHealthPercent && hero.HealthPercent < best.HealthPercent)
-                {
-                    best = hero;
-                }
+                HeroDied?.Invoke(death.Index);
             }
-
-            if (best == null || targetingMode != EnemyTargetingMode.Random || aliveHeroCount <= 1)
-            {
-                return best;
-            }
-
-            // Deterministic pick among the living.
-            int pick = random.Next(aliveHeroCount);
-            int seen = 0;
-
-            for (int i = 0; i < heroes.Length; i++)
-            {
-                HeroCombatant hero = heroes[i];
-                if (hero == null || !hero.IsAlive)
-                {
-                    continue;
-                }
-
-                if (seen == pick)
-                {
-                    return hero;
-                }
-
-                seen++;
-            }
-
-            return best;
         }
 
         /// <summary>Applies the game-pace multiplier to an attack interval.</summary>
@@ -363,19 +269,18 @@ namespace IdleRPG.Combat
             return scaled < 0.1d ? 0.1d : scaled;
         }
 
-        private void RecountAliveHeroes()
+        /// <summary>Maps the data-layer targeting enum onto the sim's target rules (decision A2).</summary>
+        private static TargetRule MapTargeting(EnemyTargetingMode mode)
         {
-            int alive = 0;
-
-            for (int i = 0; i < heroes.Length; i++)
+            switch (mode)
             {
-                if (heroes[i] != null && heroes[i].IsAlive)
-                {
-                    alive++;
-                }
+                case EnemyTargetingMode.LowestHealthPercent:
+                    return TargetRule.LowestHealthPercent;
+                case EnemyTargetingMode.Random:
+                    return TargetRule.Random;
+                default:
+                    return TargetRule.FrontMost;
             }
-
-            aliveHeroCount = alive;
         }
     }
 }

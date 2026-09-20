@@ -16,7 +16,7 @@ namespace IdleRPG.Sim
         }
 
         public SimContext(SimRules rules, int randomSeed, SimMode mode)
-            : this(rules, new SystemRng(randomSeed), mode, SimCaps.Default)
+            : this(rules, new DeterministicRng(randomSeed), mode, SimCaps.Default)
         {
         }
 

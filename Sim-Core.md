@@ -292,6 +292,11 @@ Pace 1.6 with the shipped roster:
 Step 7 acceptance: these reproduce within a few percent (refactor is behaviour-identical) and the offline table in
 `Plan.md` §17 still matches.
 
+> **Step 7b baseline (current, after the deterministic-RNG swap):** `pace x1.0 -> stage 74s, boss 28.5s`,
+> `pace x1.6 -> stage 120s, Slime 4.0s, Bat 6.0s, Goblin 11.3s, boss 45.6s`, `272 gold/stage`,
+> `2.26 gold/s`; sweep wipes from stage 4 with no upgrades. Gold and kill counts are unchanged from 7a -
+> only crit sequences moved (by design).
+>
 > **Correction (Step 7a):** the `87.8s` figure above was recorded when the stage-1 boss still had 600 HP
 > (before the x5 -> x4 boss trim), and it also ignored wave transitions. Current measured values from
 > `Tools > Idle RPG > Balance Lab > Golden Numbers` (unupgraded party, seed 12345):

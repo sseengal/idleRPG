@@ -11,7 +11,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **7b** unified `Combatant` + `Encounter` (7a done, parity verified) |
+| Current step | **7c** director + run controller + GameManager split (7a/7b done) |
 | Last completed | Step 6 (mobile polish, MVP) |
 | Next after this | 7b unified `Combatant` + `Encounter` |
 | Save schema | v2 (v3 lands in Steps 10/14 with migration) |
@@ -71,12 +71,26 @@ At pace x1.0 the sim gives 74s for stage 1; the MVP's 87.8s was recorded when th
 (before the x5 -> x4 trim): 74s + ~13.5s boss delta = **87.5s ~= 87.8s**, i.e. behaviour preserved.
 Conclusion: 7a is behaviour-identical; the old baseline was measured against a different boss value.
 
-### 7b — Unified combatant + encounter (still 1 enemy)  `[ ]`
-- [ ] `Combatant` (hero/enemy unified: side, stat block, hp, timers)
-- [ ] `Encounter` + `EncounterFactory` (single enemy for now)
-- [ ] `DeterministicRng` (stable sequences, sub-streams) replacing `System.Random`
-- [ ] **re-record the golden baseline after the RNG swap** (crit sequences shift)
-- [ ] `CombatSimulator` -> `EncounterSimulator`; indexed event payloads prepared for Step 11
+### 7b — Unified combatant + encounter (still 1 enemy)  `[x]`
+- [x] `Combatant` (hero/enemy unified: side, row/column, stat block, hp, shield, threat, timers)
+- [x] `Encounter` referee (party vs 1..N, target rules, indexed `DamageEvent`/`DeathEvent`)
+- [x] `DeterministicRng` (splitmix64, `Fork` sub-streams, persistable state) replacing `System.Random`
+- [x] **baseline re-recorded after the RNG swap** (below)
+- [x] `CombatSimulator` is now a thin facade over `Encounter`; every existing caller/event unchanged
+- [x] `EnemyData.EnemyID` added (stable ids for saves/specs)
+- [x] `FormulaUtility` moved into `Sim/` (still Unity-free, namespace unchanged)
+- [x] verified: Balance Lab + live Play probe (party/enemy keys, DeterministicRng state, damage applied)
+- [ ] **manual test (user)**: Play -> fight/buy/save as before
+- **7b baseline** (seed 12345, unupgraded, `Golden Numbers`):
+```
+pace x1.0 : Slime 2.5s  Bat 3.7s  Goblin 7.0s  boss 28.5s | stage 74s | 272 gold | 3.69 gold/s
+pace x1.6 : Slime 4.0s  Bat 6.0s  Goblin 11.3s boss 45.6s | stage 120s | 272 gold | 2.26 gold/s
+            (+6.6s of transitions = ~127s vs the 124s analytic figure)
+sweep     : stage1 120.4s/272g, stage2 139.5s/309g, stage3 171.5s/353g, wipe from stage 4
+live      : Encounter(party 3/3, enemies 0/1) | Slime [enemy:0] | Knight [party:0] 334.7/336
+            rng=DeterministicRng state=6018027440424182931
+```
+Delta vs 7a is crit-luck only (the RNG changed by design); gold/kills identical, stage-1 time within 2%.
 
 ### 7c — Director + run controller + GameManager split  `[ ]`
 - [ ] `CombatDirector` accumulator flow (replaces the `WaitForSeconds` coroutine)
