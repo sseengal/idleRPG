@@ -3,6 +3,7 @@ using UnityEngine;
 using IdleRPG.Core;
 using IdleRPG.Data;
 using IdleRPG.Economy;
+using IdleRPG.Sim;
 using IdleRPG.Progression;
 
 namespace IdleRPG.Save
@@ -21,26 +22,30 @@ namespace IdleRPG.Save
     {
         private readonly BalanceConfig balanceConfig;
         private readonly WaveConfig waveConfig;
-        private readonly EconomyManager economy;
-        private readonly EconomyRateTracker rateTracker;
+        private readonly RewardService rewards;
+        private readonly SimLedger ledger;
         private readonly Func<double, double> goldResolver;
 
+        /// <summary>
+        /// Step 9a: pays through the reward funnel (so the claim is booked as external and never pollutes the
+        /// earning rate) and reads its rate from the ledger.
+        /// </summary>
         public OfflineProgressManager(
             BalanceConfig balanceConfig,
             WaveConfig waveConfig,
-            EconomyManager economy,
-            EconomyRateTracker rateTracker,
+            RewardService rewards,
+            SimLedger ledger,
             Func<double, double> goldResolver)
         {
             this.balanceConfig = balanceConfig;
             this.waveConfig = waveConfig;
-            this.economy = economy;
-            this.rateTracker = rateTracker;
+            this.rewards = rewards;
+            this.ledger = ledger;
             this.goldResolver = goldResolver;
 
-            if (this.balanceConfig == null || this.economy == null)
+            if (this.balanceConfig == null || this.rewards == null)
             {
-                Debug.LogError("[OfflineProgressManager] Needs a BalanceConfig and an EconomyManager.");
+                Debug.LogError("[OfflineProgressManager] Needs a BalanceConfig and a RewardService.");
             }
         }
 
@@ -76,9 +81,9 @@ namespace IdleRPG.Save
 
         private double ResolveRate(int stage, double savedGoldPerSecond)
         {
-            if (rateTracker != null && rateTracker.HasEnoughSamples && rateTracker.GoldPerSecond > 0d)
+            if (ledger != null && ledger.HasEnoughSamples && ledger.GoldPerSecond > 0d)
             {
-                LastRate = rateTracker.GoldPerSecond;
+                LastRate = ledger.GoldPerSecond;
                 LastRateSource = "measured";
             }
             else if (savedGoldPerSecond > 0d)
@@ -187,10 +192,12 @@ namespace IdleRPG.Save
 
             double payable = claimed.Gold > 0d ? claimed.Gold : gold;
 
-            // Offline income must never feed the live rate measurement.
-            rateTracker?.BeginExternalGrant();
-            economy.AddGold(payable);
-            rateTracker?.EndExternalGrant();
+            // Through the till, flagged external: paid in full, excluded from the measured rate.
+            if (rewards != null)
+            {
+                // Quoted amount: the popup already showed the resolved gold, so pay it verbatim.
+                rewards.GrantQuotedGold(payable, RewardService.Source.OfflineClaim);
+            }
 
             RewardPaid?.Invoke(payable);
             Debug.Log($"[OfflineProgressManager] Paid {payable:0.#} gold for {claimed.CappedSeconds:0}s away " +

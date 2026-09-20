@@ -6,6 +6,7 @@ using IdleRPG.Combat;
 using IdleRPG.Data;
 using IdleRPG.DebugTools;
 using IdleRPG.Economy;
+using IdleRPG.Sim;
 using IdleRPG.Progression;
 using IdleRPG.Save;
 using IdleRPG.Services;
@@ -121,8 +122,11 @@ namespace IdleRPG.Core
         /// <summary>Save orchestration (autosave cadence, lifecycle hooks, manual saves).</summary>
         public SaveManager Save { get; private set; }
 
-        /// <summary>Measures live gold income so offline progress pays the real rate.</summary>
-        public EconomyRateTracker RateTracker { get; private set; }
+        /// <summary>Measures live income (gold/s, kills/s, seconds/stage) - the one rate source.</summary>
+        public SimLedger Ledger { get; private set; }
+
+        /// <summary>The single payout till: multipliers + wallet + ledger receipt.</summary>
+        public RewardService Rewards { get; private set; }
 
         /// <summary>Offline earnings: caps, rate and the claim guard.</summary>
         public OfflineProgressManager Offline { get; private set; }
@@ -206,9 +210,9 @@ namespace IdleRPG.Core
             UnsubscribeCombat();
             UnsubscribeProgression();
 
-            if (RateTracker != null)
+            if (Ledger != null)
             {
-                RateTracker.Detach();
+                Ledger.ResetSession();
             }
 
             if (Offline != null)
@@ -257,8 +261,8 @@ namespace IdleRPG.Core
             Boost = new BoostManager(balanceConfig);
             Ads = new MockAdService(this, 3f, true);
 
-            RateTracker = new EconomyRateTracker(balanceConfig);
-            RateTracker.Attach(Economy);
+            Ledger = new SimLedger(balanceConfig != null ? balanceConfig.GoldPerSecondSampleWindowSec : 60f);
+            Rewards = new RewardService(Economy, Ledger, ResolveGoldReward);
 
             Save = new SaveManager(new SaveSystem(), balanceConfig, CaptureSnapshot);
             LoadedFromSave = Save.TryLoad(out SaveData loaded);
@@ -292,7 +296,7 @@ namespace IdleRPG.Core
                 combatManager.SetStage(CurrentStage, healParty: true);
             }
 
-            Offline = new OfflineProgressManager(balanceConfig, waveConfig, Economy, RateTracker, ResolveGoldReward);
+            Offline = new OfflineProgressManager(balanceConfig, waveConfig, Rewards, Ledger, ResolveGoldReward);
             Offline.Attach();
             Offline.RewardPaid += OnOfflineRewardPaid;
 
@@ -469,8 +473,11 @@ namespace IdleRPG.Core
                 return;
             }
 
-            double awarded = ResolveGoldReward(goldReward);
-            Economy.AddGold(awarded);
+            double awarded = Rewards != null
+                ? Rewards.GrantGold(goldReward, RewardService.Source.Combat)
+                : ResolveGoldReward(goldReward);
+
+            Rewards?.RecordKill();
 
             TotalKills++;
             TotalGoldEarned += awarded;
@@ -501,7 +508,10 @@ namespace IdleRPG.Core
 
             if (Economy != null && balanceConfig != null && balanceConfig.GemsPerBossKill > 0)
             {
-                Economy.AddGems(balanceConfig.GemsPerBossKill);
+                if (Rewards != null)
+                {
+                    Rewards.GrantGems(balanceConfig.GemsPerBossKill, RewardService.Source.Combat);
+                }
             }
 
             SetState(GameState.Boss, GameState.Combat);
@@ -617,7 +627,7 @@ namespace IdleRPG.Core
                 return OfflineRewardResult.None;
             }
 
-            double savedRate = RateTracker != null ? RateTracker.GoldPerSecond : 0d;
+            double savedRate = Ledger != null ? Ledger.GoldPerSecond : 0d;
             OfflineRewardResult result = Offline.Evaluate(lastLogout, CurrentStage, savedRate);
 
             if (result.HasReward)
@@ -680,7 +690,10 @@ namespace IdleRPG.Core
 
             Resolver?.WriteToSave(data, partyConfig);
             Boost?.WriteToSave(data);
-            RateTracker?.WriteToSave(data);
+            if (Ledger != null)
+            {
+                data.lastGoldPerSecond = Ledger.GoldPerSecond;
+            }
 
             data.totalKills = TotalKills;
             data.totalGoldEarned = TotalGoldEarned;
@@ -711,7 +724,7 @@ namespace IdleRPG.Core
             Economy?.Restore(data.gold, data.gems, data.prestigeTokens);
             Resolver?.FillFromSave(data, partyConfig);
             Boost?.Restore(data.goldBoostActive, data.goldBoostExpiresAtBinary);
-            RateTracker?.SeedFromSave(data.lastGoldPerSecond);
+            Ledger?.SeedGoldPerSecond(data.lastGoldPerSecond);
 
             // Give the loaded values to combat (Initialize() would reset the stage to 1).
             combatManager.SetProgress(CurrentStage, RestoredWave, healParty: true);
@@ -789,7 +802,8 @@ namespace IdleRPG.Core
                 Ascension = Ascension,
                 Boost = Boost,
                 Ads = Ads,
-                RateTracker = RateTracker,
+                Ledger = Ledger,
+                Rewards = Rewards,
                 Save = Save,
                 Offline = Offline
             };

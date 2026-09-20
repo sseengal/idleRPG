@@ -247,6 +247,9 @@ SimLedger
 ```
 
 - Written by the reward funnel only (AD7). A payout that skips the ledger is a bug.
+- **Implemented (Step 9a):** `Sim/SimLedger.cs` holds the rolling rate (gold/s, kills/s, seconds/stage, best stage
+  time, session totals) and is advanced by `RunController` (`Tick(dt)`) - no Unity clock inside `Sim/`. The reward
+  funnel is `Economy/RewardService.cs`; `EconomyRateTracker` was deleted so there is exactly one rate source.
 - `EconomyRateTracker` keeps its currency-observer role; the ledger aggregates instead of one hardcoded stream.
 - Balance Lab + dev overlay read the same object, so what the player feels is what the tools measure.
 

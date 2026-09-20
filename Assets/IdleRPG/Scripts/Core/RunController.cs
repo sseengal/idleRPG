@@ -19,13 +19,22 @@ namespace IdleRPG.Core
     {
         private const float SlowTickIntervalSec = 1f;
 
+        /// <summary>Consecutive tick failures before the driver stops itself (G5 safe mode).</summary>
+        private const int MaxConsecutiveFailures = 10;
+
         private GameContext context;
         private float slowAccumulator;
+        private int consecutiveFailures;
 
         /// <summary>Number of combat ticks applied since the last frame (diagnostics only).</summary>
         public double LastDeltaSeconds { get; private set; }
 
         public int SlowTickCount { get; private set; }
+
+        /// <summary>True when error containment stopped the driver.</summary>
+        public bool SafeModeTriggered { get; private set; }
+
+        public int TickFailures { get; private set; }
 
         public bool IsDriving => context != null && context.Combat != null;
 
@@ -43,6 +52,43 @@ namespace IdleRPG.Core
             enabled = false;
         }
 
+        /// <summary>
+        /// Runs one combat tick with error containment (G5).
+        ///
+        /// ELI5: an idle game runs unattended, so one unexpected exception must not freeze it. The first failure
+        /// is logged, saved and skipped; too many in a row stop the run so a broken game is visible instead of
+        /// silently dead.
+        /// </summary>
+        private bool StepSafely(double deltaTime)
+        {
+            try
+            {
+                context.Combat.Tick(deltaTime);
+                consecutiveFailures = 0;
+                return true;
+            }
+            catch (Exception exception)
+            {
+                consecutiveFailures++;
+                TickFailures++;
+
+                if (consecutiveFailures == 1)
+                {
+                    Debug.LogError($"[RunController] Combat tick threw; skipping it and saving. {exception}");
+                    context.Save?.SaveNow("tick-error");
+                }
+
+                if (consecutiveFailures >= MaxConsecutiveFailures)
+                {
+                    enabled = false;
+                    SafeModeTriggered = true;
+                    Debug.LogError($"[RunController] {consecutiveFailures} consecutive failures: safe mode, run stopped.");
+                }
+
+                return false;
+            }
+        }
+
         private void Update()
         {
             if (context == null || !context.IsReady)
@@ -53,7 +99,13 @@ namespace IdleRPG.Core
             // 1) Gameplay: one accumulator-driven combat tick (no coroutines anywhere in the flow).
             double deltaTime = Time.deltaTime;
             LastDeltaSeconds = deltaTime;
-            context.Combat.Tick(deltaTime);
+
+            if (!StepSafely(deltaTime))
+            {
+                return;
+            }
+
+            context.Ledger?.Tick(deltaTime);
 
             // 2) Slow chores, once per second, in a deterministic order.
             slowAccumulator += (float)deltaTime;

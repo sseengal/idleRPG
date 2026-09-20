@@ -21,6 +21,10 @@ ledger.secondsPerStage    for "how far could I have gotten" style UI
 
 Fallback order (unchanged from the MVP): measured -> saved rate -> formula estimate.
 
+**Implemented (Step 9a):** `SimLedger` is the single rate source and `RewardService` is the single till
+(`GrantGold` computes multipliers, `GrantQuotedGold` pays an amount the UI already quoted, everything writes a
+ledger receipt; only `Source.Combat` income feeds the measured rate).
+
 ## 2. Time-based payout table (locked)
 
 | Payout | Trigger | Formula | Caps / guards |

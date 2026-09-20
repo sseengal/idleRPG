@@ -11,7 +11,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **9** economy audit - currencies, reward funnel, `IdleTimeService` (Step 8 complete) |
+| Current step | **9b** currencies + gem sinks + `IdleTimeService` + backup rotation (9a done) |
 | Last completed | Step 6 (mobile polish, MVP) |
 | Next after this | 7b unified `Combatant` + `Encounter` |
 | Save schema | v2 (v3 lands in Steps 10/14 with migration) |
@@ -151,8 +151,35 @@ Delta vs 7a is crit-luck only (the RNG changed by design); gold/kills identical,
 - [ ] `Tools > Idle RPG > Content > Run All Checks`: validate -> round-trip -> golden numbers in one command
 - [ ] extend specs to abilities/encounters/zones/tracks/loot **as** Steps 11/13/15 introduce them
 
-### 9 — Economy audit: currencies, funnel, IdleTimeService  `[ ]`
+### 9a — SimLedger + reward funnel (one rate source)  `[x]`
+- [x] `Sim/SimLedger.cs` - rolling-window rates (gold/s, kills/s, seconds/stage, best stage time, session
+      totals), pure C#, advanced by `Tick(dt)` so live and offline measure identically
+- [x] `Economy/RewardService.cs` - the single till with **two buttons**: `GrantGold` (compute multipliers then
+      pay) and `GrantQuotedGold` (pay exactly what the UI quoted), plus `GrantGems`/`GrantTokens`, all writing
+      ledger receipts; combat income feeds the rate, every other source is external
+- [x] retired `Economy/EconomyRateTracker.cs` (deleted) - the ledger is now the only rate source; offline
+      calculator, save field and F3 overlay all read it
+- [x] payouts routed through the till: kills, boss gems, ascension tokens, offline claim
+- [x] folded-in **G5**: `RunController.StepSafely` - tick exceptions are caught, logged, autosaved and skipped;
+      intermittent faults let the run continue, 10 in a row stop it (safe mode)
+- [ ] folded-in **G6** (3-version backup rotation) moved to **9b** - not done yet, do not report as complete
+- **Verification log:**
+```
+Balance Lab unchanged: pace x1.0 74s / 272 gold | pace x1.6 120s / 272 gold / 2.26 gold/s
+live: SimLedger(gold/s 4.48, kills/s 0.18, session 76 gold / 3 kills) | wallet +76 | RewardService(granted 76 gold over 3 payouts)
+offline claim: offered=41996 paid=41996 (exactly quoted) | rate 5.208 -> 5.208 unchanged (external excluded)
+              sessionGold=42049 = 53 combat + 41996 claim (funnel accounting exact)
+G5: intermittent - "Combat tick threw; skipping it and saving" (failures=13, enabled=true, run continued)
+    persistent  - "12 consecutive failures: safe mode, run stopped" (safeMode=true, enabled=false)
+```
+- **Bug found and fixed by this step (worth remembering):** the funnel initially applied the gold multipliers to
+  an amount the popup had *already* resolved, paying 57,749 for a quoted 36,093 (x1.6 double-apply). Fixed by
+  splitting `GrantGold` (compute+pay) from `GrantQuotedGold` (pay the receipt verbatim) so the class of bug is
+  impossible rather than just corrected.
+
+### 9b — Currencies, sinks, IdleTimeService  `[ ]`
 - [ ] `CurrencyDef` rows (gold, gems, tokens, shards, materials, essence, scrolls)
+- [ ] **placeholder presentation hooks** (audio service + icons) - see `Roadmap.md` Step 9b
 - [ ] `EconomyService` single reward funnel + ledger writes
 - [ ] gem **sinks** live (fast-forward, offline-cap extension)
 - [ ] `IdleTimeService` absorbs `OfflineProgressManager` (caps, tamper, pending claim)
@@ -234,13 +261,21 @@ Delta vs 7a is crit-luck only (the RNG changed by design); gold/kills identical,
 - [ ] local season track skeleton
 - [ ] acceptance: caps + cooldowns honoured; purchases mutate state + save; no power sold
 
-### 20 — Polish: l10n, a11y, perf, device  `[ ]`
+### 20 — Visual/audio/UX polish + l10n + a11y + perf  `[ ]` (owns G4, G11, G12, G14)
 - [ ] string table + settings (font scale, reduced motion, battery mode)
 - [ ] sprite atlases, scroll virtualisation, pooling audit
 - [ ] device builds: iOS + Android full-loop verification
 - [ ] `Mobile Verify Settings` all green; 60fps idle / 30fps battery mode
+- [ ] real sound design + final art replacing the Step 9b placeholders
 
-## 5. Gaps found in the review (not in any step yet)  `[NEW]`
+### 21 — CI, versioning & release readiness  `[ ]` (owns G7, G8, G9, G10, G15)
+- [ ] scripted `Unity -batchmode` build + tag-driven version; version/save-compat policy written
+- [ ] crash/ANR reporting hook; analytics opt-in + privacy decision; store/legal checklist
+
+### 22 — Local notifications  `[ ]` (G2)
+- [ ] offline-cap-full, expedition-finished, daily-reset notifications + permission flow + in-app toggle
+
+## 5. Gaps found in the review - now SCHEDULED
 
 Found while reviewing progress against the design docs. Each needs a home in `Roadmap.md`.
 

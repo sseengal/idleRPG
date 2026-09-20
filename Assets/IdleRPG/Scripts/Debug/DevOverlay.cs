@@ -182,7 +182,7 @@ namespace IdleRPG.DebugTools
             double enemyHealth = simulator != null && simulator.Enemy != null ? simulator.Enemy.CurrentHealth : 0d;
             double enemyPercent = simulator != null ? simulator.EnemyHealthPercent : 0d;
             double eta = dps > 0d ? enemyHealth / dps : 0d;
-            double goldPerSecond = context.RateTracker != null ? context.RateTracker.GoldPerSecond : 0d;
+            double goldPerSecond = context.Ledger != null ? context.Ledger.GoldPerSecond : 0d;
             int wavesPerStage = combat != null ? combat.WavesPerStage : 0;
 
             StringBuilder builder = new StringBuilder(420);
@@ -193,6 +193,11 @@ namespace IdleRPG.DebugTools
             builder.AppendLine($"party ehp  {ehp:0.#}   alive {alive}/{(heroes == null ? 0 : heroes.Length)}");
             builder.AppendLine($"enemy hp   {enemyHealth:0.#} ({enemyPercent:P0})   eta {eta:0.0}s");
             builder.AppendLine($"gold       {goldPerSecond:0.##}/s = {goldPerSecond * 60d:0.#}/min");
+
+            if (context.Ledger != null)
+            {
+                builder.AppendLine($"ledger     {context.Ledger.KillsPerSecond:0.##} kills/s | stage {(context.Ledger.SecondsPerStage <= 0d ? 0d : context.Ledger.SecondsPerStage):0}s");
+            }
             builder.AppendLine($"pace       x{rules.PaceMultiplier:0.##}   floor {rules.MinDamageRatio:P0}");
 
             if (simulator != null && simulator.Context != null && simulator.Context.Rng is DeterministicRng rng)

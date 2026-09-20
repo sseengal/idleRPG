@@ -89,7 +89,21 @@
 - **Acceptance:** `Validate` runs clean on the shipped catalog; the overlay numbers match Balance Lab.
 - **Blocked by:** Step 8a (done).
 
-### Step 9 — Economy audit: currencies, funnel, `IdleTimeService`  `TODO`
+### Step 9a — SimLedger + reward funnel  `DONE`
+- Delivered: `Sim/SimLedger.cs` (rolling rates, pure C#, `Tick(dt)`-driven), `Economy/RewardService.cs` (the single
+  till: `GrantGold` = compute+pay, `GrantQuotedGold` = pay the quoted amount, gems/tokens, ledger receipts),
+  `EconomyRateTracker` deleted, kills/boss-gems/tokens/offline claim routed through the till, `RunController`
+  error containment (G5), overlay now reads the ledger.
+- Verified: Balance Lab unchanged (74s @x1.0 / 120s @x1.6, 272 gold, 2.26 gold/s); offline claim pays exactly the
+  quoted amount and does not move the measured rate; safe mode trips only after 10 consecutive tick failures.
+- Fixed in-step: double-applied multipliers on offline claims (quoted 36,093 paid 57,749) - the two-button split
+  makes it structurally impossible.
+- Carried to 9b: **G6** save backup rotation.
+
+### Step 9 (original scope, split into 9a/9b)  `[-]`
+- **Split:** `9a` ledger + reward funnel + one rate source; `9b` `CurrencyDef` rows, gems sinks, `IdleTimeService`
+- **Folded in from the review:** **G5** sim-tick error containment (try/catch + safe mode + autosave on first
+  failure) and **G6** save backup rotation (3 versions, tagged with the schema version)
 - **Owner doc:** `Idle-Economy.md` §1-§3, §7; `Progression.md` §2-§3
 - **Goal:** define all currencies (kills the dead-gem problem - B4/C2), one ledger-fed reward funnel, one owner for
   time-based payouts (B13).
@@ -172,6 +186,27 @@
 
 ## 4. Depth, money, polish
 
+### Step 9b — Placeholder presentation hooks (audio + icons)  `TODO`
+- **Goal:** every place that *should* make a noise or show an icon gets the hook now, with placeholder assets;
+  the real polish (sound design, final art, animations) stays in Step 20.
+- **Deliverables:** `IAudioService` + `PlaceholderAudioService` (procedurally generated beeps/clicks or silent
+  stubs behind the same interface, exactly like `MockAdService`), event-driven SFX calls (hit, crit, enemy died,
+  boss wave, level up, purchase denied, offline claim, ascend, defeat), volume/mute in the settings stub,
+  `PlaceholderSpriteGenerator` extended for new content types (currencies, abilities, relics, zone banners).
+- **Acceptance:** muting silences everything; every wired event produces exactly one cue; swapping to a real
+  SDK/asset pack is a single implementation change.
+- **Note:** placeholders are generated on demand and are expected to look/sound crude until Step 20.
+
+### Step 21 — CI, versioning & release readiness  `TODO`
+- **Gaps:** **G8** scripted `Unity -batchmode` build + tag-driven versioning; **G9** version/save-compat policy;
+  **G7** crash/ANR reporting; **G10** analytics opt-in + privacy decision; **G15** store/legal checklist
+  (privacy URL, age rating, data-safety form, ad disclosure, iOS ATT).
+- **Acceptance:** one command produces a signed-ish dev build with the right version; the checklist is written down.
+
+### Step 22 — Local notifications  `TODO`
+- **Gap G2.** "Your offline cap is full", expedition finished, daily reset. Platform plugin + permission flow +
+  an in-app toggle; must never fire when notifications are denied.
+
 ### Step 17 — Mid game: roster, stars, expeditions, return hub  `TODO`
 - **Owner doc:** `Progression.md` §5; `Idle-Economy.md` §2-§4; `UI-UX.md` §4
 - **Goal:** ask #5 + B1/B7: roster growth, team 3→5, offline expeditions, bounties, dailies.
@@ -199,7 +234,12 @@
   state and saves; nothing sold grants raw power.
 - **Blocked by:** Steps 9, 16, 17.
 
-### Step 20 — Polish: l10n, a11y, perf, device builds  `TODO`
+### Step 20 — Visual/audio/UX polish + l10n + a11y + perf  `TODO`
+- **Also owns:** **G4** settings screen (audio, notifications, font scale, reduced motion, battery, language),
+  **G11** real art pipeline (atlases, import presets, Addressables when content grows), **G12** device perf
+  budgets (draw calls, GC alloc/frame, memory), **G14** a11y beyond font scale (colorblind palette,
+  screen-reader labels, haptics toggle), plus the **real sound design + final art pass** replacing the
+  Step 9b placeholders.
 - **Owner doc:** `UI-UX.md` §7-§8; `Architecture.md` B11/B12
 - **Goal:** ship-ready: localization keys, accessibility settings, pooling/atlases, battery mode, real device runs.
 - **Deliverables:** string table + settings screen (font scale, reduced motion, battery mode); sprite atlases;

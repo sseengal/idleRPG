@@ -4,6 +4,7 @@ using IdleRPG.Economy;
 using IdleRPG.Progression;
 using IdleRPG.Save;
 using IdleRPG.Services;
+using IdleRPG.Sim;
 
 namespace IdleRPG.Core
 {
@@ -36,7 +37,9 @@ namespace IdleRPG.Core
 
         public IAdService Ads { get; set; }
 
-        public EconomyRateTracker RateTracker { get; set; }
+        public SimLedger Ledger { get; set; }
+
+        public RewardService Rewards { get; set; }
 
         public SaveManager Save { get; set; }
 
