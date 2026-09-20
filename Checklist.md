@@ -11,7 +11,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **10c** Team screen + battle formation strip (10a, 10b done) |
+| Current step | **11** multi-enemy encounters (Step 10 complete: 10a, 10b, 10c) |
 | Last completed | Step 6 (mobile polish, MVP) |
 | Next after this | 7b unified `Combatant` + `Encounter` |
 | Save schema | v2 (v3 lands in Steps 10/14 with migration) |
@@ -307,10 +307,27 @@ G5: intermittent - "Combat tick threw; skipping it and saving" (failures=13, ena
       of v3 - nothing needs it yet, and reshaping live data would risk the very saves the step is protecting. It
       lands with the systems that need it (relics/abilities), as an additive migration of its own
 
-### 10c — Team screen + battle formation strip  `[ ]`
-- [ ] Team screen: roster grid, formation board, tap-swap, auto-arrange, presets
-- [ ] battle formation strip; delete `DesiredPartySize` + the fixed `heroViews[]`
-- [ ] validator: formation asset sane (slots >= party, unlock stages ascending, multiplier in (0,1])
+### 10c — Team screen + battle formation strip  `[x]`
+- [x] `UI/FormationStripUI.cs`: one view **per formation slot**, built in code from `FormationData` (rows and
+      columns straight from the asset), tap-hero-then-tap-slot swapping, `LOCKED` slots refused with a toast,
+      selected slot highlighted; works as the battle strip (health bars) or the Team board (role tags)
+- [x] `UI/TeamPanelUI.cs` + a new **TEAM** tab (nav is now BATTLE / TEAM / UPGRADES / ASCEND / SHOP): roster with
+      role + slot + hp/atk, the board, `TANK FRONT` (auto-arrange) and `HIDE THE TANK (BACK ROW)` presets
+- [x] `UI/UiRuntime.cs`: runtime twin of the editor `UiFactory` (panels/texts/buttons/health bars in code)
+- [x] deleted `PartyConfig.DesiredPartySize` and the fixed `heroViews[]`/`HeroLane0..2` lanes; `TabController`
+      exposes `TabCount`, `ScreenController` derives the tab range from it (no magic 3s left)
+- [x] damage numbers now follow the **hero**, not the lane: the strip hands the pool fresh anchors on every change
+      (and the hidden Team board deliberately feeds no pool, so it cannot hijack them)
+- [x] validator: formation checks added (slots >= party, unlocked >= party, team size >= party, multiplier in (0,1])
+- [x] **verified live**: strip built 6 slots - `Slot0='front' Slot1='Archer' Slot2='Mage' Slot3='Knight'
+      Slot4='back' Slot5='LOCKED'(not interactable)`; real button taps moved the Knight to the back row
+      (`front[- 1 2] back[0 - -]`, knightRow Back, save marked dirty); `NavTEAM` opened the tab; `HIDE THE TANK`
+      -> `front[2 1 -] back[0 - -]`, `TANK FRONT` -> `front[0 2 1] back[- - -]`; anchors read
+      `Slot0<FormationStrip> Slot2<FormationStrip> Slot1<FormationStrip>` (per hero, battle board only)
+- [x] regression: validator clean, golden numbers unchanged, save drift PASS (v3, 6 slots, additive-only)
+- **Bugs found and fixed by the probes:** the hidden Team board was overriding the damage-number anchors (it now
+      passes `null`); `HeroUnitView.Apply()` and the strip were writing the *same* label, so role tags never
+      showed (slots now have a view-owned `Name` and a strip-owned `Caption`)
 
 ### 11 — Multi-enemy encounters (up to 3)  `[ ]`
 - [ ] `Encounter` enemy list + `EncounterFactory` (spawn groups, affix, budget)

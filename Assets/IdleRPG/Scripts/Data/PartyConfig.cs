@@ -9,9 +9,13 @@ namespace IdleRPG.Data
     [CreateAssetMenu(fileName = "PartyConfig", menuName = "Idle RPG/Data/Party Config", order = 12)]
     public class PartyConfig : ScriptableObject
     {
-        public const int DesiredPartySize = 3;
+        /// <summary>
+        /// Used only by tools when no FormationData asset is available yet (the board decides the real number).
+        /// </summary>
+        public const int FallbackPartySize = 3;
 
-        [Tooltip("Exactly 3 heroes. Lane index 0 = front lane.")]
+        [Tooltip("The roster. Hero index (0, 1, 2...) is the hero's identity for saves; where it stands is the " +
+                 "formation's job (Step 10).")]
         [SerializeField] private List<HeroData> heroes = new List<HeroData>();
 
         public IReadOnlyList<HeroData> Heroes => heroes;
@@ -82,9 +86,12 @@ namespace IdleRPG.Data
                 return;
             }
 
-            if (heroes.Count > DesiredPartySize)
+            for (int i = 0; i < heroes.Count; i++)
             {
-                Debug.LogWarning($"[PartyConfig] Party has {heroes.Count} entries; design is {DesiredPartySize}. Extras are ignored by the lane layout.");
+                if (heroes[i] == null)
+                {
+                    Debug.LogWarning($"[PartyConfig] Roster slot {i} is empty.");
+                }
             }
         }
     }

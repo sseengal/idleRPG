@@ -31,6 +31,9 @@ namespace IdleRPG.UI
 
         public int ActiveIndex { get; private set; } = -1;
 
+        /// <summary>How many tabs exist (the nav bar and Page cycling use this instead of a magic number).</summary>
+        public int TabCount => tabs != null ? tabs.Count : 0;
+
         private void Start()
         {
             for (int i = 0; i < tabs.Count; i++)

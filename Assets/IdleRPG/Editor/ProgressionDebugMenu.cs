@@ -257,7 +257,9 @@ namespace IdleRPG.EditorTools
             double pace = balance.CombatPaceMultiplier;
             double dps = 0d;
 
-            for (int i = 0; i < PartyConfig.DesiredPartySize; i++)
+            int lanes = party != null ? party.ValidHeroCount : 0;
+
+            for (int i = 0; i < lanes; i++)
             {
                 HeroData hero = party.GetHero(i);
                 if (hero == null)

@@ -195,6 +195,70 @@ namespace IdleRPG.Combat
             Changed?.Invoke();
         }
 
+        /// <summary>
+        /// The "hide the tank" preset: the heaviest hero goes to the back row and everyone else fills the front.
+        /// Useful for testing ranged enemies and for squishy-composition play, and it needs no stored layout.
+        /// </summary>
+        public void ArrangeTankInBack(int heroCount, Func<int, double> weight)
+        {
+            int[] order = new int[Math.Max(0, heroCount)];
+
+            for (int hero = 0; hero < order.Length; hero++)
+            {
+                order[hero] = hero;
+            }
+
+            if (weight != null)
+            {
+                for (int i = 1; i < order.Length; i++)
+                {
+                    int current = order[i];
+                    double currentWeight = weight(current);
+                    int j = i - 1;
+
+                    while (j >= 0 && weight(order[j]) < currentWeight)
+                    {
+                        order[j + 1] = order[j];
+                        j--;
+                    }
+
+                    order[j + 1] = current;
+                }
+            }
+
+            ClearSlots();
+
+            int rooms = Math.Max(1, heroBySlot.Length);
+            int backRowStart = data.Rows > 1 ? data.FirstSlotOfRow(1) : rooms - 1;
+            int cursor = 0;
+
+            for (int i = 0; i < order.Length; i++)
+            {
+                int slot;
+
+                if (i == 0 && order.Length > 1)
+                {
+                    // The tankiest hero takes the back-left slot; the rest queue up in the front row.
+                    slot = Math.Min(backRowStart, rooms - 1);
+                }
+                else
+                {
+                    // Skip whatever slot the tank already occupies.
+                    if (cursor == Math.Min(backRowStart, rooms - 1))
+                    {
+                        cursor++;
+                    }
+
+                    slot = cursor < rooms ? cursor : cursor % rooms;
+                    cursor = slot + 1;
+                }
+
+                heroBySlot[slot] = order[i];
+            }
+
+            Changed?.Invoke();
+        }
+
         /// <summary>Slot layout for saves and tooling ("-1" = empty slot).</summary>
         public int[] ToSlotArray()
         {

@@ -62,8 +62,10 @@ namespace IdleRPG.UI
                 return;
             }
 
+            int tabCount = tabs != null ? tabs.TabCount : 0;
             int next = tabs != null ? tabs.ActiveIndex + 1 : 1;
-            if (next > 2)
+
+            if (tabCount == 0 || next >= tabCount)
             {
                 ShowBattle();
                 return;
@@ -96,7 +98,7 @@ namespace IdleRPG.UI
             RefreshNav(0);
         }
 
-        /// <summary>Shows the management page on a specific tab (0 = upgrades, 1 = ascend, 2 = shop).</summary>
+        /// <summary>Shows the management page on a specific tab (0 = team, 1 = upgrades, 2 = ascend, 3 = shop).</summary>
         public void ShowManagement(int tabIndex)
         {
             SetPages(battle: false);
@@ -110,10 +112,10 @@ namespace IdleRPG.UI
             HudController hud = HudController.Instance;
             if (hud != null && hud.GameManager != null)
             {
-                hud.GameManager.SetLastPageIndex(Mathf.Clamp(tabIndex, 0, 2));
+                hud.GameManager.SetLastPageIndex(Mathf.Max(0, tabIndex));
             }
 
-            RefreshNav(Mathf.Clamp(tabIndex, 0, 2) + 1);
+            RefreshNav(tabIndex + 1);
         }
 
         private void SetPages(bool battle)

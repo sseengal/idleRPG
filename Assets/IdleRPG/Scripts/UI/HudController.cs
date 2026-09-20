@@ -18,11 +18,18 @@ namespace IdleRPG.UI
         [SerializeField] private GameManager gameManager;
 
         [Header("Views")]
-        [SerializeField] private HeroUnitView[] heroViews;
+        [Tooltip("The party board (Step 10c). It builds one view per formation slot at runtime.")]
+        [SerializeField] private FormationStripUI formationStrip;
         [SerializeField] private EnemyUnitView enemyView;
         [SerializeField] private FloatingDamageTextPool damageTextPool;
 
         public GameManager GameManager => gameManager;
+
+        /// <summary>The damage-number pool (the Team board feeds it its anchors too).</summary>
+        public FloatingDamageTextPool DamageTextPool => damageTextPool;
+
+        /// <summary>The party board (Step 10c).</summary>
+        public FormationStripUI FormationStrip => formationStrip;
 
         private void Awake()
         {
@@ -42,29 +49,10 @@ namespace IdleRPG.UI
                 return;
             }
 
-            PartyConfig party = gameManager.Party;
-
-            if (heroViews == null || party == null)
+            // The formation strip owns one view per board slot and refreshes itself on every board change.
+            if (formationStrip != null)
             {
-                return;
-            }
-
-            for (int i = 0; i < heroViews.Length; i++)
-            {
-                HeroUnitView view = heroViews[i];
-                if (view == null)
-                {
-                    continue;
-                }
-
-                HeroData hero = party.GetHero(i);
-                view.Configure(i);
-                view.Apply(hero);
-
-                if (hero == null)
-                {
-                    Debug.LogWarning($"[HudController] Party has no hero at lane {i}.");
-                }
+                formationStrip.Build(gameManager, damageTextPool);
             }
         }
 

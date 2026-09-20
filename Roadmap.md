@@ -126,8 +126,9 @@
   - **10b `DONE`** - save v3 + `partySlots` + `SaveMigrations.v2ToV3` + a save round-trip drift tool
     (`Save > Round-Trip Drift Test`). Verified: the layout survives a real relaunch, the dirty flag fires on a
     swap, and an older v2 file upgrades additive-only with 0 lines lost.
-  - **10c `TODO`** - Team screen (roster/board/swap/auto-arrange/presets) + battle formation strip;
-    delete `DesiredPartySize` and the fixed `heroViews[]`; validator coverage.
+  - **10c `DONE`** - battle formation strip + TEAM tab (roster, board, tap-swap, two presets), built in code from
+    `FormationData`; `DesiredPartySize` and the fixed lanes/`heroViews[]` are gone; damage anchors follow heroes.
+    Verified live with real button taps; validator + golden numbers + save drift all clean.
 - **Blocked by:** Steps 7, 8. **Risk:** schema v3 migration - test against the existing v2 save.
 
 ### Step 11 — Multi-enemy encounters (up to 3)  `TODO`

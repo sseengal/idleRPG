@@ -227,10 +227,14 @@ namespace IdleRPG.EditorTools.Content
                 return;
             }
 
-            if (file.heroIds.Count > PartyConfig.DesiredPartySize)
+            // The board (Step 10) decides how many heroes fit - not a hardcoded party size.
+            FormationData formation = AssetDatabase.LoadAssetAtPath<FormationData>("Assets/IdleRPG/Data/Config/Formation_Default.asset");
+            int boardSlots = formation != null ? formation.SlotCount : PartyConfig.FallbackPartySize;
+
+            if (file.heroIds.Count > boardSlots)
             {
                 Add(Severity.Warning, "party",
-                    $"Party has {file.heroIds.Count} heroes; the current layout supports {PartyConfig.DesiredPartySize}.");
+                    $"Party has {file.heroIds.Count} heroes; the formation board has {boardSlots} slot(s).");
             }
 
             HashSet<string> seen = new HashSet<string>();

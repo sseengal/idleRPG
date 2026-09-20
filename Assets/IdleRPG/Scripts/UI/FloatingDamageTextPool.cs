@@ -24,6 +24,15 @@ namespace IdleRPG.UI
         private readonly List<FloatingDamageTextView> active = new List<FloatingDamageTextView>();
         private float driftSeed;
 
+        /// <summary>
+        /// Replaces the per-hero damage anchors. The formation strip calls this whenever the board changes, so a
+        /// swapped hero keeps its numbers coming out of the right slot.
+        /// </summary>
+        public void SetHeroAnchors(RectTransform[] anchors)
+        {
+            heroAnchors = anchors;
+        }
+
         private void Start()
         {
             if (prefab == null)

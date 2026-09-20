@@ -34,6 +34,28 @@ namespace IdleRPG.UI
             heroIndex = index;
         }
 
+        /// <summary>
+        /// Wires a view that was created in code (the formation strip builds a view per slot at runtime, so it
+        /// cannot use the inspector). Kept separate from <see cref="Configure(int)"/> so the scene path is unchanged.
+        /// </summary>
+        public void ConfigureRuntime(int index, Image icon, HpBarView hp, TextMeshProUGUI label, CanvasGroup group)
+        {
+            heroIndex = index;
+            iconImage = icon;
+            hpBar = hp;
+            nameLabel = label;
+            canvasGroup = group;
+        }
+
+        /// <summary>Shows or hides the health bar (the Team board has no health to show).</summary>
+        public void SetHealthVisible(bool visible)
+        {
+            if (hpBar != null)
+            {
+                hpBar.gameObject.SetActive(visible);
+            }
+        }
+
         /// <summary>Applies the static data (icon, tint, name) once at setup.</summary>
         public void Apply(HeroData data)
         {

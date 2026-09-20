@@ -75,6 +75,14 @@ namespace IdleRPG.UI
             }
         }
 
+        /// <summary>Wires a bar that was created in code (formation strip slots).</summary>
+        public void ConfigureRuntime(Image fill, Image ghost, TextMeshProUGUI label)
+        {
+            fillImage = fill;
+            ghostImage = ghost;
+            valueLabel = label;
+        }
+
         public void SetVisible(bool visible)
         {
             if (gameObject.activeSelf != visible)

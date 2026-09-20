@@ -103,7 +103,7 @@ app sandbox. Set a real `companyName` before store submission (it moves that pat
 
 | Key | Action |
 |---|---|
-| `Tab` | Cycle pages (Battle / Upgrades / Ascend / Shop) |
+| `Tab` | Cycle pages (Battle / Team / Upgrades / Ascend / Shop) |
 | `1` / `2` / `3` / `4` | Buy +1 ATK / +10 ATK / +10 HP / +10 DEF for every hero |
 | `F3` | Dev overlay: party DPS/eHP, gold per minute, wave ETA, rng state, save info **+ the full hotkey list** |
 | `F5` / `F9` | Save now / delete the save file |
@@ -135,7 +135,9 @@ debug menus, the console log and the Unity MCP bridge. A manual pass takes ~5 mi
 
 1. **Combat / pacing** — Play, watch the log feed, confirm stage 1 clears in ~2 minutes and the boss
    wave pays gems.
-2. **Progression** — buy upgrades on UPGRADES, ascend on ASCEND, buy a prestige upgrade, then check the
+2. **Formation** — tap a hero on the battle strip, then tap an empty slot to move it (the back row takes 25% less
+   damage while the front row holds). TEAM has the full board plus `TANK FRONT` / `HIDE THE TANK` presets.
+3. **Progression** — buy upgrades on UPGRADES, ascend on ASCEND, buy a prestige upgrade, then check the
    header values moved.
 3. **Persistence** — buy things, stop, Play again: gold/stage/hero levels restore (`Save load: file`).
    `F5` saves, `F9` wipes, and corrupting `savegame.json` recovers from `.bak`.

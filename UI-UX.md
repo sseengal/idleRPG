@@ -26,6 +26,7 @@ Target shell adds depth without nav explosion:
 
 ```
 Bottom nav (max 5):  BATTLE | TEAM | GROW | ASCEND | SHOP
+                     (Step 10c ships BATTLE | TEAM | UPGRADES | ASCEND | SHOP; GROW/ascension-tree splitting is Step 21)
   BATTLE  encounter view, formation strip, combat log, affix chips, speed toggle
   TEAM    roster grid, formation board, hero detail, presets
   GROW    upgrades, abilities, relics, automation (one segmented control, data-driven lists)
