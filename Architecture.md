@@ -301,8 +301,8 @@ ui             { lastScreenIndex, settings{...} }
 | # | Decision | Status |
 |---|---|---|
 | AD1 | Four layers, dependency downward: Data -> Sim -> Services -> UI; `Sim/` has zero Unity refs | Locked |
-| AD2 | One gameplay driver: `RunController.Tick(dt)`; no coroutines in gameplay flow | Locked |
-| AD3 | `GameContext` built once and injected; no runtime `Find*`/`GetComponent` | Locked |
+| AD2 | One gameplay driver: `RunController.Tick(dt)`; no coroutines in gameplay flow | Locked - **implemented in 7c** |
+| AD3 | `GameContext` built once and injected; no runtime `Find*`/`GetComponent` | Locked - **implemented in 7c** (panel `EnsureBound()` fallbacks retire in Step 8) |
 | AD4 | `SimContext` snapshot (rules + rng + `SimMode`) is the sim's only input besides specs | Locked |
 | AD5 | Save stores **ids + string keys only**; lists not dictionaries; schema v3 generic records | Locked |
 | AD6 | Offline always uses the measured `SimLedger` rate first; no second offline formula | Locked |

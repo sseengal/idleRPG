@@ -48,7 +48,7 @@ namespace IdleRPG.Core
         [SerializeField] private bool logFlowToConsole = true;
 
         private bool isWired;
-        private Coroutine slowTickRoutine;
+        private RunController runner;
 
         /// <summary>(previous, next) state transitions for interested systems/UI.</summary>
         public event Action<GameState, GameState> StateChanged;
@@ -107,6 +107,12 @@ namespace IdleRPG.Core
 
         /// <summary>True once the player has reached the minimum stage for an ascension.</summary>
         public bool CanAscend => balanceConfig != null && HighestStageReached >= balanceConfig.MinStageToAscend;
+
+        /// <summary>Every wired system in one box (Step 7c). Nothing hunts the scene any more.</summary>
+        public GameContext Context { get; private set; }
+
+        /// <summary>The single heartbeat: combat ticks + the 1s slow chores.</summary>
+        public RunController Runner => runner;
 
         /// <summary>Save orchestration (autosave cadence, lifecycle hooks, manual saves).</summary>
         public SaveManager Save { get; private set; }
@@ -212,10 +218,9 @@ namespace IdleRPG.Core
                 Resolver.StatsChanged -= OnStatsChanged;
             }
 
-            if (slowTickRoutine != null)
+            if (runner != null)
             {
-                StopCoroutine(slowTickRoutine);
-                slowTickRoutine = null;
+                runner.Detach();
             }
         }
 
@@ -288,7 +293,7 @@ namespace IdleRPG.Core
 
             Debug.Log($"[GameManager] Save load: {Save.LastLoadSource} | stage {CurrentStage} wave {RestoredWave} | {Economy}");
 
-            slowTickRoutine = StartCoroutine(SlowTickLoop());
+            BuildContext();
 
             return true;
         }
@@ -757,21 +762,41 @@ namespace IdleRPG.Core
         }
 
         /// <summary>One-second tick for time-based systems (boost expiry; autosave joins in Step 5).</summary>
-        private IEnumerator SlowTickLoop()
+        /// <summary>
+        /// Fills the <see cref="GameContext"/> and starts the single heartbeat. Everything exists by this
+        /// point, so the box is complete the moment anything can read it.
+        /// </summary>
+        private void BuildContext()
         {
-            WaitForSeconds wait = new WaitForSeconds(1f);
-
-            while (true)
+            Context = new GameContext
             {
-                yield return wait;
+                Balance = balanceConfig,
+                Waves = waveConfig,
+                Party = partyConfig,
+                Combat = combatManager,
+                Economy = Economy,
+                Resolver = Resolver,
+                Upgrade = Upgrade,
+                Ascension = Ascension,
+                Boost = Boost,
+                Ads = Ads,
+                RateTracker = RateTracker,
+                Save = Save,
+                Offline = Offline
+            };
 
-                if (Boost != null && Boost.Refresh())
+            if (runner == null)
+            {
+                runner = gameObject.GetComponent<RunController>();
+
+                if (runner == null)
                 {
-                    LogFlow("Ad gold boost expired.");
+                    runner = gameObject.AddComponent<RunController>();
                 }
-
-                Save?.Tick(1f);
             }
+
+            runner.Attach(Context, true);
+            LogFlow($"Run controller attached | {Context}");
         }
 
 #if UNITY_EDITOR

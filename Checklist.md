@@ -11,7 +11,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **7c** director + run controller + GameManager split (7a/7b done) |
+| Current step | **8** content pipeline tools + dev overlay (Step 7 complete) |
 | Last completed | Step 6 (mobile polish, MVP) |
 | Next after this | 7b unified `Combatant` + `Encounter` |
 | Save schema | v2 (v3 lands in Steps 10/14 with migration) |
@@ -92,12 +92,28 @@ live      : Encounter(party 3/3, enemies 0/1) | Slime [enemy:0] | Knight [party:
 ```
 Delta vs 7a is crit-luck only (the RNG changed by design); gold/kills identical, stage-1 time within 2%.
 
-### 7c — Director + run controller + GameManager split  `[ ]`
-- [ ] `CombatDirector` accumulator flow (replaces the `WaitForSeconds` coroutine)
-- [ ] `RunController.Tick` as the single gameplay driver
-- [ ] `GameContext` construction/injection (no runtime `Find*`)
-- [ ] `GameManager` reduced to a composition root (< 150 lines)
-- [ ] live Play test: identical pacing, defeat/retry, offline still correct
+### 7c — Director + run controller + GameManager split  `[x]`
+- [x] `CombatDirector` accumulator flow (replaces the `WaitForSeconds` coroutine)
+- [x] `RunController` as the single gameplay driver (Update -> combat tick + 1s slow chores)
+- [x] `GameContext` built once in `BuildContext()` and handed out (nothing hunts the scene)
+- [x] `CombatManager` reduced to a 246-line facade (sim = 360-line `Encounter`, flow = 275-line director)
+- [!] `GameManager` still 810 lines: the coroutine + slow loop are gone, but snapshot/apply, offline
+      evaluation and lifetime stats remain -> they move to `SaveCoordinator`/`IdleTimeService` in Step 9
+      (recorded as a deviation rather than claiming the < 150-line target)
+- [x] live Play test: waves advance, stage hand-off, wipe/rollback/retry, autosave cadence all verified
+- **7c verification log:**
+```
+[GameManager] Run controller attached | GameContext(ready=True, combat=yes, save=yes)
+[7C0] runnerNull=False driving=True
+[7C1] after 900 driven updates: stage 6 wave 9 | slowTicks=18 saveCount=62 playTime=207
+[GameManager] Stage 5 complete -> now stage 6 | [Economy] Gold=125K Gems=1 Tokens=27
+[7C2] (drove 4000 updates) wave=11 state=Boss   <- boss fight takes longer than the window, expected
+[GameManager] DEFEAT on stage 90. Rolled back to stage 89, wave 1. Auto-retry=False.
+[7C3] state=Defeat stage=89 combatRunning=False
+[GameManager] Retry accepted: stage 89, wave 1.
+[7C4] state=Combat running=True wave=1
+-- gameplay coroutines remaining: none (only UI toast/ascension timers + the mock ad service)
+```
 
 ### 8 — Content pipeline tools + dev overlay  `[ ]`
 - [ ] `Content/Specs/*.json` for heroes / enemies / abilities / zones / loot

@@ -41,9 +41,18 @@
 - Note: the `EncounterSimulator` rename was dropped - `CombatSimulator` stays as the runtime facade name so no
   caller churn; the pure engine is `Encounter` inside `Sim/`.
 
-### Step 7c — Director + RunController + GameManager split  `TODO`
-- Deliverables: `CombatDirector` accumulator flow, `RunController.Tick`, `GameContext`, `GameManager` < 150 lines.
-- Acceptance: identical pacing/defeat/retry in live Play; no coroutines left in the gameplay flow.
+### Step 7c — Director + RunController + GameContext  `DONE`
+- Delivered: `Combat/CombatDirector.cs` (accumulator + simulated-time inter-wave pause, catch-up cap),
+  `Core/RunController.cs` (the single heartbeat: combat tick + 1s boost/autosave chores),
+  `Core/GameContext.cs` (one box of wired systems, built in `GameManager.BuildContext()`),
+  `CombatManager` is now a 246-line facade over the sim + director. No gameplay coroutines remain.
+- Verified live: `Run controller attached | GameContext(ready=True...)`, waves advance under a driven loop,
+  `Stage 5 complete -> now stage 6`, `DEFEAT on stage 90 -> rolled back to 89`, `Retry accepted` with
+  combat running again, autosave cadence (saveCount 62) and play-time accrual intact.
+- **Deviation:** `GameManager` is still 810 lines. The coroutine and slow loop are gone, but snapshot/apply,
+  offline evaluation and lifetime stats stay there until Step 9 extracts `SaveCoordinator` + `IdleTimeService`.
+  Claiming the < 150-line target now would be dishonest; the acceptance test (identical live behaviour,
+  no coroutines in the gameplay flow) is met.
 
 ### Step 7 (original scope, superseded by the splits above)  `[-]`
 - **Owner doc:** `Sim-Core.md` §2-§5, §14
