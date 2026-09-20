@@ -20,12 +20,12 @@
 | File | Covers | Status |
 |---|---|---|
 | `Architecture.md` (this) | Index, layers, boundaries, data catalog, save schema, rules, decisions | **written** |
-| `Sim-Core.md` | Pure sim: `SimContext`, `StatBlock`, `Encounter`, `Formation`, `EffectPipeline`, `AbilityRuntime`, `StatusContainer`, `SimLedger` | pending |
-| `Roadmap.md` | Ordered backlog, Step 7..N with acceptance tests + status | pending |
-| `Progression.md` | Currencies/sinks, tracks, roster/stars/shards, relics, prestige layers, automation | pending |
-| `Content.md` | Zones, walls, affixes, encounter budgets, enemy archetypes, content pipeline + validator | pending |
-| `Idle-Economy.md` | Ledger rates, offline model, bounty/expedition payouts, ads/gems/shop, anti-abuse, telemetry | pending |
-| `UI-UX.md` | Screen inventory, return hub, wall guidance, presenter pattern, prefab policy, a11y/l10n | pending |
+| `Sim-Core.md` | Pure sim: `SimContext`, `StatBlock`, `Encounter`, `Formation`, `EffectPipeline`, `AbilityRuntime`, `StatusContainer`, `SimLedger` | **written** |
+| `Roadmap.md` | Ordered backlog, Step 7-20 with acceptance tests + status board | **written** |
+| `Progression.md` | Currencies/sinks, tracks, roster/stars/shards, relics, prestige layers, automation | **written** |
+| `Content.md` | Zones, walls, affixes, encounter budgets, enemy archetypes, content pipeline + validator | **written** |
+| `Idle-Economy.md` | Ledger rates, offline model, bounty/expedition payouts, ads/gems/shop, anti-abuse, telemetry | **written** |
+| `UI-UX.md` | Screen inventory, return hub, wall guidance, presenter pattern, prefab policy, a11y/l10n | **written** |
 
 ---
 
@@ -372,10 +372,10 @@ ui             { lastScreenIndex, settings{...} }
 
 | Item | State |
 |---|---|
-| This document | written (Step 6.5) |
+| Docs | **complete** - `Architecture.md`, `Sim-Core.md`, `Progression.md`, `Content.md`, `Idle-Economy.md`, `UI-UX.md`, `Roadmap.md` |
 | Code changes | none - documentation only |
-| Next file to write | `Sim-Core.md` (pure sim design + Step 7-13 specs) |
-| Next code step | `Roadmap.md` Step 7: sim core refactor + Balance Lab v1, behaviour-identical |
+| Ready to implement | **yes** - start at `Roadmap.md` Step 7 (sim core refactor, behaviour-identical) |
+| Per-step contract | owner doc section -> one change -> recompile -> acceptance test -> docs+status -> manual test handoff |
 
 Handoff rules for the next steps: write the doc part for a system, then implement **one** small code change,
 then stop for a manual Unity test (`.clinerules` E12). Every code step must update its owning doc and the
