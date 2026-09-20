@@ -3,6 +3,10 @@
 > 2D Mobile Idle RPG (Unity 6000.6.0f1, URP 2D). iOS + Android.
 > Repo: https://github.com/sseengal/idleRPG.git
 > Last updated: Step 6 (mobile polish) - MVP complete; pending device test
+>
+> **Post-MVP design doc: `Architecture.md`** (layers, data catalog, save schema v3, decision log) +
+> the topic docs it indexes (`Sim-Core.md`, `Roadmap.md`, `Progression.md`, `Content.md`,
+> `Idle-Economy.md`, `UI-UX.md`). This file stays the MVP build journal; new work is planned there.
 
 ---
 
