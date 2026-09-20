@@ -53,6 +53,7 @@ namespace IdleRPG.EditorTools
                 ApplyBalance(balance);
                 CreateStatUpgrades();
                 CreatePrestigeUpgrades();
+                CreateCurrencies();
 
                 Debug.Log($"[DataAssetGenerator] Data assets ready (balance={balance.name}, heroes={heroes.Count}, enemies={enemies.Count}).");
             }
@@ -100,6 +101,9 @@ namespace IdleRPG.EditorTools
                 .Set("offlineCapSeconds", 28800f)
                 .Set("offlineEfficiency", 0.7f)
                 .Set("minOfflineSecondsForPopup", 30f)
+                .Set("offlineCapExtensionSeconds", 3600f)
+                .Set("offlineCapExtensionGemCost", 50d)
+                .Set("offlineCapExtensionMaxSeconds", 10800f)
                 .Set("offlineMaxEquivalentSeconds", 7200f)
                 .Set("offlineEstimatedSecondsPerKill", 3.6f)
                 .Set("startingGold", 0d)
@@ -114,6 +118,46 @@ namespace IdleRPG.EditorTools
         // ------------------------------------------------------------------
         // Content definitions
         // ------------------------------------------------------------------
+        /// <summary>
+        /// Currency rows (Step 9b). Gold/gems/tokens are live; the rest are labelled placeholders so later
+        /// steps only flip a flag rather than inventing a new concept.
+        /// </summary>
+        private static void CreateCurrencies()
+        {
+            string folder = DataRoot + "/Currencies";
+            EnsureFolder(folder);
+
+            CreateCurrency(folder, "Currency_Gold", "gold", "Gold", false, true,
+                "every kill", "hero stat levels");
+            CreateCurrency(folder, "Currency_Gems", "gems", "Gems", true, true,
+                "boss kills, milestones", "offline income cap, expeditions (Step 19)");
+            CreateCurrency(folder, "Currency_Tokens", "tokens", "Prestige Tokens", false, true,
+                "ascension", "permanent prestige tracks");
+            CreateCurrency(folder, "Currency_Shards", "shards", "Hero Shards", false, false,
+                "duplicates, boss chests, bounties (Step 17)", "star-ups and hero unlocks");
+            CreateCurrency(folder, "Currency_Materials", "materials", "Materials", false, false,
+                "zone-tier stage drops (Step 18)", "relic upgrades");
+            CreateCurrency(folder, "Currency_Essence", "essence", "Essence", false, false,
+                "transcendence (Step 18)", "L2 permanent tracks");
+            CreateCurrency(folder, "Currency_Scrolls", "scrolls", "Ability Scrolls", false, false,
+                "bosses and expeditions (Step 13)", "ability levels");
+        }
+
+        private static void CreateCurrency(string folder, string fileName, string id, string displayName,
+            bool isPremium, bool isImplemented, string earnSource, string sink)
+        {
+            CurrencyDef currency = CreateOrLoad<CurrencyDef>(folder + "/" + fileName + ".asset");
+
+            new Editable(currency)
+                .Set("currencyID", id)
+                .Set("displayName", displayName)
+                .Set("isPremium", isPremium)
+                .Set("isImplemented", isImplemented)
+                .Set("earnSource", earnSource)
+                .Set("sinkDescription", sink)
+                .Apply();
+        }
+
         private static List<HeroData> CreateHeroes()
         {
             List<HeroData> heroes = new List<HeroData>();

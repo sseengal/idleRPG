@@ -26,6 +26,9 @@ namespace IdleRPG.Save
         private readonly SimLedger ledger;
         private readonly Func<double, double> goldResolver;
 
+        /// <summary>Extra offline cap bought in the shop (seconds); set by GameManager after a load.</summary>
+        public double BonusEquivalentCapSeconds { get; set; }
+
         /// <summary>
         /// Step 9a: pays through the reward funnel (so the claim is booked as external and never pollutes the
         /// earning rate) and reads its rate from the ledger.
@@ -156,7 +159,9 @@ namespace IdleRPG.Save
             double cap = balanceConfig != null ? balanceConfig.OfflineCapSeconds : awaySeconds;
             double wallSeconds = Math.Min(awaySeconds, cap);
 
-            double equivalentCap = balanceConfig != null ? balanceConfig.OfflineMaxEquivalentSeconds : wallSeconds;
+            // Shop purchases raise the equivalent cap: that is the cap that actually limits a payout.
+            double equivalentCap = (balanceConfig != null ? balanceConfig.OfflineMaxEquivalentSeconds : wallSeconds)
+                                   + (BonusEquivalentCapSeconds < 0d ? 0d : BonusEquivalentCapSeconds);
             double paidSeconds = Math.Min(wallSeconds, equivalentCap);
 
             double rate = ResolveRate(stage, savedGoldPerSecond);

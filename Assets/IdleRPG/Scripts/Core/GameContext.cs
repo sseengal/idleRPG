@@ -41,6 +41,8 @@ namespace IdleRPG.Core
 
         public RewardService Rewards { get; set; }
 
+        public ShopService Shop { get; set; }
+
         public SaveManager Save { get; set; }
 
         public OfflineProgressManager Offline { get; set; }

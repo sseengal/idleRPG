@@ -23,4 +23,4 @@ MonoBehaviour:
   attackIntervalSec: 1.8
   bossHealthMultiplier: 1
   bossGoldMultiplier: 1
-  placeholderTint: {r: 0.4, g: 0.7490196, b: 0.34901962, a: 1}
+  placeholderTint: {r: 0.4, g: 0.75, b: 0.35, a: 1}

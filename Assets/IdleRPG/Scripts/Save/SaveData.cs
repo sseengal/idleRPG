@@ -106,6 +106,12 @@ namespace IdleRPG.Save
         // --- Permanent upgrades ---
         public List<PrestigeUpgradeRecord> prestigeUpgrades = new List<PrestigeUpgradeRecord>();
 
+        // --- Shop purchases (schema v2 additive: older files simply default to 0) ---
+        /// <summary>Extra seconds of offline income cap bought with gems (the gem sink).</summary>
+        public double offlineEquivalentCapBonusSeconds;
+
+        public int offlineCapExtensionsPurchased;
+
         // --- Boosts ---
         public bool goldBoostActive;
         public double goldBoostExpiresAtBinary;
@@ -192,6 +198,12 @@ namespace IdleRPG.Save
                 lastPageIndex = 0;
             }
 
+            if (offlineCapExtensionsPurchased < 0)
+            {
+                offlineCapExtensionsPurchased = 0;
+            }
+
+            offlineEquivalentCapBonusSeconds = Progression.FormulaUtility.Sanitize(offlineEquivalentCapBonusSeconds);
             totalGoldEarned = Progression.FormulaUtility.Sanitize(totalGoldEarned);
             playTimeSeconds = Progression.FormulaUtility.Sanitize(playTimeSeconds);
             gold = Progression.FormulaUtility.Sanitize(gold);

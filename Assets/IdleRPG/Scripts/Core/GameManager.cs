@@ -128,6 +128,9 @@ namespace IdleRPG.Core
         /// <summary>The single payout till: multipliers + wallet + ledger receipt.</summary>
         public RewardService Rewards { get; private set; }
 
+        /// <summary>Gem sinks (Step 9b: the offline income cap extension).</summary>
+        public ShopService Shop { get; private set; }
+
         /// <summary>Offline earnings: caps, rate and the claim guard.</summary>
         public OfflineProgressManager Offline { get; private set; }
 
@@ -263,6 +266,7 @@ namespace IdleRPG.Core
 
             Ledger = new SimLedger(balanceConfig != null ? balanceConfig.GoldPerSecondSampleWindowSec : 60f);
             Rewards = new RewardService(Economy, Ledger, ResolveGoldReward);
+            Shop = new ShopService(balanceConfig, Economy);
 
             Save = new SaveManager(new SaveSystem(), balanceConfig, CaptureSnapshot);
             LoadedFromSave = Save.TryLoad(out SaveData loaded);
@@ -296,7 +300,10 @@ namespace IdleRPG.Core
                 combatManager.SetStage(CurrentStage, healParty: true);
             }
 
-            Offline = new OfflineProgressManager(balanceConfig, waveConfig, Rewards, Ledger, ResolveGoldReward);
+            Offline = new OfflineProgressManager(balanceConfig, waveConfig, Rewards, Ledger, ResolveGoldReward)
+            {
+                BonusEquivalentCapSeconds = Shop != null ? Shop.OfflineCapBonusSeconds : 0d
+            };
             Offline.Attach();
             Offline.RewardPaid += OnOfflineRewardPaid;
 
@@ -695,6 +702,8 @@ namespace IdleRPG.Core
                 data.lastGoldPerSecond = Ledger.GoldPerSecond;
             }
 
+            Shop?.WriteToSave(data);
+
             data.totalKills = TotalKills;
             data.totalGoldEarned = TotalGoldEarned;
             data.ascensionCount = AscensionCount;
@@ -725,6 +734,7 @@ namespace IdleRPG.Core
             Resolver?.FillFromSave(data, partyConfig);
             Boost?.Restore(data.goldBoostActive, data.goldBoostExpiresAtBinary);
             Ledger?.SeedGoldPerSecond(data.lastGoldPerSecond);
+            Shop?.Restore(data.offlineEquivalentCapBonusSeconds, data.offlineCapExtensionsPurchased);
 
             // Give the loaded values to combat (Initialize() would reset the stage to 1).
             combatManager.SetProgress(CurrentStage, RestoredWave, healParty: true);
@@ -804,6 +814,7 @@ namespace IdleRPG.Core
                 Ads = Ads,
                 Ledger = Ledger,
                 Rewards = Rewards,
+                Shop = Shop,
                 Save = Save,
                 Offline = Offline
             };

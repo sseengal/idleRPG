@@ -42,6 +42,9 @@ MonoBehaviour:
   offlineMaxEquivalentSeconds: 7200
   offlineEstimatedSecondsPerKill: 3.6
   minOfflineSecondsForPopup: 30
+  offlineCapExtensionSeconds: 3600
+  offlineCapExtensionGemCost: 50
+  offlineCapExtensionMaxSeconds: 10800
   startingGold: 0
   startingGems: 0
   goldPerSecondSampleWindowSec: 60

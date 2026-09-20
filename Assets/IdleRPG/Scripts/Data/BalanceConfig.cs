@@ -136,6 +136,15 @@ namespace IdleRPG.Data
         [Tooltip("Seconds to ignore. Prevents instant popups after a quick app switch.")]
         [SerializeField] private float minOfflineSecondsForPopup = 30f;
 
+        [Tooltip("Gem sink: seconds of extra offline income cap per purchase (3600 = +1h).")]
+        [SerializeField] private float offlineCapExtensionSeconds = 3600f;
+
+        [Tooltip("Gem sink: how much extra cap one purchase costs.")]
+        [SerializeField] private double offlineCapExtensionGemCost = 50d;
+
+        [Tooltip("Gem sink: ceiling on the total extra cap (10800 = +3h).")]
+        [SerializeField] private float offlineCapExtensionMaxSeconds = 10800f;
+
         // ------------------------------------------------------------------
         // Economy & monetisation
         // ------------------------------------------------------------------
@@ -222,6 +231,12 @@ namespace IdleRPG.Data
         public float OfflineEstimatedSecondsPerKill => Mathf.Max(0.1f, offlineEstimatedSecondsPerKill);
 
         public float MinOfflineSecondsForPopup => Mathf.Max(0f, minOfflineSecondsForPopup);
+
+        public float OfflineCapExtensionSeconds => Mathf.Max(60f, offlineCapExtensionSeconds);
+
+        public double OfflineCapExtensionGemCost => offlineCapExtensionGemCost < 0d ? 0d : offlineCapExtensionGemCost;
+
+        public float OfflineCapExtensionMaxSeconds => Mathf.Max(0f, offlineCapExtensionMaxSeconds);
 
         public double StartingGold => startingGold < 0d ? 0d : startingGold;
 

@@ -23,6 +23,14 @@ namespace IdleRPG.Save
 
         public string BackupPath => SavePath + ".bak";
 
+        /// <summary>How many rolling backups to keep (G6: idle saves live for months).</summary>
+        public const int BackupCount = 3;
+
+        public string BackupPathFor(int index)
+        {
+            return index <= 0 ? BackupPath : BackupPath + index;
+        }
+
         /// <summary>True when the last load had to fall back to the backup file.</summary>
         public bool RecoveredFromBackup { get; private set; }
 
@@ -47,11 +55,14 @@ namespace IdleRPG.Save
                 QuarantineCorruptFile();
             }
 
-            if (TryRead(BackupPath, out data))
+            for (int i = 0; i < BackupCount; i++)
             {
-                RecoveredFromBackup = true;
-                Debug.LogWarning("[SaveSystem] Primary save unusable; recovered the backup.");
-                return true;
+                if (TryRead(BackupPathFor(i), out data))
+                {
+                    RecoveredFromBackup = true;
+                    Debug.LogWarning($"[SaveSystem] Primary save unusable; recovered backup {i}.");
+                    return true;
+                }
             }
 
             data = null;
@@ -97,9 +108,12 @@ namespace IdleRPG.Save
                     File.Delete(SavePath);
                 }
 
-                if (File.Exists(BackupPath))
+                for (int i = 0; i < BackupCount; i++)
                 {
-                    File.Delete(BackupPath);
+                    if (File.Exists(BackupPathFor(i)))
+                    {
+                        File.Delete(BackupPathFor(i));
+                    }
                 }
 
                 return true;
@@ -145,12 +159,35 @@ namespace IdleRPG.Save
             }
         }
 
+        /// <summary>
+        /// Writes the temp file into place, rolling the old files down: .bak -> .bak2 -> .bak3.
+        ///
+        /// ELI5: instead of keeping one spare copy, keep three - each one generation older. An idle save is
+        /// played for months, so being able to step back two saves is worth a few extra kilobytes.
+        /// </summary>
         private void ReplaceWithBackup(string tempPath)
         {
+            if (File.Exists(BackupPathFor(BackupCount - 1)))
+            {
+                File.Delete(BackupPathFor(BackupCount - 1));
+            }
+
+            for (int i = BackupCount - 2; i >= 1; i--)
+            {
+                if (File.Exists(BackupPathFor(i)))
+                {
+                    File.Move(BackupPathFor(i), BackupPathFor(i + 1));
+                }
+            }
+
+            if (File.Exists(BackupPath))
+            {
+                File.Move(BackupPath, BackupPathFor(1));
+            }
+
             if (File.Exists(SavePath))
             {
-                File.Copy(SavePath, BackupPath, true);
-                File.Delete(SavePath);
+                File.Move(SavePath, BackupPath);
             }
 
             File.Move(tempPath, SavePath);

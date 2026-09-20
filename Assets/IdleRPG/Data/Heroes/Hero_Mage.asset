@@ -19,4 +19,4 @@ MonoBehaviour:
   baseAttack: 16
   baseDefense: 5
   attackIntervalSec: 2
-  placeholderTint: {r: 0.7490196, g: 0.4, b: 0.9490196, a: 1}
+  placeholderTint: {r: 0.75, g: 0.4, b: 0.95, a: 1}

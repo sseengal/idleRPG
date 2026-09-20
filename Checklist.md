@@ -11,7 +11,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **9b** currencies + gem sinks + `IdleTimeService` + backup rotation (9a done) |
+| Current step | **9b-2** `IdleTimeService` + instant-income sink (9b-1 done) |
 | Last completed | Step 6 (mobile polish, MVP) |
 | Next after this | 7b unified `Combatant` + `Encounter` |
 | Save schema | v2 (v3 lands in Steps 10/14 with migration) |
@@ -177,7 +177,35 @@ G5: intermittent - "Combat tick threw; skipping it and saving" (failures=13, ena
   splitting `GrantGold` (compute+pay) from `GrantQuotedGold` (pay the receipt verbatim) so the class of bug is
   impossible rather than just corrected.
 
-### 9b — Currencies, sinks, IdleTimeService  `[ ]`
+### 9b-1 — Currencies + gem sink + backup rotation  `[x]`
+- [x] `Data/CurrencyDef.cs` (id, display, icon, isPremium, **isImplemented**, earnSource, sinkDescription)
+- [x] 7 currency assets generated: gold/gems/tokens live; shards/materials/essence/scrolls are labelled
+      placeholders so later steps flip a flag instead of inventing a concept
+- [x] **gem sink**: `Economy/ShopService.cs` trades gems for extra offline income cap (`+1h`, 50 gems,
+      max `+3h`); BalanceConfig knobs `offlineCapExtensionSeconds/GemCost/MaxSeconds`
+- [x] offline calculator honours the purchase (`BonusEquivalentCapSeconds`), saved as
+      `offlineEquivalentCapBonusSeconds` + `offlineCapExtensionsPurchased` (schema v2 additive, no migration)
+- [x] shop UI row built **in code** inside the existing shop panel (placeholder styling; Step 19 redesigns it,
+      and no scene rebuild was needed)
+- [x] **G6**: `SaveSystem` now rotates 3 backups (`.bak`, `.bak1`, `.bak2`) and the recovery path walks them
+- [x] verified live: offer `'+60 min offline income - 50 gems'` -> bought -> cap 0 -> 3600s, gems 201 -> 151;
+      **9h away paid 10800s (2h base + 1h bought)** instead of 7200s; 3 purchases max out (`offline cap is
+      maxed`, 4th refused); save contains `capBonusSeconds: 10800.0, purchases: 3`; files on disk:
+      `savegame.json`, `.bak`, `.bak1`, `.bak2`
+- **Design note:** the shop raises the *equivalent* cap, not the 8h wall clock - the equivalent cap is what
+      actually limits a payout, so raising the wall clock would have been a purchase with no effect
+
+### 9b-2 — IdleTimeService (+ instant-income sink)  `[ ]`
+- [ ] `IdleTimeService` absorbs `OfflineProgressManager` ownership of time-based payouts (offline, later
+      expeditions/bounties) behind one interface and one set of caps/tamper guards
+- [ ] second gem sink: instant income ("fast-forward", `rate x 1h x 0.7`, external so it cannot inflate rates)
+- [ ] `OfflineCapExtension` placeholder audio/icon hooks come with the Step 9b presentation pass
+
+### 9b-3 — Placeholder presentation hooks (audio + icons)  `[ ]`
+- [ ] `IAudioService` + `PlaceholderAudioService` + event-driven SFX cues + volume/mute stub
+- [ ] `PlaceholderSpriteGenerator` extended for currencies/abilities/relics
+
+### 9b (original scope)  `[-]`
 - [ ] `CurrencyDef` rows (gold, gems, tokens, shards, materials, essence, scrolls)
 - [ ] **placeholder presentation hooks** (audio service + icons) - see `Roadmap.md` Step 9b
 - [ ] `EconomyService` single reward funnel + ledger writes

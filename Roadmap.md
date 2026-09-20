@@ -186,7 +186,16 @@
 
 ## 4. Depth, money, polish
 
-### Step 9b — Placeholder presentation hooks (audio + icons)  `TODO`
+### Step 9b-1 — Currencies + gem sink + backup rotation  `DONE`
+- Delivered: `CurrencyDef` + 7 currency assets, `ShopService` (gems -> extra offline income cap), BalanceConfig
+  knobs, save fields, offline calculator honouring the purchase, code-built shop row, `SaveSystem` 3-backup
+  rotation.
+- Verified live: bought +1h for 50 gems; a 9h absence paid **10800s** (2h base + 1h bought) vs 7200s before;
+  max-out refuses the 4th purchase; save round-trips the bonus; 4 save files on disk (.json/.bak/.bak1/.bak2).
+
+### Step 9b-2 — `IdleTimeService` + instant-income sink  `TODO`
+
+### Step 9b-3 — Placeholder presentation hooks (audio + icons)  `TODO`
 - **Goal:** every place that *should* make a noise or show an icon gets the hook now, with placeholder assets;
   the real polish (sound design, final art, animations) stays in Step 20.
 - **Deliverables:** `IAudioService` + `PlaceholderAudioService` (procedurally generated beeps/clicks or silent

@@ -136,7 +136,7 @@ TelemetryFeed (ring buffer, ~200 entries, no allocation in the loop)
 | `offlineMaxEquivalentSeconds` | `BalanceConfig` | 7200 (locked) |
 | `offlineEfficiency` | `BalanceConfig` | 0.7 (locked) |
 | `minOfflineSecondsForPopup` | `BalanceConfig` | 30 |
-| extra offline cap hours | shop/gems | +2h per purchase, cap +4h total |
+| extra offline **equivalent** cap | shop/gems | +1h per purchase (50 gems), max +3h - applied to the equivalent cap, since that is the cap that actually limits a payout (Step 9b-1) |
 | `expeditionDurationOptions` | `ExpeditionDef` | 1h / 4h / 8h |
 | `bountyChoicesOffered` | `BountyDef` | 3 |
 | ad daily caps | `AdPlacementDef` | per placement, see §5 |
