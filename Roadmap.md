@@ -123,7 +123,9 @@
     per-slot/team-size unlocks, back-row damage reduction, per-hero `role`/`targetRule`, simulator/manager wiring,
     validator coverage. Verified: tank to back row -> enemy hits the new front-most; back-row hit x0.75 exactly;
     exposed when the front row is empty; golden numbers unchanged.
-  - **10b `TODO`** - save v3 + `SaveMigrations.v2ToV3` + `partySlots` round-trip drift check.
+  - **10b `DONE`** - save v3 + `partySlots` + `SaveMigrations.v2ToV3` + a save round-trip drift tool
+    (`Save > Round-Trip Drift Test`). Verified: the layout survives a real relaunch, the dirty flag fires on a
+    swap, and an older v2 file upgrades additive-only with 0 lines lost.
   - **10c `TODO`** - Team screen (roster/board/swap/auto-arrange/presets) + battle formation strip;
     delete `DesiredPartySize` and the fixed `heroViews[]`; validator coverage.
 - **Blocked by:** Steps 7, 8. **Risk:** schema v3 migration - test against the existing v2 save.

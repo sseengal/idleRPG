@@ -235,6 +235,11 @@ namespace IdleRPG.Core
                 Idle.Detach();
             }
 
+            if (Formation != null)
+            {
+                Formation.Changed -= OnFormationChanged;
+            }
+
             if (Resolver != null)
             {
                 Resolver.StatsChanged -= OnStatsChanged;
@@ -288,6 +293,19 @@ namespace IdleRPG.Core
             Rewards = new RewardService(Economy, Ledger, ResolveGoldReward);
             Shop = new ShopService(balanceConfig, Economy);
 
+            // Step 10a/10b: the board the party stands on. Created **before** the load so a saved layout can be
+            // restored into it; with no saved layout the default placement (the MVP's fixed lanes) is used, so a
+            // fresh game - and an upgraded v2 save - behaves exactly as before.
+            if (formationConfig != null)
+            {
+                Formation = new Formation(formationConfig);
+                Formation.PlaceInDefaultSlots(partyConfig.ValidHeroCount, 1);
+
+                // Any swap (the Team screen in Step 10c, or a debug tool) marks the save dirty; Save is null
+                // during this first placement, which the null-conditional handles.
+                Formation.Changed += OnFormationChanged;
+            }
+
             Save = new SaveManager(new SaveSystem(), balanceConfig, CaptureSnapshot);
             LoadedFromSave = Save.TryLoad(out SaveData loaded);
 
@@ -300,14 +318,6 @@ namespace IdleRPG.Core
                     // Rewrite straight away so the damaged file is replaced by good data.
                     Save.SaveNow("recovery");
                 }
-            }
-
-            // Step 10a: the board the party stands on. Default placement = the MVP's fixed lanes, so a fresh
-            // game behaves exactly as before until the player moves somebody.
-            if (formationConfig != null)
-            {
-                Formation = new Formation(formationConfig);
-                Formation.PlaceInDefaultSlots(partyConfig.ValidHeroCount, 1);
             }
 
             if (!combatManager.Initialize(balanceConfig, waveConfig, partyConfig, Formation))
@@ -734,6 +744,16 @@ namespace IdleRPG.Core
             return fromSave;
         }
 
+        /// <summary>
+        /// A board change is real progress: write it on the next autosave **and** re-stamp the live fight, so a
+        /// swap always takes effect on the next swing (no caller has to remember to call ApplyFormation).
+        /// </summary>
+        private void OnFormationChanged()
+        {
+            Save?.MarkDirty("formation");
+            combatManager?.Simulator?.ApplyFormation();
+        }
+
         private void OnIdleRewardPaid(double gold)
         {
             // Both time payouts land here: the offline claim and a bought fast-forward.
@@ -810,6 +830,11 @@ namespace IdleRPG.Core
 
             Shop?.WriteToSave(data);
 
+            if (Formation != null)
+            {
+                data.partySlots = new List<int>(Formation.ToSlotArray());
+            }
+
             data.totalKills = TotalKills;
             data.totalGoldEarned = TotalGoldEarned;
             data.ascensionCount = AscensionCount;
@@ -824,6 +849,12 @@ namespace IdleRPG.Core
             if (data == null)
             {
                 return;
+            }
+
+            // Formation first: the board has to be right before the party is built from it.
+            if (Formation != null && data.partySlots != null && data.partySlots.Count > 0)
+            {
+                Formation.ApplySlotArray(data.partySlots.ToArray());
             }
 
             CurrentStage = Mathf.Max(1, data.currentStage);

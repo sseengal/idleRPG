@@ -11,7 +11,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **10b** save v3 + `partySlots` persistence (10a done, 10c UI) |
+| Current step | **10c** Team screen + battle formation strip (10a, 10b done) |
 | Last completed | Step 6 (mobile polish, MVP) |
 | Next after this | 7b unified `Combatant` + `Encounter` |
 | Save schema | v2 (v3 lands in Steps 10/14 with migration) |
@@ -285,9 +285,27 @@ G5: intermittent - "Combat tick threw; skipping it and saving" (failures=13, ena
       `slotUnlockStages` (5 of 6 slots open from stage 1) and `teamSizeUnlockStages` (3 -> 4 @ stage 21 -> 5 @
       stage 41, per `Progression.md`) are separate, so the acceptance test works at stage 1
 
-### 10b — Save v3 + `partySlots` persistence  `[ ]`
-- [ ] save **v3** + `SaveMigrations.v2ToV3` (`partySlots`, keyed `statLevels`, `currency[]`, `tracks[]`)
-- [ ] formation survives reload; round-trip drift check (export -> generate -> export byte-identical)
+### 10b — Save v3 + `partySlots` persistence  `[x]`
+- [x] `SaveData.CurrentVersion = 3` + `List<int> partySlots` (slot -> party index, -1 = empty). An **empty list**
+      means "no layout saved", which the game reads as the default front row - so a v2 file plays exactly as before
+- [x] `SaveMigrations.v2ToV3`: keeps every value, adds an empty board (it must not invent a layout), logs the
+      upgrade; v1 still lands on the current schema
+- [x] `GameManager`: the board is created **before** the load so `ApplySnapshot` can restore it, `CaptureSnapshot`
+      writes it, and `Formation.Changed` marks the save dirty **and** re-stamps the live fight (a swap takes
+      effect on the next swing without any caller remembering to call `ApplyFormation`)
+- [x] `Editor/SaveRoundTripMenu.cs`: drift test (serialise -> parse -> serialise, byte-identical) for a default
+      and a fully-populated payload, v1/v2 migration checks, and a real-file check (upgraded file stable +
+      **additive-only**: every line that existed on disk is still present)
+- [x] **verified live**: moved the tank to the back-left slot -> save file shows `partySlots: [-1,1,2,0,-1,-1]`,
+      `schemaVersion 3`; **relaunched Play** -> `loadedFromSave=True`, `board=front[- 1 2] back[0 - -]`,
+      `rows=Knight[Back/col0]`; dirty flag `False -> True` on a swap; swap auto-changed the Knight's row with no
+      manual call
+- [x] drift on the real save: `file savegame.json: v3 -> v3, stable, additive-only (1513 -> 1513 chars, 6 slot(s), 0 line(s) lost)`;
+      the *pre-10b* file was v2 and upgraded `v2 -> v3 ... 0 line(s) lost`
+- [x] regression: content validator clean, golden numbers unchanged (74s@x1.0 / 120s@x1.6, 272 gold)
+- **Note:** the keyed `statLevels` / `currency[]` / `tracks[]` shape listed in the plan is deliberately **not** part
+      of v3 - nothing needs it yet, and reshaping live data would risk the very saves the step is protecting. It
+      lands with the systems that need it (relics/abilities), as an additive migration of its own
 
 ### 10c — Team screen + battle formation strip  `[ ]`
 - [ ] Team screen: roster grid, formation board, tap-swap, auto-arrange, presets

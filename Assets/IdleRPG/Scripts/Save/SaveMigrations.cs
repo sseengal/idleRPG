@@ -1,10 +1,11 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace IdleRPG.Save
 {
     /// <summary>
-    /// Upgrades older save payloads to the current schema. Every step must be additive-safe:
-    /// a v1 file has no lifetime stats, and the defaults (0) are correct for them.
+    /// Upgrades older save payloads to the current schema. Every step must be additive-safe: a v1 file has no
+    /// lifetime stats (0 is correct), and a v2 file has no party board (empty means "default front row").
     /// </summary>
     public static class SaveMigrations
     {
@@ -41,6 +42,18 @@ namespace IdleRPG.Save
                 data.saveCount = Mathf.Max(0, data.saveCount);
                 data.lastPageIndex = Mathf.Max(0, data.lastPageIndex);
                 Debug.Log("[SaveMigrations] Migrated save v1 -> v2 (lifetime stats added).");
+            }
+
+            if (version < 3)
+            {
+                // v2 -> v3: the party board was added (Step 10b). An empty layout is deliberate: the game reads
+                // "no layout" as the default front-row placement, so an upgraded save plays exactly as it did.
+                if (data.partySlots == null)
+                {
+                    data.partySlots = new List<int>();
+                }
+
+                Debug.Log($"[SaveMigrations] Migrated save v2 -> v3 (formation; {data.partySlots.Count} slot(s) recorded).");
             }
 
             data.schemaVersion = SaveData.CurrentVersion;

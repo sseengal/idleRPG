@@ -120,8 +120,9 @@ The list above is generated from `DebugHotkeyCatalog`; the same legend is printe
 
 **Editor menus** — see the Quick start table; `Save > Fake 3h Offline` offers the popup on the next
 launch, and `Debug > Log Live State` dumps the running game without touching the UI.
-`Save > Reset Game Completely` is the same fresh-install wipe as `F8`, and `Debug > Log Hotkeys` prints the list
-above.
+`Save > Reset Game Completely` is the same fresh-install wipe as `F8`, `Debug > Log Hotkeys` prints the list above,
+and `Save > Round-Trip Drift Test` proves the save schema still round-trips (and that older files upgrade without
+losing a field).
 
 **Placeholder presentation (Step 9b-3)** — SFX are procedural tones (`PlaceholderAudioService`, no audio files);
 volume and mute persist in PlayerPrefs and are wiped by a full reset. Currency icons are generated PNGs wired

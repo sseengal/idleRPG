@@ -346,6 +346,8 @@ ui             { lastScreenIndex, settings{...} }
 | B14 | Instant income (gems -> `seconds x rate x 0.7`) is booked external so buying gold never raises the measured rate | 9b | Locked |
 | B15 | Gameplay never calls audio directly: `AudioDirector` maps events -> cues, so Step 20 swaps clips without touching logic | 9b-3 | **Landed 9b-3** |
 | B16 | `ResetGame()` = fresh install (save + backups + prefs + scene reload); `DeleteSave()` only removes the file | 9b-4 | **Landed 9b-4** |
+| B17 | Save schema v3 adds `partySlots`; an empty layout means "default front row", so upgraders keep their behaviour | 10b | **Landed 10b** |
+| B18 | A schema change ships with a migration **and** an exporter/importer drift check (`Save > Round-Trip Drift Test`) | 10b | Locked |
 | B14 | Codex/bestiary doubles as the difficulty-hint system | 18 | Locked |
 
 ### 6.4 Removals / avoid

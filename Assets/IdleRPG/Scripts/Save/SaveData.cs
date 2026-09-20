@@ -85,7 +85,7 @@ namespace IdleRPG.Save
     public class SaveData
     {
         /// <summary>Bumped whenever the schema changes; drives migration (see SaveMigrations).</summary>
-        public const int CurrentVersion = 2;
+        public const int CurrentVersion = 3;
 
         public int schemaVersion = CurrentVersion;
 
@@ -97,6 +97,14 @@ namespace IdleRPG.Save
 
         // --- Heroes ---
         public List<HeroProgressRecord> heroes = new List<HeroProgressRecord>();
+
+        // --- Formation (schema v3, additive) ---
+        /// <summary>
+        /// Who stands in which board slot: one entry per slot, holding the party index (0-based) or -1 for an
+        /// empty slot. An empty list means "no layout saved" (old files), which the game reads as the default
+        /// front-row placement - so a v2 save loads exactly as it played before formation existed.
+        /// </summary>
+        public List<int> partySlots = new List<int>();
 
         // --- Currency ---
         public double gold;
@@ -140,6 +148,7 @@ namespace IdleRPG.Save
                 highestStageReached = 1,
                 autoRetryEnabled = true,
                 heroes = new List<HeroProgressRecord>(),
+                partySlots = new List<int>(),
                 prestigeUpgrades = new List<PrestigeUpgradeRecord>(),
                 gold = 0d,
                 gems = 0d,
