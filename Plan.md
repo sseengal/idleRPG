@@ -623,6 +623,11 @@ release-signing identity. Bundle ids can be changed at any time before the first
   use `FindObjectsByType(..., FindObjectsInactive.Include, ...)` in probes/tools.
 - **`/Builds/` is gitignored** (local player builds are ~90 MB). Rebuild with MCP `build` or
   `File > Build Settings`.
+- **A brand-new editor script can be invisible to the compiler** (symptom: `error CS0103: The name 'X' does
+  not exist` while the file is valid, `MonoScript` loads but `GetClass()` returns null, and no error is reported
+  *inside* the new file). Unity's incremental script list missed the file even after
+  `AssetDatabase.Refresh(ForceUpdate)` + `RequestScriptCompilation()`. Fix: delete the `.cs` **and** its `.meta`,
+  refresh, write the file back (fresh GUID), then recompile. Seen in Step 8a with `ContentSpecIO.cs`.
 - **Do not recompile while in Play mode.** Unity reloads scripts mid-session and the reloaded
   `GameManager` can come back with `Save`/`Offline` unset (`saveNull=True` in a probe) because `Awake`
   ran against a half-loaded scene. Exit Play, recompile, then Play again.
