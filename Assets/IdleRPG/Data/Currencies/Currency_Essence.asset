@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.CurrencyDef
   currencyID: essence
   displayName: Essence
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 3fd2f2d93f5f54235a4afd11fbc7788c, type: 3}
   isPremium: 0
   isImplemented: 0
   earnSource: transcendence (Step 18)

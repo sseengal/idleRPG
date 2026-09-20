@@ -38,10 +38,12 @@ namespace IdleRPG.Debugging
             new DebugHotkeyEntry("B", "watch ad for the gold boost"),
             new DebugHotkeyEntry("A / R / S", "ascend / retry after defeat / skip a stage"),
             new DebugHotkeyEntry("F", "buy instant income (gem sink)"),
+            new DebugHotkeyEntry("M", "mute / unmute placeholder SFX"),
             new DebugHotkeyEntry("L", "log live state to the console"),
             new DebugHotkeyEntry("F3", "toggle this overlay"),
             new DebugHotkeyEntry("F5", "save now"),
-            new DebugHotkeyEntry("F9", "delete the save"),
+            new DebugHotkeyEntry("F8", "FULL RESET (save + backups + prefs + reload)"),
+            new DebugHotkeyEntry("F9", "delete the save file only"),
             new DebugHotkeyEntry("F10", "rewind the logout clock 3h and re-run the payout"),
         };
 

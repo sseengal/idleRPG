@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.CurrencyDef
   currencyID: gold
   displayName: Gold
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 57aa0bc44cb934ec4be988e932d67627, type: 3}
   isPremium: 0
   isImplemented: 1
   earnSource: every kill

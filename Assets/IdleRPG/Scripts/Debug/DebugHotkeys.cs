@@ -135,6 +135,12 @@ namespace IdleRPG.Debugging
                 Log($"Skipped to stage {nextStage}.");
             }
 
+            if (keyboard.mKey.wasPressedThisFrame)
+            {
+                bool muted = gameManager.Audio.ToggleMuted();
+                Log($"SFX {(muted ? "muted" : "unmuted")} (M) at {gameManager.Audio.Describe()}.");
+            }
+
             if (keyboard.lKey.wasPressedThisFrame)
             {
                 LogStatus();
@@ -150,6 +156,13 @@ namespace IdleRPG.Debugging
             {
                 gameManager.DeleteSave();
                 Log("Save deleted (F9). Progress stays in memory until the next save.");
+            }
+
+            if (keyboard.f8Key.wasPressedThisFrame)
+            {
+                // Fresh install: disk state wiped, PlayerPrefs wiped, scene reloaded (F9 only deletes the file).
+                bool reset = gameManager.ResetGame();
+                Log(reset ? "Full reset (F8): save + backups + prefs wiped, scene reloading." : "Full reset (F8): disk wiped, reload refused.");
             }
 
             if (keyboard.f10Key.wasPressedThisFrame)

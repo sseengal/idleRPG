@@ -117,7 +117,7 @@ Rules:
 | `Progression/` | Tracks, upgrades, prestige layers, automation rules | Cost curves + purchase logic |
 | `Economy/` | Currencies, boosts, ledger, reward funnel | One funnel, one ledger |
 | `Save/` | `SaveData` v3, mapper, migrations, system, `IdleTimeService` | IO + schema only, `IdleTimeService` is the only reader of wall-clock time |
-| `Services/` | Ads, telemetry, asset provider, platform | External boundaries behind interfaces |
+| `Services/` | Ads, audio (`IAudioService` + placeholder), telemetry, asset provider, platform | External boundaries behind interfaces |
 | `UI/` | Views, presenters, widgets, factories | No gameplay state |
 | `Debug/` | Hotkeys, loggers, dev overlay (F3) | Stripped from release builds |
 | `Editor/` | Builders, Balance Lab, validators, debug menus | Editor-only code lives only here |
@@ -148,6 +148,7 @@ GameContext
   Economy: EconomyService   Progression: ProgressionService   Roster: RosterService
   Combat: CombatDirector    Save: SaveCoordinator             Offline: OfflineCoordinator
   Time: GameClock           Ads: IAdService                   Telemetry: ITelemetry
+  Audio: IAudioService (placeholder tones) -> driven by AudioDirector (events -> cues)
   Assets: IAssetProvider    Ui: UiContext (screen stack, toast, popup host)
 ```
 
@@ -342,7 +343,9 @@ ui             { lastScreenIndex, settings{...} }
 | B11 | Battery mode: 30fps + trimmed VFX while idling | 20 | Locked |
 | B12 | Localization keys + colorblind-safe log colours from day one | 20 | Locked |
 | B13 | `IdleTimeService` owns every time-based payout (offline, expedition, bounty) with caps + tamper guards | 9 | **Landed 9b-2** |
-| B14 | Instant income (gems -> `seconds x rate x x0.7`) is booked external so buying gold never raises the measured rate | 9b | Locked |
+| B14 | Instant income (gems -> `seconds x rate x 0.7`) is booked external so buying gold never raises the measured rate | 9b | Locked |
+| B15 | Gameplay never calls audio directly: `AudioDirector` maps events -> cues, so Step 20 swaps clips without touching logic | 9b-3 | **Landed 9b-3** |
+| B16 | `ResetGame()` = fresh install (save + backups + prefs + scene reload); `DeleteSave()` only removes the file | 9b-4 | **Landed 9b-4** |
 | B14 | Codex/bestiary doubles as the difficulty-hint system | 18 | Locked |
 
 ### 6.4 Removals / avoid

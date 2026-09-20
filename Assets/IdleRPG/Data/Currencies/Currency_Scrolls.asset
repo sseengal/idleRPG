@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.CurrencyDef
   currencyID: scrolls
   displayName: Ability Scrolls
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 7303e9b0c68d6494db3a5ccbac3886a1, type: 3}
   isPremium: 0
   isImplemented: 0
   earnSource: bosses and expeditions (Step 13)

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.CurrencyDef
   currencyID: tokens
   displayName: Prestige Tokens
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 7dcca1029866c482b81df21b24c541dd, type: 3}
   isPremium: 0
   isImplemented: 1
   earnSource: ascension

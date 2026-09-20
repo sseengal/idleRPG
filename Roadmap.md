@@ -205,7 +205,16 @@
 - One catalogue (`DebugHotkeyCatalog`) feeds the F3 overlay legend and a debug menu printer; new `C` (gems) and
   `F` (instant income) keys added. Overlay panels auto-fit so the legend never overlaps the stats.
 
-### Step 9b-3 — Placeholder presentation hooks (audio + icons)  `TODO`
+### Step 9b-4 — Full reset (`F8`)  `DONE`
+- `GameManager.ResetGame()` wipes save + backups + PlayerPrefs and reloads the scene (fresh install); hotkey `F8`
+  and a Save menu item call the same method. Verified live end to end.
+
+### Step 9b-3 — Placeholder presentation hooks (audio + icons)  `DONE`
+- Delivered: `IAudioService`/`SfxCue`, `PlaceholderAudioService` (procedural tones, no asset files, PlayerPrefs
+  volume/mute), `AudioDirector` (events -> cues with throttles), 4 new currency icons wired onto all 7
+  `CurrencyDef` assets.
+- Verified live: 10 cue paths through the real event bus; silent normal spawns stay silent; mute persists;
+  validator + golden numbers clean. Key presses need Editor focus (frames do not tick when backgrounded).
 - **Goal:** every place that *should* make a noise or show an icon gets the hook now, with placeholder assets;
   the real polish (sound design, final art, animations) stays in Step 20.
 - **Deliverables:** `IAudioService` + `PlaceholderAudioService` (procedurally generated beeps/clicks or silent

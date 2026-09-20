@@ -111,13 +111,21 @@ app sandbox. Set a real `companyName` before store submission (it moves that pat
 | `G` / `T` / `C` | Grant test gold / prestige tokens / gems |
 | `B` / `A` / `R` / `S` | Watch ad for the gold boost, request ascension, retry after defeat, skip to the next stage |
 | `F` | Buy instant income (gem sink #2) through the real shop path |
+| `M` | Mute / unmute the placeholder SFX |
 | `L` | Log live state (stage, economy, rates, save info) |
+| `F8` / `F9` | **Full reset** (save + backups + PlayerPrefs + scene reload) / delete the save file only |
 
 The list above is generated from `DebugHotkeyCatalog`; the same legend is printed by the `F3` overlay and by
 `Tools/Idle RPG/Debug/Log Hotkeys`, so the three can never drift apart.
 
 **Editor menus** — see the Quick start table; `Save > Fake 3h Offline` offers the popup on the next
 launch, and `Debug > Log Live State` dumps the running game without touching the UI.
+`Save > Reset Game Completely` is the same fresh-install wipe as `F8`, and `Debug > Log Hotkeys` prints the list
+above.
+
+**Placeholder presentation (Step 9b-3)** — SFX are procedural tones (`PlaceholderAudioService`, no audio files);
+volume and mute persist in PlayerPrefs and are wiped by a full reset. Currency icons are generated PNGs wired
+onto each `CurrencyDef.icon`; Step 19/20 replace art and sound without code changes.
 
 ## Testing
 

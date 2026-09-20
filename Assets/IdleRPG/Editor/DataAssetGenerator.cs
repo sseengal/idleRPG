@@ -129,24 +129,24 @@ namespace IdleRPG.EditorTools
             string folder = DataRoot + "/Currencies";
             EnsureFolder(folder);
 
-            CreateCurrency(folder, "Currency_Gold", "gold", "Gold", false, true,
+            CreateCurrency(folder, "Currency_Gold", "gold", "Gold", false, true, "ui_icon_gold",
                 "every kill", "hero stat levels");
-            CreateCurrency(folder, "Currency_Gems", "gems", "Gems", true, true,
-                "boss kills, milestones", "offline income cap, expeditions (Step 19)");
-            CreateCurrency(folder, "Currency_Tokens", "tokens", "Prestige Tokens", false, true,
+            CreateCurrency(folder, "Currency_Gems", "gems", "Gems", true, true, "ui_icon_gem",
+                "boss kills, milestones", "offline income cap, instant income, expeditions (Step 19)");
+            CreateCurrency(folder, "Currency_Tokens", "tokens", "Prestige Tokens", false, true, "ui_icon_token",
                 "ascension", "permanent prestige tracks");
-            CreateCurrency(folder, "Currency_Shards", "shards", "Hero Shards", false, false,
+            CreateCurrency(folder, "Currency_Shards", "shards", "Hero Shards", false, false, "ui_icon_shard",
                 "duplicates, boss chests, bounties (Step 17)", "star-ups and hero unlocks");
-            CreateCurrency(folder, "Currency_Materials", "materials", "Materials", false, false,
+            CreateCurrency(folder, "Currency_Materials", "materials", "Materials", false, false, "ui_icon_material",
                 "zone-tier stage drops (Step 18)", "relic upgrades");
-            CreateCurrency(folder, "Currency_Essence", "essence", "Essence", false, false,
+            CreateCurrency(folder, "Currency_Essence", "essence", "Essence", false, false, "ui_icon_essence",
                 "transcendence (Step 18)", "L2 permanent tracks");
-            CreateCurrency(folder, "Currency_Scrolls", "scrolls", "Ability Scrolls", false, false,
+            CreateCurrency(folder, "Currency_Scrolls", "scrolls", "Ability Scrolls", false, false, "ui_icon_scroll",
                 "bosses and expeditions (Step 13)", "ability levels");
         }
 
         private static void CreateCurrency(string folder, string fileName, string id, string displayName,
-            bool isPremium, bool isImplemented, string earnSource, string sink)
+            bool isPremium, bool isImplemented, string spriteName, string earnSource, string sink)
         {
             CurrencyDef currency = CreateOrLoad<CurrencyDef>(folder + "/" + fileName + ".asset");
 
@@ -157,6 +157,7 @@ namespace IdleRPG.EditorTools
                 .Set("isImplemented", isImplemented)
                 .Set("earnSource", earnSource)
                 .Set("sinkDescription", sink)
+                .SetSprite("icon", spriteName)
                 .Apply();
         }
 

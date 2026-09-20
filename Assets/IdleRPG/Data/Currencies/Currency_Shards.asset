@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.CurrencyDef
   currencyID: shards
   displayName: Hero Shards
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 53ca96c5ff41544ed9ee34a20634dbbe, type: 3}
   isPremium: 0
   isImplemented: 0
   earnSource: duplicates, boss chests, bounties (Step 17)

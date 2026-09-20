@@ -75,6 +75,12 @@ namespace IdleRPG.EditorTools
             count += WriteIcon("ui_icon_token", new Color(0.85f, 0.55f, 0.98f), IconShape.Star);
             count += WriteIcon("ui_icon_ad", new Color(0.35f, 0.85f, 0.55f), IconShape.Play);
 
+            // Step 9b-3: one icon per currency row, so a currency is never a bare label in the UI.
+            count += WriteIcon("ui_icon_shard", new Color(0.70f, 0.78f, 0.90f), IconShape.Shard);
+            count += WriteIcon("ui_icon_material", new Color(0.72f, 0.60f, 0.42f), IconShape.Ingot);
+            count += WriteIcon("ui_icon_essence", new Color(0.55f, 0.95f, 0.85f), IconShape.Flask);
+            count += WriteIcon("ui_icon_scroll", new Color(0.92f, 0.86f, 0.66f), IconShape.Scroll);
+
             return count;
         }
 
@@ -119,7 +125,11 @@ namespace IdleRPG.EditorTools
             Coin,
             Diamond,
             Star,
-            Play
+            Play,
+            Shard,
+            Ingot,
+            Flask,
+            Scroll
         }
 
         // ------------------------------------------------------------------
@@ -283,6 +293,45 @@ namespace IdleRPG.EditorTools
 
                 case IconShape.Star:
                     DrawPolygon(texture, BuildStar(cx, cy, radius, radius * 0.45f, 5), tint, dark);
+                    break;
+
+                case IconShape.Shard:
+                    DrawPolygon(texture, new[]
+                    {
+                        new Vector2(cx - radius * 0.2f, cy + radius),
+                        new Vector2(cx + radius * 0.65f, cy + radius * 0.25f),
+                        new Vector2(cx + radius * 0.15f, cy - radius),
+                        new Vector2(cx - radius * 0.7f, cy - radius * 0.15f)
+                    }, tint, dark);
+                    break;
+
+                case IconShape.Ingot:
+                    DrawPolygon(texture, new[]
+                    {
+                        new Vector2(cx - radius * 0.8f, cy - radius * 0.6f),
+                        new Vector2(cx + radius * 0.45f, cy - radius * 0.6f),
+                        new Vector2(cx + radius * 0.8f, cy + radius * 0.6f),
+                        new Vector2(cx - radius * 0.45f, cy + radius * 0.6f)
+                    }, tint, dark);
+                    break;
+
+                case IconShape.Flask:
+                    DrawPolygon(texture, new[]
+                    {
+                        new Vector2(cx - radius * 0.22f, cy + radius),
+                        new Vector2(cx + radius * 0.22f, cy + radius),
+                        new Vector2(cx + radius * 0.22f, cy),
+                        new Vector2(cx + radius * 0.75f, cy - radius),
+                        new Vector2(cx - radius * 0.75f, cy - radius),
+                        new Vector2(cx - radius * 0.22f, cy)
+                    }, tint, dark);
+                    break;
+
+                case IconShape.Scroll:
+                    FillRoundedRect(texture, Mathf.RoundToInt(cx - radius * 0.7f), Mathf.RoundToInt(cy - radius * 0.55f),
+                        Mathf.RoundToInt(radius * 1.4f), Mathf.RoundToInt(radius * 1.1f), 6, tint);
+                    FillCircle(texture, cx - radius * 0.7f, cy, radius * 0.22f, dark);
+                    FillCircle(texture, cx + radius * 0.7f, cy, radius * 0.22f, dark);
                     break;
 
                 default:

@@ -280,6 +280,11 @@ namespace IdleRPG.DebugTools
                 builder.AppendLine($"save       {context.Save.LastLoadSource} x{context.Save.SaveCount}  {context.Save.PlayTimeSeconds:0}s played");
             }
 
+            if (context.Audio != null)
+            {
+                builder.AppendLine($"audio      {context.Audio.Describe()} | {context.Audio.PlayedCount} cues (M mutes)");
+            }
+
             if (telemetry != null)
             {
                 builder.AppendLine($"telemetry  {telemetry.Count} buffered / {telemetry.TotalEvents} total");

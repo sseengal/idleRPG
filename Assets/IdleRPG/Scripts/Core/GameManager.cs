@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using IdleRPG.Combat;
 using IdleRPG.Data;
 using IdleRPG.DebugTools;
@@ -129,8 +130,11 @@ namespace IdleRPG.Core
         /// <summary>The single payout till: multipliers + wallet + ledger receipt.</summary>
         public RewardService Rewards { get; private set; }
 
-        /// <summary>Gem sinks (Step 9b: the offline income cap extension).</summary>
+        /// <summary>Gem sinks (Step 9b: the offline income cap extension + instant income).</summary>
         public ShopService Shop { get; private set; }
+
+        /// <summary>SFX abstraction. Placeholder tones today, authored clips in Step 20.</summary>
+        public IAudioService Audio { get; private set; }
 
         /// <summary>Every time-based payout: the offline window and the instant-income gem sink.</summary>
         public IdleTimeService Idle { get; private set; }
@@ -264,6 +268,10 @@ namespace IdleRPG.Core
             Ascension = new AscensionManager(balanceConfig, Economy, Resolver, prestigeUpgrades);
             Boost = new BoostManager(balanceConfig);
             Ads = new MockAdService(this, 3f, true);
+
+            // Step 9b-3: placeholder SFX (procedural tones) driven by the event bus.
+            Audio = new PlaceholderAudioService(this);
+            AudioDirector.Create(gameObject, Audio);
 
             Ledger = new SimLedger(balanceConfig != null ? balanceConfig.GoldPerSecondSampleWindowSec : 60f);
             Rewards = new RewardService(Economy, Ledger, ResolveGoldReward);
@@ -619,6 +627,37 @@ namespace IdleRPG.Core
         }
 
         /// <summary>
+        /// The nuclear option: a fresh install. Wipes the save, its backups and PlayerPrefs, then reloads the
+        /// scene so nothing survives in memory either.
+        ///
+        /// ELI5: `DeleteSave` only deletes the file on disk - the game keeps running with everything the player
+        /// already earned, and the next autosave writes it all back. This one empties the disk *and* starts the
+        /// scene again from scratch, which is what a "start over" button (or a corrupted-state bug report) needs.
+        /// </summary>
+        public bool ResetGame()
+        {
+            Idle?.ClearPending();
+            Save?.DeleteSave();          // save file, every backup generation, logout timestamp
+
+            // A fresh install has no preferences either (audio volume/mute live here).
+            PlayerPrefs.DeleteAll();
+            PlayerPrefs.Save();
+
+            Scene scene = SceneManager.GetActiveScene();
+
+            if (scene.buildIndex < 0)
+            {
+                Debug.LogWarning($"[GameManager] Reset wiped disk state, but scene '{scene.name}' is not in Build " +
+                                 "Settings, so it cannot be reloaded; stop and start Play mode for a clean run.");
+                return false;
+            }
+
+            Debug.Log($"[GameManager] Full reset: save, backups and PlayerPrefs wiped; reloading '{scene.name}'.");
+            SceneManager.LoadScene(scene.buildIndex, LoadSceneMode.Single);
+            return true;
+        }
+
+        /// <summary>
         /// Offers the offline reward for the time since the last session ended.
         /// Called once on start; also used by the debug tooling to re-run the calculation.
         /// </summary>
@@ -854,6 +893,7 @@ namespace IdleRPG.Core
                 Ascension = Ascension,
                 Boost = Boost,
                 Ads = Ads,
+                Audio = Audio,
                 Ledger = Ledger,
                 Rewards = Rewards,
                 Shop = Shop,

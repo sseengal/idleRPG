@@ -11,7 +11,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **9b-3** placeholder audio + currency icons (9b-1, 9b-2 done) |
+| Current step | **10** formation (Step 9 complete: 9a, 9b-1, 9b-2, 9b-2b, 9b-3, 9b-4) |
 | Last completed | Step 6 (mobile polish, MVP) |
 | Next after this | 7b unified `Combatant` + `Encounter` |
 | Save schema | v2 (v3 lands in Steps 10/14 with migration) |
@@ -225,11 +225,33 @@ G5: intermittent - "Combat tick threw; skipping it and saving" (failures=13, ena
       `C` gems 270 -> 370; `F` logged `Instant income bought (F): +4.7K gold for 30 gems` (30 gems spent,
       `InstantIncomePurchases` 0 -> 1)
 
-### 9b-3 — Placeholder presentation hooks (audio + icons)  `[ ]`
-- [ ] `IAudioService` + `PlaceholderAudioService` + event-driven SFX cues for the 7 Step-9b events
-      (hit, crit, kill, boss, level-up, claim, purchase) + volume/mute stub + PlayerPrefs wiring
-- [ ] `PlaceholderSpriteGenerator` extended for currencies (gold/gems/tokens) + ability/relic icons
-- [ ] currency icons referenced by `CurrencyDef.icon` so Step 19 swaps art without touching code
+### 9b-3 — Placeholder presentation hooks (audio + icons)  `[x]`
+- [x] `Services/IAudioService.cs` (volume, mute, `PlayedCount`, `Play`, `ToggleMuted`, `Describe`) +
+      `SfxCue` enum: hit, crit, kill, boss, level-up, claim, purchase, ascend, defeat
+- [x] `Services/PlaceholderAudioService.cs`: **no audio files** - each cue is a short procedural tone
+      (pitch sweep + brightness harmonic + decay envelope) generated once and cached; volume/mute in PlayerPrefs
+- [x] `Services/AudioDirector.cs`: the only class that maps events -> cues, with throttles (hit 70ms, kill 50ms)
+      so a burst of combat cannot turn into one buzz; crits always play
+- [x] `PlaceholderSpriteGenerator` grew shard/ingot/flask/scroll shapes -> `ui_icon_shard/material/essence/scroll`
+- [x] all 7 `CurrencyDef` assets now carry `icon` (gold/gem/token/shard/material/essence/scroll) so Step 19 swaps
+      art without touching code
+- [x] verified live: service created + `AudioDirector` wired; every cue path fired through the **real event bus**
+      (EnemyDamaged hit + crit, EnemyKilled, boss spawn, HeroLevelChanged, UpgradePurchased, OfflineRewardsClaimed,
+      AscensionCompleted, PartyWiped, BossFailed -> 10 cues, and a normal enemy spawn correctly made **no** sound);
+      mute: `Describe()='muted'`, `EffectiveVolume=0`, pref written; icons verified by GUID match against each
+      `CurrencyDef.icon`; validator clean; golden numbers unchanged
+- **Note:** key presses need the Editor focused (frames do not tick while it is backgrounded), so cue wiring was
+  proved through the event bus; the manual pass confirms it audibly
+
+### 9b-4 — Full reset (`F8`)  `[x]`
+- [x] `GameManager.ResetGame()`: wipes save + every backup + PlayerPrefs, then reloads the active scene, so a
+      fresh run starts immediately (F9 only deletes the file and the old progress keeps running)
+- [x] hotkey `F8` + `Tools/Idle RPG/Save/Reset Game Completely` (calls the same method in Play mode, wipes files
+      directly in edit mode)
+- [x] verified live: before reset stage 6 / 321,752 gold / cap +1h bought / audio muted at 30%; after reset
+      stage 1, highest 1, gold-gems-tokens 0, `LoadedFromSave=false`, shop purchases 0, audio back to 50%
+      unmuted with `volPref` absent (prefs really wiped); only a fresh 1,390-byte save + one `.bak` on disk;
+      `F8` itself fired through `DebugHotkeys`
 
 ### 9b (original scope)  `[-]`
 - [ ] `CurrencyDef` rows (gold, gems, tokens, shards, materials, essence, scrolls)
@@ -335,7 +357,7 @@ Found while reviewing progress against the design docs. Each needs a home in `Ro
 
 | # | Gap | Why it matters | Proposed home |
 |---|---|---|---|
-| G1 | **No audio at all** - no SFX/music service, no mute setting | Idle games live on feedback (hit, crit, level-up, claim); silence feels broken | new step after 19 (or fold into 20) |
+| G1 | **No audio at all** - no SFX/music service, no mute setting (`IAudioService` + placeholder + mute: 9b-3; authored SFX/music still Step 20) | Idle games live on feedback (hit, crit, level-up, claim); silence feels broken | new step after 19 (or fold into 20) |
 | G2 | **No local notifications** ("your offline cap is full") | Biggest single re-engagement lever for an idle game; needs a platform plugin + permission flow | new step after 19 |
 | G3 | **No first-run onboarding** - new players get no goals | The first 2 minutes decide retention; wall guidance (15) covers later sessions only | fold into 15 as "first-session goals" |
 | G4 | **No settings screen** (audio, notifications, font scale, reduced motion, battery, language) | Required before any store build; currently settings do not exist at all | part of 20, but must be explicit |

@@ -69,7 +69,38 @@ namespace IdleRPG.EditorTools
             Debug.Log("[SaveDebugMenu] Deleted the save files.");
         }
 
-        [MenuItem("Tools/Idle RPG/Save/Fake 3h Offline (next launch)", priority = 63)]
+        [MenuItem("Tools/Idle RPG/Save/Reset Game Completely (save + backups + prefs)", priority = 63)]
+        public static void ResetGameCompletely()
+        {
+            if (Application.isPlaying)
+            {
+                GameManager manager = UnityEngine.Object.FindAnyObjectByType<GameManager>();
+
+                if (manager != null)
+                {
+                    // Through the game: wipes the same state *and* reloads the scene for a clean run.
+                    manager.ResetGame();
+                    Debug.Log("[SaveDebugMenu] Full reset through the running game.");
+                    return;
+                }
+            }
+
+            if (!EditorUtility.DisplayDialog("Reset the game?",
+                "Wipes savegame.json, every backup and PlayerPrefs (a fresh install).", "Reset", "Cancel"))
+            {
+                return;
+            }
+
+            // No live game: wipe the same on-disk state by hand.
+            SaveSystem system = new SaveSystem();
+            system.Delete();
+            PlayerPrefs.DeleteAll();
+            PlayerPrefs.Save();
+
+            Debug.Log($"[SaveDebugMenu] Reset: save + backups deleted from {Application.persistentDataPath}, PlayerPrefs wiped.");
+        }
+
+        [MenuItem("Tools/Idle RPG/Save/Fake 3h Offline (next launch)", priority = 64)]
         public static void FakeOffline()
         {
             double binary = GameClock.UtcNow.AddHours(-3).ToBinary();

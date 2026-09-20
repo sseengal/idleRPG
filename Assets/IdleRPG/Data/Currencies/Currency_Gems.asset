@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.CurrencyDef
   currencyID: gems
   displayName: Gems
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: ef10cace4946a4fa19ef36d7007377f5, type: 3}
   isPremium: 1
   isImplemented: 1
   earnSource: boss kills, milestones
-  sinkDescription: offline income cap, expeditions (Step 19)
+  sinkDescription: offline income cap, instant income, expeditions (Step 19)

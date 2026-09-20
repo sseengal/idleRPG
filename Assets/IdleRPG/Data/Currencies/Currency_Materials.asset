@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.CurrencyDef
   currencyID: materials
   displayName: Materials
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: cd84d07b70ac04f9d9327a20e222ded0, type: 3}
   isPremium: 0
   isImplemented: 0
   earnSource: zone-tier stage drops (Step 18)
