@@ -45,7 +45,7 @@ namespace IdleRPG.Core
 
         public SaveManager Save { get; set; }
 
-        public OfflineProgressManager Offline { get; set; }
+        public IdleTimeService Idle { get; set; }
 
         /// <summary>True once the minimum set of systems is present.</summary>
         public bool IsReady => Balance != null && Waves != null && Party != null && Combat != null && Economy != null;

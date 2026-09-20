@@ -10,6 +10,7 @@ using IdleRPG.Sim;
 using IdleRPG.Progression;
 using IdleRPG.Save;
 using IdleRPG.Services;
+using IdleRPG.Utils;
 
 namespace IdleRPG.Core
 {
@@ -131,8 +132,8 @@ namespace IdleRPG.Core
         /// <summary>Gem sinks (Step 9b: the offline income cap extension).</summary>
         public ShopService Shop { get; private set; }
 
-        /// <summary>Offline earnings: caps, rate and the claim guard.</summary>
-        public OfflineProgressManager Offline { get; private set; }
+        /// <summary>Every time-based payout: the offline window and the instant-income gem sink.</summary>
+        public IdleTimeService Idle { get; private set; }
 
         /// <summary>True when the current run was restored from disk.</summary>
         public bool LoadedFromSave { get; private set; }
@@ -218,10 +219,10 @@ namespace IdleRPG.Core
                 Ledger.ResetSession();
             }
 
-            if (Offline != null)
+            if (Idle != null)
             {
-                Offline.RewardPaid -= OnOfflineRewardPaid;
-                Offline.Detach();
+                Idle.RewardPaid -= OnIdleRewardPaid;
+                Idle.Detach();
             }
 
             if (Resolver != null)
@@ -300,12 +301,13 @@ namespace IdleRPG.Core
                 combatManager.SetStage(CurrentStage, healParty: true);
             }
 
-            Offline = new OfflineProgressManager(balanceConfig, waveConfig, Rewards, Ledger, ResolveGoldReward)
+            // Step 9b-2: one owner for time-based payouts (offline window + instant income).
+            Idle = new IdleTimeService(balanceConfig, waveConfig, Rewards, Ledger, ResolveGoldReward)
             {
                 BonusEquivalentCapSeconds = Shop != null ? Shop.OfflineCapBonusSeconds : 0d
             };
-            Offline.Attach();
-            Offline.RewardPaid += OnOfflineRewardPaid;
+            Idle.Attach();
+            Idle.RewardPaid += OnIdleRewardPaid;
 
             SubscribeCombat();
             SubscribeProgression();
@@ -612,7 +614,7 @@ namespace IdleRPG.Core
         /// <summary>Wipes the save (debug tooling / future reset button).</summary>
         public void DeleteSave()
         {
-            Offline?.ClearPending();
+            Idle?.ClearPending();
             Save?.DeleteSave();
         }
 
@@ -622,7 +624,7 @@ namespace IdleRPG.Core
         /// </summary>
         public OfflineRewardResult EvaluateOffline()
         {
-            if (Offline == null)
+            if (Idle == null)
             {
                 return OfflineRewardResult.None;
             }
@@ -635,12 +637,12 @@ namespace IdleRPG.Core
             }
 
             double savedRate = Ledger != null ? Ledger.GoldPerSecond : 0d;
-            OfflineRewardResult result = Offline.Evaluate(lastLogout, CurrentStage, savedRate);
+            OfflineRewardResult result = Idle.Evaluate(lastLogout, CurrentStage, savedRate);
 
             if (result.HasReward)
             {
                 LogFlow($"Offline: {result.RawSeconds:0}s away -> {result.CappedSeconds:0}s paid, " +
-                        $"{result.Gold:0.#} gold at {result.GoldPerSecond:0.##}/s ({Offline.LastRateSource})");
+                        $"{result.Gold:0.#} gold at {result.GoldPerSecond:0.##}/s ({Idle.LastRateSource})");
 
                 // Consume the window straight away so a kill before claiming cannot pay twice.
                 Save?.SaveNow("offline");
@@ -668,10 +670,50 @@ namespace IdleRPG.Core
             return fromSave;
         }
 
-        private void OnOfflineRewardPaid(double gold)
+        private void OnIdleRewardPaid(double gold)
         {
+            // Both time payouts land here: the offline claim and a bought fast-forward.
             TotalGoldEarned += gold;
-            Save?.MarkDirty("offline-claim");
+            Save?.MarkDirty("idle-income");
+        }
+
+        /// <summary>
+        /// Gem sink #2: buys <c>instantIncomeSeconds</c> of income outright ("fast-forward").
+        /// Quote first, then charge, then pay - so gems are never spent on a payout of zero.
+        /// </summary>
+        public bool BuyInstantIncome()
+        {
+            if (Shop == null || Idle == null)
+            {
+                return false;
+            }
+
+            double savedRate = Ledger != null ? Ledger.GoldPerSecond : 0d;
+            double quote = Idle.QuoteInstantIncome(CurrentStage, savedRate);
+
+            if (quote <= 0d)
+            {
+                GameEvents.RaiseToast("No income to fast-forward yet");
+                return false;
+            }
+
+            if (!Shop.CanAffordInstantIncome)
+            {
+                GameEvents.RaiseToast($"Needs {Shop.InstantIncomeGemCost:0} gems");
+                return false;
+            }
+
+            double gold = Idle.TryGrantInstantIncome(CurrentStage, savedRate, Shop.TrySpendInstantIncomeGems);
+
+            if (gold <= 0d)
+            {
+                return false;
+            }
+
+            GameEvents.RaiseToast($"+{NumberFormatter.Format(gold)} gold");
+            LogFlow($"Instant income: {Shop.InstantIncomeSeconds / 60d:0} min for {Shop.InstantIncomeGemCost:0} gems" +
+                    $" -> {gold:0.#} gold (purchase #{Idle.InstantIncomePurchases})");
+            return true;
         }
 
         /// <summary>Remembers which management tab the player was on.</summary>
@@ -816,7 +858,7 @@ namespace IdleRPG.Core
                 Rewards = Rewards,
                 Shop = Shop,
                 Save = Save,
-                Offline = Offline
+                Idle = Idle
             };
 
             if (runner == null)

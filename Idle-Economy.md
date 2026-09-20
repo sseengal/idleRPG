@@ -43,15 +43,17 @@ absurd deltas (tamper) and is idempotent via a pending/claimed flag.
 
 ```
 IdleTimeService
-  ClaimOffline() -> OfflineReward  (existing OfflineProgressManager behaviour, extended to bundles)
+  ClaimOffline() -> OfflineReward  (the Step 5 offline window, unchanged)
   StartExpedition(heroId, definitionId) / CollectExpedition(slot)
   RollBounties(awaySeconds) / ClaimBounty(id)
   Tick(now)         # expires boosts, completes expeditions, resets dailies
   Guards: pendingClaim, negativeDelta -> 0, clampSeconds, per-source daily caps
 ```
 
-- The existing `OfflineProgressManager` becomes the offline *calculator* inside this service; its verified guards
-  (dual cap, tamper, double-claim) stay as-is.
+- **Implemented (Step 9b-2):** this service exists as `Save/IdleTimeService.cs` and owns two payouts - the
+  offline window (dual cap, tamper, double-claim guards preserved) and instant income. Both share one rate
+  resolution, one efficiency and one external payment path, so they cannot drift apart.
+- Expeditions and bounties land here in Step 17 as a third payout rather than a second copy of the maths.
 - Everything time-based is registered here, so there is exactly one place that reads wall-clock time.
 
 ## 4. Return hub (the 30-second session - B1)
@@ -137,6 +139,7 @@ TelemetryFeed (ring buffer, ~200 entries, no allocation in the loop)
 | `offlineEfficiency` | `BalanceConfig` | 0.7 (locked) |
 | `minOfflineSecondsForPopup` | `BalanceConfig` | 30 |
 | extra offline **equivalent** cap | shop/gems | +1h per purchase (50 gems), max +3h - applied to the equivalent cap, since that is the cap that actually limits a payout (Step 9b-1) |
+| instant income (fast-forward) | shop/gems 30 | 1h of income at the measured rate x0.7, paid external, repeatable - **implemented 9b-2** |
 | `expeditionDurationOptions` | `ExpeditionDef` | 1h / 4h / 8h |
 | `bountyChoicesOffered` | `BountyDef` | 3 |
 | ad daily caps | `AdPlacementDef` | per placement, see §5 |

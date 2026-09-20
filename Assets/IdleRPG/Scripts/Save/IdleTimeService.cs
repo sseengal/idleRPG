@@ -9,16 +9,27 @@ using IdleRPG.Progression;
 namespace IdleRPG.Save
 {
     /// <summary>
-    /// Turns "the player was away for N seconds" into a claimable gold reward.
+    /// The one owner of **time-based payouts** - every "the player traded time for gold" grant lives here.
+    /// Two exist today:
+    ///   * the **offline window**: time the player was away (wall-capped, equivalent-capped, discount, claim-gated),
+    ///   * **instant income**: time bought outright with gems (gem sink #2).
     ///
-    /// Two caps apply and both stay in force:
+    /// ELI5: the game can pay you for time you did not play. Two flavours: "you were away" (capped and
+    /// discounted, because sleeping should not beat playing) and "you bought an hour" (paid in full, because you
+    /// spent gems). Both need the same three answers - what is gold/sec, how much discount, and how does this
+    /// reach the wallet without fooling the speedometer - so they live in one class instead of two copies.
+    /// Expeditions and bounties (Step 17) will plug in here as a third flavour rather than re-deriving the maths.
+    ///
+    /// Two caps apply to the offline window and both stay in force:
     ///   * <c>offlineCapSeconds</c>           - the 8h spec limit on wall-clock time away,
-    ///   * <c>offlineMaxEquivalentSeconds</c> - pays at most N seconds of battle income.
+    ///   * <c>offlineMaxEquivalentSeconds</c> - pays at most N seconds of battle income (+ shop purchases),
+    ///     because the equivalent cap is what actually limits a payout.
     ///
-    /// Gold = paidSeconds * goldPerSecond * offlineEfficiency, where goldPerSecond is the measured
-    /// live rate (save-seeded when the session is young) or a formula estimate as a last resort.
+    /// Gold = paidSeconds * goldPerSecond * efficiency, then the player's gold multiplier. Every payout goes
+    /// through the reward funnel flagged **external**, so time income never inflates the measured rate that the
+    /// next payout is built from.
     /// </summary>
-    public sealed class OfflineProgressManager
+    public sealed class IdleTimeService
     {
         private readonly BalanceConfig balanceConfig;
         private readonly WaveConfig waveConfig;
@@ -26,14 +37,10 @@ namespace IdleRPG.Save
         private readonly SimLedger ledger;
         private readonly Func<double, double> goldResolver;
 
-        /// <summary>Extra offline cap bought in the shop (seconds); set by GameManager after a load.</summary>
+        /// <summary>Extra offline equivalent cap bought in the shop (seconds); set by GameManager after a load.</summary>
         public double BonusEquivalentCapSeconds { get; set; }
 
-        /// <summary>
-        /// Step 9a: pays through the reward funnel (so the claim is booked as external and never pollutes the
-        /// earning rate) and reads its rate from the ledger.
-        /// </summary>
-        public OfflineProgressManager(
+        public IdleTimeService(
             BalanceConfig balanceConfig,
             WaveConfig waveConfig,
             RewardService rewards,
@@ -48,14 +55,14 @@ namespace IdleRPG.Save
 
             if (this.balanceConfig == null || this.rewards == null)
             {
-                Debug.LogError("[OfflineProgressManager] Needs a BalanceConfig and a RewardService.");
+                Debug.LogError("[IdleTimeService] Needs a BalanceConfig and a RewardService.");
             }
         }
 
-        /// <summary>Raised after a claim is paid, with the gold actually granted.</summary>
+        /// <summary>Raised after a time-based payout is paid, with the gold actually granted.</summary>
         public event Action<double> RewardPaid;
 
-        /// <summary>Unclaimed reward, if any. Doubles as the pending-claim guard.</summary>
+        /// <summary>Unclaimed offline reward, if any. Doubles as the pending-claim guard.</summary>
         public OfflineRewardResult Pending { get; private set; }
 
         public bool HasPending => Pending.HasReward;
@@ -65,6 +72,9 @@ namespace IdleRPG.Save
 
         /// <summary>"measured", "saved" or "estimated" - which rate source won.</summary>
         public string LastRateSource { get; private set; } = "none";
+
+        /// <summary>Instant-income payouts this session (telemetry only; never part of the save).</summary>
+        public int InstantIncomePurchases { get; private set; }
 
         public void Attach()
         {
@@ -81,6 +91,58 @@ namespace IdleRPG.Save
         {
             Pending = OfflineRewardResult.None;
         }
+
+        // ------------------------------------------------------------------
+        // Instant income (gem sink #2)
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// What one fast-forward would pay right now, in resolved gold (0 = not worth offering).
+        /// No side effects beyond the rate probe, so the shop can label a button with it.
+        /// </summary>
+        public double QuoteInstantIncome(int stage, double savedGoldPerSecond)
+        {
+            double seconds = balanceConfig != null ? balanceConfig.InstantIncomeSeconds : 0d;
+            double rate = ResolveRate(stage, savedGoldPerSecond);
+
+            return seconds > 0d ? TimeGold(seconds, rate) : 0d;
+        }
+
+        /// <summary>
+        /// Buys <c>instantIncomeSeconds</c> of income outright. The gems are charged only after the payout is
+        /// known to be non-zero, so a purchase can never cost gems and pay nothing.
+        /// </summary>
+        /// <param name="chargeGems">Returns false when the player cannot afford it (nothing is paid then).</param>
+        /// <returns>Gold granted, or 0 when the purchase was refused.</returns>
+        public double TryGrantInstantIncome(int stage, double savedGoldPerSecond, Func<bool> chargeGems)
+        {
+            double quote = QuoteInstantIncome(stage, savedGoldPerSecond);
+
+            if (quote <= 0d)
+            {
+                return 0d;
+            }
+
+            if (chargeGems != null && !chargeGems())
+            {
+                return 0d;
+            }
+
+            double paid = PayExternal(quote, RewardService.Source.InstantIncome);
+
+            if (paid > 0d)
+            {
+                InstantIncomePurchases++;
+                Debug.Log($"[IdleTimeService] Instant income paid {paid:0.#} gold " +
+                          $"({balanceConfig.InstantIncomeSeconds:0}s at {LastRate:0.##}/s, {LastRateSource}).");
+            }
+
+            return paid;
+        }
+
+        // ------------------------------------------------------------------
+        // Offline window
+        // ------------------------------------------------------------------
 
         private double ResolveRate(int stage, double savedGoldPerSecond)
         {
@@ -152,7 +214,7 @@ namespace IdleRPG.Save
 
             if (awaySeconds <= 0d)
             {
-                Debug.LogWarning("[OfflineProgressManager] Non-positive offline delta; paying nothing.");
+                Debug.LogWarning("[IdleTimeService] Non-positive offline delta; paying nothing.");
                 return OfflineRewardResult.None;
             }
 
@@ -173,11 +235,7 @@ namespace IdleRPG.Save
             }
 
             // Efficiency is applied once; the cap argument is the already-capped duration.
-            double baseGold = FormulaUtility.OfflineGold(paidSeconds, rate, balanceConfig.OfflineEfficiency, paidSeconds);
-
-            // Prestige/boost multipliers are applied here so the popup shows exactly what is paid.
-            double multiplier = goldResolver != null ? Math.Max(0d, goldResolver(1d)) : 1d;
-            double gold = baseGold * multiplier;
+            double gold = TimeGold(paidSeconds, rate);
 
             Pending = new OfflineRewardResult(awaySeconds, paidSeconds, rate, gold, awaySeconds > paidSeconds);
             return Pending;
@@ -188,7 +246,7 @@ namespace IdleRPG.Save
             if (!Pending.HasReward)
             {
                 // Already claimed (or nothing was offered): ignore a second click.
-                Debug.LogWarning("[OfflineProgressManager] Ignored a claim with no pending reward.");
+                Debug.LogWarning("[IdleTimeService] Ignored a claim with no pending reward.");
                 return;
             }
 
@@ -198,15 +256,47 @@ namespace IdleRPG.Save
             double payable = claimed.Gold > 0d ? claimed.Gold : gold;
 
             // Through the till, flagged external: paid in full, excluded from the measured rate.
-            if (rewards != null)
+            PayExternal(payable, RewardService.Source.OfflineClaim);
+
+            Debug.Log($"[IdleTimeService] Paid {payable:0.#} gold for {claimed.CappedSeconds:0}s away " +
+                      $"(rate {claimed.GoldPerSecond:0.##}/s, source {LastRateSource}).");
+        }
+
+        // ------------------------------------------------------------------
+        // Shared maths for every time payout
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// Time -> gold, the single formula both flavours use: seconds * rate * efficiency, then the player's
+        /// gold multiplier (applied here so the number quoted in UI is the number paid).
+        /// </summary>
+        private double TimeGold(double seconds, double rate)
+        {
+            if (seconds <= 0d || rate <= 0d)
             {
-                // Quoted amount: the popup already showed the resolved gold, so pay it verbatim.
-                rewards.GrantQuotedGold(payable, RewardService.Source.OfflineClaim);
+                return 0d;
             }
 
-            RewardPaid?.Invoke(payable);
-            Debug.Log($"[OfflineProgressManager] Paid {payable:0.#} gold for {claimed.CappedSeconds:0}s away " +
-                      $"(rate {claimed.GoldPerSecond:0.##}/s, source {LastRateSource}).");
+            double efficiency = balanceConfig != null ? balanceConfig.OfflineEfficiency : 1d;
+            double baseGold = FormulaUtility.TimeBasedGold(seconds, rate, efficiency, seconds);
+
+            // Prestige/boost multipliers are applied here so the popup shows exactly what is paid.
+            double multiplier = goldResolver != null ? Math.Max(0d, goldResolver(1d)) : 1d;
+            return baseGold * multiplier;
+        }
+
+        /// <summary>Pays a quoted amount as external income and reports it to listeners.</summary>
+        private double PayExternal(double gold, RewardService.Source source)
+        {
+            if (gold <= 0d)
+            {
+                return 0d;
+            }
+
+            // Quoted: the UI already showed the resolved amount, so pay it verbatim.
+            double paid = rewards != null ? rewards.GrantQuotedGold(gold, source) : gold;
+            RewardPaid?.Invoke(paid);
+            return paid;
         }
     }
 }

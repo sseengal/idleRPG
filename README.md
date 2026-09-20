@@ -43,7 +43,7 @@ Assets/IdleRPG/
     Combat/      CombatSimulator (pure C#), CombatManager, combatants, CombatScaling/rewards
     Economy/     EconomyManager (gold/gems/tokens), BoostManager, EconomyRateTracker
     Progression/ FormulaUtility (all maths), StatResolver, UpgradeManager, AscensionManager
-    Save/        SaveData, SaveSystem, SaveManager, SaveMigrations, OfflineProgressManager
+    Save/        SaveData, SaveSystem, SaveManager, SaveMigrations, IdleTimeService
     Services/    IAdService, MockAdService (SDK-ready)
     UI/          ScreenController, HudController, panels, views, log, popup, SafeAreaFitter
     Utils/       NumberFormatter (K/M/B/T/aa...)

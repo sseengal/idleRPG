@@ -84,6 +84,34 @@ namespace IdleRPG.Economy
             return true;
         }
 
+        // ------------------------------------------------------------------
+        // Offer 2: instant income (fast-forward)
+        // ------------------------------------------------------------------
+
+        /// <summary>Seconds of income one fast-forward buys.</summary>
+        public double InstantIncomeSeconds => balanceConfig != null ? balanceConfig.InstantIncomeSeconds : 0d;
+
+        /// <summary>Gems charged per fast-forward purchase.</summary>
+        public double InstantIncomeGemCost => balanceConfig != null ? balanceConfig.InstantIncomeGemCost : 0d;
+
+        /// <summary>Repeatable offer: no cap, but it costs gems every time.</summary>
+        public bool CanAffordInstantIncome => economy != null && InstantIncomeGemCost > 0d && economy.Gems >= InstantIncomeGemCost;
+
+        /// <summary>
+        /// Charges the gems for a fast-forward. Called by <see cref="IdleTimeService"/> only after it knows the
+        /// payout is non-zero, so gems are never spent on an empty purchase.
+        /// </summary>
+        public bool TrySpendInstantIncomeGems()
+        {
+            return economy != null && InstantIncomeGemCost > 0d && economy.SpendGems(InstantIncomeGemCost);
+        }
+
+        public string DescribeInstantIncomeOffer()
+        {
+            double minutes = InstantIncomeSeconds / 60d;
+            return $"Fast-forward {minutes:0} min - {InstantIncomeGemCost:0} gems";
+        }
+
         /// <summary>Restores purchases from a save.</summary>
         public void Restore(double bonusSeconds, int purchases)
         {

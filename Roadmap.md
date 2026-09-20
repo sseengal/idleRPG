@@ -193,7 +193,13 @@
 - Verified live: bought +1h for 50 gems; a 9h absence paid **10800s** (2h base + 1h bought) vs 7200s before;
   max-out refuses the 4th purchase; save round-trips the bonus; 4 save files on disk (.json/.bak/.bak1/.bak2).
 
-### Step 9b-2 — `IdleTimeService` + instant-income sink  `TODO`
+### Step 9b-2 — `IdleTimeService` + instant-income sink  `DONE`
+- Delivered: `OfflineProgressManager` renamed into `IdleTimeService` (one owner of time-based payouts), shared
+  rate/efficiency/multiplier/external-payment helpers, `FormulaUtility.TimeBasedGold`, instant income gem sink
+  (`+1h` for 30 gems, repeatable) and the shop row builder.
+- Verified live: purchase paid 32,326 gold for 30 gems while the **measured rate did not move**; a broke player
+  is refused without paying; offline window unchanged (3h -> 10800s / 71,678 gold); validator + golden numbers
+  clean.
 
 ### Step 9b-3 — Placeholder presentation hooks (audio + icons)  `TODO`
 - **Goal:** every place that *should* make a noise or show an icon gets the hook now, with placeholder assets;

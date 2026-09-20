@@ -20,9 +20,15 @@ namespace IdleRPG.UI
 
         private GameManager manager;
 
-        // Runtime-built gem-sink row (placeholder UI: the shop gets a proper redesign in Step 19).
-        private Button gemSinkButton;
-        private TextMeshProUGUI gemSinkLabel;
+        // Runtime-built gem-sink rows (placeholder UI: the shop gets a proper redesign in Step 19).
+        // Both are built from the same builder so a third offer is one line, not one copied block.
+        private Button offlineCapButton;
+        private TextMeshProUGUI offlineCapLabel;
+        private Button instantIncomeButton;
+        private TextMeshProUGUI instantIncomeLabel;
+
+        private const float OfferRowHeight = 72f;
+        private const float OfferRowSpacing = 8f;
 
         private void Start()
         {
@@ -52,7 +58,7 @@ namespace IdleRPG.UI
                 watchAdButton.onClick.AddListener(OnWatchAdClicked);
             }
 
-            EnsureGemSinkRow();
+            EnsureOfferRows();
             Refresh();
         }
 
@@ -83,33 +89,49 @@ namespace IdleRPG.UI
         }
 
         /// <summary>
-        /// Builds the gem-sink row in code so the scene does not need a rebuild for every new offer.
+        /// Builds the gem-sink rows in code so the scene does not need a rebuild for every new offer.
         /// Placeholder styling on purpose - Step 19 gives the shop its real layout.
+        /// Rows stack upwards from the bottom of the panel.
         /// </summary>
-        private void EnsureGemSinkRow()
+        private void EnsureOfferRows()
         {
-            if (gemSinkButton != null || manager == null || manager.Shop == null)
+            if (manager == null || manager.Shop == null)
             {
                 return;
             }
 
-            GameObject row = new GameObject("GemSinkRow");
+            if (offlineCapButton == null)
+            {
+                offlineCapButton = CreateOfferRow("OfflineCapRow", 0, OnOfflineCapClicked, out offlineCapLabel);
+            }
+
+            if (instantIncomeButton == null)
+            {
+                instantIncomeButton = CreateOfferRow("InstantIncomeRow", 1, OnInstantIncomeClicked, out instantIncomeLabel);
+            }
+        }
+
+        /// <summary>One shop offer row: a tappable background with a centred label.</summary>
+        private Button CreateOfferRow(string name, int stackIndex, UnityEngine.Events.UnityAction onClick,
+            out TextMeshProUGUI label)
+        {
+            GameObject row = new GameObject(name);
             row.transform.SetParent(transform, false);
 
             RectTransform rowRect = row.AddComponent<RectTransform>();
             rowRect.anchorMin = new Vector2(0f, 0f);
             rowRect.anchorMax = new Vector2(1f, 0f);
             rowRect.pivot = new Vector2(0.5f, 0f);
-            rowRect.anchoredPosition = new Vector2(0f, 8f);
-            rowRect.sizeDelta = new Vector2(0f, 72f);
+            rowRect.anchoredPosition = new Vector2(0f, OfferRowSpacing + stackIndex * (OfferRowHeight + OfferRowSpacing));
+            rowRect.sizeDelta = new Vector2(0f, OfferRowHeight);
 
             Image background = row.AddComponent<Image>();
             background.color = new Color(0.12f, 0.14f, 0.2f, 0.95f);
 
-            gemSinkButton = row.AddComponent<Button>();
-            gemSinkButton.targetGraphic = background;
-            gemSinkButton.onClick.RemoveAllListeners();
-            gemSinkButton.onClick.AddListener(OnGemSinkClicked);
+            Button button = row.AddComponent<Button>();
+            button.targetGraphic = background;
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(onClick);
 
             GameObject labelObject = new GameObject("Label");
             labelObject.transform.SetParent(row.transform, false);
@@ -120,14 +142,16 @@ namespace IdleRPG.UI
             labelRect.offsetMin = new Vector2(12f, 4f);
             labelRect.offsetMax = new Vector2(-12f, -4f);
 
-            gemSinkLabel = labelObject.AddComponent<TextMeshProUGUI>();
-            gemSinkLabel.fontSize = 22f;
-            gemSinkLabel.alignment = TextAlignmentOptions.Center;
-            gemSinkLabel.color = Color.white;
-            gemSinkLabel.raycastTarget = false;
+            label = labelObject.AddComponent<TextMeshProUGUI>();
+            label.fontSize = 22f;
+            label.alignment = TextAlignmentOptions.Center;
+            label.color = Color.white;
+            label.raycastTarget = false;
+
+            return button;
         }
 
-        private void OnGemSinkClicked()
+        private void OnOfflineCapClicked()
         {
             if (manager == null || manager.Shop == null)
             {
@@ -139,6 +163,21 @@ namespace IdleRPG.UI
                 manager.Save?.MarkDirty("shop");
             }
 
+            Refresh();
+        }
+
+        /// <summary>
+        /// Fast-forward: GameManager owns the order of operations (quote -> charge -> pay) because the gems and
+        /// the payout live in two different services.
+        /// </summary>
+        private void OnInstantIncomeClicked()
+        {
+            if (manager == null)
+            {
+                return;
+            }
+
+            manager.BuyInstantIncome();
             Refresh();
         }
 
@@ -190,14 +229,24 @@ namespace IdleRPG.UI
                 gemsLabel.SetText(string.Format("{0} gems", NumberFormatter.Format(manager.Economy.Gems)));
             }
 
-            if (gemSinkLabel != null && manager.Shop != null)
+            if (offlineCapLabel != null && manager.Shop != null)
             {
-                gemSinkLabel.SetText(manager.Shop.DescribeOfflineCapOffer());
+                offlineCapLabel.SetText(manager.Shop.DescribeOfflineCapOffer());
             }
 
-            if (gemSinkButton != null && manager.Shop != null)
+            if (offlineCapButton != null && manager.Shop != null)
             {
-                gemSinkButton.interactable = manager.Shop.CanAffordOfflineCapExtension;
+                offlineCapButton.interactable = manager.Shop.CanAffordOfflineCapExtension;
+            }
+
+            if (instantIncomeLabel != null && manager.Shop != null)
+            {
+                instantIncomeLabel.SetText(manager.Shop.DescribeInstantIncomeOffer());
+            }
+
+            if (instantIncomeButton != null && manager.Shop != null)
+            {
+                instantIncomeButton.interactable = manager.Shop.CanAffordInstantIncome;
             }
         }
     }

@@ -64,7 +64,7 @@ Assets/IdleRPG/
     Combat/      CombatSimulator (pure C#), CombatManager, HeroUnit, EnemyUnit,
                  HpBar, FloatingDamageText
     Progression/ FormulaUtility, UpgradeManager, AscensionManager, StatResolver
-    Save/        SaveData, SaveSystem, OfflineProgressManager
+    Save/        SaveData, SaveSystem, IdleTimeService
     UI/          HeaderUI, TabController, UpgradePanelUI, AscensionPanelUI,
                  ShopPanelUI, OfflineRewardsPopup, SafeAreaFitter
     Services/    IAdService, MockAdService
@@ -194,7 +194,7 @@ Headless logic only (views moved to Step 4, matching Phase 2 = "debug logs").
       (see section 16)
 
 ### Step 5b — Offline progress  `[DONE 2026-09-19]`
-- [x] `OfflineProgressManager` — wall cap + equivalent cap, efficiency x0.7, rate resolution
+- [x] `IdleTimeService` (was `OfflineProgressManager`) — wall cap + equivalent cap, efficiency x0.7, rate resolution, plus instant income (9b-2)
       (measured -> saved -> formula), pending-claim guard, negative-delta tamper guard,
       pays through `ResolveGoldReward` so prestige/boost are included, excludes the payout from the
       live rate measurement

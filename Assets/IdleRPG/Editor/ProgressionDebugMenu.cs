@@ -126,7 +126,7 @@ namespace IdleRPG.EditorTools
 
             foreach (int stage in stageList)
             {
-                double rate = OfflineProgressManager.EstimateGoldPerSecond(balance, waves, stage);
+                double rate = IdleTimeService.EstimateGoldPerSecond(balance, waves, stage);
                 builder.AppendLine(string.Format("  stage {0,-3} rate {1,8:0.00} gold/s  (formula fallback)", stage, rate));
 
                 foreach (double away in awayList)

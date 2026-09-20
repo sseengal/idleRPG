@@ -32,7 +32,8 @@ namespace IdleRPG.Economy
             AdBoost = 2,
             Milestone = 3,
             Expedition = 4,
-            Debug = 5
+            Debug = 5,
+            InstantIncome = 6
         }
 
         private readonly EconomyManager economy;

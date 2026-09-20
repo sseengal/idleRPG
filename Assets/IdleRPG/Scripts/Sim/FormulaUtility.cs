@@ -123,15 +123,20 @@ namespace IdleRPG.Progression
         /// <summary>
         /// Offline Gold = seconds * goldPerSecond * efficiency, with seconds capped.
         /// </summary>
-        public static double OfflineGold(double offlineSeconds, double goldPerSecond, double efficiency, double capSeconds)
+        /// <summary>
+        /// Time-based gold, shared by every time payout in the game: seconds * goldPerSecond * efficiency,
+        /// with the seconds clamped to a cap. The offline window and instant income both call this, so the two
+        /// can never disagree about the discount.
+        /// </summary>
+        public static double TimeBasedGold(double seconds, double goldPerSecond, double efficiency, double capSeconds)
         {
-            if (offlineSeconds <= 0d || goldPerSecond <= 0d)
+            if (seconds <= 0d || goldPerSecond <= 0d)
             {
                 return 0d;
             }
 
             double safeCap = capSeconds < 0d ? 0d : capSeconds;
-            double cappedSeconds = offlineSeconds > safeCap ? safeCap : offlineSeconds;
+            double cappedSeconds = seconds > safeCap ? safeCap : seconds;
             double safeEfficiency = efficiency < 0d ? 0d : efficiency;
 
             return cappedSeconds * goldPerSecond * safeEfficiency;

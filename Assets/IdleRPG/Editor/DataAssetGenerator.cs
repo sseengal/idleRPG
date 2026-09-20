@@ -104,6 +104,8 @@ namespace IdleRPG.EditorTools
                 .Set("offlineCapExtensionSeconds", 3600f)
                 .Set("offlineCapExtensionGemCost", 50d)
                 .Set("offlineCapExtensionMaxSeconds", 10800f)
+                .Set("instantIncomeSeconds", 3600f)
+                .Set("instantIncomeGemCost", 30d)
                 .Set("offlineMaxEquivalentSeconds", 7200f)
                 .Set("offlineEstimatedSecondsPerKill", 3.6f)
                 .Set("startingGold", 0d)

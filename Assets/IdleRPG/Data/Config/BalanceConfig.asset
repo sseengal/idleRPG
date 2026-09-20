@@ -45,6 +45,8 @@ MonoBehaviour:
   offlineCapExtensionSeconds: 3600
   offlineCapExtensionGemCost: 50
   offlineCapExtensionMaxSeconds: 10800
+  instantIncomeSeconds: 3600
+  instantIncomeGemCost: 30
   startingGold: 0
   startingGems: 0
   goldPerSecondSampleWindowSec: 60

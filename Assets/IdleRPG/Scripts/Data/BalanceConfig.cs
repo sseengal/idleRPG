@@ -145,6 +145,12 @@ namespace IdleRPG.Data
         [Tooltip("Gem sink: ceiling on the total extra cap (10800 = +3h).")]
         [SerializeField] private float offlineCapExtensionMaxSeconds = 10800f;
 
+        [Tooltip("Gem sink: seconds of income bought outright by one fast-forward purchase.")]
+        [SerializeField] private float instantIncomeSeconds = 3600f;
+
+        [Tooltip("Gem sink: gems charged per fast-forward purchase (repeatable, no cap).")]
+        [SerializeField] private double instantIncomeGemCost = 30d;
+
         // ------------------------------------------------------------------
         // Economy & monetisation
         // ------------------------------------------------------------------
@@ -237,6 +243,10 @@ namespace IdleRPG.Data
         public double OfflineCapExtensionGemCost => offlineCapExtensionGemCost < 0d ? 0d : offlineCapExtensionGemCost;
 
         public float OfflineCapExtensionMaxSeconds => Mathf.Max(0f, offlineCapExtensionMaxSeconds);
+
+        public float InstantIncomeSeconds => Mathf.Max(60f, instantIncomeSeconds);
+
+        public double InstantIncomeGemCost => instantIncomeGemCost < 0d ? 0d : instantIncomeGemCost;
 
         public double StartingGold => startingGold < 0d ? 0d : startingGold;
 

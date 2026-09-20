@@ -8,7 +8,7 @@ using IdleRPG.Utils;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// Offline earnings popup. Built in Step 4; Step 5's OfflineProgressManager raises
+    /// Offline earnings popup. Built in Step 4; IdleTimeService raises
     /// <see cref="GameEvents.OfflineRewardsReady"/> and this panel shows the claim screen.
     /// </summary>
     public sealed class OfflineRewardsPopup : MonoBehaviour

@@ -116,7 +116,7 @@ Rules:
 | `Content/` | SO definitions (`HeroData`, `AbilityData`, `ZoneData`, ...) | Moved from `Data/`; definitions only |
 | `Progression/` | Tracks, upgrades, prestige layers, automation rules | Cost curves + purchase logic |
 | `Economy/` | Currencies, boosts, ledger, reward funnel | One funnel, one ledger |
-| `Save/` | `SaveData` v3, mapper, migrations, system, `IdleTimeService` | IO + schema only |
+| `Save/` | `SaveData` v3, mapper, migrations, system, `IdleTimeService` | IO + schema only, `IdleTimeService` is the only reader of wall-clock time |
 | `Services/` | Ads, telemetry, asset provider, platform | External boundaries behind interfaces |
 | `UI/` | Views, presenters, widgets, factories | No gameplay state |
 | `Debug/` | Hotkeys, loggers, dev overlay (F3) | Stripped from release builds |
@@ -166,7 +166,8 @@ GameContext
 | `AbilityService` | Equip/level/priority, auto-cast policy | Run cooldowns (sim does that) |
 | `EconomyService` | Currencies, boosts, one reward funnel + ledger writes | Decide content rewards (loot tables do) |
 | `SaveCoordinator` | Snapshot/apply, cadence, migrations, dirty flags | Contain gameplay maths |
-| `IdleTimeService` | Time-based payouts: offline, expeditions, bounties, caps, tamper guards | Duplicate the offline formula |
+| `IdleTimeService` | Time-based payouts: offline claim + instant income today, expeditions/bounties in Step 17; caps, tamper guards, rate resolution | Duplicate the offline formula |
+| `ShopService` | Gem pricing only (what an offer costs, whether it is affordable) | Compute payouts (that is `IdleTimeService`) |
 
 ---
 
@@ -340,7 +341,8 @@ ui             { lastScreenIndex, settings{...} }
 | B10 | Local telemetry ring buffer + dev overlay (F3): DPS, eHP, gold/min, wall ETA | 8 | Locked |
 | B11 | Battery mode: 30fps + trimmed VFX while idling | 20 | Locked |
 | B12 | Localization keys + colorblind-safe log colours from day one | 20 | Locked |
-| B13 | `IdleTimeService` owns every time-based payout (offline, expedition, bounty) with caps + tamper guards | 9 | Locked |
+| B13 | `IdleTimeService` owns every time-based payout (offline, expedition, bounty) with caps + tamper guards | 9 | **Landed 9b-2** |
+| B14 | Instant income (gems -> `seconds x rate x x0.7`) is booked external so buying gold never raises the measured rate | 9b | Locked |
 | B14 | Codex/bestiary doubles as the difficulty-hint system | 18 | Locked |
 
 ### 6.4 Removals / avoid

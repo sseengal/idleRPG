@@ -11,7 +11,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **9b-2** `IdleTimeService` + instant-income sink (9b-1 done) |
+| Current step | **9b-3** placeholder audio + currency icons (9b-1, 9b-2 done) |
 | Last completed | Step 6 (mobile polish, MVP) |
 | Next after this | 7b unified `Combatant` + `Encounter` |
 | Save schema | v2 (v3 lands in Steps 10/14 with migration) |
@@ -195,15 +195,29 @@ G5: intermittent - "Combat tick threw; skipping it and saving" (failures=13, ena
 - **Design note:** the shop raises the *equivalent* cap, not the 8h wall clock - the equivalent cap is what
       actually limits a payout, so raising the wall clock would have been a purchase with no effect
 
-### 9b-2 — IdleTimeService (+ instant-income sink)  `[ ]`
-- [ ] `IdleTimeService` absorbs `OfflineProgressManager` ownership of time-based payouts (offline, later
-      expeditions/bounties) behind one interface and one set of caps/tamper guards
-- [ ] second gem sink: instant income ("fast-forward", `rate x 1h x 0.7`, external so it cannot inflate rates)
-- [ ] `OfflineCapExtension` placeholder audio/icon hooks come with the Step 9b presentation pass
+### 9b-2 — `IdleTimeService` + instant-income sink  `[x]`
+- [x] `OfflineProgressManager` -> **`IdleTimeService`** (git mv, GUIDs kept): one owner of every time-based
+      payout. Offline behaviour byte-identical; expeditions/bounties (Step 17) now extend one class
+- [x] shared privates for the parts both payouts need: `ResolveRate` (measured -> saved -> estimated),
+      `TimeGold` (seconds x rate x efficiency + gold multiplier) and `PayExternal` (funnel + `RewardPaid`)
+- [x] `FormulaUtility.OfflineGold` -> **`TimeBasedGold`** (one formula, two callers - the two can never
+      disagree about the discount)
+- [x] **second gem sink**: instant income / fast-forward (`instantIncomeSeconds` 3600, `instantIncomeGemCost`
+      30, repeatable). Quote -> charge -> pay order, so gems are never spent on a zero payout
+- [x] `RewardService.Source.InstantIncome` receipt source; payout booked **external** like every time payout
+- [x] shop UI: `CreateOfferRow` builder extracted, rows stack from the bottom; second row wired
+- [x] verified live: `'Fast-forward 60 min - 30 gems'` bought for 30 gems -> `+32,326 gold` (3600 x 8.017 x 0.7
+      x 1.6 mult) and **measured rate unchanged** (5.9258 -> 5.9258) across a 23,893 gold purchase;
+      broken-player purchase refused (no gems spent, no payout); both rows present and labelled
+      (`OfflineCapRow='Offline cap is maxed' interactable=False`, `InstantIncomeRow` enabled);
+      offline regression 3h away -> 10800s / 71,678 gold through the renamed service
+- [x] regression: content validator clean, golden numbers unchanged (74s@x1.0 / 120s@x1.6, 272 gold)
 
 ### 9b-3 — Placeholder presentation hooks (audio + icons)  `[ ]`
-- [ ] `IAudioService` + `PlaceholderAudioService` + event-driven SFX cues + volume/mute stub
-- [ ] `PlaceholderSpriteGenerator` extended for currencies/abilities/relics
+- [ ] `IAudioService` + `PlaceholderAudioService` + event-driven SFX cues for the 7 Step-9b events
+      (hit, crit, kill, boss, level-up, claim, purchase) + volume/mute stub + PlayerPrefs wiring
+- [ ] `PlaceholderSpriteGenerator` extended for currencies (gold/gems/tokens) + ability/relic icons
+- [ ] currency icons referenced by `CurrencyDef.icon` so Step 19 swaps art without touching code
 
 ### 9b (original scope)  `[-]`
 - [ ] `CurrencyDef` rows (gold, gems, tokens, shards, materials, essence, scrolls)
