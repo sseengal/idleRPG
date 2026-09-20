@@ -11,11 +11,8 @@ namespace IdleRPG.Debugging
     /// Uses the new Input System directly (the project has the legacy handler disabled),
     /// and reads only <c>wasPressedThisFrame</c>, so there is no polling cost concern.
     ///
-    /// 1 = +1 ATK (all heroes)   2 = +10 ATK      3 = +10 HP       4 = +10 DEF
-    /// G = +100K gold            T = +10 tokens   B = ad gold boost
-    /// A = ascend                R = retry after defeat             S = skip one stage
-    /// Tab = cycle pages (Battle / Upgrades / Ascend / Shop)      L = log status
-    /// F5 = save now            F9 = delete save            F10 = rewind logout by 3h
+    /// The printed list lives in <see cref="DebugHotkeyCatalog"/> (the F3 overlay shows it); keep the two in
+    /// sync when a key is added or removed here.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class DebugHotkeys : MonoBehaviour
@@ -30,6 +27,9 @@ namespace IdleRPG.Debugging
 
         [Tooltip("Prestige tokens granted by the T key.")]
         [SerializeField] private double tokenGrantAmount = 10d;
+
+        [Tooltip("Gems granted by the C key (gem-sink testing).")]
+        [SerializeField] private double gemGrantAmount = 100d;
 
         public void EditorInitialize(GameManager manager)
         {
@@ -98,6 +98,23 @@ namespace IdleRPG.Debugging
             if (keyboard.bKey.wasPressedThisFrame)
             {
                 gameManager.WatchAdForGoldBoost();
+            }
+
+            if (keyboard.cKey.wasPressedThisFrame)
+            {
+                gameManager.Economy.AddGems(gemGrantAmount);
+                Log($"Granted {NumberFormatter.Format(gemGrantAmount)} gems (C).");
+            }
+
+            if (keyboard.fKey.wasPressedThisFrame)
+            {
+                // Gem sink #2: same call the shop button makes, so the key tests the real path.
+                double goldBefore = gameManager.Economy.Gold;
+                bool bought = gameManager.BuyInstantIncome();
+                Log(bought
+                    ? $"Instant income bought (F): +{NumberFormatter.Format(gameManager.Economy.Gold - goldBefore)} gold " +
+                      $"for {gameManager.Shop.InstantIncomeGemCost:0} gems."
+                    : "Instant income refused (F): needs gems and a measurable income.");
             }
 
             if (keyboard.aKey.wasPressedThisFrame)

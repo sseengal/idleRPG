@@ -105,12 +105,16 @@ app sandbox. Set a real `companyName` before store submission (it moves that pat
 |---|---|
 | `Tab` | Cycle pages (Battle / Upgrades / Ascend / Shop) |
 | `1` / `2` / `3` / `4` | Buy +1 ATK / +10 ATK / +10 HP / +10 DEF for every hero |
-| `F3` | Dev overlay: party DPS/eHP, gold per minute, wave ETA, rng state, save info |
+| `F3` | Dev overlay: party DPS/eHP, gold per minute, wave ETA, rng state, save info **+ the full hotkey list** |
 | `F5` / `F9` | Save now / delete the save file |
 | `F10` | Rewind the logout clock by 3h **and** re-run the offline calculation (payout + popup) |
-| `G` / `T` / `B` / `A` | Grant gold, grant tokens, watch ad for the gold boost, request ascension |
-| `R` / `S` | Retry after defeat / skip to the next stage |
+| `G` / `T` / `C` | Grant test gold / prestige tokens / gems |
+| `B` / `A` / `R` / `S` | Watch ad for the gold boost, request ascension, retry after defeat, skip to the next stage |
+| `F` | Buy instant income (gem sink #2) through the real shop path |
 | `L` | Log live state (stage, economy, rates, save info) |
+
+The list above is generated from `DebugHotkeyCatalog`; the same legend is printed by the `F3` overlay and by
+`Tools/Idle RPG/Debug/Log Hotkeys`, so the three can never drift apart.
 
 **Editor menus** — see the Quick start table; `Save > Fake 3h Offline` offers the popup on the next
 launch, and `Debug > Log Live State` dumps the running game without touching the UI.

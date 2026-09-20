@@ -213,6 +213,18 @@ G5: intermittent - "Combat tick threw; skipping it and saving" (failures=13, ena
       offline regression 3h away -> 10800s / 71,678 gold through the renamed service
 - [x] regression: content validator clean, golden numbers unchanged (74s@x1.0 / 120s@x1.6, 272 gold)
 
+### 9b-2b — Dev hotkey catalogue + in-game legend  `[x]`
+- [x] `Debug/DebugHotkeyCatalog.cs`: the one list of dev keys (key + description). The F3 overlay renders it and
+      `Tools/Idle RPG/Debug/Log Hotkeys` prints it, so code/overlay/README cannot drift
+- [x] `DebugHotkeys` doc comment now points at the catalogue instead of duplicating the list
+- [x] new keys: `C` = grant gems, `F` = buy instant income (calls the same `GameManager.BuyInstantIncome` as the
+      shop button, so the key tests the real purchase path)
+- [x] `DevOverlay` grew a second panel for the legend, both panels **auto-fit** their text and re-stack, so new
+      stats lines or new keys cannot overlap
+- [x] verified live: `F3` -> stats panel h=206 at y=-8, hotkey panel h=221 at y=-220, all 12 rows listed;
+      `C` gems 270 -> 370; `F` logged `Instant income bought (F): +4.7K gold for 30 gems` (30 gems spent,
+      `InstantIncomePurchases` 0 -> 1)
+
 ### 9b-3 — Placeholder presentation hooks (audio + icons)  `[ ]`
 - [ ] `IAudioService` + `PlaceholderAudioService` + event-driven SFX cues for the 7 Step-9b events
       (hit, crit, kill, boss, level-up, claim, purchase) + volume/mute stub + PlayerPrefs wiring

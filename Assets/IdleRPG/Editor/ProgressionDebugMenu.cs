@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using IdleRPG.Core;
 using IdleRPG.Data;
+using IdleRPG.Debugging;
 using IdleRPG.Progression;
 using IdleRPG.Save;
 using IdleRPG.Utils;
@@ -280,6 +281,13 @@ namespace IdleRPG.EditorTools
                 manager.Economy.AddGold(100000d);
                 Debug.Log($"[ProgressionDebugMenu] Granted 100K gold | {manager.Economy}");
             }
+        }
+
+        [MenuItem("Tools/Idle RPG/Debug/Log Hotkeys", priority = 45)]
+        public static void LogHotkeys()
+        {
+            // Same catalogue the F3 overlay renders, so the console and the screen can never disagree.
+            Debug.Log("[ProgressionDebugMenu]\n" + DebugHotkeyCatalog.BuildLegend());
         }
 
         [MenuItem("Tools/Idle RPG/Debug/Grant 25 Tokens (Play Mode)", priority = 42)]

@@ -201,6 +201,10 @@
   is refused without paying; offline window unchanged (3h -> 10800s / 71,678 gold); validator + golden numbers
   clean.
 
+### Step 9b-2b — Dev hotkey catalogue + in-game legend  `DONE`
+- One catalogue (`DebugHotkeyCatalog`) feeds the F3 overlay legend and a debug menu printer; new `C` (gems) and
+  `F` (instant income) keys added. Overlay panels auto-fit so the legend never overlaps the stats.
+
 ### Step 9b-3 — Placeholder presentation hooks (audio + icons)  `TODO`
 - **Goal:** every place that *should* make a noise or show an icon gets the hook now, with placeholder assets;
   the real polish (sound design, final art, animations) stays in Step 20.
