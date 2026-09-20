@@ -1,11 +1,13 @@
 using IdleRPG.Data;
 using IdleRPG.Progression;
+using IdleRPG.Sim;
 
 namespace IdleRPG.Combat
 {
     /// <summary>
-    /// Runtime state of the enemy currently being fought. Pure C#; stats are derived
-    /// from <see cref="EnemyData"/> through the shared stage-scaling formulas.
+    /// Runtime state of the enemy being fought. Pure C#; stats are derived from <see cref="EnemyData"/>
+    /// through the shared stage-scaling formulas and stored in a <see cref="StatBlock"/> (Step 7a) so the
+    /// upcoming effect pipeline can read/write any stat without changing this class.
     /// </summary>
     public sealed class EnemyCombatant
     {
@@ -22,13 +24,16 @@ namespace IdleRPG.Combat
 
         public bool IsBoss { get; private set; }
 
-        public double MaxHealth { get; private set; }
+        /// <summary>Derived stats (hp/atk/def today; more stats from Step 12 on).</summary>
+        public StatBlock Stats { get; private set; }
+
+        public double MaxHealth => Stats.MaxHealth;
 
         public double CurrentHealth { get; private set; }
 
-        public double Attack { get; private set; }
+        public double Attack => Stats.Attack;
 
-        public double Defense { get; private set; }
+        public double Defense => Stats.Defense;
 
         public double AttackIntervalSec { get; private set; }
 
@@ -41,50 +46,65 @@ namespace IdleRPG.Combat
 
         public string DisplayName => Data == null ? "Enemy" : Data.EnemyName;
 
+        /// <summary>Legacy entry point: builds the rule snapshot from the MVP scaling struct.</summary>
+        public static EnemyCombatant Create(EnemyData data, int stage, bool isBoss, CombatScaling scaling, double externalGoldMultiplier)
+        {
+            return Create(data, stage, isBoss, SimRulesFactory.FromScaling(scaling), externalGoldMultiplier, scaling);
+        }
+
         /// <summary>
-        /// Creates a scaled enemy for a stage. Returns null when data is missing so the
+        /// Creates a scaled enemy from a frozen rule snapshot. Returns null when data is missing so the
         /// caller can decide how to fail safely.
         /// </summary>
-        public static EnemyCombatant Create(EnemyData data, int stage, bool isBoss, CombatScaling scaling, double externalGoldMultiplier)
+        public static EnemyCombatant Create(EnemyData data, int stage, bool isBoss, SimRules rules, double externalGoldMultiplier)
+        {
+            return Create(data, stage, isBoss, rules, externalGoldMultiplier, null);
+        }
+
+        private static EnemyCombatant Create(EnemyData data, int stage, bool isBoss, SimRules rules, double externalGoldMultiplier, CombatScaling? legacyScaling)
         {
             if (data == null)
             {
-                UnityEngine.Debug.LogError("[EnemyCombatant] Cannot spawn an enemy from a null EnemyData.");
+                SimLog.LogError("[EnemyCombatant] Cannot spawn an enemy from a null EnemyData.");
                 return null;
             }
 
+            rules = rules.Sanitized();
             int safeStage = stage < 1 ? 1 : stage;
 
-            double maxHealth = FormulaUtility.EnemyMaxHealth(data.BaseHealth, safeStage, scaling.EnemyHealthGrowth);
+            double maxHealth = FormulaUtility.EnemyMaxHealth(data.BaseHealth, safeStage, rules.EnemyHealthGrowth);
             if (isBoss)
             {
                 maxHealth *= data.BossHealthMultiplier;
             }
 
             double defense = data.BaseDefense;
-            if (scaling.ScaleEnemyDefenseWithStage)
+            if (rules.ScaleEnemyDefenseWithStage)
             {
-                defense = FormulaUtility.ScaleByStage(defense, safeStage, scaling.EnemyAttackGrowth);
+                defense = FormulaUtility.ScaleByStage(defense, safeStage, rules.EnemyAttackGrowth);
             }
+
+            double interval = data.AttackIntervalSec * rules.PaceMultiplier;   // parity: no extra clamp
 
             EnemyCombatant enemy = new EnemyCombatant
             {
                 Data = data,
                 Stage = safeStage,
                 IsBoss = isBoss,
-                MaxHealth = FormulaUtility.Sanitize(maxHealth, 1d),
-                Attack = FormulaUtility.Sanitize(FormulaUtility.EnemyAttack(data.BaseAttack, safeStage, scaling.EnemyAttackGrowth)),
-                Defense = FormulaUtility.Sanitize(defense),
-                AttackIntervalSec = data.AttackIntervalSec * scaling.PaceMultiplier,
-                GoldReward = CombatRewardCalculator.CalculateGold(data, safeStage, isBoss, scaling, externalGoldMultiplier)
+                AttackIntervalSec = interval,
+                GoldReward = legacyScaling.HasValue
+                    ? CombatRewardCalculator.CalculateGold(data, safeStage, isBoss, legacyScaling.Value, externalGoldMultiplier)
+                    : CombatRewardCalculator.CalculateGold(data, safeStage, isBoss, rules, externalGoldMultiplier)
             };
 
-            if (enemy.MaxHealth < 1d)
-            {
-                enemy.MaxHealth = 1d;
-            }
+            enemy.Stats = new StatBlock(
+                FormulaUtility.Sanitize(maxHealth, 1d),
+                FormulaUtility.Sanitize(FormulaUtility.EnemyAttack(data.BaseAttack, safeStage, rules.EnemyAttackGrowth)),
+                FormulaUtility.Sanitize(defense));
+            enemy.Stats.Sanitize();
+            enemy.Stats.MaxHealth = enemy.Stats.MaxHealth < 1d ? 1d : enemy.Stats.MaxHealth;
 
-            enemy.CurrentHealth = enemy.MaxHealth;
+            enemy.CurrentHealth = enemy.Stats.MaxHealth;
             enemy.attackTimer = enemy.AttackIntervalSec * 0.5d;
 
             return enemy;

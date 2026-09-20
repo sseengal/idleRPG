@@ -3,6 +3,7 @@
     "rootNamespace": "IdleRPG.EditorTools",
     "references": [
         "IdleRPG.Runtime",
+        "IdleRPG.Sim",
         "UnityEngine.UI",
         "Unity.TextMeshPro",
         "Unity.InputSystem"

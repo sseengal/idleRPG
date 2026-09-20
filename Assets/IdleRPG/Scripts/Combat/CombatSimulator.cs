@@ -2,6 +2,7 @@ using System;
 using IdleRPG.Core;
 using IdleRPG.Data;
 using IdleRPG.Progression;
+using IdleRPG.Sim;
 
 namespace IdleRPG.Combat
 {
@@ -18,17 +19,28 @@ namespace IdleRPG.Combat
         private ICombatStatProvider statProvider;
         private readonly EnemyTargetingMode targetingMode;
 
-        private CombatScaling scaling;
+        private SimContext context;
         private Random random;
         private HeroCombatant[] heroes = Array.Empty<HeroCombatant>();
         private int aliveHeroCount;
         private bool partyWipeRaised;
 
+        /// <summary>Legacy entry point (Step 2-6 callers): converts the scaling snapshot into a context.</summary>
         public CombatSimulator(ICombatStatProvider statProvider, EnemyTargetingMode targetingMode, CombatScaling scaling, int randomSeed)
+            : this(statProvider, targetingMode, SimContext.CreateDefault(), randomSeed)
+        {
+            ApplyScaling(scaling);
+        }
+
+        /// <summary>
+        /// Preferred constructor (Step 7a+): the caller owns the frozen rules, the mode and the caps.
+        /// The seed still comes from the caller so live and headless runs can share a sequence.
+        /// </summary>
+        public CombatSimulator(ICombatStatProvider statProvider, EnemyTargetingMode targetingMode, SimContext context, int randomSeed)
         {
             this.statProvider = statProvider ?? DefaultStatProvider.Instance;
             this.targetingMode = targetingMode;
-            this.scaling = scaling.Sanitized();
+            this.context = context ?? SimContext.CreateDefault();
             random = new Random(randomSeed);
         }
 
@@ -63,8 +75,20 @@ namespace IdleRPG.Combat
         /// <summary>Updates the tuning snapshot (called when BalanceConfig changes).</summary>
         public void ApplyScaling(CombatScaling newScaling)
         {
-            scaling = newScaling.Sanitized();
+            context.ApplyRules(SimRulesFactory.FromScaling(newScaling));
         }
+
+        /// <summary>Replaces the whole context (rules + mode + caps) - used by fast-forward and offline runs.</summary>
+        public void ApplyContext(SimContext newContext)
+        {
+            if (newContext != null)
+            {
+                context = newContext;
+            }
+        }
+
+        /// <summary>The context this simulation is running with (read-only for callers).</summary>
+        public SimContext Context => context;
 
         /// <summary>
         /// Swaps the stat source (Step 3 injects the upgrade/prestige aware resolver).
@@ -163,7 +187,7 @@ namespace IdleRPG.Combat
         /// <summary>Spawns a fresh enemy. Returns false when the enemy could not be built.</summary>
         public bool StartEncounter(EnemyData enemyData, int stage, bool isBoss, double externalGoldMultiplier = 1d)
         {
-            Enemy = EnemyCombatant.Create(enemyData, stage, isBoss, scaling, externalGoldMultiplier);
+            Enemy = EnemyCombatant.Create(enemyData, stage, isBoss, context.Rules, externalGoldMultiplier);
             partyWipeRaised = false;
             RecountAliveHeroes();
 
@@ -212,9 +236,9 @@ namespace IdleRPG.Combat
                     continue;
                 }
 
-                bool isCritical = scaling.CriticalChance > 0d && random.NextDouble() < scaling.CriticalChance;
-                double multiplier = (isCritical ? scaling.CriticalDamageMultiplier : 1d) * statProvider.GlobalDamageMultiplier;
-                double damage = FormulaUtility.Damage(hero.Attack, Enemy.Defense, scaling.MinDamageRatio, multiplier);
+                bool isCritical = context.Rules.CriticalChance > 0d && random.NextDouble() < context.Rules.CriticalChance;
+                double multiplier = (isCritical ? context.Rules.CriticalDamageMultiplier : 1d) * statProvider.GlobalDamageMultiplier;
+                double damage = FormulaUtility.Damage(hero.Attack, Enemy.Defense, context.Rules.MinDamageRatio, multiplier);
 
                 if (damage <= 0d)
                 {
@@ -248,7 +272,7 @@ namespace IdleRPG.Combat
                 return;
             }
 
-            double damage = FormulaUtility.Damage(Enemy.Attack, target.Defense, scaling.MinDamageRatio);
+            double damage = FormulaUtility.Damage(Enemy.Attack, target.Defense, context.Rules.MinDamageRatio);
             if (damage <= 0d)
             {
                 return;
@@ -335,7 +359,7 @@ namespace IdleRPG.Combat
         /// <summary>Applies the game-pace multiplier to an attack interval.</summary>
         private double ScaledInterval(double baseIntervalSec)
         {
-            double scaled = baseIntervalSec * scaling.PaceMultiplier;
+            double scaled = baseIntervalSec * context.Rules.PaceMultiplier;
             return scaled < 0.1d ? 0.1d : scaled;
         }
 

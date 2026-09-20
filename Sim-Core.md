@@ -292,6 +292,12 @@ Pace 1.6 with the shipped roster:
 Step 7 acceptance: these reproduce within a few percent (refactor is behaviour-identical) and the offline table in
 `Plan.md` §17 still matches.
 
+> **Correction (Step 7a):** the `87.8s` figure above was recorded when the stage-1 boss still had 600 HP
+> (before the x5 -> x4 boss trim), and it also ignored wave transitions. Current measured values from
+> `Tools > Idle RPG > Balance Lab > Golden Numbers` (unupgraded party, seed 12345):
+> stage 1 at pace 1.0 = **74s**, at pace 1.6 = **117.9s** (+6.6s of transition delays = the 124s analytic
+> figure), gold/stage **272**, **2.31 gold/s**. Use these as the 7b+ baseline.
+
 ## 15. Step acceptance summary (details + status in `Roadmap.md`)
 
 | Step | Sim change | Acceptance |

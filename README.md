@@ -149,4 +149,16 @@ debug menus, the console log and the Unity MCP bridge. A manual pass takes ~5 mi
 | 6 | Mobile polish (settings audit, runtime device policy, README) | done |
 | next | Art pass, real ad SDK, shop/IAP, more heroes and prestige upgrades, device builds | planned |
 
-See `Plan.md` for the full build plan, balance decisions, verification logs and open risks.
+## Design docs (post-MVP)
+
+| File | Covers |
+|---|---|
+| `Architecture.md` | layers, boundaries, data catalog, save schema v3, engineering rules, decision log |
+| `Sim-Core.md` | pure simulation design (encounters, formation, effect pipeline, abilities, statuses, ledger) |
+| `Progression.md` | currencies + sinks, tracks, roster/stars, relics, prestige layers, automation |
+| `Content.md` | zones, difficulty curves, walls, affixes, enemy archetypes, content pipeline + validator |
+| `Idle-Economy.md` | ledger rates, offline model, expeditions/bounties, ads/gems/shop, anti-abuse, telemetry |
+| `UI-UX.md` | screens, navigation, return hub, wall guidance, accessibility + localization |
+| `Roadmap.md` | ordered post-MVP backlog (Step 7-20) with acceptance tests + status board |
+
+See `Plan.md` for the MVP build journal (balance decisions, verification logs, open risks).

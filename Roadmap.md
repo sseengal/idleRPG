@@ -21,7 +21,24 @@
 
 ## 1. Foundation (behaviour-preserving)
 
-### Step 7 — Sim core refactor + Balance Lab v1  `TODO`
+### Step 7a — Sim assembly + stat primitives + Balance Lab  `DONE`
+- Delivered: `IdleRPG.Sim` asmdef (`noEngineReferences`), `SimLog`(+bridge), `SimMode`, `SimCaps`, `SimRules`,
+  `SimContext`, `IRng`/`SystemRng`, `StatId`/`StatBlock`, combatants migrated to `StatBlock`, `CombatSimulator`
+  now driven by a `SimContext`, `SimRulesFactory`, `Editor/BalanceLabMenu` (`Golden Numbers`, `Sweep Stages 1-10`).
+- Verified: stage 1 = 117.9s / 272 gold / 2.31 gold/s at pace 1.6 (+6.6s of transitions = the 124s analytic
+  baseline); stage 1 at pace 1.0 = 74s, which reconciles to the MVP's 87.8s once the old 600 HP boss is
+  accounted for; unupgraded party wipes from stage 5 (expected). Compile clean.
+
+### Step 7b — Unified combatant + encounter (still 1 enemy)  `TODO`
+- Deliverables: `Combatant`, `Encounter` + `EncounterFactory`, `DeterministicRng` (replaces `System.Random`),
+  indexed event payloads, `EncounterSimulator` rename.
+- Acceptance: re-recorded golden baseline matches the live game; offline table unchanged.
+
+### Step 7c — Director + RunController + GameManager split  `TODO`
+- Deliverables: `CombatDirector` accumulator flow, `RunController.Tick`, `GameContext`, `GameManager` < 150 lines.
+- Acceptance: identical pacing/defeat/retry in live Play; no coroutines left in the gameplay flow.
+
+### Step 7 (original scope, superseded by the splits above)  `[-]`
 - **Owner doc:** `Sim-Core.md` §2-§5, §14
 - **Goal:** introduce `SimContext` / `StatBlock` / `StatDefinition` / `Combatant` / `EncounterSimulator` /
   `CombatDirector` / `RunController` / `GameContext` with **zero behaviour change**; split `GameManager` (A6/A7);

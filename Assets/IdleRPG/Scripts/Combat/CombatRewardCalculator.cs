@@ -1,5 +1,6 @@
 using IdleRPG.Data;
 using IdleRPG.Progression;
+using IdleRPG.Sim;
 
 namespace IdleRPG.Combat
 {
@@ -18,6 +19,29 @@ namespace IdleRPG.Combat
             }
 
             double gold = FormulaUtility.EnemyGoldDrop(enemy.BaseGoldDrop, stage, scaling.EnemyGoldGrowth);
+
+            if (isBoss)
+            {
+                gold *= enemy.BossGoldMultiplier;
+            }
+
+            if (externalGoldMultiplier > 0d)
+            {
+                gold *= externalGoldMultiplier;
+            }
+
+            return FormulaUtility.Sanitize(gold);
+        }
+
+        /// <summary>Rule-snapshot overload (Step 7a): same formula, no dependence on the legacy struct.</summary>
+        public static double CalculateGold(EnemyData enemy, int stage, bool isBoss, SimRules rules, double externalGoldMultiplier)
+        {
+            if (enemy == null)
+            {
+                return 0d;
+            }
+
+            double gold = FormulaUtility.EnemyGoldDrop(enemy.BaseGoldDrop, stage, rules.Sanitized().EnemyGoldGrowth);
 
             if (isBoss)
             {

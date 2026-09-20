@@ -1,12 +1,7 @@
 {
-    "name": "IdleRPG.Runtime",
-    "rootNamespace": "IdleRPG",
-    "references": [
-        "IdleRPG.Sim",
-        "UnityEngine.UI",
-        "Unity.TextMeshPro",
-        "Unity.InputSystem"
-    ],
+    "name": "IdleRPG.Sim",
+    "rootNamespace": "IdleRPG.Sim",
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
@@ -15,5 +10,5 @@
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],
-    "noEngineReferences": false
+    "noEngineReferences": true
 }

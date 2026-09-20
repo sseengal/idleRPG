@@ -1,10 +1,14 @@
 using IdleRPG.Data;
+using IdleRPG.Sim;
 
 namespace IdleRPG.Combat
 {
     /// <summary>
-    /// Runtime state of one party member during a fight. Pure C#: no MonoBehaviour,
-    /// no scene lookup — the same object can run in the live game or in a simulation.
+    /// Runtime state of one party member during a fight. Pure C#: no MonoBehaviour, no scene lookup -
+    /// the same object runs in the live game, a fast-forward or an offline estimate.
+    ///
+    /// Stats live in a <see cref="StatBlock"/> (Step 7a) so new stats can be added without touching this
+    /// class. The legacy properties are thin aliases kept for existing callers (UI, combat log, probes).
     /// </summary>
     public sealed class HeroCombatant
     {
@@ -21,23 +25,25 @@ namespace IdleRPG.Combat
             Index = index;
             Data = data;
 
-            MaxHealth = maxHealth < 1d ? 1d : maxHealth;
-            Attack = attack < 0d ? 0d : attack;
-            Defense = defense < 0d ? 0d : defense;
-            AttackIntervalSec = attackIntervalSec < HeroData.MinAttackIntervalSec ? HeroData.MinAttackIntervalSec : attackIntervalSec;
+            Stats = new StatBlock(ClampHealth(maxHealth), ClampStat(attack), ClampStat(defense));
+            Stats.Sanitize();
+            AttackIntervalSec = ClampInterval(attackIntervalSec);
 
-            CurrentHealth = MaxHealth;
+            CurrentHealth = Stats.MaxHealth;
             // Stagger the first hit so all three heroes never swing on the same frame.
             attackTimer = AttackIntervalSec * 0.5d;
         }
 
-        public double MaxHealth { get; private set; }
+        /// <summary>Derived stats (hp/atk/def today; more stats from Step 12 on).</summary>
+        public StatBlock Stats { get; private set; }
+
+        public double MaxHealth => Stats.MaxHealth;
 
         public double CurrentHealth { get; private set; }
 
-        public double Attack { get; private set; }
+        public double Attack => Stats.Attack;
 
-        public double Defense { get; private set; }
+        public double Defense => Stats.Defense;
 
         public double AttackIntervalSec { get; private set; }
 
@@ -46,24 +52,40 @@ namespace IdleRPG.Combat
         /// <summary>Remaining health as 0..1 (safe when max health is zero).</summary>
         public double HealthPercent => MaxHealth <= 0d ? 0d : CurrentHealth / MaxHealth;
 
-        public string DisplayName => Data == null ? $"Hero {Index}" : Data.HeroName;
+        public string DisplayName => Data == null ? "Hero " + Index : Data.HeroName;
 
         /// <summary>
-        /// Re-applies derived stats (hero levels / prestige upgrades). Keeps the current
-        /// health percentage so an upgrade bought mid-fight cannot heal or kill the hero.
+        /// Re-applies derived stats (hero levels / prestige upgrades). Keeps the current health percentage
+        /// so an upgrade bought mid-fight cannot heal or kill the hero.
         /// </summary>
         public void ApplyStats(double maxHealth, double attack, double defense, double attackIntervalSec)
         {
+            StatBlock stats = new StatBlock(ClampHealth(maxHealth), ClampStat(attack), ClampStat(defense));
+            stats.Sanitize();
+            ApplyStats(stats, attackIntervalSec);
+        }
+
+        /// <summary>Stat-block overload: the pipeline may hand in any stat set.</summary>
+        public void ApplyStats(StatBlock stats, double attackIntervalSec)
+        {
+            if (stats == null)
+            {
+                return;
+            }
+
             double ratio = MaxHealth > 0d ? CurrentHealth / MaxHealth : 1d;
 
-            MaxHealth = maxHealth < 1d ? 1d : maxHealth;
-            Attack = attack < 0d ? 0d : attack;
-            Defense = defense < 0d ? 0d : defense;
-            AttackIntervalSec = attackIntervalSec < HeroData.MinAttackIntervalSec ? HeroData.MinAttackIntervalSec : attackIntervalSec;
+            Stats.CopyFrom(stats);
+            Stats.Sanitize();
+            Stats.MaxHealth = ClampHealth(Stats.MaxHealth);
+            AttackIntervalSec = ClampInterval(attackIntervalSec);
 
+            // Behaviour preserved from the MVP: a living hero keeps their health percentage, and a hero at
+            // exactly 0% is restored to full. (Step 7a is a structure-only refactor - the revive-on-upgrade
+            // quirk is logged in Checklist.md and gets a proper decision in Step 12.)
             CurrentHealth = IsAlive || ratio > 0d
-                ? Clamp(ratio * MaxHealth, MaxHealth)
-                : MaxHealth;
+                ? ClampTo(ratio * Stats.MaxHealth, Stats.MaxHealth)
+                : Stats.MaxHealth;
         }
 
         /// <summary>Advances the attack cooldown; true when a swing is ready this step.</summary>
@@ -112,11 +134,26 @@ namespace IdleRPG.Combat
         /// <summary>Full heal (stage advance, retry, or a fresh run).</summary>
         public void RestoreFullHealth()
         {
-            CurrentHealth = MaxHealth;
+            CurrentHealth = Stats.MaxHealth;
             attackTimer = AttackIntervalSec * 0.5d;
         }
 
-        private static double Clamp(double value, double maxValue)
+        private static double ClampHealth(double value)
+        {
+            return value < 1d ? 1d : value;
+        }
+
+        private static double ClampStat(double value)
+        {
+            return value < 0d ? 0d : value;
+        }
+
+        private static double ClampInterval(double value)
+        {
+            return value < HeroData.MinAttackIntervalSec ? HeroData.MinAttackIntervalSec : value;
+        }
+
+        private static double ClampTo(double value, double maxValue)
         {
             if (value < 0d)
             {
