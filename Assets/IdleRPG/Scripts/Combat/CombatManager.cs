@@ -57,8 +57,11 @@ namespace IdleRPG.Combat
 
         public double CurrentEnemyHealthPercent => simulator == null ? 0d : simulator.EnemyHealthPercent;
 
+        /// <summary>Who stands where (formation). Null = the legacy fixed lanes.</summary>
+        public Formation Formation => simulator != null ? simulator.Formation : null;
+
         /// <summary>Wires the data assets, builds the party and prepares the director.</summary>
-        public bool Initialize(BalanceConfig balance, WaveConfig waves, PartyConfig party)
+        public bool Initialize(BalanceConfig balance, WaveConfig waves, PartyConfig party, Formation formation = null)
         {
             if (balance == null || waves == null || party == null)
             {
@@ -78,7 +81,7 @@ namespace IdleRPG.Combat
             simulator.HeroDied += OnSimHeroDied;
             simulator.PartyWiped += OnSimPartyWiped;
 
-            if (!simulator.SetupParty(partyConfig))
+            if (!simulator.SetupParty(partyConfig, formation))
             {
                 return false;
             }

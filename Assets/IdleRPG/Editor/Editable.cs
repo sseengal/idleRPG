@@ -33,6 +33,35 @@ namespace IdleRPG.EditorTools
             return this;
         }
 
+        /// <summary>Sets an enum field by name ("Tank", "BacklineFirst", ...); ignores unknown names.</summary>
+        public Editable SetEnum(string fieldName, System.Enum value)
+        {
+            SerializedProperty property = Find(fieldName);
+
+            if (property != null && value != null)
+            {
+                // enumNames are the raw C# names; enumDisplayNames are prettified ("Backline First").
+                int index = System.Array.IndexOf(property.enumNames, value.ToString());
+
+                if (index < 0)
+                {
+                    index = System.Array.IndexOf(property.enumDisplayNames, value.ToString());
+                }
+
+                if (index < 0)
+                {
+                    Debug.LogWarning($"[Editable] '{value}' is not a value of {fieldName} " +
+                                     $"({string.Join(", ", property.enumNames)}).");
+                }
+                else
+                {
+                    property.enumValueIndex = index;
+                }
+            }
+
+            return this;
+        }
+
         public Editable Set(string fieldName, int value)
         {
             SerializedProperty property = Find(fieldName);
@@ -61,6 +90,29 @@ namespace IdleRPG.EditorTools
             if (property != null)
             {
                 property.boolValue = value;
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        /// Replaces a serialized array of ints (formation slot unlock stages). The array is resized first, so the
+        /// generator can grow or shrink it without leaving stale entries behind.
+        /// </summary>
+        public Editable SetIntArray(string fieldName, int[] values)
+        {
+            SerializedProperty property = Find(fieldName);
+
+            if (property == null || !property.isArray)
+            {
+                return this;
+            }
+
+            property.arraySize = values != null ? values.Length : 0;
+
+            for (int i = 0; i < property.arraySize; i++)
+            {
+                property.GetArrayElementAtIndex(i).intValue = values[i];
             }
 
             return this;

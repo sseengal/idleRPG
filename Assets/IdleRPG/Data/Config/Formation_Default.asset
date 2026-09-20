@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add7b2c9d6b7d4d41b7e6eb369a162ab, type: 3}
+  m_Name: Formation_Default
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.FormationData
+  rows: 2
+  columns: 3
+  slotUnlockStages: 01000000010000000100000001000000010000000f270000i
+  teamSizeUnlockStages: 0100000001000000010000001500000029000000i
+  backRowDamageTakenMultiplier: 0.75
+  frontRowProtectsBackRow: 1

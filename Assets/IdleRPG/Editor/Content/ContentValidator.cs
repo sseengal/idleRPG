@@ -60,11 +60,63 @@ namespace IdleRPG.EditorTools.Content
             CheckWaves(waves, enemies);
             CheckUpgrades(upgrades);
             CheckAssetsAgainstSpecs(heroes, enemies);
+            CheckFormation();
             CheckBalanceBand();
 
             WriteCsv();
             LogSummary();
             return Issues;
+        }
+
+        // ------------------------------------------------------------------
+        // Formation (Step 10a)
+        // ------------------------------------------------------------------
+        /// <summary>
+        /// Board sanity: the asset exists, the party fits on it, the unlock lists are ordered and sane, and the
+        /// row rules are inside their legal ranges. Catches a hand-edited FormationData before the sim does.
+        /// </summary>
+        private static void CheckFormation()
+        {
+            string path = "Assets/IdleRPG/Data/Config/Formation_Default.asset";
+            FormationData formation = AssetDatabase.LoadAssetAtPath<FormationData>(path);
+
+            if (formation == null)
+            {
+                Add(Severity.Error, "formation", $"No FormationData at {path}; run Tools > Idle RPG > Generate Data Assets.");
+                return;
+            }
+
+            PartyConfig party = SceneWiringUtility.LoadPartyConfig();
+            int heroes = party != null ? party.ValidHeroCount : 0;
+
+            if (formation.SlotCount < heroes)
+            {
+                Add(Severity.Error, "formation",
+                    $"Board has {formation.SlotCount} slot(s) but the party has {heroes} hero(es).");
+            }
+
+            if (formation.UnlockedSlotCount(1) < heroes)
+            {
+                Add(Severity.Error, "formation",
+                    $"Only {formation.UnlockedSlotCount(1)} slot(s) unlocked at stage 1; the party needs {heroes}.");
+            }
+
+            if (formation.MaxTeamSize(1) < heroes)
+            {
+                Add(Severity.Error, "formation",
+                    $"Team size at stage 1 is {formation.MaxTeamSize(1)}; the party has {heroes} hero(es).");
+            }
+
+            if (formation.BackRowDamageTakenMultiplier <= 0f || formation.BackRowDamageTakenMultiplier > 1f)
+            {
+                Add(Severity.Error, "formation",
+                    $"backRowDamageTakenMultiplier must be in (0, 1] but is {formation.BackRowDamageTakenMultiplier}.");
+            }
+
+            Add(Severity.Info, "formation",
+                $"board {formation.Rows}x{formation.Columns} ({formation.SlotCount} slots, " +
+                $"{formation.UnlockedSlotCount(1)} open at stage 1), team {formation.MaxTeamSize(1)} -> " +
+                $"{formation.MaxTeamSize(41)}, back-row damage x{formation.BackRowDamageTakenMultiplier}.");
         }
 
         // ------------------------------------------------------------------

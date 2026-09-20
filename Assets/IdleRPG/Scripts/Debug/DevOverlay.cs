@@ -275,6 +275,11 @@ namespace IdleRPG.DebugTools
                 builder.AppendLine($"rng state  0x{rng.State:X16}");
             }
 
+            if (context.Formation != null)
+            {
+                builder.AppendLine($"formation  {context.Formation.Describe()}");
+            }
+
             if (context.Save != null)
             {
                 builder.AppendLine($"save       {context.Save.LastLoadSource} x{context.Save.SaveCount}  {context.Save.PlayTimeSeconds:0}s played");

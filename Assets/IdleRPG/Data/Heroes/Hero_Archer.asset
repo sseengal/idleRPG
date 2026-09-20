@@ -19,4 +19,6 @@ MonoBehaviour:
   baseAttack: 8
   baseDefense: 4
   attackIntervalSec: 1
+  role: 1
+  targetRule: 3
   placeholderTint: {r: 0.35, g: 0.85, b: 0.45, a: 1}

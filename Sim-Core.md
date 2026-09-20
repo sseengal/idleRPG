@@ -136,7 +136,7 @@ Unified so targeting, effects and statuses never special-case side. Differences:
 | Rewards | none (kills reward) | `LootTable` per archetype/boss |
 | Revival | heal on stage advance (`healHeroesOnStageAdvance`) | none |
 
-Row/column rules (locked):
+Row/column rules (locked; **1/2 implemented in Step 10a**, 3/4 arrive with ranged enemies and taunts):
 
 1. Enemies with `row = Round` must be dead before `row = Back` enemies can be targeted - **unless** the attacker
    has the `Ranged` tag or the ability's target rule says otherwise (`BacklineFirst`).

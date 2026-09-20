@@ -115,13 +115,17 @@
 
 ## 2. Combat depth (the player's asks)
 
-### Step 10 — Formation: rows, slots, targeting  `TODO`
+### Step 10 — Formation: rows, slots, targeting  `IN PROGRESS`
 - **Owner doc:** `Sim-Core.md` §5-§6; `UI-UX.md` §3, §6; `Architecture.md` C1/C3
 - **Goal:** ask #1. Rows/columns, slot unlocks, row targeting rules, positional modifiers, save v3 `partySlots`.
-- **Deliverables:** `Formation`/`FormationData`; `TargetResolver` + rules; Team screen (roster + board + swap +
-  auto-arrange + presets); battle formation strip; delete `DesiredPartySize` and the fixed `heroViews[]`.
-- **Acceptance:** moving the tank to the back row makes the enemy hit the new front-most hero; back-row damage
-  reduction applies; the swap persists across save/load; presets switch in one tap.
+- **Split for testability** (the sim can be proven before any UI exists):
+  - **10a `DONE`** - model + row targeting: `FormationData`/`Formation`, row-aware `FrontMost`, `BacklineFirst`,
+    per-slot/team-size unlocks, back-row damage reduction, per-hero `role`/`targetRule`, simulator/manager wiring,
+    validator coverage. Verified: tank to back row -> enemy hits the new front-most; back-row hit x0.75 exactly;
+    exposed when the front row is empty; golden numbers unchanged.
+  - **10b `TODO`** - save v3 + `SaveMigrations.v2ToV3` + `partySlots` round-trip drift check.
+  - **10c `TODO`** - Team screen (roster/board/swap/auto-arrange/presets) + battle formation strip;
+    delete `DesiredPartySize` and the fixed `heroViews[]`; validator coverage.
 - **Blocked by:** Steps 7, 8. **Risk:** schema v3 migration - test against the existing v2 save.
 
 ### Step 11 — Multi-enemy encounters (up to 3)  `TODO`

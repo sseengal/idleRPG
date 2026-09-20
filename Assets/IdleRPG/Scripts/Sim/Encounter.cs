@@ -6,9 +6,15 @@ namespace IdleRPG.Sim
     /// <summary>How a side picks its target (data-driven per archetype/ability from Step 11 on).</summary>
     public enum TargetRule
     {
+        /// <summary>Closest to the enemy: lowest row first (front row tanks), then left to right.</summary>
         FrontMost = 0,
+
         LowestHealthPercent = 1,
-        Random = 2
+
+        Random = 2,
+
+        /// <summary>Reaches over the front row and hits the back row first - the ranged counter (Step 10).</summary>
+        BacklineFirst = 3
     }
 
     /// <summary>One hit, with explicit indices so views and the log can attribute it.</summary>
@@ -81,6 +87,15 @@ namespace IdleRPG.Sim
 
         /// <summary>How the party chooses an enemy to hit (per-hero overrides arrive in Step 11).</summary>
         public TargetRule PartyTargetRule { get; set; }
+
+        /// <summary>
+        /// Damage a back-row defender takes while its own front row still has a living member (Step 10).
+        /// 1.0 = rows carry no protection. Set from <c>FormationData</c> by the caller.
+        /// </summary>
+        public double BackRowDamageTakenMultiplier { get; set; } = 1d;
+
+        /// <summary>Off = position is cosmetic (A/B testing rows without the rules).</summary>
+        public bool FrontRowProtectsBackRow { get; set; } = true;
 
         public Combatant FirstAliveEnemy => SelectTarget(enemies, PartyTargetRule);
 
@@ -225,6 +240,9 @@ namespace IdleRPG.Sim
                 double multiplier = isCritical ? context.Rules.CriticalDamageMultiplier : 1d;
                 double damage = FormulaUtility.Damage(attacker.Attack, target.Defense, context.Rules.MinDamageRatio, multiplier);
 
+                // Row rules (Step 10): a hero in the back row takes reduced damage while the front row holds.
+                damage *= RowDamageMultiplier(defenders, target);
+
                 if (damage <= 0d)
                 {
                     continue;
@@ -272,12 +290,61 @@ namespace IdleRPG.Sim
             }
         }
 
+        /// <summary>
+        /// Row protection (Step 10): a back-row defender takes <see cref="BackRowDamageTakenMultiplier"/> damage
+        /// while its own front row still has a living member. Once the front row is empty the back row is exposed.
+        /// Returns 1 when rows do not apply (protection off, front-row target, or no row information).
+        /// </summary>
+        private double RowDamageMultiplier(Combatant[] defenders, Combatant target)
+        {
+            if (!FrontRowProtectsBackRow || BackRowDamageTakenMultiplier >= 1d)
+            {
+                return 1d;
+            }
+
+            if (target == null || target.Row != CombatRow.Back || !HasLivingRow(defenders, CombatRow.Front))
+            {
+                return 1d;
+            }
+
+            return BackRowDamageTakenMultiplier < 0d ? 0d : BackRowDamageTakenMultiplier;
+        }
+
+        private static bool HasLivingRow(Combatant[] combatants, CombatRow row)
+        {
+            if (combatants == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < combatants.Length; i++)
+            {
+                Combatant candidate = combatants[i];
+                if (candidate != null && candidate.IsAlive && candidate.Row == row)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>Picks a target for a swing (deterministic; uses the sim RNG for the Random rule).</summary>
         private Combatant SelectTarget(Combatant[] candidates, TargetRule rule)
         {
             if (candidates == null || candidates.Length == 0)
             {
                 return null;
+            }
+
+            if (rule == TargetRule.FrontMost)
+            {
+                return SelectByRow(candidates, CombatRow.Front);
+            }
+
+            if (rule == TargetRule.BacklineFirst)
+            {
+                return SelectByRow(candidates, CombatRow.Back) ?? SelectByRow(candidates, CombatRow.Front);
             }
 
             Combatant best = null;
@@ -293,13 +360,6 @@ namespace IdleRPG.Sim
                 if (best == null)
                 {
                     best = candidate;
-
-                    if (rule == TargetRule.FrontMost)
-                    {
-                        // Lowest index wins: the first alive member is the front one.
-                        return best;
-                    }
-
                     continue;
                 }
 
@@ -337,6 +397,32 @@ namespace IdleRPG.Sim
                 }
 
                 seen++;
+            }
+
+            return best;
+        }
+
+        /// <summary>
+        /// Front-most (or back-most) alive combatant of a row: lowest column wins, index breaks ties. With every
+        /// party member in the front row this is exactly the MVP's "first alive lane", so nothing changes until
+        /// the player actually moves somebody.
+        /// </summary>
+        private static Combatant SelectByRow(Combatant[] candidates, CombatRow row)
+        {
+            Combatant best = null;
+
+            for (int i = 0; i < candidates.Length; i++)
+            {
+                Combatant candidate = candidates[i];
+                if (candidate == null || !candidate.IsAlive || candidate.Row != row)
+                {
+                    continue;
+                }
+
+                if (best == null || candidate.Column < best.Column)
+                {
+                    best = candidate;
+                }
             }
 
             return best;

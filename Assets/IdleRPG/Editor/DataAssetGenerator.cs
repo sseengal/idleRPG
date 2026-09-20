@@ -54,6 +54,7 @@ namespace IdleRPG.EditorTools
                 CreateStatUpgrades();
                 CreatePrestigeUpgrades();
                 CreateCurrencies();
+                CreateFormation();
 
                 Debug.Log($"[DataAssetGenerator] Data assets ready (balance={balance.name}, heroes={heroes.Count}, enemies={enemies.Count}).");
             }
@@ -145,6 +146,28 @@ namespace IdleRPG.EditorTools
                 "bosses and expeditions (Step 13)", "ability levels");
         }
 
+        /// <summary>
+        /// Step 10a: the party board. 2 rows x 3 columns, the first three slots open from the start so the MVP's
+        /// fixed lanes are reproduced exactly; later slots open on stage milestones (zone-based unlocks arrive
+        /// with ZoneData in Step 15).
+        /// </summary>
+        private static void CreateFormation()
+        {
+            string folder = DataRoot + "/Config";
+            EnsureFolder(folder);
+
+            FormationData formation = CreateOrLoad<FormationData>(folder + "/Formation_Default.asset");
+
+            new Editable(formation)
+                .Set("rows", 2)
+                .Set("columns", 3)
+                .SetIntArray("slotUnlockStages", new[] { 1, 1, 1, 1, 1, 9999 })
+                .SetIntArray("teamSizeUnlockStages", new[] { 1, 1, 1, 21, 41 })
+                .Set("backRowDamageTakenMultiplier", 0.75f)
+                .Set("frontRowProtectsBackRow", true)
+                .Apply();
+        }
+
         private static void CreateCurrency(string folder, string fileName, string id, string displayName,
             bool isPremium, bool isImplemented, string spriteName, string earnSource, string sink)
         {
@@ -173,6 +196,8 @@ namespace IdleRPG.EditorTools
                 .Set("baseAttack", 12f)
                 .Set("baseDefense", 12f)
                 .Set("attackIntervalSec", 1.5f)
+                .SetEnum("role", IdleRPG.Data.HeroRole.Tank)
+                .SetEnum("targetRule", IdleRPG.Sim.TargetRule.FrontMost)
                 .SetSprite("heroIcon", "hero_knight")
                 .SetColor("placeholderTint", new Color(0.35f, 0.55f, 0.95f, 1f))
                 .Apply();
@@ -186,6 +211,8 @@ namespace IdleRPG.EditorTools
                 .Set("baseAttack", 8f)
                 .Set("baseDefense", 4f)
                 .Set("attackIntervalSec", 1f)
+                .SetEnum("role", IdleRPG.Data.HeroRole.Damage)
+                .SetEnum("targetRule", IdleRPG.Sim.TargetRule.BacklineFirst)
                 .SetSprite("heroIcon", "hero_archer")
                 .SetColor("placeholderTint", new Color(0.35f, 0.85f, 0.45f, 1f))
                 .Apply();
@@ -199,6 +226,8 @@ namespace IdleRPG.EditorTools
                 .Set("baseAttack", 16f)
                 .Set("baseDefense", 5f)
                 .Set("attackIntervalSec", 2f)
+                .SetEnum("role", IdleRPG.Data.HeroRole.Damage)
+                .SetEnum("targetRule", IdleRPG.Sim.TargetRule.BacklineFirst)
                 .SetSprite("heroIcon", "hero_mage")
                 .SetColor("placeholderTint", new Color(0.75f, 0.4f, 0.95f, 1f))
                 .Apply();

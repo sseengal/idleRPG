@@ -32,6 +32,9 @@ namespace IdleRPG.Core
         [SerializeField] private BalanceConfig balanceConfig;
         [SerializeField] private WaveConfig waveConfig;
         [SerializeField] private PartyConfig partyConfig;
+
+        [Tooltip("Formation board for the party (rows/columns, slot unlocks, row rules). Step 10.")]
+        [SerializeField] private FormationData formationConfig;
         [Tooltip("The three hero stat tracks (ATK / HP / DEF).")]
         [SerializeField] private List<StatUpgradeData> statUpgrades = new List<StatUpgradeData>();
         [Tooltip("The permanent upgrade tree (+% Gold, +% Damage, +% HP).")]
@@ -74,6 +77,9 @@ namespace IdleRPG.Core
         public WaveConfig WaveData => waveConfig;
 
         public PartyConfig Party => partyConfig;
+
+        /// <summary>Who stands where. Built from <see cref="formationConfig"/> on start.</summary>
+        public Formation Formation { get; private set; }
 
         public BalanceConfig Balance => balanceConfig;
 
@@ -247,6 +253,11 @@ namespace IdleRPG.Core
 
         private bool WireUp()
         {
+            if (formationConfig == null)
+            {
+                Debug.LogError("[GameManager] No FormationData assigned; the party falls back to fixed lanes.");
+            }
+
             if (balanceConfig == null || waveConfig == null || partyConfig == null)
             {
                 Debug.LogError("[GameManager] BalanceConfig / WaveConfig / PartyConfig must be assigned in the inspector.");
@@ -291,7 +302,15 @@ namespace IdleRPG.Core
                 }
             }
 
-            if (!combatManager.Initialize(balanceConfig, waveConfig, partyConfig))
+            // Step 10a: the board the party stands on. Default placement = the MVP's fixed lanes, so a fresh
+            // game behaves exactly as before until the player moves somebody.
+            if (formationConfig != null)
+            {
+                Formation = new Formation(formationConfig);
+                Formation.PlaceInDefaultSlots(partyConfig.ValidHeroCount, 1);
+            }
+
+            if (!combatManager.Initialize(balanceConfig, waveConfig, partyConfig, Formation))
             {
                 Debug.LogError("[GameManager] CombatManager failed to initialise (check PartyConfig heroes).");
                 return false;
@@ -333,12 +352,18 @@ namespace IdleRPG.Core
         /// Editor-only wiring hook used by the authoring tools. Keeps the serialized
         /// fields private while avoiding reflection/SerializedObject in scene builders.
         /// </summary>
-        public void EditorInitialize(BalanceConfig balance, WaveConfig waves, PartyConfig party, CombatManager combat)
+        public void EditorInitialize(BalanceConfig balance, WaveConfig waves, PartyConfig party, CombatManager combat,
+            FormationData formation = null)
         {
             balanceConfig = balance;
             waveConfig = waves;
             partyConfig = party;
             combatManager = combat;
+
+            if (formation != null)
+            {
+                formationConfig = formation;
+            }
         }
 #endif
 
@@ -886,6 +911,7 @@ namespace IdleRPG.Core
                 Balance = balanceConfig,
                 Waves = waveConfig,
                 Party = partyConfig,
+                Formation = Formation,
                 Combat = combatManager,
                 Economy = Economy,
                 Resolver = Resolver,

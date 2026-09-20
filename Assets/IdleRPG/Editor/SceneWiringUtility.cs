@@ -45,6 +45,10 @@ namespace IdleRPG.EditorTools
 
         public static PartyConfig LoadPartyConfig() => LoadAsset<PartyConfig>(ConfigFolder + "/PartyConfig.asset");
 
+        /// <summary>Step 10: the party board (rows/columns, unlocks, row rules).</summary>
+        public static FormationData LoadFormationConfig() =>
+            LoadAsset<FormationData>(ConfigFolder + "/Formation_Default.asset");
+
         public static List<StatUpgradeData> LoadStatTracks()
         {
             return LoadOrdered<StatUpgradeData>(ConfigFolder, "StatUpgrade_ATK", "StatUpgrade_HP", "StatUpgrade_DEF");
@@ -130,7 +134,7 @@ namespace IdleRPG.EditorTools
         /// </summary>
         public static GameManager CreateGameManagerObject(BalanceConfig balance, WaveConfig waveConfig,
             PartyConfig partyConfig, List<StatUpgradeData> statTracks, List<PrestigeUpgradeData> prestigeUpgrades,
-            bool enableDebugLogger, bool enableHotkeys)
+            bool enableDebugLogger, bool enableHotkeys, FormationData formationConfig = null)
         {
             GameObject root = new GameObject("GameManager");
 
@@ -139,7 +143,7 @@ namespace IdleRPG.EditorTools
             CombatEventLogger logger = root.AddComponent<CombatEventLogger>();
             DebugHotkeys hotkeys = root.AddComponent<DebugHotkeys>();
 
-            gameManager.EditorInitialize(balance, waveConfig, partyConfig, combatManager);
+            gameManager.EditorInitialize(balance, waveConfig, partyConfig, combatManager, formationConfig);
             gameManager.EditorInitializeProgression(statTracks, prestigeUpgrades);
             hotkeys.EditorInitialize(gameManager);
 

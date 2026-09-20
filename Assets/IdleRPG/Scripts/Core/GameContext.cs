@@ -23,6 +23,8 @@ namespace IdleRPG.Core
 
         public PartyConfig Party { get; set; }
 
+        public Formation Formation { get; set; }
+
         public CombatManager Combat { get; set; }
 
         public EconomyManager Economy { get; set; }

@@ -65,6 +65,7 @@ namespace IdleRPG.EditorTools
             BalanceConfig balance = SceneWiringUtility.LoadBalance();
             WaveConfig waveConfig = SceneWiringUtility.LoadWaveConfig();
             PartyConfig partyConfig = SceneWiringUtility.LoadPartyConfig();
+            FormationData formationConfig = SceneWiringUtility.LoadFormationConfig();
             List<StatUpgradeData> statTracks = SceneWiringUtility.LoadStatTracks();
             List<PrestigeUpgradeData> prestigeUpgrades = SceneWiringUtility.LoadPrestigeUpgrades();
 
@@ -76,7 +77,7 @@ namespace IdleRPG.EditorTools
 
             GameManager gameManager = SceneWiringUtility.CreateGameManagerObject(
                 balance, waveConfig, partyConfig, statTracks, prestigeUpgrades,
-                enableDebugLogger: false, enableHotkeys: true);
+                enableDebugLogger: false, enableHotkeys: true, formationConfig);
 
             if (gameManager.Balance == null || gameManager.Combat == null || gameManager.Party == null)
             {

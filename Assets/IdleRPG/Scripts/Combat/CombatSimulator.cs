@@ -18,6 +18,7 @@ namespace IdleRPG.Combat
     {
         private ICombatStatProvider statProvider;
         private readonly EnemyTargetingMode targetingMode;
+        private Formation formation;
 
         private SimContext context;
         private Encounter encounter;
@@ -79,6 +80,9 @@ namespace IdleRPG.Combat
 
         public HeroCombatant[] Heroes => heroes;
 
+        /// <summary>Who stands where (null until a formation is assigned).</summary>
+        public Formation Formation => formation;
+
         public bool IsEncounterActive => Enemy != null && Enemy.IsAlive && AliveHeroCount > 0;
 
         public double EnemyHealthPercent => encounter.TotalEnemyHealthPercent;
@@ -124,6 +128,16 @@ namespace IdleRPG.Combat
         /// </summary>
         public bool SetupParty(PartyConfig party)
         {
+            return SetupParty(party, null);
+        }
+
+        /// <summary>
+        /// Builds the party and stamps each hero's formation position. The array stays in **PartyConfig order**
+        /// (hero 0, 1, 2...) because that index is the hero's identity for stat levels; the row/column carries the
+        /// position the sim's targeting rules read.
+        /// </summary>
+        public bool SetupParty(PartyConfig party, Formation assignedFormation)
+        {
             if (party == null)
             {
                 SimLog.LogError("[CombatSimulator] PartyConfig is null; cannot build a party.");
@@ -159,8 +173,37 @@ namespace IdleRPG.Combat
                 index++;
             }
 
+            formation = assignedFormation;
             encounter.SetParty(heroes);
+            ApplyFormation();
             return true;
+        }
+
+        /// <summary>
+        /// Re-stamps row/column from the formation and pushes the row rules into the encounter. Called after a
+        /// party swap so the next swing already respects the new board (no rebuild, no lost health).
+        /// </summary>
+        public void ApplyFormation()
+        {
+            if (formation == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < heroes.Length; i++)
+            {
+                HeroCombatant hero = heroes[i];
+                if (hero == null)
+                {
+                    continue;
+                }
+
+                hero.Row = formation.RowOfHero(hero.SlotIndex);
+                hero.Column = formation.ColumnOfHero(hero.SlotIndex);
+            }
+
+            encounter.BackRowDamageTakenMultiplier = formation.Data.BackRowDamageTakenMultiplier;
+            encounter.FrontRowProtectsBackRow = formation.Data.FrontRowProtectsBackRow;
         }
 
         /// <summary>Re-reads derived stats from the provider while preserving each hero's health percentage.</summary>

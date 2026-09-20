@@ -11,7 +11,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **10** formation (Step 9 complete: 9a, 9b-1, 9b-2, 9b-2b, 9b-3, 9b-4) |
+| Current step | **10b** save v3 + `partySlots` persistence (10a done, 10c UI) |
 | Last completed | Step 6 (mobile polish, MVP) |
 | Next after this | 7b unified `Combatant` + `Encounter` |
 | Save schema | v2 (v3 lands in Steps 10/14 with migration) |
@@ -263,13 +263,36 @@ G5: intermittent - "Combat tick threw; skipping it and saving" (failures=13, ena
 
 ## 3. Combat depth
 
-### 10 — Formation (rows, slots, targeting)  `[ ]`
-- [ ] `Formation` + `FormationData` (rows/columns, slot unlocks, row rules, positional modifiers)
-- [ ] `TargetResolver` + `ITargetRule` set; per-hero default rule
+### 10a — Formation model + row targeting (sim)  `[x]`
+- [ ] `Data/FormationData.cs`: rows/columns, slot unlock stages, row rules (`backRowDamageTakenMultiplier`
+      0.75, `frontRowProtectsBackRow`), slot -> row/column mapping; all values data, none hardcoded in the sim
+- [ ] `Combat/Formation.cs`: runtime slot assignment (slot -> hero), `TrySwap`, `AutoArrange`, `ToSave`/`FromSave`
+      hooks, combat-order helpers; pure C#, no UI
+- [ ] `Encounter`: row-aware `SelectTarget` (`FrontMost` = lowest row first, then column) + new `BacklineFirst`
+      rule + back-row damage multiplier applied while the front row has a living member
+- [ ] `HeroData` grows `role` (Tank/Damage/Support) + `targetRule` (per-hero override lives here, wired in Step 11)
+- [ ] `CombatSimulator.SetupParty(party, formation)` stamps each hero's row/column; `CombatManager` and
+      `GameManager` carry the formation asset
+- [x] acceptance **verified live**: board `front[0 1 2] back[- - -]` on start (= the MVP's fixed lanes); moved the
+      tank to the back-left slot -> `front[- 1 2] back[0 - -]`, rows re-stamped `Knight[Back/col0]`; with
+      `FrontMost` the enemy's first hit landed on **index 1 (Archer)**, i.e. the new front-most; with
+      `BacklineFirst` it reached the back-row Knight and the sampled minimum hit went 0.9 -> **0.675 = exactly
+      x0.75**; with the front row empty the same hit stayed 0.9 (back row exposed) as Sim-Core rule 2 requires
+- [x] golden parity: Balance Lab unchanged (74s@x1.0, 120s@x1.6, 272 gold, 2.26 gold/s) and the validator is
+      clean, now with a formation line (`board 2x3, 5 slots open at stage 1, team 3 -> 5, back-row x0.75`)
+- **Design correction found by the probe:** board slots and *team size* are two different rules. The first model
+      gated the back row behind stage 21, so no player could reach the back row on day one - wrong. Now
+      `slotUnlockStages` (5 of 6 slots open from stage 1) and `teamSizeUnlockStages` (3 -> 4 @ stage 21 -> 5 @
+      stage 41, per `Progression.md`) are separate, so the acceptance test works at stage 1
+
+### 10b — Save v3 + `partySlots` persistence  `[ ]`
 - [ ] save **v3** + `SaveMigrations.v2ToV3` (`partySlots`, keyed `statLevels`, `currency[]`, `tracks[]`)
+- [ ] formation survives reload; round-trip drift check (export -> generate -> export byte-identical)
+
+### 10c — Team screen + battle formation strip  `[ ]`
 - [ ] Team screen: roster grid, formation board, tap-swap, auto-arrange, presets
 - [ ] battle formation strip; delete `DesiredPartySize` + the fixed `heroViews[]`
-- [ ] acceptance: tank to back row -> enemy hits the new front-most; persists across reload
+- [ ] validator: formation asset sane (slots >= party, unlock stages ascending, multiplier in (0,1])
 
 ### 11 — Multi-enemy encounters (up to 3)  `[ ]`
 - [ ] `Encounter` enemy list + `EncounterFactory` (spawn groups, affix, budget)
