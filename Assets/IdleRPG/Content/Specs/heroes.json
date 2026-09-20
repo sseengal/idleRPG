@@ -1,0 +1,38 @@
+{
+    "version": 1,
+    "heroes": [
+        {
+            "id": "hero_archer",
+            "asset": "Hero_Archer",
+            "displayName": "Archer",
+            "icon": "hero_archer",
+            "baseHealth": 110.0,
+            "baseAttack": 8.0,
+            "baseDefense": 4.0,
+            "attackIntervalSec": 1.0,
+            "tint": "#59D973FF"
+        },
+        {
+            "id": "hero_knight",
+            "asset": "Hero_Knight",
+            "displayName": "Knight",
+            "icon": "hero_knight",
+            "baseHealth": 240.0,
+            "baseAttack": 12.0,
+            "baseDefense": 12.0,
+            "attackIntervalSec": 1.5,
+            "tint": "#598CF2FF"
+        },
+        {
+            "id": "hero_mage",
+            "asset": "Hero_Mage",
+            "displayName": "Mage",
+            "icon": "hero_mage",
+            "baseHealth": 130.0,
+            "baseAttack": 16.0,
+            "baseDefense": 5.0,
+            "attackIntervalSec": 2.0,
+            "tint": "#BF66F2FF"
+        }
+    ]
+}

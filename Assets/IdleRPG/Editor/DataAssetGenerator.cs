@@ -12,6 +12,8 @@ namespace IdleRPG.EditorTools
     /// only their fields are refreshed, so it is safe to re-run at any time.
     ///
     /// Menu: Tools > Idle RPG > Generate Data Assets
+    ///
+    /// Field assignment goes through the shared <see cref="Editable"/> helper.
     /// </summary>
     public static class DataAssetGenerator
     {
@@ -273,144 +275,6 @@ namespace IdleRPG.EditorTools
 
             EnsureFolder(parent);
             AssetDatabase.CreateFolder(parent, leaf);
-        }
-
-        /// <summary>
-        /// Fluent <see cref="SerializedObject"/> wrapper so private [SerializeField] fields
-        /// can be authored without widening their access.
-        /// </summary>
-        private sealed class Editable
-        {
-            private readonly SerializedObject serializedObject;
-
-            public Editable(Object target)
-            {
-                serializedObject = new SerializedObject(target);
-            }
-
-            public Editable Set(string fieldName, float value)
-            {
-                SerializedProperty property = Find(fieldName);
-                if (property != null)
-                {
-                    property.floatValue = value;
-                }
-
-                return this;
-            }
-
-            public Editable Set(string fieldName, int value)
-            {
-                SerializedProperty property = Find(fieldName);
-                if (property != null)
-                {
-                    property.intValue = value;
-                }
-
-                return this;
-            }
-
-            public Editable Set(string fieldName, double value)
-            {
-                SerializedProperty property = Find(fieldName);
-                if (property != null)
-                {
-                    property.doubleValue = value;
-                }
-
-                return this;
-            }
-
-            public Editable Set(string fieldName, bool value)
-            {
-                SerializedProperty property = Find(fieldName);
-                if (property != null)
-                {
-                    property.boolValue = value;
-                }
-
-                return this;
-            }
-
-            public Editable Set(string fieldName, string value)
-            {
-                SerializedProperty property = Find(fieldName);
-                if (property != null)
-                {
-                    property.stringValue = value;
-                }
-
-                return this;
-            }
-
-            /// <summary>Assigns a generated placeholder sprite by art file name (optional).</summary>
-            public Editable SetSprite(string fieldName, string spriteName)
-            {
-                SerializedProperty property = Find(fieldName);
-                if (property == null)
-                {
-                    return this;
-                }
-
-                Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(ArtFolder + "/" + spriteName + ".png");
-                if (sprite == null)
-                {
-                    Debug.LogWarning($"[DataAssetGenerator] No art for '{spriteName}'; run Tools > Idle RPG > Art > Generate Placeholder Sprites.");
-                }
-
-                property.objectReferenceValue = sprite;
-                return this;
-            }
-
-            public Editable SetColor(string fieldName, Color value)
-            {
-                SerializedProperty property = Find(fieldName);
-                if (property != null)
-                {
-                    property.colorValue = value;
-                }
-
-                return this;
-            }
-
-            /// <summary>Replaces a List&lt;T&gt; of asset references.</summary>
-            public Editable SetObjectList<T>(string fieldName, List<T> values) where T : Object
-            {
-                SerializedProperty property = Find(fieldName);
-                if (property == null)
-                {
-                    return this;
-                }
-
-                property.ClearArray();
-                int count = values == null ? 0 : values.Count;
-                property.arraySize = count;
-
-                for (int i = 0; i < count; i++)
-                {
-                    property.GetArrayElementAtIndex(i).objectReferenceValue = values[i];
-                }
-
-                return this;
-            }
-
-            public void Apply()
-            {
-                serializedObject.ApplyModifiedPropertiesWithoutUndo();
-                EditorUtility.SetDirty(serializedObject.targetObject);
-            }
-
-            private SerializedProperty Find(string fieldName)
-            {
-                SerializedProperty property = serializedObject.FindProperty(fieldName);
-                if (property == null)
-                {
-                    Debug.LogError($"[DataAssetGenerator] Field '{fieldName}' not found on " +
-                                   $"{serializedObject.targetObject.GetType().Name} ({serializedObject.targetObject.name}).");
-                }
-
-                return property;
-            }
         }
     }
 }

@@ -1,0 +1,73 @@
+{
+    "version": 1,
+    "statUpgrades": [
+        {
+            "id": "StatUpgrade_ATK",
+            "asset": "StatUpgrade_ATK",
+            "statType": "attack",
+            "displayName": "ATK",
+            "description": "+10% of base ATK per level.",
+            "baseCost": 10.0,
+            "costGrowth": 1.0700000524520874,
+            "statGainPerLevelFraction": 0.10000000149011612,
+            "maxLevel": 0
+        },
+        {
+            "id": "StatUpgrade_DEF",
+            "asset": "StatUpgrade_DEF",
+            "statType": "defense",
+            "displayName": "DEF",
+            "description": "+15% of base DEF per level.",
+            "baseCost": 15.0,
+            "costGrowth": 1.0700000524520874,
+            "statGainPerLevelFraction": 0.15000000596046448,
+            "maxLevel": 0
+        },
+        {
+            "id": "StatUpgrade_HP",
+            "asset": "StatUpgrade_HP",
+            "statType": "health",
+            "displayName": "HP",
+            "description": "+10% of base HP per level.",
+            "baseCost": 12.0,
+            "costGrowth": 1.0700000524520874,
+            "statGainPerLevelFraction": 0.10000000149011612,
+            "maxLevel": 0
+        }
+    ],
+    "prestigeUpgrades": [
+        {
+            "id": "Prestige_Damage",
+            "asset": "Prestige_Damage",
+            "effectType": "damagepercent",
+            "displayName": "War Mastery",
+            "description": "+10% Damage per level.",
+            "baseCostTokens": 1.0,
+            "costGrowth": 1.399999976158142,
+            "effectPerLevel": 0.10000000149011612,
+            "maxLevel": 10
+        },
+        {
+            "id": "Prestige_Gold",
+            "asset": "Prestige_Gold",
+            "effectType": "goldpercent",
+            "displayName": "Gold Mastery",
+            "description": "+10% Gold per level.",
+            "baseCostTokens": 1.0,
+            "costGrowth": 1.399999976158142,
+            "effectPerLevel": 0.10000000149011612,
+            "maxLevel": 10
+        },
+        {
+            "id": "Prestige_Health",
+            "asset": "Prestige_Health",
+            "effectType": "healthpercent",
+            "displayName": "Vitality Mastery",
+            "description": "+10% HP per level.",
+            "baseCostTokens": 1.0,
+            "costGrowth": 1.399999976158142,
+            "effectPerLevel": 0.10000000149011612,
+            "maxLevel": 10
+        }
+    ]
+}

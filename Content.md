@@ -116,10 +116,18 @@ in `SimContext.Rules`.
 
 ## 8. Authoring pipeline (spec → generate → validate)
 
-1. **Spec files** live in `Assets/IdleRPG/Content/Specs/*.json` (heroes, abilities, enemies, encounters, zones,
-   affixes, tracks, loot). One file per content type; human-editable, diffable, reviewable in PRs.
-2. `ContentGenerator` (Editor menu `Tools > Idle RPG > Content > Generate From Specs`) creates/updates SO assets
-   idempotently, keyed by `id`; never deletes by default (a `--prune` toggle exists behind a confirm dialog).
+1. **Spec files** live in `Assets/IdleRPG/Content/Specs/*.json`. Shipped in Step 8a: `heroes.json`,
+   `enemies.json`, `party.json`, `waves.json`, `upgrades.json`. Still to come: abilities, encounters, zones,
+   affixes, tracks, loot. One file per content type; human-editable, diffable, reviewable in PRs.
+2. `ContentGenerator` (Editor menus `Tools > Idle RPG > Content > Export Specs From Assets` and
+   `Generate Assets From Specs`) creates/updates SO assets idempotently, keyed by `id`.
+   **Workflow:** export first (so the cards tell the truth), edit cards, generate, then export again - the
+   second export must be byte-identical, which is the drift check.
+   **Never deletes** by default, and **never writes an unresolved reference**: an unknown hero/enemy id aborts
+   that write with an error instead of silently emptying a list (learned the hard way in Step 8a).
+   Ids are lowercase and stable (save-key style); the separate `asset` field carries the Unity file name.
+   `Editor/Editable.cs` + `Editor/SoField.cs` are the shared write/read helpers for private `[SerializeField]`
+   fields, also used by `DataAssetGenerator`.
 3. `ContentValidator` (Editor menu `Tools > Idle RPG > Content > Validate`) checks:
    - unique ids per type; filenames match ids
    - every reference resolves (`abilityIds`, `lootTableId`, `encounterTableIds`, `statId`, `currencyId`, icon/sprite)

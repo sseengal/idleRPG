@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Enemy_Bat
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.EnemyData
   enemyName: Bat
+  enemyID: enemy_bat
   enemySprite: {fileID: 21300000, guid: 359611c60077a4b78b7b8a31c1ef68b4, type: 3}
   baseHealth: 90
   baseAttack: 9
@@ -22,4 +23,4 @@ MonoBehaviour:
   attackIntervalSec: 1.6
   bossHealthMultiplier: 1
   bossGoldMultiplier: 1
-  placeholderTint: {r: 0.6, g: 0.4, b: 0.3, a: 1}
+  placeholderTint: {r: 0.6, g: 0.4, b: 0.29803923, a: 1}

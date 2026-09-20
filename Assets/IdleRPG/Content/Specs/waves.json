@@ -1,0 +1,11 @@
+{
+    "version": 1,
+    "normalEnemyIds": [
+        "enemy_slime",
+        "enemy_bat",
+        "enemy_goblin"
+    ],
+    "bossEnemyIds": [
+        "boss_ogre"
+    ]
+}

@@ -11,7 +11,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **8** content pipeline tools + dev overlay (Step 7 complete) |
+| Current step | **8b** content validator + dev overlay + telemetry (8a done) |
 | Last completed | Step 6 (mobile polish, MVP) |
 | Next after this | 7b unified `Combatant` + `Encounter` |
 | Save schema | v2 (v3 lands in Steps 10/14 with migration) |
@@ -115,13 +115,30 @@ Delta vs 7a is crit-luck only (the RNG changed by design); gold/kills identical,
 -- gameplay coroutines remaining: none (only UI toast/ascension timers + the mock ad service)
 ```
 
-### 8 — Content pipeline tools + dev overlay  `[ ]`
-- [ ] `Content/Specs/*.json` for heroes / enemies / abilities / zones / loot
-- [ ] `ContentGenerator` (idempotent, keyed by id)
-- [ ] `ContentValidator` (ids, references, curves, bands) + CSV report
-- [ ] dev overlay (F3): DPS, eHP, gold/min, stage ETA
+### 8a — Spec files + generator (round-trip proven)  `[x]`
+- [x] `Editor/Content/ContentSpecs.cs` (JSON shapes: heroes, enemies, party, waves, stat + prestige upgrades)
+- [x] `Editor/Content/ContentSpecIO.cs` (paths, pretty JSON, hex colours, create-or-load, folder helper)
+- [x] `Editor/Content/ContentGenerator.cs` (Export Specs From Assets / Generate Assets From Specs)
+- [x] shared `Editor/Editable.cs` + `Editor/SoField.cs` (write/read private [SerializeField] fields)
+- [x] **never write unresolved references**: a party/pool with an unknown id now aborts the write with an
+      error instead of silently emptying the list
+- [x] verified: export -> generate -> export is **byte-identical**; Balance Lab golden numbers unchanged
+      (stage 1: 74s @x1.0, 120s @x1.6, 272 gold, 2.26 gold/s)
+- **Two real bugs caught by the round-trip test:**
+  1. `ParseEffectType` only knew "damage"/"health" while export wrote "damagepercent"/"healthpercent" ->
+     generating silently turned the Damage and Health prestige upgrades into Gold (fixed: both spellings
+     accepted; specs restored and re-applied).
+  2. normalising enemy ids (`Enemy_Slime` -> `enemy_slime`) left `waves.json` referencing the old ids, and the
+     generator wrote the resulting **empty** pools, wiping `WaveConfig` (fixed: refuse to write unresolved
+     refs; pools restored).
+- [x] conventions locked: spec `id` is lowercase/stable (save-key style), `asset` carries the file name
+
+### 8b — Validator + dev overlay + telemetry  `[ ]`
+- [ ] `ContentValidator`: unique ids, all references resolve, curves sane, hero/zone completeness,
+      orphan assets, balance bands (stage 1 = 90-180s) + CSV under `Temp/content-report.csv`
+- [ ] dev overlay (F3): party DPS, eHP, gold/min, stage ETA, wave/zone, rng state
 - [ ] local telemetry ring buffer (`Idle-Economy.md` §8)
-- [ ] validate clean on the existing catalog; regeneration reproduces today's assets
+- [ ] acceptance: `Validate` clean on the catalog; overlay numbers match Balance Lab
 
 ### 9 — Economy audit: currencies, funnel, IdleTimeService  `[ ]`
 - [ ] `CurrencyDef` rows (gold, gems, tokens, shards, materials, essence, scrolls)

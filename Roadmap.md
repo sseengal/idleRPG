@@ -65,14 +65,21 @@
   `Plan.md` §17 is unchanged; live Play still battles, buys and saves.
 - **Blocked by:** nothing. **Risk:** medium (biggest refactor) - mitigated by "no new features" scope.
 
-### Step 8 — Content pipeline tools + dev overlay  `TODO`
+### Step 8a — Spec files + generator  `DONE`
+- Delivered: `Editor/Content/ContentSpecs.cs`, `ContentSpecIO.cs`, `ContentGenerator.cs`, plus shared
+  `Editor/Editable.cs` and `Editor/SoField.cs` (extracted from `DataAssetGenerator`, which now uses them).
+- Verified: export -> generate -> export is byte-identical; Balance Lab golden numbers unchanged; two real
+  bugs caught and fixed (prestige enum spelling flip; unresolved wave references wiping `WaveConfig`).
+- Safety rule added: unresolved references abort the write with an error, never silently empty a list.
+
+### Step 8b — Validator + dev overlay + telemetry  `TODO`
 - **Owner doc:** `Content.md` §8-§10, `Architecture.md` B10
 - **Goal:** spec-driven content + validation + overlay, so every later step can add content safely.
-- **Deliverables:** `Content/Specs/*.json`; `ContentGenerator`; `ContentValidator` (report + CSV); dev overlay (F3)
-  showing DPS/eHP/gold-per-min/stage ETA from `SimLedger`; local telemetry ring buffer.
-- **Acceptance:** `Validate` clean on the existing catalog; regenerating from specs reproduces today's assets with
-  no gameplay drift.
-- **Blocked by:** Step 7 (needs `SimLedger` + the headless sim).
+- **Deliverables:** `ContentValidator` (unique ids, resolvable references, sane curves, hero/zone completeness,
+  orphan assets, balance bands) + CSV report under `Temp/content-report.csv`; dev overlay (F3) showing party DPS,
+  eHP, gold/min, stage ETA, wave/state and rng state; local telemetry ring buffer.
+- **Acceptance:** `Validate` runs clean on the shipped catalog; the overlay numbers match Balance Lab.
+- **Blocked by:** Step 8a (done).
 
 ### Step 9 — Economy audit: currencies, funnel, `IdleTimeService`  `TODO`
 - **Owner doc:** `Idle-Economy.md` §1-§3, §7; `Progression.md` §2-§3
