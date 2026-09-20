@@ -72,7 +72,15 @@
   bugs caught and fixed (prestige enum spelling flip; unresolved wave references wiping `WaveConfig`).
 - Safety rule added: unresolved references abort the write with an error, never silently empty a list.
 
-### Step 8b — Validator + dev overlay + telemetry  `TODO`
+### Step 8b — Validator + dev overlay + telemetry  `DONE`
+- Delivered: `Editor/Content/ContentValidator.cs` (8 check groups + CSV report), `Debug/TelemetryFeed.cs`
+  (in-memory ring buffer on the event bus), `Debug/DevOverlay.cs` (runtime F3 dashboard, dev builds only).
+- Verified: validator clean on the shipped catalog **and** a negative test with 4 injected faults reported all 4;
+  overlay rendered live values (`stage 88 wave 1/11`, `crit x1.05`, `pace x1.6 floor 15%`, `rng state 0x...`,
+  `save file x84`), telemetry buffered stage/defeat/save entries.
+- Debt: overlay maths moves onto `SimLedger` in Step 9.
+
+### Step 8b (original scope)  `[-]`
 - **Owner doc:** `Content.md` §8-§10, `Architecture.md` B10
 - **Goal:** spec-driven content + validation + overlay, so every later step can add content safely.
 - **Deliverables:** `ContentValidator` (unique ids, resolvable references, sane curves, hero/zone completeness,
@@ -242,6 +250,15 @@
 | Leaderboards / guilds / PvP (C5) | out of scope without a server |
 | Cosmetics store | after Step 19 |
 | Detailed analytics upload | after local telemetry proves useful |
+| **Audio system** (SFX + music + mute) - review gap G1 | nothing competes for the slot yet; needs a service + event hooks |
+| **Local notifications** (offline cap full) - G2 | needs a platform plugin + permission flow |
+| **Sim-tick error containment** (safe mode + autosave on failure) - G5 | fold into Step 9 |
+| **Save backup rotation** (3 versions) - G6 | fold into Step 9 (`SaveCoordinator`) |
+| **CI + scripted build + version policy** - G8/G9 | after the feature set stabilises, before Step 20 |
+| **Store/legal checklist** (privacy, ratings, ad disclosure, ATT) - G15 | once Step 19 exists |
+| **Settings screen** (audio/notifications/a11y/battery/language) - G4 | must be explicit in Step 20 |
+| **Device perf budgets + real art pipeline** - G11/G12 | Step 20 |
+| **Daily reset boundary decision** (UTC vs local) - G13 | Step 16 |
 
 ## 8. Definition of done (every step)
 

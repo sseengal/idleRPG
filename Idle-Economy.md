@@ -120,6 +120,8 @@ TelemetryFeed (ring buffer, ~200 entries, no allocation in the loop)
 - Purpose: tune pacing from real sessions, not vibes ("where do players stall?", "is the offline claim ever
   claimed?"). The dev overlay (F3) renders a live subset.
 - Local only, no network. An opt-in upload lands after the game proves it needs it (Step 20+).
+- **Implemented (Step 8b):** `Scripts/Debug/TelemetryFeed.cs` - 200-entry ring buffer subscribed to `GameEvents`
+  (stage, defeat, offline offer/claim, save, upgrade, ascend, boost), read by the F3 overlay. No per-frame cost.
 - Cheapest ingestion point: the same events `GameEvents` already raises; the feed just samples the interesting ones.
 
 ## 9. Config knobs (all data, no literals)

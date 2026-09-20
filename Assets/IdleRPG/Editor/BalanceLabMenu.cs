@@ -145,7 +145,7 @@ namespace IdleRPG.EditorTools
         }
 
         /// <summary>Runs a full stage (all waves + boss) headless, healing the party at the start like the game does.</summary>
-        private static StageRun RunStage(BalanceConfig balance, WaveConfig waves, PartyConfig party, int stage, double pace)
+        internal static StageRun RunStage(BalanceConfig balance, WaveConfig waves, PartyConfig party, int stage, double pace)
         {
             SimRules rules = SimRulesFactory.FromBalance(balance);
             rules.PaceMultiplier = pace;
@@ -216,7 +216,7 @@ namespace IdleRPG.EditorTools
             public bool Cleared;
         }
 
-        private struct StageRun
+        internal struct StageRun
         {
             public double Seconds;
             public int Kills;
@@ -224,7 +224,7 @@ namespace IdleRPG.EditorTools
             public bool Wiped;
         }
 
-        private static T Load<T>(string fileName) where T : Object
+        internal static T Load<T>(string fileName) where T : Object
         {
             T asset = AssetDatabase.LoadAssetAtPath<T>($"{ConfigFolder}/{fileName}.asset");
             if (asset == null)

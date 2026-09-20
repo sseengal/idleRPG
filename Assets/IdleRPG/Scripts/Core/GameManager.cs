@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using IdleRPG.Combat;
 using IdleRPG.Data;
+using IdleRPG.DebugTools;
 using IdleRPG.Economy;
 using IdleRPG.Progression;
 using IdleRPG.Save;
@@ -114,6 +115,9 @@ namespace IdleRPG.Core
         /// <summary>The single heartbeat: combat ticks + the 1s slow chores.</summary>
         public RunController Runner => runner;
 
+        /// <summary>Local session diary (in-memory ring buffer; never leaves the device).</summary>
+        public TelemetryFeed Telemetry { get; private set; }
+
         /// <summary>Save orchestration (autosave cadence, lifecycle hooks, manual saves).</summary>
         public SaveManager Save { get; private set; }
 
@@ -221,6 +225,11 @@ namespace IdleRPG.Core
             if (runner != null)
             {
                 runner.Detach();
+            }
+
+            if (Telemetry != null)
+            {
+                Telemetry.Detach();
             }
         }
 
@@ -795,7 +804,16 @@ namespace IdleRPG.Core
                 }
             }
 
+            Telemetry = new TelemetryFeed();
+            Telemetry.Attach();
+
             runner.Attach(Context, true);
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            // Dev-only dashboard (F3); never compiled into a release build.
+            DevOverlay.Create(gameObject, Context, Telemetry);
+#endif
+
             LogFlow($"Run controller attached | {Context}");
         }
 

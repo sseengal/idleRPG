@@ -11,7 +11,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **8b** content validator + dev overlay + telemetry (8a done) |
+| Current step | **9** economy audit - currencies, reward funnel, `IdleTimeService` (Step 8 complete) |
 | Last completed | Step 6 (mobile polish, MVP) |
 | Next after this | 7b unified `Combatant` + `Encounter` |
 | Save schema | v2 (v3 lands in Steps 10/14 with migration) |
@@ -133,12 +133,23 @@ Delta vs 7a is crit-luck only (the RNG changed by design); gold/kills identical,
      refs; pools restored).
 - [x] conventions locked: spec `id` is lowercase/stable (save-key style), `asset` carries the file name
 
-### 8b — Validator + dev overlay + telemetry  `[ ]`
-- [ ] `ContentValidator`: unique ids, all references resolve, curves sane, hero/zone completeness,
-      orphan assets, balance bands (stage 1 = 90-180s) + CSV under `Temp/content-report.csv`
-- [ ] dev overlay (F3): party DPS, eHP, gold/min, stage ETA, wave/zone, rng state
-- [ ] local telemetry ring buffer (`Idle-Economy.md` §8)
-- [ ] acceptance: `Validate` clean on the catalog; overlay numbers match Balance Lab
+### 8b — Validator + dev overlay + telemetry  `[x]`
+- [x] `ContentValidator` (menu `Tools > Idle RPG > Content > Validate Content`): unique ids + asset names,
+      hero/enemy numeric sanity, party lanes, wave pools, upgrade tracks, spec<->asset agreement (orphans,
+      hand edits), stage-1 balance band (90-180s) reusing the Balance Lab runner, CSV to `Temp/content-report.csv`
+- [x] **negative test passed**: 4 injected faults (unknown enemy id, empty boss pool, baseHealth -5,
+      attackIntervalSec 0.01) produced exactly 4 errors; clean run after restoring
+- [x] `Debug/TelemetryFeed.cs` - in-memory ring buffer (200) of notable events; no network, no per-frame cost
+- [x] `Debug/DevOverlay.cs` - F3 dashboard built at runtime (own canvas): enemy, stage/wave/boss, party DPS,
+      eHP + alive, enemy HP + wave ETA, gold/s + gold/min, pace + floor, rng state (hex), save info, fps
+- [x] wired in `GameManager.BuildContext()`: telemetry always, overlay inside `#if UNITY_EDITOR || DEVELOPMENT_BUILD`
+- [x] verified live: `RESULT: clean`; overlay rendered `stage 88 wave 1/11`, `crit x1.05`, `pace x1.6`,
+      `rng state 0x...`, `save file x84`
+- **Debt:** the overlay computes DPS/eHP itself until `SimLedger` exists (Step 9); it must then read the ledger
+
+### 8c — One-click checks + spec coverage for future types  `[ ]`
+- [ ] `Tools > Idle RPG > Content > Run All Checks`: validate -> round-trip -> golden numbers in one command
+- [ ] extend specs to abilities/encounters/zones/tracks/loot **as** Steps 11/13/15 introduce them
 
 ### 9 — Economy audit: currencies, funnel, IdleTimeService  `[ ]`
 - [ ] `CurrencyDef` rows (gold, gems, tokens, shards, materials, essence, scrolls)
@@ -229,7 +240,32 @@ Delta vs 7a is crit-luck only (the RNG changed by design); gold/kills identical,
 - [ ] device builds: iOS + Android full-loop verification
 - [ ] `Mobile Verify Settings` all green; 60fps idle / 30fps battery mode
 
-## 5. Cross-cutting (apply in the step that touches it)
+## 5. Gaps found in the review (not in any step yet)  `[NEW]`
+
+Found while reviewing progress against the design docs. Each needs a home in `Roadmap.md`.
+
+| # | Gap | Why it matters | Proposed home |
+|---|---|---|---|
+| G1 | **No audio at all** - no SFX/music service, no mute setting | Idle games live on feedback (hit, crit, level-up, claim); silence feels broken | new step after 19 (or fold into 20) |
+| G2 | **No local notifications** ("your offline cap is full") | Biggest single re-engagement lever for an idle game; needs a platform plugin + permission flow | new step after 19 |
+| G3 | **No first-run onboarding** - new players get no goals | The first 2 minutes decide retention; wall guidance (15) covers later sessions only | fold into 15 as "first-session goals" |
+| G4 | **No settings screen** (audio, notifications, font scale, reduced motion, battery, language) | Required before any store build; currently settings do not exist at all | part of 20, but must be explicit |
+| G5 | **Sim tick has no error containment** - one exception freezes an unattended idle game | Add try/catch in `RunController` + safe-mode skip + autosave on first failure | small; fold into 9 |
+| G6 | **Save keeps only one `.bak`** | Idle saves are played for months; rotate 3 backups + tag them with the schema version | fold into 9 (`SaveCoordinator`) |
+| G7 | **No crash/ANR reporting** | You cannot fix what you cannot see on device | fold into 19/20 |
+| G8 | **No CI or scripted build** | "Production-ready" needs `Unity -batchmode` build + tag-driven versioning + store upload stubs | new step before 20 |
+| G9 | **No version/release policy** (`bundleVersion` 0.1.0, no changelog, no save-compat promise) | Save compatibility is a promise to players; needs a written rule | part of G8 |
+| G10 | **Analytics decision unrecorded** (store privacy policy + opt-in) | Required for both stores if any telemetry leaves the device | part of 19 |
+| G11 | **Real art pipeline undefined** (atlases, import presets, Addressables later) | Placeholders are procedural; shipping art needs a policy | part of 20 |
+| G12 | **Device performance budgets not set** (draw calls, GC alloc/frame, memory) | Step 20 says "verify" but nothing to verify against | part of 20 |
+| G13 | **Daily reset boundary undefined** (UTC vs local midnight, DST) | Daily/weekly systems land in 16-17 | decide in 16 |
+| G14 | **Accessibility beyond font scale** (colorblind palette, TMP labels for screen readers, haptics toggle) | Cheap now, expensive later | part of 20 |
+| G15 | **Store/legal checklist** (privacy URL, age rating, data-safety form, ad disclosure, iOS ATT) | Blocks submission once ads/IAP exist | part of 19 |
+| G16 | **No single "run all checks" command** | Our regression net is manual today; one command makes it habitual | Step 8c |
+
+---
+
+## 6. Cross-cutting (apply in the step that touches it)
 
 - [ ] every payout path writes `SimLedger` (from Step 9 on)
 - [ ] every new screen: data-driven rows + prefab template (no fixed arrays)

@@ -113,6 +113,7 @@ condition ("2 stars", "zone 3").
 | Combat log | <= 15 visible lines, ring buffer, budgeted lines/sec |
 | Scrolls | virtualise beyond ~50 rows (roster, relics) |
 | Battery mode (B11) | 30fps target, VFX trimmed, animations simplified, log budget halved |
+| Dev overlay (F3) | runtime-built overlay canvas (sorting 500), top-left panel, 4 Hz refresh, dev builds only |
 
 ## 9. Screen work per step
 
