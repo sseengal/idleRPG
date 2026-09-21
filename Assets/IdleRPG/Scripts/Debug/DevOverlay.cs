@@ -249,7 +249,43 @@ namespace IdleRPG.DebugTools
 
             dps *= critFactor;
 
-            double enemyHealth = simulator != null && simulator.Enemy != null ? simulator.Enemy.CurrentHealth : 0d;
+            // Step 11d: the overlay used to read enemy 0 only. It now reports the whole wave (1-3 enemies),
+            // so the HP total and the ETA describe what is actually standing there.
+            double enemyHealth = 0d;
+            int livingEnemies = 0;
+            string waveLine = "wave       -";
+
+            if (simulator != null && simulator.Enemies != null && simulator.Enemies.Length > 0)
+            {
+                StringBuilder wave = new StringBuilder();
+
+                for (int i = 0; i < simulator.Enemies.Length; i++)
+                {
+                    var enemy = simulator.Enemies[i];
+
+                    if (enemy == null)
+                    {
+                        continue;
+                    }
+
+                    enemyHealth += enemy.CurrentHealth;
+
+                    if (enemy.IsAlive)
+                    {
+                        livingEnemies++;
+                    }
+
+                    if (wave.Length > 0)
+                    {
+                        wave.Append("  ");
+                    }
+
+                    wave.Append($"{enemy.DisplayName}#{i} {enemy.CurrentHealth:0.#}/{enemy.MaxHealth:0.#}");
+                }
+
+                waveLine = $"wave       {simulator.Enemies.Length} enemies ({livingEnemies} alive)  {wave}";
+            }
+
             double enemyPercent = simulator != null ? simulator.EnemyHealthPercent : 0d;
             double eta = dps > 0d ? enemyHealth / dps : 0d;
             double goldPerSecond = context.Ledger != null ? context.Ledger.GoldPerSecond : 0d;
@@ -258,10 +294,11 @@ namespace IdleRPG.DebugTools
             StringBuilder builder = new StringBuilder(420);
             builder.AppendLine("F3 DEV OVERLAY  (dev builds only)");
             builder.AppendLine($"enemy      {(combat == null ? "-" : combat.CurrentEnemyName)}");
+            builder.AppendLine(waveLine);
             builder.AppendLine($"stage      {(combat == null ? 0 : combat.CurrentStage)} wave {(combat == null ? 0 : combat.CurrentWave)}/{wavesPerStage}{(combat != null && combat.IsBossWave ? "  BOSS" : string.Empty)}");
             builder.AppendLine($"party dps  {dps:0.#}/s   (crit x{critFactor:0.###})");
             builder.AppendLine($"party ehp  {ehp:0.#}   alive {alive}/{(heroes == null ? 0 : heroes.Length)}");
-            builder.AppendLine($"enemy hp   {enemyHealth:0.#} ({enemyPercent:P0})   eta {eta:0.0}s");
+            builder.AppendLine($"enemy hp   {enemyHealth:0.#} total ({enemyPercent:P0} of wave)   eta {eta:0.0}s");
             builder.AppendLine($"gold       {goldPerSecond:0.##}/s = {goldPerSecond * 60d:0.#}/min");
 
             if (context.Ledger != null)
