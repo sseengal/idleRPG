@@ -90,7 +90,10 @@ namespace IdleRPG.Combat
         /// <summary>Updates the tuning snapshot (called when BalanceConfig changes).</summary>
         public void ApplyScaling(CombatScaling newScaling)
         {
-            context.ApplyRules(SimRulesFactory.FromScaling(newScaling));
+            // The formation owns the row rule, so it is re-stamped on top of every rules refresh.
+            SimRules rules = SimRulesFactory.FromScaling(newScaling);
+            rules.BackRowTargetWeight = formation != null ? formation.Data.BackRowTargetWeight : rules.BackRowTargetWeight;
+            context.ApplyRules(rules);
         }
 
         /// <summary>Replaces the whole context (rules + rng + mode + caps) - fast-forward and offline runs.</summary>
@@ -174,14 +177,15 @@ namespace IdleRPG.Combat
             }
 
             formation = assignedFormation;
+            StampFormationRules();
             encounter.SetParty(heroes);
             ApplyFormation();
             return true;
         }
 
         /// <summary>
-        /// Re-stamps row/column from the formation and pushes the row rules into the encounter. Called after a
-        /// party swap so the next swing already respects the new board (no rebuild, no lost health).
+        /// Re-stamps each hero's rank/position from the board. Called after a swap so the next swing already
+        /// respects the new layout (no rebuild, no lost health).
         /// </summary>
         public void ApplyFormation()
         {
@@ -198,12 +202,25 @@ namespace IdleRPG.Combat
                     continue;
                 }
 
-                hero.Row = formation.RowOfHero(hero.SlotIndex);
-                hero.Column = formation.ColumnOfHero(hero.SlotIndex);
+                hero.Row = formation.RankOfHero(hero.SlotIndex);
+                hero.Column = formation.PositionOfHero(hero.SlotIndex);
+            }
+        }
+
+        /// <summary>
+        /// Copies the board's row rule into the frozen rules snapshot. Done here (not by the caller) so a fight can
+        /// never run with a stale weighting because somebody forgot a call.
+        /// </summary>
+        private void StampFormationRules()
+        {
+            if (formation == null)
+            {
+                return;
             }
 
-            encounter.BackRowDamageTakenMultiplier = formation.Data.BackRowDamageTakenMultiplier;
-            encounter.FrontRowProtectsBackRow = formation.Data.FrontRowProtectsBackRow;
+            SimRules rules = context.Rules;
+            rules.BackRowTargetWeight = formation.Data.BackRowTargetWeight;
+            context.ApplyRules(rules);
         }
 
         /// <summary>Re-reads derived stats from the provider while preserving each hero's health percentage.</summary>

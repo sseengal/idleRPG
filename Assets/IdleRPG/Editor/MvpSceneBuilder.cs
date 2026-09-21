@@ -98,7 +98,7 @@ namespace IdleRPG.EditorTools
             GameObject managementPage = CreatePage("ManagementPage", safeArea);
 
             BuildViewport(battlePage.GetComponent<RectTransform>(), damageRoot,
-                out FormationStripUI formationStrip, out EnemyUnitView enemyView,
+                out FormationBoardView formationBoard, out EnemyUnitView enemyView,
                 out FloatingDamageTextPool damagePool, out RectTransform enemyAnchor);
             CombatLogUI combatLog = BuildCombatLog(battlePage.GetComponent<RectTransform>());
             TabController tabs = BuildManagementPage(managementPage.GetComponent<RectTransform>(), partyConfig, prestigeUpgrades);
@@ -108,11 +108,11 @@ namespace IdleRPG.EditorTools
             EnsureEventSystem();
 
             SceneWiringUtility.SetField(hud, "gameManager", gameManager);
-            SceneWiringUtility.SetField(hud, "formationStrip", formationStrip);
+            SceneWiringUtility.SetField(hud, "formationBoard", formationBoard);
             SceneWiringUtility.SetField(hud, "enemyView", enemyView);
             SceneWiringUtility.SetField(hud, "damageTextPool", damagePool);
             SceneWiringUtility.SetField(damagePool, "enemyAnchor", enemyAnchor);
-            SceneWiringUtility.SetField(formationStrip, "damagePool", damagePool, required: false);
+            SceneWiringUtility.SetField(formationBoard, "damagePool", damagePool, required: false);
 
             EditorUtility.SetDirty(hud);
             EditorUtility.SetDirty(combatLog);
@@ -368,7 +368,7 @@ namespace IdleRPG.EditorTools
         }
 
         private static void BuildViewport(RectTransform pageRoot, RectTransform damageRoot,
-            out FormationStripUI formationStrip, out EnemyUnitView enemyView, out FloatingDamageTextPool damagePool,
+            out FormationBoardView formationBoard, out EnemyUnitView enemyView, out FloatingDamageTextPool damagePool,
             out RectTransform enemyAnchor)
         {
             GameObject viewport = UiFactory.Node("Viewport", pageRoot);
@@ -378,18 +378,17 @@ namespace IdleRPG.EditorTools
             background.sprite = UiFactory.LoadSprite("combat_bg");
             UiFactory.Stretch(background.rectTransform);
 
-            // Step 10c: the party board is not a fixed set of lanes any more - FormationStripUI draws one view
-            // per formation slot (rows and columns straight from FormationData) and owns tap-to-swap. The old
-            // HeroLane0..2 hierarchy and its damage anchors are gone: anchors now follow the hero, not the slot.
-            GameObject stripObject = UiFactory.Node("FormationStrip", viewport.transform);
-            RectTransform stripRect = stripObject.GetComponent<RectTransform>();
-            stripRect.anchorMin = new Vector2(0.01f, 0.5f);
-            stripRect.anchorMax = new Vector2(0.01f, 0.5f);
-            stripRect.pivot = new Vector2(0f, 0.5f);
-            stripRect.anchoredPosition = Vector2.zero;
-            stripRect.sizeDelta = new Vector2(560f, 420f);
+            // The party board is drawn in code from FormationData: two vertical columns (front rank nearest the
+            // enemy, back rank behind it), one view per slot. Display only - swapping lives on the Party screen.
+            GameObject boardObject = UiFactory.Node("FormationBoard", viewport.transform);
+            RectTransform boardRect = boardObject.GetComponent<RectTransform>();
+            boardRect.anchorMin = new Vector2(0.01f, 0.5f);
+            boardRect.anchorMax = new Vector2(0.01f, 0.5f);
+            boardRect.pivot = new Vector2(0f, 0.5f);
+            boardRect.anchoredPosition = Vector2.zero;
+            boardRect.sizeDelta = new Vector2(320f, 470f);
 
-            formationStrip = stripObject.AddComponent<FormationStripUI>();
+            formationBoard = boardObject.AddComponent<FormationBoardView>();
 
             enemyView = BuildEnemySlot(viewport.transform);
 
@@ -462,7 +461,7 @@ namespace IdleRPG.EditorTools
             GameObject panelsRoot = UiFactory.Node("Panels", shell.transform);
             UiFactory.Anchor(panelsRoot.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, 10f, 10f, 10f, 10f);
 
-            GameObject teamPanel = BuildTeamPanel(panelsRoot.transform);
+            GameObject partyPanel = BuildPartyPanel(panelsRoot.transform);
             GameObject upgradePanel = BuildUpgradePanel(panelsRoot.transform, partyConfig);
             GameObject ascensionPanel = BuildAscensionPanel(panelsRoot.transform, prestigeUpgrades);
             GameObject shopPanel = BuildShopPanel(panelsRoot.transform);
@@ -471,7 +470,7 @@ namespace IdleRPG.EditorTools
             // ScreenController drives these panels through the TabController below.
             List<TabController.TabDefinition> definitions = new List<TabController.TabDefinition>
             {
-                CreatePanelTab(teamPanel),
+                CreatePanelTab(partyPanel),
                 CreatePanelTab(upgradePanel),
                 CreatePanelTab(ascensionPanel),
                 CreatePanelTab(shopPanel)
@@ -482,14 +481,14 @@ namespace IdleRPG.EditorTools
         }
 
         /// <summary>
-        /// The TEAM tab panel. The board itself is built at runtime by <see cref="TeamPanelUI"/>, so adding a row, a
-        /// column or a preset never means re-authoring the scene.
+        /// The PARTY tab panel. The board, the roster and the hero card are built at runtime by
+        /// <see cref="PartyPanelUI"/>, so adding a row (a stat, an equipment slot) never means re-authoring a scene.
         /// </summary>
-        private static GameObject BuildTeamPanel(Transform parent)
+        private static GameObject BuildPartyPanel(Transform parent)
         {
-            GameObject panel = UiFactory.Node("TeamPanel", parent);
+            GameObject panel = UiFactory.Node("PartyPanel", parent);
             UiFactory.Stretch(panel.GetComponent<RectTransform>());
-            panel.AddComponent<TeamPanelUI>();
+            panel.AddComponent<PartyPanelUI>();
             return panel;
         }
 
@@ -501,7 +500,7 @@ namespace IdleRPG.EditorTools
             UiFactory.Anchor(bar.rectTransform, Vector2.zero, new Vector2(1f, NavBarTop), 14f, 10f, 14f, 6f);
             ScreenController controller = bar.gameObject.AddComponent<ScreenController>();
 
-            string[] labels = { "BATTLE", "TEAM", "UPGRADES", "ASCEND", "SHOP" };
+            string[] labels = { "BATTLE", "PARTY", "UPGRADES", "ASCEND", "SHOP" };
             Button[] buttons = new Button[labels.Length];
             Image[] backgrounds = new Image[labels.Length];
             TextMeshProUGUI[] buttonLabels = new TextMeshProUGUI[labels.Length];

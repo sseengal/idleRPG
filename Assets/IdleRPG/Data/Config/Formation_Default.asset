@@ -12,9 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: add7b2c9d6b7d4d41b7e6eb369a162ab, type: 3}
   m_Name: Formation_Default
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.FormationData
-  rows: 2
-  columns: 3
-  slotUnlockStages: 01000000010000000100000001000000010000000f270000i
-  teamSizeUnlockStages: 0100000001000000010000001500000029000000i
-  backRowDamageTakenMultiplier: 0.75
-  frontRowProtectsBackRow: 1
+  frontSlots: 3
+  backSlots: 3
+  backRowTargetWeight: 0.35

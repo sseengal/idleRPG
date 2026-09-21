@@ -37,8 +37,12 @@ namespace IdleRPG.Sim
         public double PaceMultiplier;
 
         // --- Formation (used from Step 10) ---
-        /// <summary>Damage the back row takes while the front row still has a living member.</summary>
-        public double BackRowDamageTakenMultiplier;
+        /// <summary>
+        /// How attractive the back rank is relative to the front rank (1 = front) when an attacker picks a target.
+        /// The back row is hit *less often*, never for less damage - damage maths is untouched by position.
+        /// 0 = strict front rank (the back rank is only reached when the front rank is empty).
+        /// </summary>
+        public double BackRowTargetWeight;
 
         public static SimRules Default
         {
@@ -58,7 +62,7 @@ namespace IdleRPG.Sim
                     CriticalChance = 0.05d,
                     CriticalDamageMultiplier = 2d,
                     PaceMultiplier = 1d,
-                    BackRowDamageTakenMultiplier = 0.75d
+                    BackRowTargetWeight = 0.35d
                 };
             }
         }
@@ -78,7 +82,8 @@ namespace IdleRPG.Sim
             safe.ArmorCap = Clamp01(safe.ArmorCap);
             safe.CriticalChance = Clamp01(safe.CriticalChance);
             safe.CriticalDamageMultiplier = safe.CriticalDamageMultiplier < 1d ? 1d : safe.CriticalDamageMultiplier;
-            safe.BackRowDamageTakenMultiplier = Clamp01(safe.BackRowDamageTakenMultiplier);
+            // 0..1 inclusive: 0 means "only reachable once the front rank is gone", 1 means "equal odds".
+            safe.BackRowTargetWeight = Clamp01(safe.BackRowTargetWeight);
 
             if (safe.PaceMultiplier < 0.25d)
             {

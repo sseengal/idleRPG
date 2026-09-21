@@ -299,10 +299,10 @@ namespace IdleRPG.Core
             if (formationConfig != null)
             {
                 Formation = new Formation(formationConfig);
-                Formation.PlaceInDefaultSlots(partyConfig.ValidHeroCount, 1);
+                Formation.PlaceInDefaultSlots(partyConfig.ValidHeroCount);
 
-                // Any swap (the Team screen in Step 10c, or a debug tool) marks the save dirty; Save is null
-                // during this first placement, which the null-conditional handles.
+                // Any swap (the Party screen, or a debug tool) marks the save dirty and re-stamps the fight; Save
+                // is null during this first placement, which the null-conditional handles.
                 Formation.Changed += OnFormationChanged;
             }
 
@@ -851,10 +851,12 @@ namespace IdleRPG.Core
                 return;
             }
 
-            // Formation first: the board has to be right before the party is built from it.
-            if (Formation != null && data.partySlots != null && data.partySlots.Count > 0)
+            // Formation first: the board has to be right before the party is built from it. The hero count is the
+            // roster size, so a hero missing from an older save lands in a free slot instead of vanishing.
+            if (Formation != null)
             {
-                Formation.ApplySlotArray(data.partySlots.ToArray());
+                int rosterSize = partyConfig != null ? partyConfig.Heroes.Count : 0;
+                Formation.ApplySlotArray(data.partySlots != null ? data.partySlots.ToArray() : null, rosterSize);
             }
 
             CurrentStage = Mathf.Max(1, data.currentStage);

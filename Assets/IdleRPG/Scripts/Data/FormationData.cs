@@ -4,163 +4,87 @@ using IdleRPG.Sim;
 namespace IdleRPG.Data
 {
     /// <summary>
-    /// The party's battle formation: how many rows/columns exist, when each slot unlocks, and the row rules.
+    /// The party's battle formation: how many heroes stand in each rank and how attractive the back rank is.
     ///
-    /// ELI5: a football pitch painted on the ground. The pitch says how many spots there are, which spots you
-    /// are allowed to use yet, and what happens to a player standing at the back (they take less of a beating,
-    /// as long as somebody is still standing at the front to block for them).
+    /// ELI5: two lines of defence. The front rank is what enemies aim at; the back rank stands behind it, so it
+    /// gets picked *less often* - not hit softer (a landed hit always does full damage). New heroes always start in
+    /// the front rank, so a fresh game plays exactly as it did before formation existed.
     ///
-    /// Everything here is **data**: the sim reads these numbers, it never hardcodes a row count or a damage
-    /// multiplier. Balance can be changed without touching code, which is the same rule as heroes and enemies.
+    /// Deliberately tiny: the board is a fixed two-by-three, every slot is usable, and the numbers live in data so
+    /// balance never touches code. Team size (3 -> 4 -> 5) is a *roster* rule owned by Step 17, not a board rule.
     /// </summary>
     [CreateAssetMenu(fileName = "FormationData", menuName = "Idle RPG/Data/Formation", order = 16)]
     public class FormationData : ScriptableObject
     {
-        public const int MaxRows = 2;
-        public const int MaxColumns = 3;
+        public const int RankCount = 2;
+        public const int MaxSlotsPerRank = 4;
 
-        [Header("Layout")]
-        [Tooltip("1 or 2. Row 0 is the front row (takes the hits); row 1 is the back row.")]
-        [SerializeField] private int rows = 2;
+        [Header("Board")]
+        [Tooltip("Heroes per rank. Rank 0 = front, rank 1 = back. Every slot is available from the start.")]
+        [SerializeField] private int frontSlots = 3;
 
-        [Tooltip("Columns per row: how many heroes can stand side by side.")]
-        [SerializeField] private int columns = 2;
+        [SerializeField] private int backSlots = 3;
 
-        [Header("Unlocks")]
-        [Tooltip("Highest stage needed for each board slot to be usable, in slot order (slot 0 = front-left). " +
-                 "Default: both rows are painted from the start and only the last spot is gated. Board slots and " +
-                 "team size are different rules - see teamSizeUnlockStages.")]
-        [SerializeField] private int[] slotUnlockStages = { 1, 1, 1, 1, 1, 9999 };
-
-        [Tooltip("How many heroes may stand on the board, per unlock. Default: 3 at start, 4th at stage 21 " +
-                 "(zone 2), 5th at stage 41 (zone 4) - the Progression.md team-size rule.")]
-        [SerializeField] private int[] teamSizeUnlockStages = { 1, 1, 1, 21, 41 };
-
-        [Header("Row rules")]
-        [Tooltip("Damage a back-row hero takes while its front row still has a living member (design: 0.75).")]
+        [Header("Row rule")]
+        [Tooltip("How attractive the back rank is when an attacker picks a target (front rank = 1). 0.35 means " +
+                 "roughly one swing in four goes to the back rank. 0 = strict front rank.")]
         [Range(0f, 1f)]
-        [SerializeField] private float backRowDamageTakenMultiplier = 0.75f;
+        [SerializeField] private float backRowTargetWeight = 0.35f;
 
-        [Tooltip("Off = rows are cosmetic and position carries no protection (useful for A/B testing).")]
-        [SerializeField] private bool frontRowProtectsBackRow = true;
+        public int FrontSlots => Mathf.Clamp(frontSlots, 1, MaxSlotsPerRank);
 
-        public int Rows => Mathf.Clamp(rows, 1, MaxRows);
+        public int BackSlots => Mathf.Clamp(backSlots, 1, MaxSlotsPerRank);
 
-        public int Columns => Mathf.Clamp(columns, 1, MaxColumns);
+        /// <summary>Slots per rank when reading/writing an index (both ranks share one width).</summary>
+        public int SlotsPerRank => Mathf.Max(FrontSlots, BackSlots);
 
-        /// <summary>Total slots on the board (rows x columns).</summary>
-        public int SlotCount => Rows * Columns;
+        public int SlotCount => SlotsPerRank * RankCount;
 
-        public float BackRowDamageTakenMultiplier => Mathf.Clamp(backRowDamageTakenMultiplier, 0f, 1f);
+        /// <summary>How attractive the back rank is relative to the front rank (1 = equal odds).</summary>
+        public float BackRowTargetWeight => Mathf.Clamp01(backRowTargetWeight);
 
-        public bool FrontRowProtectsBackRow => frontRowProtectsBackRow;
-
-        /// <summary>Slots unlocked at a given progress point (highest stage reached).</summary>
-        public int UnlockedSlotCount(int highestStageReached)
+        /// <summary>Rank of a slot index: 0 = front, 1 = back, -1 = out of range.</summary>
+        public int RankOfSlot(int slotIndex)
         {
-            int safeStage = Mathf.Max(1, highestStageReached);
-
-            if (slotUnlockStages == null || slotUnlockStages.Length == 0)
-            {
-                return SlotCount;
-            }
-
-            int unlocked = 0;
-
-            for (int i = 0; i < slotUnlockStages.Length && i < SlotCount; i++)
-            {
-                if (slotUnlockStages[i] <= safeStage)
-                {
-                    unlocked++;
-                }
-            }
-
-            return unlocked;
+            return slotIndex < 0 || slotIndex >= SlotCount ? -1 : slotIndex / SlotsPerRank;
         }
 
-        public bool IsSlotUnlocked(int slotIndex, int highestStageReached)
+        /// <summary>Vertical position of a slot within its rank (0 = closest to the enemy).</summary>
+        public int PositionOfSlot(int slotIndex)
         {
-            return slotIndex >= 0 && slotIndex < UnlockedSlotCount(highestStageReached);
+            return slotIndex < 0 || slotIndex >= SlotCount ? -1 : slotIndex % SlotsPerRank;
         }
 
-        /// <summary>
-        /// How many heroes may be fielded at a given progress point (3 at the start, 4 after zone 2, 5 after
-        /// zone 4 by default). This is the *team size* rule and it is separate from which board slots exist, so a
-        /// player with three heroes can already choose to stand one of them in the back row on day one.
-        /// </summary>
-        public int MaxTeamSize(int highestStageReached)
+        public CombatRow RowOfSlot(int slotIndex)
         {
-            int safeStage = Mathf.Max(1, highestStageReached);
+            return RankOfSlot(slotIndex) == 1 ? CombatRow.Back : CombatRow.Front;
+        }
 
-            if (teamSizeUnlockStages == null || teamSizeUnlockStages.Length == 0)
+        public int SlotIndexOf(CombatRow row, int position)
+        {
+            int rank = row == CombatRow.Back ? 1 : 0;
+            return rank * SlotsPerRank + Mathf.Clamp(position, 0, SlotsPerRank - 1);
+        }
+
+        /// <summary>True when this slot belongs to a rank that has that many heroes' worth of room.</summary>
+        public bool IsSlotInUse(int slotIndex)
+        {
+            int rank = RankOfSlot(slotIndex);
+
+            if (rank < 0)
             {
-                return SlotCount;
+                return false;
             }
 
-            int allowed = 0;
-
-            for (int i = 0; i < teamSizeUnlockStages.Length; i++)
-            {
-                if (teamSizeUnlockStages[i] <= safeStage)
-                {
-                    allowed++;
-                }
-            }
-
-            return Mathf.Clamp(allowed, 0, SlotCount);
-        }
-
-        /// <summary>Row a slot belongs to. Slots are laid out row-major: 0..Columns-1 = front row.</summary>
-        public CombatRow RowForSlot(int slotIndex)
-        {
-            return RowIndexForSlot(slotIndex) == 0 ? CombatRow.Front : CombatRow.Back;
-        }
-
-        public int RowIndexForSlot(int slotIndex)
-        {
-            if (slotIndex < 0)
-            {
-                return 0;
-            }
-
-            return Mathf.Clamp(slotIndex / Columns, 0, Rows - 1);
-        }
-
-        public int ColumnForSlot(int slotIndex)
-        {
-            if (slotIndex < 0)
-            {
-                return 0;
-            }
-
-            return Mathf.Clamp(slotIndex % Columns, 0, Columns - 1);
-        }
-
-        /// <summary>First slot index of a row (used by auto-arrange and the UI board).</summary>
-        public int FirstSlotOfRow(int rowIndex)
-        {
-            return Mathf.Clamp(rowIndex, 0, Rows - 1) * Columns;
+            int position = PositionOfSlot(slotIndex);
+            return position < (rank == 0 ? FrontSlots : BackSlots);
         }
 
         private void OnValidate()
         {
-            rows = Mathf.Clamp(rows, 1, MaxRows);
-            columns = Mathf.Clamp(columns, 1, MaxColumns);
-
-            if (slotUnlockStages == null || slotUnlockStages.Length == 0)
-            {
-                slotUnlockStages = new[] { 1 };
-            }
-
-            if (teamSizeUnlockStages == null || teamSizeUnlockStages.Length == 0)
-            {
-                teamSizeUnlockStages = new[] { 1 };
-            }
-
-            for (int i = 0; i < slotUnlockStages.Length; i++)
-            {
-                slotUnlockStages[i] = Mathf.Max(1, slotUnlockStages[i]);
-            }
+            frontSlots = Mathf.Clamp(frontSlots, 1, MaxSlotsPerRank);
+            backSlots = Mathf.Clamp(backSlots, 1, MaxSlotsPerRank);
+            backRowTargetWeight = Mathf.Clamp01(backRowTargetWeight);
         }
     }
 }

@@ -18,8 +18,8 @@ namespace IdleRPG.UI
         [SerializeField] private GameManager gameManager;
 
         [Header("Views")]
-        [Tooltip("The party board (Step 10c). It builds one view per formation slot at runtime.")]
-        [SerializeField] private FormationStripUI formationStrip;
+        [Tooltip("The battle board (display only): one view per formation slot, built at runtime.")]
+        [SerializeField] private FormationBoardView formationBoard;
         [SerializeField] private EnemyUnitView enemyView;
         [SerializeField] private FloatingDamageTextPool damageTextPool;
 
@@ -28,8 +28,8 @@ namespace IdleRPG.UI
         /// <summary>The damage-number pool (the Team board feeds it its anchors too).</summary>
         public FloatingDamageTextPool DamageTextPool => damageTextPool;
 
-        /// <summary>The party board (Step 10c).</summary>
-        public FormationStripUI FormationStrip => formationStrip;
+        /// <summary>The battle board (display only; the Party tab owns editing).</summary>
+        public FormationBoardView FormationBoard => formationBoard;
 
         private void Awake()
         {
@@ -49,10 +49,10 @@ namespace IdleRPG.UI
                 return;
             }
 
-            // The formation strip owns one view per board slot and refreshes itself on every board change.
-            if (formationStrip != null)
+            // The board owns one view per slot and refreshes itself on every board change.
+            if (formationBoard != null)
             {
-                formationStrip.Build(gameManager, damageTextPool);
+                formationBoard.Build(gameManager, damageTextPool);
             }
         }
 

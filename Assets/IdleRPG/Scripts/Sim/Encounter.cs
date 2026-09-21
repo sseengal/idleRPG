@@ -89,13 +89,11 @@ namespace IdleRPG.Sim
         public TargetRule PartyTargetRule { get; set; }
 
         /// <summary>
-        /// Damage a back-row defender takes while its own front row still has a living member (Step 10).
-        /// 1.0 = rows carry no protection. Set from <c>FormationData</c> by the caller.
+        /// Row targeting weight, mirrored from <see cref="SimRules.BackRowTargetWeight"/> so a fight reads it the
+        /// same way it reads every other tuning value. Position changes *who gets picked*, never how hard they
+        /// are hit.
         /// </summary>
-        public double BackRowDamageTakenMultiplier { get; set; } = 1d;
-
-        /// <summary>Off = position is cosmetic (A/B testing rows without the rules).</summary>
-        public bool FrontRowProtectsBackRow { get; set; } = true;
+        public double BackRowTargetWeight => context.Rules.BackRowTargetWeight;
 
         public Combatant FirstAliveEnemy => SelectTarget(enemies, PartyTargetRule);
 
@@ -240,9 +238,6 @@ namespace IdleRPG.Sim
                 double multiplier = isCritical ? context.Rules.CriticalDamageMultiplier : 1d;
                 double damage = FormulaUtility.Damage(attacker.Attack, target.Defense, context.Rules.MinDamageRatio, multiplier);
 
-                // Row rules (Step 10): a hero in the back row takes reduced damage while the front row holds.
-                damage *= RowDamageMultiplier(defenders, target);
-
                 if (damage <= 0d)
                 {
                     continue;
@@ -291,23 +286,50 @@ namespace IdleRPG.Sim
         }
 
         /// <summary>
-        /// Row protection (Step 10): a back-row defender takes <see cref="BackRowDamageTakenMultiplier"/> damage
-        /// while its own front row still has a living member. Once the front row is empty the back row is exposed.
-        /// Returns 1 when rows do not apply (protection off, front-row target, or no row information).
+        /// Row-aware, weighted target selection. The front rank is the preferred target; the back rank is picked
+        /// with probability <c>weight / (weight + 1)</c> per swing, so standing behind the tank means being hit
+        /// *less often* - never for less damage.
+        ///
+        /// Once a rank has no living member the other rank takes every swing (nobody becomes untargetable), which
+        /// is why this can never return null while anyone is alive.
         /// </summary>
-        private double RowDamageMultiplier(Combatant[] defenders, Combatant target)
+        private Combatant SelectByRowWeight(Combatant[] candidates)
         {
-            if (!FrontRowProtectsBackRow || BackRowDamageTakenMultiplier >= 1d)
+            bool frontAlive = HasLivingRow(candidates, CombatRow.Front);
+            bool backAlive = HasLivingRow(candidates, CombatRow.Back);
+
+            if (!frontAlive && !backAlive)
             {
-                return 1d;
+                return null;
             }
 
-            if (target == null || target.Row != CombatRow.Back || !HasLivingRow(defenders, CombatRow.Front))
+            if (!backAlive)
             {
-                return 1d;
+                return SelectByRow(candidates, CombatRow.Front);
             }
 
-            return BackRowDamageTakenMultiplier < 0d ? 0d : BackRowDamageTakenMultiplier;
+            if (!frontAlive)
+            {
+                return SelectByRow(candidates, CombatRow.Back);
+            }
+
+            double weight = context.Rules.BackRowTargetWeight;
+
+            if (weight <= 0d)
+            {
+                return SelectByRow(candidates, CombatRow.Front);
+            }
+
+            if (weight >= 1d)
+            {
+                // Equal odds: coin flip between the ranks, then the front-most of the chosen rank.
+                CombatRow pick = context.Rng.NextDouble() < 0.5d ? CombatRow.Front : CombatRow.Back;
+                return SelectByRow(candidates, pick);
+            }
+
+            double backChance = weight / (weight + 1d);
+            CombatRow chosen = context.Rng.NextDouble() < backChance ? CombatRow.Back : CombatRow.Front;
+            return SelectByRow(candidates, chosen);
         }
 
         private static bool HasLivingRow(Combatant[] combatants, CombatRow row)
@@ -320,6 +342,7 @@ namespace IdleRPG.Sim
             for (int i = 0; i < combatants.Length; i++)
             {
                 Combatant candidate = combatants[i];
+
                 if (candidate != null && candidate.IsAlive && candidate.Row == row)
                 {
                     return true;
@@ -339,7 +362,7 @@ namespace IdleRPG.Sim
 
             if (rule == TargetRule.FrontMost)
             {
-                return SelectByRow(candidates, CombatRow.Front);
+                return SelectByRowWeight(candidates);
             }
 
             if (rule == TargetRule.BacklineFirst)

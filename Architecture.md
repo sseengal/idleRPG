@@ -348,8 +348,11 @@ ui             { lastScreenIndex, settings{...} }
 | B16 | `ResetGame()` = fresh install (save + backups + prefs + scene reload); `DeleteSave()` only removes the file | 9b-4 | **Landed 9b-4** |
 | B17 | Save schema v3 adds `partySlots`; an empty layout means "default front row", so upgraders keep their behaviour | 10b | **Landed 10b** |
 | B18 | A schema change ships with a migration **and** an exporter/importer drift check (`Save > Round-Trip Drift Test`) | 10b | Locked |
-| B19 | Party UI is built in code from `FormationData` (one view per slot); the scene only provides the host node, so a bigger board or a new preset is a data/code change, never a scene rebuild | 10c | Locked |
-| B20 | Damage numbers anchor to the **hero**, not the lane: exactly one board (the battle strip) feeds the pool | 10c | Locked |
+| B19 | Party UI is built in code from `FormationData` (one view per slot); the scene only provides the host node, so a bigger board is a data change, never a scene rebuild | 10c | Locked |
+| B20 | Damage numbers anchor to the **hero**, not the lane: exactly one board (the battle board) feeds the pool | 10c | Locked |
+| B21 | Formation is **edited only on the Party tab**; the battle board is display-only (no Button components at all) | 10d | Locked |
+| B22 | Rows change **targeting frequency, never damage**: `SimRules.BackRowTargetWeight`, and the other rank is always eligible so nobody is untargetable | 10d | Locked |
+| B23 | The board is a vertical two-column layout (front rank nearest the enemy); data stores rank+position only, presentation owns orientation | 10d | Locked |
 | B14 | Codex/bestiary doubles as the difficulty-hint system | 18 | Locked |
 
 ### 6.4 Removals / avoid

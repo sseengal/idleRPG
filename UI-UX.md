@@ -25,10 +25,10 @@ MVP shell today: header + Battle/Management pages + nav (BATTLE / UPGRADES / ASC
 Target shell adds depth without nav explosion:
 
 ```
-Bottom nav (max 5):  BATTLE | TEAM | GROW | ASCEND | SHOP
-                     (Step 10c ships BATTLE | TEAM | UPGRADES | ASCEND | SHOP; GROW/ascension-tree splitting is Step 21)
+Bottom nav (max 5):  BATTLE | PARTY | GROW | ASCEND | SHOP
+                     (Step 10d ships BATTLE | PARTY | UPGRADES | ASCEND | SHOP; the GROW split is Step 21)
   BATTLE  encounter view, formation strip, combat log, affix chips, speed toggle
-  TEAM    roster grid, formation board, hero detail, presets
+  PARTY   roster list, formation board (the only place heroes are moved), hero card: stats now, gear/abilities later
   GROW    upgrades, abilities, relics, automation (one segmented control, data-driven lists)
   ASCEND  ascension (L1), transcendence (L2), prestige trees, milestones
   SHOP    gem sinks, rewarded ads, season pass, no-ads
@@ -44,8 +44,9 @@ close is always top-left, primary button reachable one-handed (1080x1920 referen
 ┌ header: gold | gems | stage/wave | boost chip | speed ┐
 │           ENEMY ROW   [E1] [E2] [E3]                  │  1-3 enemy views, HP bars, status icons
 │                                                       │
-│     FRONT ROW   [H1] [H2] [H3]                        │  formation rows, tap to swap
-│     BACK ROW    [H4] [H5]        (locked slot)        │
+│   BACK  FRONT                                         │  two vertical columns, FRONT nearest the enemy,
+│   [H4]  [H1]                                          │  positions stacked downwards; nothing to tap here
+│   [H5]  [H2]                                          │  (display only - swapping happens on the PARTY tab)
 │                                                       │
 │ combat log (scrollable, per-enemy attribution)         │
 │ affix chips (opt-in difficulty)      [SPEED x1/x2]     │
@@ -54,8 +55,8 @@ close is always top-left, primary button reachable one-handed (1080x1920 referen
 
 - Damage numbers: pooled + aggregated per target (3 heroes x 3 enemies would be 9 streams), capped per second.
 - Statuses: up to 3 icons per unit with stack count; tap a unit for a bottom-sheet inspect (combat keeps running).
-- Formation swap: tap hero, then tap slot (no drag needed - reliable on small screens); 1-tap auto-arrange + presets
-  (farm / boss / expedition).
+- Formation swap happens on the **PARTY** tab only: tap hero, then tap any slot (occupied = swap, empty = move, the
+  old slot is vacated). No drag, no auto-arrange, no presets - position is the player's call (Step 10d).
 - Defeat feedback: retry banner shows "you were X% short" from `EncounterResult`.
 
 ## 4. Return hub & offline claim (B1)

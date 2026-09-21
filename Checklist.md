@@ -11,7 +11,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **11** multi-enemy encounters (Step 10 complete: 10a, 10b, 10c) |
+| Current step | **11** multi-enemy encounters (Step 10 complete: 10a, 10b, 10c-reworked-as-10d) |
 | Last completed | Step 6 (mobile polish, MVP) |
 | Next after this | 7b unified `Combatant` + `Encounter` |
 | Save schema | v2 (v3 lands in Steps 10/14 with migration) |
@@ -307,7 +307,9 @@ G5: intermittent - "Combat tick threw; skipping it and saving" (failures=13, ena
       of v3 - nothing needs it yet, and reshaping live data would risk the very saves the step is protecting. It
       lands with the systems that need it (relics/abilities), as an additive migration of its own
 
-### 10c — Team screen + battle formation strip  `[x]`
+### 10c — Team screen + battle formation strip  `[~] superseded by 10d`
+> Kept for the record. The locked slots, the two preset buttons, the tap-swap on the battle screen and the
+> `FormationStripUI` option flags were all removed in 10d after review - see below.
 - [x] `UI/FormationStripUI.cs`: one view **per formation slot**, built in code from `FormationData` (rows and
       columns straight from the asset), tap-hero-then-tap-slot swapping, `LOCKED` slots refused with a toast,
       selected slot highlighted; works as the battle strip (health bars) or the Team board (role tags)
@@ -328,6 +330,39 @@ G5: intermittent - "Combat tick threw; skipping it and saving" (failures=13, ena
 - **Bugs found and fixed by the probes:** the hidden Team board was overriding the damage-number anchors (it now
       passes `null`); `HeroUnitView.Apply()` and the strip were writing the *same* label, so role tags never
       showed (slots now have a view-owned `Name` and a strip-owned `Caption`)
+
+### 10d — Formation rework (review fixes)  `[x]`
+- [x] **Rows now change *who gets picked*, never how hard they are hit.** `backRowDamageTakenMultiplier` and
+      `frontRowProtectsBackRow` are gone; `SimRules.BackRowTargetWeight` (0.35) replaces them: per swing the
+      attacker draws a rank with `weight / (weight + 1)` odds for the back rank, then takes the front-most hero of
+      that rank. No damage maths touches position any more
+- [x] **Stall bug fixed**: `FrontMost` used to return `null` when the front rank was empty, and `ResolvePhase`
+      `return`ed - so a party hiding behind a dead front line was never attacked again (the fight only ended via
+      the boss timer). Selection now falls back to the other rank, so nobody is untargetable
+- [x] **Duplicated-hero bug fixed**: empty slots were only disabled, never blanked, so a moved hero kept rendering
+      in his old slot. `HeroUnitView.ClearVisual()` now blanks icon/name/HP and both boards call it
+- [x] **Battle screen is display-only**: `FormationBoardView` builds slots with **no Button components at all**, so
+      a stray tap during a fight cannot reshuffle the team
+- [x] **Editing lives only on the Party tab** (nav label `TEAM` -> `PARTY`, `TeamPanelUI` -> `PartyPanelUI`)
+- [x] **Board is vertical**: front and back rank are two *columns* (front nearest the enemy on the right), positions
+       stack downwards. One shared `FormationBoardLayout` draws both boards so they cannot drift
+- [x] **No locked slots, no presets, no auto-arrange**: every slot is usable from the first minute;
+      `AutoArrange`/`ArrangeTankInBack`/`MaxTeamSize`/both unlock arrays deleted. Team size 3 -> 4 -> 5 is parked
+      as a **Step 17 roster rule** (recorded there), not a board rule
+- [x] **Party tab planned for what is coming**: board + roster rows (name, role, rank+position, hp/atk) + a hero
+      card (stats today, 4 reserved gear slots for Step 18). All rows are built from data, so later systems append
+      rows instead of redesigning the screen
+- [x] **`SimRules` owns the row rule** (stamped from the formation asset by the simulator), so a fight can never run
+      with stale weighting because a caller forgot a push
+- [x] verified live: board `front[- 0 1] back[2 - -]`; back-rank share of enemy swings **28.0%** over 25 swings
+      vs **25.9%** expected (weight 0.35); back-rank hit damage `1.0 == formula x1.0` -> **no reduction**; front rank
+      killed -> **9 swings still landed**, all on the lone back-rank hero (old code: 0); battle board `0` buttons and
+      mirrors the Party board exactly; party tap-swap moved the Knight and the vacated slot read `empty` with the
+      hero appearing exactly once; save `partySlots: [-1,0,1,2,-1,-1]` and the validator line reads
+      `board front 3 / back 3 (6 slots, all usable), back-rank target weight 0.35`
+- [x] regression: validator clean, golden numbers unchanged (74s@x1.0 / 120s@x1.6, 272 gold), save drift PASS
+- **Notes:** the default layout (front rank first) keeps the unupgraded MVP party entirely in the front rank, which
+      is why golden parity survives untouched; `HeroData.targetRule` is still inert (wired in Step 11)
 
 ### 11 — Multi-enemy encounters (up to 3)  `[ ]`
 - [ ] `Encounter` enemy list + `EncounterFactory` (spawn groups, affix, budget)

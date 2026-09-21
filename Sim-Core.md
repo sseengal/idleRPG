@@ -136,14 +136,17 @@ Unified so targeting, effects and statuses never special-case side. Differences:
 | Rewards | none (kills reward) | `LootTable` per archetype/boss |
 | Revival | heal on stage advance (`healHeroesOnStageAdvance`) | none |
 
-Row/column rules (locked; **1/2 implemented in Step 10a**, 3/4 arrive with ranged enemies and taunts):
+Row rules (implemented in Step 10d; the details below are the model the sim obeys today):
 
-1. Enemies with `row = Round` must be dead before `row = Back` enemies can be targeted - **unless** the attacker
-   has the `Ranged` tag or the ability's target rule says otherwise (`BacklineFirst`).
-2. Party back row takes `backRowDamageTakenMultiplier` (default 0.75) damage while its front row has a living
-   member; once the front row is empty the back row is exposed at 1.0.
-3. A `Ranged` enemy always ignores row protection when picking its target (it is the counter to a stacked back row).
-4. Taunt/guard statuses force targeting regardless of row rules (they are how tanks keep working late game).
+1. **Position never changes damage.** A landed hit does exactly what the damage formula says, wherever the target
+   stands. Rows only decide *who* gets picked.
+2. **The back rank is picked less often**: per swing the attacker draws a rank with `BackRowTargetWeight`
+   (`w / (w + 1)` odds for the back rank, default 0.35 ~= one swing in four), then takes the front-most living
+   hero of that rank. `w = 0` means "strict front rank".
+3. **Nobody is ever untargetable**: when one rank has no living member the other rank takes every swing - including
+   the case where a lone hero hides behind a dead front line (this used to stall the fight).
+4. `BacklineFirst` (ranged attackers, Step 11) reaches over the front rank first, then falls back to it.
+5. Taunt/guard statuses will force targeting regardless of the rule (Step 12).
 
 ## 6. Targeting
 

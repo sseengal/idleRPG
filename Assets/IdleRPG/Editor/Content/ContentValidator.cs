@@ -95,28 +95,15 @@ namespace IdleRPG.EditorTools.Content
                     $"Board has {formation.SlotCount} slot(s) but the party has {heroes} hero(es).");
             }
 
-            if (formation.UnlockedSlotCount(1) < heroes)
+            if (formation.BackRowTargetWeight > 1f)
             {
                 Add(Severity.Error, "formation",
-                    $"Only {formation.UnlockedSlotCount(1)} slot(s) unlocked at stage 1; the party needs {heroes}.");
-            }
-
-            if (formation.MaxTeamSize(1) < heroes)
-            {
-                Add(Severity.Error, "formation",
-                    $"Team size at stage 1 is {formation.MaxTeamSize(1)}; the party has {heroes} hero(es).");
-            }
-
-            if (formation.BackRowDamageTakenMultiplier <= 0f || formation.BackRowDamageTakenMultiplier > 1f)
-            {
-                Add(Severity.Error, "formation",
-                    $"backRowDamageTakenMultiplier must be in (0, 1] but is {formation.BackRowDamageTakenMultiplier}.");
+                    $"backRowTargetWeight must be in [0, 1] but is {formation.BackRowTargetWeight}.");
             }
 
             Add(Severity.Info, "formation",
-                $"board {formation.Rows}x{formation.Columns} ({formation.SlotCount} slots, " +
-                $"{formation.UnlockedSlotCount(1)} open at stage 1), team {formation.MaxTeamSize(1)} -> " +
-                $"{formation.MaxTeamSize(41)}, back-row damage x{formation.BackRowDamageTakenMultiplier}.");
+                $"board front {formation.FrontSlots} / back {formation.BackSlots} ({formation.SlotCount} slots, " +
+                $"all usable), back-rank target weight {formation.BackRowTargetWeight:0.##}.");
         }
 
         // ------------------------------------------------------------------
@@ -230,6 +217,7 @@ namespace IdleRPG.EditorTools.Content
             // The board (Step 10) decides how many heroes fit - not a hardcoded party size.
             FormationData formation = AssetDatabase.LoadAssetAtPath<FormationData>("Assets/IdleRPG/Data/Config/Formation_Default.asset");
             int boardSlots = formation != null ? formation.SlotCount : PartyConfig.FallbackPartySize;
+
 
             if (file.heroIds.Count > boardSlots)
             {

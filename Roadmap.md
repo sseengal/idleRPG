@@ -126,9 +126,11 @@
   - **10b `DONE`** - save v3 + `partySlots` + `SaveMigrations.v2ToV3` + a save round-trip drift tool
     (`Save > Round-Trip Drift Test`). Verified: the layout survives a real relaunch, the dirty flag fires on a
     swap, and an older v2 file upgrades additive-only with 0 lines lost.
-  - **10c `DONE`** - battle formation strip + TEAM tab (roster, board, tap-swap, two presets), built in code from
-    `FormationData`; `DesiredPartySize` and the fixed lanes/`heroViews[]` are gone; damage anchors follow heroes.
-    Verified live with real button taps; validator + golden numbers + save drift all clean.
+  - **10c `SUPERSEDED`** - first cut of the board + TEAM tab. Shipped locked slots, presets and battle-screen
+    tap-swap; all removed in 10d. Kept in history only.
+  - **10d `DONE`** - formation rework: rows change targeting *frequency* (not damage), the front-rank-empty stall
+    bug and the duplicated-hero bug are fixed, the board is a vertical two-column layout, battle is display-only,
+    editing is Party-only, all slots usable, presets deleted. Party tab structured for stats/gear rows.
 - **Blocked by:** Steps 7, 8. **Risk:** schema v3 migration - test against the existing v2 save.
 
 ### Step 11 — Multi-enemy encounters (up to 3)  `TODO`

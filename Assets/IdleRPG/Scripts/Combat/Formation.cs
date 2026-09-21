@@ -5,18 +5,15 @@ using IdleRPG.Sim;
 namespace IdleRPG.Combat
 {
     /// <summary>
-    /// Who stands where. The board comes from <see cref="FormationData"/>; this class only remembers which hero
-    /// occupies which slot and answers the questions the sim and the UI ask.
+    /// Who stands where. The board shape and the row rule live in <see cref="FormationData"/>; this class only
+    /// records the assignment and answers questions.
     ///
-    /// ELI5: the coach's clipboard. It does not decide the rules - the pitch does - it just records "Knight
-    /// front-left, Archer back-left, nobody back-right" and can swap two names in one move.
-    ///
-    /// Pure C# and no Unity: it can be tested, saved and reasoned about without a scene. Swapping raises
-    /// <see cref="Changed"/> so the save can be marked dirty.
+    /// ELI5: the coach's clipboard. "Knight and Archer in the front line, Mage behind them." One move operation,
+    /// no rules of its own, no Unity - so it can be saved, logged and reasoned about on its own.
     /// </summary>
     public sealed class Formation
     {
-        /// <summary>-1 = empty slot.</summary>
+        /// <summary>PartyConfig index per slot (rank-major). -1 = empty.</summary>
         private readonly int[] heroBySlot;
 
         private readonly FormationData data;
@@ -26,100 +23,108 @@ namespace IdleRPG.Combat
             this.data = data != null ? data : throw new ArgumentNullException(nameof(data));
 
             heroBySlot = new int[this.data.SlotCount];
-            for (int i = 0; i < heroBySlot.Length; i++)
-            {
-                heroBySlot[i] = -1;
-            }
+            ClearSlots();
         }
 
-        /// <summary>Raised after any successful placement or swap (the save listens to this).</summary>
+        /// <summary>Raised after any change (the save marks itself dirty, the fight re-stamps its rows).</summary>
         public event Action Changed;
 
         public FormationData Data => data;
 
         public int SlotCount => heroBySlot.Length;
 
-        /// <summary>Hero occupying a slot, or -1 when empty. The value is the PartyConfig index.</summary>
+        /// <summary>Hero occupying a slot, or -1 when empty.</summary>
         public int HeroAt(int slotIndex)
         {
             return slotIndex >= 0 && slotIndex < heroBySlot.Length ? heroBySlot[slotIndex] : -1;
         }
 
-        /// <summary>Slot a hero occupies, or -1 when unplaced.</summary>
+        /// <summary>Slot a hero occupies, or -1 when the hero is not on the board.</summary>
         public int SlotOfHero(int heroIndex)
         {
-            for (int i = 0; i < heroBySlot.Length; i++)
+            for (int slot = 0; slot < heroBySlot.Length; slot++)
             {
-                if (heroBySlot[i] == heroIndex)
+                if (heroBySlot[slot] == heroIndex)
                 {
-                    return i;
+                    return slot;
                 }
             }
 
             return -1;
         }
 
-        public CombatRow RowOfHero(int heroIndex)
+        public CombatRow RankOfHero(int heroIndex)
         {
             int slot = SlotOfHero(heroIndex);
-            return slot < 0 ? CombatRow.Front : data.RowForSlot(slot);
+            return slot < 0 ? CombatRow.Front : data.RowOfSlot(slot);
         }
 
-        public int ColumnOfHero(int heroIndex)
+        /// <summary>Vertical position of a hero inside its rank (0 = closest to the enemy).</summary>
+        public int PositionOfHero(int heroIndex)
         {
             int slot = SlotOfHero(heroIndex);
-            return slot < 0 ? heroIndex : data.ColumnForSlot(slot);
+            return slot < 0 ? heroIndex : data.PositionOfSlot(slot);
+        }
+
+        public int FrontCount
+        {
+            get
+            {
+                int count = 0;
+                for (int slot = 0; slot < heroBySlot.Length; slot++)
+                {
+                    if (heroBySlot[slot] >= 0 && data.RowOfSlot(slot) == CombatRow.Front)
+                    {
+                        count++;
+                    }
+                }
+
+                return count;
+            }
+        }
+
+        public int BackCount => PlacedCount - FrontCount;
+
+        public int PlacedCount
+        {
+            get
+            {
+                int count = 0;
+                for (int slot = 0; slot < heroBySlot.Length; slot++)
+                {
+                    if (heroBySlot[slot] >= 0)
+                    {
+                        count++;
+                    }
+                }
+
+                return count;
+            }
         }
 
         /// <summary>
-        /// The standard start: hero 0..N-1 into slot 0..N-1 (front row, left to right) - exactly the MVP's fixed
-        /// lanes, so a fresh game behaves identically to before formation existed.
+        /// The one move operation: put a hero in a slot. An empty slot simply receives the hero; an occupied slot
+        /// swaps the two, so the source slot is always vacated. Returns false only for out-of-range input.
         /// </summary>
-        public void PlaceInDefaultSlots(int heroCount, int highestStageReached = 1)
+        public bool TryMove(int heroIndex, int targetSlot)
         {
-            ClearSlots();
-
-            int fielded = Math.Min(heroCount, data.MaxTeamSize(highestStageReached));
-            int rooms = Math.Max(1, Math.Min(fielded, data.UnlockedSlotCount(highestStageReached)));
-
-            for (int hero = 0; hero < fielded; hero++)
-            {
-                // Overflow (more heroes than rooms) stacks from slot 0 rather than dropping the hero.
-                int slot = hero < rooms ? hero : hero % rooms;
-                heroBySlot[slot] = hero;
-            }
-
-            Changed?.Invoke();
-        }
-
-        /// <summary>How many heroes may be fielded at a given progress point (team size, not board size).</summary>
-        public int MaxTeamSize(int highestStageReached)
-        {
-            return data.MaxTeamSize(highestStageReached);
-        }
-
-        /// <summary>
-        /// Moves a hero into a slot. Returns false when the slot is locked or out of range. If the target is
-        /// occupied the two heroes trade places (a tap-swap is two placements).
-        /// </summary>
-        public bool TryMoveHero(int heroIndex, int targetSlot, int highestStageReached = int.MaxValue)
-        {
-            if (heroIndex < 0 || targetSlot < 0 || targetSlot >= heroBySlot.Length)
-            {
-                return false;
-            }
-
-            if (!data.IsSlotUnlocked(targetSlot, highestStageReached))
+            if (heroIndex < 0 || targetSlot < 0 || targetSlot >= heroBySlot.Length || !data.IsSlotInUse(targetSlot))
             {
                 return false;
             }
 
             int fromSlot = SlotOfHero(heroIndex);
+
+            if (fromSlot == targetSlot)
+            {
+                return false;
+            }
+
             int displaced = heroBySlot[targetSlot];
 
             if (fromSlot >= 0)
             {
-                heroBySlot[fromSlot] = displaced;
+                heroBySlot[fromSlot] = displaced;   // -1 when the target was empty: the old slot is vacated
             }
 
             heroBySlot[targetSlot] = heroIndex;
@@ -127,139 +132,36 @@ namespace IdleRPG.Combat
             return true;
         }
 
-        /// <summary>Swaps whatever is in two slots (either may be empty).</summary>
-        public bool TrySwapSlots(int slotA, int slotB)
-        {
-            if (slotA < 0 || slotB < 0 || slotA >= heroBySlot.Length || slotB >= heroBySlot.Length || slotA == slotB)
-            {
-                return false;
-            }
-
-            int temp = heroBySlot[slotA];
-            heroBySlot[slotA] = heroBySlot[slotB];
-            heroBySlot[slotB] = temp;
-            Changed?.Invoke();
-            return true;
-        }
-
-        private void ClearSlots()
-        {
-            for (int i = 0; i < heroBySlot.Length; i++)
-            {
-                heroBySlot[i] = -1;
-            }
-        }
-
         /// <summary>
-        /// Auto-arrange: the heaviest heroes move to the front row, ordered left to right.
-        /// <paramref name="weight"/> is the sorting key - the caller passes "how much can this hero take".
+        /// Default layout: hero 0, 1, 2... fill the front rank first, then the back rank. This is exactly the
+        /// MVP's fixed lanes, so a fresh run behaves as it always did until the player moves somebody.
         /// </summary>
-        public void AutoArrange(int heroCount, Func<int, double> weight)
+        public void PlaceInDefaultSlots(int heroCount)
         {
-            int[] order = new int[Math.Max(0, heroCount)];
-
-            for (int hero = 0; hero < order.Length; hero++)
-            {
-                order[hero] = hero;
-            }
-
-            if (weight != null)
-            {
-                // Insertion sort: 3-6 heroes, clarity beats cleverness, and equal weights keep their order.
-                for (int i = 1; i < order.Length; i++)
-                {
-                    int current = order[i];
-                    double currentWeight = weight(current);
-                    int j = i - 1;
-
-                    while (j >= 0 && weight(order[j]) < currentWeight)
-                    {
-                        order[j + 1] = order[j];
-                        j--;
-                    }
-
-                    order[j + 1] = current;
-                }
-            }
-
             ClearSlots();
 
-            int rooms = Math.Max(1, heroBySlot.Length);
+            int slots = Math.Min(Math.Max(0, heroCount), heroBySlot.Length);
 
-            for (int i = 0; i < order.Length; i++)
+            for (int hero = 0; hero < slots; hero++)
             {
-                // Slot 0..N-1 in sorted order: heaviest first (front row), which is the tank's job.
-                heroBySlot[i < rooms ? i : i % rooms] = order[i];
+                heroBySlot[DefaultSlotFor(hero)] = hero;
             }
 
             Changed?.Invoke();
         }
 
-        /// <summary>
-        /// The "hide the tank" preset: the heaviest hero goes to the back row and everyone else fills the front.
-        /// Useful for testing ranged enemies and for squishy-composition play, and it needs no stored layout.
-        /// </summary>
-        public void ArrangeTankInBack(int heroCount, Func<int, double> weight)
+        /// <summary>Front rank in order, then back rank in order (purely to make the default layout obvious).</summary>
+        private int DefaultSlotFor(int order)
         {
-            int[] order = new int[Math.Max(0, heroCount)];
-
-            for (int hero = 0; hero < order.Length; hero++)
+            if (order < data.FrontSlots)
             {
-                order[hero] = hero;
+                return order;
             }
 
-            if (weight != null)
-            {
-                for (int i = 1; i < order.Length; i++)
-                {
-                    int current = order[i];
-                    double currentWeight = weight(current);
-                    int j = i - 1;
-
-                    while (j >= 0 && weight(order[j]) < currentWeight)
-                    {
-                        order[j + 1] = order[j];
-                        j--;
-                    }
-
-                    order[j + 1] = current;
-                }
-            }
-
-            ClearSlots();
-
-            int rooms = Math.Max(1, heroBySlot.Length);
-            int backRowStart = data.Rows > 1 ? data.FirstSlotOfRow(1) : rooms - 1;
-            int cursor = 0;
-
-            for (int i = 0; i < order.Length; i++)
-            {
-                int slot;
-
-                if (i == 0 && order.Length > 1)
-                {
-                    // The tankiest hero takes the back-left slot; the rest queue up in the front row.
-                    slot = Math.Min(backRowStart, rooms - 1);
-                }
-                else
-                {
-                    // Skip whatever slot the tank already occupies.
-                    if (cursor == Math.Min(backRowStart, rooms - 1))
-                    {
-                        cursor++;
-                    }
-
-                    slot = cursor < rooms ? cursor : cursor % rooms;
-                    cursor = slot + 1;
-                }
-
-                heroBySlot[slot] = order[i];
-            }
-
-            Changed?.Invoke();
+            return data.SlotsPerRank + (order - data.FrontSlots);
         }
 
-        /// <summary>Slot layout for saves and tooling ("-1" = empty slot).</summary>
+        /// <summary>Slot layout for saves and tooling ("-1" = empty).</summary>
         public int[] ToSlotArray()
         {
             int[] copy = new int[heroBySlot.Length];
@@ -268,46 +170,99 @@ namespace IdleRPG.Combat
         }
 
         /// <summary>
-        /// Restores a saved layout, ignoring anything out of range or duplicated, so a hand-edited save can never
-        /// put two heroes in one slot.
+        /// Restores a saved layout. Out-of-range, out-of-shape and duplicated entries are ignored, so a hand-edited
+        /// save can never put two heroes in one slot or drop one off the board.
         /// </summary>
-        public void ApplySlotArray(int[] slots)
+        public void ApplySlotArray(int[] slots, int heroCount)
         {
+            int[] previous = ToSlotArray();
             ClearSlots();
 
-            if (slots == null)
+            if (slots != null)
             {
-                Changed?.Invoke();
-                return;
+                for (int slot = 0; slot < slots.Length && slot < heroBySlot.Length; slot++)
+                {
+                    int hero = slots[slot];
+
+                    if (hero < 0 || hero >= heroCount || !data.IsSlotInUse(slot) || SlotOfHero(hero) >= 0)
+                    {
+                        continue;
+                    }
+
+                    heroBySlot[slot] = hero;
+                }
             }
 
-            for (int i = 0; i < slots.Length && i < heroBySlot.Length; i++)
+            // Any hero the save did not place (new hero, older save) lands in the free front-most slot.
+            for (int hero = 0; hero < heroCount; hero++)
             {
-                int hero = slots[i];
-
-                if (hero < 0 || SlotOfHero(hero) >= 0)
+                if (SlotOfHero(hero) >= 0)
                 {
                     continue;
                 }
 
-                heroBySlot[i] = hero;
+                int free = FirstFreeSlot();
+
+                if (free >= 0)
+                {
+                    heroBySlot[free] = hero;
+                }
             }
 
-            Changed?.Invoke();
+            if (!SameLayout(previous, heroBySlot))
+            {
+                Changed?.Invoke();
+            }
         }
 
-        /// <summary>Readable board for the dev overlay and logs: hero ids front-to-back, "x" = locked, "-" = empty.</summary>
+        private int FirstFreeSlot()
+        {
+            for (int slot = 0; slot < heroBySlot.Length; slot++)
+            {
+                if (heroBySlot[slot] < 0 && data.IsSlotInUse(slot))
+                {
+                    return slot;
+                }
+            }
+
+            return -1;
+        }
+
+        private static bool SameLayout(int[] a, int[] b)
+        {
+            if (a == null || b == null || a.Length != b.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < a.Length; i++)
+            {
+                if (a[i] != b[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>One-line board dump for logs and the dev overlay: "front[0 2] back[1]".</summary>
         public string Describe()
         {
             string front = string.Empty;
             string back = string.Empty;
 
-            for (int slot = 0; slot < data.SlotCount; slot++)
+            for (int slot = 0; slot < heroBySlot.Length; slot++)
             {
-                int hero = heroBySlot[slot];
-                string label = hero >= 0 ? hero.ToString() : (data.IsSlotUnlocked(slot, int.MaxValue) ? "-" : "x");
+                if (!data.IsSlotInUse(slot))
+                {
+                    continue;
+                }
 
-                if (data.RowForSlot(slot) == CombatRow.Front)
+                int hero = heroBySlot[slot];
+                string label = hero >= 0 ? hero.ToString() : "-";
+
+                if (data.RowOfSlot(slot) == CombatRow.Front)
                 {
                     front += label + " ";
                 }
@@ -318,6 +273,14 @@ namespace IdleRPG.Combat
             }
 
             return $"front[{front.TrimEnd()}] back[{back.TrimEnd()}]";
+        }
+
+        private void ClearSlots()
+        {
+            for (int slot = 0; slot < heroBySlot.Length; slot++)
+            {
+                heroBySlot[slot] = -1;
+            }
         }
     }
 }

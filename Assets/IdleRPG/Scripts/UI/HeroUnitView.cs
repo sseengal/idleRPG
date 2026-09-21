@@ -47,12 +47,45 @@ namespace IdleRPG.UI
             canvasGroup = group;
         }
 
-        /// <summary>Shows or hides the health bar (the Team board has no health to show).</summary>
+        /// <summary>Shows or hides the health bar (the Party board has no health to show).</summary>
         public void SetHealthVisible(bool visible)
         {
             if (hpBar != null)
             {
                 hpBar.gameObject.SetActive(visible);
+            }
+        }
+
+        /// <summary>
+        /// Blank the slot. Clearing used to be just `enabled = false`, which left the previous hero's icon and
+        /// name on screen - so a hero who moved appeared in two slots at once.
+        /// </summary>
+        public void ClearVisual(string label = "")
+        {
+            heroIndex = -1;
+            flashTimer = 0f;
+            baseColor = Color.white;
+
+            if (iconImage != null)
+            {
+                iconImage.sprite = null;
+                iconImage.color = new Color(1f, 1f, 1f, 0.12f);
+            }
+
+            if (nameLabel != null)
+            {
+                nameLabel.SetText(label);
+            }
+
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 1f;
+            }
+
+            if (hpBar != null)
+            {
+                hpBar.SetFill(0f, instant: true);
+                hpBar.SetLabel(string.Empty);
             }
         }
 

@@ -159,12 +159,9 @@ namespace IdleRPG.EditorTools
             FormationData formation = CreateOrLoad<FormationData>(folder + "/Formation_Default.asset");
 
             new Editable(formation)
-                .Set("rows", 2)
-                .Set("columns", 3)
-                .SetIntArray("slotUnlockStages", new[] { 1, 1, 1, 1, 1, 9999 })
-                .SetIntArray("teamSizeUnlockStages", new[] { 1, 1, 1, 21, 41 })
-                .Set("backRowDamageTakenMultiplier", 0.75f)
-                .Set("frontRowProtectsBackRow", true)
+                .Set("frontSlots", 3)
+                .Set("backSlots", 3)
+                .Set("backRowTargetWeight", 0.35f)
                 .Apply();
         }
 
