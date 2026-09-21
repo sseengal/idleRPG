@@ -112,7 +112,8 @@ condition ("2 stars", "zone 3").
 |---|---|
 | Canvas rebuilds | no layout churn during combat except pooled rows/text |
 | Damage numbers | <= 12 live views, aggregated per target, pooled |
-| Combat log | <= 15 visible lines, ring buffer, budgeted lines/sec |
+| Combat log | Ring buffer, budgeted lines (5/s), pool of 36 labels, merge window 0.5s, auto-follow with scroll-back |
+| Log contract | **One line per wave** (`-- Wave 5: Bat, Goblin --`, dupes as `Goblin x2`); every line names the *real* attacker (indices come from the events, never guessed); names are captured when the line is written so nothing renames itself; enemy suffixes A/B/C when a wave holds duplicates |
 | Scrolls | virtualise beyond ~50 rows (roster, relics) |
 | Battery mode (B11) | 30fps target, VFX trimmed, animations simplified, log budget halved |
 | Dev overlay (F3) | runtime-built overlay canvas (sorting 500), top-left panel, 4 Hz refresh, dev builds only |

@@ -132,7 +132,7 @@ namespace IdleRPG.UI
             GameEvents.StageChanged -= OnStageChangedHandler;
         }
 
-        private void OnHeroDamaged(int index, double damage, double currentHealth, double maxHealth)
+        private void OnHeroDamaged(int index, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex)
         {
             if (index != heroIndex)
             {

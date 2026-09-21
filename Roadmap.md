@@ -168,13 +168,22 @@
 - Evidence: 100-wave histogram 26/48/26 (avg 2.00); `1x 100%` reproduces the single-enemy golden numbers exactly;
   the mix re-measured at 126s / 22 kills / 272 gold / 2.16 gold/s vs the 124s / 2.20 baseline.
 
+### Step 11e — Battle log fixed for multi-enemy  `DONE`
+- Incoming-hit lines were naming enemy #0 (the attacker index never left the sim); a wave wrote three "appears"
+  lines and overran the feed budget; an open "xN" line could rename itself across a wave rollover. All three are
+  fixed: the attacker index flows to the log, **one line per wave** (`-- Wave 5: Bat, Goblin --`, duplicates as
+  `Goblin x2`), the aggregate closes on every spawn, and the feed budget/pool were raised for multi-enemy volume.
+- **Standing rule:** the battle log is a regression surface alongside the golden numbers. Any feature that adds or
+  renames combat text (statuses, abilities, enemy item drops, item usage in battle) must re-validate it.
+
 ### Step 12 — Effect pipeline + statuses  `TODO`
 - **Owner doc:** `Sim-Core.md` §8, §10
 - **Goal:** ask #2 foundation: ordered pipeline, per-entity crit (A1), armor% + pen (A3), per-type floors (A4),
   buffs/debuffs/dots as the only temporary modifiers.
 - **Deliverables:** `EffectPipeline`, `StatusContainer`, `StatAggregator` sources; one enemy prototype ability that
   applies a visible status (e.g. enrage below 30% HP); the global crit in `CombatScaling` is deleted.
-- **Acceptance:** the enemy status shows in log/UI, TTK matches a hand calculation, no global crit remains, and
+- **Acceptance:** the enemy status shows in log/UI, TTK matches a hand calculation, no global crit remains, the
+  **battle log** (section 0 standing rule) reads correctly with the new texts, and
   `MaxTriggerDepth` demonstrably stops recursion.
 - **Blocked by:** Steps 7, 11.
 

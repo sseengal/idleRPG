@@ -18,6 +18,11 @@
 | Shipped build | `Builds/IdleRPG-mac.app` verified (boot, save, offline, combat) |
 | Docs | complete (Architecture, Sim-Core, Progression, Content, Idle-Economy, UI-UX, Roadmap) |
 
+**Standing regression surfaces** (run these on every combat-affecting change): golden numbers, content validator,
+save drift, **battle log**. The log is a *contract with the player*, not decoration: any feature that produces or
+renames combat text (statuses, abilities, **enemy item drops**, **item usage in battle**, affixes, pets) must be
+re-checked for correct attribution, one line per wave, no mid-line renaming and no "... N more hits" flooding.
+
 ## 1. MVP (Steps 0-6) — DONE
 
 - [x] 0 skeleton, asmdefs, portrait lock, git
@@ -462,6 +467,28 @@ count 3 wave 3: 3 -> Goblin[F0] 60.4hp | Slime[F1] 27.9hp | Bat[F2] 41.8hp | tot
 - [x] validator clean (`wave size 1-3, recipe 1x 25%, 2x 50%, 3x 25% (mean 2, boss always 1)`), drift PASS,
       live check: a 2-enemy Slime+Bat wave rendered with 24/36 hp split and the log read `Bat A` / `Goblin B`
 
+### 11e — Battle log fixed for multi-enemy  `[x]`
+Four defects, all in the event/log plumbing (the stacked views and HP bars were fine):
+1. **`GameEvents.HeroDamaged` carried no attacker index**, so every incoming-hit line named enemy #0 ("Slime A hits
+   Knight" while the Goblin swung). The sim already knew the attacker (`DamageEvent.AttackerIndex`) - it is now
+   forwarded through `Simulator.HeroDamaged` -> `GameEvents.HeroDamaged` (new 5-arg `SafeInvoke` overload) -> the
+   log, which keys per `hero:{hero}:{enemy}`
+2. **Three "appears" lines per wave** overran the 3/s budget and pushed real events into "... N more hits". Now
+   **one line per wave**, written on the first spawn event: `-- Wave 5: Bat, Goblin --` (duplicates collapse to
+   `Goblin x2`, bosses get a `(BOSS)` suffix)
+3. **A line could rename itself**: the aggregator re-rendered by reading the *live* wave, so a wave rollover could
+   relabel an open "xN" line. The aggregate now closes on every wave spawn and is keyed per enemy - names are
+   captured once
+4. **Feed tuned for multi-enemy volume**: `maxLinesPerSecond` 3 -> 5, `aggregateWindowSec` 0.35 -> 0.5,
+   `poolSize` 24 -> 36 (scene values, set by `MvpSceneBuilder.BuildCombatLog`)
+- [x] subscriber signatures updated (hero view, damage-text pool, debug logger) - all ignore the new index except
+      the log
+- [x] **verified live** (dumped the visible lines): `Bat B hits Archer for 1.1  (103/110)`, `Slime defeated  +3.2
+      gold`, `-- Wave 5: Bat, Goblin --`; no "more hits" summary across 20s of combat; 2-enemy stack drawn with the
+      24/36 hp split
+- **Rule extracted:** the battle log is a standing regression surface - see the note in section 0. Every new
+      combat-text feature (statuses, abilities, drops, item use) re-opens it
+
 ### 11d — remaining index-0 cleanups  `[ ]`
 - [ ] `DevOverlay` and `HudController` still read enemy 0 for debug readouts; the battle page itself is index-aware
 - [ ] optional: hero-side `targetRule`, a ranged enemy archetype
@@ -472,6 +499,7 @@ count 3 wave 3: 3 -> Goblin[F0] 60.4hp | Slime[F1] 27.9hp | Bat[F2] 41.8hp | tot
 - [ ] `StatusContainer` (stack modes, expiry, dot/hot ticks, tags, eviction cap)
 - [ ] `StatAggregator` sources (stats, statuses, auras, run modifiers)
 - [ ] prototype enemy ability (enrage below 30% HP) visible in log/UI
+- [ ] **battle log re-checked** with the new texts (status ticks, per-type damage, crit changes) - see section 0
 - [ ] acceptance: TTK matches hand-calc; trigger depth cap proven
 
 ### 13 — Ability system  `[ ]`

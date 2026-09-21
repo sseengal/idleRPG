@@ -239,9 +239,9 @@ namespace IdleRPG.Combat
             return enemy == null ? "Enemy" : enemy.DisplayName;
         }
 
-        private void OnSimHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth)
+        private void OnSimHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex)
         {
-            GameEvents.RaiseHeroDamaged(heroIndex, damage, currentHealth, maxHealth);
+            GameEvents.RaiseHeroDamaged(heroIndex, damage, currentHealth, maxHealth, attackerEnemyIndex);
 
             if (!logCombatEvents)
             {

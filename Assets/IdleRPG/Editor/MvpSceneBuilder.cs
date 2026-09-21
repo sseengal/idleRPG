@@ -872,6 +872,12 @@ namespace IdleRPG.EditorTools
             SceneWiringUtility.SetField(ui, "scrollRect", scroll);
             SceneWiringUtility.SetField(ui, "content", content);
             SceneWiringUtility.SetField(ui, "lineTemplate", template);
+
+            // Feed tuning for multi-enemy waves (Step 11e): more lines allowed per second, a slightly longer
+            // merge window, and a deeper pool so a burst of hits never allocates during combat.
+            SceneWiringUtility.SetField(ui, "maxLinesPerSecond", 5);
+            SceneWiringUtility.SetField(ui, "aggregateWindowSec", 0.5f);
+            SceneWiringUtility.SetField(ui, "poolSize", 36);
             return ui;
         }
 

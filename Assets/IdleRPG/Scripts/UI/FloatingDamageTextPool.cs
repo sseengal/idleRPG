@@ -88,7 +88,7 @@ namespace IdleRPG.UI
             return enemyAnchors[Mathf.Clamp(enemyIndex, 0, enemyAnchors.Length - 1)];
         }
 
-        private void OnHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth)
+        private void OnHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex)
         {
             if (damage <= 0d || heroAnchors == null || heroIndex < 0 || heroIndex >= heroAnchors.Length)
             {

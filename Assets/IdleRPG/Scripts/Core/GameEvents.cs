@@ -59,8 +59,8 @@ namespace IdleRPG.Core
         /// <summary>(enemyName, goldReward, enemyIndex). One call per enemy.</summary>
         public static event Action<string, double, int> EnemyKilled;
 
-        /// <summary>(heroIndex, damage, currentHealth, maxHealth).</summary>
-        public static event Action<int, double, double, double> HeroDamaged;
+        /// <summary>(heroIndex, damage, currentHealth, maxHealth, attackerEnemyIndex). See <see cref="HeroDamaged"/> above.</summary>
+        public static event Action<int, double, double, double, int> HeroDamaged;
 
         /// <summary>(heroIndex).</summary>
         public static event Action<int> HeroDied;
@@ -196,9 +196,9 @@ namespace IdleRPG.Core
             SafeInvoke(EnemyKilled, enemyName, goldReward, enemyIndex, nameof(EnemyKilled));
         }
 
-        internal static void RaiseHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth)
+        internal static void RaiseHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex)
         {
-            SafeInvoke(HeroDamaged, heroIndex, damage, currentHealth, maxHealth, nameof(HeroDamaged));
+            SafeInvoke(HeroDamaged, heroIndex, damage, currentHealth, maxHealth, attackerEnemyIndex, nameof(HeroDamaged));
         }
 
         internal static void RaiseHeroDied(int heroIndex)
@@ -332,6 +332,23 @@ namespace IdleRPG.Core
             try
             {
                 handler(arg1, arg2, arg3, arg4);
+            }
+            catch (Exception exception)
+            {
+                LogSubscriberException(eventName, exception);
+            }
+        }
+
+        private static void SafeInvoke<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> handler, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, string eventName)
+        {
+            if (handler == null)
+            {
+                return;
+            }
+
+            try
+            {
+                handler(arg1, arg2, arg3, arg4, arg5);
             }
             catch (Exception exception)
             {

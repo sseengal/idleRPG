@@ -358,6 +358,8 @@ ui             { lastScreenIndex, settings{...} }
 | B26 | A multi-enemy wave is **budget-neutral**: per-member stats are ratioed so the wave's HP/attack/gold totals equal a single-enemy wave's (`BalanceConfig.wave*Multiplier`, all 1 = parity). Defence is never split; `waveAttackMultiplier` compensates for per-hit defence | 11a | Locked |
 | B27 | Targeting preference lives on the **attacker** (`Combatant.TargetRule`, `null` = inherit the side rule), set from `EnemyData.targetRule`; the global `BalanceConfig.enemyTargeting` stays as the wave default | 11a | Locked |
 | B28 | **Enemies have no ranks.** A wave is a flat list of 1-3; the battle page stacks them vertically and every slot owns its sprite, name, HP bar and damage anchor | 11b | Locked |
+| B32 | Combat events carry the **attacker's enemy index** (`HeroDamaged`, `EnemyDamagedInfo`), so the log and UI attribute text from data, never by guessing index 0 | 11e | Locked |
+| B33 | The battle log writes **one line per wave** and closes its aggregator on every spawn, so a line can never merge or rename across waves. The log is a standing regression surface for every combat-text feature | 11e | Locked |
 | B30 | Wave **size** is derived, never stored: `WaveComposition.ResolveCount(stage, wave, isBoss)` hashes the wave and reads the recipe in `BalanceConfig` (1 x25, 2 x50, 3 x25). Not the sim RNG (would shift crit rolls), never a modulo cycle | 11c | Locked |
 | B31 | The offline estimator uses the recipe **mean** (`MeanEnemiesPerWave`), so a varied wave size cannot inflate the away-time payout | 11c | Locked |
 | B29 | A wave ends when the **last** enemy dies (per-enemy kill events carry the index and pay individually), so multi-enemy waves cannot end or pay early | 11b | Locked |

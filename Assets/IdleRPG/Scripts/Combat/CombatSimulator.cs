@@ -56,7 +56,12 @@ namespace IdleRPG.Combat
         /// <summary>(enemyIndex, goldReward) - one call per enemy, so the UI can attribute a 1-3 enemy wave.</summary>
         public event Action<int, double> EnemyKilled;
 
-        public event Action<int, double, double, double> HeroDamaged;
+        /// <summary>
+        /// (heroIndex, damage, currentHealth, maxHealth, attackerEnemyIndex).
+        /// The attacker index is what lets the battle log and the models say *which* enemy swung - with 1-3
+        /// enemies a line like "Goblin A hits Knight" must never be guesswork.
+        /// </summary>
+        public event Action<int, double, double, double, int> HeroDamaged;
 
         public event Action<int> HeroDied;
 
@@ -317,7 +322,7 @@ namespace IdleRPG.Combat
                 return;
             }
 
-            HeroDamaged?.Invoke(damage.TargetIndex, damage.Damage, damage.TargetHealth, damage.TargetMaxHealth);
+            HeroDamaged?.Invoke(damage.TargetIndex, damage.Damage, damage.TargetHealth, damage.TargetMaxHealth, damage.AttackerIndex);
         }
 
         private void OnEncounterDied(DeathEvent death)
