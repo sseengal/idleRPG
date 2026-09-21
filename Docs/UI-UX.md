@@ -2,6 +2,7 @@
 
 > Owns: everything the player sees and taps.
 > Parent: `Architecture.md` (AD8, E7, E10, C7, D6) and `.clinerules`.
+> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** Step 11e (2026-09-21).
 > Specs the UI side of Steps 10, 11, 13, 15, 17, 20.
 
 ---

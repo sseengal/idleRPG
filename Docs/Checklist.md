@@ -1,7 +1,8 @@
 # Checklist — master progress record
 
 > The single place that answers "what is left to finish the game, and where are we right now?"
-> Roadmap detail: `Roadmap.md`. Design: `Architecture.md` + topic docs. MVP journal: `Plan.md`.
+> Roadmap detail: `Roadmap.md`. Design: `Architecture.md` + topic docs. Folder index: `README.md`.
+> MVP journal: `archive/Plan.md` (**obsolete**, kept for the record - see `REVIEW.md`).
 > Rule: **one sub-step at a time** - implement, recompile, verify, tick the box, hand off for a manual test.
 > Legend: `[x]` done · `[~]` in progress · `[ ]` todo · `[!]` blocked · `[-]` dropped/deferred.
 
@@ -16,7 +17,7 @@
 | Next after this | 7b unified `Combatant` + `Encounter` |
 | Save schema | v2 (v3 lands in Steps 10/14 with migration) |
 | Shipped build | `Builds/IdleRPG-mac.app` verified (boot, save, offline, combat) |
-| Docs | complete (Architecture, Sim-Core, Progression, Content, Idle-Economy, UI-UX, Roadmap) |
+| Docs | all live in `Docs/` - index `Docs/README.md`; status here; backlog `Roadmap.md`; deletion candidates `Docs/REVIEW.md`; obsolete MVP journal `Docs/archive/Plan.md` (awaiting confirmation) |
 
 **Standing regression surfaces** (run these on every combat-affecting change): golden numbers, content validator,
 save drift, **battle log**. The log is a *contract with the player*, not decoration: any feature that produces or

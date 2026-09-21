@@ -2,6 +2,7 @@
 
 > Owns: the Unity-free combat + reward simulation (`Assets/IdleRPG/Scripts/Sim/`).
 > Parent: `Architecture.md` (§2 layers, §3 data catalog, §4 save, E1-E14 rules).
+> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** Step 11e (2026-09-21).
 > Specs the Steps 7-13 changes; acceptance tests live in `Roadmap.md`.
 > **Rule: this folder never references `UnityEngine`** (no `Mathf`, no `Vector2`, no `Debug`).
 
@@ -312,7 +313,7 @@ Pace 1.6 with the shipped roster:
 | Gold per stage | 276 | 2.2 gold/s |
 
 Step 7 acceptance: these reproduce within a few percent (refactor is behaviour-identical) and the offline table in
-`Plan.md` §17 still matches.
+`archive/Plan.md` §17 still matches.
 
 > **Step 7b baseline (current, after the deterministic-RNG swap):** `pace x1.0 -> stage 74s, boss 28.5s`,
 > `pace x1.6 -> stage 120s, Slime 4.0s, Bat 6.0s, Goblin 11.3s, boss 45.6s`, `272 gold/stage`,

@@ -2,6 +2,7 @@
 
 > Owns: what the player fights and how hard it gets, plus the content pipeline.
 > Parent: `Architecture.md` (§3.1 combat SOs, §3.3 pipeline, A2-A4, C4).
+> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** Step 11e (2026-09-21).
 > Specs Steps 8, 11, 13, 15 + every future content drop.
 
 ---

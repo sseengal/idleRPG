@@ -2,6 +2,7 @@
 
 > Owns: everything the player buys/earns outside a single fight.
 > Parent: `Architecture.md` (§3.2 SO contracts, §4 save, AD5-AD7).
+> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** Step 11e (2026-09-21).
 > Specs Steps 14-18. Acceptance tests live in `Roadmap.md`.
 
 ---

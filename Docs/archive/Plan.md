@@ -1,4 +1,14 @@
-# Idle RPG — Build Plan & Progress Tracker
+# Idle RPG — Build Plan & Progress Tracker  ·  **OBSOLETE (archived)**
+
+> **Status: OBSOLETE — superseded.** This is the MVP build journal (Steps 0-6). The MVP is finished, and current
+> status/planning lives elsewhere:
+> - `../Checklist.md` — master progress record and status (authoritative)
+> - `../Roadmap.md` — ordered backlog with acceptance tests
+> - `../Architecture.md` — every decision that still binds (decision log A/B/AD)
+> - `../Sim-Core.md`, `../Content.md`, `../Progression.md`, `../Idle-Economy.md`, `../UI-UX.md` — topic designs
+>
+> **Kept only for the historical record** (per-step verification logs, the MVP's original locked spec decisions).
+> Listed as deletion candidate **R1** in `../REVIEW.md` — awaiting the owner's confirmation. Do not update this file.
 
 > 2D Mobile Idle RPG (Unity 6000.6.0f1, URP 2D). iOS + Android.
 > Repo: https://github.com/sseengal/idleRPG.git

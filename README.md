@@ -167,16 +167,20 @@ debug menus, the console log and the Unity MCP bridge. A manual pass takes ~5 mi
 | 6 | Mobile polish (settings audit, runtime device policy, README) | done |
 | next | Art pass, real ad SDK, shop/IAP, more heroes and prestige upgrades, device builds | planned |
 
-## Design docs (post-MVP)
+## Design docs
+
+**Everything lives in `Docs/`** - start with `Docs/README.md` (index) and `Docs/Checklist.md` (live status).
 
 | File | Covers |
 |---|---|
-| `Architecture.md` | layers, boundaries, data catalog, save schema v3, engineering rules, decision log |
-| `Sim-Core.md` | pure simulation design (encounters, formation, effect pipeline, abilities, statuses, ledger) |
-| `Progression.md` | currencies + sinks, tracks, roster/stars, relics, prestige layers, automation |
-| `Content.md` | zones, difficulty curves, walls, affixes, enemy archetypes, content pipeline + validator |
-| `Idle-Economy.md` | ledger rates, offline model, expeditions/bounties, ads/gems/shop, anti-abuse, telemetry |
-| `UI-UX.md` | screens, navigation, return hub, wall guidance, accessibility + localization |
-| `Roadmap.md` | ordered post-MVP backlog (Step 7-20) with acceptance tests + status board |
-
-See `Plan.md` for the MVP build journal (balance decisions, verification logs, open risks).
+| `Docs/README.md` | index: where to look, standing rules, folder layout |
+| `Docs/Checklist.md` | **master progress record** - what is done, what is left, current step |
+| `Docs/Roadmap.md` | ordered backlog with acceptance tests + status board |
+| `Docs/Architecture.md` | layers, boundaries, data catalog, save schema, engineering rules, decision log |
+| `Docs/Sim-Core.md` | pure simulation design (encounters, formation, waves, effect pipeline, abilities, ledger) |
+| `Docs/Progression.md` | currencies + sinks, tracks, roster/stars, relics, prestige layers, automation |
+| `Docs/Content.md` | zones, difficulty curves, walls, affixes, enemy archetypes, content pipeline + validator |
+| `Docs/Idle-Economy.md` | ledger rates, offline model, expeditions/bounties, ads/gems/shop, anti-abuse |
+| `Docs/UI-UX.md` | screens, navigation, battle-log contract, accessibility |
+| `Docs/REVIEW.md` | deletion candidates awaiting owner confirmation |
+| `Docs/archive/Plan.md` | **OBSOLETE** MVP build journal, kept for the record (deletion candidate R1) |

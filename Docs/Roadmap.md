@@ -3,6 +3,7 @@
 > Owns: **the order of work.** One step at a time, one small change per iteration, manual test, then next step.
 > Parent: `Architecture.md` (§6 decision log). Design detail lives in the topic docs, not here.
 > Status values: `TODO` | `WIP` | `DONE` | `BLOCKED` | `DEFERRED`.
+> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** Step 11e (2026-09-21).
 
 ---
 
@@ -62,7 +63,7 @@
 - **Deliverables:** `Sim/` folder + asmdef with no Unity refs; `CombatDirector` + `RunController`; `GameManager`
   reduced to composition root (< 150 lines); Balance Lab menu with `Simulate Stage` + `Golden Numbers`.
 - **Acceptance:** `Sim-Core.md` §14 golden numbers reproduce within a few percent; the offline payout table in
-  `Plan.md` §17 is unchanged; live Play still battles, buys and saves.
+  `archive/Plan.md` §17 is unchanged; live Play still battles, buys and saves.
 - **Blocked by:** nothing. **Risk:** medium (biggest refactor) - mitigated by "no new features" scope.
 
 ### Step 8a — Spec files + generator  `DONE`

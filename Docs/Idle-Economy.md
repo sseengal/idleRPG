@@ -2,6 +2,7 @@
 
 > Owns: every way the game pays the player for time, and every way it asks for money.
 > Parent: `Architecture.md` (AD6, AD7, B4-B7, B13, A9).
+> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** Step 11e (2026-09-21).
 > Specs Steps 9, 17, 19. Acceptance tests live in `Roadmap.md`.
 
 ---
@@ -38,6 +39,10 @@ ledger receipt; only `Source.Combat` income feeds the measured rate).
 
 `paidSeconds` is always computed from `GameClock` timestamps stored in the save; every path clamps negative and
 absurd deltas (tamper) and is idempotent via a pending/claimed flag.
+
+**Wave size (Step 11c):** a stage's wave holds 1-3 enemies (recipe `1 x25 / 2 x50 / 3 x25`, boss always 1), so the
+formula estimate of income uses `BalanceConfig.MeanEnemiesPerWave` (the recipe's average, currently 2), **not** the
+maximum. Using the max would overpay away-time gold by ~50% the moment the recipe stops being "always 3".
 
 ## 3. `IdleTimeService` (one owner, replaces ad-hoc offline code)
 

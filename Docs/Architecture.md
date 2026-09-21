@@ -2,8 +2,8 @@
 
 > 2D mobile idle RPG. Unity 6000.6.0f1, URP 2D, portrait, iOS + Android.
 > Status: MVP shipped (Steps 0-6). This is the **design north star** for everything after the MVP.
-> `Plan.md` remains the MVP build journal (what was done + verification logs). This file is *how the game is
-> built and how it scales*.
+> The MVP build journal now lives in `archive/Plan.md` (**obsolete**, kept for its verification logs).
+> This file is *how the game is built and how it scales*. Folder index: `README.md`.
 
 ---
 
