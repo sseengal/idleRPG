@@ -133,6 +133,12 @@
     editing is Party-only, all slots usable, presets deleted. Party tab structured for stats/gear rows.
 - **Blocked by:** Steps 7, 8. **Risk:** schema v3 migration - test against the existing v2 save.
 
+### Step 10e — Even spread inside a rank  `DONE`
+- Targeting inside a rank is now an even random draw (was: the front-most hero took every hit). Rank odds and damage
+  maths untouched; a single-member rank consumes no RNG, so a one-hero board is unchanged. Golden numbers were
+  deliberately re-baselined (79s@x1.0 / 124s@x1.6, 272 gold, per-enemy TTK identical) so Step 11 has one stable
+  parity net to build on instead of two.
+
 ### Step 11 — Multi-enemy encounters (up to 3)  `TODO`
 - **Owner doc:** `Sim-Core.md` §7; `Content.md` §4-§5; `UI-UX.md` §3
 - **Goal:** ask #3. 1-3 enemies per encounter with an HP/gold budget that preserves the idle rate.

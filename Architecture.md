@@ -352,6 +352,7 @@ ui             { lastScreenIndex, settings{...} }
 | B20 | Damage numbers anchor to the **hero**, not the lane: exactly one board (the battle board) feeds the pool | 10c | Locked |
 | B21 | Formation is **edited only on the Party tab**; the battle board is display-only (no Button components at all) | 10d | Locked |
 | B22 | Rows change **targeting frequency, never damage**: `SimRules.BackRowTargetWeight`, and the other rank is always eligible so nobody is untargetable | 10d | Locked |
+| B24 | Inside a rank hits are **spread evenly** (one RNG draw, none when a rank holds a single member) so the front line shares the beating | 10e | Locked |
 | B23 | The board is a vertical two-column layout (front rank nearest the enemy); data stores rank+position only, presentation owns orientation | 10d | Locked |
 | B14 | Codex/bestiary doubles as the difficulty-hint system | 18 | Locked |
 

@@ -141,8 +141,9 @@ Row rules (implemented in Step 10d; the details below are the model the sim obey
 1. **Position never changes damage.** A landed hit does exactly what the damage formula says, wherever the target
    stands. Rows only decide *who* gets picked.
 2. **The back rank is picked less often**: per swing the attacker draws a rank with `BackRowTargetWeight`
-   (`w / (w + 1)` odds for the back rank, default 0.35 ~= one swing in four), then takes the front-most living
-   hero of that rank. `w = 0` means "strict front rank".
+   (`w / (w + 1)` odds for the back rank, default 0.35 ~= one swing in four), then **spreads evenly** across the
+   living members of that rank - the whole line shares the hits (Step 10e) instead of the first hero soaking them.
+   `w = 0` means "strict front rank". A rank holding a single hero consumes no RNG draw, so nothing changes there.
 3. **Nobody is ever untargetable**: when one rank has no living member the other rank takes every swing - including
    the case where a lone hero hides behind a dead front line (this used to stall the fight).
 4. `BacklineFirst` (ranged attackers, Step 11) reaches over the front rank first, then falls back to it.

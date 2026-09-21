@@ -288,7 +288,8 @@ namespace IdleRPG.Sim
         /// <summary>
         /// Row-aware, weighted target selection. The front rank is the preferred target; the back rank is picked
         /// with probability <c>weight / (weight + 1)</c> per swing, so standing behind the tank means being hit
-        /// *less often* - never for less damage.
+        /// *less often* - never for less damage. Inside the chosen rank the hits are spread evenly, so one front
+        /// rank shares the beating instead of the first hero soaking all of it.
         ///
         /// Once a rank has no living member the other rank takes every swing (nobody becomes untargetable), which
         /// is why this can never return null while anyone is alive.
@@ -305,31 +306,31 @@ namespace IdleRPG.Sim
 
             if (!backAlive)
             {
-                return SelectByRow(candidates, CombatRow.Front);
+                return SelectRandomOfRow(candidates, CombatRow.Front);
             }
 
             if (!frontAlive)
             {
-                return SelectByRow(candidates, CombatRow.Back);
+                return SelectRandomOfRow(candidates, CombatRow.Back);
             }
 
             double weight = context.Rules.BackRowTargetWeight;
 
             if (weight <= 0d)
             {
-                return SelectByRow(candidates, CombatRow.Front);
+                return SelectRandomOfRow(candidates, CombatRow.Front);
             }
 
             if (weight >= 1d)
             {
-                // Equal odds: coin flip between the ranks, then the front-most of the chosen rank.
+                // Equal odds: coin flip between the ranks, then an even pick inside the chosen rank.
                 CombatRow pick = context.Rng.NextDouble() < 0.5d ? CombatRow.Front : CombatRow.Back;
-                return SelectByRow(candidates, pick);
+                return SelectRandomOfRow(candidates, pick);
             }
 
             double backChance = weight / (weight + 1d);
             CombatRow chosen = context.Rng.NextDouble() < backChance ? CombatRow.Back : CombatRow.Front;
-            return SelectByRow(candidates, chosen);
+            return SelectRandomOfRow(candidates, chosen);
         }
 
         private static bool HasLivingRow(Combatant[] combatants, CombatRow row)
@@ -367,7 +368,7 @@ namespace IdleRPG.Sim
 
             if (rule == TargetRule.BacklineFirst)
             {
-                return SelectByRow(candidates, CombatRow.Back) ?? SelectByRow(candidates, CombatRow.Front);
+                return SelectRandomOfRow(candidates, CombatRow.Back) ?? SelectRandomOfRow(candidates, CombatRow.Front);
             }
 
             Combatant best = null;
@@ -426,29 +427,58 @@ namespace IdleRPG.Sim
         }
 
         /// <summary>
-        /// Front-most (or back-most) alive combatant of a row: lowest column wins, index breaks ties. With every
-        /// party member in the front row this is exactly the MVP's "first alive lane", so nothing changes until
-        /// the player actually moves somebody.
+        /// Picks a living member of a rank, **evenly at random** among them: the whole front line shares the
+        /// incoming hits instead of the first hero soaking every swing. Uses the sim RNG, so live, offline and
+        /// fast-forward all produce the same sequence.
+        ///
+        /// A rank with a single living member draws nothing (no RNG consumed), which keeps a one-hero board
+        /// byte-identical to before.
         /// </summary>
-        private static Combatant SelectByRow(Combatant[] candidates, CombatRow row)
+        private Combatant SelectRandomOfRow(Combatant[] candidates, CombatRow row)
         {
-            Combatant best = null;
+            if (candidates == null)
+            {
+                return null;
+            }
+
+            int alive = 0;
 
             for (int i = 0; i < candidates.Length; i++)
             {
                 Combatant candidate = candidates[i];
+
+                if (candidate != null && candidate.IsAlive && candidate.Row == row)
+                {
+                    alive++;
+                }
+            }
+
+            if (alive <= 0)
+            {
+                return null;
+            }
+
+            int pick = alive == 1 ? 0 : context.Rng.Next(alive);
+            int seen = 0;
+
+            for (int i = 0; i < candidates.Length; i++)
+            {
+                Combatant candidate = candidates[i];
+
                 if (candidate == null || !candidate.IsAlive || candidate.Row != row)
                 {
                     continue;
                 }
 
-                if (best == null || candidate.Column < best.Column)
+                if (seen == pick)
                 {
-                    best = candidate;
+                    return candidate;
                 }
+
+                seen++;
             }
 
-            return best;
+            return null;
         }
 
         private static int CountAlive(Combatant[] combatants)

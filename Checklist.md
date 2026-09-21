@@ -11,7 +11,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **11** multi-enemy encounters (Step 10 complete: 10a, 10b, 10c-reworked-as-10d) |
+| Current step | **11a** multi-enemy: sim-side teams, still 1 enemy (Step 10 complete: 10a-10e) |
 | Last completed | Step 6 (mobile polish, MVP) |
 | Next after this | 7b unified `Combatant` + `Encounter` |
 | Save schema | v2 (v3 lands in Steps 10/14 with migration) |
@@ -361,8 +361,31 @@ G5: intermittent - "Combat tick threw; skipping it and saving" (failures=13, ena
       hero appearing exactly once; save `partySlots: [-1,0,1,2,-1,-1]` and the validator line reads
       `board front 3 / back 3 (6 slots, all usable), back-rank target weight 0.35`
 - [x] regression: validator clean, golden numbers unchanged (74s@x1.0 / 120s@x1.6, 272 gold), save drift PASS
+      (**baseline superseded by 10e**: 79s / 124s - the targeting rule changed in the next step)
 - **Notes:** the default layout (front rank first) keeps the unupgraded MVP party entirely in the front rank, which
       is why golden parity survives untouched; `HeroData.targetRule` is still inert (wired in Step 11)
+
+### 10e — Even spread inside a rank  `[x]`
+- [x] `Encounter.SelectByRow` (front-most soaks everything) -> `SelectRandomOfRow`: hits inside the chosen rank are
+      spread **evenly at random** using the sim RNG. A rank with one living member draws nothing, so a one-hero
+      board is unchanged. Rank odds are untouched (front rank 1.0, back rank `BackRowTargetWeight` 0.35)
+- [x] **verified** (simple probe, 75 swings each): all three in the front rank -> Knight **37%** / Archer **32%** /
+      Mage **31%** (was 100/0/0); mixed board `front[0 1 -] back[2 - -]` -> front **73%** / back **27%**
+      (expected ~74/26)
+- [x] **golden numbers re-baselined** (the targeting rule consumes RNG draws, so crit luck moves - expected, and the
+      reason this landed *before* Step 11 instead of after)::
+```
+per-enemy TTK   unchanged: Slime 4.0s, Bat 6.0s, Goblin 11.3s (pace x1.6)
+pace x1.0       stage 1 = 79s  (was 74s) | 272 gold | 3.45 gold/s (was 3.69)
+pace x1.6       stage 1 = 124s (was 120s) | 272 gold | 2.20 gold/s (was 2.26) | boss 44.0s (was 45.6s)
+stage sweep     1:123.6s 272g no | 2:171.6s 309g no | 3:200.1s wipe | 4..10 wipe (new baseline)
+validator       ok [balance] Stage 1: 124s, 11 kills, 272 gold, 2.20 gold/s (band 90-180s)
+```
+- [x] regression: validator clean, save drift PASS (v3, 6 slots, additive-only)
+- **Read this as a design change, not a bug:** the front line now shares the beating instead of hero 1 tanking
+      alone, so the party survives longer on hard stages. The few seconds of drift on stage totals is crit luck from
+      the changed RNG stream - the per-enemy TTK is identical, which is the number that proves the *combat* model did
+      not move. Enemy damage was deliberately **not** retuned; difficulty impact is measured in the sweep above
 
 ### 11 — Multi-enemy encounters (up to 3)  `[ ]`
 - [ ] `Encounter` enemy list + `EncounterFactory` (spawn groups, affix, budget)
