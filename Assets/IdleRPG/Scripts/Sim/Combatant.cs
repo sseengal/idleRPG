@@ -77,6 +77,12 @@ namespace IdleRPG.Sim
         /// <summary>Aggro weight used by threat-based targeting from Step 11 on.</summary>
         public double Threat { get; set; }
 
+        /// <summary>
+        /// This combatant's own targeting rule, if its archetype has a preference.
+        /// null = fall back to the side rule the fight was started with (today's behaviour for every unit).
+        /// </summary>
+        public TargetRule? TargetRule { get; set; }
+
         public double MinAttackIntervalSec { get; private set; }
 
         public double MaxHealth => Stats.MaxHealth;

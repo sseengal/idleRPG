@@ -226,7 +226,8 @@ namespace IdleRPG.Sim
                     continue;
                 }
 
-                Combatant target = SelectTarget(defenders, rule);
+                // An archetype with its own preference uses it; everybody else uses the side rule (Step 11a).
+                Combatant target = SelectTarget(defenders, attacker.TargetRule ?? rule);
                 if (target == null)
                 {
                     return;

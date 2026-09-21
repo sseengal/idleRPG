@@ -51,11 +51,72 @@ namespace IdleRPG.Data
             return picked;
         }
 
+        /// <summary>
+        /// The enemy team for one wave: the wave's normal pick plus its rotation neighbours.
+        ///
+        /// ELI5: the wave already knows which enemy it would have used on its own. A multi-enemy wave keeps that
+        /// enemy first and fills the remaining slots with the next ones in the same rotation, so waves get variety
+        /// for free and the first enemy of every wave is exactly the one it would have been before.
+        ///
+        /// Deterministic from (stage, wave) - same inputs, same team - which is why the save file needs no
+        /// composition data (no schema change). A team is smaller than requested only when the pool is smaller.
+        /// </summary>
+        /// <param name="count">How many enemies the wave should hold (1 = the single-enemy behaviour).</param>
+        public List<EnemyData> GetEnemiesFor(int stage, int wave, int normalWavesPerStage, int count)
+        {
+            List<EnemyData> team = new List<EnemyData>();
+
+            EnemyData primary = GetEnemyFor(stage, wave, normalWavesPerStage);
+            if (primary == null)
+            {
+                return team;
+            }
+
+            team.Add(primary);
+
+            int wanted = Mathf.Clamp(count, 1, MaxTeamSize);
+            if (wanted <= 1)
+            {
+                return team;
+            }
+
+            List<EnemyData> pool = IsBossWave(wave, normalWavesPerStage) ? bossEnemies : normalEnemies;
+            if (pool == null || pool.Count == 0)
+            {
+                return team;
+            }
+
+            int start = PoolIndexOf(pool, stage, wave);
+
+            for (int step = 1; step <= pool.Count && team.Count < wanted; step++)
+            {
+                EnemyData candidate = pool[(start + step) % pool.Count];
+
+                if (candidate == null || candidate == primary)
+                {
+                    continue;
+                }
+
+                team.Add(candidate);
+            }
+
+            return team;
+        }
+
         /// <summary>A wave is a boss wave when it is the (normalWavesPerStage + 1)-th wave of a stage.</summary>
         public static bool IsBossWave(int wave, int normalWavesPerStage)
         {
             int safeNormalWaves = Mathf.Max(1, normalWavesPerStage);
             return wave >= safeNormalWaves + 1;
+        }
+
+        /// <summary>Team size ceiling (mirrors <see cref="BalanceConfig.MaxEnemiesPerWave"/> and the sim cap).</summary>
+        public const int MaxTeamSize = 3;
+
+        private static int PoolIndexOf(List<EnemyData> pool, int stage, int wave)
+        {
+            int seed = (Mathf.Max(1, stage) - 1) * 31 + (Mathf.Max(1, wave) - 1);
+            return seed % pool.Count;
         }
 
         private static EnemyData PickFromPool(List<EnemyData> pool, int stage, int wave)
@@ -65,9 +126,7 @@ namespace IdleRPG.Data
                 return null;
             }
 
-            int seed = (Mathf.Max(1, stage) - 1) * 31 + (Mathf.Max(1, wave) - 1);
-            int index = seed % pool.Count;
-            return pool[index];
+            return pool[PoolIndexOf(pool, stage, wave)];
         }
     }
 }

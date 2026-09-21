@@ -21,6 +21,13 @@ namespace IdleRPG.EditorTools.Content
         private const int MinStageOneSeconds = 90;
         private const int MaxStageOneSeconds = 180;
 
+        /// <summary>Formation fields an enemy spec may carry (Step 11a).</summary>
+        private static readonly System.Collections.Generic.HashSet<string> KnownTargetRules =
+            new System.Collections.Generic.HashSet<string> { "inherit", "frontmost", "lowesthealthpercent", "random", "backlinefirst" };
+
+        private static readonly System.Collections.Generic.HashSet<string> KnownRows =
+            new System.Collections.Generic.HashSet<string> { "front", "back" };
+
         public enum Severity
         {
             Error = 0,
@@ -61,6 +68,7 @@ namespace IdleRPG.EditorTools.Content
             CheckUpgrades(upgrades);
             CheckAssetsAgainstSpecs(heroes, enemies);
             CheckFormation();
+            CheckEncounters();
             CheckBalanceBand();
 
             WriteCsv();
@@ -104,6 +112,39 @@ namespace IdleRPG.EditorTools.Content
             Add(Severity.Info, "formation",
                 $"board front {formation.FrontSlots} / back {formation.BackSlots} ({formation.SlotCount} slots, " +
                 $"all usable), back-rank target weight {formation.BackRowTargetWeight:0.##}.");
+        }
+
+        // ------------------------------------------------------------------
+        // Encounters (Step 11a)
+        // ------------------------------------------------------------------
+        /// <summary>
+        /// Multi-enemy sanity: the team size must fit the portrait layout, and the wave budget knobs are reported so
+        /// a balance change is visible in the report. With enemiesPerWave = 1 this is the parity baseline.
+        /// </summary>
+        private static void CheckEncounters()
+        {
+            string path = ContentSpecIO.ConfigFolder + "/BalanceConfig.asset";
+            BalanceConfig balance = AssetDatabase.LoadAssetAtPath<BalanceConfig>(path);
+
+            if (balance == null)
+            {
+                Add(Severity.Error, "encounters", $"No BalanceConfig at {path}.");
+                return;
+            }
+
+            int raw = SoField.Int(balance, "enemiesPerWave", balance.EnemiesPerWave);
+
+            if (raw > BalanceConfig.MaxEnemiesPerWave)
+            {
+                Add(Severity.Warning, "encounters",
+                    $"enemiesPerWave is clamped to {BalanceConfig.MaxEnemiesPerWave} (the asset says {raw}); " +
+                    "the portrait layout holds three.");
+            }
+
+            Add(Severity.Info, "encounters",
+                $"enemiesPerWave {balance.EnemiesPerWave} (1 = MVP parity), wave budget " +
+                $"HP x{balance.WaveHealthMultiplier:0.##} ATK x{balance.WaveAttackMultiplier:0.##} " +
+                $"gold x{balance.WaveGoldMultiplier:0.##}.");
         }
 
         // ------------------------------------------------------------------
@@ -189,6 +230,20 @@ namespace IdleRPG.EditorTools.Content
                 if (enemy.isBoss && (enemy.bossHealthMultiplier < 1f || enemy.bossGoldMultiplier < 1f))
                 {
                     Add(Severity.Warning, "enemies", $"{enemy.id}: boss multipliers below 1 make a boss weaker than a normal enemy.");
+                }
+
+                // Step 11a: the two formation fields. A typo silently falls back to the default, so warn.
+                if (!KnownTargetRules.Contains((enemy.targetRule ?? "").Trim().ToLowerInvariant()))
+                {
+                    Add(Severity.Warning, "enemies",
+                        $"{enemy.id}: unknown targetRule '{enemy.targetRule}' (falls back to inherit). " +
+                        $"Known: {string.Join(", ", KnownTargetRules)}.");
+                }
+
+                if (!KnownRows.Contains((enemy.preferredRow ?? "").Trim().ToLowerInvariant()))
+                {
+                    Add(Severity.Warning, "enemies",
+                        $"{enemy.id}: unknown preferredRow '{enemy.preferredRow}' (falls back to front).");
                 }
             }
 

@@ -10,6 +10,18 @@ namespace IdleRPG.Data
         LowestHealthPercent = 1,
 
         /// <summary>Deterministic pseudo-random pick among alive heroes.</summary>
-        Random = 2
+        Random = 2,
+
+        /// <summary>
+        /// Archetype default: use the wave's global rule from <see cref="BalanceConfig.EnemyTargeting"/>.
+        /// This is what an enemy that does not care about positioning keeps.
+        /// </summary>
+        Inherit = 3,
+
+        /// <summary>
+        /// Reaches over the front rank and hits the back rank first - the ranged counter to hiding behind a tank
+        /// (Step 11). Once the back rank is empty it falls through to the front rank.
+        /// </summary>
+        BacklineFirst = 4
     }
 }

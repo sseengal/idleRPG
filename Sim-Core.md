@@ -175,9 +175,22 @@ Encounter
   Result { cleared, wiped, secondsElapsed, damageDealt[], damageTaken[], kills[] }
 ```
 
-- `EncounterFactory` builds enemies from `EncounterData` + `DifficultyCurve` + affixes + rng seed, applying the
-  HP/gold budget split (§5 of `Content.md`).
-- Event payloads gain `enemyIndex` / `heroIndex` (fixes D3 so log and UI can attribute with 2-3 enemies).
+- `EncounterFactory` (Step 11a, live) builds the team for a wave: boss waves are always one enemy, otherwise the
+  size comes from `BalanceConfig.enemiesPerWave` capped at `MaxEnemiesPerWave` (3). Composition is the wave's normal
+  pick plus its rotation neighbours (`WaveConfig.GetEnemiesFor`) - deterministic from (stage, wave), so the save file
+  needs no composition data. `EncounterData` + affixes + `DifficultyCurve` remain the plan for Step 15 zones.
+- **Ranks on the enemy side:** every enemy gets `Row`/`Column` from `EnemyData.preferredRow` (front slots fill
+  0,1,2 then back slots), so the party's own rule decides whether it must chew through the front rank first.
+  An attacker with its own preference (`Combatant.TargetRule`, from `EnemyData.targetRule`; `null` = inherit the
+  wave rule) uses it, e.g. a ranged enemy reaching the party's back rank. Nobody is ever untargetable.
+- **Wave budget split (the maths):** let `P` be the enemy the wave would have spawned alone. Each member keeps its
+  own pool, and the group is re-ratios so the wave's totals equal `P * multiplier`:
+  `healthFactor = P.hp * waveHealthMultiplier / Σ hp`, same shape for attack and gold, applied to every member.
+  With one enemy the factors are exactly 1 (and are not applied at all), which is what keeps the MVP numbers
+  byte-identical. Relative beefiness survives (a goblin stays chunkier than a slime). **Defence is not split** -
+  armour is archetype identity; because per-hit defence compounds (`max(atk-def, atk*floor)`), three split attacks
+  land softer than one big one, so `waveAttackMultiplier > 1` is the compensation knob, tuned from the sweep (11c).
+- Event payloads gain `enemyIndex` / `heroIndex` (fixes D3 so log and UI can attribute with 2-3 enemies) - 11c.
 - `Result` is what the ledger consumes; it is also what a headless Balance Lab run returns.
 
 ## 8. Effect pipeline (the only place damage/healing happens)

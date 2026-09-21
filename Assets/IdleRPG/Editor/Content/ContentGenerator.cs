@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using IdleRPG.Data;
+using IdleRPG.Sim;
 
 namespace IdleRPG.EditorTools.Content
 {
@@ -110,7 +111,11 @@ namespace IdleRPG.EditorTools.Content
                     isBoss = SoField.Bool(enemy, "isBoss"),
                     bossHealthMultiplier = SoField.Float(enemy, "bossHealthMultiplier", 1f),
                     bossGoldMultiplier = SoField.Float(enemy, "bossGoldMultiplier", 1f),
-                    tint = ContentSpecIO.ToHex(SoField.Color(enemy, "placeholderTint", Color.white))
+                    tint = ContentSpecIO.ToHex(SoField.Color(enemy, "placeholderTint", Color.white)),
+                    targetRule = ((EnemyTargetingMode)SoField.Int(enemy, "targetRule", (int)EnemyTargetingMode.Inherit))
+                        .ToString().ToLowerInvariant(),
+                    preferredRow = ((CombatRow)SoField.Int(enemy, "preferredRow", (int)CombatRow.Front))
+                        .ToString().ToLowerInvariant()
                 });
             }
 
@@ -267,6 +272,8 @@ namespace IdleRPG.EditorTools.Content
                     .Set("isBoss", spec.isBoss)
                     .Set("bossHealthMultiplier", spec.bossHealthMultiplier)
                     .Set("bossGoldMultiplier", spec.bossGoldMultiplier)
+                    .Set("targetRule", (int)ParseTargetRule(spec.targetRule))
+                    .Set("preferredRow", (int)ParseRow(spec.preferredRow))
                     .SetColor("placeholderTint", ContentSpecIO.FromHex(spec.tint, Color.white))
                     .SetSprite("enemySprite", spec.sprite)
                     .Apply();
@@ -411,6 +418,31 @@ namespace IdleRPG.EditorTools.Content
                     .Set("maxLevel", entry.maxLevel)
                     .Apply();
             }
+        }
+
+        /// <summary>"frontmost" | "lowesthealthpercent" | "random" | "backlinefirst" | anything else = inherit.</summary>
+        private static EnemyTargetingMode ParseTargetRule(string value)
+        {
+            switch ((value ?? "").Trim().ToLowerInvariant())
+            {
+                case "frontmost":
+                case "front":
+                    return EnemyTargetingMode.FrontMost;
+                case "lowesthealthpercent":
+                    return EnemyTargetingMode.LowestHealthPercent;
+                case "random":
+                    return EnemyTargetingMode.Random;
+                case "backlinefirst":
+                    return EnemyTargetingMode.BacklineFirst;
+                default:
+                    return EnemyTargetingMode.Inherit;
+            }
+        }
+
+        /// <summary>"back" = the back rank; anything else = the front rank.</summary>
+        private static CombatRow ParseRow(string value)
+        {
+            return (value ?? "").Trim().ToLowerInvariant() == "back" ? CombatRow.Back : CombatRow.Front;
         }
 
         private static HeroStatType ParseStatType(string value)

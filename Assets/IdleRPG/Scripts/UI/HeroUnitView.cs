@@ -191,7 +191,9 @@ namespace IdleRPG.UI
                 return;
             }
 
-            var hero = manager.Combat.Simulator.Heroes != null && manager.Combat.Simulator.Heroes.Length > heroIndex
+            // heroIndex is -1 while a view is unbound/pooled, and a negative index *passes* the length check.
+            var hero = heroIndex >= 0 && manager.Combat.Simulator.Heroes != null
+                       && manager.Combat.Simulator.Heroes.Length > heroIndex
                 ? manager.Combat.Simulator.Heroes[heroIndex]
                 : null;
 

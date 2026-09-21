@@ -139,7 +139,17 @@
   deliberately re-baselined (79s@x1.0 / 124s@x1.6, 272 gold, per-enemy TTK identical) so Step 11 has one stable
   parity net to build on instead of two.
 
-### Step 11 — Multi-enemy encounters (up to 3)  `TODO`
+### Step 11a — Encounter factory + composition + enemy ranks  `DONE`
+- **Simplified on purpose:** composition is the wave's enemy plus its rotation neighbours (deterministic from
+  stage/wave -> no save change, no second content pipeline). The `EncounterData`/`encounters.json` idea is parked
+  until hand-authored mixes are actually needed (11c at the earliest).
+- `EncounterFactory` (team size capped at 3, boss always 1, ranks from `EnemyData.preferredRow`, per-enemy rule from
+  `EnemyData.targetRule`, wave budget ratios in `BalanceConfig`), `WaveConfig.GetEnemiesFor`, `Combatant.TargetRule`.
+- Parity: golden numbers byte-identical, validator + drift clean, factory probe shows identical totals at 1 and 3
+  enemies. Also fixed a pre-existing `HeroUnitView` index crash and the "wave ends on first kill" landmine.
+- **Ahead:** 11b targeting symmetry (heroes + a ranged enemy archetype), 11c presentation + flipping the switch.
+
+### Step 11 — Multi-enemy encounters (up to 3)  `IN PROGRESS``
 - **Owner doc:** `Sim-Core.md` §7; `Content.md` §4-§5; `UI-UX.md` §3
 - **Goal:** ask #3. 1-3 enemies per encounter with an HP/gold budget that preserves the idle rate.
 - **Deliverables:** `Encounter` + `EncounterFactory`; `EncounterData` rows; indexed event payloads (fixes D3);

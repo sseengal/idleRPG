@@ -49,7 +49,57 @@ namespace IdleRPG.EditorTools
             Debug.Log(report.ToString());
         }
 
-        [MenuItem("Tools/Idle RPG/Balance Lab/Sweep Stages 1-10", priority = 91)]
+        [MenuItem("Tools/Idle RPG/Balance Lab/Encounter Factory Probe", priority = 92)]
+        public static void EncounterFactoryProbe()
+        {
+            SimLogBridge.EnsureInstalled();
+
+            BalanceConfig balance = Load<BalanceConfig>("BalanceConfig");
+            WaveConfig waves = Load<WaveConfig>("WaveConfig");
+
+            if (balance == null || waves == null)
+            {
+                return;
+            }
+
+            SimRules rules = SimRulesFactory.FromBalance(balance);
+            StringBuilder report = new StringBuilder();
+            report.AppendLine("=== Balance Lab: encounter factory (Step 11a) ===");
+            report.AppendLine($"seed-free, stage 1, rules from BalanceConfig (pace x{rules.PaceMultiplier:0.##})");
+
+            foreach (int count in new[] { 1, BalanceConfig.MaxEnemiesPerWave })
+            {
+                for (int wave = 1; wave <= 3; wave++)
+                {
+                    EnemyCombatant[] team = EncounterFactory.Build(waves, balance, 1, wave, false, rules, count);
+
+                    if (team == null || team.Length == 0)
+                    {
+                        report.AppendLine($"count {count} wave {wave}: (nothing to spawn)");
+                        continue;
+                    }
+
+                    double health = 0d;
+                    double attack = 0d;
+                    double gold = 0d;
+
+                    for (int i = 0; i < team.Length; i++)
+                    {
+                        health += team[i].MaxHealth;
+                        attack += team[i].Attack;
+                        gold += team[i].GoldReward;
+                    }
+
+                    report.AppendLine(
+                        $"count {count} wave {wave}: {team.Length} -> {EncounterFactory.Describe(team)} " +
+                        $"| total {health:0.#}hp {attack:0.#}atk {gold:0.#}g");
+                }
+            }
+
+            Debug.Log(report.ToString());
+        }
+
+        [MenuItem("Tools/Idle RPG/Balance Lab/Sweep Stages 1-10", priority = 93)]
         public static void SweepStages()
         {
             SimLogBridge.EnsureInstalled();

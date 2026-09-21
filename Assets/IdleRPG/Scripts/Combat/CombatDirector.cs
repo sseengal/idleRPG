@@ -221,9 +221,12 @@ namespace IdleRPG.Combat
 
             IsBossWave = WaveConfig.IsBossWave(CurrentWave, NormalWaves());
 
-            EnemyData enemyData = waveConfig.GetEnemyFor(CurrentStage, CurrentWave, NormalWaves());
+            // The factory owns composition, ranks and the per-wave budget (Step 11a); with one enemy per wave it
+            // returns exactly what the old single-enemy path did.
+            EnemyCombatant[] team = EncounterFactory.Build(
+                waveConfig, balanceConfig, CurrentStage, CurrentWave, IsBossWave, simulator.Context.Rules);
 
-            if (enemyData == null || !simulator.StartEncounter(enemyData, CurrentStage, IsBossWave))
+            if (team == null || team.Length == 0 || !simulator.StartEncounter(team))
             {
                 SimLog.LogError($"[CombatDirector] No enemy for stage {CurrentStage} wave {CurrentWave}; stopping.");
                 running = false;

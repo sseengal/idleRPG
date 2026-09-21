@@ -83,7 +83,7 @@ namespace IdleRPG.Combat
         /// <summary>Who stands where (null until a formation is assigned).</summary>
         public Formation Formation => formation;
 
-        public bool IsEncounterActive => Enemy != null && Enemy.IsAlive && AliveHeroCount > 0;
+        public bool IsEncounterActive => AliveHeroCount > 0 && encounter.AliveEnemyCount > 0;
 
         public double EnemyHealthPercent => encounter.TotalEnemyHealthPercent;
 
@@ -265,7 +265,7 @@ namespace IdleRPG.Combat
             return true;
         }
 
-        /// <summary>Spawns a whole enemy team (multi-enemy waves arrive in Step 11).</summary>
+        /// <summary>Spawns a whole enemy team (1..N enemies; composition comes from <see cref="EncounterFactory"/>).</summary>
         public bool StartEncounter(EnemyCombatant[] team)
         {
             if (team == null || team.Length == 0)
@@ -275,6 +275,7 @@ namespace IdleRPG.Combat
 
             enemies = team;
             encounter.SpawnEnemies(enemies);
+            encounter.PartyTargetRule = TargetRule.FrontMost;
             return true;
         }
 
@@ -329,18 +330,10 @@ namespace IdleRPG.Combat
             return scaled < 0.1d ? 0.1d : scaled;
         }
 
-        /// <summary>Maps the data-layer targeting enum onto the sim's target rules (decision A2).</summary>
+        /// <summary>Maps the data-layer targeting enum onto the sim's target rules (one table, in EncounterFactory).</summary>
         private static TargetRule MapTargeting(EnemyTargetingMode mode)
         {
-            switch (mode)
-            {
-                case EnemyTargetingMode.LowestHealthPercent:
-                    return TargetRule.LowestHealthPercent;
-                case EnemyTargetingMode.Random:
-                    return TargetRule.Random;
-                default:
-                    return TargetRule.FrontMost;
-            }
+            return EncounterFactory.MapRule(mode) ?? TargetRule.FrontMost;
         }
     }
 }

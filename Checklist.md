@@ -11,7 +11,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **11a** multi-enemy: sim-side teams, still 1 enemy (Step 10 complete: 10a-10e) |
+| Current step | **11b** multi-enemy: targeting symmetry, then 11c (Step 10 complete: 10a-10e) |
 | Last completed | Step 6 (mobile polish, MVP) |
 | Next after this | 7b unified `Combatant` + `Encounter` |
 | Save schema | v2 (v3 lands in Steps 10/14 with migration) |
@@ -387,13 +387,54 @@ validator       ok [balance] Stage 1: 124s, 11 kills, 272 gold, 2.20 gold/s (ban
       the changed RNG stream - the per-enemy TTK is identical, which is the number that proves the *combat* model did
       not move. Enemy damage was deliberately **not** retuned; difficulty impact is measured in the sweep above
 
-### 11 — Multi-enemy encounters (up to 3)  `[ ]`
-- [ ] `Encounter` enemy list + `EncounterFactory` (spawn groups, affix, budget)
-- [ ] `EncounterData` rows per zone
-- [ ] HP/gold budget split (idle rate preserved)
-- [ ] indexed event payloads (`enemyIndex`) + combat log attribution
-- [ ] pooled enemy views (1-3) + per-enemy HP/status
-- [ ] `enemiesPerWave` becomes live
+### 11a — Encounter factory + composition + enemy ranks  `[x]`  (still 1 enemy per wave)
+- [x] **simplified the plan on purpose:** no `EncounterData` SO and no `encounters.json` yet. Composition is the
+      wave's existing enemy plus its rotation neighbours (`WaveConfig.GetEnemiesFor`), so it stays deterministic
+      from (stage, wave) - **no save/schema change** - and one content pipeline instead of two. If 11c needs
+      hand-authored mixes, add an optional block to `waves.json` then, when the data is actually exercised
+- [x] `Scripts/Combat/EncounterFactory.cs`: team size (boss always 1, cap 3), rows/columns from
+      `EnemyData.preferredRow`, per-enemy target rule from `EnemyData.targetRule`, wave budget split
+- [x] `EnemyData` += `targetRule` (`EnemyTargetingMode`, new `Inherit` = wave default, new `BacklineFirst`) and
+      `preferredRow` (`CombatRow`); authored in `enemies.json`, exported/generated/validated by the existing pipeline
+- [x] `WaveConfig.GetEnemiesFor(stage, wave, normalWaves, count)`; `GetEnemyFor` unchanged (single-pick authority)
+- [x] `Combatant.TargetRule` (nullable) - `null` = use the side rule, so every existing unit is unchanged
+- [x] `BalanceConfig` += `waveHealthMultiplier` / `waveAttackMultiplier` / `waveGoldMultiplier` (all 1 = parity);
+      `enemiesPerWave` clamped to 1..3
+- [x] `CombatDirector.BeginWave` builds through the factory; `CombatSimulator.StartEncounter(team)` embeds it
+- [x] parity-safe landmine fixes: `Simulator.IsEncounterActive` now means "any enemy alive" (it was "enemy 0
+      alive", which would have ended a 3-enemy wave on the first kill), and `MapTargeting` shares one table
+- [x] **verified - factory probe** (new menu `Tools/Idle RPG/Balance Lab/Encounter Factory Probe`, 1 click):
+```
+count 1 wave 1: 1 -> Slime[F0] 60hp 6atk 8g                       | total 60hp 6atk 8g
+count 3 wave 1: 3 -> Slime[F0] 12.9hp | Bat[F1] 19.3hp | Goblin[F2] 27.9hp | total 60hp 6atk 8g
+count 1 wave 3: 1 -> Goblin[F0] 130hp 12atk 18g                   | total 130hp 12atk 18g
+count 3 wave 3: 3 -> Goblin[F0] 60.4hp | Slime[F1] 27.9hp | Bat[F2] 41.8hp | total 130hp 12atk 18g
+```
+      i.e. totals identical at 1 and 3 enemies, the wave's primary enemy keeps slot 0, and relative beefiness
+      survives (goblin > bat > slime)
+- [x] **verified - parity byte-identical** to the 10e baseline: TTK 4.0/6.0/11.3s, boss 44.0s, stage 79s@x1 and
+      124s@x1.6, 11 kills, 272 gold, 2.20 gold/s. validator clean (new `ok [encounters]` line), save drift PASS
+- [x] spec round-trip: `enemies.json` gained `targetRule: "inherit"` / `preferredRow: "front"`; export -> generate
+      -> export stable (one-time cosmetic tint normalisation: specs store 8-bit hex, assets now match them)
+- [x] **incidental crash fix found in the smoke test** (pre-existing, not from 11a): `HeroUnitView.RefreshFromSimulator`
+      indexed `Heroes[heroIndex]` with `heroIndex = -1` for unbound/pooled views, and a negative index passes the
+      `Length > heroIndex` guard -> `IndexOutOfRangeException` on every StageChanged. Play mode now logs 0 errors
+
+### 11b — Targeting symmetry  `[ ]`
+- [ ] wire `HeroData.targetRule` (still inert) to `Combatant.TargetRule`; the enemy side is already wired
+- [ ] author one ranged archetype (`preferredRow: "back"`, `targetRule: "backlinefirst"`) in `enemies.json`
+- [ ] acceptance: "who hits whom" matrix, nobody untargetable, 1-enemy numbers still identical
+
+### 11c — Presentation + enable N=2-3  `[ ]`
+- [ ] **gate first:** a wave must end when *all* enemies die. `CombatDirector.NotifyEnemyKilled` starts the wave
+      transition on the *first* kill (and pays one gold reward), so flipping `enemiesPerWave` before that lands
+      would end every multi-enemy wave after one kill. Same for `BalanceLabMenu.RunStage`, which records only
+      `lastKillGold` per wave (gold/s would read low)
+- [ ] index-0 assumptions to sweep: `CombatLogUI:468`, `EnemyUnitView:144`, `DevOverlay:252`, `CombatManager.Enemy`
+- [ ] indexed event payloads (`enemyIndex`) + combat log attribution for duplicate names (Goblin A/B/C)
+- [ ] pooled enemy views (1-3) + per-enemy HP bar/anchor
+- [ ] Balance Lab **Multi-Enemy Sweep** tool, then flip `BalanceConfig.enemiesPerWave` to 2-3 and tune the three
+      `wave*Multiplier` knobs from the sweep (per-hit defence compounds, so >1 on attack is the compensation)
 - [ ] acceptance: 3-enemy wave ~= same clear time and gold/s; log names each enemy
 
 ### 12 — Effect pipeline + statuses  `[ ]`

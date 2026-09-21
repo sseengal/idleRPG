@@ -32,6 +32,17 @@ namespace IdleRPG.Data
         [Tooltip("Number of enemies spawned per normal wave. MVP uses 1 for lane clarity.")]
         [SerializeField] private int enemiesPerWave = 1;
 
+        [Tooltip("Multi-enemy budget: total wave HP compared to a one-enemy wave. 1 = same clear time, " +
+                 "each enemy gets 1/count of the pool.")]
+        [SerializeField] private float waveHealthMultiplier = 1f;
+
+        [Tooltip("Multi-enemy budget: total enemy attack compared to a one-enemy wave. 1 = same incoming DPS. " +
+                 "Per-hit defence makes split attacks weaker, so >1 is the compensation knob.")]
+        [SerializeField] private float waveAttackMultiplier = 1f;
+
+        [Tooltip("Multi-enemy budget: total gold compared to a one-enemy wave. 1 = same gold per second.")]
+        [SerializeField] private float waveGoldMultiplier = 1f;
+
         [Tooltip("Gem reward for killing a stage boss. Spec left the gem source undefined.")]
         [SerializeField] private int gemsPerBossKill = 1;
 
@@ -204,7 +215,19 @@ namespace IdleRPG.Data
 
         public int NormalWavesPerStage => Mathf.Max(1, normalWavesPerStage);
 
-        public int EnemiesPerWave => Mathf.Max(1, enemiesPerWave);
+        public int EnemiesPerWave => Mathf.Clamp(enemiesPerWave, 1, MaxEnemiesPerWave);
+
+        /// <summary>Portrait layout holds three enemies; the sim cap (<see cref="Sim.SimCaps"/>) is the same number.</summary>
+        public const int MaxEnemiesPerWave = 3;
+
+        /// <summary>Total wave HP versus a one-enemy wave (1 = idle parity).</summary>
+        public float WaveHealthMultiplier => Mathf.Max(0.05f, waveHealthMultiplier);
+
+        /// <summary>Total wave attack versus a one-enemy wave (1 = same incoming DPS).</summary>
+        public float WaveAttackMultiplier => Mathf.Max(0.05f, waveAttackMultiplier);
+
+        /// <summary>Total wave gold versus a one-enemy wave (1 = same gold per second).</summary>
+        public float WaveGoldMultiplier => Mathf.Max(0.05f, waveGoldMultiplier);
 
         public int GemsPerBossKill => Mathf.Max(0, gemsPerBossKill);
 
