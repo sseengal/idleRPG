@@ -81,7 +81,8 @@ Rules:
 
 1. **3 weak enemies must take about as long as 1 strong one** - otherwise multi-enemy changes the idle rate.
 
-> **Implemented (Step 11a) - simpler than the sketch above.** The budget is not a curve: the enemy the wave would
+> **Implemented (Step 11a/b) - simpler than the sketch above.** Enemies have no ranks: a wave is a flat 1-3 list.
+> Tuned from measurement at 3 enemies: `waveHealthMultiplier 0.95` restores the idle rate (126s vs 124s). The budget is not a curve: the enemy the wave would
 > have spawned alone *is* the budget, and every member is ratioed so the group's totals match it
 > (`Σ hp = P.hp * waveHealthMultiplier`, same for attack and gold; see `Sim-Core.md` §7). One enemy -> factors of
 > exactly 1 and nothing is rescaled, which is why the MVP numbers do not move. Archetype bulk/relative beefiness is

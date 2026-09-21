@@ -53,7 +53,8 @@ namespace IdleRPG.Combat
         // --- Events (mirrors the old API so UI/log keep working) ---
         public event Action<EnemyDamagedInfo> EnemyDamaged;
 
-        public event Action<double> EnemyKilled;
+        /// <summary>(enemyIndex, goldReward) - one call per enemy, so the UI can attribute a 1-3 enemy wave.</summary>
+        public event Action<int, double> EnemyKilled;
 
         public event Action<int, double, double, double> HeroDamaged;
 
@@ -77,6 +78,9 @@ namespace IdleRPG.Combat
         public int HeroCount => heroes.Length;
 
         public int AliveHeroCount => encounter.AlivePartyCount;
+
+        /// <summary>Living enemies in the current wave - the director ends a wave only when this hits 0.</summary>
+        public int AliveEnemyCount => encounter.AliveEnemyCount;
 
         public HeroCombatant[] Heroes => heroes;
 
@@ -299,7 +303,7 @@ namespace IdleRPG.Combat
         {
             encounter.Damaged += OnEncounterDamaged;
             encounter.Died += OnEncounterDied;
-            encounter.EnemyKilled += gold => EnemyKilled?.Invoke(gold);
+            encounter.EnemyKilled += (index, gold) => EnemyKilled?.Invoke(index, gold);
             encounter.PartyWiped += () => PartyWiped?.Invoke();
         }
 
@@ -308,7 +312,8 @@ namespace IdleRPG.Combat
             if (damage.TargetSide == CombatantSide.Enemy)
             {
                 EnemyDamaged?.Invoke(new EnemyDamagedInfo(
-                    damage.Damage, damage.TargetHealth, damage.TargetMaxHealth, damage.IsCritical, damage.AttackerIndex));
+                    damage.Damage, damage.TargetHealth, damage.TargetMaxHealth, damage.IsCritical,
+                    damage.AttackerIndex, damage.TargetIndex));
                 return;
             }
 

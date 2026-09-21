@@ -98,7 +98,7 @@ namespace IdleRPG.EditorTools
             GameObject managementPage = CreatePage("ManagementPage", safeArea);
 
             BuildViewport(battlePage.GetComponent<RectTransform>(), damageRoot,
-                out FormationBoardView formationBoard, out EnemyUnitView enemyView,
+                out FormationBoardView formationBoard, out EnemyStackView enemyStack,
                 out FloatingDamageTextPool damagePool, out RectTransform enemyAnchor);
             CombatLogUI combatLog = BuildCombatLog(battlePage.GetComponent<RectTransform>());
             TabController tabs = BuildManagementPage(managementPage.GetComponent<RectTransform>(), partyConfig, prestigeUpgrades);
@@ -109,7 +109,7 @@ namespace IdleRPG.EditorTools
 
             SceneWiringUtility.SetField(hud, "gameManager", gameManager);
             SceneWiringUtility.SetField(hud, "formationBoard", formationBoard);
-            SceneWiringUtility.SetField(hud, "enemyView", enemyView);
+            SceneWiringUtility.SetField(hud, "enemyStack", enemyStack);
             SceneWiringUtility.SetField(hud, "damageTextPool", damagePool);
             SceneWiringUtility.SetField(damagePool, "enemyAnchor", enemyAnchor);
             SceneWiringUtility.SetField(formationBoard, "damagePool", damagePool, required: false);
@@ -133,7 +133,7 @@ namespace IdleRPG.EditorTools
             AddSceneToBuildSettings(ScenePath);
             AssetDatabase.SaveAssets();
 
-            Debug.Log($"[MvpSceneBuilder] Built {ScenePath}: header + viewport (3 heroes, 1 enemy) + dock (Upgrades/Ascension/Shop) + damage canvas + popups.");
+            Debug.Log($"[MvpSceneBuilder] Built {ScenePath}: header + viewport (3 heroes, 1-3 stacked enemies) + dock (Upgrades/Ascension/Shop) + damage canvas + popups.");
         }
 
         // ------------------------------------------------------------------
@@ -360,15 +360,8 @@ namespace IdleRPG.EditorTools
         // ------------------------------------------------------------------
         // Combat viewport
         // ------------------------------------------------------------------
-        /// <summary>Maps a battle-viewport-relative Y (0 bottom .. 1 top) to a full-screen Y.</summary>
-        private static float ScreenYInViewport(float viewportFraction)
-        {
-            float pageFraction = BattleViewportBottom + (1f - BattleViewportBottom) * viewportFraction;
-            return PagesBottom + (HeaderBottom - PagesBottom) * pageFraction;
-        }
-
         private static void BuildViewport(RectTransform pageRoot, RectTransform damageRoot,
-            out FormationBoardView formationBoard, out EnemyUnitView enemyView, out FloatingDamageTextPool damagePool,
+            out FormationBoardView formationBoard, out EnemyStackView enemyStack, out FloatingDamageTextPool damagePool,
             out RectTransform enemyAnchor)
         {
             GameObject viewport = UiFactory.Node("Viewport", pageRoot);
@@ -390,44 +383,80 @@ namespace IdleRPG.EditorTools
 
             formationBoard = boardObject.AddComponent<FormationBoardView>();
 
-            enemyView = BuildEnemySlot(viewport.transform);
+            // The enemy side is a vertical stack of up to 3 slots, each with its own sprite, name and HP bar.
+            // Enemies have no ranks: the stack is presentation only (the sim decides who gets hit).
+            GameObject stackObject = UiFactory.Node("EnemyStack", viewport.transform);
+            RectTransform stackRect = stackObject.GetComponent<RectTransform>();
+            UiFactory.Anchor(stackRect, new Vector2(0.54f, 0.10f), new Vector2(0.98f, 0.92f));
 
-            GameObject enemyAnchorObject = UiFactory.Node("EnemyDamageAnchor", damageRoot);
-            UiFactory.CenterOn(enemyAnchorObject.GetComponent<RectTransform>(), new Vector2(0.78f, ScreenYInViewport(0.5f)), new Vector2(1f, 1f));
-            enemyAnchor = enemyAnchorObject.GetComponent<RectTransform>();
+            EnemyUnitView[] enemySlots = new EnemyUnitView[EnemyStackView.MaxSlots];
+
+            for (int i = 0; i < enemySlots.Length; i++)
+            {
+                enemySlots[i] = BuildEnemySlot(stackRect, i);
+                enemySlots[i].gameObject.SetActive(false);
+            }
+
+            RectTransform[] enemyAnchors = new RectTransform[EnemyStackView.MaxSlots];
+
+            for (int i = 0; i < enemyAnchors.Length; i++)
+            {
+                enemyAnchors[i] = BuildEnemyAnchor(stackRect, i);
+            }
+
+            EnemyStackView stack = stackObject.AddComponent<EnemyStackView>();
+            SceneWiringUtility.SetField(stack, "container", stackRect);
+            SceneWiringUtility.SetField(stack, "slots", enemySlots);
+            SceneWiringUtility.SetField(stack, "anchors", enemyAnchors);
+            enemyStack = stack;
+
+            // Legacy single anchor (kept as the pool's fallback) points at the first slot.
+            enemyAnchor = enemyAnchors[0];
 
             damagePool = BuildDamageTextPool(damageRoot);
         }
 
-        private static EnemyUnitView BuildEnemySlot(Transform parent)
+        /// <summary>One enemy slot: sprite, name, HP bar and the boss frame. Laid out by <see cref="EnemyStackView"/>.</summary>
+        private static EnemyUnitView BuildEnemySlot(Transform parent, int index)
         {
-            GameObject slot = UiFactory.Node("EnemySlot", parent);
+            GameObject slot = UiFactory.Node("EnemySlot" + index, parent);
             RectTransform slotRect = slot.GetComponent<RectTransform>();
-            UiFactory.Anchor(slotRect, new Vector2(0.54f, 0.10f), new Vector2(0.98f, 0.92f));
+            UiFactory.Anchor(slotRect, new Vector2(0f, 1f), new Vector2(1f, 1f));
 
             Image bossFrame = UiFactory.Panel("BossFrame", slot.transform, "ui_panel_bordered", new Color(1f, 0.85f, 0.35f, 0.85f));
             UiFactory.Stretch(bossFrame.rectTransform);
             bossFrame.enabled = false;
 
             Image icon = UiFactory.Icon("Icon", slot.transform, Color.white);
-            UiFactory.CenterOn(icon.rectTransform, new Vector2(0.5f, 0.58f), new Vector2(220f, 220f));
+            UiFactory.CenterOn(icon.rectTransform, new Vector2(0.5f, 0.58f), new Vector2(170f, 170f));
             icon.enabled = false;
 
-            TextMeshProUGUI nameLabel = UiFactory.Text("Name", slot.transform, "Enemy", 28f,
+            TextMeshProUGUI nameLabel = UiFactory.Text("Name", slot.transform, "Enemy", 24f,
                 TextAlignmentOptions.Center, TextColor);
-            UiFactory.Anchor(nameLabel.rectTransform, new Vector2(0f, 0.82f), new Vector2(1f, 1f));
+            UiFactory.Anchor(nameLabel.rectTransform, new Vector2(0f, 0.80f), new Vector2(1f, 0.98f));
 
             HpBarView hpBar = CreateHpBar(slot.transform, "HpBar");
-            UiFactory.Anchor(hpBar.GetComponent<RectTransform>(), new Vector2(0.06f, 0.04f), new Vector2(0.94f, 0.20f));
+            UiFactory.Anchor(hpBar.GetComponent<RectTransform>(), new Vector2(0.10f, 0.03f), new Vector2(0.90f, 0.18f));
 
             EnemyUnitView view = slot.AddComponent<EnemyUnitView>();
-            SceneWiringUtility.SetField(view, "spriteImage", icon);
-            SceneWiringUtility.SetField(view, "hpBar", hpBar);
-            SceneWiringUtility.SetField(view, "nameLabel", nameLabel);
-            SceneWiringUtility.SetField(view, "root", slotRect);
-            SceneWiringUtility.SetField(view, "bossFrame", bossFrame);
+            view.ConfigureRuntime(index, icon, hpBar, nameLabel, slotRect, bossFrame);
 
             return view;
+        }
+
+        /// <summary>
+        /// Floating-text anchor for one enemy slot. Lives under the stack (so damage numbers draw above the
+        /// enemy sprite) and is moved to the slot's vertical centre by <see cref="EnemyStackView"/>.
+        /// </summary>
+        private static RectTransform BuildEnemyAnchor(Transform parent, int index)
+        {
+            GameObject anchor = UiFactory.Node("EnemyAnchor" + index, parent);
+            RectTransform rect = anchor.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 1f);
+            rect.anchorMax = new Vector2(0.5f, 1f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = new Vector2(1f, 1f);
+            return rect;
         }
 
         private static FloatingDamageTextPool BuildDamageTextPool(RectTransform damageRoot)

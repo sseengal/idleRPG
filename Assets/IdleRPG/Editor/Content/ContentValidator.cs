@@ -25,9 +25,6 @@ namespace IdleRPG.EditorTools.Content
         private static readonly System.Collections.Generic.HashSet<string> KnownTargetRules =
             new System.Collections.Generic.HashSet<string> { "inherit", "frontmost", "lowesthealthpercent", "random", "backlinefirst" };
 
-        private static readonly System.Collections.Generic.HashSet<string> KnownRows =
-            new System.Collections.Generic.HashSet<string> { "front", "back" };
-
         public enum Severity
         {
             Error = 0,
@@ -142,7 +139,7 @@ namespace IdleRPG.EditorTools.Content
             }
 
             Add(Severity.Info, "encounters",
-                $"enemiesPerWave {balance.EnemiesPerWave} (1 = MVP parity), wave budget " +
+                $"enemiesPerWave {balance.EnemiesPerWave} (1 = single enemy; 2-3 stack on the battle page), wave budget " +
                 $"HP x{balance.WaveHealthMultiplier:0.##} ATK x{balance.WaveAttackMultiplier:0.##} " +
                 $"gold x{balance.WaveGoldMultiplier:0.##}.");
         }
@@ -240,11 +237,6 @@ namespace IdleRPG.EditorTools.Content
                         $"Known: {string.Join(", ", KnownTargetRules)}.");
                 }
 
-                if (!KnownRows.Contains((enemy.preferredRow ?? "").Trim().ToLowerInvariant()))
-                {
-                    Add(Severity.Warning, "enemies",
-                        $"{enemy.id}: unknown preferredRow '{enemy.preferredRow}' (falls back to front).");
-                }
             }
 
             if (bosses == 0)

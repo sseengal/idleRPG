@@ -179,8 +179,9 @@ Encounter
   size comes from `BalanceConfig.enemiesPerWave` capped at `MaxEnemiesPerWave` (3). Composition is the wave's normal
   pick plus its rotation neighbours (`WaveConfig.GetEnemiesFor`) - deterministic from (stage, wave), so the save file
   needs no composition data. `EncounterData` + affixes + `DifficultyCurve` remain the plan for Step 15 zones.
-- **Ranks on the enemy side:** every enemy gets `Row`/`Column` from `EnemyData.preferredRow` (front slots fill
-  0,1,2 then back slots), so the party's own rule decides whether it must chew through the front rank first.
+- **The enemy side has no ranks** (dropped by design): enemies are a flat list of 1-3. All of them count as front
+  rank, so the party's even-spread rule (Step 10e) shares hits across the group, and the battle page stacks them
+  vertically - presentation only, it never influences targeting.
   An attacker with its own preference (`Combatant.TargetRule`, from `EnemyData.targetRule`; `null` = inherit the
   wave rule) uses it, e.g. a ranged enemy reaching the party's back rank. Nobody is ever untargetable.
 - **Wave budget split (the maths):** let `P` be the enemy the wave would have spawned alone. Each member keeps its

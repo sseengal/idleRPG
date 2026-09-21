@@ -11,7 +11,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **11b** multi-enemy: targeting symmetry, then 11c (Step 10 complete: 10a-10e) |
+| Current step | **11 done** (1-3 stacked enemies live); candidates next: hero-side target rules, ranged enemy, per-wave counts |
 | Last completed | Step 6 (mobile polish, MVP) |
 | Next after this | 7b unified `Combatant` + `Encounter` |
 | Save schema | v2 (v3 lands in Steps 10/14 with migration) |
@@ -420,22 +420,31 @@ count 3 wave 3: 3 -> Goblin[F0] 60.4hp | Slime[F1] 27.9hp | Bat[F2] 41.8hp | tot
       indexed `Heroes[heroIndex]` with `heroIndex = -1` for unbound/pooled views, and a negative index passes the
       `Length > heroIndex` guard -> `IndexOutOfRangeException` on every StageChanged. Play mode now logs 0 errors
 
-### 11b — Targeting symmetry  `[ ]`
-- [ ] wire `HeroData.targetRule` (still inert) to `Combatant.TargetRule`; the enemy side is already wired
-- [ ] author one ranged archetype (`preferredRow: "back"`, `targetRule: "backlinefirst"`) in `enemies.json`
-- [ ] acceptance: "who hits whom" matrix, nobody untargetable, 1-enemy numbers still identical
+### 11b — 1-3 enemies per wave, stacked on the battle page  `[x]`  (design changed: no enemy ranks)
+- [x] **dropped enemy ranks entirely** (your call): `EnemyData.preferredRow` and the factory's rank assignment are
+      gone, so the enemy side is a flat list of 1-3. Data, spec, generator and validator all cleaned up
+- [x] **a wave ends when the last enemy dies** (was: first kill). `CombatDirector.NotifyEnemyKilled(index, gold)`
+      still pays every kill, but only starts the inter-wave pause when `Simulator.AliveEnemyCount == 0`
+- [x] **events carry the enemy index**: `EnemyDamagedInfo.EnemyIndex`, `GameEvents.EnemySpawned(...,index)` raised
+      once per enemy, `GameEvents.EnemyKilled(...,index)`; 5 subscribers updated (UI, log, audio, debug logger)
+- [x] `EnemyStackView` (new): up to 3 slots stacked vertically, one view per enemy, laid out top-down and bound
+      from the simulator on every spawn. `EnemyUnitView` now knows its own index and ignores other enemies' events
+- [x] each enemy: own sprite (auto-sized so 3 fit), own name, own HP bar, own damage-number anchor
+- [x] log disambiguates duplicates as **Goblin A / Goblin B / Goblin C**; single enemies and bosses print bare
+- [x] `Simulator.IsEncounterActive` fixed to "any enemy alive" (was "enemy 0 alive" - would have ended a 3-enemy
+      wave one kill early); `BalanceLabMenu.RunStage` now builds waves through the factory and sums gold per kill
+- [x] **verified live** (screenshot + logs): 3 stacked enemies each with its own bar; "Goblin A hits Knight",
+      "Archer hits Slime B for 9", "Bat C for 7.7", "Bat defeated +5.7 gold", "(N left in wave)"; boss waves stay 1
+- [x] **balance**: `enemiesPerWave 3`, `waveHealthMultiplier 0.95`. Measured stage 1 = **126s / 31 kills / 272 gold /
+      2.16 gold/s** vs the 1-enemy baseline 124s / 11 kills / 272 gold / 2.20 (2% off). Tuning was measured, not
+      guessed: x1.0 was 140s, x0.85 116s (the fight is quantised by hits, so the knob is coarse at low HP)
+- [x] validator clean (`enemiesPerWave 3 ... wave budget HP x0.95`), save drift PASS, parity at 1 enemy byte-identical
+- **Still open (next, optional):** hero-side `HeroData.targetRule` is still inert, and a ranged enemy archetype
+      (`targetRule: "backlinefirst"`) that reaches the party's back rank is not authored yet
 
-### 11c — Presentation + enable N=2-3  `[ ]`
-- [ ] **gate first:** a wave must end when *all* enemies die. `CombatDirector.NotifyEnemyKilled` starts the wave
-      transition on the *first* kill (and pays one gold reward), so flipping `enemiesPerWave` before that lands
-      would end every multi-enemy wave after one kill. Same for `BalanceLabMenu.RunStage`, which records only
-      `lastKillGold` per wave (gold/s would read low)
-- [ ] index-0 assumptions to sweep: `CombatLogUI:468`, `EnemyUnitView:144`, `DevOverlay:252`, `CombatManager.Enemy`
-- [ ] indexed event payloads (`enemyIndex`) + combat log attribution for duplicate names (Goblin A/B/C)
-- [ ] pooled enemy views (1-3) + per-enemy HP bar/anchor
-- [ ] Balance Lab **Multi-Enemy Sweep** tool, then flip `BalanceConfig.enemiesPerWave` to 2-3 and tune the three
-      `wave*Multiplier` knobs from the sweep (per-hit defence compounds, so >1 on attack is the compensation)
-- [ ] acceptance: 3-enemy wave ~= same clear time and gold/s; log names each enemy
+### 11c — remaining index-0 cleanups  `[ ]`
+- [ ] `DevOverlay` and `HudController` still read enemy 0 for debug readouts; the battle page itself is index-aware
+- [ ] optional: hero-side `targetRule`, ranged enemy archetype, per-wave counts (1 -> 3 across a stage)
 
 ### 12 — Effect pipeline + statuses  `[ ]`
 - [ ] `EffectPipeline` (11 ordered stages; per-type floors; armor% + pen)

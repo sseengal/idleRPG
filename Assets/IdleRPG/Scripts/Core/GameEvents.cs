@@ -50,14 +50,14 @@ namespace IdleRPG.Core
         // ------------------------------------------------------------------
         // Combat
         // ------------------------------------------------------------------
-        /// <summary>(enemyName, maxHealth, isBoss).</summary>
-        public static event Action<string, double, bool> EnemySpawned;
+        /// <summary>(enemyName, maxHealth, isBoss, enemyIndex). Raised once per enemy in the wave.</summary>
+        public static event Action<string, double, bool, int> EnemySpawned;
 
-        /// <summary>Per-hit damage detail.</summary>
+        /// <summary>Per-hit damage detail (carries the enemy index).</summary>
         public static event Action<EnemyDamagedInfo> EnemyDamaged;
 
-        /// <summary>(enemyName, goldReward).</summary>
-        public static event Action<string, double> EnemyKilled;
+        /// <summary>(enemyName, goldReward, enemyIndex). One call per enemy.</summary>
+        public static event Action<string, double, int> EnemyKilled;
 
         /// <summary>(heroIndex, damage, currentHealth, maxHealth).</summary>
         public static event Action<int, double, double, double> HeroDamaged;
@@ -181,9 +181,9 @@ namespace IdleRPG.Core
             SafeInvoke(WaveCompleted, stage, wave, nameof(WaveCompleted));
         }
 
-        internal static void RaiseEnemySpawned(string enemyName, double maxHealth, bool isBoss)
+        internal static void RaiseEnemySpawned(string enemyName, double maxHealth, bool isBoss, int enemyIndex)
         {
-            SafeInvoke(EnemySpawned, enemyName, maxHealth, isBoss, nameof(EnemySpawned));
+            SafeInvoke(EnemySpawned, enemyName, maxHealth, isBoss, enemyIndex, nameof(EnemySpawned));
         }
 
         internal static void RaiseEnemyDamaged(EnemyDamagedInfo info)
@@ -191,9 +191,9 @@ namespace IdleRPG.Core
             SafeInvoke(EnemyDamaged, info, nameof(EnemyDamaged));
         }
 
-        internal static void RaiseEnemyKilled(string enemyName, double goldReward)
+        internal static void RaiseEnemyKilled(string enemyName, double goldReward, int enemyIndex)
         {
-            SafeInvoke(EnemyKilled, enemyName, goldReward, nameof(EnemyKilled));
+            SafeInvoke(EnemyKilled, enemyName, goldReward, enemyIndex, nameof(EnemyKilled));
         }
 
         internal static void RaiseHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth)

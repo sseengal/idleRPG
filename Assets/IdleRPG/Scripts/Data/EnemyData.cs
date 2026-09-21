@@ -1,5 +1,4 @@
 using UnityEngine;
-using IdleRPG.Sim;
 
 namespace IdleRPG.Data
 {
@@ -31,13 +30,8 @@ namespace IdleRPG.Data
         [Tooltip("Enemy attack cadence. Spec only defined it for heroes.")]
         [SerializeField] private float attackIntervalSec = 2f;
 
-        [Header("Formation (Step 11)")]
         [Tooltip("Who this enemy attacks. Inherit = use the wave's global rule (BalanceConfig.EnemyTargeting).")]
         [SerializeField] private EnemyTargetingMode targetRule = EnemyTargetingMode.Inherit;
-
-        [Tooltip("Which rank this enemy stands in. Back = a ranged/squishy archetype that the party must " +
-                 "reach through the front rank first.")]
-        [SerializeField] private CombatRow preferredRow = CombatRow.Front;
 
         [Header("Boss Multipliers (applied when isBoss)")]
         [SerializeField] private float bossHealthMultiplier = 10f;
@@ -65,9 +59,6 @@ namespace IdleRPG.Data
 
         /// <summary>Who this archetype attacks (Step 11). <see cref="EnemyTargetingMode.Inherit"/> = wave default.</summary>
         public EnemyTargetingMode TargetRule => targetRule;
-
-        /// <summary>Which rank this archetype stands in (Step 11). Front today; Back for ranged archetypes.</summary>
-        public CombatRow PreferredRow => preferredRow;
 
         public float AttackIntervalSec => Mathf.Max(MinAttackIntervalSec, attackIntervalSec);
 

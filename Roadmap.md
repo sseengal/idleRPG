@@ -149,11 +149,13 @@
   enemies. Also fixed a pre-existing `HeroUnitView` index crash and the "wave ends on first kill" landmine.
 - **Ahead:** 11b targeting symmetry (heroes + a ranged enemy archetype), 11c presentation + flipping the switch.
 
-### Step 11 — Multi-enemy encounters (up to 3)  `IN PROGRESS``
-- **Owner doc:** `Sim-Core.md` §7; `Content.md` §4-§5; `UI-UX.md` §3
-- **Goal:** ask #3. 1-3 enemies per encounter with an HP/gold budget that preserves the idle rate.
-- **Deliverables:** `Encounter` + `EncounterFactory`; `EncounterData` rows; indexed event payloads (fixes D3);
-  pooled enemy views; per-enemy HP + status; `enemiesPerWave` becomes live.
+### Step 11b — 1-3 enemies per wave, stacked on the battle page  `DONE`
+- **Design change:** enemy ranks dropped (never wanted). Enemies are a flat 1-3 list, stacked vertically on the
+  battle page, each with its own sprite, name, HP bar and damage-number anchor.
+- A wave now ends on the **last** kill, per-enemy events carry an index, and duplicate names log as Goblin A/B/C.
+- Balance: `enemiesPerWave 3` + `waveHealthMultiplier 0.95` -> stage 1 = 126s / 31 kills / 272 gold / 2.16 gold/s
+  against the single-enemy baseline of 124s / 11 kills / 272 gold / 2.20. Verified live (screenshot + logs).
+- **Parked:** hero-side `targetRule`, a ranged enemy archetype, per-wave counts, hand-authored mixes.
 - **Acceptance:** a 3-enemy wave clears in about the same time as the equivalent single enemy, pays the same
   gold/s, and the log attributes damage per enemy.
 - **Blocked by:** Steps 7, 10.

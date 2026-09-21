@@ -20,7 +20,8 @@ namespace IdleRPG.UI
         [Header("Views")]
         [Tooltip("The battle board (display only): one view per formation slot, built at runtime.")]
         [SerializeField] private FormationBoardView formationBoard;
-        [SerializeField] private EnemyUnitView enemyView;
+        [Tooltip("The enemy side: up to 3 stacked slots, each with its own HP bar.")]
+        [SerializeField] private EnemyStackView enemyStack;
         [SerializeField] private FloatingDamageTextPool damageTextPool;
 
         public GameManager GameManager => gameManager;
@@ -53,6 +54,11 @@ namespace IdleRPG.UI
             if (formationBoard != null)
             {
                 formationBoard.Build(gameManager, damageTextPool);
+            }
+
+            if (enemyStack != null)
+            {
+                enemyStack.Build(gameManager, damageTextPool);
             }
         }
 

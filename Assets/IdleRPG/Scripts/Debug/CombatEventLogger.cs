@@ -83,11 +83,11 @@ namespace IdleRPG.Debugging
             }
         }
 
-        private void OnEnemySpawned(string enemyName, double maxHealth, bool isBoss)
+        private void OnEnemySpawned(string enemyName, double maxHealth, bool isBoss, int enemyIndex)
         {
             if (logWavesAndKills)
             {
-                Debug.Log($"[Spawn] {enemyName} ({(isBoss ? "BOSS" : "normal")}) HP {NumberFormatter.Format(maxHealth)}");
+                Debug.Log($"[Spawn] #{enemyIndex} {enemyName} ({(isBoss ? "BOSS" : "normal")}) HP {NumberFormatter.Format(maxHealth)}");
             }
         }
 
@@ -100,7 +100,7 @@ namespace IdleRPG.Debugging
             }
         }
 
-        private void OnEnemyKilled(string enemyName, double goldReward)
+        private void OnEnemyKilled(string enemyName, double goldReward, int enemyIndex)
         {
             if (logWavesAndKills)
             {

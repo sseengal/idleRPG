@@ -208,8 +208,8 @@ namespace IdleRPG.EditorTools
                 return new StageRun();
             }
 
-            double lastKillGold = 0d;
-            System.Action<double> onKill = gold => lastKillGold = gold;
+            double waveGold = 0d;
+            System.Action<int, double> onKill = (index, gold) => waveGold += gold;
             simulator.EnemyKilled += onKill;
 
             StageRun run = new StageRun();
@@ -217,15 +217,17 @@ namespace IdleRPG.EditorTools
 
             for (int wave = 1; wave <= lastWave; wave++)
             {
-                EnemyData data = waves.GetEnemyFor(stage, wave, balance.NormalWavesPerStage);
-                if (data == null)
+                bool isBoss = WaveConfig.IsBossWave(wave, balance.NormalWavesPerStage);
+                EnemyCombatant[] team = EncounterFactory.Build(waves, balance, stage, wave, isBoss, rules);
+
+                if (team == null || team.Length == 0)
                 {
                     continue;
                 }
 
-                bool isBoss = WaveConfig.IsBossWave(wave, balance.NormalWavesPerStage);
+                waveGold = 0d;   // gold is summed per kill, so a 3-enemy wave pays all three
 
-                if (!simulator.StartEncounter(data, stage, isBoss))
+                if (!simulator.StartEncounter(team))
                 {
                     break;
                 }
@@ -246,8 +248,8 @@ namespace IdleRPG.EditorTools
                     break;
                 }
 
-                run.Kills++;
-                run.Gold += lastKillGold;
+                run.Kills += team.Length;
+                run.Gold += waveGold;
 
                 if (simulator.AliveHeroCount == 0)
                 {

@@ -88,12 +88,12 @@ namespace IdleRPG.Services
             PlayThrottled(SfxCue.Hit, ref lastHitPlayTime, hitMinGapSec);
         }
 
-        private void OnEnemyKilled(string enemyName, double goldReward)
+        private void OnEnemyKilled(string enemyName, double goldReward, int enemyIndex)
         {
             PlayThrottled(SfxCue.Kill, ref lastKillPlayTime, killMinGapSec);
         }
 
-        private void OnEnemySpawned(string enemyName, double maxHealth, bool isBoss)
+        private void OnEnemySpawned(string enemyName, double maxHealth, bool isBoss, int enemyIndex)
         {
             if (isBoss)
             {

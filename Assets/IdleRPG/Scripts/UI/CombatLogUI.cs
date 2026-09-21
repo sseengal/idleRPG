@@ -212,7 +212,7 @@ namespace IdleRPG.UI
             GameEvents.OfflineRewardsClaimed -= OnOfflineRewardsClaimed;
         }
 
-        private void OnEnemySpawned(string enemyName, double maxHealth, bool isBoss)
+        private void OnEnemySpawned(string enemyName, double maxHealth, bool isBoss, int enemyIndex)
         {
             Append(isBoss
                 ? string.Format("-- {0} (BOSS) appears --", enemyName)
@@ -223,7 +223,7 @@ namespace IdleRPG.UI
         private void OnEnemyDamaged(EnemyDamagedInfo info)
         {
             string attacker = HeroName(info.AttackerIndex);
-            string target = EnemyName();
+            string target = EnemyName(info.EnemyIndex);
             string key = string.Format("enemy:{0}:{1}", info.AttackerIndex, info.IsCritical);
 
             AddOrAggregate(key, info.Damage, info.IsCritical ? criticalColor : heroHitColor,
@@ -247,7 +247,7 @@ namespace IdleRPG.UI
                     count > 1 ? string.Format(" x{0}", count) : string.Empty));
         }
 
-        private void OnEnemyKilled(string enemyName, double goldReward)
+        private void OnEnemyKilled(string enemyName, double goldReward, int enemyIndex)
         {
             Append(string.Format("{0} defeated  +{1} gold", enemyName, NumberFormatter.Format(goldReward)), goldColor);
         }
@@ -455,7 +455,11 @@ namespace IdleRPG.UI
             return hero != null ? hero.HeroName : string.Format("Hero {0}", heroIndex + 1);
         }
 
-        private static string EnemyName()
+        /// <summary>
+        /// Name of one enemy. When the wave holds several of the same archetype the slots are suffixed
+        /// A/B/C, so "Goblin" x3 reads as Goblin A, Goblin B, Goblin C in the log.
+        /// </summary>
+        private static string EnemyName(int enemyIndex = 0)
         {
             HudController hud = HudController.Instance;
             GameManager manager = hud != null ? hud.GameManager : null;
@@ -465,8 +469,22 @@ namespace IdleRPG.UI
                 return "the enemy";
             }
 
-            var enemy = manager.Combat.Simulator.Enemy;
-            return enemy != null ? enemy.DisplayName : "the enemy";
+            var enemies = manager.Combat.Simulator.Enemies;
+
+            if (enemies == null || enemies.Length == 0)
+            {
+                return "the enemy";
+            }
+
+            int index = Mathf.Clamp(enemyIndex, 0, enemies.Length - 1);
+            var enemy = enemies[index];
+
+            if (enemy == null)
+            {
+                return "the enemy";
+            }
+
+            return enemies.Length > 1 ? string.Format("{0} {1}", enemy.DisplayName, (char)('A' + index)) : enemy.DisplayName;
         }
     }
 }

@@ -61,8 +61,6 @@ namespace IdleRPG.EditorTools.Content
         public string tint = "#FFFFFFFF";
         /// <summary>"inherit" | "frontmost" | "lowesthealthpercent" | "random" | "backlinefirst".</summary>
         public string targetRule = "inherit";
-        /// <summary>"front" | "back" - which rank the archetype stands in.</summary>
-        public string preferredRow = "front";
     }
 
     [Serializable]

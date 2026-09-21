@@ -185,14 +185,22 @@ namespace IdleRPG.Combat
             }
         }
 
-        /// <summary>Called by the wrapper when the sim reports a kill: starts the inter-wave pause.</summary>
-        public void NotifyEnemyKilled(double goldReward)
+        /// <summary>
+        /// Called by the wrapper for every enemy that dies. The inter-wave pause only starts when the **last**
+        /// enemy is down, so a 3-enemy wave is not cut short (and paid for) after the first kill.
+        /// </summary>
+        public void NotifyEnemyKilled(int enemyIndex, double goldReward)
         {
+            EnemyKilled?.Invoke(goldReward);
+
+            if (simulator != null && simulator.AliveEnemyCount > 0)
+            {
+                return;
+            }
+
             transitionPending = true;
             transitionRemaining = balanceConfig != null ? balanceConfig.WaveTransitionDelaySec : 0d;
             stepAccumulator = 0d;
-
-            EnemyKilled?.Invoke(goldReward);
         }
 
         /// <summary>Called by the wrapper when the sim reports a party wipe.</summary>

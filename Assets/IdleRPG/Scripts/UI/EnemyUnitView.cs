@@ -7,8 +7,12 @@ using IdleRPG.Data;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// View for the single enemy slot. Reads the live enemy from the simulator so the sprite,
-    /// boss styling and HP all come from the same source of truth as combat.
+    /// View for **one** enemy of a 1-3 enemy wave. Reads that enemy from the simulator by index, so sprite,
+    /// name and HP all come from the same source of truth as combat.
+    ///
+    /// ELI5: this used to be "the enemy" - a single slot that showed whatever was being fought. Now each slot
+    /// knows its own number (0, 1, 2) and ignores events that are not about it, so three stacked slots each
+    /// update their own sprite and HP bar.
     /// </summary>
     public sealed class EnemyUnitView : MonoBehaviour
     {
@@ -24,8 +28,29 @@ namespace IdleRPG.UI
         [SerializeField] private float spawnPopDurationSec = 0.18f;
         [SerializeField] private float deathFadeDurationSec = 0.20f;
 
+        private int enemyIndex;
         private float popTimer;
         private float deathTimer = -1f;
+
+        /// <summary>Which enemy of the wave this view shows (0-based).</summary>
+        public int EnemyIndex => enemyIndex;
+
+        /// <summary>Points this view at slot <paramref name="index"/> of the wave.</summary>
+        public void Configure(int index)
+        {
+            enemyIndex = index;
+        }
+
+        /// <summary>Runtime wiring (used by the code-built battle page).</summary>
+        public void ConfigureRuntime(int index, Image icon, HpBarView bar, TextMeshProUGUI label, RectTransform rect, Image frame)
+        {
+            enemyIndex = index;
+            spriteImage = icon;
+            hpBar = bar;
+            nameLabel = label;
+            root = rect;
+            bossFrame = frame;
+        }
 
         private void OnEnable()
         {
@@ -41,7 +66,33 @@ namespace IdleRPG.UI
             GameEvents.EnemyKilled -= OnEnemyKilled;
         }
 
-        private void OnEnemySpawned(string enemyName, double maxHealth, bool isBoss)
+        private void OnEnemySpawned(string enemyName, double maxHealth, bool isBoss, int index)
+        {
+            if (index != enemyIndex)
+            {
+                return;
+            }
+
+            Show(enemyName, maxHealth, isBoss);
+        }
+
+        /// <summary>
+        /// Resizes the sprite. A 1-enemy wave fills the space; a 3-enemy wave shrinks so the three sprites do not
+        /// overlap their neighbours' bars.
+        /// </summary>
+        public void SetIconSize(float pixels)
+        {
+            if (spriteImage != null)
+            {
+                spriteImage.rectTransform.sizeDelta = new Vector2(pixels, pixels);
+            }
+        }
+
+        /// <summary>
+        /// Shows this enemy (sprite, name, full health bar). Called by the spawn event and by the stack when it
+        /// re-lays out a wave, so a slot that was switched off last wave comes back correctly.
+        /// </summary>
+        public void Show(string enemyName, double maxHealth, bool isBoss)
         {
             EnemyData data = ResolveEnemyData();
 
@@ -79,16 +130,21 @@ namespace IdleRPG.UI
 
         private void OnEnemyDamaged(EnemyDamagedInfo info)
         {
-            if (hpBar != null)
+            if (info.EnemyIndex != enemyIndex || hpBar == null)
             {
-                hpBar.SetFill(info.NormalizedHealth);
-                hpBar.SetValueLabel(info.CurrentHealth, info.MaxHealth);
+                return;
             }
+
+            hpBar.SetFill(info.NormalizedHealth);
+            hpBar.SetValueLabel(info.CurrentHealth, info.MaxHealth);
         }
 
-        private void OnEnemyKilled(string enemyName, double goldReward)
+        private void OnEnemyKilled(string enemyName, double goldReward, int index)
         {
-            deathTimer = deathFadeDurationSec;
+            if (index == enemyIndex)
+            {
+                deathTimer = deathFadeDurationSec;
+            }
         }
 
         private void Update()
@@ -141,8 +197,14 @@ namespace IdleRPG.UI
                 return null;
             }
 
-            var enemy = manager.Combat.Simulator.Enemy;
-            return enemy == null ? null : enemy.Data;
+            var enemies = manager.Combat.Simulator.Enemies;
+
+            if (enemies == null || enemyIndex < 0 || enemyIndex >= enemies.Length || enemies[enemyIndex] == null)
+            {
+                return null;
+            }
+
+            return enemies[enemyIndex].Data;
         }
     }
 }

@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using IdleRPG.Data;
-using IdleRPG.Sim;
 
 namespace IdleRPG.EditorTools.Content
 {
@@ -113,8 +112,6 @@ namespace IdleRPG.EditorTools.Content
                     bossGoldMultiplier = SoField.Float(enemy, "bossGoldMultiplier", 1f),
                     tint = ContentSpecIO.ToHex(SoField.Color(enemy, "placeholderTint", Color.white)),
                     targetRule = ((EnemyTargetingMode)SoField.Int(enemy, "targetRule", (int)EnemyTargetingMode.Inherit))
-                        .ToString().ToLowerInvariant(),
-                    preferredRow = ((CombatRow)SoField.Int(enemy, "preferredRow", (int)CombatRow.Front))
                         .ToString().ToLowerInvariant()
                 });
             }
@@ -273,7 +270,6 @@ namespace IdleRPG.EditorTools.Content
                     .Set("bossHealthMultiplier", spec.bossHealthMultiplier)
                     .Set("bossGoldMultiplier", spec.bossGoldMultiplier)
                     .Set("targetRule", (int)ParseTargetRule(spec.targetRule))
-                    .Set("preferredRow", (int)ParseRow(spec.preferredRow))
                     .SetColor("placeholderTint", ContentSpecIO.FromHex(spec.tint, Color.white))
                     .SetSprite("enemySprite", spec.sprite)
                     .Apply();
@@ -437,12 +433,6 @@ namespace IdleRPG.EditorTools.Content
                 default:
                     return EnemyTargetingMode.Inherit;
             }
-        }
-
-        /// <summary>"back" = the back rank; anything else = the front rank.</summary>
-        private static CombatRow ParseRow(string value)
-        {
-            return (value ?? "").Trim().ToLowerInvariant() == "back" ? CombatRow.Back : CombatRow.Front;
         }
 
         private static HeroStatType ParseStatType(string value)

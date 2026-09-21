@@ -53,7 +53,21 @@ namespace IdleRPG.Combat
 
         public bool IsRunning => director != null && director.IsRunning;
 
-        public string CurrentEnemyName => simulator == null || simulator.Enemy == null ? "-" : simulator.Enemy.DisplayName;
+        /// <summary>Wave label for the HUD: one name, or "Goblin +2" when the wave holds several enemies.</summary>
+        public string CurrentEnemyName
+        {
+            get
+            {
+                if (simulator == null || simulator.Enemies == null || simulator.Enemies.Length == 0)
+                {
+                    return "-";
+                }
+
+                string name = simulator.Enemies[0] == null ? "-" : simulator.Enemies[0].DisplayName;
+                int extra = simulator.Enemies.Length - 1;
+                return extra > 0 ? $"{name} +{extra}" : name;
+            }
+        }
 
         public double CurrentEnemyHealthPercent => simulator == null ? 0d : simulator.EnemyHealthPercent;
 
@@ -171,16 +185,24 @@ namespace IdleRPG.Combat
         {
             WaveStarted?.Invoke(stage, wave, isBoss);
 
-            if (simulator == null || simulator.Enemy == null)
+            if (simulator == null || simulator.Enemies == null || simulator.Enemies.Length == 0)
             {
                 return;
             }
 
-            GameEvents.RaiseEnemySpawned(simulator.Enemy.DisplayName, simulator.Enemy.MaxHealth, isBoss);
+            // One event per enemy so each of the 1-3 slots on the battle page can bind itself.
+            for (int i = 0; i < simulator.Enemies.Length; i++)
+            {
+                EnemyCombatant enemy = simulator.Enemies[i];
+
+                if (enemy != null)
+                {
+                    GameEvents.RaiseEnemySpawned(enemy.DisplayName, enemy.MaxHealth, enemy.IsBoss, i);
+                }
+            }
 
             LogCombat($"Stage {stage} | Wave {wave}/{WavesPerStage}{(isBoss ? " (BOSS)" : string.Empty)} -> " +
-                      $"{simulator.Enemy.DisplayName} HP {simulator.Enemy.MaxHealth:0} ATK {simulator.Enemy.Attack:0} " +
-                      $"gold {simulator.Enemy.GoldReward:0}");
+                      $"{EncounterFactory.Describe(simulator.Enemies)}");
         }
 
         private void OnSimEnemyDamaged(EnemyDamagedInfo info)
@@ -189,19 +211,32 @@ namespace IdleRPG.Combat
 
             if (logCombatEvents)
             {
-                Debug.Log($"[Combat] {simulator.Enemy?.DisplayName} took {info.Damage:0.#}" +
+                Debug.Log($"[Combat] {EnemyLabel(info.EnemyIndex)} took {info.Damage:0.#}" +
                           $"{(info.IsCritical ? " CRIT" : string.Empty)} -> {info.CurrentHealth:0}/{info.MaxHealth:0}");
             }
         }
 
-        private void OnSimEnemyKilled(double goldReward)
+        private void OnSimEnemyKilled(int enemyIndex, double goldReward)
         {
-            string enemyName = simulator.Enemy == null ? "Enemy" : simulator.Enemy.DisplayName;
+            string enemyName = EnemyLabel(enemyIndex);
 
-            GameEvents.RaiseEnemyKilled(enemyName, goldReward);
-            director?.NotifyEnemyKilled(goldReward);
+            GameEvents.RaiseEnemyKilled(enemyName, goldReward, enemyIndex);
+            director?.NotifyEnemyKilled(enemyIndex, goldReward);
 
-            LogCombat($"{enemyName} killed -> +{goldReward:0} gold");
+            int left = simulator != null ? simulator.AliveEnemyCount : 0;
+            LogCombat($"{enemyName} killed -> +{goldReward:0} gold ({left} left in wave)");
+        }
+
+        /// <summary>Name of one enemy in the wave, for logs and events.</summary>
+        private string EnemyLabel(int enemyIndex)
+        {
+            if (simulator == null || simulator.Enemies == null || enemyIndex < 0 || enemyIndex >= simulator.Enemies.Length)
+            {
+                return "Enemy";
+            }
+
+            EnemyCombatant enemy = simulator.Enemies[enemyIndex];
+            return enemy == null ? "Enemy" : enemy.DisplayName;
         }
 
         private void OnSimHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth)

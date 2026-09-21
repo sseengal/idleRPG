@@ -64,7 +64,7 @@ namespace IdleRPG.Sim
         // --- Events (indices included; the runtime maps them onto GameEvents) ---
         public event Action<DamageEvent> Damaged;
         public event Action<DeathEvent> Died;
-        public event Action<double> EnemyKilled;
+        public event Action<int, double> EnemyKilled;
         public event Action PartyWiped;
 
         // --- Read-only state ---
@@ -274,7 +274,7 @@ namespace IdleRPG.Sim
 
                 if (target.Side == CombatantSide.Enemy)
                 {
-                    EnemyKilled?.Invoke(target.GoldReward);
+                    EnemyKilled?.Invoke(target.SlotIndex, target.GoldReward);
 
                     // MVP parity: the target died inside this phase, so if nothing is left alive the rest of
                     // the phase (and the enemy phase) never happens.

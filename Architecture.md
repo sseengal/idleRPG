@@ -356,7 +356,9 @@ ui             { lastScreenIndex, settings{...} }
 | B23 | The board is a vertical two-column layout (front rank nearest the enemy); data stores rank+position only, presentation owns orientation | 10d | Locked |
 | B25 | Multi-enemy composition is **derived, not stored**: the wave's normal pick plus its rotation neighbours, deterministic from (stage, wave) - no new asset, no save change | 11a | Locked (revisit in 15 if zones need authored mixes) |
 | B26 | A multi-enemy wave is **budget-neutral**: per-member stats are ratioed so the wave's HP/attack/gold totals equal a single-enemy wave's (`BalanceConfig.wave*Multiplier`, all 1 = parity). Defence is never split; `waveAttackMultiplier` compensates for per-hit defence | 11a | Locked |
-| B27 | Targeting preference lives on the **attacker** (`Combatant.TargetRule`, `null` = inherit the side rule), set from `EnemyData.targetRule`; the global `BalanceConfig.enemyTargeting` stays as the wave default until 11b moves heroes over too | 11a | Locked |
+| B27 | Targeting preference lives on the **attacker** (`Combatant.TargetRule`, `null` = inherit the side rule), set from `EnemyData.targetRule`; the global `BalanceConfig.enemyTargeting` stays as the wave default | 11a | Locked |
+| B28 | **Enemies have no ranks.** A wave is a flat list of 1-3; the battle page stacks them vertically and every slot owns its sprite, name, HP bar and damage anchor | 11b | Locked |
+| B29 | A wave ends when the **last** enemy dies (per-enemy kill events carry the index and pay individually), so multi-enemy waves cannot end or pay early | 11b | Locked |
 | B14 | Codex/bestiary doubles as the difficulty-hint system | 18 | Locked |
 
 ### 6.4 Removals / avoid

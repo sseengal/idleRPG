@@ -72,7 +72,6 @@ namespace IdleRPG.Combat
                 team[i] = enemy;
             }
 
-            AssignPositions(team, picks);
             ApplyWaveBudget(team, balance);
 
             return team;
@@ -99,7 +98,7 @@ namespace IdleRPG.Combat
             }
         }
 
-        /// <summary>One readable line for tools and logs ("Goblin[F0] 168hp 12atk 18g | Bat[F1] ...").</summary>
+        /// <summary>One readable line for tools and logs ("Goblin#0 60hp 12atk 18g | Bat#1 ...").</summary>
         public static string Describe(EnemyCombatant[] team)
         {
             if (team == null || team.Length == 0)
@@ -123,28 +122,11 @@ namespace IdleRPG.Combat
                     builder.Append(" | ");
                 }
 
-                builder.Append($"{enemy.DisplayName}[{(enemy.Row == CombatRow.Front ? "F" : "B")}{enemy.Column}] ")
+                builder.Append($"{enemy.DisplayName}#{i} ")
                        .Append($"{enemy.MaxHealth:0.#}hp {enemy.Attack:0.#}atk {enemy.GoldReward:0.#}g");
             }
 
             return builder.ToString();
-        }
-
-        /// <summary>
-        /// Spreads the team over the two ranks, filling front slots (0,1,2) then back slots - the same shape the
-        /// party board uses, so "front rank tanks, back rank is reached later" reads the same on both sides.
-        /// </summary>
-        private static void AssignPositions(EnemyCombatant[] team, List<EnemyData> picks)
-        {
-            int front = 0;
-            int back = 0;
-
-            for (int i = 0; i < team.Length; i++)
-            {
-                bool inBack = picks[i].PreferredRow == CombatRow.Back;
-                team[i].Row = inBack ? CombatRow.Back : CombatRow.Front;
-                team[i].Column = inBack ? back++ : front++;
-            }
         }
 
         /// <summary>

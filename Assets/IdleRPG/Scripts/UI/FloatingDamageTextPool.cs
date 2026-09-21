@@ -13,6 +13,8 @@ namespace IdleRPG.UI
         [Header("Wiring")]
         [SerializeField] private FloatingDamageTextView prefab;
         [SerializeField] private RectTransform enemyAnchor;
+        [Tooltip("One anchor per enemy slot (1-3); takes priority over enemyAnchor when set by the stack.")]
+        [SerializeField] private RectTransform[] enemyAnchors;
         [SerializeField] private RectTransform[] heroAnchors;
 
         [Header("Pool")]
@@ -60,6 +62,12 @@ namespace IdleRPG.UI
             GameEvents.HeroDamaged -= OnHeroDamaged;
         }
 
+        /// <summary>Replaces the per-enemy damage anchors so numbers come out of the enemy that was hit.</summary>
+        public void SetEnemyAnchors(RectTransform[] anchors)
+        {
+            enemyAnchors = anchors;
+        }
+
         private void OnEnemyDamaged(EnemyDamagedInfo info)
         {
             if (info.Damage <= 0d)
@@ -67,7 +75,17 @@ namespace IdleRPG.UI
                 return;
             }
 
-            Spawn(info.Damage, enemyAnchor, info.IsCritical ? FloatingTextStyle.Critical : FloatingTextStyle.Normal);
+            Spawn(info.Damage, EnemyAnchor(info.EnemyIndex), info.IsCritical ? FloatingTextStyle.Critical : FloatingTextStyle.Normal);
+        }
+
+        private RectTransform EnemyAnchor(int enemyIndex)
+        {
+            if (enemyAnchors == null || enemyAnchors.Length == 0)
+            {
+                return enemyAnchor;
+            }
+
+            return enemyAnchors[Mathf.Clamp(enemyIndex, 0, enemyAnchors.Length - 1)];
         }
 
         private void OnHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth)
