@@ -177,6 +177,11 @@
 - **Standing rule:** the battle log is a regression surface alongside the golden numbers. Any feature that adds or
   renames combat text (statuses, abilities, enemy item drops, item usage in battle) must re-validate it.
 
+### Step 11d — Index-0 cleanups  `DONE`
+- `DevOverlay` reports the whole wave (roster line + per-enemy HP, totals and ETA from the wave), so the last
+  single-enemy assumption in the debug tools is gone. Everything the player sees was already index-aware.
+- Parked as their own small step: hero-side `HeroData.targetRule` and a ranged enemy archetype.
+
 ### Step 12 — Effect pipeline + statuses  `TODO`
 - **Owner doc:** `Sim-Core.md` §8, §10
 - **Goal:** ask #2 foundation: ordered pipeline, per-entity crit (A1), armor% + pen (A3), per-type floors (A4),

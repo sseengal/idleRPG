@@ -12,7 +12,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **Step 12** effect pipeline + statuses (Step 11 complete: 11a-11c; 11d is small cleanups) |
+| Current step | **Step 12** effect pipeline + statuses (Step 11 complete: 11a-11e) |
 | Last completed | Step 6 (mobile polish, MVP) |
 | Next after this | 7b unified `Combatant` + `Encounter` |
 | Save schema | v2 (v3 lands in Steps 10/14 with migration) |
@@ -490,9 +490,15 @@ Four defects, all in the event/log plumbing (the stacked views and HP bars were 
 - **Rule extracted:** the battle log is a standing regression surface - see the note in section 0. Every new
       combat-text feature (statuses, abilities, drops, item use) re-opens it
 
-### 11d — remaining index-0 cleanups  `[ ]`
-- [ ] `DevOverlay` and `HudController` still read enemy 0 for debug readouts; the battle page itself is index-aware
-- [ ] optional: hero-side `targetRule`, a ranged enemy archetype
+### 11d — index-0 cleanups  `[x]`
+- [x] `DevOverlay` no longer reads enemy 0: it gained a `wave` line with every enemy and its own HP, and the
+      `enemy hp` / `eta` lines now use the **wave total** (`Simulator.EnemyHealthPercent` was already total)
+- [x] verified live: `wave  3 enemies (3 alive)  Goblin#0 47.4/60.4  Slime#1 15.9/27.9  Bat#2 27.8/41.8` and
+      `enemy hp  108.6 total (100% of wave)   eta 6.6s`; `HudController`/HUD header already used the index-aware
+      `CombatManager.CurrentEnemyName` ("Goblin +2")
+- [x] regressions re-run: validator clean, drift PASS, golden numbers unchanged (126s / 22 kills / 272 gold / 2.16)
+- **Parked (own step, both small):** hero-side `HeroData.targetRule` is still inert; no ranged enemy archetype yet.
+      Both are gameplay, not cleanup - they land as "11f - targeting symmetry" when you want them
 
 ### 12 — Effect pipeline + statuses  `[ ]`
 - [ ] `EffectPipeline` (11 ordered stages; per-type floors; armor% + pen)
