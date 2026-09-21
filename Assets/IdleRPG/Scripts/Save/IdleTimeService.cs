@@ -195,7 +195,7 @@ namespace IdleRPG.Save
                 stage,
                 balanceConfig.EnemyGoldGrowth,
                 balanceConfig.OfflineEstimatedSecondsPerKill,
-                balanceConfig.EnemiesPerWave);
+                balanceConfig.MeanEnemiesPerWave);
         }
 
         /// <summary>

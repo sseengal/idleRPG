@@ -7,7 +7,7 @@ using IdleRPG.Sim;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// The enemy side of the battle page: up to <see cref="BalanceConfig.MaxEnemiesPerWave"/> slots stacked
+    /// The enemy side of the battle page: up to <see cref="BalanceConfig.HardEnemyCap"/> slots stacked
     /// vertically, each with its own sprite, name and health bar.
     ///
     /// ELI5: one tall column on the right. When the wave has 1 enemy it fills the column; 2 enemies means two
@@ -18,7 +18,7 @@ namespace IdleRPG.UI
     /// </summary>
     public sealed class EnemyStackView : MonoBehaviour
     {
-        /// <summary>Hard ceiling on stacked slots (matches BalanceConfig.MaxEnemiesPerWave / SimCaps).</summary>
+        /// <summary>Hard ceiling on stacked slots (matches BalanceConfig.HardEnemyCap / SimCaps).</summary>
         public const int MaxSlots = 3;
 
         [SerializeField] private RectTransform container;

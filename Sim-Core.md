@@ -176,7 +176,8 @@ Encounter
 ```
 
 - `EncounterFactory` (Step 11a, live) builds the team for a wave: boss waves are always one enemy, otherwise the
-  size comes from `BalanceConfig.enemiesPerWave` capped at `MaxEnemiesPerWave` (3). Composition is the wave's normal
+  size comes from `WaveComposition.ResolveCount(stage, wave, isBoss)` (Step 11c: hash of the wave + the recipe in
+  `BalanceConfig`, capped at `HardEnemyCap` = 3). Composition is the wave's normal
   pick plus its rotation neighbours (`WaveConfig.GetEnemiesFor`) - deterministic from (stage, wave), so the save file
   needs no composition data. `EncounterData` + affixes + `DifficultyCurve` remain the plan for Step 15 zones.
 - **The enemy side has no ranks** (dropped by design): enemies are a flat list of 1-3. All of them count as front

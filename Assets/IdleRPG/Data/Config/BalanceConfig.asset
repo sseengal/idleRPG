@@ -16,8 +16,16 @@ MonoBehaviour:
   enemyGoldGrowth: 1.12
   enemyAttackGrowth: 1.08
   normalWavesPerStage: 10
-  enemiesPerWave: 3
-  waveHealthMultiplier: 0.95
+  minEnemiesPerWave: 1
+  maxEnemiesPerWave: 3
+  waveCountWeights:
+  - count: 1
+    weight: 25
+  - count: 2
+    weight: 50
+  - count: 3
+    weight: 25
+  waveHealthMultiplier: 1
   waveAttackMultiplier: 1
   waveGoldMultiplier: 1
   gemsPerBossKill: 1

@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
+using IdleRPG.Combat;
 using IdleRPG.Data;
 
 namespace IdleRPG.EditorTools.Content
@@ -129,19 +130,70 @@ namespace IdleRPG.EditorTools.Content
                 return;
             }
 
-            int raw = SoField.Int(balance, "enemiesPerWave", balance.EnemiesPerWave);
+            int rawMax = SoField.Int(balance, "maxEnemiesPerWave", balance.MaxEnemiesPerWave);
+            int rawMin = SoField.Int(balance, "minEnemiesPerWave", balance.MinEnemiesPerWave);
 
-            if (raw > BalanceConfig.MaxEnemiesPerWave)
+            if (rawMax > BalanceConfig.HardEnemyCap || rawMin > BalanceConfig.HardEnemyCap)
             {
                 Add(Severity.Warning, "encounters",
-                    $"enemiesPerWave is clamped to {BalanceConfig.MaxEnemiesPerWave} (the asset says {raw}); " +
+                    $"wave size is clamped to {BalanceConfig.HardEnemyCap} (asset says min {rawMin} / max {rawMax}); " +
                     "the portrait layout holds three.");
             }
 
+            if (rawMin > rawMax)
+            {
+                Add(Severity.Warning, "encounters", $"minEnemiesPerWave ({rawMin}) is above maxEnemiesPerWave ({rawMax}).");
+            }
+
+            CheckWaveRecipe(balance);
+
             Add(Severity.Info, "encounters",
-                $"enemiesPerWave {balance.EnemiesPerWave} (1 = single enemy; 2-3 stack on the battle page), wave budget " +
-                $"HP x{balance.WaveHealthMultiplier:0.##} ATK x{balance.WaveAttackMultiplier:0.##} " +
+                $"wave size {balance.MinEnemiesPerWave}-{balance.MaxEnemiesPerWave}, recipe {WaveComposition.Describe(balance)}, " +
+                $"wave budget HP x{balance.WaveHealthMultiplier:0.##} ATK x{balance.WaveAttackMultiplier:0.##} " +
                 $"gold x{balance.WaveGoldMultiplier:0.##}.");
+        }
+
+        /// <summary
+        /// The wave-size recipe must be usable: weights above zero, every count inside min..max, and the
+        /// resulting average has to be at least 1 (it drives the offline payout).
+        /// </summary>
+        private static void CheckWaveRecipe(BalanceConfig balance)
+        {
+            var recipe = balance.WaveCountWeights;
+            int total = 0;
+
+            if (recipe.Count == 0)
+            {
+                Add(Severity.Warning, "encounters", "Wave-size recipe is empty; every wave falls back to minEnemiesPerWave.");
+            }
+
+            for (int i = 0; i < recipe.Count; i++)
+            {
+                WaveCountWeight entry = recipe[i];
+
+                if (entry.weight < 0)
+                {
+                    Add(Severity.Error, "encounters", $"Wave-size weight for {entry.count} enemies is negative.");
+                }
+                else if (entry.weight > 0 && (entry.count < balance.MinEnemiesPerWave || entry.count > balance.MaxEnemiesPerWave))
+                {
+                    Add(Severity.Warning, "encounters",
+                        $"Wave-size {entry.count} is outside {balance.MinEnemiesPerWave}..{balance.MaxEnemiesPerWave} and will never be used.");
+                }
+                else
+                {
+                    total += entry.weight;
+                }
+            }
+
+            if (total <= 0)
+            {
+                Add(Severity.Error, "encounters", "Wave-size weights sum to zero; every wave falls back to minEnemiesPerWave.");
+            }
+            else if (balance.MeanEnemiesPerWave < 1d)
+            {
+                Add(Severity.Error, "encounters", $"Wave-size average is {balance.MeanEnemiesPerWave:0.##}; it must be at least 1.");
+            }
         }
 
         // ------------------------------------------------------------------

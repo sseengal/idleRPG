@@ -73,12 +73,16 @@ namespace IdleRPG.EditorTools
         /// <summary>Explicitly writes the reviewed MVP balance values into BalanceConfig.</summary>
         private static void ApplyBalance(BalanceConfig balance)
         {
+            // Wave-size recipe A: 5 singles / 10 doubles / 5 triples out of 20 fights (Step 11d).
+            balance.EditorSetWaveCounts(1, 3, new WaveCountWeight(1, 25), new WaveCountWeight(2, 50), new WaveCountWeight(3, 25));
+
             new Editable(balance)
                 .Set("enemyHealthGrowth", 1.15f)
                 .Set("enemyGoldGrowth", 1.12f)
                 .Set("enemyAttackGrowth", 1.08f)
                 .Set("normalWavesPerStage", 10)
-                .Set("enemiesPerWave", 1)
+                .Set("minEnemiesPerWave", 1)
+                .Set("maxEnemiesPerWave", 3)
                 .Set("gemsPerBossKill", 1)
                 .Set("waveTransitionDelaySec", 0.6f)
                 .Set("minDamageRatio", 0.15f)

@@ -11,7 +11,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **11 done** (1-3 stacked enemies live); candidates next: hero-side target rules, ranged enemy, per-wave counts |
+| Current step | **Step 12** effect pipeline + statuses (Step 11 complete: 11a-11c; 11d is small cleanups) |
 | Last completed | Step 6 (mobile polish, MVP) |
 | Next after this | 7b unified `Combatant` + `Encounter` |
 | Save schema | v2 (v3 lands in Steps 10/14 with migration) |
@@ -442,9 +442,29 @@ count 3 wave 3: 3 -> Goblin[F0] 60.4hp | Slime[F1] 27.9hp | Bat[F2] 41.8hp | tot
 - **Still open (next, optional):** hero-side `HeroData.targetRule` is still inert, and a ranged enemy archetype
       (`targetRule: "backlinefirst"`) that reaches the party's back rank is not authored yet
 
-### 11c — remaining index-0 cleanups  `[ ]`
+### 11c — Randomised wave size (recipe A)  `[x]`
+- [x] **`BalanceConfig` recipe** replaces the fixed count: `minEnemiesPerWave` (1), `maxEnemiesPerWave` (3) and a
+      `waveCountWeights` list. Recipe A shipped: **1 x25, 2 x50, 3 x25** -> out of 20 fights 5 singles, 10 doubles,
+      5 triples (average 2.0). `MeanEnemiesPerWave` is computed from the recipe for the offline payout
+- [x] **`WaveComposition.ResolveCount(stage, wave, isBoss)`** (new, pure): hashes (stage, wave) through an integer
+      mixer and reads the recipe. Deliberately **not** the sim RNG (would shift crit rolls and needs no save data)
+      and **not** a modulo cycle - `(stage*31+wave) % 3` would visibly alternate 1,2,3. Boss waves are always 1
+- [x] factory + offline + generator + validator all wired to the resolver; the offline estimate now uses the
+      **mean** (was the max), which would otherwise have inflated the away-time payout by ~1.5x
+- [x] validator gained recipe sanity (weights >= 0, counts inside min..max, sum > 0, mean >= 1) and reports the
+      recipe; the data generator writes the recipe so "Generate Data Assets" can no longer reset the wave size
+- [x] **verified - histogram probe** (100 waves, 5 stages): `1x=26 2x=48 3x=26, average 2.00` against the recipe's
+      25/50/25 mean 2.00; stage 1 sequence `22222322311221223212` and stage 2 a different one - no visible cycle
+- [x] **verified - parity lever**: setting the recipe to `1x 100%` reproduces the single-enemy baseline **exactly**
+      (79s @x1, 124s @x1.6, 11 kills, 272 gold, 3.45 / 2.20 gold/s). The multi-enemy feature is purely additive
+- [x] **balance re-measured for the mix**: 0.95 -> 119s (2.29 gold/s), 0.98 and 1.00 -> 126s (2.16 gold/s). Kept
+      `waveHealthMultiplier = 1` (neutral, no fudge) since it is the closest to the 124s / 2.20 baseline (2% off)
+- [x] validator clean (`wave size 1-3, recipe 1x 25%, 2x 50%, 3x 25% (mean 2, boss always 1)`), drift PASS,
+      live check: a 2-enemy Slime+Bat wave rendered with 24/36 hp split and the log read `Bat A` / `Goblin B`
+
+### 11d — remaining index-0 cleanups  `[ ]`
 - [ ] `DevOverlay` and `HudController` still read enemy 0 for debug readouts; the battle page itself is index-aware
-- [ ] optional: hero-side `targetRule`, ranged enemy archetype, per-wave counts (1 -> 3 across a stage)
+- [ ] optional: hero-side `targetRule`, a ranged enemy archetype
 
 ### 12 — Effect pipeline + statuses  `[ ]`
 - [ ] `EffectPipeline` (11 ordered stages; per-type floors; armor% + pen)

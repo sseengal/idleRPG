@@ -39,7 +39,7 @@ namespace IdleRPG.EditorTools
 
             StringBuilder report = new StringBuilder();
             report.AppendLine("=== Balance Lab: golden numbers (MVP parity) ===");
-            report.AppendLine($"seed 12345, DefaultStatProvider (no upgrades), enemiesPerWave {balance.EnemiesPerWave}");
+            report.AppendLine($"seed 12345, DefaultStatProvider (no upgrades), wave size {WaveComposition.Describe(balance)}");
 
             foreach (double pace in new[] { 1d, (double)balance.CombatPaceMultiplier })
             {
@@ -66,8 +66,46 @@ namespace IdleRPG.EditorTools
             StringBuilder report = new StringBuilder();
             report.AppendLine("=== Balance Lab: encounter factory (Step 11a) ===");
             report.AppendLine($"seed-free, stage 1, rules from BalanceConfig (pace x{rules.PaceMultiplier:0.##})");
+            report.AppendLine($"recipe: {WaveComposition.Describe(balance)}");
 
-            foreach (int count in new[] { 1, BalanceConfig.MaxEnemiesPerWave })
+            // --- Wave-size histogram (Step 11d) -------------------------------------------------
+            // Reads the real resolver over 100 waves (5 stages x 20): every size should appear, the average
+            // should match the recipe, and the sequence must not be a visible cycle (1,2,3,1,2,3...).
+            int[] histogram = new int[BalanceConfig.HardEnemyCap + 1];
+            int total = 0;
+            int samples = 0;
+            StringBuilder stageOne = new StringBuilder();
+            StringBuilder stageTwo = new StringBuilder();
+
+            for (int stage = 1; stage <= 5; stage++)
+            {
+                for (int wave = 1; wave <= 20; wave++)
+                {
+                    int count = WaveComposition.ResolveCount(balance, stage, wave, false);
+                    histogram[Mathf.Clamp(count, 1, BalanceConfig.HardEnemyCap)]++;
+                    total += count;
+                    samples++;
+
+                    if (stage == 1)
+                    {
+                        stageOne.Append(count);
+                    }
+                    else
+                    {
+                        stageTwo.Append(count);
+                    }
+                }
+            }
+
+            report.AppendLine($"wave sizes stage 1: {stageOne}");
+            report.AppendLine($"wave sizes stage 2: {stageTwo}");
+            report.AppendLine(
+                $"histogram over {samples} waves: " +
+                $"1x={histogram[1]} 2x={histogram[2]} 3x={histogram[Mathf.Min(3, histogram.Length - 1)]} " +
+                $"| average {total / (double)samples:0.00} (recipe says {balance.MeanEnemiesPerWave:0.00})");
+            report.AppendLine($"boss wave size: {WaveComposition.ResolveCount(balance, 1, balance.NormalWavesPerStage + 1, true)} (always 1)");
+
+            foreach (int count in new[] { 1, BalanceConfig.HardEnemyCap })
             {
                 for (int wave = 1; wave <= 3; wave++)
                 {

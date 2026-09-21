@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace IdleRPG.Data
@@ -29,8 +30,21 @@ namespace IdleRPG.Data
         [Tooltip("Normal waves before a boss wave (design: 10 -> 1).")]
         [SerializeField] private int normalWavesPerStage = 10;
 
-        [Tooltip("Number of enemies spawned per normal wave. MVP uses 1 for lane clarity.")]
-        [SerializeField] private int enemiesPerWave = 1;
+        [Tooltip("Smallest wave size. 1 = a lone enemy is possible. Boss waves always ignore this (always 1).")]
+        [SerializeField] private int minEnemiesPerWave = 1;
+
+        [Tooltip("Largest wave size. The battle page holds three stacked enemies, so it clamps to 3.")]
+        [SerializeField] private int maxEnemiesPerWave = 3;
+
+        [Tooltip("How often each wave size shows up. Recipe A: 1 x25, 2 x50, 3 x25 -> out of 20 fights " +
+                 "5 singles / 10 doubles / 5 triples (average 2). Weights are relative; counts outside " +
+                 "min..max are ignored.")]
+        [SerializeField] private List<WaveCountWeight> waveCountWeights = new List<WaveCountWeight>
+        {
+            new WaveCountWeight(1, 25),
+            new WaveCountWeight(2, 50),
+            new WaveCountWeight(3, 25)
+        };
 
         [Tooltip("Multi-enemy budget: total wave HP compared to a one-enemy wave. 1 = same clear time, " +
                  "each enemy gets 1/count of the pool.")]
@@ -215,10 +229,64 @@ namespace IdleRPG.Data
 
         public int NormalWavesPerStage => Mathf.Max(1, normalWavesPerStage);
 
-        public int EnemiesPerWave => Mathf.Clamp(enemiesPerWave, 1, MaxEnemiesPerWave);
+        /// <summary>Hard ceiling on enemies in one wave: the battle page stacks three slots and the sim agrees.</summary>
+        public const int HardEnemyCap = 3;
 
-        /// <summary>Portrait layout holds three enemies; the sim cap (<see cref="Sim.SimCaps"/>) is the same number.</summary>
-        public const int MaxEnemiesPerWave = 3;
+        /// <summary>Smallest wave size (1 = a lone enemy is possible).</summary>
+        public int MinEnemiesPerWave => Mathf.Clamp(minEnemiesPerWave, 1, HardEnemyCap);
+
+        /// <summary>Largest wave size.</summary>
+        public int MaxEnemiesPerWave => Mathf.Clamp(maxEnemiesPerWave, MinEnemiesPerWave, HardEnemyCap);
+
+        /// <summary>The wave-size recipe (see <see cref="WaveCountWeight"/>). Never null.</summary>
+        public List<WaveCountWeight> WaveCountWeights => waveCountWeights != null ? waveCountWeights : new List<WaveCountWeight>();
+
+        /// <summary>
+        /// Average wave size implied by the recipe. The offline estimator uses this (not the max), so a varied
+        /// wave size cannot inflate the away-time payout.
+        /// </summary>
+        public double MeanEnemiesPerWave
+        {
+            get
+            {
+                double weighted = 0d;
+                double total = 0d;
+
+                List<WaveCountWeight> recipe = WaveCountWeights;
+
+                for (int i = 0; i < recipe.Count; i++)
+                {
+                    WaveCountWeight entry = recipe[i];
+
+                    if (entry.weight <= 0 || entry.count < MinEnemiesPerWave || entry.count > MaxEnemiesPerWave)
+                    {
+                        continue;
+                    }
+
+                    weighted += entry.count * (double)entry.weight;
+                    total += entry.weight;
+                }
+
+                if (total <= 0d)
+                {
+                    return (MinEnemiesPerWave + MaxEnemiesPerWave) * 0.5d;
+                }
+
+                return weighted / total;
+            }
+        }
+
+        /// <summary>Editor-only: writes the recipe and the bounds (used by the data generator).</summary>
+        public void EditorSetWaveCounts(int min, int max, params WaveCountWeight[] recipe)
+        {
+            minEnemiesPerWave = min;
+            maxEnemiesPerWave = max;
+
+            if (recipe != null && recipe.Length > 0)
+            {
+                waveCountWeights = new List<WaveCountWeight>(recipe);
+            }
+        }
 
         /// <summary>Total wave HP versus a one-enemy wave (1 = idle parity).</summary>
         public float WaveHealthMultiplier => Mathf.Max(0.05f, waveHealthMultiplier);

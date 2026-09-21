@@ -19,7 +19,7 @@ namespace IdleRPG.Combat
     public static class EncounterFactory
     {
         /// <summary>Ceiling on one wave's team size (the portrait layout and the sim cap agree on three).</summary>
-        public const int MaxEnemiesPerWave = BalanceConfig.MaxEnemiesPerWave;
+        public const int MaxEnemiesPerWave = BalanceConfig.HardEnemyCap;
 
         /// <summary>Builds the enemy team for a wave. Returns null when the wave has no enemy to spawn.</summary>
         /// <param name="stage">Stage the enemies are scaled to.</param>
@@ -28,7 +28,7 @@ namespace IdleRPG.Combat
         /// <param name="rules">Frozen tuning snapshot - passed in so the factory never reads a ScriptableObject
         /// the fight is not already using.</param>
         /// <param name="countOverride">Force a team size (probes/tools). 0 or less = use
-        /// <see cref="BalanceConfig.EnemiesPerWave"/>.</param>
+        /// <see cref="WaveComposition.ResolveCount"/>.</param>
         public static EnemyCombatant[] Build(
             WaveConfig waves, BalanceConfig balance, int stage, int wave, bool isBoss, SimRules rules, int countOverride = 0)
         {
@@ -39,7 +39,12 @@ namespace IdleRPG.Combat
             }
 
             int normalWaves = balance != null ? balance.NormalWavesPerStage : 10;
-            int wanted = countOverride > 0 ? countOverride : (balance != null ? balance.EnemiesPerWave : 1);
+
+            // Wave size comes from the recipe (Step 11d): hash(stage, wave) -> 1..3, bosses always 1.
+            // A positive override is for probes and tests that need an exact count.
+            int wanted = countOverride > 0
+                ? countOverride
+                : WaveComposition.ResolveCount(balance, stage, wave, isBoss);
 
             if (isBoss)
             {

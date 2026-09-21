@@ -110,7 +110,7 @@ namespace IdleRPG.Data
             return wave >= safeNormalWaves + 1;
         }
 
-        /// <summary>Team size ceiling (mirrors <see cref="BalanceConfig.MaxEnemiesPerWave"/> and the sim cap).</summary>
+        /// <summary>Team size ceiling (mirrors <see cref="BalanceConfig.HardEnemyCap"/> and the sim cap).</summary>
         public const int MaxTeamSize = 3;
 
         private static int PoolIndexOf(List<EnemyData> pool, int stage, int wave)

@@ -160,6 +160,14 @@
   gold/s, and the log attributes damage per enemy.
 - **Blocked by:** Steps 7, 10.
 
+### Step 11c — Randomised wave size (recipe A)  `DONE`
+- The fixed count became a **recipe**: `minEnemiesPerWave` / `maxEnemiesPerWave` + `waveCountWeights`
+  (1 x25, 2 x50, 3 x25 = average 2). `WaveComposition.ResolveCount(stage, wave, isBoss)` hashes the wave and reads
+  it, so nothing is stored in the save and a resumed stage replays the same fights. Bosses stay a single enemy.
+- Offline gold now uses the recipe **mean**, not the max. Validator + data generator know the recipe.
+- Evidence: 100-wave histogram 26/48/26 (avg 2.00); `1x 100%` reproduces the single-enemy golden numbers exactly;
+  the mix re-measured at 126s / 22 kills / 272 gold / 2.16 gold/s vs the 124s / 2.20 baseline.
+
 ### Step 12 — Effect pipeline + statuses  `TODO`
 - **Owner doc:** `Sim-Core.md` §8, §10
 - **Goal:** ask #2 foundation: ordered pipeline, per-entity crit (A1), armor% + pen (A3), per-type floors (A4),
