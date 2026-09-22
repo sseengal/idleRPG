@@ -52,8 +52,15 @@ Starting point (tune in Step 15 with Balance Lab):
 | Mid | 26-100 | 1.13 | 1.07 | 1.115 | prestige + relics carry |
 | Late | 101+ | 1.12 + zone rebase | 1.06 | 1.11 | automation + L2 layers |
 
-Invariant: **player power must out-grow content at the frontier while idle** (E13 checks: frontier clear
-2-3 min, wall breaks within 3 min of accumulated income).
+Invariant: **player power must out-grow content at the frontier while idle.** With the bounce loop the frontier
+moves when power arrives, so the check is "how long does the bounce last before the ceiling moves" (measured by the
+robot player in Balance Lab), not a wall-break ETA.
+
+**Known blocker on this invariant (measured 2026-09-22):** hero upgrades are **additive** (`base x (1 + 0.1 x level)`)
+while content is **exponential** (`1.15^stage`). Gold per stage grows `1.12^S`, level cost grows `1.07^L`, so levels
+gained are ~`1.674 x S` and power is a straight line against an exponential - the race is lost at every stage
+(stage time 126s -> 493s, walls 8 -> 40 min, stall at ~stage 24). A per-level **multiplicative** effect of ~x1.09
+would pace content exactly; that is the phase-2 fix, not a curve table.
 
 ## 4. Enemy archetypes (`EnemyData.archetype`)
 
@@ -143,7 +150,7 @@ in `SimContext.Rules`.
    - every hero: >= 1 ability, role + tags set, base stats inside the archetype band
    - every zone: >= 1 boss encounter, wall cadence set, reward multiplier in range
    - every ability: valid trigger + >= 1 effect + scaling stat that exists in `StatDefinition`
-   - balance bands: stage-1 clear 90-180s, frontier clear 2-3 min (uses the same headless sim as Balance Lab)
+   - balance bands: stage-1 clear 90-180s, frontier clear 2-3 min, bounce always pays (uses the same headless sim as Balance Lab)
    - no orphan assets (an SO with no spec entry is reported, never deleted silently)
 4. Validation output: per-item PASS/FAIL list in the console + a CSV under `Temp/content-report.csv`.
 

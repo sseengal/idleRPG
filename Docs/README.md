@@ -50,6 +50,5 @@ Docs/
   Idle-Economy.md    <- rates, offline, time payouts
   Monetisation.md    <- sources, sinks, IAP mock, guards (B7)
   UI-UX.md           <- screens, navigation, battle log contract
-  REVIEW.md          <- candidates for deletion (needs owner confirmation)
-  archive/           <- superseded documents, kept for the record only
+  REVIEW.md          <- deletion candidates / resolved removals
 ```

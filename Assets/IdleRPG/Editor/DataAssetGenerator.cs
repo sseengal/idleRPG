@@ -83,7 +83,8 @@ namespace IdleRPG.EditorTools
                 .Set("normalWavesPerStage", 10)
                 .Set("minEnemiesPerWave", 1)
                 .Set("maxEnemiesPerWave", 3)
-                .Set("gemsPerBossKill", 1)
+                .Set("gemsPerMilestone", 5)
+                .Set("milestoneStageInterval", 5)
                 .Set("waveTransitionDelaySec", 0.6f)
                 .Set("minDamageRatio", 0.15f)
                 .Set("criticalChance", 0.05f)
@@ -93,7 +94,7 @@ namespace IdleRPG.EditorTools
                 .Set("enemyTargeting", (int)EnemyTargetingMode.FrontMost)
                 .Set("combatTickIntervalSec", 0.05f)
                 .Set("stageRollbackOnDefeat", 1)
-                .Set("resetAutoRetryOnDefeat", true)
+                .Set("defeatPauseSeconds", 0.75f)
                 .Set("scaleEnemyDefenseWithStage", false)
                 .Set("logCombatToConsole", true)
                 .Set("combatPaceMultiplier", 1.6f)
@@ -298,10 +299,11 @@ namespace IdleRPG.EditorTools
 
         private static void CreatePrestigeUpgrades()
         {
-            // +10% per level, 10 levels = +100%. Cost growth 1.4 -> ~70 tokens to max one tree.
-            CreatePrestigeUpgrade("Prestige_Gold", "Gold Mastery", PrestigeEffectType.GoldPercent, "+10% Gold per level.");
-            CreatePrestigeUpgrade("Prestige_Damage", "War Mastery", PrestigeEffectType.DamagePercent, "+10% Damage per level.");
-            CreatePrestigeUpgrade("Prestige_Health", "Vitality Mastery", PrestigeEffectType.HealthPercent, "+10% HP per level.");
+            // +20% per level, 25 levels = +500% per track. Cost growth 1.4 -> ~600 tokens to max one tree, and the
+            // first ascension (3 tokens at stage 25) is worth +60% damage: felt, but nowhere near free.
+            CreatePrestigeUpgrade("Prestige_Gold", "Gold Mastery", PrestigeEffectType.GoldPercent, "+20% Gold per level.");
+            CreatePrestigeUpgrade("Prestige_Damage", "War Mastery", PrestigeEffectType.DamagePercent, "+20% Damage per level.");
+            CreatePrestigeUpgrade("Prestige_Health", "Vitality Mastery", PrestigeEffectType.HealthPercent, "+20% HP per level.");
         }
 
         private static void CreatePrestigeUpgrade(string fileName, string displayName, PrestigeEffectType effectType, string description)
@@ -314,8 +316,8 @@ namespace IdleRPG.EditorTools
                 .Set("effectType", (int)effectType)
                 .Set("baseCostTokens", 1d)
                 .Set("costGrowth", 1.4f)
-                .Set("maxLevel", 10)
-                .Set("effectPerLevel", 0.10f)
+                .Set("maxLevel", 25)
+                .Set("effectPerLevel", 0.20f)
                 .Apply();
         }
 

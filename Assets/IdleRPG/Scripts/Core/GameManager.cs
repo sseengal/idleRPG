@@ -69,8 +69,24 @@ namespace IdleRPG.Core
 
         public int HighestStageReached { get; private set; } = 1;
 
-        /// <summary>Cleared by DefeatState, restored by a manual retry.</summary>
+        /// <summary>
+        /// Best stage of the CURRENT run. Ascension is gated and priced on this, so the button cannot be pressed
+        /// again until the player has climbed back up. Resets to 1 on ascension; <see cref="HighestStageReached"/>
+        /// stays as the lifetime record.
+        /// </summary>
+        public int RunBestStage { get; private set; } = 1;
+
+        /// <summary>
+        /// Kept for save compatibility and a future "stop pushing" setting. The fallback loop always keeps it on:
+        /// a wipe resumes by itself, so nothing ever waits for a manual retry.
+        /// </summary>
         public bool AutoRetryEnabled { get; private set; } = true;
+
+        /// <summary>True while the short post-wipe beat is running (the loop resumes when it ends).</summary>
+        private bool defeatBeatActive;
+
+        /// <summary>Seconds left in the post-wipe beat.</summary>
+        private float defeatBeatRemaining;
 
         public CombatManager Combat => combatManager;
 
@@ -98,7 +114,7 @@ namespace IdleRPG.Core
         /// <summary>Rewarded-ad provider (mock until a real SDK is added).</summary>
         public IAdService Ads { get; private set; }
 
-        /// <summary>Tokens the player would receive by ascending right now.</summary>
+        /// <summary>Tokens the player would receive by ascending right now (priced on THIS run's best stage).</summary>
         public double PrestigeTokenYield
         {
             get
@@ -109,14 +125,17 @@ namespace IdleRPG.Core
                 }
 
                 return FormulaUtility.PrestigeTokenReward(
-                    HighestStageReached,
+                    RunBestStage,
                     balanceConfig.PrestigeStageDivisor,
                     balanceConfig.PrestigeExponent);
             }
         }
 
-        /// <summary>True once the player has reached the minimum stage for an ascension.</summary>
-        public bool CanAscend => balanceConfig != null && HighestStageReached >= balanceConfig.MinStageToAscend;
+        /// <summary>
+        /// True once THIS run has reached the minimum stage. Deliberately not <see cref="HighestStageReached"/>:
+        /// that never goes down, which left the ascend button live forever and made tokens farmable.
+        /// </summary>
+        public bool CanAscend => balanceConfig != null && RunBestStage >= balanceConfig.MinStageToAscend;
 
         /// <summary>Every wired system in one box (Step 7c). Nothing hunts the scene any more.</summary>
         public GameContext Context { get; private set; }
@@ -395,6 +414,11 @@ namespace IdleRPG.Core
                 HighestStageReached = CurrentStage;
             }
 
+            if (CurrentStage > RunBestStage)
+            {
+                RunBestStage = CurrentStage;
+            }
+
             AutoRetryEnabled = true;
             combatManager.SetStage(CurrentStage, healParty: true);
             combatManager.StartRun();
@@ -440,23 +464,28 @@ namespace IdleRPG.Core
             combatManager.StopRun();
             SetState(State, GameState.Ascension);
 
-            if (!Ascension.TryAscend(HighestStageReached, out double tokens))
+            if (!Ascension.TryAscend(RunBestStage, out double tokens))
             {
                 Debug.LogWarning("[GameManager] Ascension requested but the token yield is 0.");
                 return false;
             }
 
-            GameEvents.RaiseAscensionCompleted(tokens, HighestStageReached);
-            LogFlow($"Ascended for {tokens:0} token(s) | {Ascension.DescribeMultipliers()} | {Economy}");
+            GameEvents.RaiseAscensionCompleted(tokens, RunBestStage);
+            LogFlow($"Ascended for {tokens:0} token(s) from run best stage {RunBestStage} | " +
+                    $"{Ascension.DescribeMultipliers()} | {Economy}");
 
             ResetProgressForAscension(HighestStageReached);
             return true;
         }
 
-        /// <summary>Called by the ascension flow: gold, stage and hero levels go back to zero.</summary>
+        /// <summary>
+        /// Called by the ascension flow: gold, stage and hero levels go back to zero. The lifetime best is kept
+        /// (records, UI) but the run best restarts, which is what gates and prices the next ascension.
+        /// </summary>
         public void ResetProgressForAscension(int highestStageToKeep)
         {
             CurrentStage = 1;
+            RunBestStage = 1;
             HighestStageReached = Mathf.Max(1, highestStageToKeep);
             AutoRetryEnabled = true;
 
@@ -546,24 +575,34 @@ namespace IdleRPG.Core
             LogFlow($"Wave {wave} cleared (stage {stage}).");
         }
 
-        /// <summary>Boss died: advance the stage, grant gems, keep auto-retry behaviour.</summary>
+        /// <summary>
+        /// Boss died: advance the stage. Gems are paid only for the first-time clear of a milestone stage, so the
+        /// fallback bounce (clear the stage below the ceiling, over and over) can never farm them.
+        /// </summary>
         private void OnStageCleared(int stage)
         {
             int nextStage = stage + 1;
+            bool isNewBest = nextStage > HighestStageReached;
+
             CurrentStage = nextStage;
 
-            if (nextStage > HighestStageReached)
+            if (isNewBest)
             {
                 HighestStageReached = nextStage;
                 GameEvents.RaisePrestigeYieldChanged(PrestigeTokenYield);
             }
 
-            if (Economy != null && balanceConfig != null && balanceConfig.GemsPerBossKill > 0)
+            if (nextStage > RunBestStage)
             {
-                if (Rewards != null)
-                {
-                    Rewards.GrantGems(balanceConfig.GemsPerBossKill, RewardService.Source.Combat);
-                }
+                RunBestStage = nextStage;
+            }
+
+            int gems = CombatRewardCalculator.CalculateMilestoneGems(balanceConfig, stage, isNewBest);
+
+            if (gems > 0 && Rewards != null)
+            {
+                Rewards.GrantGems(gems, RewardService.Source.Combat);
+                LogFlow($"Milestone: stage {stage} cleared for the first time -> +{gems} gems.");
             }
 
             SetState(GameState.Boss, GameState.Combat);
@@ -574,7 +613,11 @@ namespace IdleRPG.Core
             LogFlow($"Stage {stage} complete -> now stage {CurrentStage} | {Economy}");
         }
 
-        /// <summary>Party wipe: drop back, disable auto-retry, wait for a manual retry.</summary>
+        /// <summary>
+        /// Party wipe: fall back one stage and keep fighting. The loop NEVER stops and never waits for input —
+        /// the party always ends up on a stage it can beat, so gold keeps flowing while the player pushes their
+        /// ceiling. Beating the ceiling moves it up; failing drops back one. That bounce IS the game.
+        /// </summary>
         private void OnPartyWiped()
         {
             int rollback = balanceConfig != null ? balanceConfig.StageRollbackOnDefeat : 1;
@@ -582,21 +625,39 @@ namespace IdleRPG.Core
 
             CurrentStage = Mathf.Max(1, CurrentStage - rollback);
 
-            if (balanceConfig != null && balanceConfig.ResetAutoRetryOnDefeat)
-            {
-                AutoRetryEnabled = false;
-            }
-
             combatManager.StopRun();
             SetState(GameState.Boss, GameState.Defeat);
             RaiseStageChanged();
 
             GameEvents.RaisePartyWiped();
 
-            LogFlow($"DEFEAT on stage {defeatedStage}. Rolled back to stage {CurrentStage}, wave 1. " +
-                    $"Auto-retry={AutoRetryEnabled}. Call RetryAfterDefeat() to resume.");
+            LogFlow($"DEFEAT on stage {defeatedStage}. Falling back to stage {CurrentStage} (wave 1) - resuming automatically.");
 
-            if (AutoRetryEnabled)
+            defeatBeatRemaining = balanceConfig != null ? balanceConfig.DefeatPauseSeconds : 0.75f;
+            defeatBeatActive = true;
+        }
+
+        /// <summary>
+        /// The only per-frame work GameManager does: count down the short defeat beat, then put the party straight
+        /// back into the fight. This is not gameplay polling — combat is ticked by <see cref="RunController"/>.
+        /// </summary>
+        private void Update()
+        {
+            if (!defeatBeatActive)
+            {
+                return;
+            }
+
+            defeatBeatRemaining -= Time.deltaTime;
+
+            if (defeatBeatRemaining > 0f)
+            {
+                return;
+            }
+
+            defeatBeatActive = false;
+
+            if (isWired)
             {
                 StartRun(CurrentStage);
             }
@@ -839,6 +900,7 @@ namespace IdleRPG.Core
             data.totalGoldEarned = TotalGoldEarned;
             data.ascensionCount = AscensionCount;
             data.lastPageIndex = LastPageIndex;
+            data.runBestStage = RunBestStage;
 
             return data;
         }
@@ -862,6 +924,7 @@ namespace IdleRPG.Core
             CurrentStage = Mathf.Max(1, data.currentStage);
             RestoredWave = Mathf.Max(1, data.currentWave);
             HighestStageReached = Mathf.Max(1, data.highestStageReached, CurrentStage);
+            RunBestStage = Mathf.Clamp(Mathf.Max(1, data.runBestStage), 1, HighestStageReached);
             AutoRetryEnabled = data.autoRetryEnabled;
 
             TotalKills = data.totalKills;

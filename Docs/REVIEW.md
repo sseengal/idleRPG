@@ -6,19 +6,15 @@
 
 ---
 
-## R1 — `Docs/archive/Plan.md` (701 lines) — MVP build journal  ·  status: **awaiting your confirmation**
+## R1 — `Docs/archive/Plan.md` (711 lines) — MVP build journal  ·  status: **DELETED 2026-09-22**
 
-- **What it is:** the original MVP plan and its verification logs for Steps 0-6 (tooling, spec decisions, phase
-  checklist, per-step verification results, MVP balance review, save-file location, mobile settings audit, open risks).
-- **Why it is a candidate:** the MVP it describes is finished and its live content moved on. Current status lives in
-  `Checklist.md` (master record) and `Roadmap.md` (ordered backlog); the design decisions it locked are now in
-  `Architecture.md` (decision log) and the topic docs. It is the only doc that still opens with "Last updated: Step 6".
-- **What still points at it:** the root `README.md` links to it as "the MVP build journal"; nothing in code reads it.
-- **If we delete it:** we lose the per-step verification logs for the MVP (what was tested on which date) and the
-  original locked spec decisions in their first phrasing. `Architecture.md` keeps every decision that still binds,
-  but not the historical "we tested X on day Y" record.
-- **Recommendation:** **keep for now, delete at release** (it is small, and it is the only historical audit trail of
-  the MVP). Move it to `Docs/archive/` either way - done.
+- Deleted on the owner's call ("check and update/remove obsolete docs"). The MVP it described is finished; its live
+  content moved into `Checklist.md` (status), `Roadmap.md` (backlog) and `Architecture.md` (decision log), and it was
+  the only doc still opening with "Last updated: Step 6".
+- What was lost: the per-step verification logs for Steps 0-6 (what was tested on which date) and the original locked
+  spec decisions in their first phrasing. `Architecture.md` keeps every decision that still binds.
+- Every reference was removed in the same pass: root `README.md`, `Docs/README.md`, `Docs/Checklist.md`.
+- If the history is ever wanted, `git log -- Docs/archive/Plan.md` still has it.
 
 ---
 

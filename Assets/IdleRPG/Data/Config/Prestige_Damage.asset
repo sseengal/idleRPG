@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.PrestigeUpgradeData
   upgradeID: Prestige_Damage
   displayName: War Mastery
-  description: +10% Damage per level.
+  description: +20% Damage per level.
   effectType: 1
   baseCostTokens: 1
   costGrowth: 1.4
-  maxLevel: 10
-  effectPerLevel: 0.1
+  maxLevel: 25
+  effectPerLevel: 0.2

@@ -42,6 +42,9 @@ namespace IdleRPG.EditorTools
         // Bands inside the management page.
         private const float ManagementTabBarBottom = 0.90f; // panels 0..0.90, tabs 0.90..1
 
+        /// <summary>Modal canvas order. Above the main canvas (0) and the damage canvas (10).</summary>
+        private const int ModalSortingOrder = 100;
+
         private static readonly Color TextColor = new Color(0.94f, 0.96f, 1f, 1f);
         private static readonly Color DimTextColor = new Color(0.75f, 0.78f, 0.86f, 1f);
 
@@ -90,6 +93,7 @@ namespace IdleRPG.EditorTools
 
             RectTransform canvasRoot = CreateCanvas(hudRoot);
             RectTransform damageRoot = CreateDamageCanvas(hudRoot);
+            RectTransform modalRoot = CreateModalCanvas(hudRoot);
             RectTransform safeArea = CreateSafeArea(canvasRoot);
 
             HudHeaderUI header = BuildHeader(safeArea);
@@ -103,7 +107,7 @@ namespace IdleRPG.EditorTools
             CombatLogUI combatLog = BuildCombatLog(battlePage.GetComponent<RectTransform>());
             TabController tabs = BuildManagementPage(managementPage.GetComponent<RectTransform>(), partyConfig, prestigeUpgrades);
             ScreenController screens = BuildNavBar(safeArea, battlePage, managementPage, tabs, damageRoot.gameObject);
-            OfflineRewardsPopup offlinePopup = BuildOfflinePopup(canvasRoot);
+            OfflineRewardsPopup offlinePopup = BuildOfflinePopup(modalRoot);
             ToastUI toast = BuildToast(canvasRoot);
             EnsureEventSystem();
 
@@ -189,6 +193,28 @@ namespace IdleRPG.EditorTools
             scaler.matchWidthOrHeight = 0.5f;
 
             // No GraphicRaycaster: damage numbers must never eat input.
+            return canvasObject.GetComponent<RectTransform>();
+        }
+
+        /// <summary>
+        /// Modal overlays (the offline claim) get their own canvas with the highest sorting order, so nothing on
+        /// the HUD - or on the damage canvas above it - can draw over a dialog. It keeps a GraphicRaycaster so the
+        /// dialog's buttons work; the scrim inside blocks clicks on everything behind it.
+        /// </summary>
+        private static RectTransform CreateModalCanvas(GameObject host)
+        {
+            GameObject canvasObject = UiFactory.Node("ModalCanvas", host.transform);
+            Canvas canvas = canvasObject.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = ModalSortingOrder;
+
+            CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(ReferenceWidth, ReferenceHeight);
+            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            scaler.matchWidthOrHeight = 0.5f;
+
+            canvasObject.AddComponent<GraphicRaycaster>();
             return canvasObject.GetComponent<RectTransform>();
         }
 
@@ -794,38 +820,53 @@ namespace IdleRPG.EditorTools
             return panel;
         }
 
-        private static OfflineRewardsPopup BuildOfflinePopup(RectTransform canvasRoot)
+        /// <summary>
+        /// The offline claim dialog, built as a real modal: a full-screen scrim that dims the game and blocks every
+        /// click behind it, with the panel centred on top. `root` is the scrim, so a single SetActive shows the dim
+        /// and the dialog together. Labels are set to ellipsis because TMP's default overflow lets a long line spill
+        /// into its neighbours - which is exactly what made the popup read as "text all over each other".
+        /// </summary>
+        private static OfflineRewardsPopup BuildOfflinePopup(RectTransform modalRoot)
         {
-            GameObject host = UiFactory.Node("OfflineRewardsPopup", canvasRoot);
+            GameObject host = UiFactory.Node("OfflineRewardsPopup", modalRoot);
             OfflineRewardsPopup ui = host.AddComponent<OfflineRewardsPopup>();
 
-            GameObject dialog = UiFactory.Node("Dialog", host.transform);
-            UiFactory.Anchor(dialog.GetComponent<RectTransform>(), new Vector2(0.08f, 0.30f), new Vector2(0.92f, 0.72f));
+            Image scrim = UiFactory.Panel("Scrim", host.transform, null, new Color(0f, 0f, 0f, 0.65f), raycast: true);
+            UiFactory.Stretch(scrim.rectTransform);
+
+            GameObject dialog = UiFactory.Node("Dialog", scrim.transform);
+            UiFactory.Anchor(dialog.GetComponent<RectTransform>(), new Vector2(0.08f, 0.30f), new Vector2(0.92f, 0.74f));
 
             Image background = UiFactory.Panel("Background", dialog.transform, "ui_panel_bordered",
                 new Color(1f, 1f, 1f, 0.99f), raycast: true);
             UiFactory.Stretch(background.rectTransform);
 
-            TextMeshProUGUI title = UiFactory.Text("Title", dialog.transform, "Welcome back!", 38f,
+            TextMeshProUGUI title = UiFactory.Text("Title", dialog.transform, "Welcome back!", 36f,
                 TextAlignmentOptions.Center, TextColor);
-            UiFactory.Anchor(title.rectTransform, new Vector2(0.05f, 0.82f), new Vector2(0.95f, 0.98f));
+            UiFactory.Anchor(title.rectTransform, new Vector2(0.06f, 0.84f), new Vector2(0.94f, 0.97f));
 
-            TextMeshProUGUI timeLabel = UiFactory.Text("Time", dialog.transform, "You were away for 1h", 26f,
+            TextMeshProUGUI timeLabel = UiFactory.Text("Time", dialog.transform, "You were away for 1h", 24f,
                 TextAlignmentOptions.Center, DimTextColor);
-            UiFactory.Anchor(timeLabel.rectTransform, new Vector2(0.05f, 0.66f), new Vector2(0.95f, 0.82f));
+            UiFactory.Anchor(timeLabel.rectTransform, new Vector2(0.06f, 0.68f), new Vector2(0.94f, 0.83f));
 
-            TextMeshProUGUI goldLabel = UiFactory.Text("Gold", dialog.transform, "+0 gold", 42f,
+            TextMeshProUGUI goldLabel = UiFactory.Text("Gold", dialog.transform, "+0 gold", 40f,
                 TextAlignmentOptions.Center, new Color(0.98f, 0.82f, 0.30f, 1f));
-            UiFactory.Anchor(goldLabel.rectTransform, new Vector2(0.05f, 0.44f), new Vector2(0.95f, 0.64f));
+            UiFactory.Anchor(goldLabel.rectTransform, new Vector2(0.06f, 0.47f), new Vector2(0.94f, 0.67f));
 
-            TextMeshProUGUI capNote = UiFactory.Text("CapNote", dialog.transform, "", 20f,
+            TextMeshProUGUI capNote = UiFactory.Text("CapNote", dialog.transform, "", 19f,
                 TextAlignmentOptions.Center, DimTextColor);
-            UiFactory.Anchor(capNote.rectTransform, new Vector2(0.05f, 0.30f), new Vector2(0.95f, 0.44f));
+            UiFactory.Anchor(capNote.rectTransform, new Vector2(0.08f, 0.31f), new Vector2(0.92f, 0.46f));
 
-            Button claimButton = UiFactory.Button("ClaimButton", dialog.transform, "CLAIM", "ui_button_gold", 32f, TextColor, null);
-            UiFactory.Anchor(claimButton.GetComponent<RectTransform>(), new Vector2(0.20f, 0.06f), new Vector2(0.80f, 0.28f));
+            Button claimButton = UiFactory.Button("ClaimButton", dialog.transform, "CLAIM", "ui_button_gold", 30f, TextColor, null);
+            UiFactory.Anchor(claimButton.GetComponent<RectTransform>(), new Vector2(0.22f, 0.07f), new Vector2(0.78f, 0.27f));
 
-            SceneWiringUtility.SetField(ui, "root", dialog);
+            title.overflowMode = TextOverflowModes.Ellipsis;
+            timeLabel.overflowMode = TextOverflowModes.Ellipsis;
+            goldLabel.overflowMode = TextOverflowModes.Ellipsis;
+            capNote.overflowMode = TextOverflowModes.Ellipsis;
+            capNote.textWrappingMode = TextWrappingModes.Normal;
+
+            SceneWiringUtility.SetField(ui, "root", scrim.gameObject);
             SceneWiringUtility.SetField(ui, "titleLabel", title);
             SceneWiringUtility.SetField(ui, "timeLabel", timeLabel);
             SceneWiringUtility.SetField(ui, "goldLabel", goldLabel);

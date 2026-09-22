@@ -29,7 +29,7 @@ stops feeling progress → churn.
 | Currency | Source | Sinks | Target affordability |
 |---|---|---|---|
 | `gold` | every kill (primary) | hero stats, ability levels | 1 upgrade per 20-60s early, 3-10 min mid |
-| `gems` | bosses (`gemsPerBossKill`), milestones | **fast-forward, offline-cap extension, extra expedition slot, extra auto-buy slot, bounty reroll, small scroll bundles** | 1 meaningful buy per 30-60 min |
+| `gems` | **milestone stages** - first clear of every 5th stage (`gemsPerMilestone`, `milestoneStageInterval`) | **fast-forward, offline-cap extension, extra expedition slot, extra auto-buy slot, bounty reroll, small scroll bundles** | 1 meaningful buy per 30-60 min |
 | `tokens` | ascension (exists) | prestige tracks | 1-3 levels per ascension early |
 | `shards.<heroId>` | dupes, boss chests, bounties | star-ups, unlocks | star-up per 10-30 min mid |
 | `materials` | zone-tier stage drops | relic levels | relic level per 5-15 min mid |
@@ -95,12 +95,32 @@ UI never derives costs or affordability itself (today `HeroUpgradeRowUI` re-deri
 
 | Layer | Trigger | Currency | Grants | New mechanic |
 |---|---|---|---|---|
-| **L1 Ascension** (exists) | stage >= `minStageToAscend` | `tokens` | permanent gold/damage/health multipliers; resets gold + stage + hero levels | prestige tree (exists) + **automation unlocks** (Step 16) |
+| **L1 Ascension** (exists, retuned) | **this run** reached `minStageToAscend` | `tokens` | permanent gold/damage/health multipliers; resets gold + stage + hero levels + **the run best** | prestige tree (exists) + **automation unlocks** (Step 16) |
 | **L2 Transcendence** | clear `zonesPerTranscendence` zones | `essence` | global multipliers; keeps relics, roster, tokens | ability tiers, extra team slot, difficulty affix toggle, +1 offline cap hour |
 | **L3 (later)** | seasons / long horizon | seasonal marks | cosmetics + account-wide multipliers | season modifiers (`ZoneData.seasonTag`) |
 
 Rules: a higher layer must never invalidate a lower one (L2 keeps L1 tracks and adds), and every layer states its
 **expected time to first prestige** - L1 30-60 min, L2 1-3 days, L3 weeks.
+
+### L1 in detail (retuned 2026-09-22)
+
+What it does: press ASCEND and the run is cashed in - gold, hero levels, stage and the **run best** go to zero,
+the lifetime best stays as a record, and you keep gems, tokens and every permanent upgrade you have bought.
+
+| Knob | Value | Why |
+|---|---|---|
+| Gate | `runBestStage >= minStageToAscend` (10) | **per run.** Gating on the lifetime best left the button live forever and made tokens farmable (found in play) |
+| Yield | `floor((runBestStage / 10) ^ 1.5)` | priced on the run, so re-climbing to the same stage pays the same and pushing further pays more |
+| Effect | **+20% per level** (`effectPerLevel`) | +10% was ~6% of the power gap at the first wall: it could not break the wall it exists to answer |
+| Cap | **25 levels** per track (`maxLevel`) | a 10-level cap (x2.0) ended the whole prestige system by ~stage 170 |
+
+First ascension (stage 25) = 3 tokens = +60% damage: felt, still nowhere near free. Maxing one track is ~600 tokens
+(a long haul), and each track reaches +500%.
+
+**Why a player does it:** it is the escape valve. The bounce stalls at a wall, grinding stops moving the frontier,
+so you cash the run in for a permanent multiplier and the next run is much faster. Verify with the robot player:
+after an ascension the re-climb to the old ceiling must take well under the first climb, and the frontier must
+move again.
 
 ## 8. Automation (B3 - the churn fix, Step 16)
 
@@ -122,14 +142,15 @@ Automation rules are `AutomationDef` rows with per-rule `enabled` + `threshold`,
 | First upgrade | <= 30s of play |
 | Stage 1 clear | 90-180s |
 | Frontier stage clear | 2-3 min |
-| Wall break while idle | <= 3 min of accumulated frontier income |
+| Wall behaviour | **the bounce**: wipe -> fall back one stage -> clear it -> push again, forever, no input. A failed push costs seconds; farmed income is never zero |
+| Frontier movement | a push succeeds within ~3 min of accumulated frontier income (measured by the robot player) |
 | First ascension | 30-60 min |
 | Offline cap reached | 2h equivalent (locked - see `Idle-Economy.md`) |
 | Decision cadence | an affordable, meaningful purchase every 1-3 min in the active phase |
 
 ## 10. Save keys touched
 
-`roster`, `partySlots`, `statLevels`, `tracks`, `currency`, `milestones`, `automation`, `ledger`.
+`roster`, `partySlots`, `statLevels`, `tracks`, `currency`, `milestones`, `automation`, `ledger`, `runBestStage`.
 No enum values, no asset refs (AD5). Ascension reset clears `statLevels` unless `resetPolicy = Never`;
 `roster`, `Never` tracks and `milestones` survive.
 

@@ -205,8 +205,8 @@ namespace IdleRPG.UI
             if (requirementLabel != null)
             {
                 requirementLabel.SetText(string.Format(
-                    manager.CanAscend ? "Best stage {0}  -  ready" : "Best stage {0}  -  reach stage {1}",
-                    manager.HighestStageReached,
+                    manager.CanAscend ? "This run: stage {0}  -  ready" : "This run: stage {0}  -  reach stage {1}",
+                    manager.RunBestStage,
                     required));
             }
 

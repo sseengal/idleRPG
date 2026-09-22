@@ -16,6 +16,12 @@ namespace IdleRPG.Sim
     /// </summary>
     public sealed class SimLedger
     {
+        /// <summary>
+        /// Gold amounts below this count as zero. Guards the rolling window against floating-point crumbs left
+        /// behind by trimming (see <see cref="Trim"/>), which would otherwise be reported as a real rate.
+        /// </summary>
+        private const double MinMeaningfulGold = 1e-6d;
+
         private readonly Queue<Sample> samples = new Queue<Sample>(256);
 
         private readonly double windowSeconds;
@@ -145,7 +151,10 @@ namespace IdleRPG.Sim
                 windowTotal -= samples.Dequeue().Amount;
             }
 
-            if (windowTotal < 0d)
+            // Floating-point cancellation: subtracting trimmed samples can leave a crumb like 1e-13 instead of
+            // exactly 0. Left alone that becomes a "rate" of ~1e-15, which is still > 0, so it would beat the
+            // offline formula estimate and pay the player nothing for a night away. Snap crumbs to zero.
+            if (windowTotal < MinMeaningfulGold)
             {
                 windowTotal = 0d;
             }

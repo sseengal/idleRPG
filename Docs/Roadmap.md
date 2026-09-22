@@ -195,9 +195,10 @@ interesting"), it does not enter the base - and it is not parked either unless t
 
 | Order | Step | Deliverable | Acceptance | Size |
 |---|---|---|---|---|
-| B3 | **15a - difficulty curve, walls, guidance** | piecewise `DifficultyCurve` (replaces flat growth), wall cadence, milestone gems every 10th stage, "you need ~X power (~3 min)" guidance banner | a wall breaks within ~3 min of frontier income; guidance numbers match the ledger; sweep shows designed growth, not a cliff | medium |
-| B4 | **Sweep-wide validator band** | Balance Lab wall detection + a stage 1-20 band check in the content validator | an accidental wall or a flat stretch **fails** the validator | ½ day |
-| B5 | **14 - generic progression tracks (schema v4)** | `TrackService` + data-driven tracks; hero stats + prestige migrated; save bump v3 -> v4 | a new track = spec + generate, zero code; a v3 save migrates to identical numbers | medium |
+| B3 | **Loop beat + ascension + rate guard** | the fallback bounce (never stops, no input), milestone gems every 5th stage, ascension retuned (per-run gate, +20%/level, cap 25), offline rate guard | verified in play on the save that used to freeze: bounce, cascades, milestone gems once only, ceiling moves when upgrades are bought, ascend resets the run and keeps the record, 8h offline pays | **done** |
+| B3d | **Phase 2 - compounding upgrades** | make the per-level stat effect **multiplicative** (~x1.09) instead of `+10% of base`, as a data field | the robot player shows flat stage times (not 126s -> 493s) and the frontier moves within ~3 min of income; golden numbers re-baselined on purpose | medium |
+| B4 | **Sweep-wide validator band** | Balance Lab bounce detection + a stage 1-20 band check in the content validator | an accidental stall or a flat stretch **fails** the validator | ½ day |
+| B5 | **14 - generic progression tracks (schema v5)** | `TrackService` + data-driven tracks; hero stats + prestige migrated; save bump v4 -> v5 | a new track = spec + generate, zero code; a v4 save migrates to identical numbers | medium |
 | B6 | **16 - automation & QoL** | auto-buy (budgeted), auto-retry (exists), presets | leave it running; nothing over-spends; config persists | medium |
 | B7 | **Monetisation pass** (see `Monetisation.md`) | ad placements (x2 gold, double offline, instant claim), gem sources (daily streak + milestones), gem sinks (permanent multiplier, automation unlock), `IIapService` + `MockIapService`, per-day caps + validator guard | every payout goes through the ledger rate; caps enforced; mock IAP swaps for a real store with one implementation | medium |
 | B8 | **Content + onboarding pass** | ~8-12 enemies, 5-6 heroes (data only) + 3 first-run tips | a new player knows what to do within 30s; content added with no code | medium |
@@ -213,14 +214,28 @@ per-attacker rule plumbing from 11a stays (the factory seeds it; it costs nothin
 **Definition of done for every B-step:** parity net green (golden numbers / validator / drift) + battle-log contract
 checked + a device smoke of the touched screen when hardware is available.
 
-### B3 - 15a difficulty curve, walls, guidance  `TODO`
-- Replace the flat `enemyHealthGrowth`/`attack`/`gold` exponents with a piecewise `DifficultyCurve` (data), keep the
-  balance identical at the tuned stages, add wall cadence + milestone gems + the guidance banner.
-- Acceptance: Balance Lab sweep shows the designed growth; a wall breaks within ~3 min of frontier income; guidance
-  text matches the ledger's measured rate.
+### B3 - loop beat, ascension, rate guard  `DONE (2026-09-22)`
+- **The bounce:** a wipe falls back one stage and resumes by itself; clearing the fallback returns to the frontier.
+  Two rules, no new state, no save field, no input, never stops. Cascades further down if the fallback also fails.
+- **Milestone gems:** first clear of every 5th stage pays 5 gems, new-best only - so the bounce cannot farm them and
+  an ascend-then-reclimb pays none.
+- **Ascension retuned:** gated and priced on the **run** best (was the lifetime best, which made tokens farmable by
+  spam-clicking), `+20%` per level (was +10%), cap 25 levels (was 10). Save v4 adds `runBestStage`.
+- **Offline rate guard:** the ledger's rolling window could hold a floating-point crumb (~1e-15 gold/s) that beat the
+  formula estimate and paid 0 for a night away. Crumbs are snapped to zero and rates under 0.001/s are ignored.
+- Verified in play (6x clock, real save): bounce, cascade, income never zero, no gem farming, milestone once only,
+  ceiling moves after 131 upgrades, ascend resets the run without jumping back, re-climb pays no gems, 8h offline
+  pays at the measured rate.
+- **Dropped from B3:** the piecewise `DifficultyCurve` (a curve cannot fix a lost race - see `Content.md` §3) and the
+  "you need ~X more power" banner (an invented index the player cannot see - see `UI-UX.md` §5).
+
+### B3d - phase 2: compounding upgrades  `TODO`
+- Hero upgrades are additive (`base x (1 + 0.1 x level)`); content is exponential (`1.15^stage`). Measured: stage time
+  126s -> 493s, walls 8 -> 40 min, hard stall ~stage 24. Make the per-level effect **multiplicative** (~x1.09) behind
+  a data field on `StatUpgradeData`, re-run the robot player, re-baseline the golden numbers deliberately.
 
 ### B4 - sweep-wide validator  `TODO`
-- Extend `ContentValidator` beyond the stage-1 band: check stages 1-20 for monotonic growth and no accidental wall,
+- Extend `ContentValidator` beyond the stage-1 band: check stages 1-20 for monotonic growth and no accidental stall,
   and surface the smallest growth step (the "stall" signal).
 - **Also (found 2026-09-21):** deleting a spec entry does not prune the generated assets - `WaveConfig` still pointed
   at the deleted Slinger until the next `Generate Assets From Specs`, which silently starved whole waves (18 kills
@@ -273,15 +288,17 @@ checked + a device smoke of the touched screen when hardware is available.
   save migrates to identical numbers.
 - **Blocked by:** Steps 7, 9, 10 (extend the same schema version if Step 10 already bumped it).
 
-### Step 15 — Zones, difficulty curves, walls, affixes, guidance  `SPLIT: 15a = base B3, 15b = v1.1`
+### Step 15 — Zones, difficulty curves, walls, affixes, guidance  `SPLIT: 15a = base B3 (done, trimmed), 15b = v1.1`
 - **Owner doc:** `Content.md` §2-§6; `UI-UX.md` §5
-- **Goal:** ask #4/#5. Replace flat exponents with a piecewise `DifficultyCurve`; zones + walls + affixes +
-  milestones; wall guidance (base step B3).
-- **Deliverables:** `ZoneData` + `DifficultyCurve`; zone/wall logic in `CombatDirector`; affix chips UI; milestone
-  chests; wall guidance banner + ETA; Balance Lab `Sweep Stages` + wall detection.
-- **Acceptance:** zone 2 unlocks after the zone-1 boss; the growth band changes at a wall (Balance Lab proof); a
-  wall breaks within ~3 min of accumulated frontier income; guidance numbers match the ledger.
-- **Blocked by:** Steps 8, 11, 12, 14.
+- **Goal:** ask #4/#5. Zones + walls + affixes + milestones. (The flat-exponent -> `DifficultyCurve` replacement and
+  the wall-guidance banner were **dropped** from 15a: the race is lost by arithmetic, not by curve shape, and the
+  banner quoted a number the player cannot see. See `Content.md` §3 and `UI-UX.md` §5.)
+- **Deliverables (15b):** `ZoneData` + `DifficultyCurve`; zone/wall logic in `CombatDirector`; affix chips UI;
+  milestone chests; Balance Lab `Sweep Stages` + bounce detection.
+- **Acceptance:** zone 2 unlocks after the zone-1 boss; the growth band changes at a wall (Balance Lab proof); the
+  bounce stalls and then moves within ~3 min of accumulated frontier income.
+- **Blocked by:** Steps 8, 11, 12, 14, **B3d** (the compounding-upgrade fix must land first, or the curve has
+  nothing healthy to shape).
 
 ### Step 16 — Automation & QoL (the churn fix)  `PROMOTED to base B6`
 - **Owner doc:** `Progression.md` §8; `Architecture.md` B3

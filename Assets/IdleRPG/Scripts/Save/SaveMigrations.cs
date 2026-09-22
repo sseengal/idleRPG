@@ -56,6 +56,15 @@ namespace IdleRPG.Save
                 Debug.Log($"[SaveMigrations] Migrated save v2 -> v3 (formation; {data.partySlots.Count} slot(s) recorded).");
             }
 
+            if (version < 4)
+            {
+                // v3 -> v4: the per-run best stage was added (ascension gate + token yield). An older save has no
+                // record of the current run's progress, so the honest conversion is "your run best is where you
+                // are now" - it can never invent a stage the player did not reach, and it cannot be exploited.
+                data.runBestStage = Mathf.Max(1, data.currentStage, data.runBestStage);
+                Debug.Log($"[SaveMigrations] Migrated save v3 -> v4 (run best stage = {data.runBestStage}).");
+            }
+
             data.schemaVersion = SaveData.CurrentVersion;
             return data;
         }

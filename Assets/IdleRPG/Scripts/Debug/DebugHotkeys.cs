@@ -123,11 +123,6 @@ namespace IdleRPG.Debugging
                 Log(ascended ? "Ascension requested." : "Ascension refused (stage gate or no tokens).");
             }
 
-            if (keyboard.rKey.wasPressedThisFrame)
-            {
-                gameManager.RetryAfterDefeat();
-            }
-
             if (keyboard.sKey.wasPressedThisFrame)
             {
                 int nextStage = gameManager.CurrentStage + 1;

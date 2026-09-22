@@ -57,8 +57,12 @@ namespace IdleRPG.Data
         [Tooltip("Multi-enemy budget: total gold compared to a one-enemy wave. 1 = same gold per second.")]
         [SerializeField] private float waveGoldMultiplier = 1f;
 
-        [Tooltip("Gem reward for killing a stage boss. Spec left the gem source undefined.")]
-        [SerializeField] private int gemsPerBossKill = 1;
+        [Tooltip("Gems paid for the FIRST clear of a milestone stage (see milestoneStageInterval). " +
+                 "Only a new-best stage pays, so bouncing between stages can never farm gems.")]
+        [SerializeField] private int gemsPerMilestone = 5;
+
+        [Tooltip("Every Nth stage pays gems on its first clear only. 5 = stages 5, 10, 15, 20 ...")]
+        [SerializeField] private int milestoneStageInterval = 5;
 
         [Tooltip("Delay between clearing a wave and spawning the next, in seconds.")]
         [SerializeField] private float waveTransitionDelaySec = 0.5f;
@@ -97,8 +101,9 @@ namespace IdleRPG.Data
         [Tooltip("Stages lost when the party wipes. Design spec: drop back 1 stage.")]
         [SerializeField] private int stageRollbackOnDefeat = 1;
 
-        [Tooltip("Turn auto-retry off after a defeat (design spec).")]
-        [SerializeField] private bool resetAutoRetryOnDefeat = true;
+        [Tooltip("Beat between a wipe and the automatic fallback fight, in seconds. " +
+                 "The party always keeps fighting - the loop never waits for input.")]
+        [SerializeField] private float defeatPauseSeconds = 0.75f;
 
         [Tooltip("Also scale enemy defence with the stage.")]
         [SerializeField] private bool scaleEnemyDefenseWithStage = false;
@@ -214,7 +219,8 @@ namespace IdleRPG.Data
 
         public int StageRollbackOnDefeat => Mathf.Max(0, stageRollbackOnDefeat);
 
-        public bool ResetAutoRetryOnDefeat => resetAutoRetryOnDefeat;
+        /// <summary>Seconds between a wipe and the automatic fallback fight (0 = instant).</summary>
+        public float DefeatPauseSeconds => Mathf.Max(0f, defeatPauseSeconds);
 
         public bool ScaleEnemyDefenseWithStage => scaleEnemyDefenseWithStage;
 
@@ -297,7 +303,10 @@ namespace IdleRPG.Data
         /// <summary>Total wave gold versus a one-enemy wave (1 = same gold per second).</summary>
         public float WaveGoldMultiplier => Mathf.Max(0.05f, waveGoldMultiplier);
 
-        public int GemsPerBossKill => Mathf.Max(0, gemsPerBossKill);
+        public int GemsPerMilestone => Mathf.Max(0, gemsPerMilestone);
+
+        /// <summary>Stages between gem milestones (5 = stages 5, 10, 15 ...). Never below 1.</summary>
+        public int MilestoneStageInterval => Mathf.Max(1, milestoneStageInterval);
 
         public float WaveTransitionDelaySec => Mathf.Max(0f, waveTransitionDelaySec);
 

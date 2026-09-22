@@ -33,7 +33,7 @@ Bottom nav (max 5):  BATTLE | PARTY | GROW | ASCEND | SHOP
   GROW    upgrades, abilities, relics, automation (one segmented control, data-driven lists)
   ASCEND  ascension (L1), transcendence (L2), prestige trees, milestones
   SHOP    gem sinks, rewarded ads, season pass, no-ads
-Overlays: offline popup, return hub, wall guidance, toasts, confirms, dev overlay (F3)
+Overlays: offline popup (modal, own canvas), return hub, toasts, confirms, dev overlay (F3)
 ```
 
 Rules: max 5 nav items, max 1 tab level inside a page, every list scrolls, every action toasts a confirmation,
@@ -58,9 +58,26 @@ close is always top-left, primary button reachable one-handed (1080x1920 referen
 - Statuses: up to 3 icons per unit with stack count; tap a unit for a bottom-sheet inspect (combat keeps running).
 - Formation swap happens on the **PARTY** tab only: tap hero, then tap any slot (occupied = swap, empty = move, the
   old slot is vacated). No drag, no auto-arrange, no presets - position is the player's call (Step 10d).
-- Defeat feedback: retry banner shows "you were X% short" from `EncounterResult`.
+- Defeat feedback: the party falls back one stage and resumes by itself after `defeatPauseSeconds` - no banner, no
+  button, no waiting for the player. The stage label simply moves down one and the log says why.
 
 ## 4. Return hub & offline claim (B1)
+
+The offline claim is a **modal**: its own canvas at `sortingOrder 100`, so nothing on the HUD (or the damage
+canvas at 10) can draw over it. A full-screen scrim dims the game and swallows every click behind it; the panel
+sits centred on top. `root` is the scrim, so one SetActive shows dim + dialog together. Labels use TMP ellipsis -
+with the default overflow a long line spills into its neighbours and the dialog reads as overlapping text.
+
+```
+Modal canvas (order 100)
+└ Scrim (black 65%, blocks input)              <- root
+  └ Dialog (centred panel, 8-92% x 30-74%)
+      "Welcome back!"                          title
+      "You were away for 3h 00m"               time
+      "+5.6K gold"                             reward
+      "Capped at 2h 00m of battle income (8h max away)."   note
+      [CLAIM]                                  the only action
+```
 
 ```
 Offline popup:  "You were away for 3h 00m"  +5.6K gold  (+shards when unlocked)
@@ -75,14 +92,19 @@ Order: claim (instant payoff) -> dispatch (set and forget) -> dismiss. Never mor
 
 ## 5. Wall guidance (B2, C7)
 
+**Rule (locked after the loop beat):** player-facing text is a state the player can already see - cost, seconds,
+wave, percent. **No invented index.** There is no "you need ~X more power" banner: that number cannot be seen in
+the game, and quoting it as an ETA is a promise we cannot keep.
+
 | Situation | UI |
 |---|---|
-| Frontier clear slower than target | Banner: "Wall: +X% DPS with the next upgrade" + jump-to-upgrade button |
-| Repeated defeats at a stage | "Wall breaks in ~N min of income" (from `ledger` + upgrade cost) |
+| Something affordable | The buy button lights up. That is 90% of guidance |
+| Nothing affordable | ETA on the button: cost / measured gold per second ("next ATK: 340 gold - 12s") |
+| Losing attempts | Attempt progress: "wave 8/11" or the enemy HP bar. The gap shrinking is the guidance |
 | Ascension affordable | Preview chip: "Ascend now: +14 tokens (push 3 stages: +17)" |
 | Idle > 5 min with nothing buyable | Nudge: nearest affordable upgrade highlighted + toast |
 
-Concrete numbers only (DPS, eHP, gold/min, stage ETA) - never one opaque "power" value (C7).
+Concrete numbers only (gold, seconds, wave, cost) - never one opaque "power" value (C7).
 
 ## 6. Team & hero detail
 
@@ -126,7 +148,7 @@ condition ("2 stars", "zone 3").
 | 10 | Team/formation board, battle formation strip, presets, auto-arrange |
 | 11 | Battle: 1-3 enemy views with per-enemy HP + status |
 | 13 | Abilities list, hero loadout, priority editor |
-| 15 | Affix chips, wall guidance banner, zone banner + milestone claim |
+| 15 | Affix chips, zone banner + milestone claim (the wall-guidance banner is **dropped** - see §5) |
 | 17 | Return hub, roster/stars, expeditions, bounty cards |
 | 18 | Transcendence screen, relic screen, codex |
 | 20 | Settings (font scale, reduced motion, battery mode), localization pass |

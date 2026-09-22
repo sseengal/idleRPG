@@ -57,17 +57,20 @@ namespace IdleRPG.Combat
         }
 
         /// <summary>
-        /// Gem reward for a boss kill. Gems are a design-level currency, so this is an
-        /// integer count rather than a scaled value.
+        /// Gem reward for clearing a stage. Gems are a design-level currency, so this is an integer count.
+        ///
+        /// The rule: only a FIRST-TIME clear of a milestone stage pays. The player bounces between their ceiling
+        /// and the stage below it forever, so paying per boss kill would farm gems; paying on new bests only makes
+        /// gems a pure progress reward.
         /// </summary>
-        public static int CalculateGems(BalanceConfig balanceConfig, bool isBoss)
+        public static int CalculateMilestoneGems(BalanceConfig balanceConfig, int clearedStage, bool isNewBest)
         {
-            if (balanceConfig == null || !isBoss)
+            if (balanceConfig == null || !isNewBest || clearedStage < 1)
             {
                 return 0;
             }
 
-            return balanceConfig.GemsPerBossKill;
+            return clearedStage % balanceConfig.MilestoneStageInterval == 0 ? balanceConfig.GemsPerMilestone : 0;
         }
     }
 }

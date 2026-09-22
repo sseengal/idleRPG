@@ -144,14 +144,24 @@ namespace IdleRPG.Save
         // Offline window
         // ------------------------------------------------------------------
 
+        /// <summary>
+        /// Rates below this are treated as "no measurement at all" rather than "a very slow player".
+        ///
+        /// ELI5: the ledger's rolling window can be left holding a floating-point crumb (seen live: 1.58e-15
+        /// gold/s) after its samples are trimmed. That crumb is greater than zero, so without this floor it would
+        /// win the "saved" branch, skip the formula estimate entirely, and pay the player nothing for a night
+        /// away - while still showing them a popup. Anything under a thousandth of a gold per second is noise.
+        /// </summary>
+        private const double MinUsableGoldPerSecond = 0.001d;
+
         private double ResolveRate(int stage, double savedGoldPerSecond)
         {
-            if (ledger != null && ledger.HasEnoughSamples && ledger.GoldPerSecond > 0d)
+            if (ledger != null && ledger.HasEnoughSamples && ledger.GoldPerSecond >= MinUsableGoldPerSecond)
             {
                 LastRate = ledger.GoldPerSecond;
                 LastRateSource = "measured";
             }
-            else if (savedGoldPerSecond > 0d)
+            else if (savedGoldPerSecond >= MinUsableGoldPerSecond)
             {
                 LastRate = savedGoldPerSecond;
                 LastRateSource = "saved";
@@ -229,7 +239,7 @@ namespace IdleRPG.Save
             double rate = ResolveRate(stage, savedGoldPerSecond);
             double minSeconds = balanceConfig != null ? balanceConfig.MinOfflineSecondsForPopup : 30f;
 
-            if (paidSeconds < minSeconds || rate <= 0d)
+            if (paidSeconds < minSeconds || rate < MinUsableGoldPerSecond)
             {
                 return OfflineRewardResult.None;
             }

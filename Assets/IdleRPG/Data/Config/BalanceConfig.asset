@@ -28,7 +28,8 @@ MonoBehaviour:
   waveHealthMultiplier: 1
   waveAttackMultiplier: 1
   waveGoldMultiplier: 1
-  gemsPerBossKill: 1
+  gemsPerMilestone: 5
+  milestoneStageInterval: 5
   waveTransitionDelaySec: 0.6
   minDamageRatio: 0.15
   criticalChance: 0.05
@@ -38,7 +39,7 @@ MonoBehaviour:
   enemyTargeting: 0
   combatTickIntervalSec: 0.05
   stageRollbackOnDefeat: 1
-  resetAutoRetryOnDefeat: 1
+  defeatPauseSeconds: 0.75
   scaleEnemyDefenseWithStage: 0
   logCombatToConsole: 1
   combatPaceMultiplier: 1.6

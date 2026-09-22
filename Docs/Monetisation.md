@@ -20,13 +20,14 @@ Second rule: **nothing is required to progress.** Ads and gems buy *time and con
 
 | Type | Item | Current numbers |
 |---|---|---|
-| Source | Gems from boss kills | 1 gem per boss |
+| Source | **Milestone stages** | first clear of every 5th stage pays **5 gems** (new best only) |
 | Sink | Offline cap extension | 50 gems -> +1h, max +3h bought |
 | Sink | Instant income | 30 gems -> +1h of income at the measured rate, repeatable |
 | Ad | x2 gold boost | x2 for 3600s (`MockAdService`) |
 | Plumbing | `IAdService` + `MockAdService`, `AdGoldBoost*` knobs, `ShopService` rows | swap-in ready |
 
-Gems are currently **boss-only**, which is too scarce to feel like a currency - fixing that is part of B7.
+Gems are no longer boss-only: since the loop beat landed, milestone stages pay them and the fallback bounce cannot
+farm them (a re-clear is not a new best). Tuning the amounts is part of B7.
 
 ---
 
@@ -38,7 +39,7 @@ Gems are currently **boss-only**, which is too scarce to feel like a currency - 
 | Ad | **Double your offline earnings** | one tap on the welcome-back popup | highest-converting idle ad; loop-native |
 | Ad | **Instant offline claim** | skip the wait, no gems | the fallback when gems are unaffordable |
 | Source | **Daily streak** | gems + a short ad boost, growing to a cap on day 7 | gives gems a free trickle |
-| Source | **Milestones** | first clear of every 10th stage pays gems | ties gems to the frontier (lands with 15a) |
+| Source | **Milestones** | first clear of every 5th stage pays 5 gems | ties gems to the frontier (landed with the loop beat) |
 | Sink | Offline cap +1h | 50 gems (exists) | unchanged |
 | Sink | Instant income | 30 gems (exists) | unchanged |
 | Sink | **Permanent +5% gold** | rising cost per level (`TrackService`, B5) | the classic long-tail gem sink |

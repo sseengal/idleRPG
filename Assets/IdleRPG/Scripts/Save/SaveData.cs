@@ -85,7 +85,7 @@ namespace IdleRPG.Save
     public class SaveData
     {
         /// <summary>Bumped whenever the schema changes; drives migration (see SaveMigrations).</summary>
-        public const int CurrentVersion = 3;
+        public const int CurrentVersion = 4;
 
         public int schemaVersion = CurrentVersion;
 
@@ -93,6 +93,14 @@ namespace IdleRPG.Save
         public int currentStage = 1;
         public int currentWave = 1;
         public int highestStageReached = 1;
+
+        /// <summary>
+        /// Best stage reached in the CURRENT run (resets to 1 on ascension). Ascension is gated and priced on this,
+        /// not on <see cref="highestStageReached"/>: otherwise the button stays live forever after the first
+        /// ascension and can be pressed repeatedly for free tokens.
+        /// </summary>
+        public int runBestStage = 1;
+
         public bool autoRetryEnabled = true;
 
         // --- Heroes ---
@@ -146,6 +154,7 @@ namespace IdleRPG.Save
                 currentStage = 1,
                 currentWave = 1,
                 highestStageReached = 1,
+                runBestStage = 1,
                 autoRetryEnabled = true,
                 heroes = new List<HeroProgressRecord>(),
                 partySlots = new List<int>(),
@@ -175,6 +184,16 @@ namespace IdleRPG.Save
             if (highestStageReached < currentStage)
             {
                 highestStageReached = currentStage;
+            }
+
+            if (runBestStage < 1)
+            {
+                runBestStage = 1;
+            }
+
+            if (runBestStage > highestStageReached)
+            {
+                runBestStage = highestStageReached;
             }
 
             if (heroes == null)

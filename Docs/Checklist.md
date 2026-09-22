@@ -2,7 +2,7 @@
 
 > The single place that answers "what is left to finish the game, and where are we right now?"
 > Roadmap detail: `Roadmap.md`. Design: `Architecture.md` + topic docs. Folder index: `README.md`.
-> MVP journal: `archive/Plan.md` (**obsolete**, kept for the record - see `REVIEW.md`).
+> MVP journal: deleted 2026-09-22 (obsolete - see `REVIEW.md` R1; `git log` still has it).
 > Rule: **one sub-step at a time** - implement, recompile, verify, tick the box, hand off for a manual test.
 > Legend: `[x]` done · `[~]` in progress · `[ ]` todo · `[!]` blocked · `[-]` dropped/deferred.
 
@@ -12,20 +12,76 @@
 
 | Field | Value |
 |---|---|
-| Current step | **B3 - 15a difficulty curve, walls, guidance** (base v1.0: B3..B9 + the device pass left) |
+| Current step | **B3 done** (bounce loop + milestone gems + ascension retune + offline rate guard). Next: **B3d compounding upgrades**, then the loop walk (shop, first-run hint) |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money.** No statuses/abilities/zones/affixes/gear/roster/relics before the base is done |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
-| Last completed | Step 6 (mobile polish, MVP) |
-| Next after this | 7b unified `Combatant` + `Encounter` |
-| Save schema | v2 (v3 lands in Steps 10/14 with migration) |
+| Last completed | Loop beat: the party never stops (fallback bounce) - 2026-09-22, verified in play |
+| Next after this | Offline rate guard (`ResolveRate` accepts a near-zero saved rate) + loop walk (ascend, offline, shop, first-run) |
+| Save schema | v4 (v3 -> v4 adds `runBestStage`, the per-run ascension gate; additive migration, no data loss) |
 | Shipped build | `Builds/IdleRPG-mac.app` verified (boot, save, offline, combat) |
-| Docs | all live in `Docs/` - index `Docs/README.md`; status here; backlog `Roadmap.md`; deletion candidates `Docs/REVIEW.md`; obsolete MVP journal `Docs/archive/Plan.md` (awaiting confirmation) |
+| Docs | all live in `Docs/` - index `Docs/README.md`; status here; backlog `Roadmap.md`; removals `Docs/REVIEW.md` (R1: obsolete MVP journal deleted) |
 
 **Standing regression surfaces** (run these on every combat-affecting change): golden numbers, content validator,
 save drift, **battle log**. The log is a *contract with the player*, not decoration: any feature that produces or
 renames combat text (statuses, abilities, **enemy item drops**, **item usage in battle**, affixes, pets) must be
 re-checked for correct attribution, one line per wave, no mid-line renaming and no "... N more hits" flooding.
+
+## 1a. Loop beat: the fallback bounce  ·  **built + verified 2026-09-22**
+
+The party never stops and never waits for input. Two rules, no new state:
+
+```
+clear a stage (boss dies):  next = stage + 1 | new best -> raise HighestStageReached,
+                            pay gems ONLY if stage % milestoneStageInterval == 0
+wipe:                       stage = max(1, stage - 1) | beat defeatPauseSeconds | fight again
+```
+
+- Player on 25: wipe -> 24 -> clear -> 25 -> wipe -> 24 ... forever. Income never stops.
+- Wipes can cascade (4 -> 3) when even the fallback fails. Self-healing, never starves.
+- Gems are **new-best + milestone only** (`CalculateMilestoneGems`), so bouncing can never farm
+  gems and an ascend-then-reclimb pays none either.
+- `defeatPauseSeconds` (0.75) is the only new knob. `resetAutoRetryOnDefeat` is gone.
+
+Verified in Play Mode on the exact save that used to freeze (stage 4, wave 5, zero upgrades):
+stage 4 -> 5 (clear), wipe on 5 -> fallback 4, cascade 4 -> 3 -> clear -> 4, gold rising throughout,
+gems 3 unchanged across the bounce, 131 upgrades bought -> ceiling moved to 6, milestone at stage 5 paid
++5 gems (3 -> 8), stage 10 paid +5 again (8 -> 13), ascend reset to stage 1 with best kept at 11 and
+**no** re-climb gems, post-ascend climb restarted from 1 and bounced at 4.
+
+`[!]` **Open blocker found while playing (next step):** `IdleTimeService.ResolveRate` accepts any
+`savedGoldPerSecond > 0`, so a near-zero ledger residue (seen live: `1.58e-15`, floating-point
+cancellation in `SimLedger.Trim`) wins over the "estimated" fallback and the offline popup pays **0**.
+Fix: clamp tiny `windowTotal` residues in `SimLedger.Trim`, and require a meaningful rate in
+`ResolveRate` (else fall through to the estimate).
+
+## 1b. Ascension retune (B3b)  ·  **built 2026-09-22**
+
+Found in play: the ascend button gated on `HighestStageReached`, which **ascending never lowers** - so after the
+first ascension it stayed live forever and every press paid the full yield again. Tokens were farmable by
+spam-clicking, and the payoff was far too small to matter (+20% at the first wall, when the wall needs ~x3.4).
+
+| Change | Before | After |
+|---|---|---|
+| Gate | lifetime best >= 10 | **run** best >= 10 (`runBestStage`, saved, resets on ascend) |
+| Yield | `floor((lifetimeBest/10)^1.5)` | `floor((runBest/10)^1.5)` |
+| Effect | +10% per level | **+20%** per level (`effectPerLevel` 0.2) |
+| Cap | 10 levels (x2.0, tree died ~stage 170) | **25 levels** (x6.0 per track) |
+| Panel | "Best stage N - ready" | "This run: stage N - ready" |
+
+Save schema **v3 -> v4** (`runBestStage`, additive; an older save converts to "run best = where you are now").
+Still to verify in play: the re-climb after an ascension must be visibly faster than the first climb.
+
+## 1c. Offline rate guard (B3c)  ·  **built 2026-09-22**
+
+The offline popup could show **+0 gold**. `SimLedger.Trim()` subtracts samples one at a time, so the rolling window
+could be left holding a floating-point crumb instead of exactly 0; that crumb was saved as `lastGoldPerSecond`
+(seen live: `1.58e-15`). On the next launch there are no live samples yet, so `IdleTimeService.ResolveRate` picked the
+"saved" branch - and because the test was `> 0`, the crumb won over the formula estimate and the payout was zero.
+
+Two guards: crumbs under `1e-6` gold are snapped to zero in `Trim()`, and any rate under `0.001` gold/s is treated as
+"no measurement" so the estimate is used instead. Verified the healthy path in play (8h away at a measured 11.6/s paid
+58,693 gold at the 2h equivalent cap).
 
 ## 1. MVP (Steps 0-6) — DONE
 
@@ -497,14 +553,21 @@ Four defects, all in the event/log plumbing (the stacked views and HP bars were 
 
 | # | Step | State |
 |---|---|---|
-| B3 | 15a - difficulty curve, walls, guidance, milestone gems | `[ ]` |
-| B4 | sweep-wide validator band + wall detection | `[ ]` |
-| B5 | 14 - generic progression tracks (**schema v4**) | `[ ]` |
+| B3 | loop beat: the fallback bounce (+ milestone gems) | `[x]` |
+| B3b | ascension retune: per-run gate, +20%/level, cap 25 | `[x]` |
+| B3c | offline rate guard (near-zero saved rate paid 0) | `[x]` |
+| B3d | **phase 2 - the compounding-upgrade fix** (additive effect vs exponential content) | `[ ]` |
+| B4 | sweep-wide validator band + bounce detection | `[ ]` |
+| B5 | 14 - generic progression tracks (**schema v5**) | `[ ]` |
 | B6 | 16 - automation & QoL | `[ ]` |
 | B7 | monetisation pass (design: `Monetisation.md`) | `[ ]` |
 | B8 | content + onboarding pass | `[ ]` |
 | B9 | 21-lite - version stamp, crash log, scripted build | `[ ]` |
 | B1 | device pass (deliberately last, owner-run) | `[ ]` |
+
+Dropped from B3 on 2026-09-22: the piecewise `DifficultyCurve` and the "you need ~X more power" guidance banner.
+The curve cannot fix a lost race, and the banner quoted a number the player cannot see. See `Content.md` §3 for the
+measured arithmetic and `UI-UX.md` §5 for the guidance rule that replaced it.
 
 Detail, acceptance and sizes: `Roadmap.md` §2. Every B-step is "done" only when the parity net is green,
 
@@ -545,13 +608,15 @@ the battle-log contract is checked, and the touched screen has had a device smok
 - [ ] upgrades UI reads tracks from data
 - [ ] acceptance: new track added by spec + generate with no code; v2 save migrates identically
 
-### 15 — Zones, difficulty curves, walls, affixes, guidance  `[ ]`
-- [ ] `ZoneData` + piecewise `DifficultyCurve`; stage -> zone mapping
-- [ ] walls every N stages (+ milestone chests); zone boss + zone milestones
-- [ ] affix chips (max 3) trading difficulty for reward
-- [ ] wall guidance banner + "wall breaks in ~N min" ETA
-- [ ] Balance Lab `Sweep Stages` + wall detection + curve CSV
-- [ ] acceptance: zone 2 gate; band change at walls; wall breaks within ~3 min of income
+### 15 — Zones, difficulty curves, walls, affixes, guidance  `[~ split]`
+- `[x]` milestone gems - landed early with the loop beat (first clear of every 5th stage, 5 gems, new-best only)
+- `[-]` wall guidance banner + "wall breaks in ~N min" ETA - **dropped**: it quoted an invented index the player
+      cannot see. Replaced by affordability ETAs + attempt progress (`UI-UX.md` §5)
+- `[ ]` `ZoneData` + piecewise `DifficultyCurve`; stage -> zone mapping (v1.1)
+- `[ ]` walls every N stages (+ milestone chests); zone boss + zone milestones
+- `[ ]` affix chips (max 3) trading difficulty for reward
+- `[ ]` Balance Lab `Sweep Stages` + bounce detection + curve CSV
+- `[ ]` acceptance: zone 2 gate; band change at walls; the bounce stalls and then moves within ~3 min of income
 
 ### 16 — Automation & QoL (churn fix)  `[ ]`
 - [ ] `AutomationDef` + `AutomationService` on the 1s tick (auto-buy, auto-ascend)

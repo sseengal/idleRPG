@@ -72,10 +72,10 @@ Design rules that keep the project testable:
 
 | System | Summary |
 |---|---|
-| **Combat** | 3 heroes (Knight/Archer/Mage) vs a rotating enemy pool; 10 normal waves + 1 boss per stage. Damage = `max(ATK − DEF, ATK × 0.15)`, 5% crits at ×2, and every attack interval is stretched by `combatPaceMultiplier`. Bosses pay +1 gem and ~half a stage of gold. |
-| **Defeat** | Party wipe only (no boss timer). Rollback 1 stage, auto-retry switches off; manual retry resumes at `stage − 1`. |
-| **Progression** | Per-hero stat upgrades (ATK/HP/DEF) on a 1.07 cost curve with closed-form bulk buys (+1 / +10). Ascension trades the run for prestige tokens (`floor((bestStage / 10)^1.5)`), resetting gold, stage and hero levels while keeping gems, tokens and permanent upgrades. |
-| **Economy** | Gold (combat), gems (bosses), prestige tokens (ascension). A single funnel, `ResolveGoldReward`, applies prestige multipliers and the ad boost to every gold source. |
+| **Combat** | 3 heroes (Knight/Archer/Mage) vs a rotating enemy pool; 10 normal waves + 1 boss per stage. Damage = `max(ATK − DEF, ATK × 0.15)`, 5% crits at ×2, and every attack interval is stretched by `combatPaceMultiplier`. Bosses pay ~half a stage of gold; gems come from milestone stages. |
+| **Defeat** | Party wipe only (no boss timer). The party falls back one stage, pauses `defeatPauseSeconds` (0.75s), and fights again **by itself** — the loop never waits for input and never stops. Wipes cascade further down if the fallback also fails, and income keeps flowing. |
+| **Progression** | Per-hero stat upgrades (ATK/HP/DEF) on a 1.07 cost curve with closed-form bulk buys (+1 / +10). Ascension trades the run for prestige tokens (`floor((runBest / 10)^1.5)`), resetting gold, stage, hero levels **and the run best** while keeping gems, tokens, permanent upgrades and the lifetime best. Gated and priced on the *current run*, so it cannot be farmed. |
+| **Economy** | Gold (combat), gems (milestone stages: first clear of every 5th stage pays 5), prestige tokens (ascension). A single funnel, `ResolveGoldReward`, applies prestige multipliers and the ad boost to every gold source. |
 | **Monetisation** | `MockAdService` (3s simulated rewarded ad) behind `IAdService`; a ×2 gold 1h boost, extendable by watching an ad. |
 | **Offline** | Dual capped: 8h wall-clock (spec) **and** 2h of equivalent battle income. `gold = paidSeconds × goldPerSecond × 0.7`, where the rate is the measured 60s rolling income, the save's stored rate, or a formula estimate, in that order. A rewound clock pays 0, a claim can only be taken once, and offline gold never feeds the live rate measurement. |
 
@@ -109,7 +109,7 @@ app sandbox. Set a real `companyName` before store submission (it moves that pat
 | `F5` / `F9` | Save now / delete the save file |
 | `F10` | Rewind the logout clock by 3h **and** re-run the offline calculation (payout + popup) |
 | `G` / `T` / `C` | Grant test gold / prestige tokens / gems |
-| `B` / `A` / `R` / `S` | Watch ad for the gold boost, request ascension, retry after defeat, skip to the next stage |
+| `B` / `A` / `S` | Watch ad for the gold boost, request ascension, skip to the next stage |
 | `F` | Buy instant income (gem sink #2) through the real shop path |
 | `M` | Mute / unmute the placeholder SFX |
 | `L` | Log live state (stage, economy, rates, save info) |
@@ -183,5 +183,4 @@ debug menus, the console log and the Unity MCP bridge. A manual pass takes ~5 mi
 | `Docs/Idle-Economy.md` | ledger rates, offline model, expeditions/bounties, ads/gems/shop, anti-abuse |
 | `Docs/UI-UX.md` | screens, navigation, battle-log contract, accessibility |
 | `Docs/Monetisation.md` | sources, sinks, IAP mock, per-day caps, ledger guard |
-| `Docs/REVIEW.md` | deletion candidates awaiting owner confirmation |
-| `Docs/archive/Plan.md` | **OBSOLETE** MVP build journal, kept for the record (deletion candidate R1) |
+| `Docs/REVIEW.md` | deletion candidates (R1 resolved: the obsolete MVP journal is deleted) |

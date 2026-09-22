@@ -166,6 +166,40 @@ namespace IdleRPG.EditorTools
             Debug.Log(report.ToString());
         }
 
+        [MenuItem("Tools/Idle RPG/Balance Lab/Robot Player: Climb (played loop)", priority = 94)]
+        public static void RobotPlayerClimb()
+        {
+            SimLogBridge.EnsureInstalled();
+
+            BalanceConfig balance = Load<BalanceConfig>("BalanceConfig");
+            WaveConfig waves = Load<WaveConfig>("WaveConfig");
+            PartyConfig party = Load<PartyConfig>("PartyConfig");
+
+            if (balance == null || waves == null || party == null)
+            {
+                return;
+            }
+
+            StatUpgradeData[] statUpgrades =
+            {
+                Load<StatUpgradeData>("StatUpgrade_ATK"),
+                Load<StatUpgradeData>("StatUpgrade_HP"),
+                Load<StatUpgradeData>("StatUpgrade_DEF")
+            };
+
+            PrestigeUpgradeData[] prestigeUpgrades =
+            {
+                Load<PrestigeUpgradeData>("Prestige_Gold"),
+                Load<PrestigeUpgradeData>("Prestige_Damage"),
+                Load<PrestigeUpgradeData>("Prestige_Health")
+            };
+
+            foreach (ClimbPolicy policy in new[] { ClimbPolicy.Cheapest, ClimbPolicy.AttackOnly })
+            {
+                Debug.Log(ClimbSimulation.Run(balance, waves, party, statUpgrades, prestigeUpgrades, policy));
+            }
+        }
+
         private static void AppendPaceRun(StringBuilder report, BalanceConfig balance, WaveConfig waves, PartyConfig party, double pace)
         {
             SimRules rules = SimRulesFactory.FromBalance(balance);
@@ -235,11 +269,26 @@ namespace IdleRPG.EditorTools
         /// <summary>Runs a full stage (all waves + boss) headless, healing the party at the start like the game does.</summary>
         internal static StageRun RunStage(BalanceConfig balance, WaveConfig waves, PartyConfig party, int stage, double pace)
         {
+            return RunStage(balance, waves, party, stage, pace, DefaultStatProvider.Instance);
+        }
+
+        /// <summary>
+        /// The same run with a caller-supplied stat provider. The robot player (ClimbSimulation) uses this to fight
+        /// with bought upgrade levels instead of base stats, so both tools share one stage runner.
+        /// </summary>
+        internal static StageRun RunStage(
+            BalanceConfig balance,
+            WaveConfig waves,
+            PartyConfig party,
+            int stage,
+            double pace,
+            ICombatStatProvider stats)
+        {
             SimRules rules = SimRulesFactory.FromBalance(balance);
             rules.PaceMultiplier = pace;
 
             SimContext context = new SimContext(rules, 12345, SimMode.Offline);
-            CombatSimulator simulator = new CombatSimulator(DefaultStatProvider.Instance, balance.EnemyTargeting, context, 12345);
+            CombatSimulator simulator = new CombatSimulator(stats ?? DefaultStatProvider.Instance, balance.EnemyTargeting, context, 12345);
 
             if (!simulator.SetupParty(party))
             {

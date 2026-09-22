@@ -23,8 +23,19 @@ namespace IdleRPG.UI
 
         private OfflineRewardResult pendingReward;
 
+        /// <summary>Modal dialogs must sit above every other canvas, whatever the scene was built with.</summary>
+        private const int ModalSortingOrder = 100;
+
         private void Awake()
         {
+            // Belt and braces: the scene builder parents this popup to a high-order modal canvas, but a stale or
+            // hand-edited scene must not be able to render the dialog underneath the battle HUD.
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas != null && canvas.sortingOrder < ModalSortingOrder)
+            {
+                canvas.sortingOrder = ModalSortingOrder;
+            }
+
             if (root != null)
             {
                 root.SetActive(false);
