@@ -1,5 +1,4 @@
 using UnityEngine;
-using IdleRPG.Sim;
 
 namespace IdleRPG.Data
 {
@@ -27,9 +26,6 @@ namespace IdleRPG.Data
         [Tooltip("Used by auto-arrange: tanks are pushed to the front row first.")]
         [SerializeField] private HeroRole role = HeroRole.Damage;
 
-        [Tooltip("Who this hero attacks. Melee = FrontMost, ranged = BacklineFirst (wired for real in Step 11).")]
-        [SerializeField] private TargetRule targetRule = TargetRule.FrontMost;
-
         [Header("Presentation")]
         [Tooltip("Optional tint for the placeholder sprite while real art is pending.")]
         [SerializeField] private Color placeholderTint = Color.white;
@@ -51,8 +47,6 @@ namespace IdleRPG.Data
         public Color PlaceholderTint => placeholderTint;
 
         public HeroRole Role => role;
-
-        public TargetRule DefaultTargetRule => targetRule;
 
         /// <summary>True when the asset is safe to use at runtime.</summary>
         public bool IsValid => BaseAttack > 0f && BaseHealth > 0f;

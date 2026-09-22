@@ -198,7 +198,6 @@ namespace IdleRPG.EditorTools
                 .Set("baseDefense", 12f)
                 .Set("attackIntervalSec", 1.5f)
                 .SetEnum("role", IdleRPG.Data.HeroRole.Tank)
-                .SetEnum("targetRule", IdleRPG.Sim.TargetRule.FrontMost)
                 .SetSprite("heroIcon", "hero_knight")
                 .SetColor("placeholderTint", new Color(0.35f, 0.55f, 0.95f, 1f))
                 .Apply();
@@ -213,7 +212,6 @@ namespace IdleRPG.EditorTools
                 .Set("baseDefense", 4f)
                 .Set("attackIntervalSec", 1f)
                 .SetEnum("role", IdleRPG.Data.HeroRole.Damage)
-                .SetEnum("targetRule", IdleRPG.Sim.TargetRule.BacklineFirst)
                 .SetSprite("heroIcon", "hero_archer")
                 .SetColor("placeholderTint", new Color(0.35f, 0.85f, 0.45f, 1f))
                 .Apply();
@@ -228,7 +226,6 @@ namespace IdleRPG.EditorTools
                 .Set("baseDefense", 5f)
                 .Set("attackIntervalSec", 2f)
                 .SetEnum("role", IdleRPG.Data.HeroRole.Damage)
-                .SetEnum("targetRule", IdleRPG.Sim.TargetRule.BacklineFirst)
                 .SetSprite("heroIcon", "hero_mage")
                 .SetColor("placeholderTint", new Color(0.75f, 0.4f, 0.95f, 1f))
                 .Apply();

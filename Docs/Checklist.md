@@ -517,8 +517,9 @@ the battle-log contract is checked, and the touched screen has had a device smok
       `enemy hp  108.6 total (100% of wave)   eta 6.6s`; `HudController`/HUD header already used the index-aware
       `CombatManager.CurrentEnemyName` ("Goblin +2")
 - [x] regressions re-run: validator clean, drift PASS, golden numbers unchanged (126s / 22 kills / 272 gold / 2.16)
-- **Dropped (2026-09-21):** hero-side `HeroData.targetRule` stays inert and no ranged enemy archetype will be
-      added - content depth with no loop or money path (see `Roadmap.md` §2, "Dropped")
+- **Dropped and deleted (2026-09-21):** the ranged enemy archetype **and** the hero-side target-rule data
+      (`HeroData.targetRule`) are gone - field, generator lines and the orphaned asset keys. No loop beat, no money
+      path, no dead data (see `Roadmap.md` §2, "Dropped")
 
 ### 12 — Effect pipeline + statuses  `[ ]`
 - [ ] `EffectPipeline` (11 ordered stages; per-type floors; armor% + pen)

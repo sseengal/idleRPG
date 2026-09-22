@@ -206,7 +206,8 @@ interesting"), it does not enter the base - and it is not parked either unless t
 
 **Dropped (deleted, not parked):** the ranged enemy archetype + hero target-rule stamping ("11f"). It answered no
 loop beat and no money path, and adding it to the rotation forced a golden-number re-baseline for no product win.
-Owner call: unnecessary complication - removed (spec, rotation, asset, sprite, generator line, code). The generic
+Owner call: unnecessary complication - removed (spec, rotation, asset, sprite, generator line, code). The inactive
+`HeroData.targetRule` field and its generator lines were deleted too, so no dead data remains. The generic
 per-attacker rule plumbing from 11a stays (the factory seeds it; it costs nothing).
 
 **Definition of done for every B-step:** parity net green (golden numbers / validator / drift) + battle-log contract
