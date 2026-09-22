@@ -46,7 +46,6 @@ namespace IdleRPG.EditorTools
             count += WriteUnit("enemy_slime", new Color(0.50f, 0.90f, 0.40f), UnitShape.Blob, new Color(0.08f, 0.20f, 0.08f));
             count += WriteUnit("enemy_bat", new Color(0.62f, 0.42f, 0.32f), UnitShape.Wings, new Color(0.16f, 0.10f, 0.08f));
             count += WriteUnit("enemy_goblin", new Color(0.45f, 0.75f, 0.35f), UnitShape.Ears, new Color(0.12f, 0.18f, 0.08f));
-            count += WriteUnit("enemy_slinger", new Color(0.69f, 0.49f, 0.91f), UnitShape.Chevron, new Color(0.22f, 0.12f, 0.32f));
             count += WriteUnit("boss_ogre", new Color(0.85f, 0.25f, 0.20f), UnitShape.Spikes, new Color(0.22f, 0.06f, 0.05f));
 
             return count;

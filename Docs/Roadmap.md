@@ -18,6 +18,11 @@
 
 "Blocked by" is a hard gate: do not start a step until its blockers are `DONE`.
 
+**Base gate (added 2026-09-21 after the ranged-enemy detour):** a step only enters the *base* list if it can name
+the **loop beat** or the **money path** it serves. If the answer is vague ("it would be nice", "it makes X more
+interesting"), it does not enter the base - and it is not parked either unless the owner asks for it. Content depth
+(enemy archetypes, abilities, gear, zones) is v1.1 by default.
+
 ---
 
 ## 1. Foundation (behaviour-preserving)
@@ -190,7 +195,6 @@
 
 | Order | Step | Deliverable | Acceptance | Size |
 |---|---|---|---|---|
-| B2 | **11f - targeting symmetry** `DONE` | `HeroData.targetRule` wired to `Combatant.TargetRule`; one ranged enemy archetype that hits the party's back rank | formation changes *who gets hit*; a ranged enemy visibly reaches the back rank; single-enemy parity intact | ½ day |
 | B3 | **15a - difficulty curve, walls, guidance** | piecewise `DifficultyCurve` (replaces flat growth), wall cadence, milestone gems every 10th stage, "you need ~X power (~3 min)" guidance banner | a wall breaks within ~3 min of frontier income; guidance numbers match the ledger; sweep shows designed growth, not a cliff | medium |
 | B4 | **Sweep-wide validator band** | Balance Lab wall detection + a stage 1-20 band check in the content validator | an accidental wall or a flat stretch **fails** the validator | ½ day |
 | B5 | **14 - generic progression tracks (schema v4)** | `TrackService` + data-driven tracks; hero stats + prestige migrated; save bump v3 -> v4 | a new track = spec + generate, zero code; a v3 save migrates to identical numbers | medium |
@@ -200,25 +204,13 @@
 | B9 | **21-lite - release plumbing** | version stamp, crash log file, scripted `Unity -batchmode` build | one command produces a build with the correct version | small-med |
 | B1 | **Device pass (LAST)** | build to phone + checklist (fps, safe area, touch, offline popup, store page draft) | 60fps idle with 3v3 on device; nothing clipped; popup + claim work by touch | ½ day, owner-run |
 
+**Dropped (deleted, not parked):** the ranged enemy archetype + hero target-rule stamping ("11f"). It answered no
+loop beat and no money path, and adding it to the rotation forced a golden-number re-baseline for no product win.
+Owner call: unnecessary complication - removed (spec, rotation, asset, sprite, generator line, code). The generic
+per-attacker rule plumbing from 11a stays (the factory seeds it; it costs nothing).
+
 **Definition of done for every B-step:** parity net green (golden numbers / validator / drift) + battle-log contract
 checked + a device smoke of the touched screen when hardware is available.
-
-### B2 - 11f targeting symmetry  `DONE`
-- [x] `HeroData.DefaultTargetRule` (a `TargetRule` field that was inert) is now stamped onto every hero in
-      `CombatSimulator.SetupParty`, so a hero can be authored to prefer a different target (default `FrontMost` = the
-      side rule, so single-enemy parity is untouched). With enemy ranks gone, the interesting hero rule today is
-      `LowestHealthPercent` (finisher behaviour) - available, not authored.
-- [x] **New enemy archetype `Slinger`** (`enemies.json` -> `Enemy_Slinger.asset`, `targetRule: backlinefirst`,
-      `targetRule: 4` on the asset), stats near the pool mean (85hp / 10atk / 12.5g / 1.9s) so the budget stays put,
-      added to the normal rotation (`waves.json`). Placeholder sprite `enemy_slinger` generated.
-- [x] **verified - who hits whom**: a Slinger-only wave against board `front[0 1 -] back[2 - -]` sent **53/53
-      swings (100%) into the back-rank Archer, 0 into the front rank**; with no hero in the back rank the same
-      enemy falls through to the front rank (nobody is ever untargetable). Log reads `Slinger A hits Mage for 0.6`,
-      `Slime B hits Archer`, `Slime defeated +3.1 gold` - attribution intact (standing rule).
-- [x] **golden numbers re-baselined** (the 4-enemy pool changes which enemies appear per wave - expected for a
-      content addition): stage 1 = **121s @x1.6 / 76s @x1.0, 22 kills, 271 gold, 2.24 gold/s** (was 126s / 272 /
-      2.16). Validator clean (band 90-180s), drift PASS, sweep 1-10 = 121 / 143 / 181s then wipe from stage 4
-      (unupgraded party; the curve work in B3 formalises this)
 
 ### B3 - 15a difficulty curve, walls, guidance  `TODO`
 - Replace the flat `enemyHealthGrowth`/`attack`/`gold` exponents with a piecewise `DifficultyCurve` (data), keep the
@@ -229,6 +221,10 @@ checked + a device smoke of the touched screen when hardware is available.
 ### B4 - sweep-wide validator  `TODO`
 - Extend `ContentValidator` beyond the stage-1 band: check stages 1-20 for monotonic growth and no accidental wall,
   and surface the smallest growth step (the "stall" signal).
+- **Also (found 2026-09-21):** deleting a spec entry does not prune the generated assets - `WaveConfig` still pointed
+  at the deleted Slinger until the next `Generate Assets From Specs`, which silently starved whole waves (18 kills
+  instead of 22). The golden numbers caught it; the validator did not. Add: "a data asset references something that
+  no longer exists" check, and document that spec deletions require a regenerate.
 
 ### B5 - 14 generic progression tracks (schema v4)  `TODO`
 ### B6 - 16 automation & QoL  `TODO`
@@ -279,7 +275,7 @@ checked + a device smoke of the touched screen when hardware is available.
 ### Step 15 — Zones, difficulty curves, walls, affixes, guidance  `SPLIT: 15a = base B3, 15b = v1.1`
 - **Owner doc:** `Content.md` §2-§6; `UI-UX.md` §5
 - **Goal:** ask #4/#5. Replace flat exponents with a piecewise `DifficultyCurve`; zones + walls + affixes +
-  milestones; wall guidance (B2).
+  milestones; wall guidance (base step B3).
 - **Deliverables:** `ZoneData` + `DifficultyCurve`; zone/wall logic in `CombatDirector`; affix chips UI; milestone
   chests; wall guidance banner + ETA; Balance Lab `Sweep Stages` + wall detection.
 - **Acceptance:** zone 2 unlocks after the zone-1 boss; the growth band changes at a wall (Balance Lab proof); a

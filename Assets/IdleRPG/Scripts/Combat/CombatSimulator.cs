@@ -182,10 +182,6 @@ namespace IdleRPG.Combat
                     statProvider.GetDefense(data, index),
                     ScaledInterval(statProvider.GetAttackInterval(data, index)));
 
-                // Step B2: the hero's own targeting preference (data-driven). Default is FrontMost, which is
-                // exactly what the side rule does, so nothing changes until a hero is authored otherwise.
-                heroes[index].TargetRule = data.DefaultTargetRule;
-
                 index++;
             }
 

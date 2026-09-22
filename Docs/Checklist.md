@@ -12,7 +12,8 @@
 
 | Field | Value |
 |---|---|
-| Current step | **B3 - 15a difficulty curve, walls, guidance** (base v1.0: B2 done, B3..B9 + device pass left) |
+| Current step | **B3 - 15a difficulty curve, walls, guidance** (base v1.0: B3..B9 + the device pass left) |
+| Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money.** No statuses/abilities/zones/affixes/gear/roster/relics before the base is done |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
 | Last completed | Step 6 (mobile polish, MVP) |
@@ -496,7 +497,6 @@ Four defects, all in the event/log plumbing (the stacked views and HP bars were 
 
 | # | Step | State |
 |---|---|---|
-| B2 | 11f - targeting symmetry (hero target rules + a ranged enemy) | `[x]` done - 100% back-rank hits verified |
 | B3 | 15a - difficulty curve, walls, guidance, milestone gems | `[ ]` |
 | B4 | sweep-wide validator band + wall detection | `[ ]` |
 | B5 | 14 - generic progression tracks (**schema v4**) | `[ ]` |
@@ -517,8 +517,8 @@ the battle-log contract is checked, and the touched screen has had a device smok
       `enemy hp  108.6 total (100% of wave)   eta 6.6s`; `HudController`/HUD header already used the index-aware
       `CombatManager.CurrentEnemyName` ("Goblin +2")
 - [x] regressions re-run: validator clean, drift PASS, golden numbers unchanged (126s / 22 kills / 272 gold / 2.16)
-- **Parked (own step, both small):** hero-side `HeroData.targetRule` is still inert; no ranged enemy archetype yet.
-      Both are gameplay, not cleanup - they land as "11f - targeting symmetry" when you want them
+- **Dropped (2026-09-21):** hero-side `HeroData.targetRule` stays inert and no ranged enemy archetype will be
+      added - content depth with no loop or money path (see `Roadmap.md` §2, "Dropped")
 
 ### 12 — Effect pipeline + statuses  `[ ]`
 - [ ] `EffectPipeline` (11 ordered stages; per-type floors; armor% + pen)

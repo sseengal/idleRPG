@@ -53,22 +53,6 @@
             "preferredRow": "front"
         },
         {
-            "id": "enemy_slinger",
-            "asset": "Enemy_Slinger",
-            "displayName": "Slinger",
-            "sprite": "enemy_slinger",
-            "baseHealth": 85.0,
-            "baseAttack": 10.0,
-            "baseDefense": 1.0,
-            "baseGoldDrop": 12.5,
-            "attackIntervalSec": 1.899999976158142,
-            "isBoss": false,
-            "bossHealthMultiplier": 1.0,
-            "bossGoldMultiplier": 1.0,
-            "tint": "#B07CE8FF",
-            "targetRule": "backlinefirst"
-        },
-        {
             "id": "enemy_slime",
             "asset": "Enemy_Slime",
             "displayName": "Slime",
