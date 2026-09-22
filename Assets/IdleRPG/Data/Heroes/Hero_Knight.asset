@@ -21,4 +21,4 @@ MonoBehaviour:
   attackIntervalSec: 1.5
   role: 0
   targetRule: 0
-  placeholderTint: {r: 0.35, g: 0.55, b: 0.95, a: 1}
+  placeholderTint: {r: 0.34901962, g: 0.54901963, b: 0.9490196, a: 1}

@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ec2cfe7cf2cb64fa9b4fa3c722078478, type: 3}
-  m_Name: Enemy_Goblin
+  m_Name: Enemy_Slinger
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.EnemyData
-  enemyName: Goblin
-  enemyID: enemy_goblin
-  enemySprite: {fileID: 21300000, guid: 9d3e38c42da8942f0b04152a201d32f2, type: 3}
-  baseHealth: 130
-  baseAttack: 12
-  baseDefense: 3
-  baseGoldDrop: 18
+  enemyName: Slinger
+  enemyID: enemy_slinger
+  enemySprite: {fileID: 21300000, guid: 78479c9dd838e42738b107244ede317f, type: 3}
+  baseHealth: 85
+  baseAttack: 10
+  baseDefense: 1
+  baseGoldDrop: 12.5
   isBoss: 0
-  attackIntervalSec: 1.8
-  targetRule: 3
+  attackIntervalSec: 1.9
+  targetRule: 4
   bossHealthMultiplier: 1
   bossGoldMultiplier: 1
-  placeholderTint: {r: 0.4, g: 0.7490196, b: 0.34901962, a: 1}
+  placeholderTint: {r: 0.6901961, g: 0.4862745, b: 0.9098039, a: 1}

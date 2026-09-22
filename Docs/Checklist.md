@@ -12,7 +12,9 @@
 
 | Field | Value |
 |---|---|
-| Current step | **Step 12** effect pipeline + statuses (Step 11 complete: 11a-11e) |
+| Current step | **B3 - 15a difficulty curve, walls, guidance** (base v1.0: B2 done, B3..B9 + device pass left) |
+| v1.0 gate | **the loop + money.** No statuses/abilities/zones/affixes/gear/roster/relics before the base is done |
+| Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
 | Last completed | Step 6 (mobile polish, MVP) |
 | Next after this | 7b unified `Combatant` + `Encounter` |
 | Save schema | v2 (v3 lands in Steps 10/14 with migration) |
@@ -489,6 +491,24 @@ Four defects, all in the event/log plumbing (the stacked views and HP bars were 
       24/36 hp split
 - **Rule extracted:** the battle log is a standing regression surface - see the note in section 0. Every new
       combat-text feature (statuses, abilities, drops, item use) re-opens it
+
+## 2b. Base v1.0 — the loop + money  (current focus)
+
+| # | Step | State |
+|---|---|---|
+| B2 | 11f - targeting symmetry (hero target rules + a ranged enemy) | `[x]` done - 100% back-rank hits verified |
+| B3 | 15a - difficulty curve, walls, guidance, milestone gems | `[ ]` |
+| B4 | sweep-wide validator band + wall detection | `[ ]` |
+| B5 | 14 - generic progression tracks (**schema v4**) | `[ ]` |
+| B6 | 16 - automation & QoL | `[ ]` |
+| B7 | monetisation pass (design: `Monetisation.md`) | `[ ]` |
+| B8 | content + onboarding pass | `[ ]` |
+| B9 | 21-lite - version stamp, crash log, scripted build | `[ ]` |
+| B1 | device pass (deliberately last, owner-run) | `[ ]` |
+
+Detail, acceptance and sizes: `Roadmap.md` §2. Every B-step is "done" only when the parity net is green,
+
+the battle-log contract is checked, and the touched screen has had a device smoke.
 
 ### 11d — index-0 cleanups  `[x]`
 - [x] `DevOverlay` no longer reads enemy 0: it gained a `wave` line with every enemy and its own HP, and the

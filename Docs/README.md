@@ -15,7 +15,8 @@
 | Why is the code shaped this way? Layers, decisions, rules | `Architecture.md` |
 | How does the simulation work (combat, formation, enemies)? | `Sim-Core.md` |
 | Content pipeline: specs, generator, validator, enemies/zones | `Content.md` |
-| Rates, offline payouts, currencies, monetisation | `Idle-Economy.md` |
+| Rates, offline payouts, currencies, time-based monetisation | `Idle-Economy.md` |
+| Monetisation plan: sources, sinks, IAP mock, guards | `Monetisation.md` |
 | Levelling, prestige, tracks, roster | `Progression.md` |
 | Screens, navigation, log contract, accessibility | `UI-UX.md` |
 
@@ -46,7 +47,8 @@ Docs/
   Sim-Core.md        <- pure simulation design
   Content.md         <- specs + pipeline + enemies/zones/affixes
   Progression.md     <- currencies, tracks, prestige, roster
-  Idle-Economy.md    <- rates, offline, monetisation
+  Idle-Economy.md    <- rates, offline, time payouts
+  Monetisation.md    <- sources, sinks, IAP mock, guards (B7)
   UI-UX.md           <- screens, navigation, battle log contract
   REVIEW.md          <- candidates for deletion (needs owner confirmation)
   archive/           <- superseded documents, kept for the record only

@@ -3,7 +3,8 @@
     "normalEnemyIds": [
         "enemy_slime",
         "enemy_bat",
-        "enemy_goblin"
+        "enemy_goblin",
+        "enemy_slinger"
     ],
     "bossEnemyIds": [
         "boss_ogre"

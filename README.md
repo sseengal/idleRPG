@@ -182,5 +182,6 @@ debug menus, the console log and the Unity MCP bridge. A manual pass takes ~5 mi
 | `Docs/Content.md` | zones, difficulty curves, walls, affixes, enemy archetypes, content pipeline + validator |
 | `Docs/Idle-Economy.md` | ledger rates, offline model, expeditions/bounties, ads/gems/shop, anti-abuse |
 | `Docs/UI-UX.md` | screens, navigation, battle-log contract, accessibility |
+| `Docs/Monetisation.md` | sources, sinks, IAP mock, per-day caps, ledger guard |
 | `Docs/REVIEW.md` | deletion candidates awaiting owner confirmation |
 | `Docs/archive/Plan.md` | **OBSOLETE** MVP build journal, kept for the record (deletion candidate R1) |
