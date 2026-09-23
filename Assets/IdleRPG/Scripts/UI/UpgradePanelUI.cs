@@ -14,7 +14,6 @@ namespace IdleRPG.UI
         [SerializeField] private HeroUpgradeRowUI[] rows;
 
         private GameManager manager;
-        private bool isVisible = true;
 
         private void Start()
         {
@@ -64,7 +63,7 @@ namespace IdleRPG.UI
 
         private void OnCurrencyChanged(Economy.CurrencyType currencyType, double amount)
         {
-            if (isVisible && currencyType == Economy.CurrencyType.Gold)
+            if (currencyType == Economy.CurrencyType.Gold)
             {
                 RefreshAll();
             }
@@ -72,29 +71,16 @@ namespace IdleRPG.UI
 
         private void OnUpgradePurchased(int heroIndex, HeroStatType statType, int newLevel, double cost)
         {
-            if (isVisible)
-            {
-                RefreshAll();
-            }
+            RefreshAll();
         }
 
         private void OnHeroStatsChanged(int heroIndex)
         {
-            if (isVisible)
-            {
-                RefreshAll();
-            }
+            RefreshAll();
         }
 
         private void OnSaveLoaded()
         {
-            RefreshAll();
-        }
-
-        /// <summary>Called by <see cref="TabController"/> style visibility changes (SetActive).</summary>
-        private void OnBecameVisible()
-        {
-            isVisible = true;
             RefreshAll();
         }
 

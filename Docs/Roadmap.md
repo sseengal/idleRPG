@@ -211,8 +211,9 @@ Owner call: unnecessary complication - removed (spec, rotation, asset, sprite, g
 `HeroData.targetRule` field and its generator lines were deleted too, so no dead data remains. The generic
 per-attacker rule plumbing from 11a stays (the factory seeds it; it costs nothing).
 
-**Definition of done for every B-step:** parity net green (golden numbers / validator / drift) + battle-log contract
-checked + a device smoke of the touched screen when hardware is available.
+**Definition of done for every B-step:** `Tools > Idle RPG > Run All Checks (regression)` green (save drift + content
+validation + golden numbers, one PASS/FAIL line) + the battle-log contract checked + a device smoke of the touched
+screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorTools.RegressionCheckMenu.RunAllChecks`.
 
 ### B3 - loop beat, ascension, rate guard  `DONE (2026-09-22)`
 - **The bounce:** a wipe falls back one stage and resumes by itself; clearing the fallback returns to the frontier.

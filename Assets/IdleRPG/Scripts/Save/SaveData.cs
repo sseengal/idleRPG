@@ -101,8 +101,6 @@ namespace IdleRPG.Save
         /// </summary>
         public int runBestStage = 1;
 
-        public bool autoRetryEnabled = true;
-
         // --- Heroes ---
         public List<HeroProgressRecord> heroes = new List<HeroProgressRecord>();
 
@@ -155,7 +153,6 @@ namespace IdleRPG.Save
                 currentWave = 1,
                 highestStageReached = 1,
                 runBestStage = 1,
-                autoRetryEnabled = true,
                 heroes = new List<HeroProgressRecord>(),
                 partySlots = new List<int>(),
                 prestigeUpgrades = new List<PrestigeUpgradeRecord>(),

@@ -18,8 +18,26 @@ namespace IdleRPG.EditorTools
     /// </summary>
     public static class SaveRoundTripMenu
     {
+        /// <summary>
+        /// Keys that were deliberately removed from the schema. An old file still carries them and a fresh capture
+        /// will not, so they must not read as "lost data" - that would train us to ignore a real drop.
+        ///
+        /// `autoRetryEnabled` (removed 2026-09-22): the fallback bounce resumes a wipe by itself, so the flag decided
+        /// nothing. Dropping it costs the player nothing.
+        /// </summary>
+        private static readonly HashSet<string> RetiredKeys = new HashSet<string>
+        {
+            "\"autoRetryEnabled\""
+        };
+
         [MenuItem("Tools/Idle RPG/Save/Round-Trip Drift Test", priority = 65)]
         public static void Run()
+        {
+            RunChecks();
+        }
+
+        /// <summary>Same test, but returns the verdict so the combined regression menu can aggregate it.</summary>
+        public static bool RunChecks()
         {
             bool ok = true;
 
@@ -31,6 +49,8 @@ namespace IdleRPG.EditorTools
             Debug.Log(ok
                 ? "[SaveRoundTrip] PASS - schema v" + SaveData.CurrentVersion + " round-trips cleanly and migrations are sane."
                 : "[SaveRoundTrip] FAIL - see the lines above.");
+
+            return ok;
         }
 
         /// <summary>Serialise -> parse -> serialise. Any difference is data loss.</summary>
@@ -66,7 +86,7 @@ namespace IdleRPG.EditorTools
             data.currentStage = 37;
             data.currentWave = 6;
             data.highestStageReached = 41;
-            data.autoRetryEnabled = false;
+            data.runBestStage = 39;
 
             data.heroes = new List<HeroProgressRecord>
             {
@@ -137,6 +157,32 @@ namespace IdleRPG.EditorTools
             else
             {
                 Debug.Log("[SaveRoundTrip] v2 -> v3 migration: keeps values, adds an empty board.");
+            }
+
+            // A v3 file has no runBestStage: it must adopt the current stage (never invent a higher one) and stay
+            // inside the lifetime best, because that number gates and prices the next ascension.
+            SaveData v3 = SaveData.CreateDefault();
+            v3.schemaVersion = 3;
+            v3.currentStage = 12;
+            v3.highestStageReached = 20;
+            v3.runBestStage = 0;
+
+            SaveData migratedV3 = SaveMigrations.Migrate(v3);
+
+            if (migratedV3.schemaVersion != SaveData.CurrentVersion)
+            {
+                Debug.LogError($"[SaveRoundTrip] v3 migration left version {migratedV3.schemaVersion}.");
+                ok = false;
+            }
+            else if (migratedV3.runBestStage != 12)
+            {
+                Debug.LogError($"[SaveRoundTrip] v3 migration set runBestStage {migratedV3.runBestStage}; " +
+                               "expected the current stage (12).");
+                ok = false;
+            }
+            else
+            {
+                Debug.Log("[SaveRoundTrip] v3 -> v4 migration: run best adopts the current stage.");
             }
 
             // A v1 file (no version at all) must still land on the current schema.
@@ -221,7 +267,7 @@ namespace IdleRPG.EditorTools
             {
                 string trimmed = line.Trim();
 
-                if (trimmed.Length > 0 && !IsVersionLine(trimmed) && !newer.Contains(trimmed))
+                if (trimmed.Length > 0 && !IsVersionLine(trimmed) && !IsRetiredLine(trimmed) && !newer.Contains(trimmed))
                 {
                     missing++;
                 }
@@ -238,7 +284,7 @@ namespace IdleRPG.EditorTools
             {
                 string trimmed = line.Trim();
 
-                if (trimmed.Length > 0 && !IsVersionLine(trimmed) && !newer.Contains(trimmed))
+                if (trimmed.Length > 0 && !IsVersionLine(trimmed) && !IsRetiredLine(trimmed) && !newer.Contains(trimmed))
                 {
                     builder.AppendLine("    lost: " + trimmed);
                 }
@@ -250,6 +296,20 @@ namespace IdleRPG.EditorTools
         private static bool IsVersionLine(string trimmedLine)
         {
             return trimmedLine.StartsWith("\"schemaVersion\"");
+        }
+
+        /// <summary>True when the line is a key we deliberately retired from the schema (see <see cref="RetiredKeys"/>).</summary>
+        private static bool IsRetiredLine(string trimmedLine)
+        {
+            foreach (string key in RetiredKeys)
+            {
+                if (trimmedLine.StartsWith(key))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>Reports the first differing line, which is usually the field that broke.</summary>

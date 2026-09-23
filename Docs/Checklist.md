@@ -12,7 +12,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **B3 done** (bounce loop + milestone gems + ascension retune + offline rate guard). Next: **B3d compounding upgrades**, then the loop walk (shop, first-run hint) |
+| Current step | **Refactor + regression net done** (2026-09-23). Next: **B3d compounding upgrades**, then B4 -> B9, device pass last |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money.** No statuses/abilities/zones/affixes/gear/roster/relics before the base is done |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
@@ -548,6 +548,56 @@ Four defects, all in the event/log plumbing (the stacked views and HP bars were 
       24/36 hp split
 - **Rule extracted:** the battle log is a standing regression surface - see the note in section 0. Every new
       combat-text feature (statuses, abilities, drops, item use) re-opens it
+
+## 1d. Refactor + regression command (2026-09-23)  ·  **done + verified**
+
+The six largest files were split into `partial` classes (same class, same fields, same behaviour - moved, not
+rewritten). Full table in `Architecture.md` §6.6. Largest file went 1057 → 507 lines; every split was diffed against
+`git show HEAD` and proved to be a pure move (0 code lines changed).
+
+| Class | Before | After |
+|---|---|---|
+| `GameManager` | 1057 | 507 + 342 (`Stages`) + 292 (`Save`) |
+| `MvpSceneBuilder` | 942 | 331 + 291 (`Battle`) + 356 (`Panels`) + 99 (`Overlays`) |
+| `PlaceholderSpriteGenerator` | 673 | 322 + 389 (`Shapes`) |
+| `ContentValidator` | 617 | 201 + 472 (`Checks`) |
+| `CombatLogUI` | 576 | 449 + 190 (`Events`) |
+| `Encounter` | 500 | 332 + 218 (`Targeting`) |
+
+Dead code removed (each verified to have no caller): `RetryAfterDefeat` + its `R` hotkey, `AutoRetryEnabled`
+(property + save field; the retired key is allow-listed in the drift test), `UpgradePanelUI.isVisible` +
+`OnBecameVisible` (always-true guards), `MvpSceneBuilder.CreateTab` + `ManagementTabBarBottom` (3-tab era leftovers).
+
+**New regression entry point:** `Tools > Idle RPG > Run All Checks (regression)`
+(`RegressionCheckMenu.RunAllChecks`) - save drift + content validation + the golden-number report, one PASS/FAIL
+line. Batch-mode: `-executeMethod IdleRPG.EditorTools.RegressionCheckMenu.RunAllChecks`.
+
+Verified after the refactor (batch-mode run, log `/tmp/idlerpg-regression.log`):
+`[SaveRoundTrip] PASS` (v4 round-trip + v1/v2/v3 migrations, including the new v3 -> v4 check) ·
+`Content validation: RESULT: clean (0 warning(s))` · golden numbers **exact**
+(`80s @x1` / `126s @x1.6, 22 kills, 272 gold, 2.16 gold/s`) · `[Regression] REGRESSION: PASS`.
+
+Play-verified in the same session: bounce loop, ascension (gate closes on ascend, re-opens only after a re-climb,
+lifetime best kept, run best reset, no gem farming on re-clears), and the offline modal.
+
+## 1e. Remaining path to MVP  ·  **what is left, in order**
+
+Base gate: every step below names the loop beat or money path it serves. Anything that cannot is not in the base.
+
+| # | Step | Serves | Acceptance | Size |
+|---|---|---|---|---|
+| **B3d** | Phase 2: make the per-level stat effect **multiplicative** (~x1.09) instead of `+10% of base`, as a data field on `StatUpgradeData` | the loop beat "buy -> push further": additive power cannot race exponential content (measured: stage time 126s -> 493s, stall ~stage 24) | robot player shows flat stage times and the frontier moves within ~3 min of income; golden numbers re-baselined on purpose | medium |
+| **B4** | Sweep-wide validator band | keeps the loop healthy: an accidental stall must fail the build | stages 1-20 checked for monotonic growth + no stall; a planted stall fails the validator | ½ day |
+| **B5** | Generic progression tracks (schema v5) | money path: more tracks = more to buy = more gem/ad relevance | a new track = spec + generate, zero code; a v4 save migrates to identical numbers | medium |
+| **B6** | Automation & QoL (auto-buy, presets) | retention: idling must pay off while away | leave it running; nothing over-spends; config persists | medium |
+| **B7** | Monetisation pass (`Monetisation.md`) | money path: ad placements + gem sinks + mock IAP | every payout goes through the ledger rate; per-day caps enforced; mock IAP swaps for a real store with one implementation | medium |
+| **B8** | Content + onboarding pass | first-run clarity: a stranger knows what to press | ~8-12 enemies, 5-6 heroes (data only) + 3 first-run tips; content added with no code | medium |
+| **B9** | Release plumbing | ship it | version stamp, crash log file, one scripted `-batchmode` build command | small-med |
+| **B1** | **Device pass (LAST, owner-run)** | does it actually feel good on a phone | 60fps idle with 3v3 on device; safe area clean; offline modal + CLAIM work by touch | ½ day |
+
+Loop-walk items still open from the bounce work (do them with B8 unless a play test says otherwise): first-run hint,
+shop beat verification (boss/milestone gems -> fast-forward + offline cap), and the cosmetic formation-slot tiles
+(3 empty slots draw red HP bars).
 
 ## 2b. Base v1.0 — the loop + money  (current focus)
 

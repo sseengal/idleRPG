@@ -377,6 +377,34 @@ ui             { lastScreenIndex, settings{...} }
 | C6 | Forced/interstitial ads, timed boss failure, punishing-absence timers | Avoid permanently |
 | C7 | Player-visible "power score" early | Avoid; show DPS / eHP / gold-per-min / stage ETA |
 
+### 6.6 File layout after the 2026-09-23 refactor
+
+The six largest files were split into `partial` classes: same class, same fields, same behaviour, grouped by
+responsibility. Nothing was rewritten - only moved - so the compiler is the proof (0 lines changed; verified by
+diffing the moved code against `git show HEAD`).
+
+| Class | Files | Holds |
+|---|---|---|
+| `GameManager` | `GameManager.cs` (fields, properties, lifecycle, wiring, state, context) · `GameManager.Stages.cs` (run start, wipe fallback, stage advance, ascension, combat/progression event handlers) · `GameManager.Save.cs` (snapshot capture/apply, save/delete/reset, offline evaluation, instant income, ad boost) | 1057 → 507 / 342 / 292 |
+| `MvpSceneBuilder` | `.cs` (entry, constants, cameras, canvases, safe area, event system) · `.Battle.cs` (header, HP bars, viewport, damage pool, combat log) · `.Panels.cs` (tabs, nav, party/upgrade/ascension/shop) · `.Overlays.cs` (offline modal, toast) | 942 → 331 / 291 / 356 / 99 |
+| `PlaceholderSpriteGenerator` | `.cs` (the generator: units, panels, icons, background, file IO) · `.Shapes.cs` (pixel + polygon primitives, fills, blending, colour helpers) | 673 → 322 / 389 |
+| `ContentValidator` | `.cs` (entry, plumbing, CSV, summary) · `.Checks.cs` (one check per content area) | 617 → 201 / 472 |
+| `CombatLogUI` | `.cs` (scroll/follow, line pool, aggregation) · `.Events.cs` (game-event → text handlers, wave summary) | 576 → 449 / 190 |
+| `Encounter` | `.cs` (setup, spawn, step, phases) · `.Targeting.cs` (row weights, target rules) | 500 → 332 / 218 |
+
+Also removed as dead (each verified as having no caller):
+
+| Removed | Why |
+|---|---|
+| `GameManager.RetryAfterDefeat` + the `R` debug hotkey | The fallback bounce resumes a wipe by itself; nothing ever waited for a manual retry |
+| `AutoRetryEnabled` (property, save field, restore) | It decided nothing - written and saved, never read. Retired key is allow-listed in the drift test |
+| `UpgradePanelUI.isVisible` + `OnBecameVisible` | Always true, never set false; the guards were no-ops |
+| `MvpSceneBuilder.CreateTab` / `ManagementTabBarBottom` | Leftovers from the 3-tab nav (the shell has 5 tabs via `CreatePanelTab`) |
+
+**Regression entry point:** `Tools > Idle RPG > Run All Checks (regression)`
+(`RegressionCheckMenu.RunAllChecks`) runs save drift + content validation + the golden-number report and prints one
+`REGRESSION: PASS/FAIL` line. Batch-mode: `-executeMethod IdleRPG.EditorTools.RegressionCheckMenu.RunAllChecks`.
+
 ### 6.5 Preserved from the MVP (do not regress)
 
 | Item | Reason |
