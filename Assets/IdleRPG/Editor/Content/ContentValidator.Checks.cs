@@ -763,6 +763,14 @@ namespace IdleRPG.EditorTools.Content
             ClimbSimulation.ClimbResult climb = ClimbSimulation.Simulate(
                 balance, waves, party, statUpgrades, prestigeUpgrades, ClimbPolicy.Cheapest, LoopHealthMaxStage);
 
+            // Fix D: a sustained batch of sub-10s stage clears is the "player power far ahead of content" smell.
+            if (climb.GlutStages >= 3)
+            {
+                Add(Severity.Warning, "loop",
+                    $"the robot cleared {climb.GlutStages} stage(s) in under 10s - player power is far ahead of content " +
+                    "at those levels (the one-shot power glut). Re-tune enemy growth or the compounding gain.");
+            }
+
             if (climb.Stuck)
             {
                 Add(Severity.Error, "loop",
@@ -801,17 +809,99 @@ namespace IdleRPG.EditorTools.Content
             }
 
             Add(Severity.Info, "loop", string.Format(
-                "robot (cheapest-buy) reached stage {0} in {1:0.0} min | walls {2}, worst {3:0.0} min | peak stage time {4:0}s (stage {5}) | {6} upgrades | median shopping gap {7}",
+                "robot (cheapest-buy) reached stage {0} in {1:0.0} min | walls {2}, worst {3:0.0} min | peak stage time {4:0}s (stage {5}) | fastest {6:0.0}s | {7} upgrade(s) | median shopping gap {8}",
                 climb.ReachedStage,
                 climb.TotalSeconds / 60d,
                 climb.Walls,
                 climb.WorstWallSeconds / 60d,
                 peakSeconds,
                 peakStage,
+                climb.FastestStageSeconds >= double.MaxValue ? -1d : climb.FastestStageSeconds,
                 climb.Upgrades,
                 climb.MedianShoppingGapSeconds < 0d
                     ? "n/a"
                     : string.Format("{0:0.0} min (wall phase only)", climb.MedianShoppingGapSeconds / 60d)));
+        }
+
+        // ------------------------------------------------------------------
+        // Power band (Fix D): power vs content at the levels players actually reach
+        // ------------------------------------------------------------------
+        /// <summary>A kill-time below this at a sample bracket means the enemies are being one-shot (power glut).</summary>
+        private const double PowerBandMinTtkSeconds = 8d;
+
+        /// <summary>A kill-time above this at a sample bracket means the race is lost again (stall).</summary>
+        private const double PowerBandMaxTtkSeconds = 240d;
+
+        /// <summary>
+        /// Checks the race formula directly, at sample compounding levels, instead of hoping a game session notices:
+        /// for level L the frontier sits around stage ln(1+gain)/ln(growth) x L (that is the whole point of the
+        /// compounding fix), so we compute what a one-hit/death feels like exactly there. This is the check that
+        /// would have screamed "one-shotting" instead of waiting for a player to report it.
+        ///
+        /// ELI5: a level-80 hero and a stage-24 monster have no business meeting - the formula puts level 80 at the
+        /// stage-50 frontier. When a save is far behind its own power line (legacy levels), Fix A moves the levels;
+        /// this check makes sure the LINE itself is sane in both directions (too strong up top, or stalling).
+        /// </summary>
+        private static void CheckPowerBand()
+        {
+            BalanceConfig balance = BalanceLabMenu.Load<BalanceConfig>("BalanceConfig");
+            PartyConfig party = BalanceLabMenu.Load<PartyConfig>("PartyConfig");
+            StatUpgradeData attackTrack = BalanceLabMenu.Load<StatUpgradeData>("StatUpgrade_ATK");
+
+            if (balance == null || party == null || party.ValidHeroCount == 0 || attackTrack == null)
+            {
+                Add(Severity.Error, "power", "Config assets missing; skipped the power-band check.");
+                return;
+            }
+
+            HeroData hero = party.GetHero(0);
+            if (hero == null)
+            {
+                Add(Severity.Error, "power", "No hero at index 0; skipped the power-band check.");
+                return;
+            }
+
+            double gain = attackTrack.StatGainPerLevelFraction;
+            bool compounding = attackTrack.EffectMode == StatEffectMode.Multiplicative;
+            double growth = balance.EnemyHealthGrowth;
+            double baseAtk = hero.BaseAttack;
+            double interval = hero.AttackIntervalSec;
+            double goldPerKill = 130d; // the hardest normal enemy's base HP is the yardstick (Goblin)
+
+            int[] brackets = { 25, 50, 75, 100 };
+
+            for (int b = 0; b < brackets.Length; b++)
+            {
+                int level = brackets[b];
+                double attack = compounding
+                    ? baseAtk * System.Math.Pow(1d + gain, level)
+                    : baseAtk * (1d + gain * level);
+
+                double frontierStageF = level * (System.Math.Log(1d + gain) / System.Math.Log(growth));
+                int stage = System.Math.Max(1, (int)System.Math.Floor(frontierStageF));
+
+                double enemyHp = goldPerKill * System.Math.Pow(growth, stage - 1);
+                double dps = attack / interval;
+                double ttk = enemyHp / System.Math.Max(1e-9, dps);
+
+                if (ttk < PowerBandMinTtkSeconds)
+                {
+                    Add(Severity.Warning, "power",
+                        $"at level {level} the frontier stage is ~{stage} but enemies die in {ttk:0.0}s - power is " +
+                        "far ahead of content there (one-shot glut). Raise enemy growth or lower the gain.");
+                }
+                else if (ttk > PowerBandMaxTtkSeconds)
+                {
+                    Add(Severity.Warning, "power",
+                        $"at level {level} the frontier stage is ~{stage} but enemies take {ttk / 60d:0.0} min to " +
+                        "kill - the compounding race is lost again up there. Raise the gain or lower growth.");
+                }
+                else
+                {
+                    Add(Severity.Info, "power",
+                        $"level {level} -> stage ~{stage}: enemy TTK {ttk:0.0}s (band {PowerBandMinTtkSeconds:0}-{PowerBandMaxTtkSeconds:0}s).");
+                }
+            }
         }
     }
 }

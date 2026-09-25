@@ -12,7 +12,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **B6 automation IN PROGRESS** (Steps 1-3 done 2026-09-25: cards, engine, AUTO panel, speed button + the rate guard; all verified live). Next: Step 4 robot learns the cards (or straight to B7), then B8 -> B9, device pass last |
+| Current step | **B6 automation IN PROGRESS** (Steps 1-3 done; Fix A one-shot power compensation + Fix D power-band watchdog landed 2026-09-25). Next: Step 4 robot learns the cards (or straight to B7), then B8 -> B9, device pass last |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money.** No statuses/abilities/zones/affixes/gear/roster/relics before the base is done |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
@@ -682,6 +682,17 @@ robot, so a change that halved DPS or reintroduced the additive stall still said
   `fastForward:1` + settings. Compile clean; `Run All Checks` PASS after the rebuild.
 - **Step 4 (robot learns the cards) - deferred:** the robot already buys-cheapest like auto-buy; a meaningful
   version means simulating the (manual, player-only) rebirth loop, which deserves its own small step.
+- **Fix A (the one-shot report, 2026-09-25):** a legacy save's hero levels were worth ~100x more the moment they
+  became compounding (level 80 = 11,839 ATK), so everything was one-shot. `SaveMigrations` now runs a ONE-TIME
+  compensation for pre-B3d saves: each additive-era level becomes the compounding level of EQUAL power
+  (80 -> 25, DEF 80 -> 52, mage 91 -> 26) - a rename, never a nerf; the wall band returns. The marker DEFAULTS to
+  false (a string marker defaulting to "compounding" stamped legacy saves as modern and the fix silently didn't run
+  - the player's report; that exact regression is now a drift test against real JSON). New saves carry the marker
+  true. **Fix B:** after measuring, the content curve needs NO retune - at the race frontier every bracket sits at
+  13-15s TTK (level 25/50/75/100 vs stage ~15/30/46/61). **Fix D:** the new `CheckPowerBand()` validator asserts
+  that band every run, and the robot reports fastest-stage + sub-10s stage count, so power-glut can never quietly
+  return. Verified: drift suite PASS (incl. the stray-marker regression + float-format tolerance for doubles),
+  `Run All Checks` PASS, live load of the player's save shows 25/25/52 + 26 and ATK 103 (was 11,839).
 
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 

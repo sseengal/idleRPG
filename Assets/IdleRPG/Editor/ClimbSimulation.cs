@@ -80,6 +80,10 @@ namespace IdleRPG.EditorTools
             public double FirstPurchaseSeconds;
             /// <summary>True when the climb stopped because the time budget ran out rather than because it finished.</summary>
             public bool BudgetExhausted;
+            /// <summary>Fastest cleared stage time - a sustained very low figure is the "power glut" smell (Fix D).</summary>
+            public double FastestStageSeconds;
+            /// <summary>How many cleared stages took under the glut threshold (10s): content is being one-shot.</summary>
+            public int GlutStages;
             public List<ClimbStageRow> ClearedStages;
 
             public bool Stuck => StuckStage > 0;
@@ -257,8 +261,27 @@ namespace IdleRPG.EditorTools
             result.FirstPurchaseSeconds = shoppingTrips.Count > 0 ? shoppingTrips[0] : -1d;
             result.MedianShoppingGapSeconds = MedianGap(shoppingTrips);
 
+            result.FastestStageSeconds = double.MaxValue;
+            result.GlutStages = 0;
+            for (int i = 0; i < result.ClearedStages.Count; i++)
+            {
+                ClimbStageRow row = result.ClearedStages[i];
+                if (row.Seconds < result.FastestStageSeconds)
+                {
+                    result.FastestStageSeconds = row.Seconds;
+                }
+
+                if (row.Seconds < GlutThresholdSeconds)
+                {
+                    result.GlutStages++;
+                }
+            }
+
             return result;
         }
+
+        /// <summary>A stage clearing faster than this (sustained) means player power is far ahead of content (Fix D).</summary>
+        private const double GlutThresholdSeconds = 10d;
 
         /// <summary>
         /// Median gap between consecutive shopping trips. The mean would be dragged around by one long wall, and the

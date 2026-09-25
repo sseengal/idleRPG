@@ -36,7 +36,9 @@ namespace IdleRPG.EditorTools
             "\"defenseLevel\"",
             "\"prestigeUpgrades\"",
             "\"upgradeID\"",
-            "\"level\":"
+            "\"level\":",
+            // Fix A (2026-09-25): the short-lived string marker that stamped legacy saves as modern is retired.
+            "\"powerEra\""
         };
 
         [MenuItem("Tools/Idle RPG/Save/Round-Trip Drift Test", priority = 65)]
@@ -202,10 +204,12 @@ namespace IdleRPG.EditorTools
                 Debug.Log("[SaveRoundTrip] v3 -> v4 migration: run best adopts the current stage.");
             }
 
-            // A v4 file stores hero levels in fixed columns + a prestige list. It must convert to keyed records
-            // ("hero_knight.attack" = 80) with EVERY number preserved - none lost, none invented.
+            // A v4 file stores hero levels in fixed columns + a prestige list. It must convert to keyed records AND get the
+            // one-time power compensation (Fix A): level 80 additive == level 25 compounding, so heroes keep their
+            // relative power and enemies stop being one-shot. Core numbers (stage/gold/tokens) are untouched.
             SaveData v4 = SaveData.CreateDefault();
             v4.schemaVersion = 4;
+            v4.powerCompensated = false;   // a real v4 file has no marker -> legacy, must be compensated
             v4.currentStage = 24;
             v4.highestStageReached = 24;
             v4.runBestStage = 24;
@@ -225,30 +229,66 @@ namespace IdleRPG.EditorTools
             };
 
             SaveData migratedV4 = SaveMigrations.Migrate(v4);
+            SaveData migratedV4Twice = SaveMigrations.Migrate(migratedV4);
 
             bool v4NumbersKept =
                 migratedV4.schemaVersion == SaveData.CurrentVersion &&
-                migratedV4.GetLevel("hero_knight.attack") == 80 &&
-                migratedV4.GetLevel("hero_knight.health") == 80 &&
-                migratedV4.GetLevel("hero_archer.defense") == 80 &&
-                migratedV4.GetLevel("hero_mage.attack") == 91 &&
-                migratedV4.GetLevel("Prestige_Health") == 0 &&
+                migratedV4.powerCompensated &&
+                migratedV4.GetLevel("hero_knight.attack") == 25 &&   // floor(ln(1+0.1x80)/ln(1.09))
+                migratedV4.GetLevel("hero_knight.health") == 25 &&
+                migratedV4.GetLevel("hero_knight.defense") == 52 &&  // floor(ln(1+0.15x80)/ln(1.05))
+                migratedV4.GetLevel("hero_archer.defense") == 52 &&
+                migratedV4.GetLevel("hero_mage.attack") == 26 &&     // floor(ln(1+0.1x91)/ln(1.09))
+                migratedV4.GetLevel("Prestige_Health") == 0 &&       // global tracks untouched
                 migratedV4.currentStage == 24 &&
                 migratedV4.highestStageReached == 24 &&
                 migratedV4.runBestStage == 24 &&
                 System.Math.Abs(migratedV4.gold - 4793.29d) < 0.001d &&
                 migratedV4.prestigeTokens == 2d &&
                 migratedV4.heroes.Count == 0 &&
-                migratedV4.prestigeUpgrades.Count == 0;
+                migratedV4.prestigeUpgrades.Count == 0 &&
+                migratedV4Twice.GetLevel("hero_knight.attack") == 25 &&   // never compensated twice
+                migratedV4Twice.GetLevel("hero_mage.attack") == 26;
 
             if (!v4NumbersKept)
             {
-                Debug.LogError("[SaveRoundTrip] v4 -> v5 migration lost value(s); the keyed records do not match the columns.");
+                Debug.LogError("[SaveRoundTrip] v4 -> v5 + power compensation lost value(s); check levels/powerEra.");
                 ok = false;
             }
             else
             {
-                Debug.Log($"[SaveRoundTrip] v4 -> v5 migration: {migratedV4.levels.Count} keyed level(s), all numbers preserved.");
+                Debug.Log($"[SaveRoundTrip] v4 -> v5 migration: {migratedV4.levels.Count} keyed level(s), " +
+                          "additive-era compensation applied once (25/25/52, 26), core numbers preserved.");
+            }
+
+            // Regression for the EXACT bug the player hit (2026-09-25): a legacy v5 file that was stamped
+            // "compounding" by the buggy string marker must STILL be recognised as legacy and compensated. The
+            // marker now defaults to false, so the stray "powerEra" key is ignored and the file is fixed once.
+            string legacyV5Json = "{\"schemaVersion\":5,\"currentStage\":28,\"powerEra\":\"compounding\"," +
+                "\"levels\":[{\"key\":\"hero_knight.attack\",\"level\":80},{\"key\":\"hero_knight.defense\",\"level\":80}," +
+                "{\"key\":\"Prestige_Gold\",\"level\":0},{\"key\":\"autoBuy\",\"level\":0}]}";
+            SaveData legacyV5 = JsonUtility.FromJson<SaveData>(legacyV5Json);
+            bool parsedAsLegacy = !legacyV5.powerCompensated;   // read BEFORE Migrate (it mutates and returns the same instance)
+            SaveData fixedLegacy = SaveMigrations.Migrate(legacyV5);
+            SaveData fixedTwice = SaveMigrations.Migrate(fixedLegacy);
+
+            bool legacyFixOk =
+                parsedAsLegacy &&
+                fixedLegacy.powerCompensated &&
+                fixedLegacy.GetLevel("hero_knight.attack") == 25 &&
+                fixedLegacy.GetLevel("hero_knight.defense") == 52 &&
+                fixedLegacy.GetLevel("Prestige_Gold") == 0 &&  // global tracks untouched
+                fixedLegacy.GetLevel("autoBuy") == 0 &&
+                fixedTwice.GetLevel("hero_knight.attack") == 25;  // never compensated twice
+
+            if (!legacyFixOk)
+            {
+                Debug.LogError("[SaveRoundTrip] legacy v5 save was not compensated once (the player's one-shot bug).");
+                ok = false;
+            }
+            else
+            {
+                Debug.Log("[SaveRoundTrip] legacy v5 with stray marker: recognised as additive era and compensated once.");
             }
 
             // A v1 file (no version at all) must still land on the current schema.
@@ -333,13 +373,81 @@ namespace IdleRPG.EditorTools
             {
                 string trimmed = line.Trim();
 
-                if (trimmed.Length > 0 && !IsVersionLine(trimmed) && !IsRetiredLine(trimmed) && !newer.Contains(trimmed))
+                if (trimmed.Length > 0 && !IsVersionLine(trimmed) && !IsRetiredLine(trimmed) &&
+                    !LinesMatch(trimmed, newer))
                 {
                     missing++;
                 }
             }
 
             return missing;
+        }
+
+        /// <summary>
+        /// The line is "still there" if it appears verbatim OR if the same JSON field exists in the new file with a
+        /// numerically equal value. Double values re-serialise with slightly different digits (217311.77801439282 ->
+        /// 217311.7780143928), which is formatting, not data loss - byte comparison would be a false positive.
+        /// </summary>
+        private static bool LinesMatch(string oldTrimmed, string newer)
+        {
+            if (newer.Contains(oldTrimmed))
+            {
+                return true;
+            }
+
+            if (!TryParseNumberedField(oldTrimmed, out string key, out double oldValue))
+            {
+                return false;
+            }
+
+            foreach (string line in newer.Split('\n'))
+            {
+                string trimmed = line.Trim();
+                if (TryParseNumberedField(trimmed, out string otherKey, out double newValue) &&
+                    otherKey == key &&
+                    System.Math.Abs(oldValue - newValue) <= 1e-6 * System.Math.Max(1d, System.Math.Abs(oldValue)))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>Matches `"field": <number>,` and returns the field name + numeric value.</summary>
+        private static bool TryParseNumberedField(string trimmed, out string key, out double value)
+        {
+            key = null;
+            value = 0d;
+
+            int open = trimmed.IndexOf('"', 0);
+            int close = trimmed.IndexOf('"', open + 1);
+
+            if (open < 0 || close < 0)
+            {
+                return false;
+            }
+
+            string candidateKey = trimmed.Substring(open + 1, close - open - 1);
+
+            int colon = trimmed.IndexOf(':', close);
+            if (colon < 0)
+            {
+                return false;
+            }
+
+            string numberPart = trimmed.Substring(colon + 1).Trim().TrimEnd(',');
+            double parsed;
+
+            if (!double.TryParse(numberPart, System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture, out parsed))
+            {
+                return false;
+            }
+
+            key = candidateKey;
+            value = parsed;
+            return true;
         }
 
         private static string DescribeMissingLines(string older, string newer)
@@ -350,7 +458,8 @@ namespace IdleRPG.EditorTools
             {
                 string trimmed = line.Trim();
 
-                if (trimmed.Length > 0 && !IsVersionLine(trimmed) && !IsRetiredLine(trimmed) && !newer.Contains(trimmed))
+                if (trimmed.Length > 0 && !IsVersionLine(trimmed) && !IsRetiredLine(trimmed) &&
+                    !LinesMatch(trimmed, newer))
                 {
                     builder.AppendLine("    lost: " + trimmed);
                 }

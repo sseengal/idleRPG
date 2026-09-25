@@ -156,6 +156,16 @@ namespace IdleRPG.Save
         // --- Automation (schema v5 additive, B6): on/off + the safety-reserve dial per card ---
         public List<AutomationSetting> automation = new List<AutomationSetting>();
 
+        // --- Power era (v5 additive, Fix A 2026-09-25): has this save received the one-time compensation? ---
+        /// <summary>
+        /// False (the C# default) means the save is from before the B3d compounding switch and has additive-era hero
+        /// levels; true means "compensation already applied" (or a brand-new save). JsonUtility keeps field
+        /// initializers for missing JSON keys, so this MUST default to false - a false default flag is what lets a
+        /// legacy file be recognised even though it never stored the marker. (A short-lived string marker with a
+        /// "compounding" default failed exactly here: it stamped legacy files as modern and compensation never ran.)
+        /// </summary>
+        public bool powerCompensated;
+
         // --- Legacy (schema <= v4): kept ONLY as migration input; new saves always write these empty. ---
         public List<HeroProgressRecord> heroes = new List<HeroProgressRecord>();
 
@@ -214,7 +224,8 @@ namespace IdleRPG.Save
                 prestigeUpgrades = new List<PrestigeUpgradeRecord>(),
                 gold = 0d,
                 gems = 0d,
-                prestigeTokens = 0d
+                prestigeTokens = 0d,
+                powerCompensated = true
             };
         }
 

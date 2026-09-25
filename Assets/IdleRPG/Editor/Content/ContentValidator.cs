@@ -71,6 +71,7 @@ namespace IdleRPG.EditorTools.Content
             CheckEncounters();
             CheckBalanceBand();
             CheckLoopHealth();
+            CheckPowerBand();
 
             WriteCsv();
             LogSummary();
