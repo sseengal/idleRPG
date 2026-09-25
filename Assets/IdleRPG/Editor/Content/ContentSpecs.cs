@@ -87,6 +87,7 @@ namespace IdleRPG.EditorTools.Content
         public int version = 1;
         public List<StatUpgradeSpec> statUpgrades = new List<StatUpgradeSpec>();
         public List<PrestigeUpgradeSpec> prestigeUpgrades = new List<PrestigeUpgradeSpec>();
+        public List<AutomationSpec> automationUpgrades = new List<AutomationSpec>();
     }
 
     [Serializable]
@@ -102,6 +103,11 @@ namespace IdleRPG.EditorTools.Content
         public double baseCost = 10d;
         public float costGrowth = 1.07f;
         public float statGainPerLevelFraction = 0.1f;
+        /// <summary>
+        /// "additive" (default) = base x (1 + level x gain) | "multiplicative" = base x (1 + gain)^level.
+        /// Stored as text so it survives enum reordering, same as <see cref="statType"/>.
+        /// </summary>
+        public string effectMode = "additive";
         /// <summary>0 = unlimited.</summary>
         public int maxLevel;
     }
@@ -120,5 +126,19 @@ namespace IdleRPG.EditorTools.Content
         public float costGrowth = 1.4f;
         public float effectPerLevel = 0.1f;
         public int maxLevel = 10;
+    }
+
+    /// <summary>One automation card row (B6): bought once with tokens, grants a capability.</summary>
+    [Serializable]
+    public class AutomationSpec
+    {
+        public string id = "";
+        public string asset = "";
+        /// <summary>What the card grants: "autoBuy" | "fastForward".</summary>
+        public string automationId = "autoBuy";
+        public string displayName = "";
+        public string description = "";
+        public double baseCostTokens = 4d;
+        public int minAscensions = 0;
     }
 }

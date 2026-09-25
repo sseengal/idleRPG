@@ -363,6 +363,10 @@ ui             { lastScreenIndex, settings{...} }
 | B30 | Wave **size** is derived, never stored: `WaveComposition.ResolveCount(stage, wave, isBoss)` hashes the wave and reads the recipe in `BalanceConfig` (1 x25, 2 x50, 3 x25). Not the sim RNG (would shift crit rolls), never a modulo cycle | 11c | Locked |
 | B31 | The offline estimator uses the recipe **mean** (`MeanEnemiesPerWave`), so a varied wave size cannot inflate the away-time payout | 11c | Locked |
 | B29 | A wave ends when the **last** enemy dies (per-enemy kill events carry the index and pay individually), so multi-enemy waves cannot end or pay early | 11b | Locked |
+| B34 | Hero upgrade tracks **compound** (`StatUpgradeData.effectMode`); the per-level gain is **derived** from the content/cost/gold growth (`CompoundingGainFor`), never hand-picked: ATK/HP x1.09 race enemy HP 1.15, DEF x1.05 races enemy ATK 1.08. Level 0 returns the base stat, so parity/golden numbers hold unchanged | B3d | Locked |
+| B35 | Save schema **v5**: all progression levels are ONE keyed list `levels[{key,level}]` (`"hero_knight.attack"` for hero stats, the track id for globals). The v4 hero columns + prestige list are migration input only and always write empty. **Keys are a permanent contract** - a renamed key silently throws away progress, so migrations must never rewrite keys | B5 | Locked |
+| B36 | B5 **defers** `currency[]` / `ledger{}` reshaping (Architecture §4 plan) until a step that actually needs it (B7). Reshaping three working scalars buys nothing today and doubles the risk on the live save | B5 | Locked |
+| B37 | **Tracks are authored in `tracks.json`**, the one card per row. `SceneWiringUtility` wires scene lists from the spec, so **a new track = card + generate + scene rebuild, no C#**. The scene is the last mile for references (GUIDs), so `Build MVP Scene` is part of the content workflow, not a code change | B5 | Locked |
 | B14 | Codex/bestiary doubles as the difficulty-hint system | 18 | Locked |
 
 ### 6.4 Removals / avoid

@@ -59,6 +59,50 @@ namespace IdleRPG.Save
         }
     }
 
+    /// <summary>
+    /// One keyed progression level: the "key" is the whole contract (e.g. "hero_knight.attack" = 80, or a permanent
+    /// track id). Schema v5 means the save file never needs to know what a stat is - a new track only adds new keys.
+    /// </summary>
+    [Serializable]
+    public class LevelRecord
+    {
+        public string key = "";
+        public int level;
+
+        public LevelRecord()
+        {
+        }
+
+        public LevelRecord(string key, int level)
+        {
+            this.key = key;
+            this.level = level;
+        }
+    }
+
+    /// <summary>
+    /// One automation card's player settings (B6): whether the machine is on, and how much of the wallet the machine
+    /// promises never to touch. Additive in schema v5 - an older file simply reads the defaults.
+    /// </summary>
+    [Serializable]
+    public class AutomationSetting
+    {
+        public string ruleId = "";
+        public bool enabled;
+        public float budgetFraction = 0.5f;
+
+        public AutomationSetting()
+        {
+        }
+
+        public AutomationSetting(string ruleId, bool enabled, float budgetFraction)
+        {
+            this.ruleId = ruleId;
+            this.enabled = enabled;
+            this.budgetFraction = budgetFraction;
+        }
+    }
+
     /// <summary>Permanent (prestige) upgrade level snapshot.</summary>
     [Serializable]
     public class PrestigeUpgradeRecord
@@ -85,7 +129,7 @@ namespace IdleRPG.Save
     public class SaveData
     {
         /// <summary>Bumped whenever the schema changes; drives migration (see SaveMigrations).</summary>
-        public const int CurrentVersion = 4;
+        public const int CurrentVersion = 5;
 
         public int schemaVersion = CurrentVersion;
 
@@ -101,7 +145,18 @@ namespace IdleRPG.Save
         /// </summary>
         public int runBestStage = 1;
 
-        // --- Heroes ---
+        // --- Level records (schema v5): one "key -> level" list for the whole game ---
+        /// <summary>
+        /// Every progression level as {key, level}. Keys are stable strings, never enum values (AD5): a hero stat is
+        /// "{heroId}.attack|health|defense", a permanent (prestige) track is its track id. New tracks only ever add
+        /// keys - the file shape itself never has to change again for levels.
+        /// </summary>
+        public List<LevelRecord> levels = new List<LevelRecord>();
+
+        // --- Automation (schema v5 additive, B6): on/off + the safety-reserve dial per card ---
+        public List<AutomationSetting> automation = new List<AutomationSetting>();
+
+        // --- Legacy (schema <= v4): kept ONLY as migration input; new saves always write these empty. ---
         public List<HeroProgressRecord> heroes = new List<HeroProgressRecord>();
 
         // --- Formation (schema v3, additive) ---
@@ -117,7 +172,7 @@ namespace IdleRPG.Save
         public double gems;
         public double prestigeTokens;
 
-        // --- Permanent upgrades ---
+        // --- Permanent upgrades (legacy: migration input only since v5) ---
         public List<PrestigeUpgradeRecord> prestigeUpgrades = new List<PrestigeUpgradeRecord>();
 
         // --- Shop purchases (schema v2 additive: older files simply default to 0) ---
@@ -154,6 +209,7 @@ namespace IdleRPG.Save
                 highestStageReached = 1,
                 runBestStage = 1,
                 heroes = new List<HeroProgressRecord>(),
+                levels = new List<LevelRecord>(),
                 partySlots = new List<int>(),
                 prestigeUpgrades = new List<PrestigeUpgradeRecord>(),
                 gold = 0d,
@@ -196,6 +252,50 @@ namespace IdleRPG.Save
             if (heroes == null)
             {
                 heroes = new List<HeroProgressRecord>();
+            }
+
+            if (levels == null)
+            {
+                levels = new List<LevelRecord>();
+            }
+            else
+            {
+                for (int i = 0; i < levels.Count; i++)
+                {
+                    if (levels[i] == null)
+                    {
+                        levels[i] = new LevelRecord();
+                        continue;
+                    }
+
+                    if (levels[i].level < 0)
+                    {
+                        levels[i].level = 0;
+                    }
+                }
+            }
+
+            if (automation == null)
+            {
+                automation = new List<AutomationSetting>();
+            }
+            else
+            {
+                for (int i = 0; i < automation.Count; i++)
+                {
+                    if (automation[i] == null)
+                    {
+                        automation[i] = new AutomationSetting();
+                        continue;
+                    }
+
+                    if (float.IsNaN(automation[i].budgetFraction))
+                    {
+                        automation[i].budgetFraction = 0.5f;
+                    }
+
+                    automation[i].budgetFraction = Mathf.Clamp01(automation[i].budgetFraction);
+                }
             }
 
             if (prestigeUpgrades == null)
@@ -297,6 +397,73 @@ namespace IdleRPG.Save
             PrestigeUpgradeRecord record = new PrestigeUpgradeRecord(upgradeID, 0);
             prestigeUpgrades.Add(record);
             return record;
+        }
+
+        /// <summary>Level of a keyed progression record; 0 when unknown.</summary>
+        public int GetLevel(string key)
+        {
+            if (levels == null || string.IsNullOrEmpty(key))
+            {
+                return 0;
+            }
+
+            for (int i = 0; i < levels.Count; i++)
+            {
+                LevelRecord record = levels[i];
+                if (record != null && record.key == key)
+                {
+                    return Mathf.Max(0, record.level);
+                }
+            }
+
+            return 0;
+        }
+
+        /// <summary>Writes or creates a keyed progression record. Never stores a negative level.</summary>
+        public void SetLevel(string key, int level)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                return;
+            }
+
+            if (levels == null)
+            {
+                levels = new List<LevelRecord>();
+            }
+
+            int safeLevel = level < 0 ? 0 : level;
+
+            for (int i = 0; i < levels.Count; i++)
+            {
+                LevelRecord record = levels[i];
+                if (record != null && record.key == key)
+                {
+                    record.level = safeLevel;
+                    return;
+                }
+            }
+
+            levels.Add(new LevelRecord(key, safeLevel));
+        }
+
+        /// <summary>
+        /// Stable key builders - the strings in here ARE the save contract. Ship once, never reformat: an old key
+        /// holds a player's progress and a renamed key silently throws it away (migrations must never rewrite these).
+        /// </summary>
+        public static class SaveKeys
+        {
+            /// <summary>"hero_knight.attack" - one level per hero per stat.</summary>
+            public static string HeroStat(string heroId, Data.HeroStatType stat)
+            {
+                return heroId + "." + stat.ToString().ToLowerInvariant();
+            }
+
+            /// <summary>A permanent (prestige / global) track uses its own id as the key.</summary>
+            public static string Track(string trackId)
+            {
+                return trackId;
+            }
         }
 
         /// <summary>Debug-friendly summary.</summary>

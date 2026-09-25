@@ -163,6 +163,16 @@ namespace IdleRPG.Progression
             return balanceConfig != null ? balanceConfig.UpgradeStatGainPerLevel : 0.1d;
         }
 
+        /// <summary>
+        /// How a stat's per-level gain composes. Additive unless the track asset opts into compounding (B3d):
+        /// compounding is what lets affordable power keep pace with the exponential content curve.
+        /// </summary>
+        public StatEffectMode GetEffectMode(HeroStatType statType)
+        {
+            StatUpgradeData data = GetUpgradeData(statType);
+            return data != null ? data.EffectMode : StatEffectMode.AdditiveBase;
+        }
+
         /// <summary>Cost of the next <paramref name="levels"/> levels of a stat for one hero.</summary>
         public double GetUpgradeCost(HeroStatType statType, int currentLevel, int levels)
         {
@@ -211,7 +221,8 @@ namespace IdleRPG.Progression
                 hero.BaseHealth,
                 GetHeroLevel(hero, HeroStatType.Health),
                 GetStatGainFraction(HeroStatType.Health),
-                GlobalHealthMultiplier);
+                GlobalHealthMultiplier,
+                GetEffectMode(HeroStatType.Health));
         }
 
         public double GetAttack(HeroData hero, int heroIndex)
@@ -225,7 +236,8 @@ namespace IdleRPG.Progression
                 hero.BaseAttack,
                 GetHeroLevel(hero, HeroStatType.Attack),
                 GetStatGainFraction(HeroStatType.Attack),
-                GlobalDamageMultiplier);
+                GlobalDamageMultiplier,
+                GetEffectMode(HeroStatType.Attack));
         }
 
         public double GetDefense(HeroData hero, int heroIndex)
@@ -238,7 +250,9 @@ namespace IdleRPG.Progression
             return FormulaUtility.HeroStatValue(
                 hero.BaseDefense,
                 GetHeroLevel(hero, HeroStatType.Defense),
-                GetStatGainFraction(HeroStatType.Defense));
+                GetStatGainFraction(HeroStatType.Defense),
+                1d,
+                GetEffectMode(HeroStatType.Defense));
         }
 
         public double GetAttackInterval(HeroData hero, int heroIndex)
@@ -275,9 +289,22 @@ namespace IdleRPG.Progression
                     }
 
                     HeroProgressRecord record = data.GetOrCreateHero(hero.HeroID);
-                    SetHeroLevel(hero, HeroStatType.Attack, record.attackLevel);
-                    SetHeroLevel(hero, HeroStatType.Health, record.healthLevel);
-                    SetHeroLevel(hero, HeroStatType.Defense, record.defenseLevel);
+
+                    if (data.levels != null && data.levels.Count > 0)
+                    {
+                        // Schema v5 (B5 session 2): one keyed list is the source of truth.
+                        SetHeroLevel(hero, HeroStatType.Attack, data.GetLevel(SaveData.SaveKeys.HeroStat(hero.HeroID, HeroStatType.Attack)));
+                        SetHeroLevel(hero, HeroStatType.Health, data.GetLevel(SaveData.SaveKeys.HeroStat(hero.HeroID, HeroStatType.Health)));
+                        SetHeroLevel(hero, HeroStatType.Defense, data.GetLevel(SaveData.SaveKeys.HeroStat(hero.HeroID, HeroStatType.Defense)));
+                    }
+                    else
+                    {
+                        // Legacy path (a fresh v5 file always has the keyed list; this branch only covers a hand-made
+                        // v5 payload that never populated it, so the fixed hero columns are still honoured).
+                        SetHeroLevel(hero, HeroStatType.Attack, record.attackLevel);
+                        SetHeroLevel(hero, HeroStatType.Health, record.healthLevel);
+                        SetHeroLevel(hero, HeroStatType.Defense, record.defenseLevel);
+                    }
                 }
             }
 
@@ -288,7 +315,7 @@ namespace IdleRPG.Progression
                 PrestigeUpgradeData upgrade = prestigeUpgrades[i];
                 if (upgrade != null)
                 {
-                    prestigeLevels[upgrade.UpgradeID] = data.GetPrestigeLevel(upgrade.UpgradeID);
+                    prestigeLevels[upgrade.UpgradeID] = data.GetLevel(SaveData.SaveKeys.Track(upgrade.UpgradeID));
                 }
             }
 
@@ -312,10 +339,9 @@ namespace IdleRPG.Progression
                         continue;
                     }
 
-                    HeroProgressRecord record = data.GetOrCreateHero(hero.HeroID);
-                    record.attackLevel = GetHeroLevel(hero, HeroStatType.Attack);
-                    record.healthLevel = GetHeroLevel(hero, HeroStatType.Health);
-                    record.defenseLevel = GetHeroLevel(hero, HeroStatType.Defense);
+                    data.SetLevel(SaveData.SaveKeys.HeroStat(hero.HeroID, HeroStatType.Attack), GetHeroLevel(hero, HeroStatType.Attack));
+                    data.SetLevel(SaveData.SaveKeys.HeroStat(hero.HeroID, HeroStatType.Health), GetHeroLevel(hero, HeroStatType.Health));
+                    data.SetLevel(SaveData.SaveKeys.HeroStat(hero.HeroID, HeroStatType.Defense), GetHeroLevel(hero, HeroStatType.Defense));
                 }
             }
 
@@ -327,7 +353,7 @@ namespace IdleRPG.Progression
                     continue;
                 }
 
-                data.GetOrCreatePrestigeUpgrade(upgrade.UpgradeID).level = GetPrestigeLevel(upgrade);
+                data.SetLevel(SaveData.SaveKeys.Track(upgrade.UpgradeID), GetPrestigeLevel(upgrade));
             }
         }
 

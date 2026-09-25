@@ -146,8 +146,12 @@ namespace IdleRPG.UI
 
                 if (block.effectLabel != null && resolver != null)
                 {
-                    double gain = resolver.GetStatGainFraction(statType) * 100d;
-                    block.effectLabel.SetText(string.Format("+{0:0.#}% base / lvl", gain));
+                    double gain = resolver.GetStatGainFraction(statType);
+
+                    // B3d: a compounding track reads as a multiplier (x1.09 / lvl); additive stays a flat share.
+                    block.effectLabel.SetText(resolver.GetEffectMode(statType) == StatEffectMode.Multiplicative
+                        ? string.Format("x{0:0.###} / lvl", 1d + gain)
+                        : string.Format("+{0:0.#}% base / lvl", gain * 100d));
                 }
             }
         }

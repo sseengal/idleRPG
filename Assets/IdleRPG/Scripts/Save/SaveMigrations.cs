@@ -65,6 +65,51 @@ namespace IdleRPG.Save
                 Debug.Log($"[SaveMigrations] Migrated save v3 -> v4 (run best stage = {data.runBestStage}).");
             }
 
+            if (version < 5)
+            {
+                // v4 -> v5: three fixed hero columns + a prestige list became ONE keyed list of {key, level}
+                // ("hero_knight.attack" = 80, "Prestige_Gold" = 3). Every existing level is copied by hand into its
+                // stable key - this is a rename, it cannot lose or cheapen a single level. The legacy lists are
+                // emptied afterwards so the file has exactly one shape from here on.
+                if (data.levels == null)
+                {
+                    data.levels = new List<LevelRecord>();
+                }
+
+                if (data.heroes != null)
+                {
+                    for (int i = 0; i < data.heroes.Count; i++)
+                    {
+                        HeroProgressRecord hero = data.heroes[i];
+                        if (hero == null || string.IsNullOrEmpty(hero.heroID))
+                        {
+                            continue;
+                        }
+
+                        data.SetLevel(SaveData.SaveKeys.HeroStat(hero.heroID, Data.HeroStatType.Attack), hero.attackLevel);
+                        data.SetLevel(SaveData.SaveKeys.HeroStat(hero.heroID, Data.HeroStatType.Health), hero.healthLevel);
+                        data.SetLevel(SaveData.SaveKeys.HeroStat(hero.heroID, Data.HeroStatType.Defense), hero.defenseLevel);
+                    }
+                }
+
+                if (data.prestigeUpgrades != null)
+                {
+                    for (int i = 0; i < data.prestigeUpgrades.Count; i++)
+                    {
+                        PrestigeUpgradeRecord record = data.prestigeUpgrades[i];
+                        if (record != null && !string.IsNullOrEmpty(record.upgradeID))
+                        {
+                            data.SetLevel(record.upgradeID, record.level);
+                        }
+                    }
+                }
+
+                data.heroes = new List<HeroProgressRecord>();
+                data.prestigeUpgrades = new List<PrestigeUpgradeRecord>();
+
+                Debug.Log($"[SaveMigrations] Migrated save v4 -> v5 (keyed progress records; {data.levels.Count} level key(s)).");
+            }
+
             data.schemaVersion = SaveData.CurrentVersion;
             return data;
         }

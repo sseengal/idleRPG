@@ -3,6 +3,34 @@ using System;
 namespace IdleRPG.Progression
 {
     /// <summary>
+    /// How a per-level stat gain composes.
+    ///
+    /// <para>AdditiveBase - value = base * (1 + level * gain). Linear in level (the shipped MVP model).</para>
+    /// <para>Multiplicative - value = base * (1 + gain)^level. Exponential in level.</para>
+    ///
+    /// <para>Why the mode exists (B3d): enemy HP grows x1.15 per stage and affordable levels grow only
+    /// logarithmically with gold, so additive power grows at most linearly in stage while content grows
+    /// exponentially - the frontier then has a hard ceiling that no cost tuning can move. Compounding is the
+    /// only model that races it.</para>
+    ///
+    /// <para>The compounding gain is <b>derived, not chosen</b>. Power per stage works out as
+    /// goldGrowth^(ln(1 + gain) / ln(costGrowth)), so the gain that makes affordable power grow at exactly the
+    /// content rate is <b>exp(ln(contentGrowth) x ln(costGrowth) / ln(goldGrowth)) - 1</b>; for the shipped
+    /// 1.15 / 1.07 / 1.12 that is <b>0.087</b> (x1.087). The data uses 0.09 (x1.09) on purpose - about 0.5% per
+    /// stage ahead of content, which is the margin that keeps prestige and wave luck from re-stalling the climb.
+    /// 1.08 stalls, 1.10 runs away. Change any of the three inputs and this number must be recomputed
+    /// (<see cref="FormulaUtility.CompoundingGainFor"/>).</para>
+    /// </summary>
+    public enum StatEffectMode
+    {
+        /// <summary>base * (1 + level * gain) - linear. Default, keeps old saves/numbers identical.</summary>
+        AdditiveBase = 0,
+
+        /// <summary>base * (1 + gain)^level - compounding.</summary>
+        Multiplicative = 1
+    }
+
+    /// <summary>
     /// Pure, side-effect free progression maths. No UnityEngine dependency so the
     /// exact same code can run in the editor, in-game, or in offline simulations.
     /// </summary>
@@ -83,10 +111,21 @@ namespace IdleRPG.Progression
         }
 
         /// <summary>
-        /// Final hero stat: base * (1 + level * gainPerLevelFraction) * globalMultiplier.
-        /// Additive per level, then scaled by any global prestige multiplier.
+        /// Final hero stat, additive model (shipped): base * (1 + level * gainPerLevelFraction) * globalMultiplier.
+        /// Kept as the default entry point so existing callers and numbers are untouched.
         /// </summary>
         public static double HeroStatValue(double baseStat, int level, double gainPerLevelFraction, double globalMultiplier = 1d)
+        {
+            return HeroStatValue(baseStat, level, gainPerLevelFraction, globalMultiplier, StatEffectMode.AdditiveBase);
+        }
+
+        /// <summary>
+        /// Final hero stat: base * perLevel(level, gain) * globalMultiplier, where perLevel is
+        /// (1 + level * gain) for <see cref="StatEffectMode.AdditiveBase"/> and (1 + gain)^level for
+        /// <see cref="StatEffectMode.Multiplicative"/>. Level 0 returns the base stat in both modes.
+        /// </summary>
+        public static double HeroStatValue(double baseStat, int level, double gainPerLevelFraction,
+            double globalMultiplier, StatEffectMode mode)
         {
             if (baseStat <= 0d)
             {
@@ -97,7 +136,36 @@ namespace IdleRPG.Progression
             double safeGain = gainPerLevelFraction < 0d ? 0d : gainPerLevelFraction;
             double safeMultiplier = globalMultiplier < 0d ? 0d : globalMultiplier;
 
-            return baseStat * (1d + safeLevel * safeGain) * safeMultiplier;
+            double byLevel = mode == StatEffectMode.Multiplicative
+                ? Math.Pow(1d + safeGain, safeLevel)
+                : 1d + safeLevel * safeGain;
+
+            return baseStat * byLevel * safeMultiplier;
+        }
+
+        /// <summary>
+        /// The per-level compounding gain that makes affordable power grow at exactly the content rate.
+        ///
+        /// Derivation: levels affordable grow like log_1.07(gold), so power grows like
+        /// gold^(ln(1 + gain) / ln(costGrowth)). Gold grows `goldGrowthPerStage` per stage, so power per stage is
+        /// goldGrowth^(ln(1 + gain) / ln(costGrowth)). Setting that equal to the content rate and solving gives
+        /// the fraction returned here: exp(ln(contentGrowth) x ln(costGrowth) / ln(goldGrowth)) - 1.
+        ///
+        /// With the shipped 1.15 / 1.07 / 1.12 this returns 0.087, so a track should use ~0.087-0.09 - the small
+        /// excess over the exact value is deliberate design margin, not slop.
+        /// </summary>
+        public static double CompoundingGainFor(double contentGrowthPerStage, double costGrowthPerLevel,
+            double goldGrowthPerStage)
+        {
+            if (contentGrowthPerStage <= 1d || costGrowthPerLevel <= 1d || goldGrowthPerStage <= 1d)
+            {
+                return 0d;
+            }
+
+            double gain = Math.Exp(Math.Log(contentGrowthPerStage) * Math.Log(costGrowthPerLevel) /
+                                   Math.Log(goldGrowthPerStage)) - 1d;
+
+            return gain <= 0d ? 0d : gain;
         }
 
         /// <summary>Prestige tokens = floor((highestStage / divisor)^exponent).</summary>

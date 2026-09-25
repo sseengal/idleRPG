@@ -132,7 +132,7 @@ namespace IdleRPG.EditorTools
             UiFactory.Anchor(title.rectTransform, new Vector2(0.02f, 0.93f), new Vector2(0.98f, 1f));
 
             ScrollRect scroll = UiFactory.CreateScrollView(panel.transform, "UpgradeScroll", 10f, new RectOffset(4, 4, 4, 4), out RectTransform list);
-            UiFactory.Anchor(scroll.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, 0.92f), 2f, 2f, 2f, 0f);
+            UiFactory.Anchor(scroll.GetComponent<RectTransform>(), new Vector2(0f, 0.26f), new Vector2(1f, 0.90f), 2f, 2f, 2f, 0f);
 
             HeroUpgradeRowUI[] rows = new HeroUpgradeRowUI[Mathf.Max(1, partyConfig != null ? partyConfig.ValidHeroCount : 1)];
 
@@ -142,6 +142,13 @@ namespace IdleRPG.EditorTools
             }
 
             SceneWiringUtility.SetField(ui, "rows", rows);
+
+            // B6 Step 2: the AUTO strip (auto-buy + speed cards) sits at the bottom of the page.
+            GameObject automationStrip = UiFactory.Node("AutomationStrip", panel.transform);
+            UiFactory.Anchor(automationStrip.GetComponent<RectTransform>(),
+                new Vector2(0f, 0f), new Vector2(1f, 0.24f), 4f, 2f, 4f, 2f);
+            automationStrip.AddComponent<AutomationPanelUI>();
+
             return panel;
         }
 

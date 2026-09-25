@@ -1,0 +1,34 @@
+{
+    "schemaVersion": 4,
+    "currentStage": 24,
+    "currentWave": 10,
+    "highestStageReached": 24,
+    "runBestStage": 24,
+    "heroes": [
+        { "heroID": "hero_knight", "attackLevel": 80, "healthLevel": 80, "defenseLevel": 80 },
+        { "heroID": "hero_archer", "attackLevel": 80, "healthLevel": 80, "defenseLevel": 80 },
+        { "heroID": "hero_mage", "attackLevel": 91, "healthLevel": 80, "defenseLevel": 80 }
+    ],
+    "partySlots": [0, 1, -1, 2, -1, -1],
+    "gold": 4793.293991081142,
+    "gems": 23.0,
+    "prestigeTokens": 2.0,
+    "prestigeUpgrades": [
+        { "upgradeID": "Prestige_Gold", "level": 0 },
+        { "upgradeID": "Prestige_Damage", "level": 0 },
+        { "upgradeID": "Prestige_Health", "level": 0 }
+    ],
+    "offlineEquivalentCapBonusSeconds": 0.0,
+    "offlineCapExtensionsPurchased": 0,
+    "goldBoostActive": false,
+    "goldBoostExpiresAtBinary": 0.0,
+    "totalKills": 858,
+    "totalGoldEarned": 51345.575567789,
+    "playTimeSeconds": 612.0,
+    "ascensionCount": 0,
+    "saveCount": 4,
+    "lastPageIndex": 0,
+    "lastGoldPerSecond": 8.74647744472752,
+    "lastLogoutTimestampBinary": "0",
+    "lastSaveTimestampBinary": "0"
+}

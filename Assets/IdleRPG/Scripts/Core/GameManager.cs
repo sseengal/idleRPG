@@ -40,6 +40,9 @@ namespace IdleRPG.Core
         [Tooltip("The permanent upgrade tree (+% Gold, +% Damage, +% HP).")]
         [SerializeField] private List<PrestigeUpgradeData> prestigeUpgrades = new List<PrestigeUpgradeData>();
 
+        [Tooltip("The automation cards (auto-buy manager, speed button). B6.")]
+        [SerializeField] private List<AutomationDef> automationDefs = new List<AutomationDef>();
+
         [Header("Scene References")]
         [Tooltip("Wave/encounter driver living on the same GameObject.")]
         [SerializeField] private CombatManager combatManager;
@@ -101,6 +104,15 @@ namespace IdleRPG.Core
 
         /// <summary>Token yield, ascension reset and the permanent upgrade tree.</summary>
         public AscensionManager Ascension { get; private set; }
+
+        /// <summary>
+        /// The one checkout for every progression row (B5 session 1). Hero stat purchases and the prestige tree both
+        /// spend through here, so the two can never price or pay differently again.
+        /// </summary>
+        public TrackService Tracks { get; private set; }
+
+        /// <summary>The automation engine (auto-buy; the speed button lands in Step 3). B6.</summary>
+        public AutomationService Automation { get; private set; }
 
         /// <summary>Timed gold multiplier from rewarded ads.</summary>
         public BoostManager Boost { get; private set; }
@@ -237,6 +249,11 @@ namespace IdleRPG.Core
             UnsubscribeCombat();
             UnsubscribeProgression();
 
+            if (Automation != null)
+            {
+                Automation.Changed -= OnAutomationChanged;
+            }
+
             if (Ledger != null)
             {
                 Ledger.ResetSession();
@@ -293,8 +310,17 @@ namespace IdleRPG.Core
 
             Resolver = new StatResolver(balanceConfig, statUpgrades, prestigeUpgrades);
             Resolver.StatsChanged += OnStatsChanged;
-            Upgrade = new UpgradeManager(Economy, Resolver, partyConfig);
-            Ascension = new AscensionManager(balanceConfig, Economy, Resolver, prestigeUpgrades);
+
+            // Step 14a (B5 session 1): one checkout for every progression row. StatResolver still owns the levels.
+            float fallbackGrowth = balanceConfig != null ? balanceConfig.UpgradeCostGrowth : 1.07f;
+            Tracks = new TrackService(Economy, Resolver, statUpgrades, prestigeUpgrades, automationDefs, fallbackGrowth);
+
+            Upgrade = new UpgradeManager(Economy, Resolver, partyConfig, Tracks);
+            Ascension = new AscensionManager(balanceConfig, Economy, Resolver, prestigeUpgrades, Tracks);
+
+            // B6: the automation engine. Cards are bought with tokens; the auto-buy machine runs on the 1s tick.
+            Automation = new AutomationService(Tracks, Economy, partyConfig, automationDefs);
+            Automation.Changed += OnAutomationChanged;
             Boost = new BoostManager(balanceConfig);
             Ads = new MockAdService(this, 3f, true);
 
@@ -440,6 +466,7 @@ namespace IdleRPG.Core
                 Resolver = Resolver,
                 Upgrade = Upgrade,
                 Ascension = Ascension,
+                Automation = Automation,
                 Boost = Boost,
                 Ads = Ads,
                 Audio = Audio,
@@ -476,10 +503,12 @@ namespace IdleRPG.Core
 #if UNITY_EDITOR
 
         /// <summary>Editor-only wiring for progression assets (used by the scene builder tools).</summary>
-        public void EditorInitializeProgression(List<StatUpgradeData> statTracks, List<PrestigeUpgradeData> permanentUpgrades)
+        public void EditorInitializeProgression(List<StatUpgradeData> statTracks,
+            List<PrestigeUpgradeData> permanentUpgrades, List<AutomationDef> automationCards = null)
         {
             statUpgrades = statTracks ?? new List<StatUpgradeData>();
             prestigeUpgrades = permanentUpgrades ?? new List<PrestigeUpgradeData>();
+            automationDefs = automationCards ?? new List<AutomationDef>();
         }
 #endif
     }

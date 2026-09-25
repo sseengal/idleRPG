@@ -3,6 +3,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 using IdleRPG.Data;
+using IdleRPG.Progression;
 
 namespace IdleRPG.EditorTools
 {
@@ -275,11 +276,17 @@ namespace IdleRPG.EditorTools
 
         private static void CreateStatUpgrades()
         {
-            // DEF gets a bigger per-level fraction: defence is additive (ATK - DEF), so a flat
-            // +10% of base is negligible once stage scaling multiplies enemy attack by 1.08^S.
-            CreateStatUpgrade("StatUpgrade_ATK", HeroStatType.Attack, 10d, 0.10f, "+10% of base ATK per level.");
-            CreateStatUpgrade("StatUpgrade_HP", HeroStatType.Health, 12d, 0.10f, "+10% of base HP per level.");
-            CreateStatUpgrade("StatUpgrade_DEF", HeroStatType.Defense, 15d, 0.15f, "+15% of base DEF per level.");
+            // B3d: the per-level effect compounds. Additive power is a straight line against an exponential
+            // content curve (enemy HP x1.15 per stage), so the frontier hits a ceiling no cost tuning can move.
+            //
+            // The gain is derived, not chosen: FormulaUtility.CompoundingGainFor(contentGrowth, 1.07, 1.12).
+            //   ATK / HP race enemy HP  (1.15) -> 0.087 exact, data uses 0.09 (about +0.5%/stage of margin)
+            //   DEF races enemy ATK     (1.08) -> 0.047 exact, data uses 0.05 (same margin; damage is ATK - DEF,
+            //                                   so defence only has to keep up with 1.08^stage, not 1.15^stage)
+            // Recompute both if BalanceConfig health/attack/gold growth or the 1.07 cost curve ever change.
+            CreateStatUpgrade("StatUpgrade_ATK", HeroStatType.Attack, 10d, 0.09f, "ATK x1.09 per level (compounds).");
+            CreateStatUpgrade("StatUpgrade_HP", HeroStatType.Health, 12d, 0.09f, "HP x1.09 per level (compounds).");
+            CreateStatUpgrade("StatUpgrade_DEF", HeroStatType.Defense, 15d, 0.05f, "DEF x1.05 per level (compounds).");
         }
 
         private static void CreateStatUpgrade(string fileName, HeroStatType statType, double baseCost,
@@ -292,6 +299,7 @@ namespace IdleRPG.EditorTools
                 .Set("description", description)
                 .Set("baseCost", baseCost)
                 .Set("costGrowthMultiplier", 1.07f)
+                .Set("effectMode", (int)StatEffectMode.Multiplicative)
                 .Set("statGainPerLevelFraction", gainPerLevelFraction)
                 .Set("maxLevel", 0)
                 .Apply();

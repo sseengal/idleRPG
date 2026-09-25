@@ -19,7 +19,7 @@ namespace IdleRPG.EditorTools.Content
         public const string EnemiesPath = SpecRoot + "/enemies.json";
         public const string PartyPath = SpecRoot + "/party.json";
         public const string WavesPath = SpecRoot + "/waves.json";
-        public const string UpgradesPath = SpecRoot + "/upgrades.json";
+        public const string TracksPath = SpecRoot + "/tracks.json";
 
         public const string DataRoot = "Assets/IdleRPG/Data";
         public const string HeroFolder = DataRoot + "/Heroes";

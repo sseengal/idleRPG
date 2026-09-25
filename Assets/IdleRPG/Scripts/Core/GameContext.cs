@@ -51,6 +51,8 @@ namespace IdleRPG.Core
 
         public IdleTimeService Idle { get; set; }
 
+        public AutomationService Automation { get; set; }
+
         /// <summary>True once the minimum set of systems is present.</summary>
         public bool IsReady => Balance != null && Waves != null && Party != null && Combat != null && Economy != null;
 

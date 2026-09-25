@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.StatUpgradeData
   statType: 0
   displayName: ATK
-  description: +10% of base ATK per level.
+  description: ATK x1.09 per level (compounds).
   baseCost: 10
   costGrowthMultiplier: 1.07
-  statGainPerLevelFraction: 0.1
+  effectMode: 1
+  statGainPerLevelFraction: 0.09
   maxLevel: 0

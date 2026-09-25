@@ -19,18 +19,20 @@ namespace IdleRPG.Progression
         private readonly EconomyManager economy;
         private readonly StatResolver resolver;
         private readonly List<PrestigeUpgradeData> upgrades;
+        private readonly TrackService trackService;
 
         public AscensionManager(BalanceConfig balanceConfig, EconomyManager economy, StatResolver resolver,
-            IEnumerable<PrestigeUpgradeData> prestigeUpgrades)
+            IEnumerable<PrestigeUpgradeData> prestigeUpgrades, TrackService trackService)
         {
             this.balanceConfig = balanceConfig;
             this.economy = economy;
             this.resolver = resolver;
+            this.trackService = trackService;
             upgrades = new List<PrestigeUpgradeData>(prestigeUpgrades ?? Array.Empty<PrestigeUpgradeData>());
 
-            if (this.balanceConfig == null || this.economy == null || this.resolver == null)
+            if (this.balanceConfig == null || this.economy == null || this.resolver == null || this.trackService == null)
             {
-                Debug.LogError("[AscensionManager] Requires BalanceConfig, EconomyManager and StatResolver.");
+                Debug.LogError("[AscensionManager] Requires BalanceConfig, EconomyManager, StatResolver and TrackService.");
             }
         }
 
@@ -116,40 +118,43 @@ namespace IdleRPG.Progression
             return upgrade != null && upgrade.IsAtMaxLevel(GetPrestigeLevel(upgrade));
         }
 
-        /// <summary>Buys permanent upgrade levels with Prestige Tokens.</summary>
+        /// <summary>Buys permanent upgrade levels with Prestige Tokens - through the single purchase path.</summary>
         public bool TryBuyPrestigeUpgrade(PrestigeUpgradeData upgrade, int levels = 1)
         {
-            if (upgrade == null || levels <= 0 || economy == null || resolver == null)
+            if (upgrade == null || levels <= 0 || economy == null || resolver == null ||
+                !trackService.TryGetTrack(upgrade.UpgradeID, out ProgressionTrack track))
             {
                 return false;
             }
 
             int currentLevel = GetPrestigeLevel(upgrade);
-            if (upgrade.IsAtMaxLevel(currentLevel))
+            if (track.IsAtMaxLevel(currentLevel))
             {
                 GameEvents.RaiseToast($"{upgrade.DisplayName} is already maxed.");
                 return false;
             }
 
-            int requestedLevels = levels;
-            if (upgrade.HasLevelCap)
-            {
-                int remaining = upgrade.MaxLevel - currentLevel;
-                if (requestedLevels > remaining)
-                {
-                    requestedLevels = remaining;
-                }
-            }
+            // The single checkout: clamps to the cap, prices it, spends tokens, writes the level.
+            PurchaseResult result = trackService.TryBuy(track, null, levels, out _, out int newLevel);
 
-            double cost = GetPrestigeCost(upgrade, requestedLevels);
-            if (!economy.SpendTokens(cost))
+            if (result == PurchaseResult.Maxed)
             {
-                GameEvents.RaiseToast($"Not enough tokens (need {NumberFormatter.Format(cost)}).");
+                GameEvents.RaiseToast($"{upgrade.DisplayName} is already maxed.");
                 return false;
             }
 
-            int newLevel = currentLevel + requestedLevels;
-            resolver.SetPrestigeLevel(upgrade, newLevel);
+            if (result == PurchaseResult.CannotAfford)
+            {
+                double quoted = trackService.Cost(track, null, track.ClampLevels(currentLevel, levels));
+                GameEvents.RaiseToast($"Not enough tokens (need {NumberFormatter.Format(quoted)}).");
+                return false;
+            }
+
+            if (result != PurchaseResult.Bought)
+            {
+                return false;
+            }
+
             GameEvents.RaiseToast($"{upgrade.DisplayName} -> level {newLevel}");
 
             return true;

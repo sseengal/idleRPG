@@ -56,11 +56,14 @@ Invariant: **player power must out-grow content at the frontier while idle.** Wi
 moves when power arrives, so the check is "how long does the bounce last before the ceiling moves" (measured by the
 robot player in Balance Lab), not a wall-break ETA.
 
-**Known blocker on this invariant (measured 2026-09-22):** hero upgrades are **additive** (`base x (1 + 0.1 x level)`)
-while content is **exponential** (`1.15^stage`). Gold per stage grows `1.12^S`, level cost grows `1.07^L`, so levels
-gained are ~`1.674 x S` and power is a straight line against an exponential - the race is lost at every stage
-(stage time 126s -> 493s, walls 8 -> 40 min, stall at ~stage 24). A per-level **multiplicative** effect of ~x1.09
-would pace content exactly; that is the phase-2 fix, not a curve table.
+**Resolved 2026-09-25 (B3d):** the blocker is fixed in **data**, not with a curve table. Hero tracks now **compound**
+(`StatUpgradeData.effectMode = Multiplicative`), and the per-level gain is *derived* rather than chosen:
+`FormulaUtility.CompoundingGainFor(contentGrowth, costGrowth, goldGrowth)` returns **0.087** for ATK/HP (they race
+1.15^stage) and **0.047** for DEF (damage is `ATK - DEF`, so defence only races 1.08^stage); the data rounds up with a
+~0.5%/stage margin to **x1.09** and **x1.05**. Robot player at pace x1.6: the frontier now reaches stage 30 in
+**70 min** (cheapest-buy, worst wall 8.8 min) and **34 min** (attack-only, worst wall 7.3 min), against the old
+"stage time 126s -> 493s, walls 8 -> 40 min, stall ~stage 24". Level 0 returns the base stat, so an unupgraded party
+is unaffected and the stage-1 golden numbers still read 126s / 272 gold / 2.16 gold/s.
 
 ## 4. Enemy archetypes (`EnemyData.archetype`)
 
@@ -175,6 +178,9 @@ in `SimContext.Rules`.
 | `Golden Numbers` | the MVP baseline table (§6 `Sim-Core`/§12) compared against the current build | 1 run |
 
 Rules: single invocation, no background loops, no auto-tuning, results pasted into the step log.
+
+Since B4 (2026-09-25): `Golden Numbers` are **asserted, not eyeballed** - `Run All Checks` compares them against
+`BalanceBaseline` (±2%) and fails the build on drift; the robot climb (loop health) runs inside the content validator.
 
 ## 11. Numeric + difficulty budget guards
 

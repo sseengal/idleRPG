@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using IdleRPG.Combat;
 using IdleRPG.Data;
+using IdleRPG.Progression;
 
 namespace IdleRPG.EditorTools.Content
 {
@@ -301,6 +302,7 @@ namespace IdleRPG.EditorTools.Content
         {
             HashSet<string> statTypes = new HashSet<string>();
             HashSet<string> ids = new HashSet<string>();
+            int compoundingTracks = 0;
 
             for (int i = 0; i < file.statUpgrades.Count; i++)
             {
@@ -325,6 +327,32 @@ namespace IdleRPG.EditorTools.Content
                 if (upgrade.statGainPerLevelFraction < 0f)
                 {
                     Add(Severity.Error, "upgrades", $"{upgrade.id}: statGainPerLevelFraction must be >= 0.");
+                }
+
+                // B3d: the mode decides whether power is linear (loses the race) or compounding (races it).
+                // A silent fall back to additive is a balance change, so an unknown/missing value is reported
+                // instead of being swallowed.
+                string mode = (upgrade.effectMode ?? "").Trim().ToLowerInvariant();
+                bool compounding = mode == "multiplicative" || mode == "compounding";
+
+                if (mode.Length == 0)
+                {
+                    Add(Severity.Warning, "upgrades",
+                        $"{upgrade.id}: spec has no effectMode (treated as additive). Re-run Export Specs From Assets.");
+                }
+                else if (!compounding && mode != "additive")
+                {
+                    Add(Severity.Error, "upgrades",
+                        $"{upgrade.id}: unknown effectMode '{upgrade.effectMode}' (use \"additive\" or \"multiplicative\").");
+                }
+                else if (compounding && upgrade.statGainPerLevelFraction <= 0f)
+                {
+                    Add(Severity.Error, "upgrades",
+                        $"{upgrade.id}: compounding with statGainPerLevelFraction 0 leaves the track dead.");
+                }
+                else if (compounding)
+                {
+                    compoundingTracks++;
                 }
             }
 
@@ -360,7 +388,8 @@ namespace IdleRPG.EditorTools.Content
             }
 
             Add(Severity.Info, "upgrades",
-                $"{file.statUpgrades.Count} stat + {file.prestigeUpgrades.Count} prestige tracks checked.");
+                $"{file.statUpgrades.Count} stat + {file.prestigeUpgrades.Count} prestige tracks checked " +
+                $"({compoundingTracks} compounding).");
         }
 
         // ------------------------------------------------------------------
@@ -438,6 +467,351 @@ namespace IdleRPG.EditorTools.Content
             Add(Severity.Info, "balance",
                 $"Stage 1: {run.Seconds:0}s, {run.Kills} kills, {run.Gold:0} gold, " +
                 $"{(run.Seconds <= 0d ? 0d : run.Gold / run.Seconds):0.00} gold/s.");
+        }
+
+        // ------------------------------------------------------------------
+        // Asset references (B4a): every pool element must resolve
+        // ------------------------------------------------------------------
+        /// <summary>
+        /// Catches the "recipe deleted, asset left pointing at it" bug.
+        ///
+        /// ELI5: runtime code is polite - if a wave's list holds a hole, it quietly spawns fewer monsters instead of
+        /// crashing, so the only symptom is a smaller number (this is how a deleted enemy once turned 22 kills into 18).
+        /// The inspector is not polite: a hole here is an error with a name and an index.
+        /// </summary>
+        private static void CheckAssetReferences(EnemySpecFile enemies, HeroSpecFile heroes)
+        {
+            HashSet<string> specEnemyIds = new HashSet<string>();
+            for (int i = 0; i < enemies.enemies.Count; i++)
+            {
+                specEnemyIds.Add(enemies.enemies[i].id);
+            }
+
+            HashSet<string> specHeroIds = new HashSet<string>();
+            for (int i = 0; i < heroes.heroes.Count; i++)
+            {
+                specHeroIds.Add(heroes.heroes[i].id);
+            }
+
+            WaveConfig waves = BalanceLabMenu.Load<WaveConfig>("WaveConfig");
+            if (waves == null)
+            {
+                Add(Severity.Error, "refs", "No WaveConfig asset; run Tools > Idle RPG > Generate Data Assets.");
+            }
+            else
+            {
+                CheckEnemyPool("WaveConfig.normalEnemies", waves, "normalEnemies", specEnemyIds, true);
+                CheckEnemyPool("WaveConfig.bossEnemies", waves, "bossEnemies", specEnemyIds, true);
+            }
+
+            PartyConfig party = BalanceLabMenu.Load<PartyConfig>("PartyConfig");
+            if (party == null)
+            {
+                Add(Severity.Error, "refs", "No PartyConfig asset; run Tools > Idle RPG > Generate Data Assets.");
+            }
+            else
+            {
+                int slots = SoField.Count(party, "heroes");
+                for (int i = 0; i < slots; i++)
+                {
+                    Object element = SoField.ElementAt(party, "heroes", i);
+                    if (element == null)
+                    {
+                        Add(Severity.Error, "refs",
+                            $"PartyConfig.heroes[{i}] is empty - a deleted hero asset leaves a hole; re-run Generate.");
+                        continue;
+                    }
+
+                    HeroData hero = element as HeroData;
+                    string id = hero != null ? SoField.Text(hero, "heroID", hero.name) : element.name;
+
+                    if (!specHeroIds.Contains(id))
+                    {
+                        Add(Severity.Error, "refs",
+                            $"PartyConfig.heroes[{i}] references '{id}', which is not in heroes.json (spec and assets out of sync).");
+                    }
+                }
+            }
+        }
+
+        /// <summary>One enemy pool: no holes, every id known, no duplicates.</summary>
+        private static void CheckEnemyPool(string label, Object owner, string field, HashSet<string> knownIds, bool requireNonEmpty)
+        {
+            int count = SoField.Count(owner, field);
+            if (count == 0)
+            {
+                Add(requireNonEmpty ? Severity.Error : Severity.Warning, "refs", $"{label} is empty.");
+                return;
+            }
+
+            HashSet<string> seen = new HashSet<string>();
+
+            for (int i = 0; i < count; i++)
+            {
+                Object element = SoField.ElementAt(owner, field, i);
+                if (element == null)
+                {
+                    Add(Severity.Error, "refs",
+                        $"{label}[{i}] is empty - a deleted enemy asset leaves a hole here (waves then spawn fewer enemies). " +
+                        "Re-run Tools > Idle RPG > Content > Generate Assets From Specs.");
+                    continue;
+                }
+
+                EnemyData enemy = element as EnemyData;
+                string id = enemy != null ? enemy.EnemyID : element.name;
+
+                if (string.IsNullOrEmpty(id))
+                {
+                    Add(Severity.Error, "refs", $"{label}[{i}] ('{element.name}') has no enemy id.");
+                    continue;
+                }
+
+                if (!knownIds.Contains(id))
+                {
+                    Add(Severity.Error, "refs", $"{label}[{i}] references '{id}', which is not in enemies.json.");
+                }
+
+                if (!seen.Add(id))
+                {
+                    Add(Severity.Warning, "refs", $"{label} lists '{id}' more than once (weights that enemy twice).");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Every stat track owns one stat, buys something, the spec and asset agree, and the prestige tree exists.
+        ///
+        /// ELI5: the recipe card says what an upgrade should be; the asset is what the game uses. This check makes sure
+        /// neither drifted - a hand-edited asset that disagrees with its card is caught here, not discovered by a player.
+        /// </summary>
+        private static void CheckUpgradeAssets()
+        {
+            UpgradeSpecFile spec = ContentSpecIO.Load<UpgradeSpecFile>(ContentSpecIO.TracksPath);
+            Dictionary<string, StatUpgradeSpec> specByAsset = new Dictionary<string, StatUpgradeSpec>();
+
+            if (spec != null)
+            {
+                for (int i = 0; i < spec.statUpgrades.Count; i++)
+                {
+                    StatUpgradeSpec entry = spec.statUpgrades[i];
+                    string assetName = string.IsNullOrEmpty(entry.asset) ? entry.id : entry.asset;
+                    specByAsset[assetName] = entry;
+                }
+            }
+
+            List<StatUpgradeData> statAssets = ContentSpecIO.LoadAll<StatUpgradeData>(ContentSpecIO.ConfigFolder);
+            HashSet<string> statTypes = new HashSet<string>();
+
+            for (int i = 0; i < statAssets.Count; i++)
+            {
+                StatUpgradeData upgrade = statAssets[i];
+                string statType = upgrade.StatType.ToString().ToLowerInvariant();
+
+                if (!statTypes.Add(statType))
+                {
+                    Add(Severity.Error, "refs",
+                        $"Two stat upgrade assets both cover '{statType}' ({upgrade.name}); the resolver would use one and ignore the other.");
+                }
+
+                if (upgrade.StatGainPerLevelFraction <= 0f)
+                {
+                    Add(Severity.Error, "refs", $"{upgrade.name}: statGainPerLevelFraction is 0, so the track buys nothing.");
+                }
+
+                if (!specByAsset.TryGetValue(upgrade.name, out StatUpgradeSpec entry))
+                {
+                    Add(Severity.Error, "refs",
+                        $"Stat upgrade asset '{upgrade.name}' has no entry in upgrades.json; Generate Assets From Specs would rewrite it silently.");
+                    continue;
+                }
+
+                bool specUsesCompounding = (entry.effectMode ?? "").Trim().ToLowerInvariant() is "multiplicative" or "compounding";
+                bool assetUsesCompounding = upgrade.EffectMode == StatEffectMode.Multiplicative;
+
+                if (specUsesCompounding != assetUsesCompounding)
+                {
+                    Add(Severity.Error, "refs",
+                        $"{upgrade.name}: effectMode is {(assetUsesCompounding ? "multiplicative" : "additive")} in the asset but " +
+                        $"\"{(string.IsNullOrEmpty(entry.effectMode) ? "additive" : entry.effectMode)}\" in upgrades.json. " +
+                        "Re-run Export/Generate so the card and the asset tell the same story.");
+                }
+
+                if (System.Math.Abs(upgrade.StatGainPerLevelFraction - entry.statGainPerLevelFraction) > 0.001f)
+                {
+                    Add(Severity.Warning, "refs",
+                        $"{upgrade.name}: gain is {upgrade.StatGainPerLevelFraction:0.###} in the asset but {entry.statGainPerLevelFraction:0.###} in upgrades.json.");
+                }
+            }
+
+            List<PrestigeUpgradeData> prestigeAssets = ContentSpecIO.LoadAll<PrestigeUpgradeData>(ContentSpecIO.ConfigFolder);
+            if (prestigeAssets.Count == 0)
+            {
+                Add(Severity.Warning, "refs",
+                    "No prestige upgrade assets found; ascension would pay tokens with nothing to spend them on.");
+            }
+
+            List<AutomationDef> automationAssets = ContentSpecIO.LoadAll<AutomationDef>(ContentSpecIO.ConfigFolder);
+            HashSet<string> autoIds = new HashSet<string>();
+            bool autoSpecEmpty = spec == null || spec.automationUpgrades.Count == 0;
+
+            for (int i = 0; i < automationAssets.Count; i++)
+            {
+                AutomationDef card = automationAssets[i];
+                string id = card.AutomationID;
+
+                if (!autoIds.Add(id))
+                {
+                    Add(Severity.Error, "refs", $"Duplicate automation card id '{id}'.");
+                }
+
+                if (card.BaseCostTokens <= 0d)
+                {
+                    Add(Severity.Error, "refs", $"{card.name}: baseCostTokens must be > 0.");
+                }
+
+                if (!autoSpecEmpty && !SpecHasAutomation(spec, card.name))
+                {
+                    Add(Severity.Error, "refs",
+                        $"Automation card '{card.name}' has no entry in tracks.json; Generate would rebuild it silently.");
+                }
+            }
+
+            if (autoSpecEmpty && automationAssets.Count > 0)
+            {
+                Add(Severity.Warning, "refs",
+                    "Automation cards exist but tracks.json lists none; re-run Export Specs From Assets.");
+            }
+        }
+
+        private static bool SpecHasAutomation(UpgradeSpecFile spec, string assetName)
+        {
+            for (int i = 0; i < spec.automationUpgrades.Count; i++)
+            {
+                AutomationSpec entry = spec.automationUpgrades[i];
+                if (entry == null)
+                {
+                    continue;
+                }
+
+                string candidate = string.IsNullOrEmpty(entry.asset) ? entry.id : entry.asset;
+                if (candidate == assetName)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // ------------------------------------------------------------------
+        // Loop health (B4c): play the loop, do not just look at one stage
+        // ------------------------------------------------------------------
+        /// <summary>The frontier stage the robot must reach inside the time budget. A floor, not a ceiling - raise it as the base grows.</summary>
+        private const int LoopHealthTargetStage = 25;
+
+        /// <summary>How far the robot may play before we stop paying for the check (~1.3x the stage-30 cost measured in B3d).</summary>
+        private const int LoopHealthMaxStage = 40;
+
+        /// <summary>A wall that takes longer than this to break is a warning (a tuning signal), not an error.</summary>
+        private const double LoopHealthWorstWallMinutes = 12d;
+
+        /// <summary>
+        /// Plays the loop (B4c) and asserts the frontier still moves.
+        ///
+        /// ELI5: the stage-1 band check cannot see a stall - an unupgraded party wipes at stage 4 whatever the balance is.
+        /// This check lets the robot play: fight, wipe, fall back, farm, buy, push. If it cannot reach the target stage
+        /// inside the budget, the balance has a ceiling that no amount of playing can fix, and the build fails.
+        ///
+        /// Honest limits: the robot only shops after a wipe (a live player buys mid-climb), so the cadence numbers are
+        /// wall-phase numbers. They are reported, never asserted.
+        /// </summary>
+        private static void CheckLoopHealth()
+        {
+            BalanceConfig balance = BalanceLabMenu.Load<BalanceConfig>("BalanceConfig");
+            WaveConfig waves = BalanceLabMenu.Load<WaveConfig>("WaveConfig");
+            PartyConfig party = BalanceLabMenu.Load<PartyConfig>("PartyConfig");
+
+            if (balance == null || waves == null || party == null)
+            {
+                Add(Severity.Error, "loop", "Config assets missing; skipped the loop-health check.");
+                return;
+            }
+
+            StatUpgradeData[] statUpgrades =
+            {
+                BalanceLabMenu.Load<StatUpgradeData>("StatUpgrade_ATK"),
+                BalanceLabMenu.Load<StatUpgradeData>("StatUpgrade_HP"),
+                BalanceLabMenu.Load<StatUpgradeData>("StatUpgrade_DEF")
+            };
+
+            PrestigeUpgradeData[] prestigeUpgrades =
+            {
+                BalanceLabMenu.Load<PrestigeUpgradeData>("Prestige_Gold"),
+                BalanceLabMenu.Load<PrestigeUpgradeData>("Prestige_Damage"),
+                BalanceLabMenu.Load<PrestigeUpgradeData>("Prestige_Health")
+            };
+
+            for (int i = 0; i < statUpgrades.Length; i++)
+            {
+                if (statUpgrades[i] == null)
+                {
+                    Add(Severity.Error, "loop", "A stat upgrade asset is missing; the robot cannot buy power.");
+                    return;
+                }
+            }
+
+            ClimbSimulation.ClimbResult climb = ClimbSimulation.Simulate(
+                balance, waves, party, statUpgrades, prestigeUpgrades, ClimbPolicy.Cheapest, LoopHealthMaxStage);
+
+            if (climb.Stuck)
+            {
+                Add(Severity.Error, "loop",
+                    $"the robot is STUCK on stage {climb.StuckStage} after {climb.TotalSeconds / 60d:0.0} min " +
+                    $"({climb.Upgrades} upgrades bought, {climb.WorstWallSeconds / 60d:0.0} min on the worst wall). " +
+                    "Income cannot out-grow the content curve - check each track's effectMode and gain.");
+            }
+            else if (climb.ReachedStage < LoopHealthTargetStage)
+            {
+                Add(Severity.Error, "loop",
+                    $"the robot only reached stage {climb.ReachedStage} in {climb.TotalSeconds / 60d:0.0} min; " +
+                    $"the loop needs stage {LoopHealthTargetStage} to stay healthy.");
+            }
+            else if (climb.BudgetExhausted)
+            {
+                Add(Severity.Warning, "loop",
+                    $"the robot reached stage {climb.ReachedStage} but used the whole time budget while still climbing; " +
+                    "the climb is slowing down.");
+            }
+
+            if (climb.WorstWallSeconds / 60d > LoopHealthWorstWallMinutes)
+            {
+                Add(Severity.Warning, "loop",
+                    $"the worst wall took {climb.WorstWallSeconds / 60d:0.0} min to break (target < {LoopHealthWorstWallMinutes:0} min).");
+            }
+
+            double peakSeconds = 0d;
+            int peakStage = 0;
+            for (int i = 0; i < climb.ClearedStages.Count; i++)
+            {
+                if (climb.ClearedStages[i].Seconds > peakSeconds)
+                {
+                    peakSeconds = climb.ClearedStages[i].Seconds;
+                    peakStage = climb.ClearedStages[i].Stage;
+                }
+            }
+
+            Add(Severity.Info, "loop", string.Format(
+                "robot (cheapest-buy) reached stage {0} in {1:0.0} min | walls {2}, worst {3:0.0} min | peak stage time {4:0}s (stage {5}) | {6} upgrades | median shopping gap {7}",
+                climb.ReachedStage,
+                climb.TotalSeconds / 60d,
+                climb.Walls,
+                climb.WorstWallSeconds / 60d,
+                peakSeconds,
+                peakStage,
+                climb.Upgrades,
+                climb.MedianShoppingGapSeconds < 0d
+                    ? "n/a"
+                    : string.Format("{0:0.0} min (wall phase only)", climb.MedianShoppingGapSeconds / 60d)));
         }
     }
 }

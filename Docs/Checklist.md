@@ -12,12 +12,12 @@
 
 | Field | Value |
 |---|---|
-| Current step | **Refactor + regression net done** (2026-09-23). Next: **B3d compounding upgrades**, then B4 -> B9, device pass last |
+| Current step | **B6 automation IN PROGRESS** (Steps 1-3 done 2026-09-25: cards, engine, AUTO panel, speed button + the rate guard; all verified live). Next: Step 4 robot learns the cards (or straight to B7), then B8 -> B9, device pass last |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money.** No statuses/abilities/zones/affixes/gear/roster/relics before the base is done |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
-| Last completed | Loop beat: the party never stops (fallback bounce) - 2026-09-22, verified in play |
-| Next after this | Offline rate guard (`ResolveRate` accepts a near-zero saved rate) + loop walk (ascend, offline, shop, first-run) |
+| Last completed | B3d compounding upgrades - data + pipeline + robot-player proof, 2026-09-25 |
+| Next after this | B4 sweep-wide validator band (stages 1-20, no-stall + dangling-reference checks); then the loop walk (ascend, offline, shop, first-run) with B8 |
 | Save schema | v4 (v3 -> v4 adds `runBestStage`, the per-run ascension gate; additive migration, no data loss) |
 | Shipped build | `Builds/IdleRPG-mac.app` verified (boot, save, offline, combat) |
 | Docs | all live in `Docs/` - index `Docs/README.md`; status here; backlog `Roadmap.md`; removals `Docs/REVIEW.md` (R1: obsolete MVP journal deleted) |
@@ -26,6 +26,32 @@
 save drift, **battle log**. The log is a *contract with the player*, not decoration: any feature that produces or
 renames combat text (statuses, abilities, **enemy item drops**, **item usage in battle**, affixes, pets) must be
 re-checked for correct attribution, one line per wave, no mid-line renaming and no "... N more hits" flooding.
+
+## 1d. Compounding upgrades (B3d)  ·  **built + measured 2026-09-25**
+
+The last arithmetic blocker on the loop. Hero upgrades were additive (`base x (1 + 0.1 x level)`) while content is
+exponential (`1.15^stage`), so affordable power was a straight line: stage time 126s -> 493s, walls 8 -> 40 min,
+hard stall ~stage 24. Fixed in **data**, not with a difficulty-curve table.
+
+- `FormulaUtility.StatEffectMode` (`AdditiveBase` | `Multiplicative`) + `HeroStatValue(..., mode)`; level 0 returns the
+  base stat in **both** modes, which is why the unupgraded parity net still matches byte for byte.
+- `StatUpgradeData.effectMode` is the data switch; `StatResolver` reads it per stat. The gain is **derived**:
+  `CompoundingGainFor(content = enemy HP 1.15, cost 1.07, gold 1.12)` = **0.087** for ATK/HP, and 0.047 for DEF
+  (damage is `ATK - DEF`, so defence races enemy **attack** 1.08, not HP). Data rounds up with a ~0.5%/stage margin:
+  **ATK/HP x1.09, DEF x1.05**.
+- The mode travels the whole pipeline: `UpgradeSpecFile.effectMode` ("additive" | "multiplicative"), exported by
+  `Export Specs From Assets`, applied by `Generate Assets From Specs`, defaulted by `DataAssetGenerator`, and checked by
+  the validator - so a regenerate can never silently drop a track back to additive.
+- `HeroUpgradeRowUI` labels per mode: `x1.09 / lvl` vs `+9% base / lvl`.
+- **Measured (robot player, pace x1.6, 3h budget):** stage 30 in **70.1 min** (cheapest-buy, 428 buys, 3 walls, worst
+  wall **8.8 min**) and **34.4 min** (attack-only, 222 buys, 5 walls, worst wall 7.3 min). Stage 30 is the tool ceiling
+  (`ClimbSimulation.MaxStage`) - raising it is B4's job.
+- **Regressions:** `Run All Checks (regression)` = **PASS**; validator `clean (0 warning(s))` with
+  `3 stat tracks checked (3 compounding)`; golden numbers unchanged (80s @x1.0 / 126s @x1.6, 22 kills, 272 gold,
+  3.41 / 2.16 gold/s).
+- **Spec files resynced by the export:** `upgrades.json` picked up the shipped B3b prestige tune (+20%, cap 25) and the
+  new mode field; `enemies.json` dropped the stale `preferredRow` key left over from the deleted enemy ranks (the field
+  exists in neither code nor assets).
 
 ## 1a. Loop beat: the fallback bounce  ·  **built + verified 2026-09-22**
 
@@ -549,7 +575,7 @@ Four defects, all in the event/log plumbing (the stacked views and HP bars were 
 - **Rule extracted:** the battle log is a standing regression surface - see the note in section 0. Every new
       combat-text feature (statuses, abilities, drops, item use) re-opens it
 
-## 1d. Refactor + regression command (2026-09-23)  ·  **done + verified**
+## 1f. Refactor + regression command (2026-09-23)  ·  **done + verified**
 
 The six largest files were split into `partial` classes (same class, same fields, same behaviour - moved, not
 rewritten). Full table in `Architecture.md` §6.6. Largest file went 1057 → 507 lines; every split was diffed against
@@ -580,16 +606,93 @@ Verified after the refactor (batch-mode run, log `/tmp/idlerpg-regression.log`):
 Play-verified in the same session: bounce loop, ascension (gate closes on ascend, re-opens only after a re-climb,
 lifetime best kept, run best reset, no gem farming on re-clears), and the offline modal.
 
+## 1g. Sweep-wide validator + loop harness (B4)  ·  **built + verified 2026-09-25**
+
+The regression net stopped being cosmetic. Before: `Run All Checks` *printed* the golden numbers and never ran the
+robot, so a change that halved DPS or reintroduced the additive stall still said PASS. Now it is a gate.
+
+- **`BalanceBaseline.cs`** - the recorded golden numbers in one place (±2%). `Run All Checks` asserts:
+  `[Golden] ok stage 1 seconds @x1.0/x1.6, kills, gold, gold/s` (measured 126.05s / 22 kills / 272 gold / 2.158 gold/s
+  vs baseline - all 0.0%/0.1% off). Re-baselining is one deliberate edit with a date+reason.
+- **The robot joined the build** - `ClimbSimulation` now returns a machine-readable `ClimbResult`
+  (ReachedStage / StuckStage / WorstWallSeconds / MedianShoppingGap / rows). The printed report is byte-identical
+  (menu output verified against the B3d run). `ContentValidator.CheckLoopHealth()` runs it with a bounded budget
+  (target stage 25, max stage 40): a STUCK or undershoot is an **Error** (build fails), a slow wall is a **Warning**.
+- **Reference checks (the deleted-Slinger class of bug)** - `WaveConfig` pools and `PartyConfig` lanes are walked for
+  null/stale/out-of-spec elements; every stat upgrade asset must have a spec entry and agree on `effectMode` and gain;
+  duplicate stat tracks are an error.
+- **Deliberately NOT asserted:** stage-time monotonicity. A wall makes stage times legitimately rise inside a band
+  (46s -> 229s), so a monotonic curve is the healthy shape - the loop check asserts the frontier *moves*, not that
+  seconds are flat.
+- **Planted-failure proof (both reverted, final PASS):**
+  - ATK/HP set back to `AdditiveBase` -> validator `-- [loop] the robot is STUCK on stage 25 after 187.4 min (451
+    upgrades, 42.3 min worst wall)` - the exact additive-failure mode, caught by the build.
+  - Archer attack +20% -> `[Golden] FAIL stage 1 seconds @x1.6: 112.85 (baseline 126, -10.4%)` x3, REGRESSION: FAIL.
+- **Measured on clean data:** the validator's robot reaches stage 40 in 96.9 min (worst wall 8.8 min, peak stage time
+  268s) and the whole check costs under a second.
+
+## 1h. B5 sessions 1-2: one purchase path + save v5  ·  **built + verified 2026-09-25**
+
+- **Session 1 - `TrackService` (one checkout).** `ProgressionTrack` (a menu row: id/name/currency/scope/effect/gain/
+  cost/cap/reset) built from the shipped assets, and `TrackService.TryBuy` is now the ONLY place that turns a currency
+  into a progression level. `UpgradeManager` / `AscensionManager` kept their public API and delegate to it, so the
+  game, UI and robot are untouched. Verified: goldens exact, validator green, robot climb identical, `Run All Checks`
+  PASS; a live ATK buy (2,242 gold) and a prestige buy (1 token) behaved exactly as before.
+- **Session 2 - save v5 (keyed levels).** `SaveData.CurrentVersion = 5`; hero columns + prestige list became ONE
+  `levels[{key,level}]` list (`"hero_knight.attack" = 80`, `"Prestige_Damage" = 3`). Keys are a permanent contract
+  (B35). `SaveMigrations` copies v4 values by hand (a rename, nothing lost); legacy lists write empty. Verified:
+  drift stable for default + fully-populated payloads, v1..v4 all migrate, a dedicated v4->v5 numbers-preserved test
+  passes, and the **real save** migrated live: v4 on disk -> identical stage 24 / gold 4,793.29 / ATK 80,80,91 ->
+  v5 file written -> v5 relaunch loads the same stats. Restored the v4 file so the next launch runs the real
+  migration. Fixture `SaveSamples/v4_sample.json` committed per the schema-bump rule (B35/B36 recorded in
+  `Architecture.md`).
+
+- **Sessions 3-4 - `tracks.json` + the zero-code proof.** The upgrade spec file became `tracks.json` (one card for
+  every row: hero stats + permanent tracks). `SceneWiringUtility` now loads the scene's lists FROM the spec (not from
+  three hardcoded names), so a new row is picked up by `Build MVP Scene` automatically. **Proven live:**
+  `Track_GoldHoarder` (+2% Gold per lvl, 2 tokens, cap 20) was added to `tracks.json` by hand - no C# edits - then
+  `Generate Assets From Specs` made the asset, `Build MVP Scene` wired it, and in Play Mode it appeared as a 4th
+  ASCEND row, cost 2 tokens, bought, multiplied gold x1.02, and saved as the generic key `Track_GoldHoarder` in the
+  v5 file - reloaded level 1 on the next launch. Export -> Generate -> Export is byte-identical for the six shipped
+  rows. Add a new upgrade anywhere (B6 auto-buy, B7 gem sinks) = one card + two menu clicks.
+
+## 1i. B6 Step 1: automation cards + engine  ·  **built + verified live 2026-09-25**
+
+- **Cards are data, earned with rebirth tokens** (never free): new effect kind `AutomationUnlock`, two cards in
+  `tracks.json` (`AutoBuy` automated "Auto-Buy Manager" = 4 tokens, needs 1 rebirth) + (`FastForward` "Speed Button"
+  = 6 tokens, needs 2; speech behaviour is Step 3). Teaser-locked UI is Step 2.
+- **`AutomationService`** runs on the 1s tick (RunController). Auto-buy: buys the cheapest affordable stat upgrade
+  across all heroes, always staying above a **reserve** you set (the dial), one aggregated toast per second.
+  **The big reset stays 100% manual** - no auto-ascend card, ever.
+- **Save (schema v5, additive, no bump):** ownership rides the keyed `levels` (`autoBuy: 1`); settings
+  (`enabled`, `budgetFraction`) in a small `automation` list. Drift test + full payload updated.
+- **Verified live:** cards listed, bought (tokens 2->8, owned), enabled, budget 0.20; the machine bought ATK levels
+  on two heroes while combat advanced to stage 25 and gold never went below the 20% reserve; SaveNow wrote
+  `autoBuy: 1` + the settings; save restored after. Compile clean, `Run All Checks` PASS (goldens, validator incl.
+  the new automation checks, loop health, save drift).
+- **Crash note (2026-09-25):** the editor crashed between two probe evals; the save was byte-identical afterwards,
+  the MCP request timeout was raised (client config, 60s -> 180s) and the session was re-verified from scratch.
+- **Steps 2-3 - the AUTO panel + the Speed Button.** `AutomationPanelUI` (runtime-built AUTO strip on the UPGRADES
+  page, same boot-race pattern as UpgradePanelUI): owned cards show ON/OFF + the "Keep X% gold" dial; unowned cards
+  show `LOCKED — costs N tokens (after M rebirths)` with a BUY button. The Speed Button multiplies combat tempo x2
+  (RunController) while the **honesty guard** keeps the money-tape at base tempo: the saved measured rate is divided
+  by the speed multiplier at capture, so x2 can never inflate the offline / instant-income quotes. **Verified live:**
+  bought both cards, toggled both on; ledger gold/s ~1262 while speed on, saved `lastGoldPerSecond` = 631 (=/2);
+  panel rows read `Auto-Buy Manager (on)` + `Keep 20% gold` and `Speed Button (on)`; save round-trips `autoBuy:1`,
+  `fastForward:1` + settings. Compile clean; `Run All Checks` PASS after the rebuild.
+- **Step 4 (robot learns the cards) - deferred:** the robot already buys-cheapest like auto-buy; a meaningful
+  version means simulating the (manual, player-only) rebirth loop, which deserves its own small step.
+
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 
 Base gate: every step below names the loop beat or money path it serves. Anything that cannot is not in the base.
 
 | # | Step | Serves | Acceptance | Size |
 |---|---|---|---|---|
-| **B3d** | Phase 2: make the per-level stat effect **multiplicative** (~x1.09) instead of `+10% of base`, as a data field on `StatUpgradeData` | the loop beat "buy -> push further": additive power cannot race exponential content (measured: stage time 126s -> 493s, stall ~stage 24) | robot player shows flat stage times and the frontier moves within ~3 min of income; golden numbers re-baselined on purpose | medium |
-| **B4** | Sweep-wide validator band | keeps the loop healthy: an accidental stall must fail the build | stages 1-20 checked for monotonic growth + no stall; a planted stall fails the validator | ½ day |
+| **B3d** | Phase 2: the per-level stat effect is **multiplicative** (ATK/HP x1.09, DEF x1.05) behind a data field on `StatUpgradeData`, the gain derived from the content/cost/gold growth | the loop beat "buy -> push further": additive power could not race exponential content (measured: stage time 126s -> 493s, stall ~stage 24) | `[x]` 2026-09-25: robot player clears stage 30 in 70 min (cheapest) / 34 min (attack-only), worst wall 8.8 min; goldens unchanged because level 0 = base stat | done |
+| B4 | **Sweep-wide validator + loop harness** | keeps the loop healthy: an accidental stall must fail the build | `[x]` 2026-09-25 (see §1g): dangling-ref/spec-asset checks, the robot climb runs inside the validator (target stage 25), golden numbers asserted +-2% via `BalanceBaseline`; planted stall and planted +20% buff both fail the build | done |
 | **B5** | Generic progression tracks (schema v5) | money path: more tracks = more to buy = more gem/ad relevance | a new track = spec + generate, zero code; a v4 save migrates to identical numbers | medium |
-| **B6** | Automation & QoL (auto-buy, presets) | retention: idling must pay off while away | leave it running; nothing over-spends; config persists | medium |
+| **B6** | Automation & QoL (`AutomationUnlock` cards; **ascension stays manual forever** - owner decision) | retention: idling must pay off while away | `[~]` Step 1 done 2026-09-25 (see §1i): AutoBuy + FastForward cards as data, `AutomationService` on the 1s tick, auto-buy proven live with the reserve respected; panel + speed + robot steps remain | medium |
 | **B7** | Monetisation pass (`Monetisation.md`) | money path: ad placements + gem sinks + mock IAP | every payout goes through the ledger rate; per-day caps enforced; mock IAP swaps for a real store with one implementation | medium |
 | **B8** | Content + onboarding pass | first-run clarity: a stranger knows what to press | ~8-12 enemies, 5-6 heroes (data only) + 3 first-run tips; content added with no code | medium |
 | **B9** | Release plumbing | ship it | version stamp, crash log file, one scripted `-batchmode` build command | small-med |
@@ -606,10 +709,10 @@ shop beat verification (boss/milestone gems -> fast-forward + offline cap), and 
 | B3 | loop beat: the fallback bounce (+ milestone gems) | `[x]` |
 | B3b | ascension retune: per-run gate, +20%/level, cap 25 | `[x]` |
 | B3c | offline rate guard (near-zero saved rate paid 0) | `[x]` |
-| B3d | **phase 2 - the compounding-upgrade fix** (additive effect vs exponential content) | `[ ]` |
-| B4 | sweep-wide validator band + bounce detection | `[ ]` |
-| B5 | 14 - generic progression tracks (**schema v5**) | `[ ]` |
-| B6 | 16 - automation & QoL | `[ ]` |
+| B3d | **phase 2 - the compounding-upgrade fix** (additive effect vs exponential content) | `[x]` 2026-09-25 (see §1d) |
+| B4 | **sweep-wide validator band + bounce detection** | `[x]` 2026-09-25 (see §1g) |
+| B5 | 14 - generic progression tracks (**schema v5**) | `[x]` 2026-09-25 (see §1h): TrackService = single purchase path; save v5 = one keyed `levels` list; `tracks.json` = the only upgrade spec; zero-code demo track (`Track_GoldHoarder`) added in data and proven live |
+| B6 | 16 - automation & QoL | `[~]` Step 1 done 2026-09-25 (see §1i) |
 | B7 | monetisation pass (design: `Monetisation.md`) | `[ ]` |
 | B8 | content + onboarding pass | `[ ]` |
 | B9 | 21-lite - version stamp, crash log, scripted build | `[ ]` |

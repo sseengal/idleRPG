@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.StatUpgradeData
   statType: 2
   displayName: DEF
-  description: +15% of base DEF per level.
+  description: DEF x1.05 per level (compounds).
   baseCost: 15
   costGrowthMultiplier: 1.07
-  statGainPerLevelFraction: 0.15
+  effectMode: 1
+  statGainPerLevelFraction: 0.05
   maxLevel: 0

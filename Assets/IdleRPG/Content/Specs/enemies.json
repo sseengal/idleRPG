@@ -15,8 +15,7 @@
             "bossHealthMultiplier": 4.0,
             "bossGoldMultiplier": 6.0,
             "tint": "#D94033FF",
-            "targetRule": "inherit",
-            "preferredRow": "front"
+            "targetRule": "inherit"
         },
         {
             "id": "enemy_bat",
@@ -32,8 +31,7 @@
             "bossHealthMultiplier": 1.0,
             "bossGoldMultiplier": 1.0,
             "tint": "#99664CFF",
-            "targetRule": "inherit",
-            "preferredRow": "front"
+            "targetRule": "inherit"
         },
         {
             "id": "enemy_goblin",
@@ -49,8 +47,7 @@
             "bossHealthMultiplier": 1.0,
             "bossGoldMultiplier": 1.0,
             "tint": "#66BF59FF",
-            "targetRule": "inherit",
-            "preferredRow": "front"
+            "targetRule": "inherit"
         },
         {
             "id": "enemy_slime",
@@ -66,8 +63,7 @@
             "bossHealthMultiplier": 1.0,
             "bossGoldMultiplier": 1.0,
             "tint": "#80E666FF",
-            "targetRule": "inherit",
-            "preferredRow": "front"
+            "targetRule": "inherit"
         }
     ]
 }

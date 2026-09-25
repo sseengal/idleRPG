@@ -8,24 +8,27 @@ using IdleRPG.Utils;
 namespace IdleRPG.Progression
 {
     /// <summary>
-    /// Buys hero stat levels with Gold. All cost maths lives in <see cref="StatResolver"/>
-    /// / <see cref="FormulaUtility"/>; this class only validates, spends and announces.
+    /// Buys hero stat levels with Gold. All cost maths lives in <see cref="FormulaUtility"/> and the purchase
+    /// itself runs through <see cref="TrackService"/> - the single checkout for every progression row. This class
+    /// keeps its public surface (the Step 4 UI reads it) and only adds the gold/token naming and events on top.
     /// </summary>
     public sealed class UpgradeManager
     {
         private readonly EconomyManager economy;
         private readonly StatResolver resolver;
         private readonly PartyConfig party;
+        private readonly TrackService trackService;
 
-        public UpgradeManager(EconomyManager economy, StatResolver resolver, PartyConfig party)
+        public UpgradeManager(EconomyManager economy, StatResolver resolver, PartyConfig party, TrackService trackService)
         {
             this.economy = economy;
             this.resolver = resolver;
             this.party = party;
+            this.trackService = trackService;
 
-            if (this.economy == null || this.resolver == null || this.party == null)
+            if (this.economy == null || this.resolver == null || this.party == null || this.trackService == null)
             {
-                Debug.LogError("[UpgradeManager] Requires EconomyManager, StatResolver and PartyConfig.");
+                Debug.LogError("[UpgradeManager] Requires EconomyManager, StatResolver, PartyConfig and TrackService.");
             }
         }
 
@@ -158,37 +161,39 @@ namespace IdleRPG.Progression
             }
 
             int currentLevel = resolver.GetHeroLevel(hero, statType);
-            if (resolver.IsAtMaxLevel(statType, currentLevel))
+
+            if (!trackService.TryGetHeroTrack(statType, out ProgressionTrack track))
+            {
+                Debug.LogWarning($"[UpgradeManager] No upgrade track for stat {statType}.");
+                return false;
+            }
+
+            if (track.IsAtMaxLevel(currentLevel))
             {
                 GameEvents.RaiseToast($"{statType.ToDisplayName()} is already at max level.");
                 return false;
             }
 
-            int requestedLevels = levels;
-            StatUpgradeData data = resolver.GetUpgradeData(statType);
-            if (data != null && data.HasLevelCap)
-            {
-                int remaining = data.MaxLevel - currentLevel;
-                if (requestedLevels > remaining)
-                {
-                    requestedLevels = remaining;
-                }
-            }
+            // The single checkout: clamps to the cap, prices it, spends gold, writes the level.
+            PurchaseResult result = trackService.TryBuy(track, hero, levels, out double cost, out int newLevel);
 
-            if (requestedLevels <= 0)
+            if (result == PurchaseResult.Maxed)
             {
+                GameEvents.RaiseToast($"{statType.ToDisplayName()} is already at max level.");
                 return false;
             }
 
-            double cost = resolver.GetUpgradeCost(statType, currentLevel, requestedLevels);
-            if (!economy.SpendGold(cost))
+            if (result == PurchaseResult.CannotAfford)
             {
-                GameEvents.RaiseToast($"Not enough gold (need {NumberFormatter.Format(cost)}).");
+                double quoted = trackService.Cost(track, hero, track.ClampLevels(currentLevel, levels));
+                GameEvents.RaiseToast($"Not enough gold (need {NumberFormatter.Format(quoted)}).");
                 return false;
             }
 
-            int newLevel = currentLevel + requestedLevels;
-            resolver.SetHeroLevel(hero, statType, newLevel);
+            if (result != PurchaseResult.Bought)
+            {
+                return false;
+            }
 
             TotalSpentGold += cost;
 

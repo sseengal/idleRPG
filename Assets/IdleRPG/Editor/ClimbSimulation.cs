@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using IdleRPG.Combat;
@@ -45,6 +46,45 @@ namespace IdleRPG.EditorTools
             HeroStatType.Defense
         };
 
+        /// <summary>One cleared stage of the climb: what the robot saw and what it cost in wall time.</summary>
+        internal struct ClimbStageRow
+        {
+            public int Stage;
+            public double Seconds;
+            public int Kills;
+            public double Gold;
+            public double WallSeconds;
+            public bool ClearedAfterFarming;
+        }
+
+        /// <summary>
+        /// The machine-readable outcome of one robot climb.
+        ///
+        /// ELI5: the robot used to only tell us a story (a log a human had to read). Now it also hands over a
+        /// scorecard, so "did the frontier move?" can fail a build instead of waiting for someone to notice.
+        /// </summary>
+        internal struct ClimbResult
+        {
+            public ClimbPolicy Policy;
+            public string Report;
+            public int ReachedStage;
+            /// <summary>Stage the robot was still farming when it gave up; 0 = never stuck.</summary>
+            public int StuckStage;
+            public int Walls;
+            public int Upgrades;
+            public double TotalSeconds;
+            public double WorstWallSeconds;
+            /// <summary>Median sim-time between shopping trips (a trip = a farm cycle that could afford something).</summary>
+            public double MedianShoppingGapSeconds;
+            /// <summary>Sim-time until the first purchase was affordable (-1 = never).</summary>
+            public double FirstPurchaseSeconds;
+            /// <summary>True when the climb stopped because the time budget ran out rather than because it finished.</summary>
+            public bool BudgetExhausted;
+            public List<ClimbStageRow> ClearedStages;
+
+            public bool Stuck => StuckStage > 0;
+        }
+
         internal static string Run(
             BalanceConfig balance,
             WaveConfig waves,
@@ -53,13 +93,39 @@ namespace IdleRPG.EditorTools
             PrestigeUpgradeData[] prestigeUpgrades,
             ClimbPolicy policy)
         {
+            return Simulate(balance, waves, party, statUpgrades, prestigeUpgrades, policy).Report;
+        }
+
+        /// <summary>
+        /// Plays the loop once and returns both the printable report and the numbers behind it. Bounded by
+        /// <paramref name="maxStage"/> and <paramref name="maxRunSeconds"/> so a validator call cannot loop forever.
+        /// </summary>
+        internal static ClimbResult Simulate(
+            BalanceConfig balance,
+            WaveConfig waves,
+            PartyConfig party,
+            StatUpgradeData[] statUpgrades,
+            PrestigeUpgradeData[] prestigeUpgrades,
+            ClimbPolicy policy,
+            int maxStage = MaxStage,
+            double maxRunSeconds = MaxRunSeconds)
+        {
+            ClimbResult result = new ClimbResult
+            {
+                Policy = policy,
+                ClearedStages = new List<ClimbStageRow>(),
+                MedianShoppingGapSeconds = -1d,
+                FirstPurchaseSeconds = -1d
+            };
+
             StringBuilder report = new StringBuilder();
             report.AppendLine($"=== Robot player: {policy} ===");
 
             if (balance == null || waves == null || party == null || party.ValidHeroCount == 0)
             {
                 report.AppendLine("  (missing config — nothing to simulate)");
-                return report.ToString();
+                result.Report = report.ToString();
+                return result;
             }
 
             StatResolver resolver = new StatResolver(balance, statUpgrades, prestigeUpgrades);
@@ -71,13 +137,15 @@ namespace IdleRPG.EditorTools
             int buys = 0;
             int walls = 0;
             int reachedStage = 0;
+            int stuckStage = 0;
+            List<double> shoppingTrips = new List<double>();
 
             report.AppendLine($"  party {party.ValidHeroCount} heroes | pace x{pace:0.##} | buys the cheapest affordable upgrade");
             report.AppendLine("  loop: clear -> advance | wipe -> roll back one stage (game rule) and farm it until the frontier falls");
             report.AppendLine("  stage   secs   kills      gold   gold/s  elapsed    ATKx    HPx    DEFx   buys");
 
             int stage = 1;
-            while (stage <= MaxStage && totalSeconds < MaxRunSeconds)
+            while (stage <= maxStage && totalSeconds < maxRunSeconds)
             {
                 BalanceLabMenu.StageRun attempt = BalanceLabMenu.RunStage(balance, waves, party, stage, pace, resolver);
                 totalSeconds += attempt.Seconds;
@@ -87,6 +155,15 @@ namespace IdleRPG.EditorTools
                 {
                     gold += attempt.Gold;
                     AppendStageRow(report, stage, attempt, totalSeconds, resolver, party, buys);
+                    result.ClearedStages.Add(new ClimbStageRow
+                    {
+                        Stage = stage,
+                        Seconds = attempt.Seconds,
+                        Kills = attempt.Kills,
+                        Gold = attempt.Gold,
+                        WallSeconds = 0d,
+                        ClearedAfterFarming = false
+                    });
                     reachedStage = stage;
                     stage++;
                     continue;
@@ -102,7 +179,7 @@ namespace IdleRPG.EditorTools
 
                 report.AppendLine($"  -- WALL stage {stage}: farming stage {farmStage} --");
 
-                while (!cleared && wallSeconds < MaxWallSeconds && totalSeconds < MaxRunSeconds)
+                while (!cleared && wallSeconds < MaxWallSeconds && totalSeconds < maxRunSeconds)
                 {
                     BalanceLabMenu.StageRun farm = BalanceLabMenu.RunStage(balance, waves, party, farmStage, pace, resolver);
                     totalSeconds += farm.Seconds;
@@ -114,6 +191,13 @@ namespace IdleRPG.EditorTools
                     buys += bought;
                     wallBuys += bought;
 
+                    // A "shopping trip" is a farm cycle that could actually afford something - the cadence a player
+                    // feels. Recorded here so the loop-health check can assert "there is always something to buy".
+                    if (bought > 0)
+                    {
+                        shoppingTrips.Add(totalSeconds);
+                    }
+
                     BalanceLabMenu.StageRun retry = BalanceLabMenu.RunStage(balance, waves, party, stage, pace, resolver);
                     totalSeconds += retry.Seconds;
                     wallSeconds += retry.Seconds;
@@ -124,12 +208,22 @@ namespace IdleRPG.EditorTools
                         cleared = true;
                         gold += retry.Gold;
                         AppendStageRow(report, stage, retry, totalSeconds, resolver, party, buys);
+                        result.ClearedStages.Add(new ClimbStageRow
+                        {
+                            Stage = stage,
+                            Seconds = retry.Seconds,
+                            Kills = retry.Kills,
+                            Gold = retry.Gold,
+                            WallSeconds = wallSeconds,
+                            ClearedAfterFarming = true
+                        });
                         reachedStage = stage;
                     }
                 }
 
                 if (!cleared)
                 {
+                    stuckStage = stage;
                     report.AppendLine(string.Format(
                         "  !! STUCK on stage {0}: {1:0.0} min of farming stage {2}, {3} gold earned, {4} upgrades bought, still wiping",
                         stage, wallSeconds / 60d, farmStage, NumberFormatter.Format(wallGold), wallBuys));
@@ -152,7 +246,43 @@ namespace IdleRPG.EditorTools
                 "  reached stage {0} in {1:0.0} min ({2:0.00} h) | {3} upgrades | walls {4} | worst wall {5:0.0} min",
                 reachedStage, totalSeconds / 60d, totalSeconds / 3600d, buys, walls, worstWallSeconds / 60d));
 
-            return report.ToString();
+            result.Report = report.ToString();
+            result.ReachedStage = reachedStage;
+            result.StuckStage = stuckStage;
+            result.Walls = walls;
+            result.Upgrades = buys;
+            result.TotalSeconds = totalSeconds;
+            result.WorstWallSeconds = worstWallSeconds;
+            result.BudgetExhausted = totalSeconds >= maxRunSeconds;
+            result.FirstPurchaseSeconds = shoppingTrips.Count > 0 ? shoppingTrips[0] : -1d;
+            result.MedianShoppingGapSeconds = MedianGap(shoppingTrips);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Median gap between consecutive shopping trips. The mean would be dragged around by one long wall, and the
+        /// question we care about is "how long does a typical stretch without a purchase last?".
+        /// </summary>
+        private static double MedianGap(List<double> stamps)
+        {
+            if (stamps == null || stamps.Count < 2)
+            {
+                return -1d;
+            }
+
+            List<double> gaps = new List<double>(stamps.Count - 1);
+            for (int i = 1; i < stamps.Count; i++)
+            {
+                gaps.Add(stamps[i] - stamps[i - 1]);
+            }
+
+            gaps.Sort();
+            int middle = gaps.Count / 2;
+
+            return gaps.Count % 2 == 1
+                ? gaps[middle]
+                : (gaps[middle - 1] + gaps[middle]) * 0.5d;
         }
 
         /// <summary>

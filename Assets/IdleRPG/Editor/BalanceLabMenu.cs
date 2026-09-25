@@ -49,6 +49,42 @@ namespace IdleRPG.EditorTools
             Debug.Log(report.ToString());
         }
 
+        /// <summary>The two baseline stage-1 runs, for the regression command to assert against.</summary>
+        internal struct GoldenRun
+        {
+            public bool Available;
+            public StageRun PaceOne;
+            public StageRun PaceShipped;
+
+            public double GoldPerSecondPaceOne => PaceOne.Seconds <= 0d ? 0d : PaceOne.Gold / PaceOne.Seconds;
+            public double GoldPerSecondShipped => PaceShipped.Seconds <= 0d ? 0d : PaceShipped.Gold / PaceShipped.Seconds;
+        }
+
+        /// <summary>
+        /// Runs the recorded baseline conditions (seed 12345, no upgrades, stage 1, pace x1.0 and the shipped pace) and
+        /// returns the numbers the parity report prints. Same runner as the report, so the two can never disagree.
+        /// </summary>
+        internal static GoldenRun CaptureGoldens()
+        {
+            SimLogBridge.EnsureInstalled();
+
+            BalanceConfig balance = Load<BalanceConfig>("BalanceConfig");
+            WaveConfig waves = Load<WaveConfig>("WaveConfig");
+            PartyConfig party = Load<PartyConfig>("PartyConfig");
+
+            if (balance == null || waves == null || party == null)
+            {
+                return new GoldenRun();
+            }
+
+            return new GoldenRun
+            {
+                Available = true,
+                PaceOne = RunStage(balance, waves, party, 1, 1d),
+                PaceShipped = RunStage(balance, waves, party, 1, balance.CombatPaceMultiplier)
+            };
+        }
+
         [MenuItem("Tools/Idle RPG/Balance Lab/Encounter Factory Probe", priority = 92)]
         public static void EncounterFactoryProbe()
         {

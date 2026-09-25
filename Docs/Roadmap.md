@@ -196,10 +196,10 @@ interesting"), it does not enter the base - and it is not parked either unless t
 | Order | Step | Deliverable | Acceptance | Size |
 |---|---|---|---|---|
 | B3 | **Loop beat + ascension + rate guard** | the fallback bounce (never stops, no input), milestone gems every 5th stage, ascension retuned (per-run gate, +20%/level, cap 25), offline rate guard | verified in play on the save that used to freeze: bounce, cascades, milestone gems once only, ceiling moves when upgrades are bought, ascend resets the run and keeps the record, 8h offline pays | **done** |
-| B3d | **Phase 2 - compounding upgrades** | make the per-level stat effect **multiplicative** (~x1.09) instead of `+10% of base`, as a data field | the robot player shows flat stage times (not 126s -> 493s) and the frontier moves within ~3 min of income; golden numbers re-baselined on purpose | medium |
-| B4 | **Sweep-wide validator band** | Balance Lab bounce detection + a stage 1-20 band check in the content validator | an accidental stall or a flat stretch **fails** the validator | ½ day |
-| B5 | **14 - generic progression tracks (schema v5)** | `TrackService` + data-driven tracks; hero stats + prestige migrated; save bump v4 -> v5 | a new track = spec + generate, zero code; a v4 save migrates to identical numbers | medium |
-| B6 | **16 - automation & QoL** | auto-buy (budgeted), auto-retry (exists), presets | leave it running; nothing over-spends; config persists | medium |
+| B3d | **Phase 2 - compounding upgrades** | `DONE (2026-09-25)` - the per-level effect is **multiplicative** in data (`StatUpgradeData.effectMode`): ATK/HP x1.09, DEF x1.05, both gains derived from the content/cost/gold growth | robot player clears stage 30 in 70 min (cheapest) / 34 min (attack-only), worst wall 8.8 min, against the old 493s stage time, 40-min walls and stall ~stage 24; stage-1 golden numbers untouched (level 0 = base stat) | done |
+| B4 | **Sweep-wide validator + loop harness** | `DONE (2026-09-25)` - the robot climb runs inside `Run All Checks` (target stage 25, max 40), golden numbers are asserted +-2% against `BalanceBaseline`, dangling refs and spec/asset drift are errors | a planted stall FAILS the build; a planted +20% power buff FAILS the golden gate; clean data is clean (robot reaches stage 40 in 96.9 min, check < 1s) | done |
+| B5 | **14 - generic progression tracks (schema v5)** | `DONE (2026-09-25)` - `TrackService` is the single purchase path; save v5 = one keyed `levels[{key,level}]` list (currency/ledger reshaping deferred to B7, see `Architecture.md` B35/B36); `tracks.json` is the single upgrade spec and `SceneWiringUtility` loads from it, so a new track = spec card + `Generate Assets From Specs` + `Build MVP Scene` (no C# edits) | proven: goldens/robot/validator unchanged, the real v4 save migrates with every number identical, and a data-only demo track (`Track_GoldHoarder`) was added, wired, bought, saved and reloaded in one session | done |
+| B6 | **16 - automation & QoL** | `WIP (2026-09-25)` - automation is earned content: `AutomationUnlock` cards bought with tokens (no freebies, no auto-ascend - the rebirth stays manual by owner decision). AutoBuy + FastForward cards shipped as data; `AutomationService` on the 1s tick with a player-set gold reserve; save v5 additive | Steps 1-3 proven live (auto-buy + reserve + persistence; AUTO panel rows + teasers; speed x2 with the ledger/offline honesty guard, saved rate 631 = 1262/2). Remaining: Step 4 robot learns the rebirth loop (`small`) | medium |
 | B7 | **Monetisation pass** (see `Monetisation.md`) | ad placements (x2 gold, double offline, instant claim), gem sources (daily streak + milestones), gem sinks (permanent multiplier, automation unlock), `IIapService` + `MockIapService`, per-day caps + validator guard | every payout goes through the ledger rate; caps enforced; mock IAP swaps for a real store with one implementation | medium |
 | B8 | **Content + onboarding pass** | ~8-12 enemies, 5-6 heroes (data only) + 3 first-run tips | a new player knows what to do within 30s; content added with no code | medium |
 | B9 | **21-lite - release plumbing** | version stamp, crash log file, scripted `Unity -batchmode` build | one command produces a build with the correct version | small-med |
@@ -230,18 +230,38 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
 - **Dropped from B3:** the piecewise `DifficultyCurve` (a curve cannot fix a lost race - see `Content.md` §3) and the
   "you need ~X more power" banner (an invented index the player cannot see - see `UI-UX.md` §5).
 
-### B3d - phase 2: compounding upgrades  `TODO`
-- Hero upgrades are additive (`base x (1 + 0.1 x level)`); content is exponential (`1.15^stage`). Measured: stage time
-  126s -> 493s, walls 8 -> 40 min, hard stall ~stage 24. Make the per-level effect **multiplicative** (~x1.09) behind
-  a data field on `StatUpgradeData`, re-run the robot player, re-baseline the golden numbers deliberately.
+### B3d - phase 2: compounding upgrades  `DONE (2026-09-25)`
+- The problem: hero upgrades were additive (`base x (1 + 0.1 x level)`) against exponential content (`1.15^stage`) -
+  stage time 126s -> 493s, walls 8 -> 40 min, hard stall ~stage 24.
+- The fix is **data, not a curve table**: `StatUpgradeData.effectMode` (`AdditiveBase` | `Multiplicative`) selects the
+  per-level model, `StatResolver` passes it through `FormulaUtility.HeroStatValue`, and the gain is **derived**:
+  `CompoundingGainFor(contentGrowth, 1.07, 1.12)` = 0.087 for ATK/HP (they race enemy HP 1.15) and 0.047 for DEF
+  (damage is `ATK - DEF`, so defence races enemy ATK 1.08). Data rounds up with a ~0.5%/stage margin: **x1.09 / x1.05**.
+- Level 0 returns the base stat in both modes, so an unupgraded party is untouched: golden numbers stay
+  **80s @x1 / 126s @x1.6, 22 kills, 272 gold** and `Run All Checks` is green.
+- Robot player (pace x1.6, 3h budget): **stage 30 in 70.1 min** (cheapest-buy, 428 buys, worst wall 8.8 min) and
+  **34.4 min** (attack-only, 222 buys, worst wall 7.3 min). 30 is the tool's ceiling (`ClimbSimulation.MaxStage`).
+- The mode travels through the content pipeline (`UpgradeSpecFile.effectMode`) and the validator reports it
+  ("3 stat tracks checked (3 compounding)"), so `Generate Data Assets` / `Generate Assets From Specs` cannot silently
+  reset a track back to additive.
 
-### B4 - sweep-wide validator  `TODO`
-- Extend `ContentValidator` beyond the stage-1 band: check stages 1-20 for monotonic growth and no accidental stall,
-  and surface the smallest growth step (the "stall" signal).
-- **Also (found 2026-09-21):** deleting a spec entry does not prune the generated assets - `WaveConfig` still pointed
-  at the deleted Slinger until the next `Generate Assets From Specs`, which silently starved whole waves (18 kills
-  instead of 22). The golden numbers caught it; the validator did not. Add: "a data asset references something that
-  no longer exists" check, and document that spec deletions require a regenerate.
+### B4 - sweep-wide validator + loop harness  `DONE (2026-09-25)`
+- **Design decision:** stage-time monotonicity is not asserted. A wall makes stage times legitimately rise inside a
+  band (46s -> 229s), so a monotonic curve is the healthy shape; a flat-times assertion would fail an honest loop. The
+  net asserts what matters: the frontier **moves** (the robot climb reaches its target stage), nothing is stuck, and
+  the wall time is bounded.
+- **The robot is part of the build now.** `ClimbSimulation` returns a machine-readable `ClimbResult` (printed report
+  verified byte-identical to before) and `ContentValidator.CheckLoopHealth()` runs it with a bounded budget
+  (target stage 25, max stage 40): STUCK/undershoot = **Error**, slow wall = **Warning**. Measured on clean data:
+  stage 40 in 96.9 min, worst wall 8.8 min - and the check costs under a second.
+- **Golden numbers are asserted, not printed.** `BalanceBaseline.cs` holds the recorded numbers (±2% tolerance) and
+  `Run All Checks` fails on drift. Re-baselining = one deliberate edit with a reason.
+- **Reference checks (the deleted-Slinger class of bug).** `WaveConfig` pools and `PartyConfig` lanes are walked for
+  null/stale/out-of-spec elements; every stat upgrade asset must have a spec entry and agree on `effectMode` and gain;
+  duplicate stat tracks are an error.
+- **Planted-failure proof (both reverted, final PASS):** ATK/HP back to additive -> the validator reports the robot
+  STUCK on stage 25 (worst wall 42 min, 187 min total) - the exact historical failure mode, now caught by the build;
+  a planted +20% archer attack trips the golden gate (`stage 1 seconds @x1.6: 112.85 vs 126, -10.4%`).
 
 ### B5 - 14 generic progression tracks (schema v4)  `TODO`
 ### B6 - 16 automation & QoL  `TODO`
@@ -298,8 +318,8 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
   milestone chests; Balance Lab `Sweep Stages` + bounce detection.
 - **Acceptance:** zone 2 unlocks after the zone-1 boss; the growth band changes at a wall (Balance Lab proof); the
   bounce stalls and then moves within ~3 min of accumulated frontier income.
-- **Blocked by:** Steps 8, 11, 12, 14, **B3d** (the compounding-upgrade fix must land first, or the curve has
-  nothing healthy to shape).
+- **Blocked by:** Steps 8, 11, 12, 14 (plus **B3d** `DONE 2026-09-25`: the compounding-upgrade fix landed, so there is
+  a healthy climb for the curve to shape).
 
 ### Step 16 — Automation & QoL (the churn fix)  `PROMOTED to base B6`
 - **Owner doc:** `Progression.md` §8; `Architecture.md` B3

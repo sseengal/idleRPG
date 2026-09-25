@@ -297,5 +297,11 @@ namespace IdleRPG.Core
                 combatManager.Simulator.RefreshHeroStats();
             }
         }
+
+        /// <summary>B6: an automation card was bought or its settings changed - tell the save to write it soon.</summary>
+        private void OnAutomationChanged()
+        {
+            Save?.MarkDirty("automation");
+        }
     }
 }

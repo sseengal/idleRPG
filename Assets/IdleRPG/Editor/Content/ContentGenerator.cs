@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using IdleRPG.Data;
+using IdleRPG.Progression;
 
 namespace IdleRPG.EditorTools.Content
 {
@@ -36,7 +37,7 @@ namespace IdleRPG.EditorTools.Content
             EnemySpecFile enemies = ContentSpecIO.Load<EnemySpecFile>(ContentSpecIO.EnemiesPath);
             PartySpecFile party = ContentSpecIO.Load<PartySpecFile>(ContentSpecIO.PartyPath);
             WaveSpecFile waves = ContentSpecIO.Load<WaveSpecFile>(ContentSpecIO.WavesPath);
-            UpgradeSpecFile upgrades = ContentSpecIO.Load<UpgradeSpecFile>(ContentSpecIO.UpgradesPath);
+            UpgradeSpecFile upgrades = ContentSpecIO.Load<UpgradeSpecFile>(ContentSpecIO.TracksPath);
 
             AssetDatabase.StartAssetEditing();
             try
@@ -192,6 +193,7 @@ namespace IdleRPG.EditorTools.Content
                     baseCost = SoField.Double(upgrade, "baseCost", 10d),
                     costGrowth = SoField.Float(upgrade, "costGrowthMultiplier", 1.07f),
                     statGainPerLevelFraction = SoField.Float(upgrade, "statGainPerLevelFraction", 0.1f),
+                    effectMode = ((StatEffectMode)SoField.Int(upgrade, "effectMode")).ToString().ToLowerInvariant(),
                     maxLevel = SoField.Int(upgrade, "maxLevel")
                 });
             }
@@ -215,7 +217,30 @@ namespace IdleRPG.EditorTools.Content
                 });
             }
 
-            ContentSpecIO.Save(ContentSpecIO.UpgradesPath, file);
+            ExportAutomation(file);
+
+            ContentSpecIO.Save(ContentSpecIO.TracksPath, file);
+        }
+
+        /// <summary>Exports the automation cards (B6) from their assets into tracks.json.</summary>
+        private static void ExportAutomation(UpgradeSpecFile file)
+        {
+            List<AutomationDef> cards = ContentSpecIO.LoadAll<AutomationDef>(ContentSpecIO.ConfigFolder);
+
+            for (int i = 0; i < cards.Count; i++)
+            {
+                AutomationDef card = cards[i];
+                file.automationUpgrades.Add(new AutomationSpec
+                {
+                    id = card.name,
+                    asset = card.name,
+                    automationId = SoField.Text(card, "automationID", card.name),
+                    displayName = SoField.Text(card, "displayName", card.name),
+                    description = SoField.Text(card, "description"),
+                    baseCostTokens = SoField.Double(card, "baseCostTokens", 4d),
+                    minAscensions = SoField.Int(card, "minAscensions")
+                });
+            }
         }
 
         // ------------------------------------------------------------------
@@ -393,6 +418,7 @@ namespace IdleRPG.EditorTools.Content
                     .Set("baseCost", entry.baseCost)
                     .Set("costGrowthMultiplier", entry.costGrowth)
                     .Set("statGainPerLevelFraction", entry.statGainPerLevelFraction)
+                    .Set("effectMode", (int)ParseEffectMode(entry.effectMode))
                     .Set("maxLevel", entry.maxLevel)
                     .Apply();
             }
@@ -412,6 +438,23 @@ namespace IdleRPG.EditorTools.Content
                     .Set("costGrowth", entry.costGrowth)
                     .Set("effectPerLevel", entry.effectPerLevel)
                     .Set("maxLevel", entry.maxLevel)
+                    .Apply();
+            }
+
+            for (int i = 0; i < spec.automationUpgrades.Count; i++)
+            {
+                AutomationSpec entry = spec.automationUpgrades[i];
+                string assetName = string.IsNullOrEmpty(entry.asset) ? DeriveAssetName(entry.id) : entry.asset;
+                AutomationDef card = ContentSpecIO.CreateOrLoad<AutomationDef>(ContentSpecIO.ConfigFolder + "/" + assetName + ".asset");
+
+                string automationId = string.IsNullOrEmpty(entry.automationId) ? assetName : entry.automationId;
+
+                new Editable(card)
+                    .Set("automationID", automationId)
+                    .Set("displayName", entry.displayName)
+                    .Set("description", entry.description)
+                    .Set("baseCostTokens", entry.baseCostTokens)
+                    .Set("minAscensions", entry.minAscensions)
                     .Apply();
             }
         }
@@ -448,6 +491,19 @@ namespace IdleRPG.EditorTools.Content
                     return HeroStatType.Defense;
                 default:
                     return HeroStatType.Attack;
+            }
+        }
+
+        /// <summary>"multiplicative" | "compounding" | anything else = additive (the shipped model).</summary>
+        private static StatEffectMode ParseEffectMode(string value)
+        {
+            switch ((value ?? "").Trim().ToLowerInvariant())
+            {
+                case "multiplicative":
+                case "compounding":
+                    return StatEffectMode.Multiplicative;
+                default:
+                    return StatEffectMode.AdditiveBase;
             }
         }
 

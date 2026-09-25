@@ -97,10 +97,14 @@ namespace IdleRPG.Core
             }
 
             // 1) Gameplay: one accumulator-driven combat tick (no coroutines anywhere in the flow).
+            //    B6 Step 3: the Speed Button scales combat time; the ledger still ticks in REAL time and the save
+            //    normalises the measured rate, so fast-forward can never inflate offline/instant-income quotes.
             double deltaTime = Time.deltaTime;
             LastDeltaSeconds = deltaTime;
 
-            if (!StepSafely(deltaTime))
+            double tempo = context.Automation != null ? context.Automation.SpeedMultiplier : 1d;
+
+            if (!StepSafely(deltaTime * tempo))
             {
                 return;
             }
@@ -126,6 +130,9 @@ namespace IdleRPG.Core
 
             // Autosave cadence + play-time accrual (was GameManager's SlowTickLoop).
             context.Save?.Tick(SlowTickIntervalSec);
+
+            // B6: the automation engine (auto-buy etc.) runs on the same slow tick.
+            context.Automation?.Tick(SlowTickIntervalSec);
         }
     }
 }

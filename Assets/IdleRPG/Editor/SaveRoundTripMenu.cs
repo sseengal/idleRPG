@@ -27,7 +27,16 @@ namespace IdleRPG.EditorTools
         /// </summary>
         private static readonly HashSet<string> RetiredKeys = new HashSet<string>
         {
-            "\"autoRetryEnabled\""
+            "\"autoRetryEnabled\"",
+            // schema v5 (B5): fixed hero columns + prestige list became one keyed "levels" list.
+            "\"heroes\"",
+            "\"heroID\"",
+            "\"attackLevel\"",
+            "\"healthLevel\"",
+            "\"defenseLevel\"",
+            "\"prestigeUpgrades\"",
+            "\"upgradeID\"",
+            "\"level\":"
         };
 
         [MenuItem("Tools/Idle RPG/Save/Round-Trip Drift Test", priority = 65)]
@@ -88,11 +97,19 @@ namespace IdleRPG.EditorTools
             data.highestStageReached = 41;
             data.runBestStage = 39;
 
-            data.heroes = new List<HeroProgressRecord>
+            data.levels = new List<LevelRecord>
             {
-                new HeroProgressRecord("hero_knight", 12, 9, 4),
-                new HeroProgressRecord("hero_archer", 7, 3, 11),
-                new HeroProgressRecord("hero_mage", 1, 2, 3)
+                new LevelRecord("hero_knight.attack", 12),
+                new LevelRecord("hero_knight.health", 9),
+                new LevelRecord("hero_knight.defense", 4),
+                new LevelRecord("hero_archer.attack", 7),
+                new LevelRecord("hero_archer.health", 3),
+                new LevelRecord("hero_archer.defense", 11),
+                new LevelRecord("hero_mage.attack", 1),
+                new LevelRecord("hero_mage.health", 2),
+                new LevelRecord("hero_mage.defense", 3),
+                new LevelRecord("prestige_gold", 2),
+                new LevelRecord("prestige_damage", 1)
             };
 
             data.partySlots = new List<int> { -1, 1, 2, 0, -1, -1 };
@@ -101,10 +118,10 @@ namespace IdleRPG.EditorTools
             data.gems = 42d;
             data.prestigeTokens = 3.5d;
 
-            data.prestigeUpgrades = new List<PrestigeUpgradeRecord>
+            data.automation = new List<AutomationSetting>
             {
-                new PrestigeUpgradeRecord("prestige_gold", 2),
-                new PrestigeUpgradeRecord("prestige_damage", 1)
+                new AutomationSetting("autoBuy", true, 0.25f),
+                new AutomationSetting("fastForward", false, 0.5f)
             };
 
             data.offlineEquivalentCapBonusSeconds = 3600d;
@@ -183,6 +200,55 @@ namespace IdleRPG.EditorTools
             else
             {
                 Debug.Log("[SaveRoundTrip] v3 -> v4 migration: run best adopts the current stage.");
+            }
+
+            // A v4 file stores hero levels in fixed columns + a prestige list. It must convert to keyed records
+            // ("hero_knight.attack" = 80) with EVERY number preserved - none lost, none invented.
+            SaveData v4 = SaveData.CreateDefault();
+            v4.schemaVersion = 4;
+            v4.currentStage = 24;
+            v4.highestStageReached = 24;
+            v4.runBestStage = 24;
+            v4.gold = 4793.29d;
+            v4.prestigeTokens = 2d;
+            v4.heroes = new List<HeroProgressRecord>
+            {
+                new HeroProgressRecord("hero_knight", 80, 80, 80),
+                new HeroProgressRecord("hero_archer", 80, 80, 80),
+                new HeroProgressRecord("hero_mage", 91, 80, 80)
+            };
+            v4.prestigeUpgrades = new List<PrestigeUpgradeRecord>
+            {
+                new PrestigeUpgradeRecord("Prestige_Gold", 0),
+                new PrestigeUpgradeRecord("Prestige_Damage", 0),
+                new PrestigeUpgradeRecord("Prestige_Health", 0)
+            };
+
+            SaveData migratedV4 = SaveMigrations.Migrate(v4);
+
+            bool v4NumbersKept =
+                migratedV4.schemaVersion == SaveData.CurrentVersion &&
+                migratedV4.GetLevel("hero_knight.attack") == 80 &&
+                migratedV4.GetLevel("hero_knight.health") == 80 &&
+                migratedV4.GetLevel("hero_archer.defense") == 80 &&
+                migratedV4.GetLevel("hero_mage.attack") == 91 &&
+                migratedV4.GetLevel("Prestige_Health") == 0 &&
+                migratedV4.currentStage == 24 &&
+                migratedV4.highestStageReached == 24 &&
+                migratedV4.runBestStage == 24 &&
+                System.Math.Abs(migratedV4.gold - 4793.29d) < 0.001d &&
+                migratedV4.prestigeTokens == 2d &&
+                migratedV4.heroes.Count == 0 &&
+                migratedV4.prestigeUpgrades.Count == 0;
+
+            if (!v4NumbersKept)
+            {
+                Debug.LogError("[SaveRoundTrip] v4 -> v5 migration lost value(s); the keyed records do not match the columns.");
+                ok = false;
+            }
+            else
+            {
+                Debug.Log($"[SaveRoundTrip] v4 -> v5 migration: {migratedV4.levels.Count} keyed level(s), all numbers preserved.");
             }
 
             // A v1 file (no version at all) must still land on the current schema.

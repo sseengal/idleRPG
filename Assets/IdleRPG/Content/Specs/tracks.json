@@ -1,0 +1,107 @@
+{
+    "version": 1,
+    "statUpgrades": [
+        {
+            "id": "StatUpgrade_ATK",
+            "asset": "StatUpgrade_ATK",
+            "statType": "attack",
+            "displayName": "ATK",
+            "description": "ATK x1.09 per level (compounds).",
+            "baseCost": 10.0,
+            "costGrowth": 1.0700000524520874,
+            "statGainPerLevelFraction": 0.09000000357627869,
+            "effectMode": "multiplicative",
+            "maxLevel": 0
+        },
+        {
+            "id": "StatUpgrade_DEF",
+            "asset": "StatUpgrade_DEF",
+            "statType": "defense",
+            "displayName": "DEF",
+            "description": "DEF x1.05 per level (compounds).",
+            "baseCost": 15.0,
+            "costGrowth": 1.0700000524520874,
+            "statGainPerLevelFraction": 0.05000000074505806,
+            "effectMode": "multiplicative",
+            "maxLevel": 0
+        },
+        {
+            "id": "StatUpgrade_HP",
+            "asset": "StatUpgrade_HP",
+            "statType": "health",
+            "displayName": "HP",
+            "description": "HP x1.09 per level (compounds).",
+            "baseCost": 12.0,
+            "costGrowth": 1.0700000524520874,
+            "statGainPerLevelFraction": 0.09000000357627869,
+            "effectMode": "multiplicative",
+            "maxLevel": 0
+        }
+    ],
+    "prestigeUpgrades": [
+        {
+            "id": "Prestige_Damage",
+            "asset": "Prestige_Damage",
+            "effectType": "damagepercent",
+            "displayName": "War Mastery",
+            "description": "+20% Damage per level.",
+            "baseCostTokens": 1.0,
+            "costGrowth": 1.399999976158142,
+            "effectPerLevel": 0.20000000298023224,
+            "maxLevel": 25
+        },
+        {
+            "id": "Prestige_Gold",
+            "asset": "Prestige_Gold",
+            "effectType": "goldpercent",
+            "displayName": "Gold Mastery",
+            "description": "+20% Gold per level.",
+            "baseCostTokens": 1.0,
+            "costGrowth": 1.399999976158142,
+            "effectPerLevel": 0.20000000298023224,
+            "maxLevel": 25
+        },
+        {
+            "id": "Prestige_Health",
+            "asset": "Prestige_Health",
+            "effectType": "healthpercent",
+            "displayName": "Vitality Mastery",
+            "description": "+20% HP per level.",
+            "baseCostTokens": 1.0,
+            "costGrowth": 1.399999976158142,
+            "effectPerLevel": 0.20000000298023224,
+            "maxLevel": 25
+        },
+        {
+            "id": "Track_GoldHoarder",
+            "asset": "Track_GoldHoarder",
+            "effectType": "goldpercent",
+            "displayName": "Gold Hoarder",
+            "description": "+2% Gold per level.",
+            "baseCostTokens": 2.0,
+            "costGrowth": 1.5,
+            "effectPerLevel": 0.019999999552965164,
+            "maxLevel": 20
+        }
+    ],
+    "automationUpgrades": [
+        {
+            "id": "AutoBuy",
+            "asset": "AutoBuy",
+            "automationId": "autoBuy",
+            "displayName": "Auto-Buy Manager",
+            "description": "Spends a little gold on the cheapest upgrade every few seconds - and never touches the reserve you set.",
+            "baseCostTokens": 4.0,
+            "minAscensions": 1
+        },
+        {
+            "id": "FastForward",
+            "asset": "FastForward",
+            "automationId": "fastForward",
+            "displayName": "Speed Button",
+            "description": "Doubles combat pace while it is on.",
+            "baseCostTokens": 6.0,
+            "minAscensions": 2
+        }
+    ]
+}

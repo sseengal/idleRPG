@@ -6,6 +6,7 @@ using IdleRPG.Combat;
 using IdleRPG.Core;
 using IdleRPG.Data;
 using IdleRPG.Debugging;
+using IdleRPG.EditorTools.Content;
 
 namespace IdleRPG.EditorTools
 {
@@ -49,14 +50,100 @@ namespace IdleRPG.EditorTools
         public static FormationData LoadFormationConfig() =>
             LoadAsset<FormationData>(ConfigFolder + "/Formation_Default.asset");
 
+        /// <summary>
+        /// The gold-bought hero stat tracks, in spec order. Loading from the spec (not a hardcoded list) is what makes
+        /// "a new track = one spec row + generate + scene rebuild" true: a new entry here is picked up automatically.
+        /// </summary>
         public static List<StatUpgradeData> LoadStatTracks()
         {
-            return LoadOrdered<StatUpgradeData>(ConfigFolder, "StatUpgrade_ATK", "StatUpgrade_HP", "StatUpgrade_DEF");
+            List<StatUpgradeData> tracks = new List<StatUpgradeData>();
+            UpgradeSpecFile spec = ContentSpecIO.Load<UpgradeSpecFile>(ContentSpecIO.TracksPath);
+
+            if (spec == null)
+            {
+                return tracks;
+            }
+
+            for (int i = 0; i < spec.statUpgrades.Count; i++)
+            {
+                StatUpgradeSpec entry = spec.statUpgrades[i];
+                if (entry == null)
+                {
+                    continue;
+                }
+
+                string assetName = string.IsNullOrEmpty(entry.asset) ? entry.id : entry.asset;
+                StatUpgradeData asset = LoadAsset<StatUpgradeData>(ConfigFolder + "/" + assetName + ".asset");
+
+                if (asset != null)
+                {
+                    tracks.Add(asset);
+                }
+            }
+
+            return tracks;
         }
 
+        /// <summary>The token-bought permanent tracks, in spec order (same "new row is picked up" rule).</summary>
         public static List<PrestigeUpgradeData> LoadPrestigeUpgrades()
         {
-            return LoadOrdered<PrestigeUpgradeData>(ConfigFolder, "Prestige_Gold", "Prestige_Damage", "Prestige_Health");
+            List<PrestigeUpgradeData> tracks = new List<PrestigeUpgradeData>();
+            UpgradeSpecFile spec = ContentSpecIO.Load<UpgradeSpecFile>(ContentSpecIO.TracksPath);
+
+            if (spec == null)
+            {
+                return tracks;
+            }
+
+            for (int i = 0; i < spec.prestigeUpgrades.Count; i++)
+            {
+                PrestigeUpgradeSpec entry = spec.prestigeUpgrades[i];
+                if (entry == null)
+                {
+                    continue;
+                }
+
+                string assetName = string.IsNullOrEmpty(entry.asset) ? entry.id : entry.asset;
+                PrestigeUpgradeData asset = LoadAsset<PrestigeUpgradeData>(ConfigFolder + "/" + assetName + ".asset");
+
+                if (asset != null)
+                {
+                    tracks.Add(asset);
+                }
+            }
+
+            return tracks;
+        }
+
+        /// <summary>The automation cards (auto-buy manager, speed button), in spec order (B6).</summary>
+        public static List<AutomationDef> LoadAutomationDefs()
+        {
+            List<AutomationDef> defs = new List<AutomationDef>();
+            UpgradeSpecFile spec = ContentSpecIO.Load<UpgradeSpecFile>(ContentSpecIO.TracksPath);
+
+            if (spec == null)
+            {
+                return defs;
+            }
+
+            for (int i = 0; i < spec.automationUpgrades.Count; i++)
+            {
+                AutomationSpec entry = spec.automationUpgrades[i];
+                if (entry == null)
+                {
+                    continue;
+                }
+
+                string assetName = string.IsNullOrEmpty(entry.asset) ? entry.id : entry.asset;
+                AutomationDef def = LoadAsset<AutomationDef>(ConfigFolder + "/" + assetName + ".asset");
+
+                if (def != null)
+                {
+                    defs.Add(def);
+                }
+            }
+
+            return defs;
         }
 
         /// <summary>Loads assets by file name, preserving order and skipping nulls.</summary>
@@ -144,7 +231,7 @@ namespace IdleRPG.EditorTools
             DebugHotkeys hotkeys = root.AddComponent<DebugHotkeys>();
 
             gameManager.EditorInitialize(balance, waveConfig, partyConfig, combatManager, formationConfig);
-            gameManager.EditorInitializeProgression(statTracks, prestigeUpgrades);
+            gameManager.EditorInitializeProgression(statTracks, prestigeUpgrades, LoadAutomationDefs());
             hotkeys.EditorInitialize(gameManager);
 
             SetField(combatManager, "logCombatEvents", enableDebugLogger);

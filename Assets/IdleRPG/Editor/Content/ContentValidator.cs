@@ -58,7 +58,7 @@ namespace IdleRPG.EditorTools.Content
             EnemySpecFile enemies = ContentSpecIO.Load<EnemySpecFile>(ContentSpecIO.EnemiesPath);
             PartySpecFile party = ContentSpecIO.Load<PartySpecFile>(ContentSpecIO.PartyPath);
             WaveSpecFile waves = ContentSpecIO.Load<WaveSpecFile>(ContentSpecIO.WavesPath);
-            UpgradeSpecFile upgrades = ContentSpecIO.Load<UpgradeSpecFile>(ContentSpecIO.UpgradesPath);
+            UpgradeSpecFile upgrades = ContentSpecIO.Load<UpgradeSpecFile>(ContentSpecIO.TracksPath);
 
             CheckHeroes(heroes);
             CheckEnemies(enemies);
@@ -66,9 +66,11 @@ namespace IdleRPG.EditorTools.Content
             CheckWaves(waves, enemies);
             CheckUpgrades(upgrades);
             CheckAssetsAgainstSpecs(heroes, enemies);
+            CheckAssetReferences(enemies, heroes);
             CheckFormation();
             CheckEncounters();
             CheckBalanceBand();
+            CheckLoopHealth();
 
             WriteCsv();
             LogSummary();

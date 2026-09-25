@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.StatUpgradeData
   statType: 1
   displayName: HP
-  description: +10% of base HP per level.
+  description: HP x1.09 per level (compounds).
   baseCost: 12
   costGrowthMultiplier: 1.07
-  statGainPerLevelFraction: 0.1
+  effectMode: 1
+  statGainPerLevelFraction: 0.09
   maxLevel: 0

@@ -187,10 +187,15 @@ namespace IdleRPG.Core
             data.prestigeTokens = Economy != null ? Economy.PrestigeTokens : 0d;
 
             Resolver?.WriteToSave(data, partyConfig);
+            Tracks?.WriteToSave(data);
+            Automation?.WriteToSave(data);
             Boost?.WriteToSave(data);
             if (Ledger != null)
             {
-                data.lastGoldPerSecond = Ledger.GoldPerSecond;
+                // B6 Step 3 honesty guard: the measured rate is normalised to base tempo, so the Speed Button
+                // (or any future boost) can never inflate the offline / instant-income quotes.
+                double tempo = Automation != null ? Automation.SpeedMultiplier : 1d;
+                data.lastGoldPerSecond = tempo > 1d ? Ledger.GoldPerSecond / tempo : Ledger.GoldPerSecond;
             }
 
             Shop?.WriteToSave(data);
@@ -236,6 +241,8 @@ namespace IdleRPG.Core
 
             Economy?.Restore(data.gold, data.gems, data.prestigeTokens);
             Resolver?.FillFromSave(data, partyConfig);
+            Tracks?.FillFromSave(data);
+            Automation?.FillFromSave(data);
             Boost?.Restore(data.goldBoostActive, data.goldBoostExpiresAtBinary);
             Ledger?.SeedGoldPerSecond(data.lastGoldPerSecond);
             Shop?.Restore(data.offlineEquivalentCapBonusSeconds, data.offlineCapExtensionsPurchased);

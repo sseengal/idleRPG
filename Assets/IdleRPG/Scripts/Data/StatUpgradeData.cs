@@ -1,4 +1,5 @@
 using UnityEngine;
+using IdleRPG.Progression;
 
 namespace IdleRPG.Data
 {
@@ -52,7 +53,13 @@ namespace IdleRPG.Data
         [SerializeField] private float costGrowthMultiplier = 1.07f;
 
         [Header("Effect")]
-        [Tooltip("Stat gain per level as a fraction of the hero's base stat. 0.1 = +10% of base per level.")]
+        [Tooltip("How the per-level gain composes. AdditiveBase = base * (1 + level * gain) - linear (shipped MVP). " +
+                 "Multiplicative = base * (1 + gain)^level - compounding, required to race the exponential " +
+                 "content curve (enemy HP x1.15 per stage). Level 0 returns the base stat in both modes.")]
+        [SerializeField] private StatEffectMode effectMode = StatEffectMode.AdditiveBase;
+
+        [Tooltip("Stat gain per level as a fraction. AdditiveBase: +10% of base per level. " +
+                 "Multiplicative: x1.10 per level (use 0.09 for the derived x1.09 target).")]
         [SerializeField] private float statGainPerLevelFraction = 0.1f;
 
         [Tooltip("Level cap. 0 = unlimited.")]
@@ -78,6 +85,12 @@ namespace IdleRPG.Data
         }
 
         public float StatGainPerLevelFraction => Mathf.Max(0f, statGainPerLevelFraction);
+
+        /// <summary>How the per-level gain composes (additive by default; compounding when set).</summary>
+        public StatEffectMode EffectMode => effectMode;
+
+        /// <summary>True when this track compounds: value = base * (1 + gain)^level.</summary>
+        public bool IsCompounding => effectMode == StatEffectMode.Multiplicative;
 
         /// <summary>int.MaxValue when unlimited.</summary>
         public int MaxLevel => maxLevel <= 0 ? int.MaxValue : maxLevel;
