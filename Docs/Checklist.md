@@ -12,7 +12,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **B6 automation IN PROGRESS** (Steps 1-3 done; Fix A one-shot power compensation + Fix D power-band watchdog landed 2026-09-25). Next: Step 4 robot learns the cards (or straight to B7), then B8 -> B9, device pass last |
+| Current step | **B6 automation IN PROGRESS** (Steps 1-3 done; Fix A one-shot power compensation + Fix D power-band watchdog landed and **player-verified live** 2026-09-25). Next: B6 Step 4 robot learns the cards (or straight to B7), then B8 -> B9, device pass last |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money.** No statuses/abilities/zones/affixes/gear/roster/relics before the base is done |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
@@ -693,6 +693,10 @@ robot, so a change that halved DPS or reintroduced the additive stall still said
   that band every run, and the robot reports fastest-stage + sub-10s stage count, so power-glut can never quietly
   return. Verified: drift suite PASS (incl. the stray-marker regression + float-format tolerance for doubles),
   `Run All Checks` PASS, live load of the player's save shows 25/25/52 + 26 and ATK 103 (was 11,839).
+- **Verified live by the player (2026-09-25):** one-shotting gone at the compensated levels; stage-28 combat
+  ticks normally (multi-hit fights, HP drains / walls return). The earlier play-loop wedge (editor stuck at
+  frame 1 after the crash/restart storm) cleared on a fresh Unity relaunch. Fix A is DONE. Session closed here
+  for the day; next up: B6 Step 4 (robot learns the cards) or B7.
 
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 
