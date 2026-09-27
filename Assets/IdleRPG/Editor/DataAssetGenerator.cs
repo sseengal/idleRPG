@@ -119,7 +119,7 @@ namespace IdleRPG.EditorTools
                 .Set("startingGems", 0d)
                 .Set("goldPerSecondSampleWindowSec", 60f)
                 .Set("adGoldBoostMultiplier", 2d)
-                .Set("adGoldBoostDurationSec", 3600f)
+                .Set("adGoldBoostDurationSec", 1800f)
                 .Set("autosaveIntervalSec", 15f)
                 .Apply();
 
@@ -128,6 +128,27 @@ namespace IdleRPG.EditorTools
                     .SetIntArray("dailyStreakGems", new[] { 5, 8, 10, 12, 15, 18, 25 })
                     .Set("dailyStreakDay7Boost", true)
                     .Apply();
+
+                // B7 S3: the rewarded-ad placements (caps + cooldowns).
+                var placementSo = new SerializedObject(balance);
+                SerializedProperty placements = placementSo.FindProperty("adPlacements");
+                if (placements != null && placements.isArray)
+                {
+                    placements.arraySize = 2;
+
+                    SerializedProperty boost = placements.GetArrayElementAtIndex(0);
+                    boost.FindPropertyRelative("PlacementId").intValue = (int)AdPlacementId.GoldBoost;
+                    boost.FindPropertyRelative("DailyCap").intValue = 5;
+                    boost.FindPropertyRelative("CooldownSec").floatValue = 300f;
+
+                    SerializedProperty doubleOffline = placements.GetArrayElementAtIndex(1);
+                    doubleOffline.FindPropertyRelative("PlacementId").intValue = (int)AdPlacementId.DoubleOffline;
+                    doubleOffline.FindPropertyRelative("DailyCap").intValue = 3;
+                    doubleOffline.FindPropertyRelative("CooldownSec").floatValue = 30f;
+
+                    placementSo.ApplyModifiedPropertiesWithoutUndo();
+                    EditorUtility.SetDirty(balance);
+                }
         }
 
         // ------------------------------------------------------------------

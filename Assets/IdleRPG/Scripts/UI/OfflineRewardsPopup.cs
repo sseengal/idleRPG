@@ -2,6 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using IdleRPG.Core;
+using IdleRPG.Data;
 using IdleRPG.Save;
 using IdleRPG.Utils;
 
@@ -20,8 +21,10 @@ namespace IdleRPG.UI
         [SerializeField] private TextMeshProUGUI goldLabel;
         [SerializeField] private TextMeshProUGUI capNoteLabel;
         [SerializeField] private Button claimButton;
+        [SerializeField] private Button doubleButton;
 
         private OfflineRewardResult pendingReward;
+        private GameManager manager;
 
         /// <summary>Modal dialogs must sit above every other canvas, whatever the scene was built with.</summary>
         private const int ModalSortingOrder = 100;
@@ -44,6 +47,11 @@ namespace IdleRPG.UI
             if (claimButton != null)
             {
                 claimButton.onClick.AddListener(OnClaimClicked);
+            }
+
+            if (doubleButton != null)
+            {
+                doubleButton.onClick.AddListener(OnDoubleClicked);
             }
         }
 
@@ -96,6 +104,52 @@ namespace IdleRPG.UI
                 root.SetActive(true);
                 root.transform.SetAsLastSibling();
             }
+
+            // The doubled-offline offer: hidden for no-ads owners and when the day's cap is spent.
+            if (doubleButton != null)
+            {
+                EnsureManager();
+                bool offerDouble = manager != null && !manager.AdsDisabledByNoAds &&
+                                   manager.AdCaps != null &&
+                                   manager.AdCaps.RemainingToday(AdPlacementId.DoubleOffline) > 0;
+                doubleButton.gameObject.SetActive(offerDouble);
+            }
+        }
+
+        /// <summary>Watch an ad to claim DOUBLE the quoted gold (same ledger-neutral till, no rate change).</summary>
+        private void OnDoubleClicked()
+        {
+            if (!pendingReward.HasReward)
+            {
+                Hide();
+                return;
+            }
+
+            EnsureManager();
+            if (manager == null)
+            {
+                return;
+            }
+
+            double quoted = pendingReward.Gold;
+
+            manager.TryShowAdPlacement(AdPlacementId.DoubleOffline, () =>
+            {
+                GameEvents.RaiseOfflineRewardsClaimed(quoted * 2d);
+                pendingReward = OfflineRewardResult.None;
+                Hide();
+            });
+        }
+
+        private void EnsureManager()
+        {
+            if (manager != null)
+            {
+                return;
+            }
+
+            HudController hud = HudController.Instance;
+            manager = hud != null ? hud.GameManager : null;
         }
 
         private void OnClaimClicked()

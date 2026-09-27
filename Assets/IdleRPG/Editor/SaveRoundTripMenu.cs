@@ -142,6 +142,17 @@ namespace IdleRPG.EditorTools
             data.dailyStreakLastDate = "2026-09-26";
             data.dailyStreakCount = 4;
 
+            data.adRedemptions = new System.Collections.Generic.List<AdRedemptionRecord>
+            {
+                new AdRedemptionRecord
+                {
+                    placementId = 0,
+                    dayStamp = 20260926,
+                    redemptions = 2,
+                    lastRedeemedBinary = 638999999999999999d
+                }
+            };
+
             return data;
         }
 

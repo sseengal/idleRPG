@@ -348,12 +348,36 @@ namespace IdleRPG.UI
 
             if (watchAdLabel != null)
             {
-                watchAdLabel.SetText(noAds ? "ADS REMOVED" : (active ? "BOOST ACTIVE" : "WATCH AD"));
+                if (noAds)
+                {
+                    watchAdLabel.SetText("ADS REMOVED");
+                }
+                else if (active)
+                {
+                    watchAdLabel.SetText("BOOST ACTIVE");
+                }
+                else
+                {
+                    double waitSeconds = 0d;
+                    bool capsOk = manager.AdCaps != null &&
+                                  manager.AdCaps.CanShow(IdleRPG.Data.AdPlacementId.GoldBoost, out waitSeconds);
+                    int left = manager.AdCaps != null
+                        ? manager.AdCaps.RemainingToday(IdleRPG.Data.AdPlacementId.GoldBoost)
+                        : 0;
+
+                    watchAdLabel.SetText(!capsOk
+                        ? (waitSeconds > 0d
+                            ? string.Format("WATCH AD (in {0:0}m)", waitSeconds / 60d)
+                            : "DAILY AD LIMIT")
+                        : string.Format("WATCH AD ({0} left)", left));
+                }
             }
 
             if (watchAdButton != null)
             {
-                watchAdButton.interactable = !noAds && manager.Ads != null && manager.Ads.IsRewardedAdReady;
+                bool capsOk = manager.AdCaps != null &&
+                              manager.AdCaps.CanShow(IdleRPG.Data.AdPlacementId.GoldBoost, out _);
+                watchAdButton.interactable = !noAds && capsOk && manager.Ads != null && manager.Ads.IsRewardedAdReady;
             }
 
             for (int i = 0; i < rows.Count; i++)

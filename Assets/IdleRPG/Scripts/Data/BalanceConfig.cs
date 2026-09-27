@@ -74,6 +74,16 @@ namespace IdleRPG.Data
 
         [Tooltip("The streak-cap day (day 7 with the shipped table) also starts a short gold boost.")]
         [SerializeField] private bool dailyStreakDay7Boost = true;
+// ------------------------------------------
+        // Ad placements (B7 S3)
+        // ------------------------------------------
+        [Header("Ad Placements (B7 S3)")]
+        [Tooltip("Per-day limits for each rewarded-ad placement: max redemptions per local day + minimum gap.")]
+        [SerializeField] private List<AdPlacementDef> adPlacements = new List<AdPlacementDef>
+        {
+            new AdPlacementDef(AdPlacementId.GoldBoost, 5, 300f),
+            new AdPlacementDef(AdPlacementId.DoubleOffline, 3, 30f)
+        };
 
         [Tooltip("Delay between clearing a wave and spawning the next, in seconds.")]
         [SerializeField] private float waveTransitionDelaySec = 0.5f;
@@ -348,6 +358,28 @@ namespace IdleRPG.Data
             int[] table = DailyStreakGems;
             int index = day < 1 ? 0 : (day > table.Length ? table.Length - 1 : day - 1);
             return table[index];
+        }
+
+        // ------------------------------------------------------------------
+        // Ad placements (B7 S3)
+        // ------------------------------------------------------------------
+        /// <summary>Per-day limits for a placement; falls back to a sane default when unconfigured.</summary>
+        public AdPlacementDef GetAdPlacement(AdPlacementId placementId)
+        {
+            if (adPlacements != null)
+            {
+                for (int i = 0; i < adPlacements.Count; i++)
+                {
+                    if (adPlacements[i] != null && adPlacements[i].PlacementId == placementId)
+                    {
+                        return adPlacements[i];
+                    }
+                }
+            }
+
+            return placementId == AdPlacementId.GoldBoost
+                ? new AdPlacementDef(AdPlacementId.GoldBoost, 5, 300f)
+                : new AdPlacementDef(AdPlacementId.DoubleOffline, 3, 30f);
         }
 
         public float WaveTransitionDelaySec => Mathf.Max(0f, waveTransitionDelaySec);

@@ -32,6 +32,13 @@ MonoBehaviour:
   milestoneStageInterval: 5
   dailyStreakGems: 05000000080000000a0000000c0000000f0000001200000019000000i
   dailyStreakDay7Boost: 1
+  adPlacements:
+  - PlacementId: 0
+    DailyCap: 5
+    CooldownSec: 300
+  - PlacementId: 1
+    DailyCap: 3
+    CooldownSec: 30
   waveTransitionDelaySec: 0.6
   minDamageRatio: 0.15
   criticalChance: 0.05
@@ -65,5 +72,5 @@ MonoBehaviour:
   startingGems: 0
   goldPerSecondSampleWindowSec: 60
   adGoldBoostMultiplier: 2
-  adGoldBoostDurationSec: 3600
+  adGoldBoostDurationSec: 1800
   autosaveIntervalSec: 15

@@ -248,6 +248,7 @@ namespace IdleRPG.Core
             data.lastPageIndex = LastPageIndex;
             data.dailyStreakLastDate = DailyStreak?.LastClaimDate ?? "";
             data.dailyStreakCount = DailyStreak?.StreakCount ?? 0;
+            AdCaps?.WriteToSave(data);
 
             return data;
         }
@@ -286,6 +287,7 @@ namespace IdleRPG.Core
             Ledger?.SeedGoldPerSecond(data.lastGoldPerSecond);
             Shop?.Restore(data.offlineEquivalentCapBonusSeconds, data.offlineCapExtensionsPurchased);
             DailyStreak?.Restore(data.dailyStreakLastDate, data.dailyStreakCount);
+            AdCaps?.Restore(data.adRedemptions);
 
             // Give the loaded values to combat (Initialize() would reset the stage to 1).
             combatManager.SetProgress(CurrentStage, RestoredWave, healParty: true);
@@ -310,6 +312,73 @@ namespace IdleRPG.Core
 
         /// <summary>True when the player owns the "no ads" purchase (B7 S1): the watch-ad buttons must disappear.</summary>
         public bool AdsDisabledByNoAds => Iap != null && Iap.IsOwned(IapCatalog.SkuNoAds);
+
+        /// <summary>
+        /// The ONE gate for every rewarded ad (B7 S3): no-ads -> caps + cooldown -> ready check -> show. On a
+        /// completed ad the redemption is recorded and saved before <paramref name="onReward"/> runs, so a whirlwind
+        /// tap-spam or crash can never over-pay a placement.
+        /// </summary>
+        public bool TryShowAdPlacement(AdPlacementId placement, Action onReward)
+        {
+            if (Ads == null || AdCaps == null)
+            {
+                return false;
+            }
+
+            if (AdsDisabledByNoAds)
+            {
+                GameEvents.RaiseToast("Ads removed - enjoy the quiet!");
+                return false;
+            }
+
+            if (!AdCaps.CanShow(placement, out double waitSeconds))
+            {
+                if (waitSeconds > 0d)
+                {
+                    GameEvents.RaiseToast(string.Format("Ad recently used - try again in about {0:0} min.", waitSeconds / 60d));
+                }
+                else
+                {
+                    GameEvents.RaiseToast("Daily ad limit reached - come back tomorrow.");
+                }
+
+                return false;
+            }
+
+            if (!Ads.IsRewardedAdReady)
+            {
+                GameEvents.RaiseToast("Ad not ready yet.");
+                return false;
+            }
+
+            Ads.ShowRewardedAd(success =>
+            {
+                if (!success)
+                {
+                    GameEvents.RaiseToast("Ad skipped - no reward.");
+                    return;
+                }
+
+                AdCaps.MarkShown(placement);
+                Save?.SaveNow("ad");
+                onReward?.Invoke();
+            });
+
+            return true;
+        }
+
+        /// <summary>Shows the GoldBoost ad, then activates the 2x gold boost (Shop CTA + the B hotkey).</summary>
+        public bool WatchAdForGoldBoost()
+        {
+            return TryShowAdPlacement(AdPlacementId.GoldBoost, () =>
+            {
+                if (Boost != null)
+                {
+                    Boost.Activate();
+                    LogFlow($"Ad boost active: x{Boost.GoldMultiplier:0.#} gold for {Boost.RemainingSeconds / 60f:0.#} min.");
+                }
+            });
+        }
 
         /// <summary>
         /// The single IAP funnel (B7 S1). The store confirms payment (<see cref="IIapService"/>), then this
@@ -365,39 +434,6 @@ namespace IdleRPG.Core
                 Save?.MarkDirty("iap");
                 LogFlow($"IAP bought: {product.DisplayName} (+{product.GemsGranted:0} gems, +{product.OfflineCapBonusMinutes:0} min offline cap).");
                 GameEvents.RaiseToast($"{product.DisplayName} purchased!");
-            });
-        }
-
-        /// <summary>Shows a rewarded ad, then grants the 2x gold boost on success (Shop panel).</summary>
-        public void WatchAdForGoldBoost()
-        {
-            if (Ads == null || Boost == null)
-            {
-                return;
-            }
-
-            if (AdsDisabledByNoAds)
-            {
-                GameEvents.RaiseToast("Ads removed - enjoy the quiet!");
-                return;
-            }
-
-            if (!Ads.IsRewardedAdReady)
-            {
-                GameEvents.RaiseToast("Ad not ready yet.");
-                return;
-            }
-
-            Ads.ShowRewardedAd(success =>
-            {
-                if (!success)
-                {
-                    GameEvents.RaiseToast("Ad skipped - no reward.");
-                    return;
-                }
-
-                Boost.ActivateFromAd();
-                LogFlow($"Ad boost active: x{Boost.GoldMultiplier:0.#} gold for {Boost.RemainingSeconds / 60f:0.#} min.");
             });
         }
     }

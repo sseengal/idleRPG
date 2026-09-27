@@ -263,7 +263,9 @@ namespace IdleRPG.Save
             OfflineRewardResult claimed = Pending;
             Pending = OfflineRewardResult.None;
 
-            double payable = claimed.Gold > 0d ? claimed.Gold : gold;
+            // The popup decides the exact amount: a plain claim passes the quote itself, and the double-offline
+            // ad passes 2x the quote. Pay what was said (never silently clamp back to a single payout).
+            double payable = gold > 0d ? gold : claimed.Gold;
 
             // Through the till, flagged external: paid in full, excluded from the measured rate.
             PayExternal(payable, RewardService.Source.OfflineClaim);

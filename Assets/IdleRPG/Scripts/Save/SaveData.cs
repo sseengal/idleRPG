@@ -103,6 +103,21 @@ namespace IdleRPG.Save
         }
     }
 
+    /// <summary>One rewarded-ad placement's daily usage (B7 S3): which slot, the local day it belongs to, how many
+    /// redemptions that day, and when the last one happened (cooldown). Additive in schema v5.</summary>
+    [Serializable]
+    public class AdRedemptionRecord
+    {
+        public int placementId;
+        public int dayStamp;
+        public int redemptions;
+        public double lastRedeemedBinary;
+
+        public AdRedemptionRecord()
+        {
+        }
+    }
+
     /// <summary>Permanent (prestige) upgrade level snapshot.</summary>
     [Serializable]
     public class PrestigeUpgradeRecord
@@ -159,6 +174,9 @@ namespace IdleRPG.Save
         // --- Daily streak (schema v5 additive, B7 S2): local date of the last claim + the streak length ---
         public string dailyStreakLastDate = "";
         public int dailyStreakCount;
+
+        // --- Ad redemptions (schema v5 additive, B7 S3): per-placement daily use counters ---
+        public List<AdRedemptionRecord> adRedemptions = new List<AdRedemptionRecord>();
 
         // --- Power era (v5 additive, Fix A 2026-09-25): has this save received the one-time compensation? ---
         /// <summary>

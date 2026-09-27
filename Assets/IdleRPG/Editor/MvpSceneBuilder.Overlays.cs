@@ -63,8 +63,11 @@ namespace IdleRPG.EditorTools
                 TextAlignmentOptions.Center, DimTextColor);
             UiFactory.Anchor(capNote.rectTransform, new Vector2(0.08f, 0.31f), new Vector2(0.92f, 0.46f));
 
+            Button doubleButton = UiFactory.Button("DoubleButton", dialog.transform, "DOUBLE WITH AD", "ui_button", 22f, TextColor, null);
+            UiFactory.Anchor(doubleButton.GetComponent<RectTransform>(), new Vector2(0.06f, 0.07f), new Vector2(0.47f, 0.27f));
+
             Button claimButton = UiFactory.Button("ClaimButton", dialog.transform, "CLAIM", "ui_button_gold", 30f, TextColor, null);
-            UiFactory.Anchor(claimButton.GetComponent<RectTransform>(), new Vector2(0.22f, 0.07f), new Vector2(0.78f, 0.27f));
+            UiFactory.Anchor(claimButton.GetComponent<RectTransform>(), new Vector2(0.53f, 0.07f), new Vector2(0.94f, 0.27f));
 
             title.overflowMode = TextOverflowModes.Ellipsis;
             timeLabel.overflowMode = TextOverflowModes.Ellipsis;
@@ -78,6 +81,7 @@ namespace IdleRPG.EditorTools
             SceneWiringUtility.SetField(ui, "goldLabel", goldLabel);
             SceneWiringUtility.SetField(ui, "capNoteLabel", capNote);
             SceneWiringUtility.SetField(ui, "claimButton", claimButton);
+            SceneWiringUtility.SetField(ui, "doubleButton", doubleButton);
 
             // The scrim is the popup's root: it starts hidden and one SetActive shows dim + dialog together.
             // (The Dialog must stay ACTIVE or the panel would never render - that bug hid the whole dialog.)

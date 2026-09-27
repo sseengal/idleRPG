@@ -126,15 +126,18 @@ namespace IdleRPG.Core
         /// <summary>Every-morning gift calendar (B7 S2). Reads the save, pays the daily gems.</summary>
         public Economy.DailyStreakService DailyStreak { get; private set; }
 
-        /// <summary>
-        /// Debug/testing hook: replace the calendar's "today" (e.g. yesterday/tomorrow) without touching the
-        /// device clock. Null = real local date.
-        /// </summary>
-        public System.DateTime? DailyStreakOverride { get; set; }
+        /// <summary>Per-day ad police (B7 S3): caps + cooldowns per placement, local-midnight rollover.</summary>
+        public Economy.AdCapsService AdCaps { get; private set; }
 
-        private System.DateTime ResolveStreakNow()
+        /// <summary>
+        /// Debug/testing hook: replace the shared game clock's "today" (e.g. yesterday/tomorrow) without touching
+        /// the device clock. Null = real local date. Used by the daily streak AND the ad caps.
+        /// </summary>
+        public System.DateTime? ClockOverride { get; set; }
+
+        private System.DateTime ResolveClockNow()
         {
-            return DailyStreakOverride ?? System.DateTime.Now;
+            return ClockOverride ?? System.DateTime.Now;
         }
 
         /// <summary>Tokens the player would receive by ascending right now (priced on THIS run's best stage).</summary>
@@ -360,8 +363,9 @@ namespace IdleRPG.Core
             Rewards = new RewardService(Economy, Ledger, ResolveGoldReward);
             Shop = new ShopService(balanceConfig, Economy);
 
-            // B7 S2: the every-morning gift. The injected clock lets the debug menu fake today for testing.
-            DailyStreak = new Economy.DailyStreakService(balanceConfig, ResolveStreakNow);
+            // B7 S2/S3: the every-morning gift + the ad police. One injected clock (fake-able by the debug menu).
+            DailyStreak = new Economy.DailyStreakService(balanceConfig, ResolveClockNow);
+            AdCaps = new Economy.AdCapsService(balanceConfig, ResolveClockNow);
 
             // Step 10a/10b: the board the party stands on. Created **before** the load so a saved layout can be
             // restored into it; with no saved layout the default placement (the MVP's fixed lanes) is used, so a

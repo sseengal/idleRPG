@@ -12,12 +12,12 @@
 
 | Field | Value |
 |---|---|
-| Current step | **B7 S3 NEXT: ad placements + caps** (B7 S2 - the daily streak - DONE 2026-09-27, §1l). Then S4 gem sinks, S5 validator guard; then B8, B9, device pass last |
+| Current step | **B7 S4 NEXT: gem sinks** (B7 S3 - ad placements + caps - built 2026-09-27, §1m; play verification pending the editor bridge). Then S5 validator guard; then B8, B9, device pass last |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money.** No statuses/abilities/zones/affixes/gear/roster/relics before the base is done |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
-| Last completed | B7 S2 - the daily streak, every-morning gift (see §1l), 2026-09-27 |
-| Next after this | B7 S3: ad placements (x2 boost 30 min, double-offline on the popup) + per-day caps; then S4 gem sinks, S5 validator guard; then B8 -> B9, device pass (B1) last |
+| Last completed | B7 S3 - ad placements + per-day caps (built; see §1m), 2026-09-27 |
+| Next after this | B7 S4: gem sinks (permanent +5% gold track, automation unlock via gems); then S5 validator guard + overlay readout; then B8 -> B9, device pass (B1) last |
 | Save schema | v5 (v3 -> v4 adds `runBestStage`; v4 -> v5 = one keyed `levels` list; additive migrations, no data loss - see §1h / B35-B36) |
 | Shipped build | `Builds/IdleRPG-mac.app` verified (boot, save, offline, combat) |
 | Docs | all live in `Docs/` - index `Docs/README.md`; status here; backlog `Roadmap.md`; removals `Docs/REVIEW.md` (R1: obsolete MVP journal deleted) |
@@ -807,6 +807,35 @@ claim also on background-resume, persist-then-pay, injected clock, neutral `Boos
   clean reset -> `441 gems · Day-1 streak (next +8)` in the shop header; save drift `v5 -> v5 additive-only`
   (2238 chars, incl. the 2 new fields); `Run All Checks` = **PASS** (goldens + battle log untouched).
   Screenshot: `Assets/Screenshots/shop_streak.png`.
+
+## 1m. B7 S3 — ad placements + per-day caps  ·  **built 2026-09-27 (play pass pending)**
+
+The "rules for the cartoon machine": two rewarded placements, each with data-driven daily caps + cooldowns, every
+payout through the one till. Plan `Monetisation.md` §6 item 3; owner-approved numbers (boost 5/day/5min, double
+3/day/30s, boost retuned 60 -> 30 min).
+
+- **`Data/AdPlacementDef.cs`** (new) + `BalanceConfig.adPlacements`: `GoldBoost {5/day, 300s}`,
+  `DoubleOffline {3/day, 30s}`. `GetAdPlacement` falls back to sane defaults when unconfigured.
+- **`Economy/AdCapsService.cs`** (new, pure C#, injected clock like the streak): `RemainingToday`, `CanShow`
+  (cap + cooldown left), `MarkShown`, local-midnight rollover, `Restore`/`WriteToSave`. Save v5 additive
+  (`List<AdRedemptionRecord>`).
+- **`GameManager.TryShowAdPlacement(placement, onReward)`** - the ONE ad gate: no-ads -> caps/cooldown -> ready
+  -> show -> `MarkShown` + `SaveNow` -> reward. `WatchAdForGoldBoost` (shop CTA + hotkey B) now routes through it.
+- **Boost retune** `adGoldBoostDurationSec` 3600 -> 1800 (`Generate Data Assets` writes it; asset verified).
+- **Popup**: `DOUBLE WITH AD` beside CLAIM (hidden for no-ads owners and when the day's cap is spent); pays exactly
+  2x the quoted offline gold.
+- **Shop CTA**: `WATCH AD (N left)` / `DAILY AD LIMIT` / `WATCH AD (in Nm)`; disabled at cap.
+- **`ClockOverride`** replaces `DailyStreakOverride` (one fake clock for streak + caps); `Editor/AdDebugMenu.cs`
+  (Log Caps, Reset Daily Caps, Simulate Next Day) + `Editor/AdCapsSelfCheck.cs` (batchmode-runnable: caps,
+  rollover, cooldown, save round-trip).
+- **BUG FOUND + FIXED in review:** `IdleTimeService.OnOfflineRewardsClaimed` always paid `claimed.Gold` and
+  ignored the event payload, so the "double" path would have paid 1x. It now pays the amount the popup says
+  (`gold > 0 ? gold : claimed.Gold`) - the double works, the plain claim is unchanged.
+- **Status at session pause (2026-09-27):** all code written; last full compile was **clean**; `Generate Data
+  Assets` + `Build MVP Scene` ran (asset + scene regenerated); the IdleTimeService fix landed after that compile,
+  so a fresh compile + the play pass (caps labels, double-offline 2x with the ledger rate unmoved, no-ads hiding)
+  are the next actions. The Editor MCP bridge dropped from the agent session mid-verification (server healthy on
+  port 7800), so verification resumes via the bridge or via `AdCapsSelfCheck` in batchmode.
 
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 

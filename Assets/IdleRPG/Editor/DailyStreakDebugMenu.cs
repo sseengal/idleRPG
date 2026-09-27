@@ -22,7 +22,7 @@ namespace IdleRPG.EditorTools
             }
 
             Debug.Log($"[DailyStreak] lastDate='{manager.DailyStreak.LastClaimDate}' streak={manager.DailyStreak.StreakCount} " +
-                      $"today={manager.DailyStreak.Describe()} override={(manager.DailyStreakOverride.HasValue ? manager.DailyStreakOverride.Value.ToString("yyyy-MM-dd") : "none")}");
+                      $"today={manager.DailyStreak.Describe()} override={(manager.ClockOverride.HasValue ? manager.ClockOverride.Value.ToString("yyyy-MM-dd") : "none")}");
         }
 
         [MenuItem("Tools/Idle RPG/Debug/Daily Streak/Simulate Next-Day Claim (Play)", priority = 131)]
@@ -80,7 +80,7 @@ namespace IdleRPG.EditorTools
                 return;
             }
 
-            manager.DailyStreakOverride = null;
+            manager.ClockOverride = null;
             Debug.Log("[DailyStreak] override cleared - claims now use the real device date.");
         }
 
@@ -94,7 +94,7 @@ namespace IdleRPG.EditorTools
             }
 
             // Wash out any simulated date: lastDate = real today, streak 0 => no claim until tomorrow.
-            manager.DailyStreakOverride = null;
+            manager.ClockOverride = null;
             manager.DailyStreak.Restore(DateTime.Now.Date.ToString("yyyy-MM-dd"), 0);
             manager.Save.SaveNow("streak-reset");
             Debug.Log("[DailyStreak] state reset to a clean 'claimed today, streak 0' - next claim is tomorrow (day 1).");
@@ -128,7 +128,7 @@ namespace IdleRPG.EditorTools
 
         private static void RunClaim(GameManager manager, DateTime target, string note)
         {
-            manager.DailyStreakOverride = target;
+            manager.ClockOverride = target;
             double gemsBefore = manager.Economy.Gems;
             manager.TryClaimDailyStreak();
             double gained = manager.Economy.Gems - gemsBefore;

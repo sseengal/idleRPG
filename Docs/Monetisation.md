@@ -73,8 +73,10 @@ point of doing B5 (tracks) before B7.
 1. `IIapService` + `MockIapService` + no-ads flag (proves the swap seam).  **DONE 2026-09-27** (see `Checklist.md` §1k)
 2. Daily streak + milestone gems (fixes gem scarcity first, so the sinks have something to spend).  **DONE 2026-09-27**
    (see `Checklist.md` §1l - calendar `{5,8,10,12,15,18,25}` + day-7 gold boost, local-midnight, tamper-safe; milestones verified unchanged)
-3. Ad placements (**x2 gold boost**, **double offline** - the redundant "instant claim" was cut: the popup already
-   pays instantly) + per-day caps.
+3. Ad placements (**x2 gold boost** retuned 60 -> 30 min, **double offline** - the redundant "instant claim" was cut:
+   the popup already pays instantly) + per-day caps.  **BUILT 2026-09-27** (see `Checklist.md` §1m - placements
+   `GoldBoost {5/day, 300s}` + `DoubleOffline {3/day, 30s}`, one `TryShowAdPlacement` gate, popup DOUBLE button,
+   shop CTA counters; play pass pending the editor bridge)
 4. Permanent-multiplier + automation sinks (needs B5 and B6; owner-approved 2026-09-27: gems may unlock automation
    as an accelerant - tokens stay the free path).
 5. Validator guard + a shop readout in the dev overlay.
