@@ -230,7 +230,7 @@ namespace IdleRPG.EditorTools
                 Load<PrestigeUpgradeData>("Prestige_Health")
             };
 
-            foreach (ClimbPolicy policy in new[] { ClimbPolicy.Cheapest, ClimbPolicy.AttackOnly })
+            foreach (ClimbPolicy policy in new[] { ClimbPolicy.Cheapest, ClimbPolicy.AttackOnly, ClimbPolicy.Rebirth })
             {
                 Debug.Log(ClimbSimulation.Run(balance, waves, party, statUpgrades, prestigeUpgrades, policy));
             }

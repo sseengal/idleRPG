@@ -16,7 +16,16 @@ namespace IdleRPG.EditorTools
         Cheapest = 0,
 
         /// <summary>Rusher: every coin into ATK, never HP or DEF.</summary>
-        AttackOnly = 1
+        AttackOnly = 1,
+
+        /// <summary>
+        /// B6 Step 4: a player who bought the automation cards (auto-buy always on) and plays the manual
+        /// rebirth loop - buys whenever affordable, and when a wall outlives the rebirth trigger (or beats the
+        /// farm budget) with the ascension gate met, ascends, spends the tokens on permanent upgrades and
+        /// climbs again. Answers the question the single-run robot cannot: does a rebirth actually extend the
+        /// frontier, or is it a coin-sink that never pays for itself?
+        /// </summary>
+        Rebirth = 2
     }
 
     /// <summary>
@@ -35,6 +44,15 @@ namespace IdleRPG.EditorTools
 
         /// <summary>30 simulated minutes stuck on one stage counts as "this wall is a bug, not a wall".</summary>
         private const double MaxWallSeconds = 1800d;
+
+        /// <summary>B6 Step 4: a wall that still holds after this long (with the ascension gate met) is when a
+        /// manual player ascends instead of farming to the wall timeout.</summary>
+        private const double RebirthWallSeconds = 240d;
+
+        /// <summary>B6 Step 4: voluntary-ascent schedule. A real player does not only rebirth at a wall - they
+        /// take the yield when it is worth it. The robot ascends at these run-best stages too, so the rebirth
+        /// loop is always exercised and measured on clean data, not just when a wall forces it.</summary>
+        private static readonly int[] RebirthMilestones = { 20, 40 };
 
         /// <summary>3 simulated hours for the whole climb — the robot stops there and reports.</summary>
         private const double MaxRunSeconds = 10800d;
@@ -85,6 +103,13 @@ namespace IdleRPG.EditorTools
             /// <summary>How many cleared stages took under the glut threshold (10s): content is being one-shot.</summary>
             public int GlutStages;
             public List<ClimbStageRow> ClearedStages;
+
+            /// <summary>Highest stage reached across every rebirth - the honest frontier for the long game (B6 Step 4).</summary>
+            public int LifetimeBestStage;
+            /// <summary>How many manual rebirths the robot performed.</summary>
+            public int Rebirths;
+            /// <summary>Permanent-upgrade levels bought with rebirth tokens.</summary>
+            public int PrestigeLevels;
 
             public bool Stuck => StuckStage > 0;
         }
@@ -143,9 +168,19 @@ namespace IdleRPG.EditorTools
             int reachedStage = 0;
             int stuckStage = 0;
             List<double> shoppingTrips = new List<double>();
+            int runBest = 1;
+            int lifetimeBest = 0;
+            int rebirths = 0;
+            int prestigeLevels = 0;
+            double tokens = 0d;
+            int nextRebirthMilestone = 0;
 
             report.AppendLine($"  party {party.ValidHeroCount} heroes | pace x{pace:0.##} | buys the cheapest affordable upgrade");
             report.AppendLine("  loop: clear -> advance | wipe -> roll back one stage (game rule) and farm it until the frontier falls");
+            if (policy == ClimbPolicy.Rebirth)
+            {
+                report.AppendLine("  automation: auto-buy always on | manual rebirth when a wall outlives the trigger and the gate is met");
+            }
             report.AppendLine("  stage   secs   kills      gold   gold/s  elapsed    ATKx    HPx    DEFx   buys");
 
             int stage = 1;
@@ -169,6 +204,48 @@ namespace IdleRPG.EditorTools
                         ClearedAfterFarming = false
                     });
                     reachedStage = stage;
+
+                    if (stage > runBest)
+                    {
+                        runBest = stage;
+                    }
+
+                    if (stage > lifetimeBest)
+                    {
+                        lifetimeBest = stage;
+                    }
+
+                    // B6 Step 4 (auto-buy card): spend whenever affordable, not only at walls.
+                    if (policy == ClimbPolicy.Rebirth)
+                    {
+                        int midBuys = SpendGold(resolver, party, ref gold, policy);
+                        if (midBuys > 0)
+                        {
+                            buys += midBuys;
+                            shoppingTrips.Add(totalSeconds);
+                        }
+                    }
+
+                    // B6 Step 4 (manual rebirth loop): a voluntary ascent at a milestone stage - the "quick
+                    // ascend" a real player takes when the yield is worth it - so the rebirth path is always
+                    // exercised and measured, not just when a wall forces it.
+                    if (policy == ClimbPolicy.Rebirth && nextRebirthMilestone < RebirthMilestones.Length &&
+                        runBest >= balance.MinStageToAscend && runBest >= RebirthMilestones[nextRebirthMilestone] &&
+                        TryRebirth(resolver, prestigeUpgrades, runBest, balance, ref tokens,
+                            out double milestoneYield, out int milestoneLevels))
+                    {
+                        nextRebirthMilestone++;
+                        rebirths++;
+                        prestigeLevels += milestoneLevels;
+                        report.AppendLine(string.Format(
+                            "  -- REBIRTH at stage {0} (milestone {1}, yield {2:0} token(s)): {3} prestige level(s)",
+                            stage, runBest, milestoneYield, milestoneLevels));
+                        gold = 0d;
+                        stage = 1;
+                        runBest = 1;
+                        continue;
+                    }
+
                     stage++;
                     continue;
                 }
@@ -180,11 +257,29 @@ namespace IdleRPG.EditorTools
                 double wallGold = 0d;
                 int wallBuys = 0;
                 bool cleared = false;
+                bool rebornThisWall = false;
 
                 report.AppendLine($"  -- WALL stage {stage}: farming stage {farmStage} --");
 
                 while (!cleared && wallSeconds < MaxWallSeconds && totalSeconds < maxRunSeconds)
                 {
+                    // B6 Step 4: a wall that already outlived the rebirth trigger is when a manual player
+                    // ascends instead of farming to the wall timeout - take the rebirth now, climb again.
+                    if (!rebornThisWall && policy == ClimbPolicy.Rebirth && runBest >= balance.MinStageToAscend &&
+                        wallSeconds >= RebirthWallSeconds)
+                    {
+                        rebornThisWall = TryRebirth(resolver, prestigeUpgrades, runBest, balance, ref tokens,
+                            out double proactiveYield, out int proactiveLevels);
+                        if (rebornThisWall)
+                        {
+                            prestigeLevels += proactiveLevels;
+                            report.AppendLine(string.Format(
+                                "  -- REBIRTH at stage {0} after {1:0.0} min of wall (yield {2:0} token(s)): {3} prestige level(s)",
+                                stage, wallSeconds / 60d, proactiveYield, proactiveLevels));
+                            break;
+                        }
+                    }
+
                     BalanceLabMenu.StageRun farm = BalanceLabMenu.RunStage(balance, waves, party, farmStage, pace, resolver);
                     totalSeconds += farm.Seconds;
                     wallSeconds += farm.Seconds;
@@ -222,17 +317,59 @@ namespace IdleRPG.EditorTools
                             ClearedAfterFarming = true
                         });
                         reachedStage = stage;
+
+                        if (stage > runBest)
+                        {
+                            runBest = stage;
+                        }
+
+                        if (stage > lifetimeBest)
+                        {
+                            lifetimeBest = stage;
+                        }
                     }
                 }
 
-                if (!cleared)
+                if (!cleared && !rebornThisWall)
                 {
-                    stuckStage = stage;
-                    report.AppendLine(string.Format(
-                        "  !! STUCK on stage {0}: {1:0.0} min of farming stage {2}, {3} gold earned, {4} upgrades bought, still wiping",
-                        stage, wallSeconds / 60d, farmStage, NumberFormatter.Format(wallGold), wallBuys));
-                    AppendWallDiagnosis(report, balance, waves, party, resolver, prestigeUpgrades, stage, lastAttemptSeconds);
-                    break;
+                    // B6 Step 4 fallback: the wall beat the farm budget. If the ascension gate is met, a manual
+                    // player would rebirth rather than quit - the permanent multipliers are how the wall breaks.
+                    if (policy == ClimbPolicy.Rebirth && runBest >= balance.MinStageToAscend &&
+                        TryRebirth(resolver, prestigeUpgrades, runBest, balance, ref tokens, out double fallbackYield, out int fallbackLevels))
+                    {
+                        rebornThisWall = true;
+                        prestigeLevels += fallbackLevels;
+                        report.AppendLine(string.Format(
+                            "  -- REBIRTH at stage {0} after {1:0.0} min of wall (yield {2:0} token(s)): {3} prestige level(s)",
+                            stage, wallSeconds / 60d, fallbackYield, fallbackLevels));
+                    }
+                    else
+                    {
+                        stuckStage = stage;
+                        report.AppendLine(string.Format(
+                            "  !! STUCK on stage {0}: {1:0.0} min of farming stage {2}, {3} gold earned, {4} upgrades bought, still wiping",
+                            stage, wallSeconds / 60d, farmStage, NumberFormatter.Format(wallGold), wallBuys));
+                        AppendWallDiagnosis(report, balance, waves, party, resolver, prestigeUpgrades, stage, lastAttemptSeconds);
+                        break;
+                    }
+                }
+
+                if (rebornThisWall)
+                {
+                    // A wall-forced ascent may pass several voluntary milestones (e.g. a wall at runBest 22
+                    // already covered the 20-stage milestone) - do not re-take it on the next climb.
+                    while (nextRebirthMilestone < RebirthMilestones.Length &&
+                           lifetimeBest >= RebirthMilestones[nextRebirthMilestone])
+                    {
+                        nextRebirthMilestone++;
+                    }
+
+                    gold = 0d;
+                    stage = 1;
+                    runBest = 1;
+                    rebirths++;
+                    report.AppendLine("  -- climbing again from stage 1 with the permanent multipliers --");
+                    continue;
                 }
 
                 if (wallSeconds > worstWallSeconds)
@@ -250,6 +387,13 @@ namespace IdleRPG.EditorTools
                 "  reached stage {0} in {1:0.0} min ({2:0.00} h) | {3} upgrades | walls {4} | worst wall {5:0.0} min",
                 reachedStage, totalSeconds / 60d, totalSeconds / 3600d, buys, walls, worstWallSeconds / 60d));
 
+            if (policy == ClimbPolicy.Rebirth)
+            {
+                report.AppendLine(string.Format(
+                    "  LONG GAME: lifetime best stage {0} | {1} rebirth(s) | {2} prestige level(s) | {3:0} token(s) held",
+                    lifetimeBest, rebirths, prestigeLevels, tokens));
+            }
+
             result.Report = report.ToString();
             result.ReachedStage = reachedStage;
             result.StuckStage = stuckStage;
@@ -260,6 +404,9 @@ namespace IdleRPG.EditorTools
             result.BudgetExhausted = totalSeconds >= maxRunSeconds;
             result.FirstPurchaseSeconds = shoppingTrips.Count > 0 ? shoppingTrips[0] : -1d;
             result.MedianShoppingGapSeconds = MedianGap(shoppingTrips);
+            result.LifetimeBestStage = lifetimeBest;
+            result.Rebirths = rebirths;
+            result.PrestigeLevels = prestigeLevels;
 
             result.FastestStageSeconds = double.MaxValue;
             result.GlutStages = 0;
@@ -306,6 +453,77 @@ namespace IdleRPG.EditorTools
             return gaps.Count % 2 == 1
                 ? gaps[middle]
                 : (gaps[middle - 1] + gaps[middle]) * 0.5d;
+        }
+
+        /// <summary>
+        /// B6 Step 4: performs one manual rebirth exactly like the game — tokens priced on the run best
+        /// (<c>FormulaUtility.PrestigeTokenReward</c>, the same call <c>AscensionManager.GetTokenYield</c> makes),
+        /// hero levels reset per config, and the whole yield spent on permanent upgrades at their real cost
+        /// (cheapest-first, mirroring the auto-buy card; the real checkout is <c>TrackService.TryBuy</c>, this
+        /// reuses its cost curve so no second formula could drift in). Returns false when the gate is not met
+        /// or the yield is 0, leaving everything untouched.
+        /// </summary>
+        private static bool TryRebirth(StatResolver resolver, PrestigeUpgradeData[] prestigeUpgrades,
+            int runBestStage, BalanceConfig balance, ref double tokens, out double yield, out int prestigeLevels)
+        {
+            yield = 0d;
+            prestigeLevels = 0;
+
+            if (resolver == null || prestigeUpgrades == null || runBestStage < 1 || balance == null)
+            {
+                return false;
+            }
+
+            double earned = FormulaUtility.PrestigeTokenReward(
+                runBestStage, balance.PrestigeStageDivisor, balance.PrestigeExponent);
+            if (earned <= 0d)
+            {
+                return false;
+            }
+
+            yield = earned;
+            tokens += earned;
+
+            if (balance.ResetHeroLevelsOnAscension)
+            {
+                resolver.ResetHeroLevels();
+            }
+
+            double remaining = tokens;
+
+            bool boughtAny;
+            do
+            {
+                boughtAny = false;
+
+                for (int i = 0; i < prestigeUpgrades.Length; i++)
+                {
+                    PrestigeUpgradeData upgrade = prestigeUpgrades[i];
+                    if (upgrade == null)
+                    {
+                        continue;
+                    }
+
+                    int level = resolver.GetPrestigeLevel(upgrade);
+                    if (upgrade.IsAtMaxLevel(level))
+                    {
+                        continue;
+                    }
+
+                    double cost = FormulaUtility.StatUpgradeBulkCost(upgrade.BaseCostTokens, level, 1, upgrade.CostGrowth);
+                    if (cost <= remaining)
+                    {
+                        resolver.SetPrestigeLevel(upgrade, level + 1);
+                        remaining -= cost;
+                        prestigeLevels++;
+                        boughtAny = true;
+                    }
+                }
+            }
+            while (boughtAny);
+
+            tokens = remaining;
+            return true;
         }
 
         /// <summary>

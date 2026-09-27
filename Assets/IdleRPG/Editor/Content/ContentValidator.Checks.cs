@@ -797,6 +797,38 @@ namespace IdleRPG.EditorTools.Content
                     $"the worst wall took {climb.WorstWallSeconds / 60d:0.0} min to break (target < {LoopHealthWorstWallMinutes:0} min).");
             }
 
+            // B6 Step 4: the long game - the same loop played with the automation cards (auto-buy mid-climb)
+            // and manual rebirths. This is the check that would catch a token/prestige sink that never pays for
+            // itself: even with the permanent multipliers, the lifetime frontier must keep moving.
+            ClimbSimulation.ClimbResult longGame = ClimbSimulation.Simulate(
+                balance, waves, party, statUpgrades, prestigeUpgrades, ClimbPolicy.Rebirth, LoopHealthMaxStage);
+
+            if (longGame.Stuck)
+            {
+                Add(Severity.Error, "loop",
+                    $"the rebirth robot is STUCK on stage {longGame.StuckStage} after {longGame.TotalSeconds / 60d:0.0} min " +
+                    $"({longGame.Rebirths} rebirth(s), {longGame.PrestigeLevels} prestige level(s)). " +
+                    "Even manual rebirths cannot move the frontier - the permanent upgrades do not pay for themselves.");
+            }
+            else if (longGame.LifetimeBestStage < LoopHealthTargetStage)
+            {
+                Add(Severity.Error, "loop",
+                    $"the rebirth robot's lifetime frontier only reached stage {longGame.LifetimeBestStage} " +
+                    $"in {longGame.TotalSeconds / 60d:0.0} min ({longGame.Rebirths} rebirth(s)); " +
+                    $"the long game needs lifetime stage {LoopHealthTargetStage} to stay healthy.");
+            }
+            else if (longGame.BudgetExhausted)
+            {
+                Add(Severity.Warning, "loop",
+                    $"the rebirth robot reached lifetime stage {longGame.LifetimeBestStage} but used the whole time budget; " +
+                    "the long game is slowing down across rebirths.");
+            }
+
+            Add(Severity.Info, "loop", string.Format(
+                "robot+rebirth: lifetime best stage {0} (run {1}) in {2:0.0} min | {3} rebirth(s), {4} prestige level(s)",
+                longGame.LifetimeBestStage, longGame.ReachedStage, longGame.TotalSeconds / 60d,
+                longGame.Rebirths, longGame.PrestigeLevels));
+
             double peakSeconds = 0d;
             int peakStage = 0;
             for (int i = 0; i < climb.ClearedStages.Count; i++)
