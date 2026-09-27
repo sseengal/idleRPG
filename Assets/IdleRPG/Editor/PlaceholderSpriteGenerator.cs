@@ -30,10 +30,12 @@ namespace IdleRPG.EditorTools
             written += GeneratePanels();
             written += GenerateIcons();
             written += GenerateBackground();
-            written += GenerateCardUnits();   // one picture per hero/enemy card that has none yet
+            int newCardPictures = GenerateCardUnits(out int cardsChecked);   // one picture per card that has none yet
+            written += newCardPictures;
 
             AssetDatabase.Refresh();
-            Debug.Log($"[PlaceholderSpriteGenerator] {written} placeholder sprite(s) ready in {ArtFolder}.");
+            Debug.Log($"[PlaceholderSpriteGenerator] {written} sprite(s) written (units, panels, icons, background) | " +
+                      $"{cardsChecked} card(s) checked, {newCardPictures} new card picture(s) drawn | existing pictures kept.");
         }
 
         // ------------------------------------------------------------------
@@ -173,9 +175,19 @@ namespace IdleRPG.EditorTools
         /// </summary>
         public static int GenerateCardUnits()
         {
+            return GenerateCardUnits(out int cardsChecked);
+        }
+
+        /// <summary>
+        /// Same as <see cref="GenerateCardUnits()"/>, and also reports how many cards were looked at, so the menu
+        /// line can say "7 cards checked, 0 new pictures drawn" instead of a bare number.
+        /// </summary>
+        public static int GenerateCardUnits(out int cardsChecked)
+        {
             EnsureFolder(ArtFolder);
 
             int written = 0;
+            cardsChecked = 0;
 
             HeroSpecFile heroes = ContentSpecIO.Load<HeroSpecFile>(ContentSpecIO.HeroesPath);
             if (heroes != null)
@@ -183,6 +195,7 @@ namespace IdleRPG.EditorTools
                 for (int i = 0; i < heroes.heroes.Count; i++)
                 {
                     HeroSpec hero = heroes.heroes[i];
+                    cardsChecked++;
                     written += WriteCardUnit(PictureName(hero.icon, hero.id), hero.tint, hero.id, false);
                 }
             }
@@ -193,13 +206,14 @@ namespace IdleRPG.EditorTools
                 for (int i = 0; i < enemies.enemies.Count; i++)
                 {
                     EnemySpec enemy = enemies.enemies[i];
+                    cardsChecked++;
                     written += WriteCardUnit(PictureName(enemy.sprite, enemy.id), enemy.tint, enemy.id, enemy.isBoss);
                 }
             }
 
             if (written > 0)
             {
-                Debug.Log($"[PlaceholderSpriteGenerator] {written} new card picture(s) drawn.");
+                Debug.Log($"[PlaceholderSpriteGenerator] {written} new card picture(s) drawn ({cardsChecked} card(s) checked).");
             }
 
             return written;

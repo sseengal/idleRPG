@@ -989,12 +989,17 @@ Shape families read from the id: `slime|blob|ooze|swarm|spider|worm` → blob, `
 chevron, anything else → blob, and every boss → spikes.
 
 ### Verified (2026-09-27)
-- Shipped cards: **0 pictures drawn** (all 4 monsters + 3 heroes already have one) - nothing touched.
-- **Rehearsal, then reverted:** a card for `enemy_wolf` (no picture, tint `#8C7A5A`) was added to `enemies.json`; one
-  press drew exactly **1 picture** (`enemy_wolf.png`, imported as a Sprite, ears silhouette in the card's colour) with
-  **zero code changes**. A second press drew **0** (never overwrites). The card and the picture were then deleted -
-  **no monsters were added to the game.**
-- The 7 existing pictures are **byte-identical** (md5 compared before and after).
+- Shipped cards: **0 pictures drawn** (all 4 monsters + 3 heroes already have one) - nothing touched. The menu now
+  reports this plainly: `23 sprite(s) written (units, panels, icons, background) | 7 card(s) checked, 0 new card
+  picture(s) drawn | existing pictures kept.` (the old line said only "23 placeholder sprite(s) ready", which was the
+  same number every time and told the reader nothing - owner caught it in the first manual test).
+- **Rehearsal, then reverted:** a card for `enemy_spider` (no picture, tint `#7A4FA0`) was added to `enemies.json`;
+  one press of the Art menu reported **`8 card(s) checked, 1 new card picture(s) drawn`**, wrote `enemy_spider.png`
+  (imported as a Sprite, blob silhouette in the card's colour) and logged
+  `1 new card picture(s) drawn (8 card(s) checked)` - with **zero code changes**. A second press drew **0** (never
+  overwrites). The card and the picture were then deleted - **no monsters were added to the game.**
+- Re-running the menu leaves the whole Art folder untouched: the 7 unit pictures are **byte-identical** (md5 compared
+  before and after) and `git status` reports no changed picture files.
 - `Run All Checks (regression)` = **PASS**, golden numbers unchanged (gold/s 2.158 vs baseline 2.16, -0.1%) and
   `BalanceBaseline` still records the 2026-09-25 baseline - the tool changes no game maths.
 
