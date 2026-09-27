@@ -5,136 +5,21 @@ using UnityEngine;
 namespace IdleRPG.Save
 {
     /// <summary>Per-hero level snapshot (one entry per party lane).</summary>
-    [Serializable]
-    public class HeroProgressRecord
-    {
-        public string heroID = "";
-        public int attackLevel;
-        public int healthLevel;
-        public int defenseLevel;
-
-        public HeroProgressRecord()
-        {
-        }
-
-        public HeroProgressRecord(string heroID, int attackLevel, int healthLevel, int defenseLevel)
-        {
-            this.heroID = heroID;
-            this.attackLevel = attackLevel;
-            this.healthLevel = healthLevel;
-            this.defenseLevel = defenseLevel;
-        }
-
-        public int GetLevel(Data.HeroStatType statType)
-        {
-            switch (statType)
-            {
-                case Data.HeroStatType.Attack:
-                    return attackLevel;
-                case Data.HeroStatType.Health:
-                    return healthLevel;
-                case Data.HeroStatType.Defense:
-                    return defenseLevel;
-                default:
-                    return 0;
-            }
-        }
-
-        public void SetLevel(Data.HeroStatType statType, int level)
-        {
-            int safeLevel = level < 0 ? 0 : level;
-
-            switch (statType)
-            {
-                case Data.HeroStatType.Attack:
-                    attackLevel = safeLevel;
-                    break;
-                case Data.HeroStatType.Health:
-                    healthLevel = safeLevel;
-                    break;
-                case Data.HeroStatType.Defense:
-                    defenseLevel = safeLevel;
-                    break;
-            }
-        }
-    }
 
     /// <summary>
     /// One keyed progression level: the "key" is the whole contract (e.g. "hero_knight.attack" = 80, or a permanent
     /// track id). Schema v5 means the save file never needs to know what a stat is - a new track only adds new keys.
     /// </summary>
-    [Serializable]
-    public class LevelRecord
-    {
-        public string key = "";
-        public int level;
-
-        public LevelRecord()
-        {
-        }
-
-        public LevelRecord(string key, int level)
-        {
-            this.key = key;
-            this.level = level;
-        }
-    }
 
     /// <summary>
     /// One automation card's player settings (B6): whether the machine is on, and how much of the wallet the machine
     /// promises never to touch. Additive in schema v5 - an older file simply reads the defaults.
     /// </summary>
-    [Serializable]
-    public class AutomationSetting
-    {
-        public string ruleId = "";
-        public bool enabled;
-        public float budgetFraction = 0.5f;
-
-        public AutomationSetting()
-        {
-        }
-
-        public AutomationSetting(string ruleId, bool enabled, float budgetFraction)
-        {
-            this.ruleId = ruleId;
-            this.enabled = enabled;
-            this.budgetFraction = budgetFraction;
-        }
-    }
 
     /// <summary>One rewarded-ad placement's daily usage (B7 S3): which slot, the local day it belongs to, how many
     /// redemptions that day, and when the last one happened (cooldown). Additive in schema v5.</summary>
-    [Serializable]
-    public class AdRedemptionRecord
-    {
-        public int placementId;
-        public int dayStamp;
-        public int redemptions;
-        public double lastRedeemedBinary;
-
-        public AdRedemptionRecord()
-        {
-        }
-    }
 
     /// <summary>Permanent (prestige) upgrade level snapshot.</summary>
-    [Serializable]
-    public class PrestigeUpgradeRecord
-    {
-        public string upgradeID = "";
-        public int level;
-
-        public PrestigeUpgradeRecord()
-        {
-        }
-
-        public PrestigeUpgradeRecord(string upgradeID, int level)
-        {
-            this.upgradeID = upgradeID;
-            this.level = level;
-        }
-    }
 
     /// <summary>
     /// Plain-serialisable snapshot of the whole game, written by <see cref="SaveSystem"/>.
