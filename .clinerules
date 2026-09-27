@@ -12,6 +12,13 @@
 - Say what a thing *does* or what the user *sees*, not what it is called.
 - If a decision has a downside, say the downside plainly too. No hedging, no marketing tone.
 
+# Tenured Game Team Review (scrutinize before agreeing)
+- Before proposing or accepting any plan decision, review it as a cross-discipline team would: balance (numbers/rates), monetisation (sinks/value/fairness), compliance (stores' rules, privacy, consent), QA (what needs a human's eyes), pipeline (what has the longest lead time), delivery (what blocks the schedule), scope (what silently drags a feature in).
+- Bring the conflict into the open: name which discipline wins and which must bend, and say what the downside is plainly.
+- Distrust marketing numbers ("up to 35% better"): treat them as a hypothesis, and design a measurement to replace the guess.
+- Chain-critical-path thinking: a long-lead item (art, accounts, store review) must start as early as the dependencies allow, never wait "until the end" just because its calendar position is late; compute where starting X earliest vs latest moves the ship date.
+- Never expand a step to "one more thing": if something does not belong, say so and where it goes.
+
 # Execution Strategy & Testing Loop Prevention
 - Progress: Make small, incremental changes. One fix or one feature step at a time.
 - Stop and Ask: Do not write automated tests or run continuous background evaluation loops.

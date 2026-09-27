@@ -1,18 +1,19 @@
 # B10 — your start-list (exactly what to do or hand to me)
 
-B10 swaps the fake register + fake cinema for the real ones. **None of it can start until the pieces below exist.**
+B10 swaps the fake register + fake cinema for the real ones. **Both ad sellers are baked in from the start** — Step 3
+creates BOTH accounts; there is nothing optional here. **None of it can start until the pieces below exist.**
 Each step is either **You do** or **Hand me**. Tick it when done. Most take 5-15 minutes; the installs take longer.
 
 ---
 
 ## Step 1 — the real names (10 minutes, you decide + hand me)
 
-The app still says "DefaultCompany / Idle RPG". Pick and hand me:
-
 - [ ] **Company name** (shown in the stores; goes into the save folder on phones).
 - [ ] **App display name** (what the store shows, e.g. "Idle RPG").
 - [ ] **Bundle id / package id** — one string used by BOTH stores, e.g. `com.<yourname>.idlerpg`.
       *Rule: pick it once. It can never change after launch without becoming a different app.*
+- [ ] **Commission the app icon now** (1024x1024 + a launch screen) — standalone art with the longest lead;
+      the store packet (B10b) and the store screenshots need it, so it starts today, not at the art pass.
 
 ## Step 2 — the two store-build kits on this Mac (you install; the Go/No-Go menu confirms)
 

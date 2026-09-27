@@ -196,8 +196,9 @@ interesting"), it does not enter the base - and it is not parked either unless t
 > **MVP is now store-submittable** (owner decision 2026-09-27, `Checklist.md` §1p): the base game is finished, so the
 > remaining work is content + onboarding, the **shipping checklist** (the "release plumbing" - the version number,
 > phone builds, portrait lock, icon, back button, crash diary and one build command), **live ad/IAP wiring with
-> consent + Restore Purchases**, the store packet, and the device passes - with **art + audio as the final pass
-> before submission**. The long-form evidence and the owner's Store Day-0 checklist live in `Checklist.md` §1p.
+> consent + Restore Purchases**, the store packet, and the device passes - with **art starting at the B10 UI freeze**
+> (longest-lead item, so it overlaps B10b + B1a instead of waiting for them) and **audio running in parallel**.
+> The long-form evidence and the owner's Store Day-0 checklist live in `Checklist.md` §1p.
 
 | Order | Step | Deliverable | Acceptance | Size |
 |---|---|---|---|---|
@@ -209,10 +210,10 @@ interesting"), it does not enter the base - and it is not parked either unless t
 | B7 | **Monetisation pass** (see `Monetisation.md`) | `DONE (2026-09-27)` - ad placements (x2 gold 30 min, double offline) with per-day caps, gem sources (daily streak + milestones), gem sinks (the Golden Foundry permanent multiplier, bought with gems - currency is data), `IIapService` + `MockIapService` with the single `PurchaseIap` funnel, and `CheckMonetisation()` (2x time-value rule, rate-free payback floor for permanent multipliers, no product sells power, free reachability) | proven: every payout goes through the ledger rate (the simulated gold/s never moves), caps enforced, a planted cheat card / power SKU both FAIL the build, mock IAP swaps for a real store with one implementation; `Run All Checks` PASS | done |
 | B8' | **Monster-making kit + polish** (**no new monsters**) | the 3 tools that let content scale later without code: (1) the drawing tool gives any card a picture by itself, (2) content checks for a card with no picture (error) and a card in no fight pool (warning), (3) a who-appears-where map with a "what shifts if you add a card" preview. Plus 3 **first-run tips** and **empty formation seats that look empty** | launch roster stays **3 heroes / 4 monsters**; a card added during the rehearsal got its picture with zero code; the picture tool never overwrites existing art; golden numbers unchanged (no game maths touched) | small-med |
 | B9' | **The shipping checklist (both stores)** | version stamp; building as a phone app for Apple and Android (Play AAB signing key, iOS provisioning); real app + company names; portrait-only screen; app icon + launch screen; Android back button behaviour; crash diary file; **one build command that only runs when `Run All Checks` is green**; written save-compat policy | one command produces both builds with the right version, and only when every check passes | med |
-| **B10** | **Live store wiring** (new 2026-09-27, `Checklist.md` §1p) | real rewarded ads (**AdMob marketplace with Unity Ads bidding, both live**) + Unity IAP behind the existing seams; **Restore Purchases UI**; minimal settings (Restore + privacy link + mute); iOS ATT + EEA consent (Google's message form covers both sellers); `PrivacyInfo.xcprivacy` + Play Data Safety for **both** sellers | a real purchase and a real rewarded ad work in each store's sandbox; a no-fill from either seller never consumes a daily cap; owned no-ads survives a reinstall via Restore; after launch the AdMob console shows each seller's earnings, so whether the second seller earns its keep is measured, not guessed | **large** |
+| **B10** | **Live store wiring** (new 2026-09-27, `Checklist.md` §1p) | real rewarded ads (**AdMob marketplace with Unity Ads bidding, both live**) + Unity IAP behind the existing seams; **Restore Purchases UI**; minimal settings (Restore + privacy link + mute); iOS ATT + EEA consent (Google's message form covers both sellers); `PrivacyInfo.xcprivacy` + Play Data Safety for **both** sellers | a real purchase and a real rewarded ad work in each store's sandbox; a no-fill from either seller never consumes a daily cap; owned no-ads survives a reinstall via Restore and **never sees the consent question or a tracking prompt**; after launch the AdMob console shows each seller's earnings, so whether the second seller earns its keep is measured, not guessed | **large** |
 | **B10b** | **Store packet** (new 2026-09-27) | screenshots (iPhone 6.7" + Play phone + 1024x500 feature graphic), listing copy, age/content rating, Data Safety answers, product records matched to `IapCatalog` | both consoles accept the packet; sandbox end-to-end on real hardware | med-large |
-| B1a | **Device pass 1 (owner-run)** | build to phone (both platforms) + checklist (fps, safe area, touch, back button, offline popup) | 60fps idle with 3v3 on device; nothing clipped; popup + claim work by touch | ½ day |
-| B1b | **Device pass 2 + submission (owner-run, LAST)** | re-run the pass **after the art + audio final pass**, then submit both builds | art/audio in; layout clean at both aspect ratios; both stores submitted | ½ day |
+| B1a | **Device pass 1 - logic (owner-run)** | build to phone (both platforms) once the modules exist + checklist (fps, safe area, touch, back button, offline popup) - runs **in parallel with the art pass** | 60fps idle with 3v3 on device; nothing clipped; popup + claim work by touch | ½ day |
+| B1b | **Device pass 2 + submission (owner-run, LAST)** | after **art + audio are IN**: the looks pass (layout, legibility, sound, no dev overlay) then submit both builds | art/audio in; layout clean at both aspect ratios; both stores submitted | ½ day |
 
 **Dropped (deleted, not parked):** the ranged enemy archetype + hero target-rule stamping ("11f"). It answered no
 loop beat and no money path, and adding it to the rotation forced a golden-number re-baseline for no product win.
@@ -279,8 +280,8 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
 ### B9' - the shipping checklist, both stores  `IN PROGRESS`  (part 1 built + verified 2026-09-27: go/no-go gate, version 1.0.0, portrait lock, crash diary, Android back; part 2 = owner installs + phone tests - see `Checklist.md` §1r)
 ### B10 - live store wiring  `TODO`  (AdMob marketplace + Unity Ads bidding, Unity IAP, Restore Purchases, minimal settings, consent/ATT, privacy manifests for both sellers) - the largest remaining step
 ### B10b - store packet  `TODO`  (screenshots, listing, ratings, Data Safety, product records, sandbox)
-### B1a - device pass 1  `TODO`  (owner-run: logic/perf on real hardware)
-### B1b - device pass 2 + submission  `TODO`  (owner-run, LAST: after the art + audio final pass)
+### B1a - device pass 1 (logic)  `TODO`  (owner-run: logic/perf on real hardware, parallel with the art pass)
+### B1b - device pass 2 + submission  `TODO`  (owner-run, LAST: after art + audio are in, then submit)
 
 > **Post-launch content drop (owner decision 2026-09-27).** Real monsters arrive **after release** as an update, using
 > the kit built in B8': one card each, the picture drawn automatically, the who-appears-where map read before

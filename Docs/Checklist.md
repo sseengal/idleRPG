@@ -928,8 +928,9 @@ not the *store* plan. Evidence found while reviewing (all verified in the repo):
 | **Store release has wall-clock lead time** | new *personal* Play accounts need **12 testers x 14 continuous days** before production access | **Store Day-0** (below) is on the critical path - start it before writing code, not after |
 
 **Order now:** B8' monster-making kit + polish (no new monsters) -> the B9' shipping checklist -> **B10 live SDKs + consent
-+ Restore + minimal settings** -> B10b store packet -> B1a device pass -> **art + audio final pass** -> B1b device pass
-+ submission. Real monsters then ship as a **post-launch update**, drawn by the kit.
++ Restore + minimal settings** (the UI freeze lives here) -> **art + audio start at the freeze** (icon/splash: NOW) while
+**B10b store packet** and **B1a logic pass** run in parallel -> **B1b looks pass + submission** once art+audio are in.
+Real monsters ship **post-launch**, drawn by the kit.
 
 **Also caused by "both stores at once":** Android back/gesture handling (B9'), adaptive + 1024 icons and a launch
 screen (B10b), two build paths (Play signing key + AAB, iOS provisioning + Xcode), **one freeze window** (the art pass
@@ -961,13 +962,21 @@ submission; and a mismatched Data Safety / privacy manifest, which is worse than
 3. **Real monsters ship post-launch as an update**, drawn by the kit with placeholder art, after the artist has finished
    the 4-monster launch roster.
 4. **No analytics SDK ships** - the stores' own crash reports cover us.
-5. **Both stores at once**, one submission push; **art + audio = the final pass before submission**.
+5. **Both stores at once**, one submission push. **Art timing (corrected 2026-09-27 after team review):** art starts
+   when the screens stop moving - the end of B10 (settings sheet + consent + Restore all landed). It is NOT "after
+   everything": art is the longest-lead item, so it begins at that freeze and runs WHILE B10b + B1a happen. **Audio**
+   can run in parallel any time (it never touches layout). The **app icon + launch screen are commissioned now**
+   (standalone, long lead, and the store packet needs them).
 6. **Ad sellers: BOTH at launch** - **AdMob** is the marketplace (its Google Mobile Ads Unity plugin hosts the auction)
    with **Unity Ads as a second, bidding seller from day one**. The quoted "35% more" is marketing, not a promise - the
    mechanism is real (Google's own doc: the Unity Ads adapter "supports Bidding and Waterfall" for Banner, Interstitial,
    and **Rewarded** ads) but the actual gain depends on player numbers and countries. Fallback: if the second seller
    misbehaves in B10 testing, ship with AdMob alone - the switch is one config change, the game code never changes, and
    the game's reward values are decided by the game either way, so which seller wins an auction changes no gameplay.
+7. **A No Ads owner never sees the consent question** - if the player owns the No Ads product, the privacy prompt and
+   any tracking request are skipped entirely (ads are off, so asking would be wrong). Verified in B10.
+8. **Both sellers are measured, not believed** - after launch the AdMob console reports each seller's earnings, so
+   the second seller earns its keep - or is removed - on data, not on a 35% poster.
 
 ### Still open (needed before B10)
 1. Play account type (personal vs organization) - decides whether the 14-day closed-test gate is on the critical path.
@@ -1140,10 +1149,10 @@ Base gate: every step below names the loop beat or money path it serves. Anythin
 | **B7** | Monetisation pass (`Monetisation.md`) | money path: ad placements + gem sinks + mock IAP | `[x]` 2026-09-27 (see §1k-§1o): every payout goes through the ledger rate, per-day caps enforced, mock IAP swaps for a real store with one implementation, and the build now refuses a sink that beats its own time-value | done |
 | **B8'** | **Monster-making kit + polish** (**no new monsters**) | first-run clarity + content that can scale later | the 3 tools (§1q): (1) the drawing tool gives every card a picture with no code, (2) content checks that shout at a missing picture / a monster nobody ever meets / a stray family word, (3) a map showing who appears where and what shifts if a card is added. Plus the recipe (`Content.md` §8a), **3 first-run hints** (once each, saved, no schema change) and **empty formation seats that look empty**. Launch roster stays **3 heroes / 4 monsters**; real monsters are a post-launch update | `[~]` all built 2026-09-27; owner's proof lap (battle log + shop beat) remains | small-med |
 | **B9'** | The **shipping checklist** (get the game into the stores' hands, both targets) | ship it | version stamp, real app + company names, building as a phone app for Apple and Android (with signing), portrait-only screen, app icon + launch screen, Android back button behaviour, crash diary file, written save-compat policy, and **one build command that only runs when every check passes** | `[~]` part 1 built + verified 2026-09-27 (see §1r); part 2 = owner phone tests + installs | med |
-| **B10** | **Live store wiring** (new, §1p) | the real money path | real rewarded ads (**AdMob marketplace + Unity Ads bidding, both live**) + Unity IAP behind the existing seams; **Restore Purchases UI**; minimal settings (Restore + privacy link + mute); iOS ATT + EEA consent (Google's message form covers both sellers); `PrivacyInfo.xcprivacy` + Play Data Safety for **both** sellers; an ad that fails or is skipped must not consume a daily cap; a no-fill from either seller never costs a player their reward | **large** |
+| **B10** | **Live store wiring** (new, §1p) | the real money path | real rewarded ads (**AdMob marketplace + Unity Ads bidding, both live**) + Unity IAP behind the existing seams; **Restore Purchases UI**; minimal settings (Restore + privacy link + mute); iOS ATT + EEA consent (Google's message form covers both sellers) - **skipped entirely for No Ads owners**; `PrivacyInfo.xcprivacy` + Play Data Safety for **both** sellers; an ad that fails or is skipped must not consume a daily cap; a no-fill from either seller never costs a player their reward | **large** |
 | **B10b** | **Store packet** (new, §1p) | a build the stores accept | screenshots (iPhone 6.7" + Play phone + 1024x500 feature graphic), listing copy, age/content rating, Data Safety answers, product records matched to `IapCatalog`, sandbox end-to-end on both platforms | med-large |
-| **B1a** | **Device pass 1 (owner-run)** | does the logic hold on hardware | 60fps idle with 3v3 on device; safe area clean; offline modal + CLAIM work by touch; back button behaves | ½ day |
-| **B1b** | **Device pass 2 + submission (owner-run, LAST)** | does it *look* right | re-run the pass **after the art + audio final pass**, then submit both builds; layout clean at both aspect ratios | ½ day |
+| **B1a** | **Device pass 1 - logic (owner-run)** | does the *logic* hold on hardware | 60fps idle with 3v3, safe area clean, offline CLAIM by touch, back button behaves. Runs as soon as a developer phone build exists - **in parallel with the art pass** (logic does not care about looks) | ½ day |
+| **B1b** | **Device pass 2 + submission (owner-run, LAST)** | does it *look* right | after art + audio are IN: layout clean at both aspect ratios, art legibility, sound balance + mute, F3 overlay absent - then submit both builds | ½ day |
 
 Loop-walk items still open from the bounce work (do them with B8' unless a play test says otherwise): first-run hint,
 shop beat verification (boss/milestone gems -> fast-forward + offline cap), and the cosmetic formation-slot tiles

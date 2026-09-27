@@ -62,6 +62,9 @@ includes them (enforced at build time from B10).
 
 ## 4. B1a — device pass 1 (does the logic feel right on a phone)
 
+> Runs as soon as a developer phone build exists — it can run **in parallel with the art pass** (logic does not care
+> about looks).
+
 - [ ] **Fresh install** → first-run whispers lead you to the UPGRADE page (once each).
 - [ ] **Resume** — force-quit, reopen: stage/wave/gold exactly as you left them.
 - [ ] **Idle for 30 minutes** (screen on) → steady 60 frames; booster/extras expire on time; no slow creep.
