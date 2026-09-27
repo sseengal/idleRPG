@@ -10,19 +10,24 @@ using IdleRPG.Utils;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// Panel C: shop. One uniform list of offers built from data: the rewarded-ad gold boost, the two gem
-    /// machines and - since B7 - every purchasable product in <see cref="IapCatalog"/>. A real store only has
-    /// to implement <see cref="Services.IIapService"/>; the rows do not change.
+    /// Panel C: shop, styled to match the ASCEND page. A headline action button (watch an ad) sits in the same
+    /// header band as the ASCEND button, and every offer is drawn as a card like a prestige upgrade row:
+    /// name + description on the left, value in the middle, one BUY button on the right.
     ///
-    /// ELI5: the shop is a shelf. Every row is one toy with its own button; all buttons are wired to the same
-    /// cashier, so a new toy (gem pack, starter box) is a data change, not a code change.
+    /// ELI5: the shop now looks like the toy-store version of the ascend tree - same shape, different coins.
     /// </summary>
     public sealed class ShopPanelUI : MonoBehaviour
     {
         [Header("Wiring")]
         [SerializeField] private TextMeshProUGUI gemsLabel;
+        [SerializeField] private Button watchAdButton;
+        [SerializeField] private TextMeshProUGUI watchAdLabel;
         [Tooltip("Scroll content the offer rows are built into (provided by Build MVP Scene).")]
         [SerializeField] private RectTransform offerRoot;
+        [Tooltip("Card sprite for offer rows (ui_panel), set by the scene builder.")]
+        [SerializeField] private Sprite rowSprite;
+        [Tooltip("Button sprite for offer rows (ui_button), set by the scene builder.")]
+        [SerializeField] private Sprite buttonSprite;
 
         private GameManager manager;
         private bool bound;
@@ -30,14 +35,18 @@ namespace IdleRPG.UI
 
         private readonly List<ShopRow> rows = new List<ShopRow>();
 
-        private const float OfferRowHeight = 64f;
+        private const float OfferRowHeight = 116f;
+
+        // Palette shared with the scene builder (MvpSceneBuilder.TextColor / DimTextColor).
+        private static readonly Color TextColor = new Color(0.94f, 0.96f, 1f, 1f);
+        private static readonly Color DimTextColor = new Color(0.75f, 0.78f, 0.86f, 1f);
+        private static readonly Color CardColor = new Color(1f, 1f, 1f, 0.30f);
 
         private enum RowKind
         {
-            Ad = 0,
-            OfflineCap = 1,
-            InstantIncome = 2,
-            Iap = 3
+            OfflineCap = 0,
+            InstantIncome = 1,
+            Iap = 2
         }
 
         private sealed class ShopRow
@@ -45,14 +54,19 @@ namespace IdleRPG.UI
             public readonly RowKind Kind;
             public readonly string Sku;
             public readonly Button Button;
-            public readonly TextMeshProUGUI Label;
+            public readonly TextMeshProUGUI Name;
+            public readonly TextMeshProUGUI Effect;
+            public readonly TextMeshProUGUI Value;
 
-            public ShopRow(RowKind kind, string sku, Button button, TextMeshProUGUI label)
+            public ShopRow(RowKind kind, string sku, Button button, TextMeshProUGUI name,
+                TextMeshProUGUI effect, TextMeshProUGUI value)
             {
                 Kind = kind;
                 Sku = sku;
                 Button = button;
-                Label = label;
+                Name = name;
+                Effect = effect;
+                Value = value;
             }
         }
 
@@ -79,6 +93,13 @@ namespace IdleRPG.UI
             }
 
             bound = true;
+
+            if (watchAdButton != null)
+            {
+                watchAdButton.onClick.RemoveAllListeners();
+                watchAdButton.onClick.AddListener(OnWatchAdClicked);
+            }
+
             EnsureOfferRows();
             Refresh();
         }
@@ -86,6 +107,14 @@ namespace IdleRPG.UI
         private void OnEnable()
         {
             EnsureBound();
+
+            // Rows are built while this page is hidden, so the scroll layout has not run yet - force it once
+            // so the cards stack correctly the moment the shop opens (the ascend page builds its rows in the
+            // scene, so it never needed this).
+            if (offerRoot != null)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(offerRoot);
+            }
 
             if (!boundToIap && manager != null && manager.Iap != null)
             {
@@ -127,7 +156,7 @@ namespace IdleRPG.UI
             Refresh();
         }
 
-        /// <summary>Builds every offer row in code (the scene only hosts the scroll view).</summary>
+        /// <summary>Builds every offer card at runtime (the scene only hosts the scroll view).</summary>
         private void EnsureOfferRows()
         {
             if (rows.Count > 0)
@@ -135,53 +164,104 @@ namespace IdleRPG.UI
                 return;
             }
 
-            rows.Add(new ShopRow(RowKind.Ad, null, CreateOfferRow("AdRow", OnWatchAdClicked, out TextMeshProUGUI adLabel), adLabel));
-            rows.Add(new ShopRow(RowKind.OfflineCap, null, CreateOfferRow("OfflineCapRow", OnOfflineCapClicked, out TextMeshProUGUI capLabel), capLabel));
-            rows.Add(new ShopRow(RowKind.InstantIncome, null, CreateOfferRow("InstantIncomeRow", OnInstantIncomeClicked, out TextMeshProUGUI incomeLabel), incomeLabel));
-
-            for (int i = 0; i < IapCatalog.All.Count; i++)
-            {
-                IapProduct product = IapCatalog.All[i];
-                rows.Add(new ShopRow(RowKind.Iap, product.Sku,
-                    CreateOfferRow("Iap_" + product.Sku, delegate { OnIapClicked(product.Sku); }, out TextMeshProUGUI iapLabel), iapLabel));
-            }
+            rows.Add(CreateRow(RowKind.OfflineCap, null, "Offline Cap", "extra income while away", OnOfflineCapClicked));
+            rows.Add(CreateRow(RowKind.InstantIncome, null, "Fast-Forward", "an hour of income right now", OnInstantIncomeClicked));
+            rows.Add(CreateRow(RowKind.Iap, IapCatalog.SkuNoAds, "No Ads", "remove ads forever", delegate { OnIapClicked(IapCatalog.SkuNoAds); }));
+            rows.Add(CreateRow(RowKind.Iap, IapCatalog.SkuGemsSmall, "5 Gems", "street-price gems", delegate { OnIapClicked(IapCatalog.SkuGemsSmall); }));
+            rows.Add(CreateRow(RowKind.Iap, IapCatalog.SkuGemsMedium, "30 Gems", "most popular bundle", delegate { OnIapClicked(IapCatalog.SkuGemsMedium); }));
+            rows.Add(CreateRow(RowKind.Iap, IapCatalog.SkuGemsLarge, "110 Gems", "best value bundle", delegate { OnIapClicked(IapCatalog.SkuGemsLarge); }));
+            rows.Add(CreateRow(RowKind.Iap, IapCatalog.SkuStarterPack, "Starter Pack", "50 gems + 1h offline cap", delegate { OnIapClicked(IapCatalog.SkuStarterPack); }));
         }
 
-        /// <summary>One shop offer row: a tappable background with a centred label. The scroll layout owns the
-        /// position; the row only sets its own height.</summary>
-        private Button CreateOfferRow(string name, UnityAction onClick, out TextMeshProUGUI label)
+        /// <summary>One offer card, laid out exactly like a prestige upgrade row (name/effect/value/buy).</summary>
+        private ShopRow CreateRow(RowKind kind, string sku, string displayName, string description, UnityAction onClick)
         {
             RectTransform root = offerRoot != null ? offerRoot : (RectTransform)transform;
 
-            GameObject row = new GameObject(name);
+            GameObject row = new GameObject("Offer_" + sku ?? kind.ToString());
             row.transform.SetParent(root, false);
 
-            RectTransform rowRect = row.AddComponent<RectTransform>();
-            rowRect.sizeDelta = new Vector2(0f, OfferRowHeight);
+            LayoutElement layout = row.AddComponent<LayoutElement>();
+            layout.minHeight = OfferRowHeight;
+            layout.preferredHeight = OfferRowHeight;
 
-            Image background = row.AddComponent<Image>();
-            background.color = new Color(0.12f, 0.14f, 0.2f, 0.95f);
+            Image card = row.AddComponent<Image>();
+            card.sprite = rowSprite;
+            card.type = Image.Type.Sliced;
+            card.color = CardColor;
 
-            Button button = row.AddComponent<Button>();
+            TextMeshProUGUI name = UiText("Name", row.transform,
+                new Vector2(0.03f, 0.58f), new Vector2(0.56f, 0.96f), 26f, TextAlignmentOptions.MidlineLeft, TextColor);
+            name.SetText(displayName);
+
+            TextMeshProUGUI effect = UiText("Effect", row.transform,
+                new Vector2(0.03f, 0.12f), new Vector2(0.56f, 0.55f), 18f, TextAlignmentOptions.MidlineLeft, DimTextColor);
+            effect.SetText(description);
+
+            TextMeshProUGUI value = UiText("Value", row.transform,
+                new Vector2(0.56f, 0.58f), new Vector2(0.76f, 0.96f), 24f, TextAlignmentOptions.Center, TextColor);
+
+            Button button = CreateActionButton(row.transform, onClick);
+            return new ShopRow(kind, sku, button, name, effect, value);
+        }
+
+        private TextMeshProUGUI UiText(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax,
+            float size, TextAlignmentOptions alignment, Color color)
+        {
+            GameObject labelObject = new GameObject(name);
+            labelObject.transform.SetParent(parent, false);
+
+            RectTransform rect = labelObject.AddComponent<RectTransform>();
+            rect.anchorMin = anchorMin;
+            rect.anchorMax = anchorMax;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+
+            TextMeshProUGUI label = labelObject.AddComponent<TextMeshProUGUI>();
+            label.fontSize = size;
+            label.alignment = alignment;
+            label.color = color;
+            label.raycastTarget = false;
+            return label;
+        }
+
+        /// <summary>The BUY button on the right of each card (ui_button sprite, like the prestige rows).</summary>
+        private Button CreateActionButton(Transform parent, UnityAction onClick)
+        {
+            GameObject buttonObject = new GameObject("BuyButton");
+            buttonObject.transform.SetParent(parent, false);
+
+            RectTransform rect = buttonObject.AddComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.78f, 0.16f);
+            rect.anchorMax = new Vector2(0.97f, 0.86f);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+
+            Image background = buttonObject.AddComponent<Image>();
+            background.sprite = buttonSprite;
+            background.type = Image.Type.Sliced;
+            background.color = Color.white;
+
+            Button button = buttonObject.AddComponent<Button>();
             button.targetGraphic = background;
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(onClick);
 
             GameObject labelObject = new GameObject("Label");
-            labelObject.transform.SetParent(row.transform, false);
+            labelObject.transform.SetParent(buttonObject.transform, false);
 
             RectTransform labelRect = labelObject.AddComponent<RectTransform>();
             labelRect.anchorMin = Vector2.zero;
             labelRect.anchorMax = Vector2.one;
-            labelRect.offsetMin = new Vector2(12f, 4f);
-            labelRect.offsetMax = new Vector2(-12f, -4f);
+            labelRect.offsetMin = new Vector2(4f, 4f);
+            labelRect.offsetMax = new Vector2(-4f, -4f);
 
-            label = labelObject.AddComponent<TextMeshProUGUI>();
-            label.fontSize = 20f;
+            TextMeshProUGUI label = labelObject.AddComponent<TextMeshProUGUI>();
+            label.fontSize = 24f;
             label.alignment = TextAlignmentOptions.Center;
-            label.color = Color.white;
+            label.color = TextColor;
             label.raycastTarget = false;
-
+            label.SetText("BUY");
             return button;
         }
 
@@ -200,10 +280,7 @@ namespace IdleRPG.UI
             Refresh();
         }
 
-        /// <summary>
-        /// Fast-forward: GameManager owns the order of operations (quote -> charge -> pay) because the gems and
-        /// the payout live in two different services.
-        /// </summary>
+        /// <summary>Fast-forward: GameManager owns the order of operations (quote -> charge -> pay).</summary>
         private void OnInstantIncomeClicked()
         {
             if (manager == null)
@@ -223,7 +300,7 @@ namespace IdleRPG.UI
             }
         }
 
-        /// <summary>Any product row: the store confirms, then the GameManager grants the contents.</summary>
+        /// <summary>Any product card: the store confirms, then the GameManager grants the contents.</summary>
         private void OnIapClicked(string sku)
         {
             if (manager == null)
@@ -251,95 +328,76 @@ namespace IdleRPG.UI
                 gemsLabel.SetText(string.Format("{0} gems", NumberFormatter.Format(manager.Economy.Gems)));
             }
 
+            if (watchAdLabel != null)
+            {
+                watchAdLabel.SetText(noAds ? "ADS REMOVED" : (active ? "BOOST ACTIVE" : "WATCH AD"));
+            }
+
+            if (watchAdButton != null)
+            {
+                watchAdButton.interactable = !noAds && manager.Ads != null && manager.Ads.IsRewardedAdReady;
+            }
+
             for (int i = 0; i < rows.Count; i++)
             {
                 ShopRow row = rows[i];
-                TextMeshProUGUI label = row.Label;
-                Button button = row.Button;
 
-                switch (row.Kind)
+                if (row.Kind == RowKind.OfflineCap)
                 {
-                    case RowKind.Ad:
-                        if (label != null)
-                        {
-                            if (noAds)
-                            {
-                                label.SetText("ADS REMOVED");
-                            }
-                            else if (active)
-                            {
-                                label.SetText(string.Format("BOOST ACTIVE - Gold x{0} ({1})",
-                                    boost.GoldMultiplier.ToString("0.#"),
-                                    NumberFormatter.FormatDuration(boost.RemainingSeconds)));
-                            }
-                            else
-                            {
-                                double multiplier = manager.Balance != null ? manager.Balance.AdGoldBoostMultiplier : 2d;
-                                double minutes = manager.Balance != null ? manager.Balance.AdGoldBoostDurationSec / 60d : 60d;
-                                label.SetText(string.Format("WATCH AD - Gold x{0} for {1:0} min", multiplier.ToString("0.#"), minutes));
-                            }
-                        }
+                    row.Name.SetText(manager.Shop != null && manager.Shop.IsOfflineCapMaxed ? "Offline Cap (max)" : "Offline Cap");
+                    row.Effect.SetText(manager.Shop != null ? manager.Shop.DescribeOfflineCapOffer() : "");
+                    row.Value.SetText(manager.Shop != null ? string.Format("{0:0} gems", manager.Shop.NextOfflineCapExtensionCost) : "");
+                    row.Button.interactable = manager.Shop != null && manager.Shop.CanAffordOfflineCapExtension;
+                }
+                else if (row.Kind == RowKind.InstantIncome)
+                {
+                    row.Effect.SetText(manager.Shop != null ? manager.Shop.DescribeInstantIncomeOffer() : "");
+                    row.Value.SetText(manager.Shop != null ? string.Format("{0:0} gems", manager.Shop.InstantIncomeGemCost) : "");
+                    row.Button.interactable = manager.Shop != null && manager.Shop.CanAffordInstantIncome;
+                }
+                else
+                {
+                    bool owned = manager.Iap != null && manager.Iap.IsOwned(row.Sku);
+                    bool isNoAds = row.Sku == IapCatalog.SkuNoAds;
 
-                        if (button != null)
-                        {
-                            button.interactable = !noAds && manager.Ads != null && manager.Ads.IsRewardedAdReady;
-                        }
-                        break;
-
-                    case RowKind.OfflineCap:
-                        if (label != null && manager.Shop != null)
-                        {
-                            label.SetText(manager.Shop.DescribeOfflineCapOffer());
-                        }
-
-                        if (button != null && manager.Shop != null)
-                        {
-                            button.interactable = manager.Shop.CanAffordOfflineCapExtension;
-                        }
-                        break;
-
-                    case RowKind.InstantIncome:
-                        if (label != null && manager.Shop != null)
-                        {
-                            label.SetText(manager.Shop.DescribeInstantIncomeOffer());
-                        }
-
-                        if (button != null && manager.Shop != null)
-                        {
-                            button.interactable = manager.Shop.CanAffordInstantIncome;
-                        }
-                        break;
-
-                    case RowKind.Iap:
-                        bool owned = manager.Iap != null && manager.Iap.IsOwned(row.Sku);
-
-                        if (label != null)
-                        {
-                            label.SetText(owned && row.Sku == IapCatalog.SkuNoAds
-                                ? "No Ads - OWNED"
-                                : DescribeProduct(row.Sku));
-                        }
-
-                        if (button != null)
-                        {
-                            button.interactable = !owned || row.Sku != IapCatalog.SkuNoAds;
-                        }
-                        break;
+                    row.Name.SetText(isNoAds && owned ? "No Ads (owned)" : row.Name.text);
+                    row.Value.SetText(DescribeValue(row.Sku));
+                    SetButtonLabel(row.Button, isNoAds && owned ? "OWNED" : "BUY");
+                    row.Button.interactable = !owned || !isNoAds;
                 }
             }
         }
 
-        private static string DescribeProduct(string sku)
+        private static string DescribeValue(string sku)
         {
             switch (sku)
             {
                 case IapCatalog.SkuNoAds:
-                    return "No Ads - remove ads forever";
+                    return "1-time";
+                case IapCatalog.SkuGemsSmall:
+                    return "+5";
+                case IapCatalog.SkuGemsMedium:
+                    return "+30";
+                case IapCatalog.SkuGemsLarge:
+                    return "+110";
                 case IapCatalog.SkuStarterPack:
-                    return "Starter Pack - 50 gems + 1h offline cap";
+                    return "50 gems";
                 default:
-                    IapProduct product = IapCatalog.Find(sku);
-                    return product != null ? product.DisplayName : sku;
+                    return "";
+            }
+        }
+
+        private static void SetButtonLabel(Button button, string label)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            TextMeshProUGUI text = button.GetComponentInChildren<TextMeshProUGUI>();
+            if (text != null)
+            {
+                text.SetText(label);
             }
         }
     }

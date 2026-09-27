@@ -303,34 +303,30 @@ namespace IdleRPG.EditorTools
             UiFactory.Stretch(panel.GetComponent<RectTransform>());
             ShopPanelUI ui = panel.AddComponent<ShopPanelUI>();
 
+            // Header band, mirroring the ASCEND page: title, sub-line, one big gold action button.
             TextMeshProUGUI title = UiFactory.Text("Title", panel.transform, "Shop", 30f,
                 TextAlignmentOptions.Center, TextColor);
-            UiFactory.Anchor(title.rectTransform, new Vector2(0.05f, 0.88f), new Vector2(0.95f, 1f));
+            UiFactory.Anchor(title.rectTransform, new Vector2(0.03f, 0.88f), new Vector2(0.97f, 1f));
 
             TextMeshProUGUI gemsLabel = UiFactory.Text("Gems", panel.transform, "0 gems", 22f,
                 TextAlignmentOptions.Center, DimTextColor);
-            UiFactory.Anchor(gemsLabel.rectTransform, new Vector2(0.05f, 0.80f), new Vector2(0.95f, 0.86f));
+            UiFactory.Anchor(gemsLabel.rectTransform, new Vector2(0.03f, 0.79f), new Vector2(0.97f, 0.88f));
 
-            // The offer shelf: one scrollable list (ad boost, gem machines, then every IAP product).
-            // It must live BELOW the title + gems counter, not stretch over them. (B7 shop cleanup)
-            ScrollRect scroll = UiFactory.CreateScrollView(panel.transform, "Offers", 8f, new RectOffset(10, 10, 10, 10), out RectTransform offerRoot);
+            // The headline action (same slot as the ASCEND button): watch an ad for a gold boost.
+            Button watchAdButton = UiFactory.Button("WatchAdButton", panel.transform, "WATCH AD", "ui_button_gold", 30f, TextColor, null);
+            UiFactory.Anchor(watchAdButton.GetComponent<RectTransform>(), new Vector2(0.24f, 0.60f), new Vector2(0.76f, 0.77f));
+            TextMeshProUGUI watchAdLabel = watchAdButton.GetComponentInChildren<TextMeshProUGUI>();
 
-            RectTransform scrollRectTransform = scroll.GetComponent<RectTransform>();
-            scrollRectTransform.anchorMin = new Vector2(0f, 0f);
-            scrollRectTransform.anchorMax = new Vector2(1f, 0.78f);
-            scrollRectTransform.offsetMin = Vector2.zero;
-            scrollRectTransform.offsetMax = new Vector2(0f, -8f);
-
-            // Rows are fixed-height buttons - the layout must keep their height, not stretch them to fill.
-            VerticalLayoutGroup layout = offerRoot.GetComponent<VerticalLayoutGroup>();
-            if (layout != null)
-            {
-                layout.childControlHeight = false;
-                layout.childForceExpandHeight = false;
-            }
+            // The offer shelf, styled like the prestige tree (same scroll band, same card rows).
+            ScrollRect scroll = UiFactory.CreateScrollView(panel.transform, "Offers", 8f, new RectOffset(4, 4, 4, 4), out RectTransform offerRoot);
+            UiFactory.Anchor(scroll.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, 0.57f), 2f, 2f, 2f, 0f);
 
             SceneWiringUtility.SetField(ui, "gemsLabel", gemsLabel);
+            SceneWiringUtility.SetField(ui, "watchAdButton", watchAdButton);
+            SceneWiringUtility.SetField(ui, "watchAdLabel", watchAdLabel);
             SceneWiringUtility.SetField(ui, "offerRoot", offerRoot);
+            SceneWiringUtility.SetField(ui, "rowSprite", UiFactory.LoadSprite("ui_panel"));
+            SceneWiringUtility.SetField(ui, "buttonSprite", UiFactory.LoadSprite("ui_button"));
             return panel;
         }
     }

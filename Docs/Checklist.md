@@ -771,6 +771,15 @@ double-offline ad instead of two, gems may buy automation as an accelerant, anal
   8 rows inside the masked viewport, ownership cleared to a clean state, `Run All Checks` = **PASS**.
   (Note: the Editor crashed twice during this session - after scene rebuilds, both relaunched successfully;
   a stale-no-ads PlayerPrefs from a stalled mock coroutine was the only data side-effect and has been cleared.)
+- **Addendum 3 - ASCEND-style shop.** Restyled the shop page to mirror the ASCEND page exactly: same header band
+  (30pt title, 22pt dim sub-line, one big gold CTA button in the 0.60-0.77 slot now labelled WATCH AD / BOOST ACTIVE /
+  ADS REMOVED) and a scroll band anchored (0,0)-(1,0.57) whose offer cards are drawn like prestige rows -
+  `ui_panel` card at 30% alpha, name (26pt) + description (18pt dim) on the left, value in the middle, one
+  `ui_button` BUY on the right. Found and fixed a real layout bug on the way: rows added at runtime while the
+  page is hidden never triggered the scroll layout (all seven stacked on one spot), so `ShopPanelUI.OnEnable`
+  now forces a `LayoutRebuilder` pass. Verified live: seven 116px cards stacked 1056->196 with correct
+  name/value/effect/button labels, CTA live, no overlap; `Run All Checks` = **PASS**.
+  Screenshot: `Assets/Screenshots/shop_ascend_style.png`.
 
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 
