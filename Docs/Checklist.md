@@ -963,7 +963,7 @@ submission; and a mismatched Data Safety / privacy manifest, which is worse than
 2. Play account type (personal vs organization) - decides whether the 14-day closed-test gate is on the critical path.
 3. Art/audio timing: already in flight, or starts after B10?
 
-## 1q. B8' — the monster-making kit  ·  **tools 1-2 built + verified 2026-09-27** (tool 3 + polish still to come)
+## 1q. B8' — the monster-making kit  ·  **tools 1-3 built + verified 2026-09-27** (recipe + polish still to come)
 
 **Why this step exists.** Adding one monster used to mean touching four things by hand, and two of them failed
 silently: a picture had to be added as a line of code, a monster that was missing from the fight rotation simply never
@@ -1031,10 +1031,30 @@ check - the reason rules 1 and 3 can never drift apart.
 Shipped data was re-checked after every step; `Run All Checks (regression)` = **PASS**; console cleared and re-run to
 confirm **0 errors**; the 7 original pictures still byte-identical; no monsters were kept.
 
+### Tool 3 — the map (who appears where)
+A menu that prints which monster appears at every stage and wave, plus the numbers for "what changes if you add one
+card", and one truth check between the cards and the generated asset.
+
+`Tools > Idle RPG > Content > Print Rotation Map (who appears where)` -> the console and `Temp/rotation-map.txt`.
+
+Everything the map prints comes from `WaveConfig.ResolvePoolIndex` - **the exact same maths the shipped game runs**,
+so the map and the game cannot disagree (it is the one place that maths lives).
+
+### Tool 3 verified (2026-09-27)
+- The printed stage table is correct for the wrap rule (`S1` = Slime, Bat, Goblin…; `S2` opens with Bat because
+  `31 % 3 = 1`; the boss wave is always the 11th and always the Ogre with a pool of one).
+- **Cross-checked against the running game**: the map's 7 sampled picks are identical to what the real `WaveConfig`
+  asset picks for the same stage/wave (`S1w1 Slime S1w2 Bat S1w3 Goblin S2w1 Bat S2w10 Bat S3w1 Goblin S2w11 Ogre`).
+- The "what shifts" numbers are honest and big: appending **one** normal card re-shuffles **150 of the first 220**
+  stage/wave picks; appending one boss changes **10 of 20** boss waves. That is the warning, in numbers, before
+  anyone commits a card.
+- Lead frequencies over stages 1-20 sum to 20 (Slime x7, Bat x7, Goblin x6).
+- The truth check reads the generated asset and reports "Generated asset matches the cards (same pools, same order)."
+
 ### Still to come in B8'
-- **Tool 3** - the who-appears-where map, including "what shifts if you add a card" (the fight rotation wraps by pool
-  size, so adding one card re-shuffles which monster appears at every stage - the map makes that visible *before*
-  anyone commits a card).
+- **The recipe card** (`Docs/Content.md`): how to add a monster in 6 steps - add the card, the drawing tool makes the
+  picture, the checks shout at mistakes, the map shows the shuffle, regenerate, then re-record the golden numbers on
+  purpose (the honest ritual when a monster pool changes).
 - **Polish** - 3 first-run tips (reusing the existing message line, flags in the existing keyed save list) and empty
   formation seats that look empty instead of showing a red health bar.
 
@@ -1072,7 +1092,7 @@ shop beat verification (boss/milestone gems -> fast-forward + offline cap), and 
 | B5 | 14 - generic progression tracks (**schema v5**) | `[x]` 2026-09-25 (see §1h): TrackService = single purchase path; save v5 = one keyed `levels` list; `tracks.json` = the only upgrade spec; zero-code demo track (`Track_GoldHoarder`) added in data and proven live |
 | B6 | 16 - automation & QoL | `[x]` 2026-09-27 (see §1i + §1j) |
 | B7 | monetisation pass (design: `Monetisation.md`) | `[x]` 2026-09-27 (see §1k-§1o): S1 IAP seam + no-ads, S2 daily streak, S3 ad placements + caps, S4 gem sinks, S5 monetisation guard + F3 readout |
-| B8' | monster-making kit (picture tool, content checks, who-appears-where map) + 3 first-run tips + empty seats | `[~]` tools 1-2 done 2026-09-27 (see §1q) |
+| B8' | monster-making kit (picture tool, content checks, who-appears-where map) + recipe + 3 first-run tips + empty seats | `[~]` tools 1-3 done 2026-09-27 (see §1q) |
 | B9' | release plumbing, both targets (version/names, portrait lock, back button, icon/splash, checks-gated build) | `[ ]` |
 | B10 | live store wiring (real ads + IAP, Restore, minimal settings, consent, manifests) | `[ ]` |
 | B10b | store packet (screenshots, listing, ratings, Data Safety, sandbox) | `[ ]` |

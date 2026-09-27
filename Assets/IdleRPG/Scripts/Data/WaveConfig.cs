@@ -115,8 +115,23 @@ namespace IdleRPG.Data
 
         private static int PoolIndexOf(List<EnemyData> pool, int stage, int wave)
         {
+            return ResolvePoolIndex(stage, wave, pool.Count);
+        }
+
+        /// <summary>
+        /// Index of the pick a stage/wave makes inside a rotating pool. THE single place the rotation maths lives:
+        /// the game picks with it, and the rotation-map tool prints with it, so the tool can never disagree with
+        /// the game. Wraps by pool size - which is exactly why adding a card re-shuffles every stage.
+        /// </summary>
+        public static int ResolvePoolIndex(int stage, int wave, int poolSize)
+        {
+            if (poolSize <= 0)
+            {
+                return 0;
+            }
+
             int seed = (Mathf.Max(1, stage) - 1) * 31 + (Mathf.Max(1, wave) - 1);
-            return seed % pool.Count;
+            return seed % poolSize;
         }
 
         private static EnemyData PickFromPool(List<EnemyData> pool, int stage, int wave)
