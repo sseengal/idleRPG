@@ -54,8 +54,13 @@ namespace IdleRPG.EditorTools.Content
                 AssetDatabase.SaveAssets();
             }
 
+            // Any card that has no picture yet gets one (never overwrites existing art). Kept outside the
+            // asset-editing batch because each picture is its own import.
+            int drawn = PlaceholderSpriteGenerator.GenerateCardUnits();
+
             Debug.Log($"[ContentGenerator] Applied specs (heroes {heroes.heroes.Count}, enemies {enemies.enemies.Count}, " +
-                      $"stat upgrades {upgrades.statUpgrades.Count}, prestige {upgrades.prestigeUpgrades.Count}).");
+                      $"stat upgrades {upgrades.statUpgrades.Count}, prestige {upgrades.prestigeUpgrades.Count}, " +
+                      $"new card pictures {drawn}).");
         }
 
         // ------------------------------------------------------------------

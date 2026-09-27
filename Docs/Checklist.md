@@ -927,8 +927,9 @@ not the *store* plan. Evidence found while reviewing (all verified in the repo):
 | **Hero count was a scope trap** | `party.json` hardcodes the 3 hero ids, there is **no picker**, and the formation holds 3 slots | "5-6 heroes (data only)" was **not** data-only: it silently pulled in roster UI + chosen-party save (Step 17). **Owner call: ship 3 heroes**; content budget goes to enemies |
 | **Store release has wall-clock lead time** | new *personal* Play accounts need **12 testers x 14 continuous days** before production access | **Store Day-0** (below) is on the critical path - start it before writing code, not after |
 
-**Order now:** B8' content/onboarding -> B9' release plumbing -> **B10 live SDKs + consent + Restore + minimal
-settings** -> B10b store packet -> B1a device pass -> **art + audio final pass** -> B1b device pass + submission.
+**Order now:** B8' monster-making kit + polish (no new monsters) -> B9' release plumbing -> **B10 live SDKs + consent
++ Restore + minimal settings** -> B10b store packet -> B1a device pass -> **art + audio final pass** -> B1b device pass
++ submission. Real monsters then ship as a **post-launch update**, drawn by the kit.
 
 **Also caused by "both stores at once":** Android back/gesture handling (B9'), adaptive + 1024 icons and a launch
 screen (B10b), two build paths (Play signing key + AAB, iOS provisioning + Xcode), **one freeze window** (the art pass
@@ -936,7 +937,8 @@ must land before *either* submission), and double device QA (B1a/B1b).
 
 **Cuts held for MVP (all v1.1):** localisation, notifications, roster/hero picker, achievements / Game Center / Play
 Games, cloud save, tablet/iPad layout, second orientation, analytics SDK, season skeleton, remote config, A/B,
-haptics, font scale, the automation-for-gems accelerant.
+haptics, font scale, the automation-for-gems accelerant, and **new monsters** (they ship as a post-launch update,
+drawn by the kit from B8').
 
 **Rejection risks to respect:** placeholder-looking builds (Apple 2.2 / 4.2) - hence art + audio strictly *before*
 submission; and a mismatched Data Safety / privacy manifest, which is worse than a missing feature.
@@ -949,12 +951,62 @@ submission; and a mismatched Data Safety / privacy manifest, which is worse than
 - [ ] Privacy policy + support URL hosted (both stores require the URLs)
 - [ ] Art/audio pass commissioned + dated (it sets the submission date)
 
-### Open owner decisions (needed before B10)
+### Decisions taken (owner, 2026-09-27)
+1. **3 playable heroes** at launch; a 4th hero needs the roster picker, which is v1.1 (Step 17).
+2. **Launch roster = 4 monsters** (slime, bat, goblin, ogre) - **no monsters added before release.** Instead B8' builds the "monster-making kit" (see §1q) so content scales later without code.
+3. **Real monsters ship post-launch as an update**, drawn by the kit with placeholder art, after the artist has finished the 4-monster launch roster.
+4. **No analytics SDK ships** - the stores' own crash reports cover us.
+5. **Both stores at once**, one submission push; **art + audio = the final pass before submission**.
+
+### Still open (needed before B10)
 1. Ad network: **Unity Ads** (one vendor, Unity-authored privacy manifest + consent tooling) vs AdMob (better fill/eCPM, ATT + UMP + Google data forms). Docs stay vendor-neutral until decided.
-2. Play account type (personal vs organization) - decides whether the 14-day test gate is on the critical path.
+2. Play account type (personal vs organization) - decides whether the 14-day closed-test gate is on the critical path.
 3. Art/audio timing: already in flight, or starts after B10?
 
-## 1e. Remaining path to MVP  ·  **what is left, in order**
+## 1q. B8' — the monster-making kit  ·  **tool 1 built + verified 2026-09-27** (tools 2-3 + polish still to come)
+
+**Why this step exists.** Adding one monster used to mean touching four things by hand, and two of them failed
+silently: a picture had to be added as a line of code, a monster that was missing from the fight rotation simply never
+appeared, and the difficulty surprise only showed up after the fact. Owner decision (2026-09-27): **add no monsters
+before release** - build the tools that make adding them a paperwork job instead, and ship the monsters later.
+
+### Tool 1 — the drawing tool gives every card a picture, with no code
+`PlaceholderSpriteGenerator.GenerateCardUnits()` reads the hero and enemy cards and draws one picture per card that
+does not have one yet. It runs in two places, so either menu press is enough:
+`Tools > Idle RPG > Art > Generate Placeholder Sprites`, and
+`Tools > Idle RPG > Content > Generate Assets From Specs` (a card now yields both its asset and its picture).
+
+Two safety rules, both deliberate:
+
+| Rule | Why |
+|---|---|
+| An existing picture file is **never overwritten** | the 7 curated units and any hand-made art stay exactly as they are; artists replace files later without the tool fighting them |
+| The shape comes from the **words in the card's id** and the colour from its **tint** | both already survive the trip from card to asset and back. A brand-new card field would be silently dropped by `Export Specs From Assets` (it rebuilds the card list from the assets), so the family lives in the id instead - and tool 2 will warn when a card's id carries no family word |
+
+Shape families read from the id: `slime|blob|ooze|swarm|spider|worm` → blob, `bat|wing|fly|moth|harpy|wyvern` → wings,
+`goblin|orc|ogre|brute|troll|rat|wolf|beast` → ears, `knight|guard|shield|turtle|golem|armou|armor|tank` → shield,
+`mage|wizard|witch|sorcer|spirit|elemental` → diamond, `archer|ranger|hunter|gold|rich|coin|mimic|chest|treasure` →
+chevron, anything else → blob, and every boss → spikes.
+
+### Verified (2026-09-27)
+- Shipped cards: **0 pictures drawn** (all 4 monsters + 3 heroes already have one) - nothing touched.
+- **Rehearsal, then reverted:** a card for `enemy_wolf` (no picture, tint `#8C7A5A`) was added to `enemies.json`; one
+  press drew exactly **1 picture** (`enemy_wolf.png`, imported as a Sprite, ears silhouette in the card's colour) with
+  **zero code changes**. A second press drew **0** (never overwrites). The card and the picture were then deleted -
+  **no monsters were added to the game.**
+- The 7 existing pictures are **byte-identical** (md5 compared before and after).
+- `Run All Checks (regression)` = **PASS**, golden numbers unchanged (gold/s 2.158 vs baseline 2.16, -0.1%) and
+  `BalanceBaseline` still records the 2026-09-25 baseline - the tool changes no game maths.
+
+### Still to come in B8'
+- **Tool 2** - content checks: a card with no picture fails the content check; a card that is in no fight pool warns;
+  a card id with no family word warns.
+- **Tool 3** - the who-appears-where map, including "what shifts if you add a card" (the rotation wraps by pool size,
+  so adding one card re-shuffles every stage - the map makes that visible *before* anyone commits a card).
+- **Polish** - 3 first-run tips (reusing the existing message line, flags in the existing keyed save list) and empty
+  formation seats that look empty instead of showing a red health bar.
+
+
 
 Base gate: every step below names the loop beat or money path it serves. Anything that cannot is not in the base.
 
@@ -965,7 +1017,7 @@ Base gate: every step below names the loop beat or money path it serves. Anythin
 | **B5** | Generic progression tracks (schema v5) | money path: more tracks = more to buy = more gem/ad relevance | a new track = spec + generate, zero code; a v4 save migrates to identical numbers | medium |
 | **B6** | Automation & QoL (`AutomationUnlock` cards; **ascension stays manual forever** - owner decision) | retention: idling must pay off while away | `[x]` Step 4 done 2026-09-27 (see §1j): the robot learns the rebirth loop (auto-buy mid-climb + voluntary/wall ascents, lifetime frontier asserted by the validator); Steps 1-3 + Fix A landed 2026-09-25 (see §1i) | medium |
 | **B7** | Monetisation pass (`Monetisation.md`) | money path: ad placements + gem sinks + mock IAP | `[x]` 2026-09-27 (see §1k-§1o): every payout goes through the ledger rate, per-day caps enforced, mock IAP swaps for a real store with one implementation, and the build now refuses a sink that beats its own time-value | done |
-| **B8'** | Content + onboarding pass (**3 heroes**) | first-run clarity: a stranger knows what to press | enemies **4 -> 8-12** (+ boss variety); **heroes stay 3** (§1p: a 4th hero needs the v1.1 roster UI); 3 first-run tips; formation-slot tiles; shop-beat play check; content added with no code | small-med |
+| **B8'** | **Monster-making kit + polish** (**no new monsters**) | first-run clarity + content that can scale later | the 3 tools (§1q): (1) the drawing tool gives every card a picture with no code, (2) two content checks - a card with no picture fails, a card that never appears in a fight warns, (3) a map showing which monster appears at every stage/wave and what shifts if a card is added. Plus 2 polish jobs: **3 first-run tips** and **empty formation seats that look empty**. Launch roster stays **3 heroes / 4 monsters**; real monsters are a post-launch update | small-med |
 | **B9'** | Release plumbing (**both targets**) | ship it | version stamp, mobile targets + signing, portrait lock, app icon + launch screen (placeholders), crash log file, **checks-gated one-command build**, **Android back/gesture handling**, written save-compat policy | med |
 | **B10** | **Live store wiring** (new, §1p) | the real money path | real rewarded ads + Unity IAP behind the existing seams; **Restore Purchases UI**; minimal settings (Restore + privacy link + mute); iOS ATT + EEA consent; `PrivacyInfo.xcprivacy` + Play Data Safety; an ad that fails or is skipped must not consume a daily cap | **large** |
 | **B10b** | **Store packet** (new, §1p) | a build the stores accept | screenshots (iPhone 6.7" + Play phone + 1024x500 feature graphic), listing copy, age/content rating, Data Safety answers, product records matched to `IapCatalog`, sandbox end-to-end on both platforms | med-large |
@@ -988,7 +1040,7 @@ shop beat verification (boss/milestone gems -> fast-forward + offline cap), and 
 | B5 | 14 - generic progression tracks (**schema v5**) | `[x]` 2026-09-25 (see §1h): TrackService = single purchase path; save v5 = one keyed `levels` list; `tracks.json` = the only upgrade spec; zero-code demo track (`Track_GoldHoarder`) added in data and proven live |
 | B6 | 16 - automation & QoL | `[x]` 2026-09-27 (see §1i + §1j) |
 | B7 | monetisation pass (design: `Monetisation.md`) | `[x]` 2026-09-27 (see §1k-§1o): S1 IAP seam + no-ads, S2 daily streak, S3 ad placements + caps, S4 gem sinks, S5 monetisation guard + F3 readout |
-| B8' | content + onboarding (enemies 4 -> 8-12, **3 heroes stay**) | `[ ]` |
+| B8' | monster-making kit (picture tool, content checks, who-appears-where map) + 3 first-run tips + empty seats | `[~]` tool 1 done 2026-09-27 (see §1q) |
 | B9' | release plumbing, both targets (version/names, portrait lock, back button, icon/splash, checks-gated build) | `[ ]` |
 | B10 | live store wiring (real ads + IAP, Restore, minimal settings, consent, manifests) | `[ ]` |
 | B10b | store packet (screenshots, listing, ratings, Data Safety, sandbox) | `[ ]` |

@@ -4,6 +4,14 @@
 - Output only code, exact commands, or ultra-short context.
 - No "Sure, I can help" or conversational transitions.
 
+# Always Explain Simply (no jargon)
+- Every explanation must be in plain words a smart 12-year-old could follow. No jargon, no acronyms, no internal names unless unavoidable.
+- If a term must be used (file name, class, tool), define it in one short line the first time: "the drawing tool - the menu command that makes monster pictures".
+- Prefer a concrete example over an abstract description: say "add a card, press the button, a picture appears" instead of "the pipeline is spec-driven".
+- Always lead with the plain-words version, then the detail. Never lead with jargon and explain later.
+- Say what a thing *does* or what the user *sees*, not what it is called.
+- If a decision has a downside, say the downside plainly too. No hedging, no marketing tone.
+
 # Execution Strategy & Testing Loop Prevention
 - Progress: Make small, incremental changes. One fix or one feature step at a time.
 - Stop and Ask: Do not write automated tests or run continuous background evaluation loops.

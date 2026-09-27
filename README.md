@@ -170,7 +170,7 @@ debug menus, the console log and the Unity MCP bridge. A manual pass takes ~5 mi
 | B3–B5 | Loop beat + ascension retune + compounding upgrades, validator/loop gate, generic tracks (save v5) | done |
 | B6 | Automation cards: auto-buy + speed button (earned, sold for tokens) | done |
 | B7 | Monetisation (IAP seam + no-ads, daily streak, ad caps, gem sinks, validator guard) | done |
-| B8' | Content + onboarding (enemies 4 → 8-12, 3 heroes, first-run tips, formation-slot tiles) | next |
+| B8' | Monster-making kit (picture tool, content checks, who-appears-where map) + 3 first-run tips + empty seats — **no new monsters** | in progress (tool 1 done) |
 | B9' | Release plumbing, both targets (version/names, portrait lock, back button, checks-gated build) | planned |
 | B10 | Live store wiring (real ads + IAP, Restore Purchases, minimal settings, consent, privacy manifests) | planned |
 | B10b | Store packet (screenshots, listing, ratings, Data Safety, sandbox) | planned |
