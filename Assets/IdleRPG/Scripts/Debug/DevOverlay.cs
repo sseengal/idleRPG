@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -5,7 +6,11 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using IdleRPG.Combat;
 using IdleRPG.Core;
+using IdleRPG.Data;
 using IdleRPG.Debugging;
+using IdleRPG.Economy;
+using IdleRPG.Progression;
+using IdleRPG.Services;
 using IdleRPG.Sim;
 
 namespace IdleRPG.DebugTools
@@ -332,12 +337,83 @@ namespace IdleRPG.DebugTools
                 builder.AppendLine($"telemetry  {telemetry.Count} buffered / {telemetry.TotalEvents} total");
             }
 
-            builder.AppendLine($"fps        {1f / Mathf.Max(0.0001f, Time.smoothDeltaTime):0}");
+            // Shop readout (B7 S5): today's money facts, all read from live services - no extra state.
+            if (context.Economy != null || context.DailyStreak != null)
+            {
+                builder.AppendLine($"money      {MoneyLine()}");
+            }
 
+            if (context.AdCaps != null)
+            {
+                builder.AppendLine($"ads        {AdLine()}");
+            }
+
+            builder.AppendLine($"fps        {1f / Mathf.Max(0.0001f, Time.smoothDeltaTime):0}");
             label.SetText(builder);
 
             // Auto-fit: the stats panel grows with its own line count, and the legend parks underneath it.
             FitPanels(label.preferredHeight + 12f);
+        }
+
+        /// <summary>
+        /// Shop readout for the money line: the wallet, the streak, and every gems-priced (permanent) row.
+        /// Reads only live services, so it can never disagree with the shop.
+        /// </summary>
+        private string MoneyLine()
+        {
+            string gems = context.Economy != null ? $"{context.Economy.Gems:0} gems" : "gems n/a";
+            string streak = context.DailyStreak != null
+                ? $"streak day {context.DailyStreak.CurrentDay} ({context.DailyStreak.StreakCount} run)"
+                : "streak n/a";
+            string rows = "no gem rows";
+
+            if (context.Tracks != null)
+            {
+                StringBuilder text = new StringBuilder();
+                IReadOnlyList<ProgressionTrack> all = context.Tracks.Tracks;
+
+                for (int i = 0; i < all.Count; i++)
+                {
+                    ProgressionTrack track = all[i];
+
+                    if (track.Currency != CurrencyType.Gems)
+                    {
+                        continue;
+                    }
+
+                    text.Append(text.Length > 0 ? ", " : "");
+                    text.Append($"{track.DisplayName} Lv{context.Tracks.GetLevel(track, null)}/{track.MaxLevel}");
+                }
+
+                if (text.Length > 0)
+                {
+                    rows = text.ToString();
+                }
+            }
+
+            return $"{gems} | {streak} | {rows}";
+        }
+
+        /// <summary>Ad readout: redemptions left today per placement, the boost cooldown, and the no-ads swap state.</summary>
+        private string AdLine()
+        {
+            StringBuilder text = new StringBuilder();
+            AdPlacementId[] placements = { AdPlacementId.GoldBoost, AdPlacementId.DoubleOffline };
+
+            for (int i = 0; i < placements.Length; i++)
+            {
+                AdPlacementId id = placements[i];
+                int cap = context.Balance != null ? context.Balance.GetAdPlacement(id).DailyCap : 0;
+                bool ready = context.AdCaps.CanShow(id, out double cooldown);
+
+                text.Append(text.Length > 0 ? " | " : "");
+                text.Append($"{id} {context.AdCaps.RemainingToday(id)}/{cap}{(ready ? "" : $" cd {cooldown:0}s")}");
+            }
+
+            bool noAds = context.Iap != null && context.Iap.IsOwned(IapCatalog.SkuNoAds);
+            text.Append(noAds ? " | no-ads OWNED" : " | no-ads no");
+
+            return text.ToString();
         }
     }
 }

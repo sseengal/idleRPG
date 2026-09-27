@@ -12,12 +12,12 @@
 
 | Field | Value |
 |---|---|
-| Current step | **B7 S5 NEXT: validator guard + overlay readout** (B7 S4 - gem sinks + currency seam - **verified 2026-09-27**, §1n). Then B8, B9, device pass last |
+| Current step | **B8 NEXT: content + onboarding** (B7 - the whole money path - is **COMPLETE 2026-09-27**, §1k-§1o). Then B9, device pass last |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money.** No statuses/abilities/zones/affixes/gear/roster/relics before the base is done |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
-| Last completed | B7 S4 - gem sinks (currency seam + Golden Foundry track; verified live, see §1n), 2026-09-27 |
-| Next after this | B7 S5: validator guard (no sink beats its time-value; define the horizon for permanent multipliers) + a shop readout in the dev overlay; then B8 -> B9, device pass (B1) last |
+| Last completed | B7 S5 - the monetisation guard + shop readout on F3 (planted cheats refused by the build; see §1o), 2026-09-27 |
+| Next after this | B8: ~8-12 enemies + 5-6 heroes (**data only**) + 3 first-run tips + formation-slot tiles; then B9 plumbing, device pass (B1) last |
 | Save schema | v5 (v3 -> v4 adds `runBestStage`; v4 -> v5 = one keyed `levels` list; additive migrations, no data loss - see §1h / B35-B36) |
 | Shipped build | `Builds/IdleRPG-mac.app` verified (boot, save, offline, combat) |
 | Docs | all live in `Docs/` - index `Docs/README.md`; status here; backlog `Roadmap.md`; removals `Docs/REVIEW.md` (R1: obsolete MVP journal deleted) |
@@ -873,7 +873,44 @@ shipped**, automation-for-gems **deferred** (the flagged optional half - a dupli
   gold multiplier **1.000 -> 1.050**, and the row refreshed to `Lv 1 | 40 gems`; **tokens untouched (2)**.
   `Run All Checks` = **PASS** (goldens untouched - level 0 = base, so the parity net holds).
 
-## 1e. Remaining path to MVP  ·  **what is left, in order**
+## 1o. B7 S5 — the monetisation guard + the shop readout  ·  **built + verified 2026-09-27**  ·  **B7 COMPLETE**
+
+Plan `Monetisation.md` §6 item 5. The doc's guard rule ("no sink grants more than **2x** the income its cost
+implies") is exact for **time sinks** but undefined for a **permanent** multiplier - over infinite time *any*
+permanent bonus out-earns its price. S5 therefore nails a rule that needs **neither a horizon nor a gold rate**:
+
+> Convert gems to seconds with the game's own exchange rate (`instantIncomeSeconds / instantIncomeGemCost` = **120
+> s/gem**). A permanent multiplier's **payback** = `costSeconds / gainFraction` - how long you must play for the extra
+> gold to equal the income those gems could have bought outright. **Require payback >= 1h of play (error), warn below
+> 3h, and require `costGrowth > 1` so payback grows with every level.** The rate cancels out, so the rule is
+> rate-free; the shipped Golden Foundry sits at **16.7h**, a cheat price lands at 0.07h.
+
+- **`ContentValidator.CheckMonetisation()`** (one new group, registered next to `CheckPowerBand`, self-contained -
+  no dependence on the robot climb):
+  - **time sinks** - instant income and offline-cap extension must stay `<= 2x` their cost in time (the doc's rule:
+    shipped `x1.00` and `x0.42`), and the exchange itself must be sane (`instantIncomeGemCost > 0`).
+  - **permanent multipliers** - every `costCurrency: gems` card in `tracks.json`: positive gain, payback floor/warn,
+    `costGrowth > 1`. Reads the **spec**, so a hand-edited card is caught before assets are generated.
+  - **nothing sold grants power** - every `IapCatalog` product must sell time (gems / offline minutes) or ad removal,
+    and a no-ads SKU must exist (the swap seam is the promise, so the guard asserts it).
+  - **free reachability** - the cheapest gem sink must be within ~3 days of the streak faucet, and *some* free gem
+    faucet must exist (milestones or streak). Warning + error respectively.
+  - **info line** - `120 s/gem | instant x1.00, cap x0.42 | 1 gem sink(s), 5 IAP SKU(s) | Track_GemGold payback 16.7h`.
+- **Shop readout on F3** (`DevOverlay`): two new lines built **only from live services** (`GameContext` gained
+  `Tracks` / `DailyStreak` / `AdCaps`, wired in `BuildContext`) - no new state, no save field, nothing to drift.
+  Verified live: `money 416 gems | streak day 1 (0 run) | Golden Foundry Lv1/10` and
+  `ads GoldBoost 5/5 | DoubleOffline 3/3 | no-ads no`.
+- **Planted-failure proof (both reverted, final clean):**
+  1. cheat card (`Track_GemGold` at **1 gem, +50%/level, costGrowth 1.0**) -> **2 errors**:
+     *"pays back in 0.07h of play (floor 1h) - money would beat playing"* +
+     *"costGrowth must be > 1 so the payback grows with every level"*;
+  2. a planted power-selling SKU (`idlerpg.test_power`, grants nothing) -> **1 error**:
+     *"sells neither time nor ad removal - power must never be sold"*.
+- **Verified (2026-09-27):** `Validate Content` = **clean, 0 errors / 0 warnings** (18 issues, the 3 money info
+  lines above). `Run All Checks` = **PASS**. **No save change** (v5 untouched), goldens untouched - the guard is
+  pure validation, it changes no number in the loop.
+
+
 
 Base gate: every step below names the loop beat or money path it serves. Anything that cannot is not in the base.
 
@@ -883,7 +920,7 @@ Base gate: every step below names the loop beat or money path it serves. Anythin
 | B4 | **Sweep-wide validator + loop harness** | keeps the loop healthy: an accidental stall must fail the build | `[x]` 2026-09-25 (see §1g): dangling-ref/spec-asset checks, the robot climb runs inside the validator (target stage 25), golden numbers asserted +-2% via `BalanceBaseline`; planted stall and planted +20% buff both fail the build | done |
 | **B5** | Generic progression tracks (schema v5) | money path: more tracks = more to buy = more gem/ad relevance | a new track = spec + generate, zero code; a v4 save migrates to identical numbers | medium |
 | **B6** | Automation & QoL (`AutomationUnlock` cards; **ascension stays manual forever** - owner decision) | retention: idling must pay off while away | `[x]` Step 4 done 2026-09-27 (see §1j): the robot learns the rebirth loop (auto-buy mid-climb + voluntary/wall ascents, lifetime frontier asserted by the validator); Steps 1-3 + Fix A landed 2026-09-25 (see §1i) | medium |
-| **B7** | Monetisation pass (`Monetisation.md`) | money path: ad placements + gem sinks + mock IAP | every payout goes through the ledger rate; per-day caps enforced; mock IAP swaps for a real store with one implementation | medium |
+| **B7** | Monetisation pass (`Monetisation.md`) | money path: ad placements + gem sinks + mock IAP | `[x]` 2026-09-27 (see §1k-§1o): every payout goes through the ledger rate, per-day caps enforced, mock IAP swaps for a real store with one implementation, and the build now refuses a sink that beats its own time-value | done |
 | **B8** | Content + onboarding pass | first-run clarity: a stranger knows what to press | ~8-12 enemies, 5-6 heroes (data only) + 3 first-run tips; content added with no code | medium |
 | **B9** | Release plumbing | ship it | version stamp, crash log file, one scripted `-batchmode` build command | small-med |
 | **B1** | **Device pass (LAST, owner-run)** | does it actually feel good on a phone | 60fps idle with 3v3 on device; safe area clean; offline modal + CLAIM work by touch | ½ day |
@@ -903,7 +940,7 @@ shop beat verification (boss/milestone gems -> fast-forward + offline cap), and 
 | B4 | **sweep-wide validator band + bounce detection** | `[x]` 2026-09-25 (see §1g) |
 | B5 | 14 - generic progression tracks (**schema v5**) | `[x]` 2026-09-25 (see §1h): TrackService = single purchase path; save v5 = one keyed `levels` list; `tracks.json` = the only upgrade spec; zero-code demo track (`Track_GoldHoarder`) added in data and proven live |
 | B6 | 16 - automation & QoL | `[x]` 2026-09-27 (see §1i + §1j) |
-| B7 | monetisation pass (design: `Monetisation.md`) | `[~]` S1 done 2026-09-27 (IAP seam + no-ads, see §1k) |
+| B7 | monetisation pass (design: `Monetisation.md`) | `[x]` 2026-09-27 (see §1k-§1o): S1 IAP seam + no-ads, S2 daily streak, S3 ad placements + caps, S4 gem sinks, S5 monetisation guard + F3 readout |
 | B8 | content + onboarding pass | `[ ]` |
 | B9 | 21-lite - version stamp, crash log, scripted build | `[ ]` |
 | B1 | device pass (deliberately last, owner-run) | `[ ]` |

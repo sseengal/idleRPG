@@ -55,6 +55,15 @@ namespace IdleRPG.Core
 
         public AutomationService Automation { get; set; }
 
+        /// <summary>The one checkout for progression rows (B5) - the dev overlay reads gem-track levels from it.</summary>
+        public TrackService Tracks { get; set; }
+
+        /// <summary>Every-morning gift calendar (B7 S2).</summary>
+        public DailyStreakService DailyStreak { get; set; }
+
+        /// <summary>Per-day ad police (B7 S3).</summary>
+        public AdCapsService AdCaps { get; set; }
+
         /// <summary>True once the minimum set of systems is present.</summary>
         public bool IsReady => Balance != null && Waves != null && Party != null && Combat != null && Economy != null;
 

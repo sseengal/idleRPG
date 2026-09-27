@@ -168,8 +168,9 @@ debug menus, the console log and the Unity MCP bridge. A manual pass takes ~5 mi
 | 7–9 | Sim refactor, content pipeline + validator + overlay, economy audit (ledger, reward funnel, time payouts, gem sinks, audio hooks) | done |
 | 10–11 | Formation (save v3) + multi-enemy waves 1–3 with a size recipe | done |
 | B3–B5 | Loop beat + ascension retune + compounding upgrades, validator/loop gate, generic tracks (save v5) | done |
-| B6 | Automation cards: auto-buy + speed button (earned, sold for tokens) | in progress |
-| next | B7 monetisation (ads/IAP), B8 content + onboarding, B9 release plumbing, B1 device pass | planned |
+| B6 | Automation cards: auto-buy + speed button (earned, sold for tokens) | done |
+| B7 | Monetisation (IAP seam + no-ads, daily streak, ad caps, gem sinks, validator guard) | done |
+| next | B8 content + onboarding, B9 release plumbing, B1 device pass (owner-run, last) | planned |
 
 ## Design docs
 

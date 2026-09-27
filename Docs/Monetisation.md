@@ -82,7 +82,12 @@ point of doing B5 (tracks) before B7.
    data now (`costCurrency`), the **Golden Foundry** +5% gold track ships (25 gems, x1.6, cap 10 = +50%), the shop
    renders gems tracks from data, and ASCEND stays token-only).  **Deferred:** the automation-for-gems accelerant
    (a duplicate card would break ownership; it must be a checkout currency override - its own small step).
-5. Validator guard + a shop readout in the dev overlay.
+5. Validator guard + a shop readout in the dev overlay.  **DONE 2026-09-27** (see `Checklist.md` §1o -
+   `CheckMonetisation()` enforces the 2x time-value rule for time sinks, a **rate-free payback floor** (>= 1h of play,
+   warn < 3h, `costGrowth > 1`) for permanent multipliers, "no product sells power" over `IapCatalog`, and free-player
+   reachability of the cheapest gem sink; F3 now prints the money/ads lines. Planted cheat card -> 2 errors, planted
+   power SKU -> 1 error, both reverted; final `Validate Content` clean, `Run All Checks` PASS).
+   **B7 is complete.**
 
 ## 7. Explicitly not in the base
 
