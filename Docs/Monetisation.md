@@ -71,7 +71,8 @@ point of doing B5 (tracks) before B7.
 ## 6. Order inside B7
 
 1. `IIapService` + `MockIapService` + no-ads flag (proves the swap seam).  **DONE 2026-09-27** (see `Checklist.md` §1k)
-2. Daily streak + milestone gems (fixes gem scarcity first, so the sinks have something to spend).
+2. Daily streak + milestone gems (fixes gem scarcity first, so the sinks have something to spend).  **DONE 2026-09-27**
+   (see `Checklist.md` §1l - calendar `{5,8,10,12,15,18,25}` + day-7 gold boost, local-midnight, tamper-safe; milestones verified unchanged)
 3. Ad placements (**x2 gold boost**, **double offline** - the redundant "instant claim" was cut: the popup already
    pays instantly) + per-day caps.
 4. Permanent-multiplier + automation sinks (needs B5 and B6; owner-approved 2026-09-27: gems may unlock automation

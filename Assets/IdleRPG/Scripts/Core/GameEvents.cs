@@ -29,6 +29,9 @@ namespace IdleRPG.Core
         /// <summary>(message) short player-facing message for a toast/snackbar.</summary>
         public static event Action<string> ToastRequested;
 
+        /// <summary>(day, gems) when the daily-streak calendar pays out (B7 S2).</summary>
+        public static event Action<int, double> DailyStreakClaimed;
+
         // ------------------------------------------------------------------
         // Game flow
         // ------------------------------------------------------------------
@@ -229,6 +232,11 @@ namespace IdleRPG.Core
         internal static void RaiseAscensionCompleted(double tokensEarned, int newHighestStage)
         {
             SafeInvoke(AscensionCompleted, tokensEarned, newHighestStage, nameof(AscensionCompleted));
+        }
+
+        internal static void RaiseDailyStreakClaimed(int day, double gems)
+        {
+            SafeInvoke(DailyStreakClaimed, day, gems, nameof(DailyStreakClaimed));
         }
 
         internal static void RaiseOfflineRewardsReady(OfflineRewardResult result)

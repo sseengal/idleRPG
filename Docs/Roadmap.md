@@ -265,7 +265,7 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
 
 ### B5 - 14 generic progression tracks (schema v5)  `DONE (2026-09-25)`  (details: `Checklist.md` §1h)
 ### B6 - 16 automation & QoL  `DONE (2026-09-27)`  (Steps 1-3 + Fix A 2026-09-25, Step 4 robot learns the rebirth loop 2026-09-27; details: `Checklist.md` §1i/§1j)
-### B7 - monetisation pass  `IN PROGRESS`  (S1 done 2026-09-27 - IAP seam + no-ads flag, see `Checklist.md` §1k; next S2 daily streak + milestone gems)
+### B7 - monetisation pass  `IN PROGRESS`  (S1 IAP seam + no-ads 2026-09-27, S2 daily streak 2026-09-27 - see `Checklist.md` §1k/§1l; next S3 ad placements + caps)
 ### B8 - content + onboarding pass  `TODO`
 ### B9 - 21-lite release plumbing  `TODO`
 ### B1 - device pass  `TODO`  (deliberately last, owner-run)

@@ -64,6 +64,17 @@ namespace IdleRPG.Data
         [Tooltip("Every Nth stage pays gems on its first clear only. 5 = stages 5, 10, 15, 20 ...")]
         [SerializeField] private int milestoneStageInterval = 5;
 
+        // ------------------------------------------
+        // Daily streak (B7 S2)
+        // ------------------------------------------
+        [Header("Daily Streak (B7 S2)")]
+        [Tooltip("Gems rewarded for each consecutive day, index 0 = day 1. The last entry is the cap: " +
+                 "while the streak holds, every later day pays the cap amount.")]
+        [SerializeField] private int[] dailyStreakGems = { 5, 8, 10, 12, 15, 18, 25 };
+
+        [Tooltip("The streak-cap day (day 7 with the shipped table) also starts a short gold boost.")]
+        [SerializeField] private bool dailyStreakDay7Boost = true;
+
         [Tooltip("Delay between clearing a wave and spawning the next, in seconds.")]
         [SerializeField] private float waveTransitionDelaySec = 0.5f;
 
@@ -307,6 +318,37 @@ namespace IdleRPG.Data
 
         /// <summary>Stages between gem milestones (5 = stages 5, 10, 15 ...). Never below 1.</summary>
         public int MilestoneStageInterval => Mathf.Max(1, milestoneStageInterval);
+
+        // ------------------------------------------------------------------
+        // Daily streak (B7 S2)
+        // ------------------------------------------------------------------
+        /// <summary>Gem table for day 1..N (never empty; falls back to a sane default).</summary>
+        public int[] DailyStreakGems
+        {
+            get
+            {
+                if (dailyStreakGems != null && dailyStreakGems.Length > 0 && dailyStreakGems[0] > 0)
+                {
+                    return dailyStreakGems;
+                }
+
+                return new[] { 5, 8, 10, 12, 15, 18, 25 };
+            }
+        }
+
+        /// <summary>The streak's ceiling: how many consecutive days the table covers.</summary>
+        public int DailyStreakCap => DailyStreakGems.Length;
+
+        /// <summary>The streak-cap day also starts a gold boost.</summary>
+        public bool DailyStreakDay7Boost => dailyStreakDay7Boost;
+
+        /// <summary>Gems a streak of <paramref name="day"/> days pays (clamped to the cap).</summary>
+        public int DailyStreakGemsForDay(int day)
+        {
+            int[] table = DailyStreakGems;
+            int index = day < 1 ? 0 : (day > table.Length ? table.Length - 1 : day - 1);
+            return table[index];
+        }
 
         public float WaveTransitionDelaySec => Mathf.Max(0f, waveTransitionDelaySec);
 

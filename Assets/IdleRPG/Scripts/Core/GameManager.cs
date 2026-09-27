@@ -123,6 +123,20 @@ namespace IdleRPG.Core
         /// <summary>Store cash register: mock today, Unity IAP (Apple/Google) at launch. B7 S1.</summary>
         public IIapService Iap { get; private set; }
 
+        /// <summary>Every-morning gift calendar (B7 S2). Reads the save, pays the daily gems.</summary>
+        public Economy.DailyStreakService DailyStreak { get; private set; }
+
+        /// <summary>
+        /// Debug/testing hook: replace the calendar's "today" (e.g. yesterday/tomorrow) without touching the
+        /// device clock. Null = real local date.
+        /// </summary>
+        public System.DateTime? DailyStreakOverride { get; set; }
+
+        private System.DateTime ResolveStreakNow()
+        {
+            return DailyStreakOverride ?? System.DateTime.Now;
+        }
+
         /// <summary>Tokens the player would receive by ascending right now (priced on THIS run's best stage).</summary>
         public double PrestigeTokenYield
         {
@@ -224,6 +238,9 @@ namespace IdleRPG.Core
 
             // Offer offline earnings (no-op on a fresh install or a very short absence).
             EvaluateOffline();
+
+            // Every-morning gift: auto-claim silently when there is a streak to pay.
+            TryClaimDailyStreak();
         }
 
         private void OnApplicationPause(bool paused)
@@ -231,6 +248,11 @@ namespace IdleRPG.Core
             if (paused)
             {
                 Save?.SaveNow("pause");
+            }
+            else
+            {
+                // An idle game can sit in the background across midnight - catch the new day on the way back in.
+                TryClaimDailyStreak();
             }
         }
 
@@ -337,6 +359,9 @@ namespace IdleRPG.Core
             Ledger = new SimLedger(balanceConfig != null ? balanceConfig.GoldPerSecondSampleWindowSec : 60f);
             Rewards = new RewardService(Economy, Ledger, ResolveGoldReward);
             Shop = new ShopService(balanceConfig, Economy);
+
+            // B7 S2: the every-morning gift. The injected clock lets the debug menu fake today for testing.
+            DailyStreak = new Economy.DailyStreakService(balanceConfig, ResolveStreakNow);
 
             // Step 10a/10b: the board the party stands on. Created **before** the load so a saved layout can be
             // restored into it; with no saved layout the default placement (the MVP's fixed lanes) is used, so a

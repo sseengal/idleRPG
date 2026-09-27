@@ -325,7 +325,25 @@ namespace IdleRPG.UI
 
             if (gemsLabel != null && manager.Economy != null)
             {
-                gemsLabel.SetText(string.Format("{0} gems", NumberFormatter.Format(manager.Economy.Gems)));
+                string streak = "";
+
+                if (manager.DailyStreak != null && manager.Balance != null)
+                {
+                    int day = manager.DailyStreak.CurrentDay;
+
+                    if (day > 0)
+                    {
+                        int cap = manager.Balance.DailyStreakCap;
+                        streak = string.Format("  ·  Day-{0} streak (next +{1})",
+                            day, manager.Balance.DailyStreakGemsForDay(day == cap ? cap : day + 1));
+                    }
+                    else
+                    {
+                        streak = string.Format("  ·  today +{0} gems", manager.Balance.DailyStreakGemsForDay(1));
+                    }
+                }
+
+                gemsLabel.SetText(string.Format("{0} gems{1}", NumberFormatter.Format(manager.Economy.Gems), streak));
             }
 
             if (watchAdLabel != null)

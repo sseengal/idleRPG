@@ -58,6 +58,16 @@ namespace IdleRPG.Economy
         /// </summary>
         public bool ActivateFromAd()
         {
+            return Activate();
+        }
+
+        /// <summary>
+        /// Starts or extends the gold boost (back-to-back activations stack their durations). Neutral naming on
+        /// purpose (B7 S2): the day-7 streak gift uses this; only the ad flow cares that it came from an ad.
+        /// Returns false only when the BalanceConfig is missing.
+        /// </summary>
+        public bool Activate()
+        {
             if (balanceConfig == null)
             {
                 return false;
@@ -66,7 +76,7 @@ namespace IdleRPG.Economy
             double now = GameClock.NowBinary;
             double durationTicks = balanceConfig.AdGoldBoostDurationSec * System.TimeSpan.TicksPerSecond;
 
-            // Extend rather than overwrite so back-to-back ads are never wasted.
+            // Extend rather than overwrite so back-to-back boosts are never wasted.
             double baseTicks = isActive && expiresAtBinary > now ? expiresAtBinary : now;
             expiresAtBinary = baseTicks + durationTicks;
 

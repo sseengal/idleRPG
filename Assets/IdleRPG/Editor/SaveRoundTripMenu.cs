@@ -139,6 +139,8 @@ namespace IdleRPG.EditorTools
             data.lastGoldPerSecond = 12.5d;
             data.lastLogoutTimestampBinary = "638888888888888888";
             data.lastSaveTimestampBinary = "638999999999999999";
+            data.dailyStreakLastDate = "2026-09-26";
+            data.dailyStreakCount = 4;
 
             return data;
         }

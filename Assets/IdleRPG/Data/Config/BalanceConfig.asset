@@ -30,6 +30,8 @@ MonoBehaviour:
   waveGoldMultiplier: 1
   gemsPerMilestone: 5
   milestoneStageInterval: 5
+  dailyStreakGems: 05000000080000000a0000000c0000000f0000001200000019000000i
+  dailyStreakDay7Boost: 1
   waveTransitionDelaySec: 0.6
   minDamageRatio: 0.15
   criticalChance: 0.05

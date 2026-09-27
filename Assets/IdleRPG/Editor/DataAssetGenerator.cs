@@ -122,6 +122,12 @@ namespace IdleRPG.EditorTools
                 .Set("adGoldBoostDurationSec", 3600f)
                 .Set("autosaveIntervalSec", 15f)
                 .Apply();
+
+                // B7 S2: the daily streak calendar (reviewed values, day 1..7 then plateau on day 7).
+                new Editable(balance)
+                    .SetIntArray("dailyStreakGems", new[] { 5, 8, 10, 12, 15, 18, 25 })
+                    .Set("dailyStreakDay7Boost", true)
+                    .Apply();
         }
 
         // ------------------------------------------------------------------

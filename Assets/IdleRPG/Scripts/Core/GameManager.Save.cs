@@ -102,6 +102,43 @@ namespace IdleRPG.Core
         }
 
         /// <summary>
+        /// The every-morning gift (B7 S2). Called on launch and on resume from background - an idle game can sit
+        /// in the background over midnight, so Start alone would miss days. Persist-first: the calendar already
+        /// wrote today's date into the service, so this SaveNow locks the day before anything else could re-claim.
+        /// </summary>
+        public void TryClaimDailyStreak()
+        {
+            if (DailyStreak == null || Rewards == null)
+            {
+                return;
+            }
+
+            Economy.DailyStreakService.ClaimResult result = DailyStreak.TryClaim();
+
+            if (!result.Claimed)
+            {
+                return;
+            }
+
+            Rewards.GrantGems(result.Gems, RewardService.Source.DailyStreak);
+
+            if (result.Day7Boost && Boost != null)
+            {
+                Boost.Activate();
+            }
+
+            Save?.SaveNow("streak");
+            GameEvents.RaiseDailyStreakClaimed(result.Day, result.Gems);
+
+            GameEvents.RaiseToast(result.Day7Boost
+                ? $"Day {result.Day} gift: +{result.Gems:0} gems + a gold boost!"
+                : $"Day {result.Day} gift: +{result.Gems:0} gems (tomorrow +{result.NextGems:0})");
+
+            LogFlow($"Daily streak: day {result.Day}, +{result.Gems:0} gems" +
+                    (result.Day7Boost ? " + gold boost" : string.Empty));
+        }
+
+        /// <summary>
         /// Most recent of the two logout timestamps (save file and PlayerPrefs). Taking the newer one
         /// means a hard process kill can never inflate the offline window.
         /// </summary>
@@ -209,6 +246,8 @@ namespace IdleRPG.Core
             data.totalGoldEarned = TotalGoldEarned;
             data.ascensionCount = AscensionCount;
             data.lastPageIndex = LastPageIndex;
+            data.dailyStreakLastDate = DailyStreak?.LastClaimDate ?? "";
+            data.dailyStreakCount = DailyStreak?.StreakCount ?? 0;
 
             return data;
         }
@@ -246,6 +285,7 @@ namespace IdleRPG.Core
             Boost?.Restore(data.goldBoostActive, data.goldBoostExpiresAtBinary);
             Ledger?.SeedGoldPerSecond(data.lastGoldPerSecond);
             Shop?.Restore(data.offlineEquivalentCapBonusSeconds, data.offlineCapExtensionsPurchased);
+            DailyStreak?.Restore(data.dailyStreakLastDate, data.dailyStreakCount);
 
             // Give the loaded values to combat (Initialize() would reset the stage to 1).
             combatManager.SetProgress(CurrentStage, RestoredWave, healParty: true);

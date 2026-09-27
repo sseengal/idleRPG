@@ -156,6 +156,10 @@ namespace IdleRPG.Save
         // --- Automation (schema v5 additive, B6): on/off + the safety-reserve dial per card ---
         public List<AutomationSetting> automation = new List<AutomationSetting>();
 
+        // --- Daily streak (schema v5 additive, B7 S2): local date of the last claim + the streak length ---
+        public string dailyStreakLastDate = "";
+        public int dailyStreakCount;
+
         // --- Power era (v5 additive, Fix A 2026-09-25): has this save received the one-time compensation? ---
         /// <summary>
         /// False (the C# default) means the save is from before the B3d compounding switch and has additive-era hero

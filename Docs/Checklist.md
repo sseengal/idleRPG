@@ -12,12 +12,12 @@
 
 | Field | Value |
 |---|---|
-| Current step | **B7 S2 NEXT: daily streak + milestone gems** (B7 S1 - the IAP seam + no-ads flag - DONE 2026-09-27, §1k). Then S3 ad placements + caps, S4 gem sinks, S5 validator guard; then B8, B9, device pass last |
+| Current step | **B7 S3 NEXT: ad placements + caps** (B7 S2 - the daily streak - DONE 2026-09-27, §1l). Then S4 gem sinks, S5 validator guard; then B8, B9, device pass last |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money.** No statuses/abilities/zones/affixes/gear/roster/relics before the base is done |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
-| Last completed | B7 S1 - the IAP seam + no-ads flag (see §1k), 2026-09-27 |
-| Next after this | B7 S2: daily streak + milestone gem tuning; then S3 ad placements + caps, S4 gem sinks, S5 validator guard; then B8 -> B9, device pass (B1) last |
+| Last completed | B7 S2 - the daily streak, every-morning gift (see §1l), 2026-09-27 |
+| Next after this | B7 S3: ad placements (x2 boost 30 min, double-offline on the popup) + per-day caps; then S4 gem sinks, S5 validator guard; then B8 -> B9, device pass (B1) last |
 | Save schema | v5 (v3 -> v4 adds `runBestStage`; v4 -> v5 = one keyed `levels` list; additive migrations, no data loss - see §1h / B35-B36) |
 | Shipped build | `Builds/IdleRPG-mac.app` verified (boot, save, offline, combat) |
 | Docs | all live in `Docs/` - index `Docs/README.md`; status here; backlog `Roadmap.md`; removals `Docs/REVIEW.md` (R1: obsolete MVP journal deleted) |
@@ -780,6 +780,33 @@ double-offline ad instead of two, gems may buy automation as an accelerant, anal
   now forces a `LayoutRebuilder` pass. Verified live: seven 116px cards stacked 1056->196 with correct
   name/value/effect/button labels, CTA live, no overlap; `Run All Checks` = **PASS**.
   Screenshot: `Assets/Screenshots/shop_ascend_style.png`.
+
+## 1l. B7 S2 — the every-morning gift (daily streak)  ·  **built + verified 2026-09-27**
+
+The gem-sources half of "fix scarcity before sinks" (plan `Monetisation.md` §6 item 2; tenured-team refinement:
+claim also on background-resume, persist-then-pay, injected clock, neutral `BoostManager.Activate`).
+
+- **`Economy/DailyStreakService.cs`** (new, pure C#, injected `Func<DateTime>`): a reward calendar. Local-midnight
+  boundary (G13 locked); rules: fresh install = day 1; same-day = nothing (idempotent); yesterday = streak +1
+  (capped at the table length, then plateau); older gap = reset to 1; a saved date IN THE FUTURE (clock rolled
+  back) = claim refused, nothing changes. Persist-first: `TryClaim` writes today's date before the caller saves,
+  so a crash between paying and saving can never pay twice.
+- **`BalanceConfig`** += `dailyStreakGems` `{5,8,10,12,15,18,25}` (day 1..7, plateau at 25) +
+  `dailyStreakDay7Boost` (true). Written by `Generate Data Assets` (`ApplyBalance`).
+- **Save (v5, additive, no migration):** `dailyStreakLastDate` + `dailyStreakCount`.
+- **Claim wiring:** `GameManager.TryClaimDailyStreak` runs on launch AND on `OnApplicationPause(false)` (an idle
+  game can sit over midnight), grants gems via `RewardService.Source.DailyStreak`, grants the day-7 gold boost via
+  the new neutral `BoostManager.Activate()` (back-to-back extends), toasts (`Day N gift: +X (tomorrow +Y)`), then
+  `SaveNow`. `GameEvents.DailyStreakClaimed(day, gems)` hook (B9 analytics plugged here later).
+- **UI:** the shop header sub-line now reads e.g. `441 gems · Day-1 streak (next +8)`.
+- **Debug:** `Tools > Idle RPG > Debug > Daily Streak`: Log State, Simulate Next-Day / Missed Day / Clock Rollback /
+  Day-7 Boost, Reset Streak (washes out simulated dates - needed after the rollback sim left a future date in the
+  live save; that exact hazard is why the reset tool exists).
+- **Verified live on Main:** launch day 1 (+5), simulate next day -> day 2 (+8, streak 2); missed day -> reset to
+  day 1 (+5); rollback -> refused, gems unchanged; day-7 probe -> +25 + boost active (extends the running boost);
+  clean reset -> `441 gems · Day-1 streak (next +8)` in the shop header; save drift `v5 -> v5 additive-only`
+  (2238 chars, incl. the 2 new fields); `Run All Checks` = **PASS** (goldens + battle log untouched).
+  Screenshot: `Assets/Screenshots/shop_streak.png`.
 
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 
