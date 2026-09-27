@@ -49,7 +49,7 @@ Docs/
   Content.md         <- specs + pipeline + enemies/zones/affixes
   Progression.md     <- currencies, tracks, prestige, roster
   Idle-Economy.md    <- rates, offline, time payouts
-  Monetisation.md    <- sources, sinks, IAP mock, guards (B7)
+  Monetisation.md    <- sources, sinks, IAP mock, guards (B7 done; live-store wiring = B10, see its §6b)
   UI-UX.md           <- screens, navigation, battle log contract
   Art-Pipeline.md    <- HD-2D art pipeline, asset volume, perf budgets (G11/G12)
   REVIEW.md          <- deletion candidates / resolved removals

@@ -170,7 +170,11 @@ debug menus, the console log and the Unity MCP bridge. A manual pass takes ~5 mi
 | B3–B5 | Loop beat + ascension retune + compounding upgrades, validator/loop gate, generic tracks (save v5) | done |
 | B6 | Automation cards: auto-buy + speed button (earned, sold for tokens) | done |
 | B7 | Monetisation (IAP seam + no-ads, daily streak, ad caps, gem sinks, validator guard) | done |
-| next | B8 content + onboarding, B9 release plumbing, B1 device pass (owner-run, last) | planned |
+| B8' | Content + onboarding (enemies 4 → 8-12, 3 heroes, first-run tips, formation-slot tiles) | next |
+| B9' | Release plumbing, both targets (version/names, portrait lock, back button, checks-gated build) | planned |
+| B10 | Live store wiring (real ads + IAP, Restore Purchases, minimal settings, consent, privacy manifests) | planned |
+| B10b | Store packet (screenshots, listing, ratings, Data Safety, sandbox) | planned |
+| B1a/B1b | Device passes (owner-run) — art + audio pass lands between them, then submission | planned |
 
 ## Design docs
 

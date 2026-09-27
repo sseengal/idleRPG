@@ -12,12 +12,13 @@
 
 | Field | Value |
 |---|---|
-| Current step | **B8 NEXT: content + onboarding** (B7 - the whole money path - is **COMPLETE 2026-09-27**, §1k-§1o). Then B9, device pass last |
+| Current step | **B8' NEXT: content + onboarding** (B7 - the whole money path - is **COMPLETE 2026-09-27**, §1k-§1o). **MVP = store-submittable** (§1p): B8' -> B9' -> **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
-| v1.0 gate | **the loop + money.** No statuses/abilities/zones/affixes/gear/roster/relics before the base is done |
+| v1.0 gate | **the loop + money**, and **MVP = store-submittable** (§1p). No statuses/abilities/zones/affixes/gear/roster/relics before the base is done |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
 | Last completed | B7 S5 - the monetisation guard + shop readout on F3 (planted cheats refused by the build; see §1o), 2026-09-27 |
-| Next after this | B8: ~8-12 enemies + 5-6 heroes (**data only**) + 3 first-run tips + formation-slot tiles; then B9 plumbing, device pass (B1) last |
+| Next after this | B8': enemies **4 -> 8-12** (3 heroes stay) + 3 first-run tips + formation-slot tiles; then B9' plumbing, B10 live store wiring, B10b store packet, B1a/B1b device passes |
+| MVP decisions (owner, 2026-09-27) | gate = **store-submittable**; **3 playable heroes** (a 4th needs the v1.1 roster UI); both stores at once; **art + audio = the final pass before submission**; no analytics SDK; full record + cuts in §1p |
 | Save schema | v5 (v3 -> v4 adds `runBestStage`; v4 -> v5 = one keyed `levels` list; additive migrations, no data loss - see §1h / B35-B36) |
 | Shipped build | `Builds/IdleRPG-mac.app` verified (boot, save, offline, combat) |
 | Docs | all live in `Docs/` - index `Docs/README.md`; status here; backlog `Roadmap.md`; removals `Docs/REVIEW.md` (R1: obsolete MVP journal deleted) |
@@ -910,7 +911,50 @@ permanent bonus out-earns its price. S5 therefore nails a rule that needs **neit
   lines above). `Run All Checks` = **PASS**. **No save change** (v5 untouched), goldens untouched - the guard is
   pure validation, it changes no number in the loop.
 
+## 1p. MVP redefined: **store-submittable**  ·  owner decision 2026-09-27  ·  **plan only (nothing built yet)**
 
+Tenured-team review of the remaining plan with **"MVP = can be submitted to both stores"** as the gate, and **art +
+audio deliberately left as the final pass**. The base game is done; what was left in the plan was the *game* plan,
+not the *store* plan. Evidence found while reviewing (all verified in the repo):
+
+| Finding | Evidence | Consequence |
+|---|---|---|
+| **Real ads + billing are unwired** | `Packages/manifest.json` carries neither `com.unity.purchasing` nor `com.unity.ads`; only `MockIapService` / `MockAdService` exist; `IAdService` is 2 members (`IsRewardedAdReady`, `ShowRewardedAd`) with no failure/skip semantics | the "one implementation swap" is **the largest remaining step** -> new **B10** |
+| **No Restore Purchases surface** | no `Restore` anywhere in `UI/`; `IIapService.RestorePurchases` is implemented but never called | Apple hard-blocks a non-consumable IAP without it -> in **B10** |
+| **No settings screen** (G4) | this file, §20 | MVP slice for G4: **Restore + privacy-policy link + mute**; font scale / reduced motion / battery / language -> v1.1 |
+| **Consent + privacy paperwork invisible** | real ad SDK | iOS ATT (+usage string), EEA consent, `PrivacyInfo.xcprivacy`, Play Data Safety, SDK manifests -> in **B10** |
+| **The build is desktop-shaped** | active target `StandaloneOSX`; `bundleVersion 0.1.0`; `companyName DefaultCompany`; **no orientation lock**; no app icon/launch screen (only placeholder UI icons) | B9' grows: mobile targets + signing, portrait lock, names/version, icon/splash placeholders, checks-gated build |
+| **Hero count was a scope trap** | `party.json` hardcodes the 3 hero ids, there is **no picker**, and the formation holds 3 slots | "5-6 heroes (data only)" was **not** data-only: it silently pulled in roster UI + chosen-party save (Step 17). **Owner call: ship 3 heroes**; content budget goes to enemies |
+| **Store release has wall-clock lead time** | new *personal* Play accounts need **12 testers x 14 continuous days** before production access | **Store Day-0** (below) is on the critical path - start it before writing code, not after |
+
+**Order now:** B8' content/onboarding -> B9' release plumbing -> **B10 live SDKs + consent + Restore + minimal
+settings** -> B10b store packet -> B1a device pass -> **art + audio final pass** -> B1b device pass + submission.
+
+**Also caused by "both stores at once":** Android back/gesture handling (B9'), adaptive + 1024 icons and a launch
+screen (B10b), two build paths (Play signing key + AAB, iOS provisioning + Xcode), **one freeze window** (the art pass
+must land before *either* submission), and double device QA (B1a/B1b).
+
+**Cuts held for MVP (all v1.1):** localisation, notifications, roster/hero picker, achievements / Game Center / Play
+Games, cloud save, tablet/iPad layout, second orientation, analytics SDK, season skeleton, remote config, A/B,
+haptics, font scale, the automation-for-gems accelerant.
+
+**Rejection risks to respect:** placeholder-looking builds (Apple 2.2 / 4.2) - hence art + audio strictly *before*
+submission; and a mismatched Data Safety / privacy manifest, which is worse than a missing feature.
+
+### Store Day-0 (owner, runs in parallel with all code)
+- [ ] Apple + Play developer accounts; **Play account type recorded** (personal => the 12x14 test gate applies)
+- [ ] App names reserved; bundle id / package id chosen
+- [ ] Product records created in both consoles with the `IapCatalog` SKUs (no-ads, 3 gem packs, starter pack) + prices
+- [ ] Play **closed test track started** (this is the wall-clock floor)
+- [ ] Privacy policy + support URL hosted (both stores require the URLs)
+- [ ] Art/audio pass commissioned + dated (it sets the submission date)
+
+### Open owner decisions (needed before B10)
+1. Ad network: **Unity Ads** (one vendor, Unity-authored privacy manifest + consent tooling) vs AdMob (better fill/eCPM, ATT + UMP + Google data forms). Docs stay vendor-neutral until decided.
+2. Play account type (personal vs organization) - decides whether the 14-day test gate is on the critical path.
+3. Art/audio timing: already in flight, or starts after B10?
+
+## 1e. Remaining path to MVP  ·  **what is left, in order**
 
 Base gate: every step below names the loop beat or money path it serves. Anything that cannot is not in the base.
 
@@ -921,11 +965,14 @@ Base gate: every step below names the loop beat or money path it serves. Anythin
 | **B5** | Generic progression tracks (schema v5) | money path: more tracks = more to buy = more gem/ad relevance | a new track = spec + generate, zero code; a v4 save migrates to identical numbers | medium |
 | **B6** | Automation & QoL (`AutomationUnlock` cards; **ascension stays manual forever** - owner decision) | retention: idling must pay off while away | `[x]` Step 4 done 2026-09-27 (see §1j): the robot learns the rebirth loop (auto-buy mid-climb + voluntary/wall ascents, lifetime frontier asserted by the validator); Steps 1-3 + Fix A landed 2026-09-25 (see §1i) | medium |
 | **B7** | Monetisation pass (`Monetisation.md`) | money path: ad placements + gem sinks + mock IAP | `[x]` 2026-09-27 (see §1k-§1o): every payout goes through the ledger rate, per-day caps enforced, mock IAP swaps for a real store with one implementation, and the build now refuses a sink that beats its own time-value | done |
-| **B8** | Content + onboarding pass | first-run clarity: a stranger knows what to press | ~8-12 enemies, 5-6 heroes (data only) + 3 first-run tips; content added with no code | medium |
-| **B9** | Release plumbing | ship it | version stamp, crash log file, one scripted `-batchmode` build command | small-med |
-| **B1** | **Device pass (LAST, owner-run)** | does it actually feel good on a phone | 60fps idle with 3v3 on device; safe area clean; offline modal + CLAIM work by touch | ½ day |
+| **B8'** | Content + onboarding pass (**3 heroes**) | first-run clarity: a stranger knows what to press | enemies **4 -> 8-12** (+ boss variety); **heroes stay 3** (§1p: a 4th hero needs the v1.1 roster UI); 3 first-run tips; formation-slot tiles; shop-beat play check; content added with no code | small-med |
+| **B9'** | Release plumbing (**both targets**) | ship it | version stamp, mobile targets + signing, portrait lock, app icon + launch screen (placeholders), crash log file, **checks-gated one-command build**, **Android back/gesture handling**, written save-compat policy | med |
+| **B10** | **Live store wiring** (new, §1p) | the real money path | real rewarded ads + Unity IAP behind the existing seams; **Restore Purchases UI**; minimal settings (Restore + privacy link + mute); iOS ATT + EEA consent; `PrivacyInfo.xcprivacy` + Play Data Safety; an ad that fails or is skipped must not consume a daily cap | **large** |
+| **B10b** | **Store packet** (new, §1p) | a build the stores accept | screenshots (iPhone 6.7" + Play phone + 1024x500 feature graphic), listing copy, age/content rating, Data Safety answers, product records matched to `IapCatalog`, sandbox end-to-end on both platforms | med-large |
+| **B1a** | **Device pass 1 (owner-run)** | does the logic hold on hardware | 60fps idle with 3v3 on device; safe area clean; offline modal + CLAIM work by touch; back button behaves | ½ day |
+| **B1b** | **Device pass 2 + submission (owner-run, LAST)** | does it *look* right | re-run the pass **after the art + audio final pass**, then submit both builds; layout clean at both aspect ratios | ½ day |
 
-Loop-walk items still open from the bounce work (do them with B8 unless a play test says otherwise): first-run hint,
+Loop-walk items still open from the bounce work (do them with B8' unless a play test says otherwise): first-run hint,
 shop beat verification (boss/milestone gems -> fast-forward + offline cap), and the cosmetic formation-slot tiles
 (3 empty slots draw red HP bars).
 
@@ -941,9 +988,12 @@ shop beat verification (boss/milestone gems -> fast-forward + offline cap), and 
 | B5 | 14 - generic progression tracks (**schema v5**) | `[x]` 2026-09-25 (see §1h): TrackService = single purchase path; save v5 = one keyed `levels` list; `tracks.json` = the only upgrade spec; zero-code demo track (`Track_GoldHoarder`) added in data and proven live |
 | B6 | 16 - automation & QoL | `[x]` 2026-09-27 (see §1i + §1j) |
 | B7 | monetisation pass (design: `Monetisation.md`) | `[x]` 2026-09-27 (see §1k-§1o): S1 IAP seam + no-ads, S2 daily streak, S3 ad placements + caps, S4 gem sinks, S5 monetisation guard + F3 readout |
-| B8 | content + onboarding pass | `[ ]` |
-| B9 | 21-lite - version stamp, crash log, scripted build | `[ ]` |
-| B1 | device pass (deliberately last, owner-run) | `[ ]` |
+| B8' | content + onboarding (enemies 4 -> 8-12, **3 heroes stay**) | `[ ]` |
+| B9' | release plumbing, both targets (version/names, portrait lock, back button, icon/splash, checks-gated build) | `[ ]` |
+| B10 | live store wiring (real ads + IAP, Restore, minimal settings, consent, manifests) | `[ ]` |
+| B10b | store packet (screenshots, listing, ratings, Data Safety, sandbox) | `[ ]` |
+| B1a | device pass 1 (logic/perf, owner-run) | `[ ]` |
+| B1b | device pass 2 after the art+audio pass, then submission (owner-run) | `[ ]` |
 
 Dropped from B3 on 2026-09-22: the piecewise `DifficultyCurve` and the "you need ~X more power" guidance banner.
 The curve cannot fix a lost race, and the banner quoted a number the player cannot see. See `Content.md` §3 for the
@@ -1025,15 +1075,23 @@ the battle-log contract is checked, and the touched screen has had a device smok
 - [ ] acceptance: caps + cooldowns honoured; purchases mutate state + save; no power sold
 
 ### 20 — Visual/audio/UX polish + l10n + a11y + perf  `[ ]` (owns G4, G11, G12, G14)
-- [ ] string table + settings (font scale, reduced motion, battery mode)
-- [ ] sprite atlases, scroll virtualisation, pooling audit
-- [ ] device builds: iOS + Android full-loop verification
-- [ ] `Mobile Verify Settings` all green; 60fps idle / 30fps battery mode
-- [ ] real sound design + final art replacing the Step 9b placeholders
+> **MVP slice (2026-09-27, §1p):** the **real art + audio pass** (the *final* step before submission), 60fps device
+> verify at both aspect ratios, and the 3-row settings screen - delivered inside B10 / B10b / B1b.
+> **Everything else here is v1.1:** localisation, font scale, reduced motion, battery mode, atlases/Addressables,
+> scroll virtualisation, pooling audit, a11y beyond defaults.
+- [ ] settings screen (MVP: Restore Purchases + privacy-policy link + mute)
+- [ ] real sound design + final art replacing the Step 9b placeholders (before submission)
+- [ ] device builds: iOS + Android full-loop verification at both aspect ratios
+- [ ] (v1.1) string table + language support, font scale, reduced motion, battery mode
+- [ ] (v1.1) sprite atlases, scroll virtualisation, pooling audit
 
 ### 21 — CI, versioning & release readiness  `[ ]` (owns G7, G8, G9, G10, G15)
-- [ ] scripted `Unity -batchmode` build + tag-driven version; version/save-compat policy written
-- [ ] crash/ANR reporting hook; analytics opt-in + privacy decision; store/legal checklist
+> **MVP slice (2026-09-27, §1p):** G8 scripted build for **both targets**, gated on `Run All Checks` (B9');
+> G9 version stamp + written save-compat policy (B9'); G7 crash log file + the stores' own crash reports (B9'/B10b -
+> **no analytics SDK**) and G10 recorded as "no analytics SDK ships" (B10b); G15 store/legal checklist (B10b).
+> **v1.1:** analytics/opt-in + remote config, tag-driven release automation, store upload stubs.
+- [ ] scripted `Unity -batchmode` build (both targets) + version stamp; version/save-compat policy written
+- [ ] crash log file; store/legal checklist (privacy URL, age rating, Data Safety, ad disclosure, iOS ATT)
 
 ### 22 — Local notifications  `[ ]` (G2)
 - [ ] offline-cap-full, expedition-finished, daily-reset notifications + permission flow + in-app toggle
@@ -1047,18 +1105,18 @@ Found while reviewing progress against the design docs. Each needs a home in `Ro
 | G1 | **No audio at all** - no SFX/music service, no mute setting (`IAudioService` + placeholder + mute: 9b-3; authored SFX/music still Step 20) | Idle games live on feedback (hit, crit, level-up, claim); silence feels broken | new step after 19 (or fold into 20) |
 | G2 | **No local notifications** ("your offline cap is full") | Biggest single re-engagement lever for an idle game; needs a platform plugin + permission flow | new step after 19 |
 | G3 | **No first-run onboarding** - new players get no goals | The first 2 minutes decide retention; wall guidance (15) covers later sessions only | fold into 15 as "first-session goals" |
-| G4 | **No settings screen** (audio, notifications, font scale, reduced motion, battery, language) | Required before any store build; currently settings do not exist at all | part of 20, but must be explicit |
+| G4 | **No settings screen** (audio, notifications, font scale, reduced motion, battery, language) | Required before any store build; currently settings do not exist at all | **MVP slice in B10**: Restore Purchases + privacy-policy link + mute (§1p); the rest v1.1 |
 | G5 | **Sim tick has no error containment** - one exception freezes an unattended idle game | Add try/catch in `RunController` + safe-mode skip + autosave on first failure | small; fold into 9 |
 | G6 | **Save keeps only one `.bak`** | Idle saves are played for months; rotate 3 backups + tag them with the schema version | fold into 9 (`SaveCoordinator`) |
-| G7 | **No crash/ANR reporting** | You cannot fix what you cannot see on device | fold into 19/20 |
-| G8 | **No CI or scripted build** | "Production-ready" needs `Unity -batchmode` build + tag-driven versioning + store upload stubs | new step before 20 |
-| G9 | **No version/release policy** (`bundleVersion` 0.1.0, no changelog, no save-compat promise) | Save compatibility is a promise to players; needs a written rule | part of G8 |
-| G10 | **Analytics decision unrecorded** (store privacy policy + opt-in) | Required for both stores if any telemetry leaves the device | part of 19 |
-| G11 | **Real art pipeline undefined** (atlases, import presets, Addressables later) | Placeholders are procedural; shipping art needs a policy | part of 20 |
-| G12 | **Device performance budgets not set** (draw calls, GC alloc/frame, memory) | Step 20 says "verify" but nothing to verify against | part of 20 |
-| G13 | **Daily reset boundary undefined** (UTC vs local midnight, DST) | Daily/weekly systems land in 16-17 | decide in 16 |
-| G14 | **Accessibility beyond font scale** (colorblind palette, TMP labels for screen readers, haptics toggle) | Cheap now, expensive later | part of 20 |
-| G15 | **Store/legal checklist** (privacy URL, age rating, data-safety form, ad disclosure, iOS ATT) | Blocks submission once ads/IAP exist | part of 19 |
+| G7 | **No crash/ANR reporting** | You cannot fix what you cannot see on device | **MVP slice in B9'/B10b**: crash log file + the stores' own crash reports (Play vitals / App Store symbolication); analytics SDK v1.1 |
+| G8 | **No CI or scripted build** | "Production-ready" needs `Unity -batchmode` build + tag-driven versioning + store upload stubs | **MVP slice in B9'**: one command, both targets, gated on `Run All Checks`; upload stubs v1.1 |
+| G9 | **No version/release policy** (`bundleVersion` 0.1.0, no changelog, no save-compat promise) | Save compatibility is a promise to players; needs a written rule | **MVP slice in B9'** (written policy + version stamp) |
+| G10 | **Analytics decision unrecorded** (store privacy policy + opt-in) | Required for both stores if any telemetry leaves the device | **decided 2026-09-27: no analytics SDK ships** (§1p) -> declare "no data collected" honestly in both stores (B10b) |
+| G11 | **Real art pipeline undefined** (atlases, import presets, Addressables later) | Placeholders are procedural; shipping art needs a policy | **MVP slice**: real art + audio land in the final pass before submission (B1b); pipeline policy (atlases/Addressables) v1.1 |
+| G12 | **Device performance budgets not set** (draw calls, GC alloc/frame, memory) | Step 20 says "verify" but nothing to verify against | **MVP slice**: 60fps verify on hardware at both aspect ratios (B1a/B1b); written budgets v1.1 |
+| G13 | **Daily reset boundary undefined** (UTC vs local midnight, DST) | Daily/weekly systems land in 16-17 | RESOLVED in B7 S2: **local midnight**, tamper-safe (`DailyStreakService`) |
+| G14 | **Accessibility beyond font scale** (colorblind palette, TMP labels for screen readers, haptics toggle) | Cheap now, expensive later | v1.1 - not a store requirement (§1p) |
+| G15 | **Store/legal checklist** (privacy URL, age rating, data-safety form, ad disclosure, iOS ATT) | Blocks submission once ads/IAP exist | **MVP-mandatory in B10/B10b** (§1p) |
 | G16 | **No single "run all checks" command** | Our regression net is manual today; one command makes it habitual | RESOLVED 2026-09-23 (§1f): `Run All Checks (regression)` |
 
 ---

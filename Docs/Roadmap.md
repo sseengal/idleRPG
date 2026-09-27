@@ -192,6 +192,11 @@ interesting"), it does not enter the base - and it is not parked either unless t
 > **The gate:** a solid, endlessly-playable loop with monetisation hooks. **No** statuses, abilities, zones,
 > affixes, gear, roster or relics until this is done - those are v1.1 depth, listed further down.
 > Order matters: each step below assumes the previous one landed.
+>
+> **MVP is now store-submittable** (owner decision 2026-09-27, `Checklist.md` §1p): the base game is finished, so the
+> remaining work is content + onboarding, release plumbing, **live ad/IAP wiring with consent + Restore Purchases**,
+> the store packet, and the device passes - with **art + audio as the final pass before submission**. The long-form
+> evidence and the owner's Store Day-0 checklist live in `Checklist.md` §1p.
 
 | Order | Step | Deliverable | Acceptance | Size |
 |---|---|---|---|---|
@@ -201,9 +206,12 @@ interesting"), it does not enter the base - and it is not parked either unless t
 | B5 | **14 - generic progression tracks (schema v5)** | `DONE (2026-09-25)` - `TrackService` is the single purchase path; save v5 = one keyed `levels[{key,level}]` list (currency/ledger reshaping deferred to B7, see `Architecture.md` B35/B36); `tracks.json` is the single upgrade spec and `SceneWiringUtility` loads from it, so a new track = spec card + `Generate Assets From Specs` + `Build MVP Scene` (no C# edits) | proven: goldens/robot/validator unchanged, the real v4 save migrates with every number identical, and a data-only demo track (`Track_GoldHoarder`) was added, wired, bought, saved and reloaded in one session | done |
 | B6 | **16 - automation & QoL** | `DONE (2026-09-27)` - automation is earned content: `AutomationUnlock` cards bought with tokens (no freebies, no auto-ascend - the rebirth stays manual by owner decision). AutoBuy + FastForward cards shipped as data; `AutomationService` on the 1s tick with a player-set gold reserve; save v5 additive | Steps 1-3 proven live (auto-buy + reserve + persistence; AUTO panel rows + teasers; speed x2 with the ledger/offline honesty guard, saved rate 631 = 1262/2); Fix A (one-shot compensation) player-verified live; Step 4 (2026-09-27, see `Checklist.md` §1j): the robot learns the manual rebirth loop - auto-buy mid-climb, voluntary ascents at milestone stages + wall-forced ascents, and the validator now asserts the LIFETIME frontier | medium |
 | B7 | **Monetisation pass** (see `Monetisation.md`) | `DONE (2026-09-27)` - ad placements (x2 gold 30 min, double offline) with per-day caps, gem sources (daily streak + milestones), gem sinks (the Golden Foundry permanent multiplier, bought with gems - currency is data), `IIapService` + `MockIapService` with the single `PurchaseIap` funnel, and `CheckMonetisation()` (2x time-value rule, rate-free payback floor for permanent multipliers, no product sells power, free reachability) | proven: every payout goes through the ledger rate (the simulated gold/s never moves), caps enforced, a planted cheat card / power SKU both FAIL the build, mock IAP swaps for a real store with one implementation; `Run All Checks` PASS | done |
-| B8 | **Content + onboarding pass** | ~8-12 enemies, 5-6 heroes (data only) + 3 first-run tips | a new player knows what to do within 30s; content added with no code | medium |
-| B9 | **21-lite - release plumbing** | version stamp, crash log file, scripted `Unity -batchmode` build | one command produces a build with the correct version | small-med |
-| B1 | **Device pass (LAST)** | build to phone + checklist (fps, safe area, touch, offline popup, store page draft) | 60fps idle with 3v3 on device; nothing clipped; popup + claim work by touch | ½ day, owner-run |
+| B8' | **Content + onboarding pass (3 heroes)** | enemies **4 -> 8-12** + boss variety; **heroes stay 3** - a 4th hero needs a picker and `party.json` hardcodes the party, so that is Step 17 (v1.1); 3 first-run tips; formation-slot tiles; shop-beat play check | a new player knows what to do within 30s; content added with no code | small-med |
+| B9' | **Release plumbing (both targets)** | version stamp; mobile targets + signing (Play AAB key, iOS provisioning); portrait lock; app icon + launch screen (placeholders); crash log file; **Android back/gesture handling**; **checks-gated one-command build**; written save-compat policy | one command produces both builds with the right version, and only when `Run All Checks` is green | med |
+| **B10** | **Live store wiring** (new 2026-09-27, `Checklist.md` §1p) | real rewarded ads + Unity IAP behind the existing seams; **Restore Purchases UI**; minimal settings (Restore + privacy link + mute); iOS ATT + EEA consent; `PrivacyInfo.xcprivacy`; Play Data Safety | a real purchase and a real rewarded ad work in each store's sandbox; an ad that fails or is skipped never consumes a daily cap; owned no-ads survives a reinstall via Restore | **large** |
+| **B10b** | **Store packet** (new 2026-09-27) | screenshots (iPhone 6.7" + Play phone + 1024x500 feature graphic), listing copy, age/content rating, Data Safety answers, product records matched to `IapCatalog` | both consoles accept the packet; sandbox end-to-end on real hardware | med-large |
+| B1a | **Device pass 1 (owner-run)** | build to phone (both platforms) + checklist (fps, safe area, touch, back button, offline popup) | 60fps idle with 3v3 on device; nothing clipped; popup + claim work by touch | ½ day |
+| B1b | **Device pass 2 + submission (owner-run, LAST)** | re-run the pass **after the art + audio final pass**, then submit both builds | art/audio in; layout clean at both aspect ratios; both stores submitted | ½ day |
 
 **Dropped (deleted, not parked):** the ranged enemy archetype + hero target-rule stamping ("11f"). It answered no
 loop beat and no money path, and adding it to the rotation forced a golden-number re-baseline for no product win.
@@ -266,9 +274,12 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
 ### B5 - 14 generic progression tracks (schema v5)  `DONE (2026-09-25)`  (details: `Checklist.md` §1h)
 ### B6 - 16 automation & QoL  `DONE (2026-09-27)`  (Steps 1-3 + Fix A 2026-09-25, Step 4 robot learns the rebirth loop 2026-09-27; details: `Checklist.md` §1i/§1j)
 ### B7 - monetisation pass  `DONE (2026-09-27)`  (S1 IAP seam + no-ads, S2 daily streak, S3 ad placements + caps, S4 gem sinks, S5 monetisation guard + F3 shop readout - all 2026-09-27; see `Checklist.md` §1k-§1o)
-### B8 - content + onboarding pass  `NEXT`  (data-only roster + first-run tips + formation-slot tiles)
-### B9 - 21-lite release plumbing  `TODO`
-### B1 - device pass  `TODO`  (deliberately last, owner-run)
+### B8' - content + onboarding pass  `NEXT`  (enemies 4 -> 8-12, **3 heroes stay**, first-run tips, formation-slot tiles)
+### B9' - release plumbing, both targets  `TODO`  (version/names, portrait lock, Android back, icon/splash placeholders, checks-gated build, save-compat policy)
+### B10 - live store wiring  `TODO`  (real ads + IAP, Restore Purchases, minimal settings, consent/ATT, privacy manifests) - the largest remaining step
+### B10b - store packet  `TODO`  (screenshots, listing, ratings, Data Safety, product records, sandbox)
+### B1a - device pass 1  `TODO`  (owner-run: logic/perf on real hardware)
+### B1b - device pass 2 + submission  `TODO`  (owner-run, LAST: after the art + audio final pass)
 
 ---
 
@@ -371,11 +382,16 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
   SDK/asset pack is a single implementation change.
 - **Note:** placeholders are generated on demand and are expected to look/sound crude until Step 20.
 
-### Step 21 — CI, versioning & release readiness  `21-lite = base B9, full = v1.1`
+### Step 21 — CI, versioning & release readiness  `21-lite = base B9' + B10b (MVP), full = v1.1`
 - **Gaps:** **G8** scripted `Unity -batchmode` build + tag-driven versioning; **G9** version/save-compat policy;
   **G7** crash/ANR reporting; **G10** analytics opt-in + privacy decision; **G15** store/legal checklist
   (privacy URL, age rating, data-safety form, ad disclosure, iOS ATT).
 - **Acceptance:** one command produces a signed-ish dev build with the right version; the checklist is written down.
+- **2026-09-27 MVP split (`Checklist.md` §1p):** **B9'** owns the scripted build for both targets (gated on
+  `Run All Checks`), the version stamp, the crash log file + written save-compat policy; **B10b** owns the
+  store/legal checklist and the Data Safety answers. **G10 decided: no analytics SDK ships** - the stores' own
+  crash reports cover us, so both privacy forms declare no data collected. Remote config, tag-driven release
+  automation and store upload stubs stay v1.1.
 
 ### Step 22 — Local notifications  `PARKED (v1.1)`
 - **Gap G2.** "Your offline cap is full", expedition finished, daily reset. Platform plugin + permission flow +
@@ -399,7 +415,7 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
   measurable multiplier; relics drop from the intended sources and their set bonuses move combat numbers.
 - **Blocked by:** Steps 15, 17.
 
-### Step 19 — Monetisation: ads, gems, shop, season skeleton  `SPLIT: base slice = B7, rest v1.1`
+### Step 19 — Monetisation: ads, gems, shop, season skeleton  `SPLIT: base slice = B7 (DONE), live-store wiring = B10, rest v1.1`
 - **Owner doc:** `Idle-Economy.md` §5-§6
 - **Goal:** B5/B6: efficiency-only monetisation, ad placements as data, gem shop, no-ads, local season track.
 - **Deliverables:** `AdPlacementDef` rows + daily caps; SDK-ready `IAdService` surface; shop SKUs (offline cap
@@ -407,8 +423,13 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
 - **Acceptance:** every placement respects cap + cooldown with the mock service; a purchase path mutates the right
   state and saves; nothing sold grants raw power.
 - **Blocked by:** Steps 9, 16, 17.
+- **2026-09-27 split:** the base slice is **done as B7** (`Checklist.md` §1k-§1o - placements, caps, streak, gem
+  sinks, mock IAP, `CheckMonetisation()` guard). The remaining half of this step is **B10 live store wiring**:
+  the real billed implementation behind `IIapService`, the real rewarded-ad implementation behind `IAdService`,
+  **Restore Purchases**, ATT/EEA consent, `PrivacyInfo.xcprivacy`, Play Data Safety - see `Checklist.md` §1p.
+  Season skeleton + extra SKUs stay v1.1.
 
-### Step 20 — Visual/audio/UX polish + l10n + a11y + perf  `TODO`
+### Step 20 — Visual/audio/UX polish + l10n + a11y + perf  `SPLIT: MVP slice = art+audio final pass / settings 3-row / device verify, rest v1.1`
 - **Also owns:** **G4** settings screen (audio, notifications, font scale, reduced motion, battery, language),
   **G11** real art pipeline (atlases, import presets, Addressables when content grows), **G12** device perf
   budgets (draw calls, GC alloc/frame, memory), **G14** a11y beyond font scale (colorblind palette,
@@ -421,6 +442,10 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
 - **Acceptance:** `Mobile Verify Settings` still all green; 60fps idle on device with 3v3 + statuses; battery mode
   runs 30fps; no layout overflow at 0.85 or 1.15 font scale.
 - **Blocked by:** every earlier step.
+- **2026-09-27 MVP split (`Checklist.md` §1p):** the MVP slice is the **real art + audio pass as the final step
+  before submission** (B1b), a **3-row settings screen** (Restore Purchases + privacy link + mute - B10), and the
+  60fps device verify at both aspect ratios (B1a/B1b). **v1.1 keeps:** l10n/string table, font scale, reduced
+  motion, battery mode, atlases/Addressables, scroll virtualisation, pooling audit, extended a11y.
 
 ---
 
@@ -437,8 +462,8 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
 
 ## 6. Status board
 
-> Base v1.0 board (§2): B3/B3b/B3c/B3d/B4/B5/B6/B7 `DONE` · B8/B9 `NEXT` ·
-> B1 (device pass) `TODO` - owner-run, deliberately last.
+> Base v1.0 board (§2): B3/B3b/B3c/B3d/B4/B5/B6/B7 `DONE` · B8'/B9'/B10/B10b `NEXT` ·
+> B1a/B1b (device passes) `TODO` - owner-run, deliberately last, and the art + audio pass lands between them.
 
 | Step | Title | Status | Notes |
 |---|---|---|---|
@@ -454,9 +479,9 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
 | 16 | Automation & QoL | DONE | promoted to base B6 (cards, AUTO panel, speed, robot rebirth loop) |
 | 17 | Roster, stars, expeditions, return hub | PARKED (v1.1) | blocked by 13, 14, 15 |
 | 18 | Transcendence, relics, codex | PARKED (v1.1) | blocked by 15, 17 |
-| 19 | Monetisation: ads, gems, shop, season skeleton | SPLIT | base slice = B7 (`DONE 2026-09-27`); rest v1.1 |
-| 20 | Visual/audio/UX polish + l10n + a11y + perf | TODO | owns G4/G11/G12/G14; placeholder audio + icons shipped in 9b-3 |
-| 21 | CI, versioning & release readiness | SPLIT | 21-lite = base B9 (`TODO`): version stamp, crash log, scripted build |
+| 19 | Monetisation: ads, gems, shop, season skeleton | SPLIT | base slice = B7 (`DONE 2026-09-27`); **live-store wiring = B10** (real SDKs, Restore, consent, manifests); season + extra SKUs v1.1 |
+| 20 | Visual/audio/UX polish + l10n + a11y + perf | SPLIT | MVP slice = **art + audio final pass before submission** + 3-row settings + device verify (B10/B10b/B1b); rest v1.1 |
+| 21 | CI, versioning & release readiness | SPLIT | 21-lite = base B9' + B10b (`TODO`): both-target checks-gated build, version stamp, crash log, save-compat policy, store/legal checklist |
 | 22 | Local notifications | PARKED (v1.1) | G2 |
 
 ## 7. Backlog (agreed direction, not scheduled)

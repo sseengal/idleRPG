@@ -87,7 +87,22 @@ point of doing B5 (tracks) before B7.
    warn < 3h, `costGrowth > 1`) for permanent multipliers, "no product sells power" over `IapCatalog`, and free-player
    reachability of the cheapest gem sink; F3 now prints the money/ads lines. Planted cheat card -> 2 errors, planted
    power SKU -> 1 error, both reverted; final `Validate Content` clean, `Run All Checks` PASS).
-   **B7 is complete.**
+   **B7 is complete** - the mock-era money path is finished.
+
+## 6b. What is NOT in the base (moved to B10 - live store wiring, 2026-09-27)
+
+`Monetisation.md` above describes the *logic* of the money path, and all of it ships behind two seams
+(`IIapService`, `IAdService`) that today are only implemented by mocks. Because **MVP is defined as
+store-submittable** (see `Checklist.md` §1p), the real wiring is its own step and its own risk:
+
+| Obligation | Why it is mandatory | Home |
+|---|---|---|
+| Real rewarded ads + real billing | mock-only code cannot earn or be accepted | **B10** |
+| **Restore Purchases** in the UI | Apple rejects a non-consumable IAP with no restore path | **B10** |
+| iOS ATT + EEA consent flow | required once a real ad SDK collects identifiers | **B10** |
+| `PrivacyInfo.xcprivacy` + Play Data Safety | both stores require the declaration; a mismatch is a rejection | **B10** / **B10b** |
+| Ad failure must not burn a daily cap | a no-fill or a skip must leave the cap intact (ledger honesty stays) | **B10** |
+| Product records + prices in both consoles | the `IapCatalog` SKU list is the single source to copy | **B10b** (Store Day-0) |
 
 ## 7. Explicitly not in the base
 
