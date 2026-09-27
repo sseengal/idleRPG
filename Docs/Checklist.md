@@ -12,12 +12,12 @@
 
 | Field | Value |
 |---|---|
-| Current step | **B8' NEXT: content + onboarding** (B7 - the whole money path - is **COMPLETE 2026-09-27**, §1k-§1o). **MVP = store-submittable** (§1p): B8' -> B9' -> **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
+| Current step | **B8' proof lap NEXT** (all kit + polish built + verified 2026-09-27, §1q; only the owner's battle-log + shop-beat play session remains). **MVP = store-submittable** (§1p): then B9' shipping checklist -> **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money**, and **MVP = store-submittable** (§1p). No statuses/abilities/zones/affixes/gear/roster/relics before the base is done |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
 | Last completed | B7 S5 - the monetisation guard + shop readout on F3 (planted cheats refused by the build; see §1o), 2026-09-27 |
-| Next after this | B8': enemies **4 -> 8-12** (3 heroes stay) + 3 first-run tips + formation-slot tiles; then B9' plumbing, B10 live store wiring, B10b store packet, B1a/B1b device passes |
+| Next after this | the B8' proof lap (you: battle-log + shop-beat play check, F3 in hand); then the B9' shipping checklist, B10 live store wiring (AdMob + Unity Ads), B10b store packet, B1a/B1b device passes |
 | MVP decisions (owner, 2026-09-27) | gate = **store-submittable**; **3 playable heroes** (a 4th needs the v1.1 roster UI); both stores at once; **art + audio = the final pass before submission**; no analytics SDK; full record + cuts in §1p |
 | Save schema | v5 (v3 -> v4 adds `runBestStage`; v4 -> v5 = one keyed `levels` list; additive migrations, no data loss - see §1h / B35-B36) |
 | Shipped build | `Builds/IdleRPG-mac.app` verified (boot, save, offline, combat) |
@@ -927,7 +927,7 @@ not the *store* plan. Evidence found while reviewing (all verified in the repo):
 | **Hero count was a scope trap** | `party.json` hardcodes the 3 hero ids, there is **no picker**, and the formation holds 3 slots | "5-6 heroes (data only)" was **not** data-only: it silently pulled in roster UI + chosen-party save (Step 17). **Owner call: ship 3 heroes**; content budget goes to enemies |
 | **Store release has wall-clock lead time** | new *personal* Play accounts need **12 testers x 14 continuous days** before production access | **Store Day-0** (below) is on the critical path - start it before writing code, not after |
 
-**Order now:** B8' monster-making kit + polish (no new monsters) -> B9' release plumbing -> **B10 live SDKs + consent
+**Order now:** B8' monster-making kit + polish (no new monsters) -> the B9' shipping checklist -> **B10 live SDKs + consent
 + Restore + minimal settings** -> B10b store packet -> B1a device pass -> **art + audio final pass** -> B1b device pass
 + submission. Real monsters then ship as a **post-launch update**, drawn by the kit.
 
@@ -946,6 +946,7 @@ submission; and a mismatched Data Safety / privacy manifest, which is worse than
 ### Store Day-0 (owner, runs in parallel with all code)
 - [ ] Apple + Play developer accounts; **Play account type recorded** (personal => the 12x14 test gate applies)
 - [ ] App names reserved; bundle id / package id chosen
+- [ ] **Ad accounts created and ids written down:** AdMob (app id per platform, a test rewarded unit) + Unity Ads (game ids, rewarded placements) - both sellers go live in B10; the Google Mobile Ads Unity plugin needs the AdMob app id in the Android manifest / iOS plist
 - [ ] Product records created in both consoles with the `IapCatalog` SKUs (no-ads, 3 gem packs, starter pack) + prices
 - [ ] Play **closed test track started** (this is the wall-clock floor)
 - [ ] Privacy policy + support URL hosted (both stores require the URLs)
@@ -953,15 +954,22 @@ submission; and a mismatched Data Safety / privacy manifest, which is worse than
 
 ### Decisions taken (owner, 2026-09-27)
 1. **3 playable heroes** at launch; a 4th hero needs the roster picker, which is v1.1 (Step 17).
-2. **Launch roster = 4 monsters** (slime, bat, goblin, ogre) - **no monsters added before release.** Instead B8' builds the "monster-making kit" (see §1q) so content scales later without code.
-3. **Real monsters ship post-launch as an update**, drawn by the kit with placeholder art, after the artist has finished the 4-monster launch roster.
+2. **Launch roster = 4 monsters** (slime, bat, goblin, ogre) - **no monsters added before release.** Instead B8' builds the
+   "monster-making kit" (see §1q) so content scales later without code.
+3. **Real monsters ship post-launch as an update**, drawn by the kit with placeholder art, after the artist has finished
+   the 4-monster launch roster.
 4. **No analytics SDK ships** - the stores' own crash reports cover us.
 5. **Both stores at once**, one submission push; **art + audio = the final pass before submission**.
+6. **Ad sellers: BOTH at launch** - **AdMob** is the marketplace (its Google Mobile Ads Unity plugin hosts the auction)
+   with **Unity Ads as a second, bidding seller from day one**. The quoted "35% more" is marketing, not a promise - the
+   mechanism is real (Google's own doc: the Unity Ads adapter "supports Bidding and Waterfall" for Banner, Interstitial,
+   and **Rewarded** ads) but the actual gain depends on player numbers and countries. Fallback: if the second seller
+   misbehaves in B10 testing, ship with AdMob alone - the switch is one config change, the game code never changes, and
+   the game's reward values are decided by the game either way, so which seller wins an auction changes no gameplay.
 
 ### Still open (needed before B10)
-1. Ad network: **Unity Ads** (one vendor, Unity-authored privacy manifest + consent tooling) vs AdMob (better fill/eCPM, ATT + UMP + Google data forms). Docs stay vendor-neutral until decided.
-2. Play account type (personal vs organization) - decides whether the 14-day closed-test gate is on the critical path.
-3. Art/audio timing: already in flight, or starts after B10?
+1. Play account type (personal vs organization) - decides whether the 14-day closed-test gate is on the critical path.
+2. Art/audio timing: already in flight, or starts after B10?
 
 ## 1q. B8' — the monster-making kit  ·  **tools 1-3 + recipe + hints + seats built + verified 2026-09-27** (only the owner's proof lap remains)
 
@@ -1090,8 +1098,8 @@ Base gate: every step below names the loop beat or money path it serves. Anythin
 | **B6** | Automation & QoL (`AutomationUnlock` cards; **ascension stays manual forever** - owner decision) | retention: idling must pay off while away | `[x]` Step 4 done 2026-09-27 (see §1j): the robot learns the rebirth loop (auto-buy mid-climb + voluntary/wall ascents, lifetime frontier asserted by the validator); Steps 1-3 + Fix A landed 2026-09-25 (see §1i) | medium |
 | **B7** | Monetisation pass (`Monetisation.md`) | money path: ad placements + gem sinks + mock IAP | `[x]` 2026-09-27 (see §1k-§1o): every payout goes through the ledger rate, per-day caps enforced, mock IAP swaps for a real store with one implementation, and the build now refuses a sink that beats its own time-value | done |
 | **B8'** | **Monster-making kit + polish** (**no new monsters**) | first-run clarity + content that can scale later | the 3 tools (§1q): (1) the drawing tool gives every card a picture with no code, (2) content checks that shout at a missing picture / a monster nobody ever meets / a stray family word, (3) a map showing who appears where and what shifts if a card is added. Plus the recipe (`Content.md` §8a), **3 first-run hints** (once each, saved, no schema change) and **empty formation seats that look empty**. Launch roster stays **3 heroes / 4 monsters**; real monsters are a post-launch update | `[~]` all built 2026-09-27; owner's proof lap (battle log + shop beat) remains | small-med |
-| **B9'** | Release plumbing (**both targets**) | ship it | version stamp, mobile targets + signing, portrait lock, app icon + launch screen (placeholders), crash log file, **checks-gated one-command build**, **Android back/gesture handling**, written save-compat policy | med |
-| **B10** | **Live store wiring** (new, §1p) | the real money path | real rewarded ads + Unity IAP behind the existing seams; **Restore Purchases UI**; minimal settings (Restore + privacy link + mute); iOS ATT + EEA consent; `PrivacyInfo.xcprivacy` + Play Data Safety; an ad that fails or is skipped must not consume a daily cap | **large** |
+| **B9'** | The **shipping checklist** (get the game into the stores' hands, both targets) | ship it | version stamp, real app + company names, building as a phone app for Apple and Android (with signing), portrait-only screen, app icon + launch screen, Android back button behaviour, crash diary file, written save-compat policy, and **one build command that only runs when every check passes** | med |
+| **B10** | **Live store wiring** (new, §1p) | the real money path | real rewarded ads (**AdMob marketplace + Unity Ads bidding, both live**) + Unity IAP behind the existing seams; **Restore Purchases UI**; minimal settings (Restore + privacy link + mute); iOS ATT + EEA consent (Google's message form covers both sellers); `PrivacyInfo.xcprivacy` + Play Data Safety for **both** sellers; an ad that fails or is skipped must not consume a daily cap; a no-fill from either seller never costs a player their reward | **large** |
 | **B10b** | **Store packet** (new, §1p) | a build the stores accept | screenshots (iPhone 6.7" + Play phone + 1024x500 feature graphic), listing copy, age/content rating, Data Safety answers, product records matched to `IapCatalog`, sandbox end-to-end on both platforms | med-large |
 | **B1a** | **Device pass 1 (owner-run)** | does the logic hold on hardware | 60fps idle with 3v3 on device; safe area clean; offline modal + CLAIM work by touch; back button behaves | ½ day |
 | **B1b** | **Device pass 2 + submission (owner-run, LAST)** | does it *look* right | re-run the pass **after the art + audio final pass**, then submit both builds; layout clean at both aspect ratios | ½ day |
@@ -1113,8 +1121,8 @@ shop beat verification (boss/milestone gems -> fast-forward + offline cap), and 
 | B6 | 16 - automation & QoL | `[x]` 2026-09-27 (see §1i + §1j) |
 | B7 | monetisation pass (design: `Monetisation.md`) | `[x]` 2026-09-27 (see §1k-§1o): S1 IAP seam + no-ads, S2 daily streak, S3 ad placements + caps, S4 gem sinks, S5 monetisation guard + F3 readout |
 | B8' | monster-making kit (picture tool, content checks, who-appears-where map) + recipe + 3 first-run hints + empty seats | `[~]` all built + verified 2026-09-27 (see §1q); only the owner's proof lap (battle-log + shop beat) remains |
-| B9' | release plumbing, both targets (version/names, portrait lock, back button, icon/splash, checks-gated build) | `[ ]` |
-| B10 | live store wiring (real ads + IAP, Restore, minimal settings, consent, manifests) | `[ ]` |
+| B9' | the shipping checklist, both stores (version/names, portrait lock, back button, icon/splash, checks-gated build) | `[ ]` |
+| B10 | live store wiring (AdMob marketplace + Unity Ads bidding, Unity IAP, Restore, minimal settings, consent, both sellers' manifests) | `[ ]` |
 | B10b | store packet (screenshots, listing, ratings, Data Safety, sandbox) | `[ ]` |
 | B1a | device pass 1 (logic/perf, owner-run) | `[ ]` |
 | B1b | device pass 2 after the art+audio pass, then submission (owner-run) | `[ ]` |

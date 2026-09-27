@@ -97,11 +97,11 @@ store-submittable** (see `Checklist.md` §1p), the real wiring is its own step a
 
 | Obligation | Why it is mandatory | Home |
 |---|---|---|
-| Real rewarded ads + real billing | mock-only code cannot earn or be accepted | **B10** |
+| Real rewarded ads (AdMob marketplace + Unity Ads bidding) + real billing | mock-only code cannot earn or be accepted; with TWO sellers the AdMob console shows each one's earnings, so the second seller earns its keep - or not - by measurement | **B10** |
 | **Restore Purchases** in the UI | Apple rejects a non-consumable IAP with no restore path | **B10** |
-| iOS ATT + EEA consent flow | required once a real ad SDK collects identifiers | **B10** |
-| `PrivacyInfo.xcprivacy` + Play Data Safety | both stores require the declaration; a mismatch is a rejection | **B10** / **B10b** |
-| Ad failure must not burn a daily cap | a no-fill or a skip must leave the cap intact (ledger honesty stays) | **B10** |
+| iOS ATT + EEA consent flow | required once a real ad SDK collects identifiers; Google's consent message form covers both sellers | **B10** |
+| `PrivacyInfo.xcprivacy` + Play Data Safety | both stores require the declaration; with two sellers each one is declared; a mismatch is a rejection | **B10** / **B10b** |
+| Ad failure must not burn a daily cap | a no-fill or a skip must leave the cap intact regardless of which seller was asked (ledger honesty stays) | **B10** |
 | Product records + prices in both consoles | the `IapCatalog` SKU list is the single source to copy | **B10b** (Store Day-0) |
 
 ## 7. Explicitly not in the base
