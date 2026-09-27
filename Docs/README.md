@@ -50,6 +50,8 @@ Docs/
   Progression.md     <- currencies, tracks, prestige, roster
   Idle-Economy.md    <- rates, offline, time payouts
   Monetisation.md    <- sources, sinks, IAP mock, guards (B7 done; live-store wiring = B10, see its §6b)
+  Manual-Tests.md    <- the one manual-testing runbook (proof lap, phone list, device passes, store tests) - do these
+  B10-owner-inputs.md<- your step-by-step list to complete BEFORE B10 can start
   UI-UX.md           <- screens, navigation, battle log contract
   Art-Pipeline.md    <- HD-2D art pipeline, asset volume, perf budgets (G11/G12)
   REVIEW.md          <- deletion candidates / resolved removals

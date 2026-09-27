@@ -944,6 +944,8 @@ drawn by the kit from B8').
 submission; and a mismatched Data Safety / privacy manifest, which is worse than a missing feature.
 
 ### Store Day-0 (owner, runs in parallel with all code)
+> The step-by-step version of this list, with check-tick boxes and what to hand me, is **`Docs/B10-owner-inputs.md`**
+> - complete it and B10 can start.
 - [ ] Apple + Play developer accounts; **Play account type recorded** (personal => the 12x14 test gate applies)
 - [ ] App names reserved; bundle id / package id chosen
 - [ ] **Ad accounts created and ids written down:** AdMob (app id per platform, a test rewarded unit) + Unity Ads (game ids, rewarded placements) - both sellers go live in B10; the Google Mobile Ads Unity plugin needs the AdMob app id in the Android manifest / iOS plist
@@ -1082,9 +1084,8 @@ generate + validate, read the rotation map first, then the **golden-number re-re
 expected; re-baseline with a dated reason exactly like B3d/B4).
 
 ### What is left of B8'
-Only the **proof lap**, and most of it is a play session the owner runs: a battle-log read-through with the bigger
-pool tooling in place, and the shop-beat play check (boss/milestone gems -> fast-forward + offline cap) that the F3
-readout was built to watch. No code remains.
+Only the **proof lap** - a play session you run. Full step-by-step in **`Docs/Manual-Tests.md` §2** (battle-log
+read-through + shop-beat walk with F3, first-run whispers on a fresh save). No code remains.
 
 
 
@@ -1121,14 +1122,8 @@ and verified blind; **part 2** needs a real phone and the missing pieces only th
 - [ ] App icon (1024) and launch screen - the final art pass owns the real ones; placeholders are enough to build.
 
 ### Things to test later on a real phone (owner - the "we'll do it later" list, B9' part 2)
-1. **Portrait lock** - turn the phone while playing; the game stays one way up, nothing is clipped at the notch /
-   punch-hole.
-2. **Android back button** - one press saves and leaves the game; reopening shows the progress still there.
-3. **Version** - the app shows **1.0.0** (app drawer / home screen).
-4. **Crash diary** - in a debug build, crash the app; `crash-log.txt` exists next to the save with a readable,
-   time-stamped last line.
-5. **Icon + launch screen** - they look right on the Android app drawer and the iPhone home screen.
-6. **Go/No-Go green** - the command finishes with every check passing and names **no missing modules**.
+The full checklist (6 items: portrait lock, back button, version, crash diary, icon/splash, go/no-go green) now
+lives in **`Docs/Manual-Tests.md` §3**. The save-compat policy is part 1 item 6, above.
 
 **The rule from here on:** a release build is allowed only when `Go or No-Go` is green first.
 
