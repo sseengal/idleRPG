@@ -12,11 +12,11 @@
 
 | Field | Value |
 |---|---|
-| Current step | **B7 S4 NEXT: gem sinks** (B7 S3 - ad placements + caps - built 2026-09-27, §1m; play verification pending the editor bridge). Then S5 validator guard; then B8, B9, device pass last |
+| Current step | **B7 S4 NEXT: gem sinks** (B7 S3 - ad placements + caps - **verified 2026-09-27**, §1m). Then S5 validator guard; then B8, B9, device pass last |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money.** No statuses/abilities/zones/affixes/gear/roster/relics before the base is done |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
-| Last completed | B7 S3 - ad placements + per-day caps (built; see §1m), 2026-09-27 |
+| Last completed | B7 S3 - ad placements + per-day caps (verified live; see §1m), 2026-09-27 |
 | Next after this | B7 S4: gem sinks (permanent +5% gold track, automation unlock via gems); then S5 validator guard + overlay readout; then B8 -> B9, device pass (B1) last |
 | Save schema | v5 (v3 -> v4 adds `runBestStage`; v4 -> v5 = one keyed `levels` list; additive migrations, no data loss - see §1h / B35-B36) |
 | Shipped build | `Builds/IdleRPG-mac.app` verified (boot, save, offline, combat) |
@@ -808,7 +808,7 @@ claim also on background-resume, persist-then-pay, injected clock, neutral `Boos
   (2238 chars, incl. the 2 new fields); `Run All Checks` = **PASS** (goldens + battle log untouched).
   Screenshot: `Assets/Screenshots/shop_streak.png`.
 
-## 1m. B7 S3 — ad placements + per-day caps  ·  **built 2026-09-27 (play pass pending)**
+## 1m. B7 S3 — ad placements + per-day caps  ·  **built + verified 2026-09-27**
 
 The "rules for the cartoon machine": two rewarded placements, each with data-driven daily caps + cooldowns, every
 payout through the one till. Plan `Monetisation.md` §6 item 3; owner-approved numbers (boost 5/day/5min, double
@@ -831,11 +831,17 @@ payout through the one till. Plan `Monetisation.md` §6 item 3; owner-approved n
 - **BUG FOUND + FIXED in review:** `IdleTimeService.OnOfflineRewardsClaimed` always paid `claimed.Gold` and
   ignored the event payload, so the "double" path would have paid 1x. It now pays the amount the popup says
   (`gold > 0 ? gold : claimed.Gold`) - the double works, the plain claim is unchanged.
-- **Status at session pause (2026-09-27):** all code written; last full compile was **clean**; `Generate Data
-  Assets` + `Build MVP Scene` ran (asset + scene regenerated); the IdleTimeService fix landed after that compile,
-  so a fresh compile + the play pass (caps labels, double-offline 2x with the ledger rate unmoved, no-ads hiding)
-  are the next actions. The Editor MCP bridge dropped from the agent session mid-verification (server healthy on
-  port 7800), so verification resumes via the bridge or via `AdCapsSelfCheck` in batchmode.
+- **Verified live on Main (2026-09-27):** `AdCapsSelfCheck` = **RESULT: PASS** (fresh day, drop-by-one, cooldown
+  block + elapse, cap reached, local-day reset, save round-trip). Shop CTA states: `WATCH AD (5 left)` -> `DAILY AD
+  LIMIT` (disabled) -> `WATCH AD (in 5m)` (disabled) -> reset. Real GoldBoost ad completed: boost **x2 for 29.7 min**
+  (the retuned 30) with the counter 5 -> 4. Real DoubleOffline ad completed: paid **+550,718 gold = 2x the 275,318
+  quote** (the ~81 remainder is combat income during the ~7s the ad ran), popup closed, pending consumed, counter
+  3 -> 2. Control: plain CLAIM paid the quote **exactly** (218,515.83). No-ads grant -> CTA `ADS REMOVED` /
+  disabled, `TryShowAdPlacement` refused, popup DOUBLE hidden; cleared restores `WATCH AD (5 left)`.
+  `Run All Checks` = **PASS** (save drift incl. the new adRedemptions fixture; goldens + battle log untouched).
+  Caps reset to a clean save afterwards.
+- **Env note:** the simulated ads are coroutine-driven, so they only elapse while the Editor is actually ticking -
+  the same restriction as the other mocks (each live ad needed an editor focus nudge). Session detail, not a bug.
 
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 
