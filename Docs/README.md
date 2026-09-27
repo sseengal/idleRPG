@@ -2,7 +2,7 @@
 
 > **Everything that describes this game lives here.** One folder, one source of truth per topic.
 > Root `README.md` is the quick start (clone → open → play); everything deeper is in this folder.
-> Last restructured: Step 11e (2026-09-21).
+> Last restructured: Step 11e (2026-09-21); Art-Pipeline.md added 2026-09-26.
 
 ---
 
@@ -19,6 +19,7 @@
 | Monetisation plan: sources, sinks, IAP mock, guards | `Monetisation.md` |
 | Levelling, prestige, tracks, roster | `Progression.md` |
 | Screens, navigation, log contract, accessibility | `UI-UX.md` |
+| Art pipeline: HD-2D look, asset volume, tooling, perf budgets (G11/G12) | `Art-Pipeline.md` |
 
 ## Status legend (used in every doc)
 
@@ -50,5 +51,6 @@ Docs/
   Idle-Economy.md    <- rates, offline, time payouts
   Monetisation.md    <- sources, sinks, IAP mock, guards (B7)
   UI-UX.md           <- screens, navigation, battle log contract
+  Art-Pipeline.md    <- HD-2D art pipeline, asset volume, perf budgets (G11/G12)
   REVIEW.md          <- deletion candidates / resolved removals
 ```

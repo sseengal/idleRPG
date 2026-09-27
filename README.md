@@ -165,7 +165,11 @@ debug menus, the console log and the Unity MCP bridge. A manual pass takes ~5 mi
 | 5a | Save system (atomic writes, backup recovery, migrations, autosave, rate tracker) | done |
 | 5b | Offline progress (dual caps, rate resolution, claim guard, popup) | done |
 | 6 | Mobile polish (settings audit, runtime device policy, README) | done |
-| next | Art pass, real ad SDK, shop/IAP, more heroes and prestige upgrades, device builds | planned |
+| 7–9 | Sim refactor, content pipeline + validator + overlay, economy audit (ledger, reward funnel, time payouts, gem sinks, audio hooks) | done |
+| 10–11 | Formation (save v3) + multi-enemy waves 1–3 with a size recipe | done |
+| B3–B5 | Loop beat + ascension retune + compounding upgrades, validator/loop gate, generic tracks (save v5) | done |
+| B6 | Automation cards: auto-buy + speed button (earned, sold for tokens) | in progress |
+| next | B7 monetisation (ads/IAP), B8 content + onboarding, B9 release plumbing, B1 device pass | planned |
 
 ## Design docs
 
@@ -183,4 +187,5 @@ debug menus, the console log and the Unity MCP bridge. A manual pass takes ~5 mi
 | `Docs/Idle-Economy.md` | ledger rates, offline model, expeditions/bounties, ads/gems/shop, anti-abuse |
 | `Docs/UI-UX.md` | screens, navigation, battle-log contract, accessibility |
 | `Docs/Monetisation.md` | sources, sinks, IAP mock, per-day caps, ledger guard |
+| `Docs/Art-Pipeline.md` | HD-2D look, asset volume + tooling, perf budgets (G11/G12) |
 | `Docs/REVIEW.md` | deletion candidates (R1 resolved: the obsolete MVP journal is deleted) |

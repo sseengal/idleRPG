@@ -120,6 +120,9 @@ namespace IdleRPG.Core
         /// <summary>Rewarded-ad provider (mock until a real SDK is added).</summary>
         public IAdService Ads { get; private set; }
 
+        /// <summary>Store cash register: mock today, Unity IAP (Apple/Google) at launch. B7 S1.</summary>
+        public IIapService Iap { get; private set; }
+
         /// <summary>Tokens the player would receive by ascending right now (priced on THIS run's best stage).</summary>
         public double PrestigeTokenYield
         {
@@ -324,6 +327,9 @@ namespace IdleRPG.Core
             Boost = new BoostManager(balanceConfig);
             Ads = new MockAdService(this, 3f, true);
 
+            // B7 S1: the toy shop's cash register. Mock today; Unity IAP implements the same seam at launch.
+            Iap = new MockIapService(this, 1f);
+
             // Step 9b-3: placeholder SFX (procedural tones) driven by the event bus.
             Audio = new PlaceholderAudioService(this);
             AudioDirector.Create(gameObject, Audio);
@@ -469,6 +475,7 @@ namespace IdleRPG.Core
                 Automation = Automation,
                 Boost = Boost,
                 Ads = Ads,
+                Iap = Iap,
                 Audio = Audio,
                 Ledger = Ledger,
                 Rewards = Rewards,

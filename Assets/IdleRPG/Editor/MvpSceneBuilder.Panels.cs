@@ -305,24 +305,32 @@ namespace IdleRPG.EditorTools
 
             TextMeshProUGUI title = UiFactory.Text("Title", panel.transform, "Shop", 30f,
                 TextAlignmentOptions.Center, TextColor);
-            UiFactory.Anchor(title.rectTransform, new Vector2(0.05f, 0.84f), new Vector2(0.95f, 1f));
-
-            TextMeshProUGUI statusLabel = UiFactory.Text("Status", panel.transform, "Watch an ad for Gold x2", 22f,
-                TextAlignmentOptions.Center, DimTextColor);
-            UiFactory.Anchor(statusLabel.rectTransform, new Vector2(0.05f, 0.60f), new Vector2(0.95f, 0.83f));
-
-            Button watchAdButton = UiFactory.Button("WatchAdButton", panel.transform, "WATCH AD", "ui_button_gold", 32f, TextColor, null);
-            UiFactory.Anchor(watchAdButton.GetComponent<RectTransform>(), new Vector2(0.18f, 0.30f), new Vector2(0.82f, 0.56f));
-            TextMeshProUGUI watchAdLabel = watchAdButton.GetComponentInChildren<TextMeshProUGUI>();
+            UiFactory.Anchor(title.rectTransform, new Vector2(0.05f, 0.88f), new Vector2(0.95f, 1f));
 
             TextMeshProUGUI gemsLabel = UiFactory.Text("Gems", panel.transform, "0 gems", 22f,
                 TextAlignmentOptions.Center, DimTextColor);
-            UiFactory.Anchor(gemsLabel.rectTransform, new Vector2(0.05f, 0.08f), new Vector2(0.95f, 0.26f));
+            UiFactory.Anchor(gemsLabel.rectTransform, new Vector2(0.05f, 0.80f), new Vector2(0.95f, 0.86f));
 
-            SceneWiringUtility.SetField(ui, "watchAdButton", watchAdButton);
-            SceneWiringUtility.SetField(ui, "watchAdLabel", watchAdLabel);
-            SceneWiringUtility.SetField(ui, "statusLabel", statusLabel);
+            // The offer shelf: one scrollable list (ad boost, gem machines, then every IAP product).
+            // It must live BELOW the title + gems counter, not stretch over them. (B7 shop cleanup)
+            ScrollRect scroll = UiFactory.CreateScrollView(panel.transform, "Offers", 8f, new RectOffset(10, 10, 10, 10), out RectTransform offerRoot);
+
+            RectTransform scrollRectTransform = scroll.GetComponent<RectTransform>();
+            scrollRectTransform.anchorMin = new Vector2(0f, 0f);
+            scrollRectTransform.anchorMax = new Vector2(1f, 0.78f);
+            scrollRectTransform.offsetMin = Vector2.zero;
+            scrollRectTransform.offsetMax = new Vector2(0f, -8f);
+
+            // Rows are fixed-height buttons - the layout must keep their height, not stretch them to fill.
+            VerticalLayoutGroup layout = offerRoot.GetComponent<VerticalLayoutGroup>();
+            if (layout != null)
+            {
+                layout.childControlHeight = false;
+                layout.childForceExpandHeight = false;
+            }
+
             SceneWiringUtility.SetField(ui, "gemsLabel", gemsLabel);
+            SceneWiringUtility.SetField(ui, "offerRoot", offerRoot);
             return panel;
         }
     }

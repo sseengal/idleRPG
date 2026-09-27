@@ -12,13 +12,13 @@
 
 | Field | Value |
 |---|---|
-| Current step | **B6 automation IN PROGRESS** (Steps 1-3 done; Fix A one-shot power compensation + Fix D power-band watchdog landed and **player-verified live** 2026-09-25). Next: B6 Step 4 robot learns the cards (or straight to B7), then B8 -> B9, device pass last |
+| Current step | **B7 S2 NEXT: daily streak + milestone gems** (B7 S1 - the IAP seam + no-ads flag - DONE 2026-09-27, §1k). Then S3 ad placements + caps, S4 gem sinks, S5 validator guard; then B8, B9, device pass last |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money.** No statuses/abilities/zones/affixes/gear/roster/relics before the base is done |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
-| Last completed | B3d compounding upgrades - data + pipeline + robot-player proof, 2026-09-25 |
-| Next after this | B4 sweep-wide validator band (stages 1-20, no-stall + dangling-reference checks); then the loop walk (ascend, offline, shop, first-run) with B8 |
-| Save schema | v4 (v3 -> v4 adds `runBestStage`, the per-run ascension gate; additive migration, no data loss) |
+| Last completed | B7 S1 - the IAP seam + no-ads flag (see §1k), 2026-09-27 |
+| Next after this | B7 S2: daily streak + milestone gem tuning; then S3 ad placements + caps, S4 gem sinks, S5 validator guard; then B8 -> B9, device pass (B1) last |
+| Save schema | v5 (v3 -> v4 adds `runBestStage`; v4 -> v5 = one keyed `levels` list; additive migrations, no data loss - see §1h / B35-B36) |
 | Shipped build | `Builds/IdleRPG-mac.app` verified (boot, save, offline, combat) |
 | Docs | all live in `Docs/` - index `Docs/README.md`; status here; backlog `Roadmap.md`; removals `Docs/REVIEW.md` (R1: obsolete MVP journal deleted) |
 
@@ -125,7 +125,7 @@ Two guards: crumbs under `1e-6` gold are snapped to zero in `Trim()`, and any ra
 
 ## 2. Foundation (behaviour-preserving)
 
-### 7a — Sim assembly + stat primitives + parity tooling  `[~]`
+### 7a — Sim assembly + stat primitives + parity tooling  `[x]`
 - [x] `Sim/` folder + `IdleRPG.Sim.asmdef` with **no engine references**
 - [x] `SimLog` (delegate logging; the sim must never call `UnityEngine.Debug`)
 - [x] `SimMode`, `SimCaps`, `SimRules`, `SimContext`
@@ -135,7 +135,7 @@ Two guards: crumbs under `1e-6` gold are snapped to zero in `Trim()`, and any ra
 - [x] `Editor/BalanceLabMenu.cs`: `Golden Numbers` + `Simulate Stage`
 - [x] compile clean through the bridge
 - [x] `Golden Numbers` / `Sweep Stages` reproduce the shipped balance (see log)
-- [ ] **manual test (user)**: Play -> fight, buy, save/reload unchanged
+- [x] **manual test (user)**: Play -> fight, buy, save/reload unchanged (long since covered by the live play-verification of every later step)
 - **Parity log** (`Tools > Idle RPG > Balance Lab > Golden Numbers`, seed 12345, no upgrades):
 ```
 === Balance Lab: golden numbers (MVP parity) ===
@@ -171,7 +171,7 @@ Conclusion: 7a is behaviour-identical; the old baseline was measured against a d
 - [x] `EnemyData.EnemyID` added (stable ids for saves/specs)
 - [x] `FormulaUtility` moved into `Sim/` (still Unity-free, namespace unchanged)
 - [x] verified: Balance Lab + live Play probe (party/enemy keys, DeterministicRng state, damage applied)
-- [ ] **manual test (user)**: Play -> fight/buy/save as before
+- [x] **manual test (user)**: Play -> fight/buy/save as before (long since covered by the live play-verification of every later step)
 - **7b baseline** (seed 12345, unupgraded, `Golden Numbers`):
 ```
 pace x1.0 : Slime 2.5s  Bat 3.7s  Goblin 7.0s  boss 28.5s | stage 74s | 272 gold | 3.69 gold/s
@@ -238,9 +238,11 @@ Delta vs 7a is crit-luck only (the RNG changed by design); gold/kills identical,
       `rng state 0x...`, `save file x84`
 - **Debt:** the overlay computes DPS/eHP itself until `SimLedger` exists (Step 9); it must then read the ledger
 
-### 8c — One-click checks + spec coverage for future types  `[ ]`
-- [ ] `Tools > Idle RPG > Content > Run All Checks`: validate -> round-trip -> golden numbers in one command
-- [ ] extend specs to abilities/encounters/zones/tracks/loot **as** Steps 11/13/15 introduce them
+### 8c — One-click checks + spec coverage for future types  `[x]`  (superseded wider by §1f)
+- [x] one command landed wider than 8c scoped it: `Tools > Idle RPG > Run All Checks (regression)` = save drift +
+      content validation + golden-number assertion + loop health (see §1f/§1g)
+- [x] spec coverage: `tracks.json` landed with B5; abilities/encounters/zones/loot specs arrive when the steps
+      that need them do (12/13/15, parked v1.1)
 
 ### 9a — SimLedger + reward funnel (one rate source)  `[x]`
 - [x] `Sim/SimLedger.cs` - rolling-window rates (gold/s, kills/s, seconds/stage, best stage time, session
@@ -253,7 +255,7 @@ Delta vs 7a is crit-luck only (the RNG changed by design); gold/kills identical,
 - [x] payouts routed through the till: kills, boss gems, ascension tokens, offline claim
 - [x] folded-in **G5**: `RunController.StepSafely` - tick exceptions are caught, logged, autosaved and skipped;
       intermittent faults let the run continue, 10 in a row stop it (safe mode)
-- [ ] folded-in **G6** (3-version backup rotation) moved to **9b** - not done yet, do not report as complete
+- [x] folded-in **G6** (3-version backup rotation) delivered in **9b-1** (see below)
 - **Verification log:**
 ```
 Balance Lab unchanged: pace x1.0 74s / 272 gold | pace x1.6 120s / 272 gold / 2.26 gold/s
@@ -355,14 +357,14 @@ G5: intermittent - "Combat tick threw; skipping it and saving" (failures=13, ena
 ## 3. Combat depth
 
 ### 10a — Formation model + row targeting (sim)  `[x]`
-- [ ] `Data/FormationData.cs`: rows/columns, slot unlock stages, row rules (`backRowDamageTakenMultiplier`
+- [x] `Data/FormationData.cs`: rows/columns, slot unlock stages, row rules (`backRowDamageTakenMultiplier`
       0.75, `frontRowProtectsBackRow`), slot -> row/column mapping; all values data, none hardcoded in the sim
-- [ ] `Combat/Formation.cs`: runtime slot assignment (slot -> hero), `TrySwap`, `AutoArrange`, `ToSave`/`FromSave`
+- [x] `Combat/Formation.cs`: runtime slot assignment (slot -> hero), `TrySwap`, `AutoArrange`, `ToSave`/`FromSave`
       hooks, combat-order helpers; pure C#, no UI
-- [ ] `Encounter`: row-aware `SelectTarget` (`FrontMost` = lowest row first, then column) + new `BacklineFirst`
+- [x] `Encounter`: row-aware `SelectTarget` (`FrontMost` = lowest row first, then column) + new `BacklineFirst`
       rule + back-row damage multiplier applied while the front row has a living member
-- [ ] `HeroData` grows `role` (Tank/Damage/Support) + `targetRule` (per-hero override lives here, wired in Step 11)
-- [ ] `CombatSimulator.SetupParty(party, formation)` stamps each hero's row/column; `CombatManager` and
+- [x] `HeroData` grows `role` (Tank/Damage/Support) + `targetRule` (per-hero override lives here, wired in Step 11)
+- [x] `CombatSimulator.SetupParty(party, formation)` stamps each hero's row/column; `CombatManager` and
       `GameManager` carry the formation asset
 - [x] acceptance **verified live**: board `front[0 1 2] back[- - -]` on start (= the MVP's fixed lanes); moved the
       tank to the back-left slot -> `front[- 1 2] back[0 - -]`, rows re-stamped `Knight[Back/col0]`; with
@@ -398,7 +400,7 @@ G5: intermittent - "Combat tick threw; skipping it and saving" (failures=13, ena
       of v3 - nothing needs it yet, and reshaping live data would risk the very saves the step is protecting. It
       lands with the systems that need it (relics/abilities), as an additive migration of its own
 
-### 10c — Team screen + battle formation strip  `[~] superseded by 10d`
+### 10c — Team screen + battle formation strip  `[-] superseded by 10d`
 > Kept for the record. The locked slots, the two preset buttons, the tap-swap on the battle screen and the
 > `FormationStripUI` option flags were all removed in 10d after review - see below.
 - [x] `UI/FormationStripUI.cs`: one view **per formation slot**, built in code from `FormationData` (rows and
@@ -680,8 +682,9 @@ robot, so a change that halved DPS or reintroduced the additive stall still said
   bought both cards, toggled both on; ledger gold/s ~1262 while speed on, saved `lastGoldPerSecond` = 631 (=/2);
   panel rows read `Auto-Buy Manager (on)` + `Keep 20% gold` and `Speed Button (on)`; save round-trips `autoBuy:1`,
   `fastForward:1` + settings. Compile clean; `Run All Checks` PASS after the rebuild.
-- **Step 4 (robot learns the cards) - deferred:** the robot already buys-cheapest like auto-buy; a meaningful
-  version means simulating the (manual, player-only) rebirth loop, which deserves its own small step.
+- **Step 4 (robot learns the cards) - done 2026-09-27, see §1j:** the robot now simulates the (manual, player-only)
+  rebirth loop - auto-buy mid-climb, voluntary ascents at milestone stages and wall-forced ascents, all priced and
+  spent through the real formulae.
 - **Fix A (the one-shot report, 2026-09-25):** a legacy save's hero levels were worth ~100x more the moment they
   became compounding (level 80 = 11,839 ATK), so everything was one-shot. `SaveMigrations` now runs a ONE-TIME
   compensation for pre-B3d saves: each additive-era level becomes the compounding level of EQUAL power
@@ -698,6 +701,77 @@ robot, so a change that halved DPS or reintroduced the additive stall still said
   frame 1 after the crash/restart storm) cleared on a fresh Unity relaunch. Fix A is DONE. Session closed here
   for the day; next up: B6 Step 4 (robot learns the cards) or B7.
 
+## 1j. B6 Step 4 — the robot learns the rebirth loop  ·  **built + verified 2026-09-27**
+
+The last open B6 item. The robot already bought-cheapest "like auto-buy", so a meaningful version of *learning the
+cards* had to simulate the one thing a single-run robot cannot: the **manual rebirth loop**. Ascension stays 100%
+manual by design; the robot plays the manual player.
+
+- New `ClimbPolicy.Rebirth` (`Editor/ClimbSimulation.cs`): the automation cards are *on* (auto-buy spends gold
+  whenever affordable, not only at walls) and a **manual rebirth** happens when either a wall outlives the
+  `RebirthWallSeconds` trigger (240s), or the farm budget is beaten, or a **voluntary milestone** is reached
+  (`RebirthMilestones = {20, 40}` - the "quick ascend" a real player takes when the yield is worth it), all gated on
+  `runBest >= MinStageToAscend`.
+- The rebirth mirrors the game exactly: tokens priced on the run best via `FormulaUtility.PrestigeTokenReward`
+  (the same call `AscensionManager.GetTokenYield` makes), hero levels reset per `ResetHeroLevelsOnAscension`, and
+  the whole yield spent on permanent upgrades at their **real** cost (`FormulaUtility.StatUpgradeBulkCost` ->
+  `StatResolver.SetPrestigeLevel`). No second formula could drift in.
+- `ClimbResult` += `LifetimeBestStage` / `Rebirths` / `PrestigeLevels`; the robot report gets a `LONG GAME:` line.
+- **`CheckLoopHealth` now runs a second climb** (maxStage 40) that asserts the LIFETIME frontier reaches the target.
+  This is the check that catches a token/prestige sink that never pays for itself: even with permanent multipliers,
+  the long-game frontier must keep moving (stuck or an undershoot fails the build).
+- **Verified - parity:** the `Cheapest` climb is byte-identical to the B3d record (stage 30 in 70.1 min, 428 buys,
+  3 walls, worst wall 8.8 min) - the new policy is purely additive.
+- **Verified - the rebirth loop lives:** `Rebirth` climbs stage 30 in 44.3 min, walls 0, **1 voluntary rebirth at
+  the stage-20 milestone (2 tokens), 2 prestige levels**, and the post-rebirth second climb covers the whole 30
+  stages ~3x faster (44.3 min total incl. the reset) - i.e. the permanent multipliers visibly pay for themselves.
+- **Verified - the gate:** `Run All Checks (regression)` = **PASS** (goldens 80s@x1 / 126s@x1.6, save drift v5,
+  validator clean), with the new long-game line `ok [loop] robot+rebirth: lifetime best stage 40 (run 40) in
+  74.4 min | 2 rebirth(s), 7 prestige level(s)`.
+- **B6 is DONE** - the base board's last `[~]` is closed. Next: B7 monetisation.
+
+## 1k. B7 S1 — the IAP seam + no-ads flag  ·  **built + verified 2026-09-27**
+
+First slice of the monetisation base (plan `Monetisation.md` §6; owner-approved refinements 2026-09-27: one
+double-offline ad instead of two, gems may buy automation as an accelerant, analytics stay local for v1.0).
+
+- `Services/IIapService.cs` - the store-billing seam: `IsInitialized`, `IsOwned(sku)`, `Purchase(sku, cb)`,
+  `RestorePurchases(cb)`. A real store (Unity IAP -> App Store / Play Billing) implements this; nothing else changes.
+- `Services/IapCatalog.cs` - one shelf of five products: **No Ads** (non-consumable), **5 / 30 / 110 Gems**,
+  **Starter Pack** (50 gems + 1h offline cap). Prices live in the store dashboards, never in code.
+- `Services/MockIapService.cs` - the pretend cash register: simulated latency (coroutine, like `MockAdService`),
+  PlayerPrefs-backed no-ads ownership, consumables always succeed.
+- `GameManager.PurchaseIap(sku)` - the ONE purchase funnel: the store confirms -> contents granted through the
+  normal till (`RewardService.GrantGems`) and shop (`ShopService.TryGrantOfflineCapBonus`, new, honours the same
+  max cap) -> save marked dirty. Contents are never granted directly.
+- `GameManager.AdsDisabledByNoAds` (owned via the receipt) gates every ad offer: `WatchAdForGoldBoost` refuses
+  with a toast and `ShopPanelUI` flips the label to `ADS REMOVED`, disabling the button.
+- Debug surface: `Tools > Idle RPG > Debug > Mock IAP` (Log State, Grant/Clear No-Ads, Buy 30 Gems, Buy Starter Pack).
+- **Verified live on Main:** mock purchase of 30 gems paid through the till (**28 -> 58 gems**, `IAP bought: 30 Gems`);
+  granting no-ads flips `AdsDisabledByNoAds` true and clearing it flips back; `Run All Checks (regression)` =
+  **PASS** (goldens, save drift v5 incl. the touched live save, validator + loop health).
+- **Env note:** the coroutine-driven mocks only elapse while the Editor is focused (frames do not tick while it is
+  backgrounded) - the same restriction the ad mock already had; verified by focusing the window.
+- **Design decisions locked (owner-approved):** no-ads truth = the purchase receipt (PlayerPrefs in the mock) so a
+  reinstall keeps it; the redundant "instant offline claim" ad is cut - the popup already pays instantly, so S3
+  ships ONE popup ad ("Double your offline earnings"). Next: S2 daily streak + milestone gems.
+- **Addendum (same session) - the shop shelf.** The walk-through found the products invisible in the shop (they
+  were Tools-menu only), so the shop gained its real rows: `MvpSceneBuilder.BuildShopPanel` now hosts a
+  `UiFactory.CreateScrollView` (fixed-height rows: `childControlHeight=false`) and wires `offerRoot`; `ShopPanelUI`
+  builds ONE uniform list - ad boost / offline cap / fast-forward + all five `IapCatalog` products - every row
+  through the same `PurchaseIap` funnel. `IIapService` gained `PurchasesChanged` (the mock raises it on purchase
+  and ownership changes) so the shelf re-renders live (e.g. no-ads flips the ad row to `ADS REMOVED`).
+  **Verified live:** 8 rows with correct labels; tapping the No Ads row -> `AdsDisabledByNoAds=True` and the shelf
+  immediately flipped to `ADS REMOVED` (disabled) + `No Ads - OWNED` (disabled); ownership cleared afterwards;
+  `Run All Checks (regression)` = **PASS**. Scenes regenerated via `Build MVP Scene`.
+- **Addendum 2 - layout fix.** The first shelf build stretched the Offers scroll view over the WHOLE panel, so the
+  rows rendered on top of the `Shop` title and the gems counter (caught in a walk-through screenshot). Fixed:
+  `BuildShopPanel` re-anchors the scroll view to `(0,0) -> (1,0.78)` below the title/gems band. Verified live by
+  world-rect measurement: Title y[1502..1674], Gems y[1388..1474], Offers/Viewport y[246..1352] - **no overlap**,
+  8 rows inside the masked viewport, ownership cleared to a clean state, `Run All Checks` = **PASS**.
+  (Note: the Editor crashed twice during this session - after scene rebuilds, both relaunched successfully;
+  a stale-no-ads PlayerPrefs from a stalled mock coroutine was the only data side-effect and has been cleared.)
+
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 
 Base gate: every step below names the loop beat or money path it serves. Anything that cannot is not in the base.
@@ -707,7 +781,7 @@ Base gate: every step below names the loop beat or money path it serves. Anythin
 | **B3d** | Phase 2: the per-level stat effect is **multiplicative** (ATK/HP x1.09, DEF x1.05) behind a data field on `StatUpgradeData`, the gain derived from the content/cost/gold growth | the loop beat "buy -> push further": additive power could not race exponential content (measured: stage time 126s -> 493s, stall ~stage 24) | `[x]` 2026-09-25: robot player clears stage 30 in 70 min (cheapest) / 34 min (attack-only), worst wall 8.8 min; goldens unchanged because level 0 = base stat | done |
 | B4 | **Sweep-wide validator + loop harness** | keeps the loop healthy: an accidental stall must fail the build | `[x]` 2026-09-25 (see §1g): dangling-ref/spec-asset checks, the robot climb runs inside the validator (target stage 25), golden numbers asserted +-2% via `BalanceBaseline`; planted stall and planted +20% buff both fail the build | done |
 | **B5** | Generic progression tracks (schema v5) | money path: more tracks = more to buy = more gem/ad relevance | a new track = spec + generate, zero code; a v4 save migrates to identical numbers | medium |
-| **B6** | Automation & QoL (`AutomationUnlock` cards; **ascension stays manual forever** - owner decision) | retention: idling must pay off while away | `[~]` Step 1 done 2026-09-25 (see §1i): AutoBuy + FastForward cards as data, `AutomationService` on the 1s tick, auto-buy proven live with the reserve respected; panel + speed + robot steps remain | medium |
+| **B6** | Automation & QoL (`AutomationUnlock` cards; **ascension stays manual forever** - owner decision) | retention: idling must pay off while away | `[x]` Step 4 done 2026-09-27 (see §1j): the robot learns the rebirth loop (auto-buy mid-climb + voluntary/wall ascents, lifetime frontier asserted by the validator); Steps 1-3 + Fix A landed 2026-09-25 (see §1i) | medium |
 | **B7** | Monetisation pass (`Monetisation.md`) | money path: ad placements + gem sinks + mock IAP | every payout goes through the ledger rate; per-day caps enforced; mock IAP swaps for a real store with one implementation | medium |
 | **B8** | Content + onboarding pass | first-run clarity: a stranger knows what to press | ~8-12 enemies, 5-6 heroes (data only) + 3 first-run tips; content added with no code | medium |
 | **B9** | Release plumbing | ship it | version stamp, crash log file, one scripted `-batchmode` build command | small-med |
@@ -727,8 +801,8 @@ shop beat verification (boss/milestone gems -> fast-forward + offline cap), and 
 | B3d | **phase 2 - the compounding-upgrade fix** (additive effect vs exponential content) | `[x]` 2026-09-25 (see §1d) |
 | B4 | **sweep-wide validator band + bounce detection** | `[x]` 2026-09-25 (see §1g) |
 | B5 | 14 - generic progression tracks (**schema v5**) | `[x]` 2026-09-25 (see §1h): TrackService = single purchase path; save v5 = one keyed `levels` list; `tracks.json` = the only upgrade spec; zero-code demo track (`Track_GoldHoarder`) added in data and proven live |
-| B6 | 16 - automation & QoL | `[~]` Step 1 done 2026-09-25 (see §1i) |
-| B7 | monetisation pass (design: `Monetisation.md`) | `[ ]` |
+| B6 | 16 - automation & QoL | `[x]` 2026-09-27 (see §1i + §1j) |
+| B7 | monetisation pass (design: `Monetisation.md`) | `[~]` S1 done 2026-09-27 (IAP seam + no-ads, see §1k) |
 | B8 | content + onboarding pass | `[ ]` |
 | B9 | 21-lite - version stamp, crash log, scripted build | `[ ]` |
 | B1 | device pass (deliberately last, owner-run) | `[ ]` |
@@ -847,7 +921,7 @@ Found while reviewing progress against the design docs. Each needs a home in `Ro
 | G13 | **Daily reset boundary undefined** (UTC vs local midnight, DST) | Daily/weekly systems land in 16-17 | decide in 16 |
 | G14 | **Accessibility beyond font scale** (colorblind palette, TMP labels for screen readers, haptics toggle) | Cheap now, expensive later | part of 20 |
 | G15 | **Store/legal checklist** (privacy URL, age rating, data-safety form, ad disclosure, iOS ATT) | Blocks submission once ads/IAP exist | part of 19 |
-| G16 | **No single "run all checks" command** | Our regression net is manual today; one command makes it habitual | Step 8c |
+| G16 | **No single "run all checks" command** | Our regression net is manual today; one command makes it habitual | RESOLVED 2026-09-23 (§1f): `Run All Checks (regression)` |
 
 ---
 

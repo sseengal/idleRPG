@@ -112,6 +112,31 @@ namespace IdleRPG.Economy
             return $"Fast-forward {minutes:0} min - {InstantIncomeGemCost:0} gems";
         }
 
+        /// <summary>
+        /// Free offline-cap bonus from an IAP (starter pack). Respects the same maximum as paid extensions,
+        /// needs no gems and counts against the external bonus, not the player's purchase buy-count.
+        /// </summary>
+        public bool TryGrantOfflineCapBonus(double minutes)
+        {
+            if (balanceConfig == null || minutes <= 0d || IsOfflineCapMaxed)
+            {
+                return false;
+            }
+
+            double bonusSeconds = System.Math.Min(
+                OfflineCapBonusSeconds + minutes * 60d,
+                MaxOfflineCapBonusSeconds);
+
+            if (bonusSeconds <= OfflineCapBonusSeconds + 0.5d)
+            {
+                return false; // nothing gained (already maxed)
+            }
+
+            OfflineCapBonusSeconds = bonusSeconds;
+            GameEvents.RaiseToast($"Offline income cap +{minutes:0} min (gift)");
+            return true;
+        }
+
         /// <summary>Restores purchases from a save.</summary>
         public void Restore(double bonusSeconds, int purchases)
         {

@@ -39,6 +39,8 @@ namespace IdleRPG.Core
 
         public IAdService Ads { get; set; }
 
+        public IIapService Iap { get; set; }
+
         public IAudioService Audio { get; set; }
 
         public SimLedger Ledger { get; set; }

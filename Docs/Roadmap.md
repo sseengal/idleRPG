@@ -3,7 +3,7 @@
 > Owns: **the order of work.** One step at a time, one small change per iteration, manual test, then next step.
 > Parent: `Architecture.md` (§6 decision log). Design detail lives in the topic docs, not here.
 > Status values: `TODO` | `WIP` | `DONE` | `BLOCKED` | `DEFERRED`.
-> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** Step 11e (2026-09-21).
+> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** B6 (2026-09-27) - status board refreshed.
 
 ---
 
@@ -199,8 +199,8 @@ interesting"), it does not enter the base - and it is not parked either unless t
 | B3d | **compounding upgrades + the one-shot fix (Fix A)** | `DONE` - per-level effect is multiplicative (ATK/HP x1.09, DEF x1.05, gains derived); legacy saves get a one-time power-preserving compensation (80 additive -> 25 compounding) so compounding can never inflate old saves into one-shotters; content curve measured healthy (no retune needed, Fix B) | goldens + robot + validator green; the drift suite holds a regression for the exact "stray marker stamped save as modern" bug | done |
 | B4 | **Sweep-wide validator + loop harness** | `DONE (2026-09-25)` - the robot climb runs inside `Run All Checks` (target stage 25, max 40), golden numbers are asserted +-2% against `BalanceBaseline`, dangling refs and spec/asset drift are errors | a planted stall FAILS the build; a planted +20% power buff FAILS the golden gate; clean data is clean (robot reaches stage 40 in 96.9 min, check < 1s) | done |
 | B5 | **14 - generic progression tracks (schema v5)** | `DONE (2026-09-25)` - `TrackService` is the single purchase path; save v5 = one keyed `levels[{key,level}]` list (currency/ledger reshaping deferred to B7, see `Architecture.md` B35/B36); `tracks.json` is the single upgrade spec and `SceneWiringUtility` loads from it, so a new track = spec card + `Generate Assets From Specs` + `Build MVP Scene` (no C# edits) | proven: goldens/robot/validator unchanged, the real v4 save migrates with every number identical, and a data-only demo track (`Track_GoldHoarder`) was added, wired, bought, saved and reloaded in one session | done |
-| B6 | **16 - automation & QoL** | `WIP (2026-09-25)` - automation is earned content: `AutomationUnlock` cards bought with tokens (no freebies, no auto-ascend - the rebirth stays manual by owner decision). AutoBuy + FastForward cards shipped as data; `AutomationService` on the 1s tick with a player-set gold reserve; save v5 additive | Steps 1-3 proven live (auto-buy + reserve + persistence; AUTO panel rows + teasers; speed x2 with the ledger/offline honesty guard, saved rate 631 = 1262/2). Fix A (one-shot compensation) player-verified live. Remaining: Step 4 robot learns the rebirth loop (`small`) | medium |
-| B7 | **Monetisation pass** (see `Monetisation.md`) | ad placements (x2 gold, double offline, instant claim), gem sources (daily streak + milestones), gem sinks (permanent multiplier, automation unlock), `IIapService` + `MockIapService`, per-day caps + validator guard | every payout goes through the ledger rate; caps enforced; mock IAP swaps for a real store with one implementation | medium |
+| B6 | **16 - automation & QoL** | `DONE (2026-09-27)` - automation is earned content: `AutomationUnlock` cards bought with tokens (no freebies, no auto-ascend - the rebirth stays manual by owner decision). AutoBuy + FastForward cards shipped as data; `AutomationService` on the 1s tick with a player-set gold reserve; save v5 additive | Steps 1-3 proven live (auto-buy + reserve + persistence; AUTO panel rows + teasers; speed x2 with the ledger/offline honesty guard, saved rate 631 = 1262/2); Fix A (one-shot compensation) player-verified live; Step 4 (2026-09-27, see `Checklist.md` §1j): the robot learns the manual rebirth loop - auto-buy mid-climb, voluntary ascents at milestone stages + wall-forced ascents, and the validator now asserts the LIFETIME frontier | medium |
+| B7 | **Monetisation pass** (see `Monetisation.md`) | ad placements (x2 gold, double offline), gem sources (daily streak + milestones), gem sinks (permanent multiplier, automation unlock), `IIapService` + `MockIapService`, per-day caps + validator guard | every payout goes through the ledger rate; caps enforced; mock IAP swaps for a real store with one implementation | medium |
 | B8 | **Content + onboarding pass** | ~8-12 enemies, 5-6 heroes (data only) + 3 first-run tips | a new player knows what to do within 30s; content added with no code | medium |
 | B9 | **21-lite - release plumbing** | version stamp, crash log file, scripted `Unity -batchmode` build | one command produces a build with the correct version | small-med |
 | B1 | **Device pass (LAST)** | build to phone + checklist (fps, safe area, touch, offline popup, store page draft) | 60fps idle with 3v3 on device; nothing clipped; popup + claim work by touch | ½ day, owner-run |
@@ -263,9 +263,9 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
   STUCK on stage 25 (worst wall 42 min, 187 min total) - the exact historical failure mode, now caught by the build;
   a planted +20% archer attack trips the golden gate (`stage 1 seconds @x1.6: 112.85 vs 126, -10.4%`).
 
-### B5 - 14 generic progression tracks (schema v4)  `TODO`
-### B6 - 16 automation & QoL  `TODO`
-### B7 - monetisation pass  `TODO`   (design: `Monetisation.md`)
+### B5 - 14 generic progression tracks (schema v5)  `DONE (2026-09-25)`  (details: `Checklist.md` §1h)
+### B6 - 16 automation & QoL  `DONE (2026-09-27)`  (Steps 1-3 + Fix A 2026-09-25, Step 4 robot learns the rebirth loop 2026-09-27; details: `Checklist.md` §1i/§1j)
+### B7 - monetisation pass  `IN PROGRESS`  (S1 done 2026-09-27 - IAP seam + no-ads flag, see `Checklist.md` §1k; next S2 daily streak + milestone gems)
 ### B8 - content + onboarding pass  `TODO`
 ### B9 - 21-lite release plumbing  `TODO`
 ### B1 - device pass  `TODO`  (deliberately last, owner-run)
@@ -299,7 +299,7 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
 
 ## 3. Meta & difficulty
 
-### Step 14 — Generic progression tracks (schema v4 core)  `PROMOTED to base B5`
+### Step 14 — Generic progression tracks (schema v5 core)  `PROMOTED to base B5`
 - **Owner doc:** `Progression.md` §3-§4, §10; `Architecture.md` C2
 - **Goal:** ask #6 enabler: `ProgressionTrack`/`CostCurve`/keyed `statLevels` replace hardcoded per-stat maths (D7)
   and the `HeroStatType` save enum (C2).
@@ -437,22 +437,27 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
 
 ## 6. Status board
 
+> Base v1.0 board (§2): B3/B3b/B3c/B3d/B4/B5/B6 `DONE` · B7/B8/B9 `TODO` ·
+> B1 (device pass) `TODO` - owner-run, deliberately last.
+
 | Step | Title | Status | Notes |
 |---|---|---|---|
-| 7 | Sim core refactor + Balance Lab v1 | TODO | next to start |
-| 8 | Content pipeline tools + dev overlay | TODO | |
-| 9 | Economy audit: currencies, funnel, IdleTimeService | TODO | |
-| 10 | Formation | TODO | |
-| 11 | Multi-enemy encounters | TODO | |
-| 12 | Effect pipeline + statuses | TODO | |
-| 13 | Ability system | TODO | |
-| 14 | Generic progression tracks | TODO | |
-| 15 | Zones, difficulty, walls, affixes, guidance | TODO | |
-| 16 | Automation & QoL | TODO | |
-| 17 | Roster, stars, expeditions, return hub | TODO | |
-| 18 | Transcendence, relics, codex | TODO | |
-| 19 | Monetisation | TODO | |
-| 20 | Polish, l10n, perf, device | TODO | |
+| 7 | Sim core refactor + Balance Lab v1 | DONE | splits 7a/7b/7c |
+| 8 | Content pipeline tools + dev overlay | DONE | 8a/8b; 8c's run-all-checks folded into 1f/1g |
+| 9 | Economy audit: currencies, funnel, IdleTimeService | DONE | 9a + 9b-1..4 (ledger, sinks, audio hooks, full reset) |
+| 10 | Formation | DONE | 10a-10e (save v3, separate boards, even-spread targeting) |
+| 11 | Multi-enemy encounters | DONE | 11a-11e (1-3 waves, size recipe, battle-log fix) |
+| 12 | Effect pipeline + statuses | PARKED (v1.1) | blocked by 7, 11 |
+| 13 | Ability system | PARKED (v1.1) | blocked by 12 |
+| 14 | Generic progression tracks | DONE | promoted to base B5 (schema v5) |
+| 15 | Zones, difficulty, walls, affixes, guidance | SPLIT | base slice landed (milestone gems + bounce detection); zone/wall/affix depth = v1.1 |
+| 16 | Automation & QoL | DONE | promoted to base B6 (cards, AUTO panel, speed, robot rebirth loop) |
+| 17 | Roster, stars, expeditions, return hub | PARKED (v1.1) | blocked by 13, 14, 15 |
+| 18 | Transcendence, relics, codex | PARKED (v1.1) | blocked by 15, 17 |
+| 19 | Monetisation: ads, gems, shop, season skeleton | SPLIT | base slice = B7 (`TODO`); rest v1.1 |
+| 20 | Visual/audio/UX polish + l10n + a11y + perf | TODO | owns G4/G11/G12/G14; placeholder audio + icons shipped in 9b-3 |
+| 21 | CI, versioning & release readiness | SPLIT | 21-lite = base B9 (`TODO`): version stamp, crash log, scripted build |
+| 22 | Local notifications | PARKED (v1.1) | G2 |
 
 ## 7. Backlog (agreed direction, not scheduled)
 

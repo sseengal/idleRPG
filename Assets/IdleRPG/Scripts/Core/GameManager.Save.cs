@@ -268,11 +268,77 @@ namespace IdleRPG.Core
             return rawGold * prestige * boost;
         }
 
+        /// <summary>True when the player owns the "no ads" purchase (B7 S1): the watch-ad buttons must disappear.</summary>
+        public bool AdsDisabledByNoAds => Iap != null && Iap.IsOwned(IapCatalog.SkuNoAds);
+
+        /// <summary>
+        /// The single IAP funnel (B7 S1). The store confirms payment (<see cref="IIapService"/>), then this
+        /// grants the product's contents through the normal till (gems) and shop (offline cap) — never directly.
+        /// </summary>
+        public void PurchaseIap(string sku)
+        {
+            if (Iap == null || !Iap.IsInitialized)
+            {
+                GameEvents.RaiseToast("Store is not ready.");
+                return;
+            }
+
+            IapProduct product = IapCatalog.Find(sku);
+
+            if (product == null)
+            {
+                GameEvents.RaiseToast("Unknown product.");
+                return;
+            }
+
+            if (Iap.IsOwned(sku))
+            {
+                GameEvents.RaiseToast("Already owned.");
+                return;
+            }
+
+            Iap.Purchase(sku, success =>
+            {
+                if (!success)
+                {
+                    GameEvents.RaiseToast("Purchase failed - nothing charged.");
+                    return;
+                }
+
+                if (product.IsNoAds)
+                {
+                    LogFlow($"IAP bought: {product.DisplayName} (ads removed).");
+                    GameEvents.RaiseToast("Ads removed - thank you!");
+                    return;
+                }
+
+                if (product.GemsGranted > 0)
+                {
+                    Rewards?.GrantGems(product.GemsGranted, RewardService.Source.Milestone);
+                }
+
+                if (product.OfflineCapBonusMinutes > 0d)
+                {
+                    Shop?.TryGrantOfflineCapBonus(product.OfflineCapBonusMinutes);
+                }
+
+                Save?.MarkDirty("iap");
+                LogFlow($"IAP bought: {product.DisplayName} (+{product.GemsGranted:0} gems, +{product.OfflineCapBonusMinutes:0} min offline cap).");
+                GameEvents.RaiseToast($"{product.DisplayName} purchased!");
+            });
+        }
+
         /// <summary>Shows a rewarded ad, then grants the 2x gold boost on success (Shop panel).</summary>
         public void WatchAdForGoldBoost()
         {
             if (Ads == null || Boost == null)
             {
+                return;
+            }
+
+            if (AdsDisabledByNoAds)
+            {
+                GameEvents.RaiseToast("Ads removed - enjoy the quiet!");
                 return;
             }
 
