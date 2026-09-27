@@ -157,6 +157,37 @@ in `SimContext.Rules`.
    - no orphan assets (an SO with no spec entry is reported, never deleted silently)
 4. Validation output: per-item PASS/FAIL list in the console + a CSV under `Temp/content-report.csv`.
 
+## 8a. How to add a monster (the recipe)  ·  added 2026-09-27 with the monster-making kit (see `Checklist.md` §1q)
+
+Six steps, no code. The golden rule that keeps it honest: **adding a monster to a fight pool re-shuffles which
+monster appears at every stage** (the rotation wraps around the pool size), so new monsters are a *balance event*,
+and the measuring numbers must be re-recorded on purpose - step 6 is that ritual.
+
+1. **Copy a card** in `Content/Specs/enemies.json`. Give it a unique id carrying a **family word** so the drawing
+   tool picks a silhouette automatically:
+   `slime blob ooze swarm spider worm` → blob · `bat wing fly moth harpy wyvern` → wings ·
+   `goblin orc ogre brute troll rat wolf beast` → ears · `knight guard shield turtle golem armou armor tank` → shield ·
+   `mage wizard witch sorcer spirit elemental` → diamond · `archer ranger hunter gold rich coin mimic chest treasure` →
+   chevron. Every boss is always spikes. A card whose id has no family word still gets a picture (a blob) and the
+   check warns about it. Unless a re-balance is *intended*, keep the stats inside the shipped envelope:
+   HP 60-130 · ATK 6-20 · DEF 0-5 · gold 8-25 · interval 1.6-2.5s.
+2. **Add the card to a pool** in `waves.json` (`normalEnemyIds` for regular fights, `bossEnemyIds` for the boss wave).
+   A monster in no pool never appears - the check warns about exactly that.
+3. **Press `Tools > Idle RPG > Content > Generate Assets From Specs`** - this creates the monster's data asset and
+   draws its picture too. (`Tools > Idle RPG > Art > Generate Placeholder Sprites` draws pictures only.)
+4. **Press `Tools > Idle RPG > Content > Print Rotation Map`** - look at which stages the new monster appears in and
+   how many picks shifted. This is the surprise, removed *before* you commit.
+5. **Press `Tools > Idle RPG > Content > Validate Content`** - the checks shout at any mistake (missing picture, no
+   family word, no pool, bad interval or stats).
+6. **Re-record the golden numbers on purpose.** Run `Tools > Idle RPG > Run All Checks (regression)`. It will FAIL -
+   that is expected and correct, not a bug. Read the new stage-1 seconds/kills/gold/rate, confirm the stage-1 clear
+   time is still inside its 90-180s band and the robot climb still reaches its target with no stall, then update
+   `Editor/BalanceBaseline.cs` (the four numbers and the `Recorded` line with the date + reason) and re-run until
+   PASS. Never widen the ±2% tolerance. Growing a pool gets a dated entry exactly like the B3d/B4 re-baselines.
+
+Heroes use the same recipe with `heroes.json` + `party.json`; at MVP the party must not exceed the 3 formation
+slots, and the check warns if it does.
+
 ## 9. Hero-add checklist (must stay 100% data)
 
 1. Add a `HeroData` entry to `heroes.json` (id, name, icon key, role, tags, base stats, interval, rarity, unlock).

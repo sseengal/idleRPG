@@ -133,6 +133,7 @@ namespace IdleRPG.Core
 
             // B6: the automation engine (auto-buy etc.) runs on the same slow tick.
             context.Automation?.Tick(SlowTickIntervalSec);
+            context.FirstRunTips?.Tick();
         }
     }
 }

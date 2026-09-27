@@ -497,6 +497,12 @@ namespace IdleRPG.Save
             {
                 return trackId;
             }
+
+            /// <summary>"tipSeen.mask" - a 3-bit mask of which first-run hints have already been shown (B8').</summary>
+            public static string TipMask()
+            {
+                return "tipSeen.mask";
+            }
         }
 
         /// <summary>Debug-friendly summary.</summary>

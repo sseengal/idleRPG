@@ -129,6 +129,9 @@ namespace IdleRPG.Core
         /// <summary>Per-day ad police (B7 S3): caps + cooldowns per placement, local-midnight rollover.</summary>
         public Economy.AdCapsService AdCaps { get; private set; }
 
+        /// <summary>Three first-run hints, shown once each (B8').</summary>
+        public Core.FirstRunTips FirstRunTips { get; private set; }
+
         /// <summary>
         /// Debug/testing hook: replace the shared game clock's "today" (e.g. yesterday/tomorrow) without touching
         /// the device clock. Null = real local date. Used by the daily streak AND the ad caps.
@@ -244,6 +247,9 @@ namespace IdleRPG.Core
 
             // Every-morning gift: auto-claim silently when there is a streak to pay.
             TryClaimDailyStreak();
+
+            // Tip 1 of the first-run hints: "tap UPGRADE to hit harder" (once per install).
+            Context?.FirstRunTips?.OnSessionStart();
         }
 
         private void OnApplicationPause(bool paused)
@@ -366,6 +372,7 @@ namespace IdleRPG.Core
             // B7 S2/S3: the every-morning gift + the ad police. One injected clock (fake-able by the debug menu).
             DailyStreak = new Economy.DailyStreakService(balanceConfig, ResolveClockNow);
             AdCaps = new Economy.AdCapsService(balanceConfig, ResolveClockNow);
+            FirstRunTips = new Core.FirstRunTips(Economy, Tracks, () => Ascension != null && Ascension.CanAscend(RunBestStage));
 
             // Step 10a/10b: the board the party stands on. Created **before** the load so a saved layout can be
             // restored into it; with no saved layout the default placement (the MVP's fixed lanes) is used, so a
@@ -505,6 +512,7 @@ namespace IdleRPG.Core
                 Tracks = Tracks,
                 DailyStreak = DailyStreak,
                 AdCaps = AdCaps,
+                FirstRunTips = FirstRunTips,
                 Boost = Boost,
                 Ads = Ads,
                 Iap = Iap,

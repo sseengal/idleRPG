@@ -171,6 +171,7 @@ namespace IdleRPG.UI
                 view.enabled = true;
                 view.Configure(heroIndex);
                 view.Apply(hero);
+                view.SetHealthVisible(true);   // a filled seat shows its health bar (it is hidden while empty)
                 anchors[Mathf.Clamp(heroIndex, 0, anchors.Length - 1)] = slotRects[slot];
             }
 

@@ -87,6 +87,9 @@ namespace IdleRPG.UI
                 hpBar.SetFill(0f, instant: true);
                 hpBar.SetLabel(string.Empty);
             }
+
+            // An empty seat is a clean tile, not a dead hero: hide the health bar entirely (B8').
+            SetHealthVisible(false);
         }
 
         /// <summary>Applies the static data (icon, tint, name) once at setup.</summary>

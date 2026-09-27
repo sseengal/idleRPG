@@ -64,6 +64,9 @@ namespace IdleRPG.Core
         /// <summary>Per-day ad police (B7 S3).</summary>
         public AdCapsService AdCaps { get; set; }
 
+        /// <summary>Three first-run hints, spoken once each through the toast line (B8').</summary>
+        public FirstRunTips FirstRunTips { get; set; }
+
         /// <summary>True once the minimum set of systems is present.</summary>
         public bool IsReady => Balance != null && Waves != null && Party != null && Combat != null && Economy != null;
 

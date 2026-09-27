@@ -249,6 +249,10 @@ namespace IdleRPG.Core
             data.dailyStreakLastDate = DailyStreak?.LastClaimDate ?? "";
             data.dailyStreakCount = DailyStreak?.StreakCount ?? 0;
             AdCaps?.WriteToSave(data);
+            if (FirstRunTips != null)
+            {
+                data.SetLevel(SaveData.SaveKeys.TipMask(), FirstRunTips.Mask);
+            }
 
             return data;
         }
@@ -288,6 +292,7 @@ namespace IdleRPG.Core
             Shop?.Restore(data.offlineEquivalentCapBonusSeconds, data.offlineCapExtensionsPurchased);
             DailyStreak?.Restore(data.dailyStreakLastDate, data.dailyStreakCount);
             AdCaps?.Restore(data.adRedemptions);
+            FirstRunTips?.Restore(data.GetLevel(SaveData.SaveKeys.TipMask()));
 
             // Give the loaded values to combat (Initialize() would reset the stage to 1).
             combatManager.SetProgress(CurrentStage, RestoredWave, healParty: true);

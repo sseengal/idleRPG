@@ -963,7 +963,7 @@ submission; and a mismatched Data Safety / privacy manifest, which is worse than
 2. Play account type (personal vs organization) - decides whether the 14-day closed-test gate is on the critical path.
 3. Art/audio timing: already in flight, or starts after B10?
 
-## 1q. B8' — the monster-making kit  ·  **tools 1-3 built + verified 2026-09-27** (recipe + polish still to come)
+## 1q. B8' — the monster-making kit  ·  **tools 1-3 + recipe + hints + seats built + verified 2026-09-27** (only the owner's proof lap remains)
 
 **Why this step exists.** Adding one monster used to mean touching four things by hand, and two of them failed
 silently: a picture had to be added as a line of code, a monster that was missing from the fight rotation simply never
@@ -1051,12 +1051,32 @@ so the map and the game cannot disagree (it is the one place that maths lives).
 - Lead frequencies over stages 1-20 sum to 20 (Slime x7, Bat x7, Goblin x6).
 - The truth check reads the generated asset and reports "Generated asset matches the cards (same pools, same order)."
 
-### Still to come in B8'
-- **The recipe card** (`Docs/Content.md`): how to add a monster in 6 steps - add the card, the drawing tool makes the
-  picture, the checks shout at mistakes, the map shows the shuffle, regenerate, then re-record the golden numbers on
-  purpose (the honest ritual when a monster pool changes).
-- **Polish** - 3 first-run tips (reusing the existing message line, flags in the existing keyed save list) and empty
-  formation seats that look empty instead of showing a red health bar.
+### The 3 first-run hints (built + verified 2026-09-27)
+`FirstRunTips` speaks through the existing bottom-of-screen message line, three times to a brand-new player:
+(1) at session start - *"Tap UPGRADE to hit harder - then push on to the next stage."*; (2) the first moment an
+upgrade is clearly affordable - *"You can afford an upgrade - buy it and watch the fight speed up."*; (3) the first
+time ascension unlocks - *"Ascension is ready - ascend and keep a bonus for the next run."*
+- Each hint fires once; the shown-mask rides the **existing keyed save list** (`tipSeen.mask`, one int, no schema
+  change), written in `CaptureSnapshot`, restored in `ApplySnapshot`, driven from the 1-second tick.
+- Verified live in Play: welcome fired at session start (mask 0 -> 1); a forced rich tick fired both others with the
+  exact texts (mask 1 -> 7); a forced save wrote `tipSeen.mask = 7` to disk; **reloading restored mask 7 with no
+  repeats** (`AllShown = true`); a fresh save (mask 0) fires again - which is exactly what a full reset does.
+
+### Empty seats look empty (built + verified 2026-09-27)
+`HeroUnitView.ClearVisual` now hides the health bar completely (a clean tile, not a dead hero), and the filled path
+re-shows it. Verified live: 3 of the formation views were **already showing a red bar on empty slots** - after the
+fix the same seats go dark, and a filled seat shows its bar again. `Run All Checks` = PASS (UI-only change; the
+parity net agrees).
+
+### The recipe card (added 2026-09-27)
+`Docs/Content.md` §8a: how to add a monster in 6 steps - the family words and the safe stat envelope, the pool step,
+generate + validate, read the rotation map first, then the **golden-number re-record ritual** (the check FAILING is
+expected; re-baseline with a dated reason exactly like B3d/B4).
+
+### What is left of B8'
+Only the **proof lap**, and most of it is a play session the owner runs: a battle-log read-through with the bigger
+pool tooling in place, and the shop-beat play check (boss/milestone gems -> fast-forward + offline cap) that the F3
+readout was built to watch. No code remains.
 
 
 
@@ -1069,7 +1089,7 @@ Base gate: every step below names the loop beat or money path it serves. Anythin
 | **B5** | Generic progression tracks (schema v5) | money path: more tracks = more to buy = more gem/ad relevance | a new track = spec + generate, zero code; a v4 save migrates to identical numbers | medium |
 | **B6** | Automation & QoL (`AutomationUnlock` cards; **ascension stays manual forever** - owner decision) | retention: idling must pay off while away | `[x]` Step 4 done 2026-09-27 (see §1j): the robot learns the rebirth loop (auto-buy mid-climb + voluntary/wall ascents, lifetime frontier asserted by the validator); Steps 1-3 + Fix A landed 2026-09-25 (see §1i) | medium |
 | **B7** | Monetisation pass (`Monetisation.md`) | money path: ad placements + gem sinks + mock IAP | `[x]` 2026-09-27 (see §1k-§1o): every payout goes through the ledger rate, per-day caps enforced, mock IAP swaps for a real store with one implementation, and the build now refuses a sink that beats its own time-value | done |
-| **B8'** | **Monster-making kit + polish** (**no new monsters**) | first-run clarity + content that can scale later | the 3 tools (§1q): (1) the drawing tool gives every card a picture with no code, (2) two content checks - a card with no picture fails, a card that never appears in a fight warns, (3) a map showing which monster appears at every stage/wave and what shifts if a card is added. Plus 2 polish jobs: **3 first-run tips** and **empty formation seats that look empty**. Launch roster stays **3 heroes / 4 monsters**; real monsters are a post-launch update | small-med |
+| **B8'** | **Monster-making kit + polish** (**no new monsters**) | first-run clarity + content that can scale later | the 3 tools (§1q): (1) the drawing tool gives every card a picture with no code, (2) content checks that shout at a missing picture / a monster nobody ever meets / a stray family word, (3) a map showing who appears where and what shifts if a card is added. Plus the recipe (`Content.md` §8a), **3 first-run hints** (once each, saved, no schema change) and **empty formation seats that look empty**. Launch roster stays **3 heroes / 4 monsters**; real monsters are a post-launch update | `[~]` all built 2026-09-27; owner's proof lap (battle log + shop beat) remains | small-med |
 | **B9'** | Release plumbing (**both targets**) | ship it | version stamp, mobile targets + signing, portrait lock, app icon + launch screen (placeholders), crash log file, **checks-gated one-command build**, **Android back/gesture handling**, written save-compat policy | med |
 | **B10** | **Live store wiring** (new, §1p) | the real money path | real rewarded ads + Unity IAP behind the existing seams; **Restore Purchases UI**; minimal settings (Restore + privacy link + mute); iOS ATT + EEA consent; `PrivacyInfo.xcprivacy` + Play Data Safety; an ad that fails or is skipped must not consume a daily cap | **large** |
 | **B10b** | **Store packet** (new, §1p) | a build the stores accept | screenshots (iPhone 6.7" + Play phone + 1024x500 feature graphic), listing copy, age/content rating, Data Safety answers, product records matched to `IapCatalog`, sandbox end-to-end on both platforms | med-large |
@@ -1092,7 +1112,7 @@ shop beat verification (boss/milestone gems -> fast-forward + offline cap), and 
 | B5 | 14 - generic progression tracks (**schema v5**) | `[x]` 2026-09-25 (see §1h): TrackService = single purchase path; save v5 = one keyed `levels` list; `tracks.json` = the only upgrade spec; zero-code demo track (`Track_GoldHoarder`) added in data and proven live |
 | B6 | 16 - automation & QoL | `[x]` 2026-09-27 (see §1i + §1j) |
 | B7 | monetisation pass (design: `Monetisation.md`) | `[x]` 2026-09-27 (see §1k-§1o): S1 IAP seam + no-ads, S2 daily streak, S3 ad placements + caps, S4 gem sinks, S5 monetisation guard + F3 readout |
-| B8' | monster-making kit (picture tool, content checks, who-appears-where map) + recipe + 3 first-run tips + empty seats | `[~]` tools 1-3 done 2026-09-27 (see §1q) |
+| B8' | monster-making kit (picture tool, content checks, who-appears-where map) + recipe + 3 first-run hints + empty seats | `[~]` all built + verified 2026-09-27 (see §1q); only the owner's proof lap (battle-log + shop beat) remains |
 | B9' | release plumbing, both targets (version/names, portrait lock, back button, icon/splash, checks-gated build) | `[ ]` |
 | B10 | live store wiring (real ads + IAP, Restore, minimal settings, consent, manifests) | `[ ]` |
 | B10b | store packet (screenshots, listing, ratings, Data Safety, sandbox) | `[ ]` |
