@@ -207,6 +207,8 @@ namespace IdleRPG.EditorTools.Content
                 {
                     id = SoField.Text(upgrade, "upgradeID", upgrade.name),
                     asset = upgrade.name,
+                    costCurrency = ((IdleRPG.Economy.CurrencyType)SoField.Int(upgrade, "costCurrency",
+                        (int)IdleRPG.Economy.CurrencyType.PrestigeTokens)).ToString().ToLowerInvariant(),
                     effectType = ((PrestigeEffectType)SoField.Int(upgrade, "effectType")).ToString().ToLowerInvariant(),
                     displayName = SoField.Text(upgrade, "displayName", upgrade.name),
                     description = SoField.Text(upgrade, "description"),
@@ -433,6 +435,7 @@ namespace IdleRPG.EditorTools.Content
                     .Set("upgradeID", entry.id)
                     .Set("displayName", entry.displayName)
                     .Set("description", entry.description)
+                    .Set("costCurrency", (int)ParseCurrency(entry.costCurrency))
                     .Set("effectType", (int)ParseEffectType(entry.effectType))
                     .Set("baseCostTokens", entry.baseCostTokens)
                     .Set("costGrowth", entry.costGrowth)
@@ -520,6 +523,21 @@ namespace IdleRPG.EditorTools.Content
                     return PrestigeEffectType.HealthPercent;
                 default:
                     return PrestigeEffectType.GoldPercent;
+            }
+        }
+
+        /// <summary>Parses a spec cost currency; anything unknown (or "prestigetokens") is tokens (B7 S4).</summary>
+        private static IdleRPG.Economy.CurrencyType ParseCurrency(string value)
+        {
+            switch ((value ?? "").Trim().ToLowerInvariant())
+            {
+                case "gems":
+                case "gem":
+                    return IdleRPG.Economy.CurrencyType.Gems;
+                case "gold":
+                    return IdleRPG.Economy.CurrencyType.Gold;
+                default:
+                    return IdleRPG.Economy.CurrencyType.PrestigeTokens;
             }
         }
     }

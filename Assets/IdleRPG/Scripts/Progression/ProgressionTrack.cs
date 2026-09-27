@@ -206,7 +206,7 @@ namespace IdleRPG.Progression
             return new ProgressionTrack(
                 data.UpgradeID,
                 data.DisplayName,
-                CurrencyType.PrestigeTokens,
+                data.CostCurrency,
                 TrackScope.Global,
                 TrackEffectKind.GlobalPercent,
                 HeroStatType.Attack,

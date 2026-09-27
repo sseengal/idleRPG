@@ -19,6 +19,7 @@ namespace IdleRPG.Progression
         private readonly EconomyManager economy;
         private readonly StatResolver resolver;
         private readonly List<PrestigeUpgradeData> upgrades;
+        private readonly List<PrestigeUpgradeData> tokenUpgrades = new List<PrestigeUpgradeData>();
         private readonly TrackService trackService;
 
         public AscensionManager(BalanceConfig balanceConfig, EconomyManager economy, StatResolver resolver,
@@ -29,6 +30,15 @@ namespace IdleRPG.Progression
             this.resolver = resolver;
             this.trackService = trackService;
             upgrades = new List<PrestigeUpgradeData>(prestigeUpgrades ?? Array.Empty<PrestigeUpgradeData>());
+
+            // B7 S4: only token-priced upgrades belong on the ASCEND page; a gems track lives in the shop shelf.
+            for (int i = 0; i < upgrades.Count; i++)
+            {
+                if (upgrades[i] != null && upgrades[i].CostCurrency == CurrencyType.PrestigeTokens)
+                {
+                    tokenUpgrades.Add(upgrades[i]);
+                }
+            }
 
             if (this.balanceConfig == null || this.economy == null || this.resolver == null || this.trackService == null)
             {
@@ -57,6 +67,9 @@ namespace IdleRPG.Progression
 
         /// <summary>Every permanent upgrade asset, in authoring order (UI list order).</summary>
         public IReadOnlyList<PrestigeUpgradeData> Upgrades => upgrades;
+
+        /// <summary>The ASCEND page's rows: token-priced upgrades only (B7 S4 - gems tracks list in the shop).</summary>
+        public IReadOnlyList<PrestigeUpgradeData> TokenUpgrades => tokenUpgrades;
 
         /// <summary>
         /// Grants tokens, wipes gold and (optionally) hero levels. Returns false when the

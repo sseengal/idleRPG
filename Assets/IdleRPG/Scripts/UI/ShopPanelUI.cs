@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using IdleRPG.Core;
+using IdleRPG.Data;
+using IdleRPG.Economy;
+using IdleRPG.Progression;
 using IdleRPG.Services;
 using IdleRPG.Utils;
 
@@ -46,7 +49,10 @@ namespace IdleRPG.UI
         {
             OfflineCap = 0,
             InstantIncome = 1,
-            Iap = 2
+            Iap = 2,
+
+            /// <summary>A gems-priced permanent track (B7 S4) - built from data, not hardcoded.</summary>
+            GemTrack = 3
         }
 
         private sealed class ShopRow
@@ -58,8 +64,11 @@ namespace IdleRPG.UI
             public readonly TextMeshProUGUI Effect;
             public readonly TextMeshProUGUI Value;
 
+            /// <summary>Set for <see cref="RowKind.GemTrack"/> rows: which track this card buys.</summary>
+            public readonly ProgressionTrack Track;
+
             public ShopRow(RowKind kind, string sku, Button button, TextMeshProUGUI name,
-                TextMeshProUGUI effect, TextMeshProUGUI value)
+                TextMeshProUGUI effect, TextMeshProUGUI value, ProgressionTrack track = default)
             {
                 Kind = kind;
                 Sku = sku;
@@ -67,6 +76,7 @@ namespace IdleRPG.UI
                 Name = name;
                 Effect = effect;
                 Value = value;
+                Track = track;
             }
         }
 
@@ -171,10 +181,32 @@ namespace IdleRPG.UI
             rows.Add(CreateRow(RowKind.Iap, IapCatalog.SkuGemsMedium, "30 Gems", "most popular bundle", delegate { OnIapClicked(IapCatalog.SkuGemsMedium); }));
             rows.Add(CreateRow(RowKind.Iap, IapCatalog.SkuGemsLarge, "110 Gems", "best value bundle", delegate { OnIapClicked(IapCatalog.SkuGemsLarge); }));
             rows.Add(CreateRow(RowKind.Iap, IapCatalog.SkuStarterPack, "Starter Pack", "50 gems + 1h offline cap", delegate { OnIapClicked(IapCatalog.SkuStarterPack); }));
+
+            // B7 S4: every gems-priced permanent track is a shop row - a new sink is a JSON card, not code.
+            if (manager.Tracks != null)
+            {
+                IReadOnlyList<ProgressionTrack> tracks = manager.Tracks.Tracks;
+
+                for (int i = 0; i < tracks.Count; i++)
+                {
+                    ProgressionTrack track = tracks[i];
+
+                    if (track.Currency != CurrencyType.Gems || track.IsAutomation ||
+                        track.EffectKind != TrackEffectKind.GlobalPercent)
+                    {
+                        continue;
+                    }
+
+                    ProgressionTrack captured = track;
+                    rows.Add(CreateRow(RowKind.GemTrack, track.Id, track.DisplayName, DescribeGemTrack(track),
+                        delegate { OnGemTrackClicked(captured); }, captured));
+                }
+            }
         }
 
         /// <summary>One offer card, laid out exactly like a prestige upgrade row (name/effect/value/buy).</summary>
-        private ShopRow CreateRow(RowKind kind, string sku, string displayName, string description, UnityAction onClick)
+        private ShopRow CreateRow(RowKind kind, string sku, string displayName, string description, UnityAction onClick,
+            ProgressionTrack track = default)
         {
             RectTransform root = offerRoot != null ? offerRoot : (RectTransform)transform;
 
@@ -202,7 +234,46 @@ namespace IdleRPG.UI
                 new Vector2(0.56f, 0.58f), new Vector2(0.76f, 0.96f), 24f, TextAlignmentOptions.Center, TextColor);
 
             Button button = CreateActionButton(row.transform, onClick);
-            return new ShopRow(kind, sku, button, name, effect, value);
+            return new ShopRow(kind, sku, button, name, effect, value, track);
+        }
+
+        /// <summary>Human line for a gem track, e.g. "+5% Gold per level (max +50%)".</summary>
+        private static string DescribeGemTrack(ProgressionTrack track)
+        {
+            string effect = track.GlobalEffect.ToDisplayName();
+            string perLevel = string.Format("+{0:0.#}% {1} per level", track.GainPerLevel * 100f, effect);
+            bool capped = track.RawMaxLevel > 0;
+            return capped
+                ? string.Format("{0} (max +{1:0.#}%)", perLevel, track.GainPerLevel * 100f * track.RawMaxLevel)
+                : perLevel;
+        }
+
+        /// <summary>Buys one level of a gems-priced track through the one checkout.</summary>
+        private void OnGemTrackClicked(ProgressionTrack track)
+        {
+            if (manager?.Tracks == null)
+            {
+                return;
+            }
+
+            PurchaseResult result = manager.Tracks.TryBuy(track, null, 1, out double spent, out int newLevel);
+
+            if (result == PurchaseResult.Bought)
+            {
+                manager.Save?.MarkDirty("gem-sink");
+                GameEvents.RaiseToast(string.Format("{0} -> Lv {1} ({2:0} gems)", track.DisplayName, newLevel, spent));
+            }
+            else if (result == PurchaseResult.Maxed)
+            {
+                GameEvents.RaiseToast(string.Format("{0} is already maxed.", track.DisplayName));
+            }
+            else if (result == PurchaseResult.CannotAfford)
+            {
+                GameEvents.RaiseToast(string.Format("Not enough gems ({0:0} needed).",
+                    manager.Tracks.Cost(track, null, 1)));
+            }
+
+            Refresh();
         }
 
         private TextMeshProUGUI UiText(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax,
@@ -396,6 +467,20 @@ namespace IdleRPG.UI
                     row.Effect.SetText(manager.Shop != null ? manager.Shop.DescribeInstantIncomeOffer() : "");
                     row.Value.SetText(manager.Shop != null ? string.Format("{0:0} gems", manager.Shop.InstantIncomeGemCost) : "");
                     row.Button.interactable = manager.Shop != null && manager.Shop.CanAffordInstantIncome;
+                }
+                else if (row.Kind == RowKind.GemTrack)
+                {
+                    ProgressionTrack track = row.Track;
+                    int level = manager.Tracks != null ? manager.Tracks.GetLevel(track, null) : 0;
+                    bool maxed = manager.Tracks != null && manager.Tracks.IsMaxed(track, null);
+                    double cost = manager.Tracks != null ? manager.Tracks.Cost(track, null, 1) : 0d;
+
+                    row.Name.SetText(maxed
+                        ? string.Format("{0} (max)", track.DisplayName)
+                        : track.DisplayName);
+                    row.Value.SetText(string.Format("Lv {0}", level));
+                    SetButtonLabel(row.Button, maxed ? "MAX" : string.Format("{0:0} gems", cost));
+                    row.Button.interactable = !maxed && manager.Tracks != null && manager.Tracks.CanAfford(track, null, 1);
                 }
                 else
                 {

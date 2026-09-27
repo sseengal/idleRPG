@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: War Mastery
   description: +20% Damage per level.
   effectType: 1
+  costCurrency: 2
   baseCostTokens: 1
   costGrowth: 1.4
   maxLevel: 25

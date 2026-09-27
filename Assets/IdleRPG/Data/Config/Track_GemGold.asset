@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fdc72964ecc1048f3bed6cb00e7852f4, type: 3}
-  m_Name: Track_GoldHoarder
+  m_Name: Track_GemGold
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.PrestigeUpgradeData
-  upgradeID: Track_GoldHoarder
-  displayName: Gold Hoarder
-  description: +2% Gold per level.
+  upgradeID: Track_GemGold
+  displayName: Golden Foundry
+  description: +5% Gold per level, forever (capped at +50%). Bought with gems.
   effectType: 0
-  costCurrency: 2
-  baseCostTokens: 2
-  costGrowth: 1.5
-  maxLevel: 20
-  effectPerLevel: 0.02
+  costCurrency: 1
+  baseCostTokens: 25
+  costGrowth: 1.6
+  maxLevel: 10
+  effectPerLevel: 0.05

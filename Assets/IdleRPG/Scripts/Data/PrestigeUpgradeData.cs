@@ -1,4 +1,5 @@
 using UnityEngine;
+using IdleRPG.Economy;
 
 namespace IdleRPG.Data
 {
@@ -46,6 +47,9 @@ namespace IdleRPG.Data
         [SerializeField] private PrestigeEffectType effectType = PrestigeEffectType.GoldPercent;
 
         [Header("Cost Curve (Prestige Tokens)")]
+        [Tooltip("What the player pays with. Tokens = the ASCEND tree; Gems = the SHOP shelf (B7 S4).")]
+        [SerializeField] private CurrencyType costCurrency = CurrencyType.PrestigeTokens;
+
         [Tooltip("Token cost of level 0 -> 1.")]
         [SerializeField] private double baseCostTokens = 1d;
 
@@ -66,6 +70,9 @@ namespace IdleRPG.Data
         public string Description => description;
 
         public PrestigeEffectType EffectType => effectType;
+
+        /// <summary>What the player pays with (B7 S4): tokens = ASCEND tree, gems = SHOP shelf.</summary>
+        public CurrencyType CostCurrency => costCurrency;
 
         public double BaseCostTokens => baseCostTokens < 0d ? 0d : baseCostTokens;
 

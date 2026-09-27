@@ -244,11 +244,22 @@ namespace IdleRPG.EditorTools
             ScrollRect scroll = UiFactory.CreateScrollView(panel.transform, "PrestigeScroll", 8f, new RectOffset(4, 4, 4, 4), out RectTransform list);
             UiFactory.Anchor(scroll.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, 0.57f), 2f, 2f, 2f, 0f);
 
-            PrestigeUpgradeRowUI[] rows = new PrestigeUpgradeRowUI[prestigeUpgrades.Count];
+            PrestigeUpgradeRowUI[] rows = new PrestigeUpgradeRowUI[TokenRowCount(prestigeUpgrades)];
 
-            for (int i = 0; i < rows.Length; i++)
+            int rowIndex = 0;
+
+            for (int i = 0; i < prestigeUpgrades.Count; i++)
             {
-                rows[i] = CreatePrestigeRow(list, i, prestigeUpgrades[i]);
+                // B7 S4: gems-priced tracks are NOT ascend rows - they list on the shop shelf instead.
+                PrestigeUpgradeData data = prestigeUpgrades[i];
+
+                if (data == null || data.CostCurrency != IdleRPG.Economy.CurrencyType.PrestigeTokens)
+                {
+                    continue;
+                }
+
+                rows[rowIndex] = CreatePrestigeRow(list, rowIndex, data);
+                rowIndex++;
             }
 
             SceneWiringUtility.SetField(ui, "yieldLabel", yieldLabel);
@@ -257,6 +268,28 @@ namespace IdleRPG.EditorTools
             SceneWiringUtility.SetField(ui, "ascendButtonLabel", ascendButtonLabel);
             SceneWiringUtility.SetField(ui, "prestigeRows", rows);
             return panel;
+        }
+
+        /// <summary>How many ASCEND rows the panel needs: token-priced upgrades only (B7 S4).</summary>
+        private static int TokenRowCount(List<PrestigeUpgradeData> prestigeUpgrades)
+        {
+            int count = 0;
+
+            if (prestigeUpgrades == null)
+            {
+                return 0;
+            }
+
+            for (int i = 0; i < prestigeUpgrades.Count; i++)
+            {
+                if (prestigeUpgrades[i] != null &&
+                    prestigeUpgrades[i].CostCurrency == IdleRPG.Economy.CurrencyType.PrestigeTokens)
+                {
+                    count++;
+                }
+            }
+
+            return count;
         }
 
         private static PrestigeUpgradeRowUI CreatePrestigeRow(Transform parent, int index, PrestigeUpgradeData data)

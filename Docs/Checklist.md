@@ -12,12 +12,12 @@
 
 | Field | Value |
 |---|---|
-| Current step | **B7 S4 NEXT: gem sinks** (B7 S3 - ad placements + caps - **verified 2026-09-27**, §1m). Then S5 validator guard; then B8, B9, device pass last |
+| Current step | **B7 S5 NEXT: validator guard + overlay readout** (B7 S4 - gem sinks + currency seam - **verified 2026-09-27**, §1n). Then B8, B9, device pass last |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money.** No statuses/abilities/zones/affixes/gear/roster/relics before the base is done |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
-| Last completed | B7 S3 - ad placements + per-day caps (verified live; see §1m), 2026-09-27 |
-| Next after this | B7 S4: gem sinks (permanent +5% gold track, automation unlock via gems); then S5 validator guard + overlay readout; then B8 -> B9, device pass (B1) last |
+| Last completed | B7 S4 - gem sinks (currency seam + Golden Foundry track; verified live, see §1n), 2026-09-27 |
+| Next after this | B7 S5: validator guard (no sink beats its time-value; define the horizon for permanent multipliers) + a shop readout in the dev overlay; then B8 -> B9, device pass (B1) last |
 | Save schema | v5 (v3 -> v4 adds `runBestStage`; v4 -> v5 = one keyed `levels` list; additive migrations, no data loss - see §1h / B35-B36) |
 | Shipped build | `Builds/IdleRPG-mac.app` verified (boot, save, offline, combat) |
 | Docs | all live in `Docs/` - index `Docs/README.md`; status here; backlog `Roadmap.md`; removals `Docs/REVIEW.md` (R1: obsolete MVP journal deleted) |
@@ -842,6 +842,36 @@ payout through the one till. Plan `Monetisation.md` §6 item 3; owner-approved n
   Caps reset to a clean save afterwards.
 - **Env note:** the simulated ads are coroutine-driven, so they only elapse while the Editor is actually ticking -
   the same restriction as the other mocks (each live ad needed an editor focus nudge). Session detail, not a bug.
+
+## 1n. B7 S4 — gem sinks (the currency seam + Golden Foundry)  ·  **built + verified 2026-09-27**
+
+Plan `Monetisation.md` §6 item 4, tenured-team refined: **currency became data** (no duplicate rows), **one sink
+shipped**, automation-for-gems **deferred** (the flagged optional half - a duplicate card would break ownership).
+
+- **Currency is data now:** `PrestigeUpgradeData.costCurrency` (default `PrestigeTokens`) is read by
+  `ProgressionTrack.FromPrestige`; `TrackService` was already currency-agnostic, so the checkout needed no change.
+  The pipeline carries it: `tracks.json` `costCurrency`, export + generate (`ParseCurrency`, tolerant), and the
+  validator errors on an unknown currency **and on an uncapped gems-priced track** (uncapped premium multiplier =
+  unlimited power).
+- **New sink (data only):** `Track_GemGold` "Golden Foundry" - `goldpercent`, **+5%/level, cap 10 (+50%)**,
+  **25 gems** base x**1.6**/level. Faucet check: streak (<=25/day) + milestones (5/5 stages) => a full track ~= 4,540
+  gems, months of play - a long-tail sink by design.
+- **ASCEND stays token-only:** `AscensionManager.TokenUpgrades` + `AscensionPanelUI.BindRows` + `MvpSceneBuilder`
+  (row count/builder) all filter by currency, while the **resolver keeps every track** (the multiplier must apply).
+  Verified in the scene: GameManager carries **5** prestige entries (incl. `Track_GemGold`), AscensionPanel carries
+  **4** rows.
+- **The shop renders gems tracks from data:** `ShopPanelUI` gained `RowKind.GemTrack` - any non-automation track
+  whose currency is Gems becomes a card (name / effect / `Lv N` / cost button / MAX). **A new sink later = one JSON
+  card + `Generate Assets From Specs` + `Build MVP Scene`.**
+- **No save change:** levels ride the keyed v5 list (the B5 payoff) - the `Track_GemGold` key, no migration.
+- **Verified (2026-09-27):** `GemSinkSelfCheck` = **RESULT: PASS** (13 checks: pays with gems, no gold/tokens
+  touched, cost 25 then 40, +5% then +50% at cap, over-cap refused, reload keeps the level). *The check itself was
+  wrong at first - it saved/restored through `TrackService` only; the real path is `StatResolver.WriteToSave` /
+  `FillFromSave`. Fixed, then green - a good reminder that tracks-levels are the resolver's, not the checkout's.*
+  `Validate Content` = **clean (0 warnings)** with `3 stat + 5 prestige tracks checked`. Live on Main: shop shows
+  **8 rows**, `Golden Foundry | Lv 0 | 25 gems`; buying it paid **exactly 25 gems** (441 -> 416), moved the global
+  gold multiplier **1.000 -> 1.050**, and the row refreshed to `Lv 1 | 40 gems`; **tokens untouched (2)**.
+  `Run All Checks` = **PASS** (goldens untouched - level 0 = base, so the parity net holds).
 
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 

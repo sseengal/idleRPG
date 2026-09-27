@@ -78,7 +78,10 @@ point of doing B5 (tracks) before B7.
    `GoldBoost {5/day, 300s}` + `DoubleOffline {3/day, 30s}`, one `TryShowAdPlacement` gate, popup DOUBLE button,
    shop CTA counters; play pass pending the editor bridge)
 4. Permanent-multiplier + automation sinks (needs B5 and B6; owner-approved 2026-09-27: gems may unlock automation
-   as an accelerant - tokens stay the free path).
+   as an accelerant - tokens stay the free path).  **PART 1 BUILT 2026-09-27** (see `Checklist.md` §1n - currency is
+   data now (`costCurrency`), the **Golden Foundry** +5% gold track ships (25 gems, x1.6, cap 10 = +50%), the shop
+   renders gems tracks from data, and ASCEND stays token-only).  **Deferred:** the automation-for-gems accelerant
+   (a duplicate card would break ownership; it must be a checkout currency override - its own small step).
 5. Validator guard + a shop readout in the dev overlay.
 
 ## 7. Explicitly not in the base

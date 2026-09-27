@@ -167,7 +167,7 @@ namespace IdleRPG.UI
                 return;
             }
 
-            var upgrades = manager.Ascension.Upgrades;
+            var upgrades = manager.Ascension.TokenUpgrades;
 
             for (int i = 0; i < prestigeRows.Length; i++)
             {

@@ -118,6 +118,8 @@ namespace IdleRPG.EditorTools.Content
         public string id = "";
         /// <summary>Asset file name without extension (e.g. "Prestige_Gold").</summary>
         public string asset = "";
+        /// <summary>"tokens" (ASCEND tree) | "gems" (SHOP shelf). Missing = tokens (B7 S4).</summary>
+        public string costCurrency = "tokens";
         /// <summary>"gold" | "damage" | "health".</summary>
         public string effectType = "gold";
         public string displayName = "";

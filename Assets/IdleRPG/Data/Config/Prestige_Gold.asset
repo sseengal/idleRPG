@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Gold Mastery
   description: +20% Gold per level.
   effectType: 0
+  costCurrency: 2
   baseCostTokens: 1
   costGrowth: 1.4
   maxLevel: 25

@@ -385,6 +385,21 @@ namespace IdleRPG.EditorTools.Content
                 {
                     Add(Severity.Error, "upgrades", $"{upgrade.id}: effectPerLevel must be > 0.");
                 }
+
+                // B7 S4: costCurrency must be a known value, and a gems-priced track must be capped - an
+                // uncapped permanent multiplier is unlimited power for a premium currency.
+                string currency = (upgrade.costCurrency ?? "tokens").Trim().ToLowerInvariant();
+
+                if (currency != "tokens" && currency != "prestigetokens" && currency != "gems" && currency != "gold")
+                {
+                    Add(Severity.Error, "upgrades", $"{upgrade.id}: unknown costCurrency '{upgrade.costCurrency}' (use tokens|gems).");
+                }
+
+                if ((currency == "gems" || currency == "gold") && upgrade.maxLevel <= 0)
+                {
+                    Add(Severity.Error, "upgrades",
+                        $"{upgrade.id}: a {currency}-priced track must have a level cap (maxLevel > 0).");
+                }
             }
 
             Add(Severity.Info, "upgrades",
