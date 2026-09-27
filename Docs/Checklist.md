@@ -963,7 +963,7 @@ submission; and a mismatched Data Safety / privacy manifest, which is worse than
 2. Play account type (personal vs organization) - decides whether the 14-day closed-test gate is on the critical path.
 3. Art/audio timing: already in flight, or starts after B10?
 
-## 1q. B8' — the monster-making kit  ·  **tool 1 built + verified 2026-09-27** (tools 2-3 + polish still to come)
+## 1q. B8' — the monster-making kit  ·  **tools 1-2 built + verified 2026-09-27** (tool 3 + polish still to come)
 
 **Why this step exists.** Adding one monster used to mean touching four things by hand, and two of them failed
 silently: a picture had to be added as a line of code, a monster that was missing from the fight rotation simply never
@@ -1003,11 +1003,38 @@ chevron, anything else → blob, and every boss → spikes.
 - `Run All Checks (regression)` = **PASS**, golden numbers unchanged (gold/s 2.158 vs baseline 2.16, -0.1%) and
   `BalanceBaseline` still records the 2026-09-25 baseline - the tool changes no game maths.
 
+### Tool 2 — the content checks (a mistake now shouts instead of shipping)
+Same idea as a spell-checker: five rules, run by `Tools > Idle RPG > Content > Validate Content` (and inside
+`Run All Checks`). Every rule reads the cards exactly like the drawing tool reads them, so the check and the tool can
+never disagree.
+
+| # | Rule | Shouts as | Why it matters |
+|---|---|---|---|
+| 1 | a hero or monster card with **no picture file** | **error** | the fight would show an empty space |
+| 2 | the picture file exists but is **not imported as a sprite** | **error** | it looks fine in the folder and is invisible in the game |
+| 3 | a card whose id carries **no family word** | warning | its drawn picture falls back to a plain blob - the naming rule is visible instead of hidden in code |
+| 4 | a monster card that is **in no fight pool** | warning | it exists but the player would never meet it |
+| 5 | a hero card that is **not in the party** | warning | it exists but never fights |
+
+The family words now live in one place (`PlaceholderSpriteGenerator.FamilyOf`), used by both the drawing tool and the
+check - the reason rules 1 and 3 can never drift apart.
+
+### Tool 2 verified (2026-09-27) — five planted mistakes, all reverted
+| Planted | What the check said |
+|---|---|
+| a monster card `enemy_phantom` and a hero card `hero_rogue`, neither with a picture | **2 errors**: `no picture at Assets/IdleRPG/Art/Placeholder/enemy_phantom.png` (and the hero equivalent), each naming the fix |
+| pressed the drawing tool | **2 new card picture(s) drawn (9 card(s) checked)** - the tool filled both gaps |
+| re-ran the check | errors gone; **4 warnings**: `hero_rogue: this hero is not in the party, so it never fights` + `enemy_phantom: this monster is in no fight pool, so it will never appear in the game` + one "no family word" warning for each |
+| switched `enemy_phantom.png` to import as a plain texture instead of a sprite | **1 error**: `exists but is not imported as a sprite, so the fight will show an empty space` |
+| all plants reverted (cards, pictures) | **clean: 19 issues, 0 errors, 0 warnings**, `7 card picture(s) checked, 0 missing` |
+
+Shipped data was re-checked after every step; `Run All Checks (regression)` = **PASS**; console cleared and re-run to
+confirm **0 errors**; the 7 original pictures still byte-identical; no monsters were kept.
+
 ### Still to come in B8'
-- **Tool 2** - content checks: a card with no picture fails the content check; a card that is in no fight pool warns;
-  a card id with no family word warns.
-- **Tool 3** - the who-appears-where map, including "what shifts if you add a card" (the rotation wraps by pool size,
-  so adding one card re-shuffles every stage - the map makes that visible *before* anyone commits a card).
+- **Tool 3** - the who-appears-where map, including "what shifts if you add a card" (the fight rotation wraps by pool
+  size, so adding one card re-shuffles which monster appears at every stage - the map makes that visible *before*
+  anyone commits a card).
 - **Polish** - 3 first-run tips (reusing the existing message line, flags in the existing keyed save list) and empty
   formation seats that look empty instead of showing a red health bar.
 
@@ -1045,7 +1072,7 @@ shop beat verification (boss/milestone gems -> fast-forward + offline cap), and 
 | B5 | 14 - generic progression tracks (**schema v5**) | `[x]` 2026-09-25 (see §1h): TrackService = single purchase path; save v5 = one keyed `levels` list; `tracks.json` = the only upgrade spec; zero-code demo track (`Track_GoldHoarder`) added in data and proven live |
 | B6 | 16 - automation & QoL | `[x]` 2026-09-27 (see §1i + §1j) |
 | B7 | monetisation pass (design: `Monetisation.md`) | `[x]` 2026-09-27 (see §1k-§1o): S1 IAP seam + no-ads, S2 daily streak, S3 ad placements + caps, S4 gem sinks, S5 monetisation guard + F3 readout |
-| B8' | monster-making kit (picture tool, content checks, who-appears-where map) + 3 first-run tips + empty seats | `[~]` tool 1 done 2026-09-27 (see §1q) |
+| B8' | monster-making kit (picture tool, content checks, who-appears-where map) + 3 first-run tips + empty seats | `[~]` tools 1-2 done 2026-09-27 (see §1q) |
 | B9' | release plumbing, both targets (version/names, portrait lock, back button, icon/splash, checks-gated build) | `[ ]` |
 | B10 | live store wiring (real ads + IAP, Restore, minimal settings, consent, manifests) | `[ ]` |
 | B10b | store packet (screenshots, listing, ratings, Data Safety, sandbox) | `[ ]` |

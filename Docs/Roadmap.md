@@ -274,7 +274,7 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
 ### B5 - 14 generic progression tracks (schema v5)  `DONE (2026-09-25)`  (details: `Checklist.md` §1h)
 ### B6 - 16 automation & QoL  `DONE (2026-09-27)`  (Steps 1-3 + Fix A 2026-09-25, Step 4 robot learns the rebirth loop 2026-09-27; details: `Checklist.md` §1i/§1j)
 ### B7 - monetisation pass  `DONE (2026-09-27)`  (S1 IAP seam + no-ads, S2 daily streak, S3 ad placements + caps, S4 gem sinks, S5 monetisation guard + F3 shop readout - all 2026-09-27; see `Checklist.md` §1k-§1o)
-### B8' - monster-making kit + polish  `IN PROGRESS`  (tool 1 done 2026-09-27; tool 2, tool 3, first-run tips, empty seats remain - see `Checklist.md` §1q)
+### B8' - monster-making kit + polish  `IN PROGRESS`  (tools 1-2 done 2026-09-27; tool 3, first-run tips, empty seats remain - see `Checklist.md` §1q)
 ### B9' - release plumbing, both targets  `TODO`  (version/names, portrait lock, Android back, icon/splash placeholders, checks-gated build, save-compat policy)
 ### B10 - live store wiring  `TODO`  (real ads + IAP, Restore Purchases, minimal settings, consent/ATT, privacy manifests) - the largest remaining step
 ### B10b - store packet  `TODO`  (screenshots, listing, ratings, Data Safety, product records, sandbox)

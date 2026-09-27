@@ -249,44 +249,78 @@ namespace IdleRPG.EditorTools
         /// </summary>
         private static UnitShape ShapeForCard(string cardId, bool isBoss)
         {
+            switch (FamilyOf(cardId, isBoss))
+            {
+                case "spikes":
+                    return UnitShape.Spikes;
+
+                case "wings":
+                    return UnitShape.Wings;
+
+                case "ears":
+                    return UnitShape.Ears;
+
+                case "shield":
+                    return UnitShape.Shield;
+
+                case "diamond":
+                    return UnitShape.Diamond;
+
+                case "chevron":
+                    return UnitShape.Chevron;
+
+                default:
+                    return UnitShape.Blob;
+            }
+        }
+
+        /// <summary>
+        /// Family name for a card - "blob", "wings", "ears", "shield", "diamond", "chevron", "spikes", or "unknown"
+        /// when the id carries no family word. Every boss is "spikes".
+        ///
+        /// This is the single place the words are listed: the drawing tool turns the family into a shape, and the
+        /// content check warns when the family is "unknown", so the naming rule is visible instead of hidden here.
+        /// </summary>
+        public static string FamilyOf(string cardId, bool isBoss)
+        {
             if (isBoss)
             {
-                return UnitShape.Spikes;
+                return "spikes";
             }
 
             string id = (cardId ?? string.Empty).ToLowerInvariant();
 
             if (ContainsAny(id, "slime", "blob", "ooze", "swarm", "spider", "worm"))
             {
-                return UnitShape.Blob;
+                return "blob";
             }
 
             if (ContainsAny(id, "bat", "wing", "fly", "moth", "harpy", "wyvern"))
             {
-                return UnitShape.Wings;
+                return "wings";
             }
 
             if (ContainsAny(id, "goblin", "orc", "ogre", "brute", "troll", "rat", "wolf", "beast"))
             {
-                return UnitShape.Ears;
+                return "ears";
             }
 
             if (ContainsAny(id, "knight", "guard", "shield", "turtle", "golem", "armou", "armor", "tank"))
             {
-                return UnitShape.Shield;
+                return "shield";
             }
 
             if (ContainsAny(id, "mage", "wizard", "witch", "sorcer", "spirit", "elemental"))
             {
-                return UnitShape.Diamond;
+                return "diamond";
             }
 
             if (ContainsAny(id, "archer", "ranger", "hunter", "gold", "rich", "coin", "mimic", "chest", "treasure"))
             {
-                return UnitShape.Chevron;
+                return "chevron";
             }
 
-            return UnitShape.Blob;
+            return "unknown";
         }
 
         private static bool ContainsAny(string text, params string[] words)

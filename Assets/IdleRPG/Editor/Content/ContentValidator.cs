@@ -67,6 +67,7 @@ namespace IdleRPG.EditorTools.Content
             CheckUpgrades(upgrades);
             CheckAssetsAgainstSpecs(heroes, enemies);
             CheckAssetReferences(enemies, heroes);
+            CheckCardPictures(heroes, enemies);
             CheckFormation();
             CheckEncounters();
             CheckBalanceBand();
