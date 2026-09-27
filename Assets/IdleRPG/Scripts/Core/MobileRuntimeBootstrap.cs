@@ -33,6 +33,13 @@ namespace IdleRPG.Core
             QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = TargetFrameRate;
 
+            // Portrait only (B9'): the game is one-way-up on a phone. The Editor keeps its own game view.
+            Screen.orientation = ScreenOrientation.Portrait;
+            Screen.autorotateToPortrait = true;
+            Screen.autorotateToPortraitUpsideDown = false;
+            Screen.autorotateToLandscapeLeft = false;
+            Screen.autorotateToLandscapeRight = false;
+
             if (KeepScreenAwake)
             {
                 Screen.sleepTimeout = SleepTimeout.NeverSleep;

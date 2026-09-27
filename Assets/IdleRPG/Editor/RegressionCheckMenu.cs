@@ -23,6 +23,15 @@ namespace IdleRPG.EditorTools
         [MenuItem("Tools/Idle RPG/Run All Checks (regression)", priority = 50)]
         public static void RunAllChecks()
         {
+            RunAllChecksWithResult();
+        }
+
+        /// <summary>
+        /// Runs the whole net and returns true only when nothing failed. The release command (B9') calls this to
+        /// decide GO / NO-GO, so a broken state can never be stamped and shipped.
+        /// </summary>
+        public static bool RunAllChecksWithResult()
+        {
             bool ok = true;
 
             // 1) Save schema: round-trip drift, migrations from every older version, and the live file on disk.
@@ -53,6 +62,8 @@ namespace IdleRPG.EditorTools
             Debug.Log(ok
                 ? "[Regression] REGRESSION: PASS - save drift, content validation (incl. loop health) and the golden numbers are in line."
                 : "[Regression] REGRESSION: FAIL - see the errors above.");
+
+            return ok;
         }
 
         /// <summary>Runs the recorded baseline conditions and compares them with <see cref="BalanceBaseline"/>.</summary>

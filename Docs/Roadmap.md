@@ -276,7 +276,7 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
 ### B6 - 16 automation & QoL  `DONE (2026-09-27)`  (Steps 1-3 + Fix A 2026-09-25, Step 4 robot learns the rebirth loop 2026-09-27; details: `Checklist.md` §1i/§1j)
 ### B7 - monetisation pass  `DONE (2026-09-27)`  (S1 IAP seam + no-ads, S2 daily streak, S3 ad placements + caps, S4 gem sinks, S5 monetisation guard + F3 shop readout - all 2026-09-27; see `Checklist.md` §1k-§1o)
 ### B8' - monster-making kit + polish  `IN PROGRESS`  (tools 1-3 + recipe + hints + seats built and verified 2026-09-27; the owner's proof lap remains - see `Checklist.md` §1q)
-### B9' - the shipping checklist, both stores  `TODO`  (version/names, portrait lock, Android back, icon/splash, checks-gated build, save-compat policy)
+### B9' - the shipping checklist, both stores  `IN PROGRESS`  (part 1 built + verified 2026-09-27: go/no-go gate, version 1.0.0, portrait lock, crash diary, Android back; part 2 = owner installs + phone tests - see `Checklist.md` §1r)
 ### B10 - live store wiring  `TODO`  (AdMob marketplace + Unity Ads bidding, Unity IAP, Restore Purchases, minimal settings, consent/ATT, privacy manifests for both sellers) - the largest remaining step
 ### B10b - store packet  `TODO`  (screenshots, listing, ratings, Data Safety, product records, sandbox)
 ### B1a - device pass 1  `TODO`  (owner-run: logic/perf on real hardware)

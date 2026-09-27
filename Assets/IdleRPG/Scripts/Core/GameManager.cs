@@ -218,7 +218,11 @@ namespace IdleRPG.Core
             if (!isWired)
             {
                 enabled = false;
+                return;
             }
+
+            // Android back = save, then leave (B9'). No-op everywhere else.
+            AndroidBackButton.Create(this);
         }
 
         private void Start()

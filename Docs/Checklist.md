@@ -1088,6 +1088,52 @@ readout was built to watch. No code remains.
 
 
 
+## 1r. B9' — the shipping checklist  ·  **part 1 built + verified 2026-09-27** (part 2 = your test list below)
+
+The step that gets the finished game into the stores' hands. Split in two: **part 1** is everything that can be built
+and verified blind; **part 2** needs a real phone and the missing pieces only the owner can install/fill in.
+
+### Part 1 — built + verified 2026-09-27
+1. **The Go or No-Go button** - `Tools > Idle RPG > Release > Go or No-Go (checks + stamp)`. It runs EVERY check
+   (the whole regression net); a failure means **nothing** is stamped; success stamps the version and locks the phone
+   screens to portrait. Verified: a clean run printed `REGRESSION: PASS` then `GO ... version '1.0.0' stamped ...`,
+   and the stamp was read back (`bundleVersion 1.0.0`, orientation Portrait, landscape + upside-down off).
+2. **Version number** - one source: `ReleaseMenu.ReleaseVersion` (= "1.0.0"). The Go/No-Go command applies it.
+3. **Portrait-only at runtime** - `MobileRuntimeBootstrap` forces portrait on a real phone; the Editor is untouched.
+4. **Crash diary** - every error and exception is appended to `crash-log.txt` next to the save (capped at 512KB,
+   keeps the newest 64KB). Verified in Play mode: an injected error and an injected exception both appeared with
+   timestamps. The diary survives its own failures (writing can never crash the game).
+5. **Android back button** - on a real Android phone only: one press **saves the game, then leaves**. (No effect on
+   macOS/dev; verified by code review - a phone test is in the list below.)
+6. **Written save-compat policy** - the promise that saves never break: save format stays **v5**, additive keys only
+   (an old save must load and keep every number), any future format bump requires a migration + the save-drift test
+   in the same change, and the keyed strings in `SaveData.SaveKeys` are frozen once shipped (rename = throwing away
+   a player's progress). This is already the standing rule (see §0 / the drift suite) - it is now written down as
+   part of the release gate.
+
+### Part 2 — what only you can do (owner)
+- [ ] Install the **Android** and **iOS** build modules in **Unity Hub** on this machine (the Go/No-Go console prints
+      exactly which ones are missing until they are).
+- [ ] Install **Xcode** (iOS builds) and the **Android SDK** (Android builds).
+- [ ] Give the real **company name** and **app names** + the **bundle id** (Apple) / **package id** (Google). Today
+      it reads "DefaultCompany / Idle RPG"; whatever you pick becomes part of the save path, and no player has real
+      saves yet, so now is the cheap moment to change it.
+- [ ] App icon (1024) and launch screen - the final art pass owns the real ones; placeholders are enough to build.
+
+### Things to test later on a real phone (owner - the "we'll do it later" list, B9' part 2)
+1. **Portrait lock** - turn the phone while playing; the game stays one way up, nothing is clipped at the notch /
+   punch-hole.
+2. **Android back button** - one press saves and leaves the game; reopening shows the progress still there.
+3. **Version** - the app shows **1.0.0** (app drawer / home screen).
+4. **Crash diary** - in a debug build, crash the app; `crash-log.txt` exists next to the save with a readable,
+   time-stamped last line.
+5. **Icon + launch screen** - they look right on the Android app drawer and the iPhone home screen.
+6. **Go/No-Go green** - the command finishes with every check passing and names **no missing modules**.
+
+**The rule from here on:** a release build is allowed only when `Go or No-Go` is green first.
+
+## 1e. Remaining path to MVP  ·  **what is left, in order**
+
 Base gate: every step below names the loop beat or money path it serves. Anything that cannot is not in the base.
 
 | # | Step | Serves | Acceptance | Size |
@@ -1098,7 +1144,7 @@ Base gate: every step below names the loop beat or money path it serves. Anythin
 | **B6** | Automation & QoL (`AutomationUnlock` cards; **ascension stays manual forever** - owner decision) | retention: idling must pay off while away | `[x]` Step 4 done 2026-09-27 (see §1j): the robot learns the rebirth loop (auto-buy mid-climb + voluntary/wall ascents, lifetime frontier asserted by the validator); Steps 1-3 + Fix A landed 2026-09-25 (see §1i) | medium |
 | **B7** | Monetisation pass (`Monetisation.md`) | money path: ad placements + gem sinks + mock IAP | `[x]` 2026-09-27 (see §1k-§1o): every payout goes through the ledger rate, per-day caps enforced, mock IAP swaps for a real store with one implementation, and the build now refuses a sink that beats its own time-value | done |
 | **B8'** | **Monster-making kit + polish** (**no new monsters**) | first-run clarity + content that can scale later | the 3 tools (§1q): (1) the drawing tool gives every card a picture with no code, (2) content checks that shout at a missing picture / a monster nobody ever meets / a stray family word, (3) a map showing who appears where and what shifts if a card is added. Plus the recipe (`Content.md` §8a), **3 first-run hints** (once each, saved, no schema change) and **empty formation seats that look empty**. Launch roster stays **3 heroes / 4 monsters**; real monsters are a post-launch update | `[~]` all built 2026-09-27; owner's proof lap (battle log + shop beat) remains | small-med |
-| **B9'** | The **shipping checklist** (get the game into the stores' hands, both targets) | ship it | version stamp, real app + company names, building as a phone app for Apple and Android (with signing), portrait-only screen, app icon + launch screen, Android back button behaviour, crash diary file, written save-compat policy, and **one build command that only runs when every check passes** | med |
+| **B9'** | The **shipping checklist** (get the game into the stores' hands, both targets) | ship it | version stamp, real app + company names, building as a phone app for Apple and Android (with signing), portrait-only screen, app icon + launch screen, Android back button behaviour, crash diary file, written save-compat policy, and **one build command that only runs when every check passes** | `[~]` part 1 built + verified 2026-09-27 (see §1r); part 2 = owner phone tests + installs | med |
 | **B10** | **Live store wiring** (new, §1p) | the real money path | real rewarded ads (**AdMob marketplace + Unity Ads bidding, both live**) + Unity IAP behind the existing seams; **Restore Purchases UI**; minimal settings (Restore + privacy link + mute); iOS ATT + EEA consent (Google's message form covers both sellers); `PrivacyInfo.xcprivacy` + Play Data Safety for **both** sellers; an ad that fails or is skipped must not consume a daily cap; a no-fill from either seller never costs a player their reward | **large** |
 | **B10b** | **Store packet** (new, §1p) | a build the stores accept | screenshots (iPhone 6.7" + Play phone + 1024x500 feature graphic), listing copy, age/content rating, Data Safety answers, product records matched to `IapCatalog`, sandbox end-to-end on both platforms | med-large |
 | **B1a** | **Device pass 1 (owner-run)** | does the logic hold on hardware | 60fps idle with 3v3 on device; safe area clean; offline modal + CLAIM work by touch; back button behaves | ½ day |
@@ -1121,7 +1167,7 @@ shop beat verification (boss/milestone gems -> fast-forward + offline cap), and 
 | B6 | 16 - automation & QoL | `[x]` 2026-09-27 (see §1i + §1j) |
 | B7 | monetisation pass (design: `Monetisation.md`) | `[x]` 2026-09-27 (see §1k-§1o): S1 IAP seam + no-ads, S2 daily streak, S3 ad placements + caps, S4 gem sinks, S5 monetisation guard + F3 readout |
 | B8' | monster-making kit (picture tool, content checks, who-appears-where map) + recipe + 3 first-run hints + empty seats | `[~]` all built + verified 2026-09-27 (see §1q); only the owner's proof lap (battle-log + shop beat) remains |
-| B9' | the shipping checklist, both stores (version/names, portrait lock, back button, icon/splash, checks-gated build) | `[ ]` |
+| B9' | the shipping checklist, both stores (version/names, portrait lock, back button, icon/splash, checks-gated build) | `[~]` part 1 built 2026-09-27 (see §1r); part 2 = owner |
 | B10 | live store wiring (AdMob marketplace + Unity Ads bidding, Unity IAP, Restore, minimal settings, consent, both sellers' manifests) | `[ ]` |
 | B10b | store packet (screenshots, listing, ratings, Data Safety, sandbox) | `[ ]` |
 | B1a | device pass 1 (logic/perf, owner-run) | `[ ]` |

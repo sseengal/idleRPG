@@ -171,7 +171,7 @@ debug menus, the console log and the Unity MCP bridge. A manual pass takes ~5 mi
 | B6 | Automation cards: auto-buy + speed button (earned, sold for tokens) | done |
 | B7 | Monetisation (IAP seam + no-ads, daily streak, ad caps, gem sinks, validator guard) | done |
 | B8' | Monster-making kit (picture tool, content checks, who-appears-where map) + recipe + 3 first-run hints + empty seats — **no new monsters** | proof lap pending (owner play) |
-| B9' | The shipping checklist, both stores (version/names, portrait lock, back button, checks-gated build) | planned |
+| B9' | The shipping checklist, both stores (version/names, portrait lock, back button, checks-gated build) | part 1 done (go/no-go, portrait, crash diary, back button) — owner phone tests next |
 | B10 | Live store wiring (AdMob marketplace + Unity Ads bidding, Unity IAP, Restore Purchases, minimal settings, both sellers' consent + privacy manifests) | planned |
 | B10b | Store packet (screenshots, listing, ratings, Data Safety, sandbox) | planned |
 | B1a/B1b | Device passes (owner-run) — art + audio pass lands between them, then submission | planned |
