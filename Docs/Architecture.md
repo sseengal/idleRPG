@@ -409,6 +409,30 @@ Also removed as dead (each verified as having no caller):
 (`RegressionCheckMenu.RunAllChecks`) runs save drift + content validation + the golden-number report and prints one
 `REGRESSION: PASS/FAIL` line. Batch-mode: `-executeMethod IdleRPG.EditorTools.RegressionCheckMenu.RunAllChecks`.
 
+### 6.7 File layout after the 2026-09-28 refactor (2nd wave)
+
+The biggest files had grown again since B6/B7/B8'. Same method as before: `partial` classes, pure moves, no
+rewrites — verified by per-file multiset diff of the class bodies against `git show HEAD` (every original body line
+appears exactly once across the new files) and by the regression gate after every step.
+
+| Class / file | Files now | Holds | Before → after |
+|---|---|---|---|
+| `ContentValidator` | `.cs` (entry, plumbing, CSV, summary) · `Balance.cs` (formation, encounters, wave recipe, balance band, power band) · `Specs.cs` (heroes/enemies/party/waves/upgrades card checks) · `Assets.cs` (spec↔asset agreement, references, pools, upgrades) · `Loop.cs` (loop health) · `Monetisation.cs` (price-tag guard + time sinks) · `Pictures.cs` (card pictures) | one 1226-line `.Checks.cs` → 254 / 319 / 296 / 170 / 185 / 92 |
+| `GameManager` | `GameManager.cs` (fields, properties, lifecycle, state) · `Wiring.cs` (composition root: `WireUp`/`BuildContext`, editor hooks) · `Stages.cs` (run flow) · `Save.cs` (save API, offline, streak, fast-forward) · `Snapshot.cs` (capture/apply + the gold funnel) · `Monetization.cs` (rewarded-ad gate + IAP) | 566 / 445 / 307 → 371 / 219 / 307 / 214 / 130 / 149 |
+| `ClimbSimulation` | `.cs` (entry, `Run`, `Simulate`) · `Spend.cs` (rebirth trigger + buy policy) · `Metrics.cs` (median gaps, power/dps/HP projections, wall diagnosis) | 768 → 433 / ~90 / ~230 |
+| `ShopPanelUI` | `.cs` (fields, lifecycle, refresh, labels) · `Build.cs` (procedural row construction) · `Actions.cs` (purchase handlers) | 531 → 314 / ~142 / ~75 |
+| `ContentGenerator` | `.cs` (entries + export) · `Apply.cs` (specs → assets) · `Parse.cs` (string→enum parsers) | 549 → 253 / 217 / 79 |
+| `SaveRoundTripMenu` | `.cs` (run, drift, payload, diff) · `Migrations.cs` (every older-schema migration check) | 521 → 351 / 170 |
+| `BalanceConfig` | `.cs` (raw tuning fields) · `Queries.cs` (derived reads: clamps, aliases, lookups) | 436 → 336 / 113 |
+| `CombatLogUI` | `.cs` (scroll/follow, aggregation, names) · `Pool.cs` (label rent/return/trim) · `Events.cs` | 414 → 342 / 90 / 190 |
+| `GameEvents` | `.cs` (event declarations + `ResetAll`) · `Raise.cs` (internal Raise* helpers + `SafeInvoke` overloads) | 371 → 140 / 247 |
+| `SaveData` | `.cs` (payload + accessors + save keys) · `Records.cs` (the five per-entry record shapes) | 518 → 404 / 126 |
+| `StatResolver` | `.cs` (levels, derived stats) · `Save.cs` (save mapping in/out) | 364 → 274 / 106 |
+| `PlaceholderSpriteGenerator` | `.cs` (units/panels/icons/background/IO) · `Shapes.cs` · `CardUnits.cs` (the B8' card-picture drawer) | 498 → 315 / 377 / 197 |
+
+Verification per step: clean recompile → `Run All Checks (regression)` PASS → play-mode smoke on the runtime steps
+(GameManager, ShopPanelUI) → per-file multiset diff against `git show HEAD`.
+
 ### 6.5 Preserved from the MVP (do not regress)
 
 | Item | Reason |
