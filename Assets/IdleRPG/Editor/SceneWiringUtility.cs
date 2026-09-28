@@ -51,6 +51,47 @@ namespace IdleRPG.EditorTools
             LoadAsset<FormationData>(ConfigFolder + "/Formation_Default.asset");
 
         /// <summary>
+        /// Stage backdrops: loads the catalog asset, or creates and seeds it the first time a
+        /// scene is built, so "add a backdrop" stays data-only (import sprite + add to the catalog).
+        /// </summary>
+        public static BackdropCatalog LoadBackdropCatalog()
+        {
+            const string catalogPath = "Assets/IdleRPG/Data/BackdropCatalog.asset";
+            BackdropCatalog catalog = LoadAsset<BackdropCatalog>(catalogPath);
+
+            if (catalog != null)
+            {
+                return catalog;
+            }
+
+            catalog = ScriptableObject.CreateInstance<BackdropCatalog>();
+            AssetDatabase.CreateAsset(catalog, catalogPath);
+
+            string[] spritePaths =
+            {
+                "Assets/IdleRPG/Art/Backdrops/forest bg.png",
+                "Assets/IdleRPG/Art/Backdrops/Desert bg.png",
+                "Assets/IdleRPG/Art/Backdrops/seaside bg.png",
+                "Assets/IdleRPG/Art/Backdrops/dungeon bg.png"
+            };
+
+            SerializedObject so = new SerializedObject(catalog);
+            SerializedProperty entries = so.FindProperty("entries");
+            entries.arraySize = spritePaths.Length;
+
+            for (int i = 0; i < spritePaths.Length; i++)
+            {
+                entries.GetArrayElementAtIndex(i).objectReferenceValue =
+                    AssetDatabase.LoadAssetAtPath<Sprite>(spritePaths[i]);
+            }
+
+            so.ApplyModifiedPropertiesWithoutUndo();
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[SceneWiringUtility] Created {catalogPath} with {spritePaths.Length} backdrops.");
+            return catalog;
+        }
+
+        /// <summary>
         /// The gold-bought hero stat tracks, in spec order. Loading from the spec (not a hardcoded list) is what makes
         /// "a new track = one spec row + generate + scene rebuild" true: a new entry here is picked up automatically.
         /// </summary>

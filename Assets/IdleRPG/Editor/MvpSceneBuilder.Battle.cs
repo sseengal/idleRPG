@@ -129,10 +129,17 @@ namespace IdleRPG.EditorTools
 
             Image background = UiFactory.Icon("Background", viewport.transform, Color.white, false);
             background.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/IdleRPG/Art/Backdrops/forest bg.png");
+            background.preserveAspect = true; // backdrops are never stretched
 
             // Fills the whole viewport as a simple stretched backdrop. Stays strictly inside the viewport
             // band, so it never overlaps the combat log below it or the header above it.
             UiFactory.Stretch(background.rectTransform);
+
+            // Stage-aware backdrop: GameEvents.StageChanged swaps the sprite (stage -> catalog[(stage-1) % count])
+            // when the boss is killed or a defeat rolls the party back a stage.
+            BackdropPresenter backdropPresenter = background.gameObject.AddComponent<BackdropPresenter>();
+            SceneWiringUtility.SetField(backdropPresenter, "background", background);
+            SceneWiringUtility.SetField(backdropPresenter, "catalog", SceneWiringUtility.LoadBackdropCatalog());
 
             // The party board is drawn in code from FormationData: two vertical columns (front rank nearest the
             // enemy, back rank behind it), one view per slot. Display only - swapping lives on the Party screen.
