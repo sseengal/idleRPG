@@ -127,9 +127,12 @@ namespace IdleRPG.EditorTools
             GameObject viewport = UiFactory.Node("Viewport", pageRoot);
             UiFactory.Anchor(viewport.GetComponent<RectTransform>(), new Vector2(0f, BattleViewportBottom), Vector2.one, 14f, 6f, 14f, 6f);
 
+            // Clips the cover-fitted backdrop so its overflow never draws over the header or combat log.
+            viewport.AddComponent<RectMask2D>();
+
             Image background = UiFactory.Icon("Background", viewport.transform, Color.white, false);
             background.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/IdleRPG/Art/Backdrops/forest bg.png");
-            background.preserveAspect = true; // backdrops are never stretched
+            background.preserveAspect = false; // aspect handled by the presenter's cover-fit rect
 
             // Fills the whole viewport as a simple stretched backdrop. Stays strictly inside the viewport
             // band, so it never overlaps the combat log below it or the header above it.
