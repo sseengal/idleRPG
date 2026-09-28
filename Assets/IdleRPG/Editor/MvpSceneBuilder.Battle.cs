@@ -127,8 +127,11 @@ namespace IdleRPG.EditorTools
             GameObject viewport = UiFactory.Node("Viewport", pageRoot);
             UiFactory.Anchor(viewport.GetComponent<RectTransform>(), new Vector2(0f, BattleViewportBottom), Vector2.one, 14f, 6f, 14f, 6f);
 
-            Image background = UiFactory.Icon("Background", viewport.transform, new Color(1f, 1f, 1f, 0.9f), false);
-            background.sprite = UiFactory.LoadSprite("combat_bg");
+            Image background = UiFactory.Icon("Background", viewport.transform, Color.white, false);
+            background.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/IdleRPG/Art/Backdrops/forest bg.png");
+
+            // Fills the whole viewport as a simple stretched backdrop. Stays strictly inside the viewport
+            // band, so it never overlaps the combat log below it or the header above it.
             UiFactory.Stretch(background.rectTransform);
 
             // The party board is drawn in code from FormationData: two vertical columns (front rank nearest the
