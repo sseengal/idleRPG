@@ -1173,6 +1173,8 @@ enemies leaned left (lower slots +24x). Screenshot battle-page-v11.png.
 
 Battle-page cleanup round 4 (2026-09-30): heroes now genuinely lean right (front column raised -28y), enemy slots rebuilt to hero geometry (160x176, 188px pitch, 128px icon + bar) so the stacks group alike. Screenshot battle-page-v12.png.
 
+Battle-page cleanup round 5 (2026-09-30): heroes lean as one block (rows drift left going down - front slash), enemy group vertically centered to align with the heroes (world-space mid match). Screenshot battle-page-v13.png.
+
 Battle-log repair round (2026-09-30): WaveCompleted/BossFailed bridged back onto the bus (were orphaned since
 the director refactor), PartyWiped de-duplicated, new one-event news channel `GameEvents.CombatMessage` for
 wave/clear/wipe/boss/news lines (alwaysShow priority budget so feed punctuation can't starve), feed resets with

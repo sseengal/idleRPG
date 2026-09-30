@@ -20,18 +20,21 @@ namespace IdleRPG.UI
             return row == CombatRow.Back ? 0 : 1;
         }
 
-        /// <summary>Stagger pass: the two columns slant like a "/" - the front (right) column sits higher
-        /// and a touch further right than the back column.</summary>
-        private const float StaggerColumnY = 28f;
-        private const float StaggerColumnX = 10f;
+        /// <summary>
+        /// Collective lean pass: the WHOLE formation (both columns) leans right like a front slash / - rows
+        /// drift LEFT as they descend, so the top of the block points right. The block is nudged right so the
+        /// bottom-left slot never slides off the page. This is the mirror of the enemy stack's backslash
+        /// (which drifts right as it descends).
+        /// </summary>
+        private const float StaggerRowX = 24f;
+        private const float RowShearBaseX = 48f;
 
         /// <summary>Top-left anchored position of a slot, relative to the board's own top-left pivot.</summary>
         public static Vector2 PositionOf(int rank, int position, Vector2 slotSize, float columnGap, float rowGap)
         {
             int column = ColumnOfRank(rank == 1 ? CombatRow.Back : CombatRow.Front);
-            float x = column * (slotSize.x + columnGap) + column * StaggerColumnX;
-            // Top-anchored rects: POSITIVE anchored y is DOWN, so the front column is RAISED with a minus.
-            float y = -position * (slotSize.y + rowGap) - column * StaggerColumnY;
+            float x = column * (slotSize.x + columnGap) + RowShearBaseX - position * StaggerRowX;
+            float y = -position * (slotSize.y + rowGap);
             return new Vector2(x, y);
         }
 

@@ -77,6 +77,11 @@ namespace IdleRPG.UI
             // Fixed hero-like box per enemy; shrink only enough to fit the wave in the column.
             float slotHeight = count > 0 ? Mathf.Min(SlotHeight, (height - (count - 1) * SlotGap) / count) : SlotHeight;
 
+            // Vertically centre the packed group in the column so it lines up with the hero block instead
+            // of hugging the column's top edge.
+            float usedHeight = count * slotHeight + Mathf.Max(0, count - 1) * SlotGap;
+            float startY = Mathf.Max(0f, (height - usedHeight) * 0.5f);
+
             for (int i = 0; i < slots.Length; i++)
             {
                 EnemyUnitView slot = slots[i];
@@ -100,7 +105,9 @@ namespace IdleRPG.UI
                     rect.anchorMax = new Vector2(0.5f, 1f);
                     rect.pivot = new Vector2(0.5f, 1f);
                     rect.sizeDelta = new Vector2(SlotWidth, slotHeight);
-                    float y = -i * (slotHeight + SlotGap);
+                    // Top-anchored rects: local y is negative downward, so the centered start offset is
+                    // also negative (this keeps the whole group inside the column, centred on its middle).
+                    float y = -(startY + i * (slotHeight + SlotGap));
                     rect.anchoredPosition = new Vector2(ColumnStagger * i, y);
                 }
 
@@ -111,7 +118,7 @@ namespace IdleRPG.UI
 
                 if (anchors != null && i < anchors.Length && anchors[i] != null)
                 {
-                    anchors[i].anchoredPosition = new Vector2(ColumnStagger * i, -i * (slotHeight + SlotGap) - slotHeight * 0.5f);
+                    anchors[i].anchoredPosition = new Vector2(ColumnStagger * i, -(startY + i * (slotHeight + SlotGap) + slotHeight * 0.5f));
                 }
             }
         }
