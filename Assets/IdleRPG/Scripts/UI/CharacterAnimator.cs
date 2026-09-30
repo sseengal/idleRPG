@@ -25,6 +25,13 @@ namespace IdleRPG.UI
         private float timer;
         private int cursor;
 
+        /// <summary>Icon rect size as wired by the scene - actions scale *around* this reference.</summary>
+        private Vector2 baseSizeDelta;
+
+        /// <summary>Pixels-per-sprite-pixel so every action renders its body at the same size (the pack's
+        /// attack/death frames have much wider windows than idle; a fixed rect would shrink those poses).</summary>
+        private float pixelScale = 1f;
+
         /// <summary>Whose look is wanted: true = face left (enemies). Combined with the art's own facing.</summary>
         public bool FacingLeft { get; set; }
 
@@ -48,6 +55,24 @@ namespace IdleRPG.UI
             }
 
             art = artSet;
+
+            if (target == null)
+            {
+                target = GetComponent<Image>();
+            }
+
+            if (target != null)
+            {
+                baseSizeDelta = target.rectTransform.sizeDelta;
+                Sprite[] reference = art.Idle != null && art.Idle.Length > 0 ? art.Idle : art.GetAttack();
+                if (reference != null && reference.Length > 0)
+                {
+                    Rect r = reference[0].rect;
+                    pixelScale = Mathf.Max(baseSizeDelta.x, baseSizeDelta.y)
+                                 / Mathf.Max(1f, Mathf.Max(r.width, r.height));
+                }
+            }
+
             PlayIdle();
         }
 
@@ -61,6 +86,7 @@ namespace IdleRPG.UI
             if (target != null)
             {
                 target.sprite = null;
+                target.rectTransform.sizeDelta = baseSizeDelta;
             }
         }
 
@@ -153,6 +179,8 @@ namespace IdleRPG.UI
             timer = 0f;
             cursor = 0;
 
+            ApplyClipSize();
+
             onDone = null;
             if (done != null)
             {
@@ -164,6 +192,27 @@ namespace IdleRPG.UI
             }
 
             ApplyFrame();
+        }
+
+        /// <summary>
+        /// Sizes the icon rect to the current clip's window at a single per-character pixel scale, so every
+        /// pose (idle/attack/hurt/death) renders its body at the same size. Extreme swings are capped at 1.5x
+        /// the wired base so a wide attack never overflows its slot row.
+        /// </summary>
+        private void ApplyClipSize()
+        {
+            if (target == null || clip == null || clip.Length == 0 || pixelScale <= 0f)
+            {
+                return;
+            }
+
+            Rect r = clip[0].rect;
+            float baseMax = Mathf.Max(1f, Mathf.Max(baseSizeDelta.x, baseSizeDelta.y));
+            float cap = baseMax * 1.5f;
+            float natural = Mathf.Max(r.width, r.height) * pixelScale;
+            float mul = Mathf.Min(1f, cap / Mathf.Max(1f, natural));
+
+            target.rectTransform.sizeDelta = new Vector2(r.width * pixelScale * mul, r.height * pixelScale * mul);
         }
 
         private static float Second(int fps)

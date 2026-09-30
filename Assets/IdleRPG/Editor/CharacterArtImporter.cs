@@ -267,6 +267,10 @@ namespace IdleRPG.EditorTools
             art.Hurt = LoadFrames(character, "Hurt", dir);
             art.Death = LoadFrames(character, "Death", dir);
 
+            // This pack's art is drawn facing right (verified from the sheets); heroes keep that orientation
+            // and enemies get mirrored, so both end up facing the opponent.
+            art.ArtFacesLeft = false;
+
             EditorUtility.SetDirty(art);
         }
 

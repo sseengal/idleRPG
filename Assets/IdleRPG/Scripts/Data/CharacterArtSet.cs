@@ -29,7 +29,7 @@ namespace IdleRPG.Data
 
         [Header("Facing")]
         [Tooltip("Which direction the art was drawn facing. The views combine this with the hero/enemy rule:\nheroes face right, enemies face left - so this flag decides whether a sprite needs a mirror flip.")]
-        public bool ArtFacesLeft = true;
+        public bool ArtFacesLeft = false;
 
         /// <summary>Static first frame for thumbnails and non-animated fallback.</summary>
         public Sprite Poster => Idle != null && Idle.Length > 0 ? Idle[0] : null;
