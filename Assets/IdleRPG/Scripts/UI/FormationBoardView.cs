@@ -97,7 +97,8 @@ namespace IdleRPG.UI
             UiRuntime.Stretch(background.rectTransform);
 
             Image icon = UiRuntime.CreateIcon("Icon", slot.transform);
-            UiRuntime.CenterOn(icon.rectTransform, new Vector2(0.5f, 0.62f), new Vector2(slotSize.x * 0.62f, slotSize.x * 0.62f));
+            // TinyRPG pass: the pack tiles are ~20% body so keep icons big (0.8x slot) or the characters read tiny.
+            UiRuntime.CenterOn(icon.rectTransform, new Vector2(0.5f, 0.60f), new Vector2(slotSize.x * 0.80f, slotSize.x * 0.80f));
 
             TextMeshProUGUI nameLabel = UiRuntime.CreateText(slot.transform, "Name", string.Empty, 20f,
                 TextAlignmentOptions.Center, UiTheme.Text);

@@ -1165,7 +1165,7 @@ window screenshot.
 TinyRPG characters (2026-09-30): Soldier for all heroes, Orc for the boss, Demon/Blood Monster rotating
 on the goblin slot by stage; all steps point-filtered + grid-sliced by `Import TinyRPG Characters`;
 `CharacterAnimator` drives idle/attack/hurt/death on the icon Images (enemies face left, baked shadows);
-placeholder slime/bat/goblin untouched. Screenshot `battle-page-v9-tinyrpg.png`.
+placeholder slime/bat/goblin untouched. Screenshot `battle-page-v9-tinyrpg.png`. Fix pass same day: pack tiles were ~20% body so sprites rendered tiny - importer now crops strips to the action's union opaque window and hero icons grew 0.62x -> 0.8x of the slot (heroes ~128px, enemies 170-200px live).
 
 Battle-log repair round (2026-09-30): WaveCompleted/BossFailed bridged back onto the bus (were orphaned since
 the director refactor), PartyWiped de-duplicated, new one-event news channel `GameEvents.CombatMessage` for

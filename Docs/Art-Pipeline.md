@@ -568,6 +568,7 @@ stage-1 = Demon). Slime/Bat/Goblin placeholders are untouched.
   by stage parity; stale-animator clearance on placeholder waves; enemies face left. Screenshot
   `Assets/Screenshots/battle-page-v9-tinyrpg.png`.
 - **Licence**: TESTING ONLY until the pack's terms are confirmed (no licence text shipped) - see PROVENANCE.
+- **Immediate issue (same hour): characters rendered extremely tiny.** The 100x100 pack tiles only carry ~20% body pixels, so full-tile sprites in the fixed slot rects drew as small dark blobs. Fixed by cropping every strip to the union of its opaque bounds (shared window per action -> animation stays stable) inside the importer, so the character fills its tile; hero board icons raised from 0.62x to 0.8x of the slot. Result live: heroes ~128px, enemies ~170-200px (boss).
 
 ### Verification notes (2026-09-30)
 

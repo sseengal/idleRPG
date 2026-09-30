@@ -105,6 +105,12 @@ namespace IdleRPG.EditorTools
             int fileWidth = ReadPngWidth(path);
             int cols = fileWidth > 0 ? fileWidth / Tile : 1;
 
+            // The 100x100 pack tiles carry a lot of empty margin (character body is only ~20% of the tile),
+            // so sliced sprites render tiny in the unit slots. Crop every strip to the union of the opaque
+            // bounds over ALL frames of that action - one shared window per action keeps the animation stable
+            // and makes the character fill the slot like the tight placeholder sprites did.
+            Rect crop = ComputeCropWindow(path, cols);
+
             var metas = new List<SpriteMetaData>();
             string baseName = Path.GetFileNameWithoutExtension(path);
 
@@ -128,9 +134,94 @@ namespace IdleRPG.EditorTools
             importer.spritePixelsPerUnit = Tile;
             importer.alphaIsTransparency = true;
             importer.wrapMode = TextureWrapMode.Clamp;
+
+            // Slice rects use the shared crop window; a tiny 2px pad keeps the AA edge alive.
+            for (int i = 0; i < metas.Count; i++)
+            {
+                UnityEditor.SpriteMetaData md = metas[i];
+                md.rect = new Rect(i * Tile + crop.x, crop.y, Mathf.Max(4f, crop.width), Mathf.Max(4f, crop.height));
+                metas[i] = md;
+            }
+
             importer.spritesheet = metas.ToArray();
 
             (importer as AssetImporter).SaveAndReimport();
+        }
+
+        /// <summary>
+        /// Union of nontransparent pixels across the whole strip (x range then y range), clamped to the tile.
+        /// Shadows are semi-transparent so the alpha bar is deliberately low (>= 12) to include them.
+        /// </summary>
+        private static Rect ComputeCropWindow(string assetPath, int cols)
+        {
+            var importer = AssetImporter.GetAtPath(assetPath) as TextureImporter;
+            bool wasReadable = importer != null && importer.isReadable;
+
+            if (importer == null || !importer.isReadable)
+            {
+                if (importer != null)
+                {
+                    importer.isReadable = true;
+                    (importer as AssetImporter).SaveAndReimport();
+                }
+                else
+                {
+                    AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceSynchronousImport);
+                    importer = AssetImporter.GetAtPath(assetPath) as TextureImporter;
+                    if (importer != null)
+                    {
+                        importer.isReadable = true;
+                        (importer as AssetImporter).SaveAndReimport();
+                    }
+                }
+            }
+
+            Texture2D tex = AssetDatabase.LoadAssetAtPath<Texture2D>(assetPath);
+            Rect window = new Rect(0f, 0f, Tile, Tile);
+
+            if (tex != null && tex.isReadable)
+            {
+                Color[] px = tex.GetPixels();
+                int w = tex.width;
+                int x0 = Tile, y0 = Tile, x1 = -1, y1 = -1;
+
+                for (int y = 0; y < Tile && y < tex.height; y++)
+                {
+                    for (int x = 0; x < w; x++)
+                    {
+                        if (px[y * w + x].a < 12f / 255f)
+                        {
+                            continue;
+                        }
+
+                        int col = x % Tile;
+                        if (col < x0) x0 = col;
+                        if (col > x1) x1 = col;
+                        if (y < y0) y0 = y;
+                        if (y > y1) y1 = y;
+                    }
+                }
+
+                if (x1 >= x0 && y1 >= y0)
+                {
+                    int pad = 2;
+                    int cx = Mathf.Max(0, x0 - pad);
+                    int cy = Mathf.Max(0, y0 - pad);
+                    int cw = Mathf.Min(Tile, x1 - x0 + 1 + pad * 2);
+                    int ch = Mathf.Min(Tile, y1 - y0 + 1 + pad * 2);
+                    window = new Rect(cx, cy, cw, ch);
+                }
+
+                UnityEngine.Object.DestroyImmediate(tex);
+            }
+
+            if (!wasReadable && importer != null)
+            {
+                importer.isReadable = false;
+                (importer as AssetImporter).SaveAndReimport();
+            }
+
+            return window;
         }
 
         private static void PointImport(string path)
