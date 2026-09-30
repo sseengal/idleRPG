@@ -21,6 +21,9 @@ namespace IdleRPG.UI
         /// <summary>Hard ceiling on stacked slots (matches BalanceConfig.HardEnemyCap / SimCaps).</summary>
         public const int MaxSlots = 3;
 
+        /// <summary>Stagger pass: each lower slot drifts right, so the stack leans like a backslash.</summary>
+        private const float ColumnStagger = 24f;
+
         [SerializeField] private RectTransform container;
         [SerializeField] private EnemyUnitView[] slots;
         [SerializeField] private RectTransform[] anchors;
@@ -89,7 +92,7 @@ namespace IdleRPG.UI
                     rect.anchorMax = new Vector2(1f, 1f);
                     rect.pivot = new Vector2(0.5f, 1f);
                     rect.sizeDelta = new Vector2(0f, slotHeight);
-                    rect.anchoredPosition = new Vector2(0f, -slotHeight * i);
+                    rect.anchoredPosition = new Vector2(ColumnStagger * i, -slotHeight * i);
                 }
 
                 EnemyCombatant enemy = enemies[i];
@@ -99,7 +102,7 @@ namespace IdleRPG.UI
 
                 if (anchors != null && i < anchors.Length && anchors[i] != null)
                 {
-                    anchors[i].anchoredPosition = new Vector2(0f, -slotHeight * i - slotHeight * 0.5f);
+                    anchors[i].anchoredPosition = new Vector2(ColumnStagger * i, -slotHeight * i - slotHeight * 0.5f);
                 }
             }
         }

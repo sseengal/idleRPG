@@ -22,7 +22,6 @@ namespace IdleRPG.UI
         [Header("Feedback")]
         [SerializeField] private Color hitFlashColor = new Color(1f, 0.45f, 0.45f, 1f);
         [SerializeField] private float hitFlashDurationSec = 0.12f;
-        [SerializeField] private float deadAlpha = 0.35f;
 
         private Color baseColor = Color.white;
         private float flashTimer;
@@ -191,11 +190,8 @@ namespace IdleRPG.UI
                 return;
             }
 
-            if (canvasGroup != null)
-            {
-                canvasGroup.alpha = deadAlpha;
-            }
-
+            // No fade after death: the death animation is the whole visual. The hero stays fully opaque
+            // on the death pose until the wave revives them (RefreshFromSimulator flips back to Idle).
             if (animator != null && animator.HasArt)
             {
                 animator.PlayDeath();
@@ -250,7 +246,7 @@ namespace IdleRPG.UI
 
             if (canvasGroup != null)
             {
-                canvasGroup.alpha = hero.IsAlive ? 1f : deadAlpha;
+                canvasGroup.alpha = 1f;
             }
 
             if (hpBar != null)
@@ -262,11 +258,7 @@ namespace IdleRPG.UI
 
         private void SetDeadVisual()
         {
-            if (canvasGroup != null)
-            {
-                canvasGroup.alpha = deadAlpha;
-            }
-
+            // Fully opaque - the death pose (or an absent hero) is never faded out on purpose.
             if (hpBar != null)
             {
                 hpBar.SetFill(0f, instant: true);

@@ -30,11 +30,9 @@ namespace IdleRPG.UI
         [Header("Feedback")]
         [SerializeField] private float spawnPopScale = 0.65f;
         [SerializeField] private float spawnPopDurationSec = 0.18f;
-        [SerializeField] private float deathFadeDurationSec = 0.20f;
 
         private int enemyIndex;
         private float popTimer;
-        private float deathTimer = -1f;
 
         private CharacterAnimator animator;
 
@@ -163,7 +161,6 @@ namespace IdleRPG.UI
             }
 
             popTimer = spawnPopDurationSec;
-            deathTimer = -1f;
         }
 
         private void OnEnemyDamaged(EnemyDamagedInfo info)
@@ -199,14 +196,22 @@ namespace IdleRPG.UI
                 return;
             }
 
+            // No fade after death: the death clip plays, then the sprite snaps off.
             if (animator != null && animator.HasArt)
             {
-                // Play the death clip first; the alpha fade runs when it finishes.
-                animator.PlayDeath(() => deathTimer = deathFadeDurationSec);
+                animator.PlayDeath(HideSprite);
             }
             else
             {
-                deathTimer = deathFadeDurationSec;
+                HideSprite();
+            }
+        }
+
+        private void HideSprite()
+        {
+            if (spriteImage != null)
+            {
+                spriteImage.enabled = false;
             }
         }
 
@@ -223,26 +228,6 @@ namespace IdleRPG.UI
                 float t = 1f - Mathf.Clamp01(popTimer / Mathf.Max(0.0001f, spawnPopDurationSec));
                 float scale = Mathf.Lerp(spawnPopScale, 1f, t);
                 root.localScale = new Vector3(scale, scale, 1f);
-                return;
-            }
-
-            if (deathTimer > 0f)
-            {
-                deathTimer -= Time.deltaTime;
-                float t = Mathf.Clamp01(deathTimer / Mathf.Max(0.0001f, deathFadeDurationSec));
-
-                if (spriteImage != null)
-                {
-                    Color color = spriteImage.color;
-                    color.a = t;
-                    spriteImage.color = color;
-                }
-
-                if (deathTimer <= 0f && spriteImage != null)
-                {
-                    spriteImage.enabled = false;
-                }
-
                 return;
             }
 

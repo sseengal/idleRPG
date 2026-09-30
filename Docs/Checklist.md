@@ -1167,6 +1167,10 @@ on the goblin slot by stage; all steps point-filtered + grid-sliced by `Import T
 `CharacterAnimator` drives idle/attack/hurt/death on the icon Images (enemies face left, baked shadows);
 placeholder slime/bat/goblin untouched. Screenshot `battle-page-v9-tinyrpg.png`. Fix pass same day: pack tiles were ~20% body so sprites rendered tiny - importer now crops strips to the action's union opaque window and hero icons grew 0.62x -> 0.8x of the slot (heroes ~128px, enemies 170-200px live).
 
+Battle-page cleanup round 3 (2026-09-30): no fade after death (death clip then instant hide; heroes stay
+opaque), enemy HP bars = hero style/width (~128px centred), heroes leaned right (front column +28y),
+enemies leaned left (lower slots +24x). Screenshot battle-page-v11.png.
+
 Battle-log repair round (2026-09-30): WaveCompleted/BossFailed bridged back onto the bus (were orphaned since
 the director refactor), PartyWiped de-duplicated, new one-event news channel `GameEvents.CombatMessage` for
 wave/clear/wipe/boss/news lines (alwaysShow priority budget so feed punctuation can't starve), feed resets with

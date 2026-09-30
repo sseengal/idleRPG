@@ -81,16 +81,15 @@ namespace IdleRPG.EditorTools
             GameObject barObject = UiFactory.Node(name, parent);
             HpBarView view = barObject.AddComponent<HpBarView>();
 
-            Image background = UiFactory.Icon("Background", barObject.transform, new Color(0f, 0f, 0f, 0.65f), false);
-            UiFactory.Stretch(background.rectTransform);
+            Image background = UiFactory.Icon("Background", barObject.transform, new Color(0f, 0f, 0f, 0.5f), false);
             UiFactory.Stretch(background.rectTransform);
 
-            Image ghost = CreateFilledImage("Ghost", background.transform, Color.white);
+            Image ghost = CreateFilledImage("Ghost", background.transform, new Color(1f, 0.85f, 0.35f, 0.5f));
             Image fill = CreateFilledImage("Fill", background.transform, new Color(0.35f, 0.85f, 0.45f, 1f));
 
-            TextMeshProUGUI value = UiFactory.Text("Value", barObject.transform, "0 / 0", 22f,
+            TextMeshProUGUI value = UiFactory.Text("Value", barObject.transform, "0 / 0", 20f,
                 TextAlignmentOptions.Center, UiTheme.Text);
-            UiTheme.ApplyFont(value, UiTheme.Display, 22f);
+            UiTheme.ApplyFont(value, UiTheme.Display, 20f);
             UiFactory.Stretch(value.rectTransform, 6f, 0f, 6f, 0f);
 
             SceneWiringUtility.SetField(view, "fillImage", fill);
@@ -257,7 +256,12 @@ namespace IdleRPG.EditorTools
             UiFactory.Anchor(nameLabel.rectTransform, new Vector2(0f, 0.14f), new Vector2(1f, 0.32f));
 
             HpBarView hpBar = CreateHpBar(slot.transform, "HpBar");
-            UiFactory.Anchor(hpBar.GetComponent<RectTransform>(), new Vector2(0.10f, 0.02f), new Vector2(0.90f, 0.12f));
+            RectTransform hpRect = hpBar.GetComponent<RectTransform>();
+            // Same width logic as the heroes (0.80 of their 160px slot): a fixed ~128px bar centred under the
+            // enemy, instead of stretching across the whole wide enemy column.
+            UiFactory.Anchor(hpRect, new Vector2(0.5f, 0.02f), new Vector2(0.5f, 0.12f));
+            hpRect.pivot = new Vector2(0.5f, 0.5f);
+            hpRect.sizeDelta = new Vector2(128f, 0f);
 
             EnemyUnitView view = slot.AddComponent<EnemyUnitView>();
             view.ConfigureRuntime(index, icon, hpBar, nameLabel, slotRect, null);
