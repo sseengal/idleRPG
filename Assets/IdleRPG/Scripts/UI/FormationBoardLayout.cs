@@ -30,7 +30,8 @@ namespace IdleRPG.UI
         {
             int column = ColumnOfRank(rank == 1 ? CombatRow.Back : CombatRow.Front);
             float x = column * (slotSize.x + columnGap) + column * StaggerColumnX;
-            float y = -position * (slotSize.y + rowGap) + column * StaggerColumnY;
+            // Top-anchored rects: POSITIVE anchored y is DOWN, so the front column is RAISED with a minus.
+            float y = -position * (slotSize.y + rowGap) - column * StaggerColumnY;
             return new Vector2(x, y);
         }
 

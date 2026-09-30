@@ -247,21 +247,17 @@ namespace IdleRPG.EditorTools
             UiFactory.Anchor(slotRect, new Vector2(0f, 1f), new Vector2(1f, 1f));
 
             Image icon = UiFactory.Icon("Icon", slot.transform, Color.white);
-            UiFactory.CenterOn(icon.rectTransform, new Vector2(0.5f, 0.58f), new Vector2(170f, 170f));
+            UiFactory.CenterOn(icon.rectTransform, new Vector2(0.5f, 0.60f), new Vector2(128f, 128f));
             icon.enabled = false;
 
-            TextMeshProUGUI nameLabel = UiFactory.Text("Name", slot.transform, "Enemy", 24f,
+            TextMeshProUGUI nameLabel = UiFactory.Text("Name", slot.transform, "Enemy", 20f,
                 TextAlignmentOptions.Center, UiTheme.Text);
-            UiTheme.ApplyFont(nameLabel, UiTheme.Display, 24f);
+            UiTheme.ApplyFont(nameLabel, UiTheme.Display, 20f);
             UiFactory.Anchor(nameLabel.rectTransform, new Vector2(0f, 0.14f), new Vector2(1f, 0.32f));
 
+            // Hero-identical bar layout: the slot is 160px wide, so 0.10..0.90 of it is the same ~128px bar.
             HpBarView hpBar = CreateHpBar(slot.transform, "HpBar");
-            RectTransform hpRect = hpBar.GetComponent<RectTransform>();
-            // Same width logic as the heroes (0.80 of their 160px slot): a fixed ~128px bar centred under the
-            // enemy, instead of stretching across the whole wide enemy column.
-            UiFactory.Anchor(hpRect, new Vector2(0.5f, 0.02f), new Vector2(0.5f, 0.12f));
-            hpRect.pivot = new Vector2(0.5f, 0.5f);
-            hpRect.sizeDelta = new Vector2(128f, 0f);
+            UiFactory.Anchor(hpBar.GetComponent<RectTransform>(), new Vector2(0.10f, 0.02f), new Vector2(0.90f, 0.12f));
 
             EnemyUnitView view = slot.AddComponent<EnemyUnitView>();
             view.ConfigureRuntime(index, icon, hpBar, nameLabel, slotRect, null);
