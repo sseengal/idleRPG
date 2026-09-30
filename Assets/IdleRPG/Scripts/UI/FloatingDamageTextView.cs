@@ -15,14 +15,16 @@ namespace IdleRPG.UI
 
         [Header("Animation")]
         [SerializeField] private float lifetimeSec = 0.9f;
-        [SerializeField] private float riseDistance = 90f;
-        [SerializeField] private float horizontalDrift = 40f;
+        [SerializeField] private float riseDistance = 56f;
+        [SerializeField] private float horizontalDrift = 30f;
         [SerializeField] private AnimationCurve scaleCurve = AnimationCurve.EaseInOut(0f, 1.25f, 1f, 0.85f);
 
         [Header("Colours")]
         [SerializeField] private Color normalColor = Color.white;
         [SerializeField] private Color criticalColor = new Color(1f, 0.85f, 0.25f, 1f);
         [SerializeField] private Color incomingColor = new Color(1f, 0.35f, 0.35f, 1f);
+        [SerializeField] private float baseFontSize = UiTheme.DamageSize;
+        [SerializeField] private float criticalScale = UiTheme.CritScale;
 
         private float elapsed;
         private Vector2 startPosition;
@@ -40,6 +42,7 @@ namespace IdleRPG.UI
             }
 
             baseScale = rectTransform != null ? rectTransform.localScale.x : 1f;
+            baseFontSize = label != null ? label.fontSize : baseFontSize;
         }
 
         /// <summary>Starts a number at a local anchored position.</summary>
@@ -60,6 +63,11 @@ namespace IdleRPG.UI
             label.color = style == FloatingTextStyle.Critical
                 ? criticalColor
                 : (style == FloatingTextStyle.Incoming ? incomingColor : normalColor);
+
+            // Crit damage is the "chunky" showcase: same font, bigger, gold. Reset for everything else.
+            label.fontSize = style == FloatingTextStyle.Critical
+                ? baseFontSize * criticalScale
+                : baseFontSize;
 
             gameObject.SetActive(true);
             IsPlaying = true;

@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 546d8378a11c7469ba65bc56b7cf79f0, type: 3}
+  m_Name: Demon_A_Art
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.CharacterArtSet
+  Idle:
+  - {fileID: 4610576671343732192, guid: 99c9811d5070c490380106acead9073b, type: 3}
+  - {fileID: 7933169506272541288, guid: 99c9811d5070c490380106acead9073b, type: 3}
+  - {fileID: -4751834672829971033, guid: 99c9811d5070c490380106acead9073b, type: 3}
+  - {fileID: 5165554279181358532, guid: 99c9811d5070c490380106acead9073b, type: 3}
+  - {fileID: 4962841209916830064, guid: 99c9811d5070c490380106acead9073b, type: 3}
+  - {fileID: -7143203775114824597, guid: 99c9811d5070c490380106acead9073b, type: 3}
+  Walk:
+  - {fileID: 1564836920576004226, guid: 4fe5cb9dd8b134b50bd5d549859bf4a7, type: 3}
+  - {fileID: 8663930358724894708, guid: 4fe5cb9dd8b134b50bd5d549859bf4a7, type: 3}
+  - {fileID: 4476905305216522435, guid: 4fe5cb9dd8b134b50bd5d549859bf4a7, type: 3}
+  - {fileID: -6252743113012979243, guid: 4fe5cb9dd8b134b50bd5d549859bf4a7, type: 3}
+  - {fileID: -4330850591289345602, guid: 4fe5cb9dd8b134b50bd5d549859bf4a7, type: 3}
+  - {fileID: -7873456424031651436, guid: 4fe5cb9dd8b134b50bd5d549859bf4a7, type: 3}
+  - {fileID: -8357550592321713677, guid: 4fe5cb9dd8b134b50bd5d549859bf4a7, type: 3}
+  - {fileID: -7433738477138490237, guid: 4fe5cb9dd8b134b50bd5d549859bf4a7, type: 3}
+  Attack01:
+  - {fileID: -4885465403820583246, guid: 03399460314164791ba2768608d17fe8, type: 3}
+  - {fileID: 714159002586540784, guid: 03399460314164791ba2768608d17fe8, type: 3}
+  - {fileID: 4870265971847230695, guid: 03399460314164791ba2768608d17fe8, type: 3}
+  - {fileID: 1998906437285517073, guid: 03399460314164791ba2768608d17fe8, type: 3}
+  - {fileID: -301280052444656893, guid: 03399460314164791ba2768608d17fe8, type: 3}
+  - {fileID: 2613070745431093251, guid: 03399460314164791ba2768608d17fe8, type: 3}
+  - {fileID: 3161286735664444143, guid: 03399460314164791ba2768608d17fe8, type: 3}
+  Attack02:
+  - {fileID: -4512729236205944664, guid: da1d79381fa2a4046ba6cb9b097f422b, type: 3}
+  - {fileID: -5573455744582887279, guid: da1d79381fa2a4046ba6cb9b097f422b, type: 3}
+  - {fileID: 1051274898172060042, guid: da1d79381fa2a4046ba6cb9b097f422b, type: 3}
+  - {fileID: -4678470051254981495, guid: da1d79381fa2a4046ba6cb9b097f422b, type: 3}
+  - {fileID: -4788476823661566636, guid: da1d79381fa2a4046ba6cb9b097f422b, type: 3}
+  - {fileID: 3974580466606960663, guid: da1d79381fa2a4046ba6cb9b097f422b, type: 3}
+  - {fileID: -5554250229902168988, guid: da1d79381fa2a4046ba6cb9b097f422b, type: 3}
+  Attack03: []
+  Hurt:
+  - {fileID: 7716186106518993825, guid: 2fc81c5308dba43dc8834fda1a57e93a, type: 3}
+  - {fileID: -3163463401301888315, guid: 2fc81c5308dba43dc8834fda1a57e93a, type: 3}
+  - {fileID: -6471149857940192170, guid: 2fc81c5308dba43dc8834fda1a57e93a, type: 3}
+  - {fileID: 7432858895691206856, guid: 2fc81c5308dba43dc8834fda1a57e93a, type: 3}
+  Death:
+  - {fileID: 555109730677885693, guid: 2f647a3a6565d456a95e4f75672079ad, type: 3}
+  - {fileID: 2319290710629780962, guid: 2f647a3a6565d456a95e4f75672079ad, type: 3}
+  - {fileID: 8955863190385351865, guid: 2f647a3a6565d456a95e4f75672079ad, type: 3}
+  - {fileID: -8178908634341365064, guid: 2f647a3a6565d456a95e4f75672079ad, type: 3}
+  IdleFps: 6
+  WalkFps: 8
+  AttackFps: 12
+  HurtFps: 10
+  DeathFps: 10
+  ArtFacesLeft: 1

@@ -29,6 +29,12 @@ namespace IdleRPG.Core
         /// <summary>(message) short player-facing message for a toast/snackbar.</summary>
         public static event Action<string> ToastRequested;
 
+        // ------------------------------------------------------------------
+        // Battle feed
+        // ------------------------------------------------------------------
+        /// <summary>(message) one-sentence news for the battle log; rendered verbatim by CombatLogUI.</summary>
+        public static event Action<LogMessage> CombatMessage;
+
         /// <summary>(day, gems) when the daily-streak calendar pays out (B7 S2).</summary>
         public static event Action<int, double> DailyStreakClaimed;
 
@@ -134,6 +140,7 @@ namespace IdleRPG.Core
             OfflineRewardsClaimed = null;
             SaveLoaded = null;
             SaveWritten = null;
+            CombatMessage = null;
         }
 
     }

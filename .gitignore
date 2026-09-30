@@ -122,3 +122,6 @@ Assets/_Recovery/
 ## ArtLab artifacts
 Screenshots/
 Assets/Screenshots/
+
+# macOS Finder metadata
+.DS_Store

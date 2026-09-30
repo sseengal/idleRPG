@@ -140,6 +140,17 @@ namespace IdleRPG.EditorTools
             return this;
         }
 
+        /// <summary>Assigns a specific sprite object (used for frame sub-sprites of 3rd-party sheets).</summary>
+        public Editable SetSpriteRef(string fieldName, Sprite sprite)
+        {
+            SerializedProperty property = Find(fieldName);
+            if (property != null)
+            {
+                property.objectReferenceValue = sprite;
+            }
+            return this;
+        }
+
         /// <summary>Assigns a generated placeholder sprite by art file name (optional).</summary>
         public Editable SetSprite(string fieldName, string spriteName)
         {

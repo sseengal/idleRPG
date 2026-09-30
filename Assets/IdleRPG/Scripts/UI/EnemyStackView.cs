@@ -94,7 +94,7 @@ namespace IdleRPG.UI
 
                 EnemyCombatant enemy = enemies[i];
                 slot.Configure(i);
-                slot.SetIconSize(Mathf.Min(170f, slotHeight * 0.5f));
+                slot.SetIconSize(Mathf.Min(200f, slotHeight * 0.5f));
                 slot.Show(enemy.DisplayName, enemy.MaxHealth, enemy.IsBoss);
 
                 if (anchors != null && i < anchors.Length && anchors[i] != null)

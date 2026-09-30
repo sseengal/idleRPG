@@ -102,11 +102,21 @@ namespace IdleRPG.Combat
 
             director = new CombatDirector();
             director.WaveStarted += OnDirectorWaveStarted;
-            director.WaveCleared += (stage, wave) => WaveCleared?.Invoke(stage, wave);
+            director.WaveCleared += (stage, wave) =>
+            {
+                WaveCleared?.Invoke(stage, wave);
+                GameEvents.RaiseWaveCompleted(stage, wave);
+                GameEvents.RaiseCombatMessage(new LogMessage(string.Format("Stage {0} wave {1} cleared", stage, wave), LogMessageKind.Event));
+            };
             director.StageCleared += stage => StageCleared?.Invoke(stage);
             director.EnemyKilled += gold => EnemyKilled?.Invoke(gold);
             director.PartyWiped += () => PartyWiped?.Invoke();
-            director.BossFailed += () => BossFailed?.Invoke();
+            director.BossFailed += () =>
+            {
+                BossFailed?.Invoke();
+                GameEvents.RaiseBossFailed();
+                GameEvents.RaiseCombatMessage(new LogMessage("Boss encounter failed", LogMessageKind.Defeat));
+            };
 
             return director.Initialize(balanceConfig, waveConfig, simulator);
         }
@@ -201,6 +211,9 @@ namespace IdleRPG.Combat
                 }
             }
 
+            GameEvents.RaiseCombatMessage(new LogMessage(string.Format("-- Wave {0}: {1}{2} --", wave,
+                EncounterFactory.Describe(simulator.Enemies), isBoss ? " (BOSS)" : string.Empty), LogMessageKind.Event));
+
             LogCombat($"Stage {stage} | Wave {wave}/{WavesPerStage}{(isBoss ? " (BOSS)" : string.Empty)} -> " +
                       $"{EncounterFactory.Describe(simulator.Enemies)}");
         }
@@ -268,6 +281,7 @@ namespace IdleRPG.Combat
         private void OnSimPartyWiped()
         {
             GameEvents.RaisePartyWiped();
+            GameEvents.RaiseCombatMessage(new LogMessage("Party wiped - falling back a stage", LogMessageKind.Defeat));
             director?.NotifyPartyWiped();
 
             LogCombat("PARTY WIPED");

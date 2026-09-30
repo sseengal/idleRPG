@@ -111,12 +111,30 @@ namespace IdleRPG.UI
                 return;
             }
 
+            // Directional: damage dealt to enemies pops from the enemy's top-LEFT; damage taken by
+            // heroes pops from the hero's top-RIGHT. The rect adopts the anchor's anchor/pivot so the
+            // offset lands in the SAME coordinate space (otherwise numbers drifted below the sim), then
+            // it is clamped to stay inside the battle view.
+            float side = style == FloatingTextStyle.Incoming ? 1f : -1f;
+
+            RectTransform rt = view.transform as RectTransform;
+            rt.SetParent(anchor.parent, false);
+            rt.anchorMin = anchor.anchorMin;
+            rt.anchorMax = anchor.anchorMax;
+            rt.pivot = anchor.pivot;
+
             Vector2 position = anchor.anchoredPosition + new Vector2(
-                Random.Range(-anchorJitter, anchorJitter),
-                Random.Range(0f, anchorJitter));
+                side * (40f + Random.Range(0f, Mathf.Abs(anchorJitter) * 0.5f)),
+                Random.Range(18f, 42f));
+
+            if (anchor.parent is RectTransform parentRect)
+            {
+                Rect bounds = parentRect.rect;
+                position.x = Mathf.Clamp(position.x, -(bounds.width * 0.5f) + 18f, (bounds.width * 0.5f) - 18f);
+                position.y = Mathf.Clamp(position.y, -(bounds.height * 0.5f) + 14f, (bounds.height * 0.5f) - 10f);
+            }
 
             driftSeed += 1.37f;
-            view.transform.SetParent(anchor.parent, false);
             view.Play(value, position, style, driftSeed);
             active.Add(view);
         }

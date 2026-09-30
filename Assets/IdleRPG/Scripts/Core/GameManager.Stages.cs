@@ -233,8 +233,6 @@ namespace IdleRPG.Core
             SetState(GameState.Boss, GameState.Defeat);
             RaiseStageChanged();
 
-            GameEvents.RaisePartyWiped();
-
             LogFlow($"DEFEAT on stage {defeatedStage}. Falling back to stage {CurrentStage} (wave 1) - resuming automatically.");
 
             defeatBeatRemaining = balanceConfig != null ? balanceConfig.DefeatPauseSeconds : 0.75f;

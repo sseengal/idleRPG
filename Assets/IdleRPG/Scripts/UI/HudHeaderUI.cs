@@ -19,7 +19,6 @@ namespace IdleRPG.UI
 
         [Header("Progress")]
         [SerializeField] private TextMeshProUGUI stageText;
-        [SerializeField] private TextMeshProUGUI yieldText;
 
         [Header("Boost chip")]
         [SerializeField] private GameObject boostChip;
@@ -48,7 +47,6 @@ namespace IdleRPG.UI
             GameEvents.CurrencyChanged += OnCurrencyChanged;
             GameEvents.StageChanged += OnStageChanged;
             GameEvents.GoldBoostChanged += OnGoldBoostChanged;
-            GameEvents.PrestigeYieldChanged += OnPrestigeYieldChanged;
         }
 
         private void OnDisable()
@@ -56,7 +54,6 @@ namespace IdleRPG.UI
             GameEvents.CurrencyChanged -= OnCurrencyChanged;
             GameEvents.StageChanged -= OnStageChanged;
             GameEvents.GoldBoostChanged -= OnGoldBoostChanged;
-            GameEvents.PrestigeYieldChanged -= OnPrestigeYieldChanged;
         }
 
         private void OnCurrencyChanged(CurrencyType currencyType, double amount)
@@ -95,14 +92,6 @@ namespace IdleRPG.UI
             if (boostText != null)
             {
                 boostText.SetText(string.Format("x{0}  {1}", multiplier.ToString("0.#"), NumberFormatter.FormatCountdown(remainingSeconds)));
-            }
-        }
-
-        private void OnPrestigeYieldChanged(double tokenYield)
-        {
-            if (yieldText != null)
-            {
-                yieldText.SetText(string.Format("Ascend: {0}", NumberFormatter.Format(tokenYield)));
             }
         }
 

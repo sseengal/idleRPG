@@ -25,7 +25,7 @@ namespace IdleRPG.EditorTools
         // ------------------------------------------------------------------
         private static HudHeaderUI BuildHeader(RectTransform safeArea)
         {
-            Image header = UiFactory.Panel("Header", safeArea, "ui_panel", new Color(1f, 1f, 1f, 0.98f));
+            Image header = KitPanel("Header", safeArea, UiTheme.Panel);
             UiFactory.Anchor(header.rectTransform, new Vector2(0f, HeaderBottom), Vector2.one, 14f, 0f, 14f, 14f);
             HudHeaderUI view = header.gameObject.AddComponent<HudHeaderUI>();
 
@@ -34,28 +34,20 @@ namespace IdleRPG.EditorTools
             TextMeshProUGUI gemText = CreateCurrencyChip(header.transform, "GemChip", "ui_icon_gem", 0.35f, 0.62f);
             TextMeshProUGUI tokenText = CreateCurrencyChip(header.transform, "TokenChip", "ui_icon_token", 0.65f, 0.97f);
 
-            TextMeshProUGUI stageText = UiFactory.Text("StageLabel", header.transform, "Stage 1", 34f,
-                TextAlignmentOptions.MidlineRight, TextColor);
-            UiFactory.Anchor(stageText.rectTransform, new Vector2(0.55f, 0.56f), new Vector2(0.98f, 0.92f));
-
-            TextMeshProUGUI yieldText = UiFactory.Text("YieldLabel", header.transform, "Ascend: 0", 26f,
-                TextAlignmentOptions.MidlineRight, DimTextColor);
-            UiFactory.Anchor(yieldText.rectTransform, new Vector2(0.55f, 0.14f), new Vector2(0.98f, 0.5f));
 
             // Boost chip: hidden until an ad boost is running.
-            Image boostChip = UiFactory.Panel("BoostChip", header.transform, "ui_button_gold", new Color(1f, 1f, 1f, 0.9f));
-            UiFactory.Anchor(boostChip.rectTransform, new Vector2(0.03f, 0.06f), new Vector2(0.53f, 0.46f));
+            Image boostChip = KitPanel("BoostChip", header.transform, UiTheme.Accent);
+            UiFactory.Anchor(boostChip.rectTransform, new Vector2(0.03f, 0.20f), new Vector2(0.53f, 0.92f));
 
             TextMeshProUGUI boostText = UiFactory.Text("BoostLabel", boostChip.transform, "x2", 28f,
-                TextAlignmentOptions.Center, new Color(0.15f, 0.1f, 0.02f, 1f));
+                TextAlignmentOptions.Center, UiTheme.InkOnAccent);
+            UiTheme.ApplyFont(boostText, UiTheme.Display, 28f);
             UiFactory.Stretch(boostText.rectTransform, 12f, 4f, 12f, 4f);
             boostChip.gameObject.SetActive(false);
 
             SceneWiringUtility.SetField(view, "goldText", goldText);
             SceneWiringUtility.SetField(view, "gemsText", gemText);
             SceneWiringUtility.SetField(view, "tokensText", tokenText);
-            SceneWiringUtility.SetField(view, "stageText", stageText);
-            SceneWiringUtility.SetField(view, "yieldText", yieldText);
             SceneWiringUtility.SetField(view, "boostChip", boostChip.gameObject);
             SceneWiringUtility.SetField(view, "boostText", boostText);
 
@@ -66,15 +58,16 @@ namespace IdleRPG.EditorTools
         private static TextMeshProUGUI CreateCurrencyChip(Transform parent, string name, string iconSprite,
             float xMin, float xMax)
         {
-            Image chip = UiFactory.Panel(name, parent, "ui_panel_light", new Color(1f, 1f, 1f, 0.55f));
-            UiFactory.Anchor(chip.rectTransform, new Vector2(xMin, 0.55f), new Vector2(xMax, 0.95f));
+            Image chip = KitPanel(name, parent, UiTheme.PanelLight);
+            UiFactory.Anchor(chip.rectTransform, new Vector2(xMin, 0.20f), new Vector2(xMax, 0.92f));
 
             Image icon = UiFactory.Icon("Icon", chip.transform, Color.white);
             icon.sprite = UiFactory.LoadSprite(iconSprite);
             UiFactory.Anchor(icon.rectTransform, new Vector2(0.04f, 0.12f), new Vector2(0.30f, 0.88f));
 
-            TextMeshProUGUI value = UiFactory.Text("Value", chip.transform, "0", 32f,
-                TextAlignmentOptions.MidlineLeft, TextColor);
+            TextMeshProUGUI value = UiFactory.Text("Value", chip.transform, "0", UiTheme.NumberSize,
+                TextAlignmentOptions.MidlineLeft, UiTheme.Text);
+            UiTheme.ApplyFont(value, UiTheme.Display, UiTheme.NumberSize);
             UiFactory.Anchor(value.rectTransform, new Vector2(0.32f, 0f), new Vector2(0.98f, 1f));
 
             return value;
@@ -88,14 +81,16 @@ namespace IdleRPG.EditorTools
             GameObject barObject = UiFactory.Node(name, parent);
             HpBarView view = barObject.AddComponent<HpBarView>();
 
-            Image background = UiFactory.Panel("Background", barObject.transform, "ui_panel", new Color(0f, 0f, 0f, 0.65f));
+            Image background = UiFactory.Icon("Background", barObject.transform, new Color(0f, 0f, 0f, 0.65f), false);
+            UiFactory.Stretch(background.rectTransform);
             UiFactory.Stretch(background.rectTransform);
 
             Image ghost = CreateFilledImage("Ghost", background.transform, Color.white);
             Image fill = CreateFilledImage("Fill", background.transform, new Color(0.35f, 0.85f, 0.45f, 1f));
 
             TextMeshProUGUI value = UiFactory.Text("Value", barObject.transform, "0 / 0", 22f,
-                TextAlignmentOptions.Center, TextColor);
+                TextAlignmentOptions.Center, UiTheme.Text);
+            UiTheme.ApplyFont(value, UiTheme.Display, 22f);
             UiFactory.Stretch(value.rectTransform, 6f, 0f, 6f, 0f);
 
             SceneWiringUtility.SetField(view, "fillImage", fill);
@@ -108,7 +103,7 @@ namespace IdleRPG.EditorTools
         /// <summary>A horizontal Filled image that covers the whole parent rect.</summary>
         private static Image CreateFilledImage(string name, Transform parent, Color color)
         {
-            Image image = UiFactory.Panel(name, parent, "ui_panel", color);
+            Image image = UiFactory.Icon(name, parent, color, false);
             image.type = Image.Type.Filled;
             image.fillMethod = Image.FillMethod.Horizontal;
             image.fillOrigin = (int)Image.OriginHorizontal.Left;
@@ -125,7 +120,7 @@ namespace IdleRPG.EditorTools
             out RectTransform enemyAnchor)
         {
             GameObject viewport = UiFactory.Node("Viewport", pageRoot);
-            UiFactory.Anchor(viewport.GetComponent<RectTransform>(), new Vector2(0f, BattleViewportBottom), Vector2.one, 14f, 6f, 14f, 6f);
+            UiFactory.Anchor(viewport.GetComponent<RectTransform>(), new Vector2(0f, BattleViewportBottom), new Vector2(1f, StageRowMinY), 14f, 6f, 14f, 6f);
 
             // Clips the cover-fitted backdrop so its overflow never draws over the header or combat log.
             viewport.AddComponent<RectMask2D>();
@@ -155,6 +150,11 @@ namespace IdleRPG.EditorTools
             boardRect.sizeDelta = new Vector2(320f, 470f);
 
             formationBoard = boardObject.AddComponent<FormationBoardView>();
+
+            // Test pass 2026-09-30: bigger hero slots so placeholder art + HP bars read clearly.
+            SceneWiringUtility.SetField(formationBoard, "slotSize", new Vector2(160f, 176f));
+            // Cleanup pass 2026-09-30: no translucent tiles / row indicators behind heroes on the battle view.
+            SceneWiringUtility.SetField(formationBoard, "slotColor", new Color(1f, 1f, 1f, 0f));
 
             // The enemy side is a vertical stack of up to 3 slots, each with its own sprite, name and HP bar.
             // Enemies have no ranks: the stack is presentation only (the sim decides who gets hit).
@@ -189,6 +189,57 @@ namespace IdleRPG.EditorTools
             damagePool = BuildDamageTextPool(damageRoot);
         }
 
+        /// <summary>Stage/wave row between the header and the battle screen, centered.</summary>
+        private static void BuildStageRow(RectTransform pageRoot, HudHeaderUI header)
+        {
+            Image row = KitPanel("StageRow", pageRoot, UiTheme.Panel);
+            UiFactory.Anchor(row.rectTransform, new Vector2(0f, StageRowMinY), new Vector2(1f, StageRowMaxY));
+
+            TextMeshProUGUI label = UiFactory.Text("StageLabel", row.transform, "Stage 1", 30f,
+                TextAlignmentOptions.Center, UiTheme.Text);
+            UiTheme.ApplyFont(label, UiTheme.Display, 30f);
+            UiFactory.Stretch(label.rectTransform, 24f, 0f, 24f, 0f);
+
+            // Same field HudHeaderUI already drives on StageChanged - just relocated out of the header.
+            SceneWiringUtility.SetField(header, "stageText", label);
+        }
+
+        /// <summary>"BATTLE LOG" row between the battle sim and the log (the future tab anchor).</summary>
+        private static void BuildLogHeaderRow(RectTransform pageRoot)
+        {
+            Image row = KitPanel("BattleLogHeader", pageRoot, UiTheme.Panel);
+            UiFactory.Anchor(row.rectTransform, new Vector2(0f, LogTop), new Vector2(1f, BattleViewportBottom), 14f, 0f, 14f, 0f);
+
+            TextMeshProUGUI label = UiFactory.Text("LogTitle", row.transform, "BATTLE LOG", 26f,
+                TextAlignmentOptions.MidlineLeft, UiTheme.TextDim);
+            UiTheme.ApplyFont(label, UiTheme.Display, 26f);
+            UiFactory.Stretch(label.rectTransform, 28f, 0f, 28f, 0f);
+        }
+
+        /// <summary>
+        /// A battle-page surface drawn with the kit's WHITE-face sprite so a palette tint renders exactly on
+        /// the token colour. Tinting theme colours over the OLD placeholder sprites darkened them (their grey
+        /// faces are 0.11-0.20 brightness), which is why the page read near-black instead of slate.
+        /// </summary>
+        private static Image KitPanel(string name, Transform parent, Color color, bool raycast = false)
+        {
+            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(
+                UiArtPresetApplier.UiArtRoot + "/9-Slice/Colored/grey.png");
+
+            Image image = UiFactory.Icon(name, parent, color, false);
+            image.sprite = sprite;
+            image.type = Image.Type.Sliced;
+            image.raycastTarget = raycast;
+            UiFactory.Stretch(image.rectTransform);
+
+            if (sprite == null)
+            {
+                Debug.LogWarning("[MvpSceneBuilder] Missing kit face sprite - run Tools > Idle RPG > Art > Apply UI-Art Presets.");
+            }
+
+            return image;
+        }
+
         /// <summary>One enemy slot: sprite, name, HP bar and the boss frame. Laid out by <see cref="EnemyStackView"/>.</summary>
         private static EnemyUnitView BuildEnemySlot(Transform parent, int index)
         {
@@ -196,23 +247,20 @@ namespace IdleRPG.EditorTools
             RectTransform slotRect = slot.GetComponent<RectTransform>();
             UiFactory.Anchor(slotRect, new Vector2(0f, 1f), new Vector2(1f, 1f));
 
-            Image bossFrame = UiFactory.Panel("BossFrame", slot.transform, "ui_panel_bordered", new Color(1f, 0.85f, 0.35f, 0.85f));
-            UiFactory.Stretch(bossFrame.rectTransform);
-            bossFrame.enabled = false;
-
             Image icon = UiFactory.Icon("Icon", slot.transform, Color.white);
             UiFactory.CenterOn(icon.rectTransform, new Vector2(0.5f, 0.58f), new Vector2(170f, 170f));
             icon.enabled = false;
 
             TextMeshProUGUI nameLabel = UiFactory.Text("Name", slot.transform, "Enemy", 24f,
-                TextAlignmentOptions.Center, TextColor);
-            UiFactory.Anchor(nameLabel.rectTransform, new Vector2(0f, 0.80f), new Vector2(1f, 0.98f));
+                TextAlignmentOptions.Center, UiTheme.Text);
+            UiTheme.ApplyFont(nameLabel, UiTheme.Display, 24f);
+            UiFactory.Anchor(nameLabel.rectTransform, new Vector2(0f, 0.14f), new Vector2(1f, 0.32f));
 
             HpBarView hpBar = CreateHpBar(slot.transform, "HpBar");
-            UiFactory.Anchor(hpBar.GetComponent<RectTransform>(), new Vector2(0.10f, 0.03f), new Vector2(0.90f, 0.18f));
+            UiFactory.Anchor(hpBar.GetComponent<RectTransform>(), new Vector2(0.10f, 0.02f), new Vector2(0.90f, 0.12f));
 
             EnemyUnitView view = slot.AddComponent<EnemyUnitView>();
-            view.ConfigureRuntime(index, icon, hpBar, nameLabel, slotRect, bossFrame);
+            view.ConfigureRuntime(index, icon, hpBar, nameLabel, slotRect, null);
 
             return view;
         }
@@ -236,8 +284,9 @@ namespace IdleRPG.EditorTools
         {
             GameObject template = UiFactory.Node("DamageTextTemplate", damageRoot);
             FloatingDamageTextView textView = template.AddComponent<FloatingDamageTextView>();
-            TextMeshProUGUI label = UiFactory.Text("Label", template.transform, "0", 40f,
+            TextMeshProUGUI label = UiFactory.Text("Label", template.transform, "0", UiTheme.DamageSize,
                 TextAlignmentOptions.Center, Color.white);
+            UiTheme.ApplyFont(label, UiTheme.Display, UiTheme.DamageSize);
             UiFactory.Stretch(label.rectTransform);
 
             SceneWiringUtility.SetField(textView, "label", label);
@@ -253,25 +302,32 @@ namespace IdleRPG.EditorTools
         /// <summary>Combat feed strip between the viewport and the control dock.</summary>
         private static CombatLogUI BuildCombatLog(RectTransform pageRoot)
         {
-            Image strip = UiFactory.Panel("CombatLog", pageRoot, "ui_panel", new Color(1f, 1f, 1f, 0.95f), raycast: true);
-            UiFactory.Anchor(strip.rectTransform, Vector2.zero, new Vector2(1f, BattleViewportBottom), 14f, 6f, 14f, 6f);
+            Image strip = KitPanel("CombatLog", pageRoot, UiTheme.Panel, raycast: true);
+            UiFactory.Anchor(strip.rectTransform, Vector2.zero, new Vector2(1f, LogTop), 14f, 6f, 14f, 6f);
             CombatLogUI ui = strip.gameObject.AddComponent<CombatLogUI>();
 
             ScrollRect scroll = UiFactory.CreateScrollView(strip.transform, "Scroll", 2f, new RectOffset(10, 10, 6, 6), out RectTransform content, autoSizeContent: false);
 
-            TextMeshProUGUI template = UiFactory.Text("LineTemplate", content, "line", 22f,
-                TextAlignmentOptions.MidlineLeft, TextColor);
+            // The whole pool copies this template, so the font and the bigger VT323 size land everywhere.
+            TextMeshProUGUI template = UiFactory.Text("LineTemplate", content, "line", UiTheme.LogSize,
+                TextAlignmentOptions.MidlineLeft, UiTheme.Text);
+            UiTheme.ApplyFont(template, UiTheme.Sentence, UiTheme.LogSize);
             LayoutElement element = template.gameObject.AddComponent<LayoutElement>();
-            element.minHeight = 34f;
-            element.preferredHeight = 34f;
+            element.minHeight = UiTheme.LogLineHeight;
+            element.preferredHeight = UiTheme.LogLineHeight;
             template.gameObject.SetActive(false);
 
             SceneWiringUtility.SetField(ui, "scrollRect", scroll);
             SceneWiringUtility.SetField(ui, "content", content);
             SceneWiringUtility.SetField(ui, "lineTemplate", template);
 
-            // Feed tuning for multi-enemy waves (Step 11e): more lines allowed per second, a slightly longer
-            // merge window, and a deeper pool so a burst of hits never allocates during combat.
+            // Feed tuning for multi-enemy waves (Step 11e): a bigger font needs taller lines, and the
+            // event colours map onto the picked palette.
+            SceneWiringUtility.SetField(ui, "lineHeight", UiTheme.LogLineHeight);
+            SceneWiringUtility.SetField(ui, "lineSpacing", 2);
+            SceneWiringUtility.SetField(ui, "heroHitColor", UiTheme.Text);
+            SceneWiringUtility.SetField(ui, "criticalColor", UiTheme.AccentLight);
+            SceneWiringUtility.SetField(ui, "goldColor", UiTheme.AccentLight);
             SceneWiringUtility.SetField(ui, "maxLinesPerSecond", 5);
             SceneWiringUtility.SetField(ui, "aggregateWindowSec", 0.5f);
             SceneWiringUtility.SetField(ui, "poolSize", 36);

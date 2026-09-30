@@ -28,6 +28,8 @@ namespace IdleRPG.UI
         [SerializeField] private TextMeshProUGUI[] navButtonLabels;
         [SerializeField] private Color activeNavColor = new Color(0.24f, 0.34f, 0.55f, 1f);
         [SerializeField] private Color inactiveNavColor = new Color(0.11f, 0.13f, 0.19f, 1f);
+        [SerializeField] private Color activeNavLabelColor = new Color(1f, 1f, 1f, 1f);
+        [SerializeField] private Color inactiveNavLabelColor = new Color(1f, 1f, 1f, 0.6f);
 
         /// <summary>True while the management page is on screen.</summary>
         public bool IsManagementOpen => managementPage != null && managementPage.activeSelf;
@@ -164,7 +166,7 @@ namespace IdleRPG.UI
 
                 if (navButtonLabels != null && i < navButtonLabels.Length && navButtonLabels[i] != null)
                 {
-                    navButtonLabels[i].color = isActive ? Color.white : new Color(1f, 1f, 1f, 0.6f);
+                    navButtonLabels[i].color = isActive ? activeNavLabelColor : inactiveNavLabelColor;
                 }
             }
         }

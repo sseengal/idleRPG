@@ -14,98 +14,6 @@ namespace IdleRPG.UI
     /// </summary>
     public sealed partial class CombatLogUI : MonoBehaviour
     {
-        private void OnEnemySpawned(string enemyName, double maxHealth, bool isBoss, int enemyIndex)
-        {
-            // A wave spawns its enemies one event at a time. The log writes ONE line per wave (on the first
-            // enemy) so a 3-enemy wave cannot flood the feed, and it always closes a pending aggregate so a
-            // line can never merge across a wave boundary.
-            CloseAggregate();
-
-            if (enemyIndex != 0)
-            {
-                return;
-            }
-
-            HudController hud = HudController.Instance;
-            GameManager manager = hud != null ? hud.GameManager : null;
-            int wave = manager != null && manager.Combat != null ? manager.Combat.CurrentWave : 0;
-
-            Append(string.Format("-- Wave {0}: {1}{2} --",
-                wave, WaveSummary(), isBoss ? " (BOSS)" : string.Empty), eventColor);
-        }
-
-        /// <summary>
-        /// Roster of the wave in plain words, duplicates collapsed: "Goblin x2, Slime".
-        /// Reads the live wave so it always describes what is actually standing there.
-        /// </summary>
-        private static string WaveSummary()
-        {
-            HudController hud = HudController.Instance;
-            GameManager manager = hud != null ? hud.GameManager : null;
-
-            if (manager == null || manager.Combat == null || manager.Combat.Simulator == null)
-            {
-                return "the enemy";
-            }
-
-            var enemies = manager.Combat.Simulator.Enemies;
-
-            if (enemies == null || enemies.Length == 0)
-            {
-                return "the enemy";
-            }
-
-            StringBuilder builder = new StringBuilder();
-
-            for (int i = 0; i < enemies.Length; i++)
-            {
-                if (enemies[i] == null || !IsFirstOfName(enemies, i))
-                {
-                    continue;
-                }
-
-                if (builder.Length > 0)
-                {
-                    builder.Append(", ");
-                }
-
-                int count = CountOfName(enemies, enemies[i].DisplayName);
-                builder.Append(count > 1
-                    ? string.Format("{0} x{1}", enemies[i].DisplayName, count)
-                    : enemies[i].DisplayName);
-            }
-
-            return builder.Length > 0 ? builder.ToString() : "the enemy";
-        }
-
-        private static bool IsFirstOfName(Sim.Combatant[] enemies, int index)
-        {
-            for (int j = 0; j < index; j++)
-            {
-                if (enemies[j] != null && enemies[j].DisplayName == enemies[index].DisplayName)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private static int CountOfName(Sim.Combatant[] enemies, string name)
-        {
-            int count = 0;
-
-            for (int i = 0; i < enemies.Length; i++)
-            {
-                if (enemies[i] != null && enemies[i].DisplayName == name)
-                {
-                    count++;
-                }
-            }
-
-            return count;
-        }
-
         private void OnEnemyDamaged(EnemyDamagedInfo info)
         {
             string attacker = HeroName(info.AttackerIndex);
@@ -145,21 +53,6 @@ namespace IdleRPG.UI
             Append(string.Format("{0} has fallen", HeroName(heroIndex)), killColor);
         }
 
-        private void OnWaveCompleted(int stage, int wave)
-        {
-            Append(string.Format("Stage {0} wave {1} cleared", stage, wave), eventColor);
-        }
-
-        private void OnPartyWiped()
-        {
-            Append("Party wiped - falling back a stage", incomingColor);
-        }
-
-        private void OnBossFailed()
-        {
-            Append("Boss encounter failed", incomingColor);
-        }
-
         private void OnAscensionCompleted(double tokensEarned, int newHighestStage)
         {
             Append(string.Format("Ascended - +{0} token(s), best stage {1}",
@@ -175,6 +68,36 @@ namespace IdleRPG.UI
         private void OnOfflineRewardsClaimed(double gold)
         {
             Append(string.Format("Offline earnings claimed  +{0} gold", NumberFormatter.Format(gold)), goldColor);
+        }
+
+        /// <summary>Renders the news channel (wave/clear/wipe/boss/future systems). Never budget-dropped.</summary>
+        private void OnCombatMessage(LogMessage message)
+        {
+            Color colour = eventColor;
+
+            switch (message.Kind)
+            {
+                case LogMessageKind.Defeat:
+                    colour = incomingColor;
+                    break;
+                case LogMessageKind.Reward:
+                    colour = goldColor;
+                    break;
+            }
+
+            Append(message.Text, colour, alwaysShow: true);
+        }
+
+        /// <summary>New session (restart / offline load): clean feed plus a visible divider.</summary>
+        private void OnSaveLoaded()
+        {
+            ClearLines();
+
+            lineBudget = maxLinesPerSecond;
+            priorityBudget = MaxPriorityPerSecond;
+            droppedLines = 0;
+
+            Append("-- session resumed --", eventColor, alwaysShow: true);
         }
     }
 }

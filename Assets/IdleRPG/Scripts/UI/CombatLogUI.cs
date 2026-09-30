@@ -73,6 +73,11 @@ namespace IdleRPG.UI
         private TextMeshProUGUI aggregateLabel;
         private bool pinnedToBottom = true;
 
+        /// <summary>Allowance for alwaysShow lines: never budget-dropped, capped so a buggy raiser cannot flood.</summary>
+        private float priorityBudget;
+
+        private const float MaxPriorityPerSecond = 4f;
+
         /// <summary>Scroll position we wrote last: anything else moving the content is the player.</summary>
         private float lastAppliedY = -1f;
 
@@ -96,6 +101,7 @@ namespace IdleRPG.UI
         private void Update()
         {
             lineBudget = Mathf.Min(lineBudget + maxLinesPerSecond * Time.deltaTime, maxLinesPerSecond);
+            priorityBudget = Mathf.Min(priorityBudget + MaxPriorityPerSecond * Time.deltaTime, MaxPriorityPerSecond);
 
             if (aggregateCount > 0)
             {
@@ -111,7 +117,7 @@ namespace IdleRPG.UI
             {
                 int summarized = droppedLines;
                 droppedLines = 0;
-                Append(string.Format("... {0} more hit{1}", summarized, summarized == 1 ? string.Empty : "s"), eventColor);
+                Append(string.Format("... {0} more hit{1}", summarized, summarized == 1 ? string.Empty : "s"), eventColor, alwaysShow: true);
             }
 
             FollowNewest(Time.deltaTime);
@@ -185,47 +191,58 @@ namespace IdleRPG.UI
         // ------------------------------------------------------------------
         private void OnEnable()
         {
-            GameEvents.EnemySpawned += OnEnemySpawned;
             GameEvents.EnemyDamaged += OnEnemyDamaged;
             GameEvents.EnemyKilled += OnEnemyKilled;
             GameEvents.HeroDamaged += OnHeroDamaged;
             GameEvents.HeroDied += OnHeroDied;
-            GameEvents.WaveCompleted += OnWaveCompleted;
-            GameEvents.PartyWiped += OnPartyWiped;
-            GameEvents.BossFailed += OnBossFailed;
             GameEvents.AscensionCompleted += OnAscensionCompleted;
             GameEvents.UpgradePurchased += OnUpgradePurchased;
             GameEvents.OfflineRewardsClaimed += OnOfflineRewardsClaimed;
+            GameEvents.CombatMessage += OnCombatMessage;
+            GameEvents.SaveLoaded += OnSaveLoaded;
         }
 
         private void OnDisable()
         {
-            GameEvents.EnemySpawned -= OnEnemySpawned;
             GameEvents.EnemyDamaged -= OnEnemyDamaged;
             GameEvents.EnemyKilled -= OnEnemyKilled;
             GameEvents.HeroDamaged -= OnHeroDamaged;
             GameEvents.HeroDied -= OnHeroDied;
-            GameEvents.WaveCompleted -= OnWaveCompleted;
-            GameEvents.PartyWiped -= OnPartyWiped;
-            GameEvents.BossFailed -= OnBossFailed;
             GameEvents.AscensionCompleted -= OnAscensionCompleted;
             GameEvents.UpgradePurchased -= OnUpgradePurchased;
             GameEvents.OfflineRewardsClaimed -= OnOfflineRewardsClaimed;
+            GameEvents.CombatMessage -= OnCombatMessage;
+            GameEvents.SaveLoaded -= OnSaveLoaded;
         }
 
         // ------------------------------------------------------------------
         // Line plumbing
         // ------------------------------------------------------------------
-        /// <summary>Adds a line, honouring the per-second budget (extras are summarised later).</summary>
-        private void Append(string text, Color color)
+        /// <summary>
+        /// Adds a line. Per-hit lines pay the per-second budget (extras are summarised later); alwaysShow lines
+        /// (wave/stage/wipe/news) are rare and never budget-dropped, so progression punctuation in the feed can
+        /// never starve under hot combat - and their own small cap keeps a buggy raiser from flooding the log.
+        /// </summary>
+        private void Append(string text, Color color, bool alwaysShow = false)
         {
-            if (lineBudget < 1f)
+            if (alwaysShow)
+            {
+                if (priorityBudget < 1f)
+                {
+                    return;
+                }
+
+                priorityBudget -= 1f;
+            }
+            else if (lineBudget < 1f)
             {
                 droppedLines++;
                 return;
             }
-
-            lineBudget -= 1f;
+            else
+            {
+                lineBudget -= 1f;
+            }
 
             // A new line ends the current aggregate run.
             CloseAggregate();

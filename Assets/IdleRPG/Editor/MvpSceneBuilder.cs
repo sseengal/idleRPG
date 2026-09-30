@@ -32,12 +32,16 @@ namespace IdleRPG.EditorTools
         private const float ReferenceHeight = 1920f;
 
         // Layout bands, as fractions of screen height.
-        private const float HeaderBottom = 0.88f;   // header: HeaderBottom .. 1
+        private const float HeaderBottom = 0.94f;   // header: HeaderBottom .. 1 (slim: just the currencies + boost)
         private const float PagesBottom = 0.12f;    // page area: PagesBottom .. HeaderBottom
         private const float NavBarTop = 0.12f;      // nav bar: 0 .. NavBarTop
 
-        // Bands inside the battle page.
-        private const float BattleViewportBottom = 0.38f; // log 0..0.38, viewport 0.38..1
+        // Bands inside the battle page (page coords): log 0..LogTop, log-header 0.34..0.39,
+        // viewport 0.39..StageRowMinY, stage/wave row 0.93..0.99.
+        private const float LogTop = 0.34f;
+        private const float BattleViewportBottom = 0.39f;
+        private const float StageRowMinY = 0.93f;
+        private const float StageRowMaxY = 0.99f;
 
         /// <summary>Modal canvas order. Above the main canvas (0) and the damage canvas (10).</summary>
         private const int ModalSortingOrder = 100;
@@ -97,12 +101,14 @@ namespace IdleRPG.EditorTools
             HudHeaderUI header = BuildHeader(safeArea);
 
             GameObject battlePage = CreatePage("BattlePage", safeArea);
+            BuildStageRow(battlePage.GetComponent<RectTransform>(), header);
             GameObject managementPage = CreatePage("ManagementPage", safeArea);
 
             BuildViewport(battlePage.GetComponent<RectTransform>(), damageRoot,
                 out FormationBoardView formationBoard, out EnemyStackView enemyStack,
                 out FloatingDamageTextPool damagePool, out RectTransform enemyAnchor);
             CombatLogUI combatLog = BuildCombatLog(battlePage.GetComponent<RectTransform>());
+            BuildLogHeaderRow(battlePage.GetComponent<RectTransform>());
             TabController tabs = BuildManagementPage(managementPage.GetComponent<RectTransform>(), partyConfig, prestigeUpgrades);
             ScreenController screens = BuildNavBar(safeArea, battlePage, managementPage, tabs, damageRoot.gameObject);
             OfflineRewardsPopup offlinePopup = BuildOfflinePopup(modalRoot);
@@ -256,7 +262,7 @@ namespace IdleRPG.EditorTools
         /// <summary>Saves the generated UI action asset so the EventSystem reference survives.</summary>
         private static void PersistUiActionsAsset(InputSystemUIInputModule module)
         {
-            if (module == null || module.actionsAsset == null || EditorUtility.IsPersistent(module.actionsAsset))
+            if (module == null || module.actionsAsset == null)
             {
                 return;
             }
@@ -264,11 +270,22 @@ namespace IdleRPG.EditorTools
             const string actionsPath = "Assets/IdleRPG/Settings/UiInputActions.inputactions";
             EnsureFolder("Assets/IdleRPG/Settings");
 
-            if (AssetDatabase.LoadAssetAtPath<InputActionAsset>(actionsPath) == null)
+            if (!EditorUtility.IsPersistent(module.actionsAsset))
             {
-                AssetDatabase.CreateAsset(module.actionsAsset, actionsPath);
-                AssetDatabase.SaveAssets();
-                Debug.Log($"[MvpSceneBuilder] Saved UI input actions to {actionsPath}");
+                // Write via ToJson + import. AssetDatabase.CreateAsset refuses '.inputactions' files, and an
+                // in-memory asset cannot be serialized into the scene: it used to save as a dangling reference
+                // that made InputSystemUIInputModule assert on enable ("Map must be contained in state") and
+                // froze the first frame of play mode.
+                File.WriteAllText(actionsPath, module.actionsAsset.ToJson());
+                AssetDatabase.ImportAsset(actionsPath);
+            }
+
+            InputActionAsset persisted = AssetDatabase.LoadAssetAtPath<InputActionAsset>(actionsPath);
+
+            if (persisted != null && module.actionsAsset != persisted)
+            {
+                module.actionsAsset = persisted;
+                Debug.Log($"[MvpSceneBuilder] UI input actions wired to {actionsPath}");
             }
         }
 

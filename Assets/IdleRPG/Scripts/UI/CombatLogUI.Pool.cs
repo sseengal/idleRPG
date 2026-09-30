@@ -54,6 +54,30 @@ namespace IdleRPG.UI
             }
         }
 
+        /// <summary>
+        /// New-session reset: every live line goes back to the pool and the scroll returns to the bottom,
+        /// so a restart/offline load starts with an empty, visibly resuming feed instead of rolling noise.
+        /// </summary>
+        private void ClearLines()
+        {
+            for (int i = 0; i < liveLines.Count; i++)
+            {
+                Return(liveLines[i]);
+            }
+
+            liveLines.Clear();
+            CloseAggregate();
+            RefreshContentSize();
+
+            if (content != null)
+            {
+                content.anchoredPosition = Vector2.zero;
+            }
+
+            pinnedToBottom = true;
+            lastAppliedY = -1f;
+        }
+
         private TextMeshProUGUI CreateLine()
         {
             TextMeshProUGUI label = Instantiate(lineTemplate, content);

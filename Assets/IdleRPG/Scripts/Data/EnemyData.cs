@@ -40,6 +40,12 @@ namespace IdleRPG.Data
         [Header("Presentation")]
         [SerializeField] private Color placeholderTint = new Color(0.85f, 0.3f, 0.3f, 1f);
 
+        [Tooltip("Animated frames (Idle/Attack/Hurt/Death). When set, the unit is rendered from these frames and the tint above is ignored.")]
+        [SerializeField] private CharacterArtSet artSet;
+
+        [Tooltip("Alternate looks rotated by stage (index = stage % length). Used to give one archetype several skins across a run, e.g. Demon/Blood Monster on the goblin wave.")]
+        [SerializeField] private CharacterArtSet[] stageAlternates;
+
         public string EnemyName => string.IsNullOrEmpty(enemyName) ? name : enemyName;
 
         /// <summary>Stable string id (save keys, encounter specs). Falls back to the asset name.</summary>
@@ -67,6 +73,21 @@ namespace IdleRPG.Data
         public float BossGoldMultiplier => Mathf.Max(1f, bossGoldMultiplier);
 
         public Color PlaceholderTint => placeholderTint;
+
+        /// <summary>Animated frames when real art is wired; null for placeholders/fallbacks.</summary>
+        public CharacterArtSet ArtSet => artSet;
+
+        /// <summary>Stages 0,1,2 -> alternates[0],alternates[1],alternates[0]... or the default ArtSet.</summary>
+        public CharacterArtSet ResolveArt(int stage)
+        {
+            if (stageAlternates != null && stageAlternates.Length > 0)
+            {
+                int index = Mathf.Max(0, stage) % stageAlternates.Length;
+                return stageAlternates[index];
+            }
+
+            return artSet;
+        }
 
         /// <summary>Set by the editor data generator so boss assets are always flagged consistently.</summary>
         public void EditorSetIsBoss(bool value)

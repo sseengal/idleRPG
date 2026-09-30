@@ -124,6 +124,11 @@ namespace IdleRPG.Core
             SafeInvoke(OfflineRewardsClaimed, gold, nameof(OfflineRewardsClaimed));
         }
 
+        internal static void RaiseCombatMessage(LogMessage message)
+        {
+            SafeInvoke(CombatMessage, message, nameof(CombatMessage));
+        }
+
         internal static void RaiseSaveLoaded()
         {
             SafeInvoke(SaveLoaded, nameof(SaveLoaded));

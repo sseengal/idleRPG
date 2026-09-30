@@ -4,7 +4,8 @@
 > undefined) and **G12** (device perf budgets).
 > Parent: `Architecture.md` (§6 decision log), `Roadmap.md` Step 20, `Content.md` (zones/enemies), `UI-UX.md` (screens).
 > **Location:** `Docs/` (folder index: `README.md`). **Last verified:** 2026-09-26 (new).
-> **Status: design for approval.** Nothing in §4-§8 is built. §9 lists the decisions that must be made first.
+> **Status: design for approval; §17 (the UI pass) is built and waits on one owner pick.** Nothing in §4-§8 is built.
+> §9 lists the decisions that must be made first.
 
 ---
 
@@ -383,3 +384,194 @@ of `large`. Only spend if the owner wants the club re-cut.
 - `TextureImporter.spritesheet` deprecation migration to `ISpriteEditorDataProvider` (warning only so far).
 - Tiny RPG pack licence file still missing.
 - 30 generations remain for the production unit set.
+
+---
+
+## 17. UI art pass — pixel/retro, kit imported, UI Lab built (2026-09-29)
+
+Owner decision (2026-09-29): **the UI look is pixel/retro**, to match the locked pixel goblin. Scope of the first
+pass is the **battle screen only**: top bar, battle viewport frame, combat log, bottom nav. The UI shell already
+exists and works (`MvpSceneBuilder`), so this is a **reskin, not a rebuild**.
+
+### What was added
+
+| Thing | Where | Notes |
+|---|---|---|
+| UI art pack | `Assets/ThirdParty/Kenney_PixelUI/` | Kenney Pixel UI Pack, **CC0**, 35 PNGs: 9-slice panels/buttons in 3 families + a 16x16 tile sheet |
+| Pixel fonts | `Assets/ThirdParty/PixelFonts/` + `Assets/IdleRPG/Resources/Fonts/*.asset` | Silkscreen, VT323, Jersey 10 - all OFL 1.1. Fonts live in a **Resources** folder so runtime-created text (log lines, hero HP bars, damage numbers) can load them too |
+| Import policy tool | `Tools > Idle RPG > Art > Apply UI-Art Presets` (`UiArtPresetApplier`) | Point filter, no mips, **uncompressed**, PPU 100, centre pivot, FullRect, 12px 9-slice border |
+| Font asset tool | `Tools > Idle RPG > Art > Generate Pixel Fonts` (`PixelFontAssetGenerator`) | SDF render mode, sampled at 64px - see the font policy below for why raster was rejected |
+| Comparison scene | `Tools > Idle RPG > Build UI Lab Scene` → `Scenes/UiLab.unity` | Three complete looks stacked in one portrait screen. **Not in build settings** |
+| Pixel-exact snapshot | `Tools > Idle RPG > Capture UI Lab Snapshot` | Renders 1080x1920 at 1:1 and writes `Assets/Screenshots/ui-lab/uilab-{A,B,C}.png` - one full-screen PNG per look |
+| Licence record | `Assets/ThirdParty/PROVENANCE.md` | Source + licence + date per pack, plus the two known licence gaps |
+
+### Measured, not guessed (the import numbers)
+
+Read straight out of the pack's pixels (2026-09-29):
+
+| Fact | Value | Consequence |
+|---|---|---|
+| 9-slice pieces | 48x48 | 3 x 16px design tiles |
+| Plain/outline pieces | 1px transparent margin, 1-2px outline, **square corners** | any border >= 2 keeps the outline crisp |
+| `list.png` | two horizontal inlay lines at y=16 and y=32 | they must sit inside the stretched middle band, so the border must be <= 16 |
+| `Ancient` family | serrated edge decoration down the whole side | safe to slice, but a large stretch spreads the serrations - a look call, judged in the lab |
+| **Chosen border** | **12 px** | covers every family's detail, keeps middle area for small chips |
+
+**Compression must stay off.** These are 48px textures with 1px outlines; block compression smears them into mush.
+That is a memory cost, and it is why the pack should stay to panels/buttons rather than being used as an atlas of everything.
+
+### Font policy (SDF - the raster experiment failed, and here is the record)
+
+Version 1 of the lab used **Raster (bitmap)** fonts sampled at each font's native grid (8 / 16 / 10 px). Raster is
+crisp ONLY at whole-number scaling. The game canvas rescales to fit arbitrary phones (`ScaleWithScreenSize`; 0.667x
+in a 1280x720 editor window), so the fonts **smeared - "garbled" - in the Game view, and would have done the same
+on most real devices**. That rejection is a documented finding, not a dead end.
+
+Decision: **SDF render mode, sampled at 64 px**. SDF is smooth at any scale, so the text is legible in the editor,
+on every phone, at every width. The fonts' square letterforms still read "pixel"; the pixel identity lives in the
+panels, chips, icons and backdrops, which are images and scale cleanly. The old rule "display sizes must be whole
+multiples of the native grid" is gone. Rules that remain: dynamic atlas population, auto-sizing off, and text
+sizes are **tokens**, not ad-hoc numbers.
+
+### The canvas-scale trap (found the expensive way)
+
+A pixel font is only crisp when **canvas pixels equal screen pixels**. The MVP canvas uses
+`ScaleWithScreenSize` + match 0.5, which lands on a fractional scale (0.667 in a 1280x720 editor view) and turns
+crisp glyphs into uneven ones. It looked like a font bug and was a scaling bug. Consequences:
+
+- Verdicts on pixel text must be made at 1:1 - that is why the lab renders its own 1080x1920 snapshot instead of
+  screenshotting the editor window.
+- **Open decision before the reskin lands:** either accept fractional scaling on device (chunky, slightly uneven -
+  the honest cheap option), or move the UI to integer scaling / a fixed reference canvas (crisp, costs letterboxing
+  on some phone aspect ratios). Measure on a real device before choosing.
+
+### How to look at the lab
+
+Open `Assets/IdleRPG/Scenes/UiLab.unity` and press Play (look A shows), then run the snapshot menu item. The
+decision images are the three 1:1 1080x1920 PNGs in `Assets/Screenshots/ui-lab/uilab-{A,B,C}.png` - **judge from
+the PNGs, not the editor window** (the Game view scales the canvas by a fraction and smears a pixel font).
+
+One look per screen, not three stacked: each is the full battle screen - top bar with currency chips, the dimmed
+stage as a backdrop, the hero formation board on the LEFT and the enemy stack on the RIGHT (mirroring
+`MvpSceneBuilder.Battle.cs` bands, not an invented layout), and the bottom nav. Each look pairs a font with a
+full palette, so the three PNGs are clearly different.
+
+| Look | Font | Palette | Log / chunky / numbers |
+|---|---|---|---|
+| A | Silkscreen | dark slate + gold | 24 / 32 / 40 |
+| B | VT323 | dark parchment + amber | 32 / 48 / 48 |
+| C | Jersey 10 | indigo + cyan | 30 / 40 / 40 |
+
+Palette lesson learned in the lab: tinting a sprite that already carries baked colour shifts the hue (grey-blue
+panels went muddy blue, yellow tinted with gold went orange). The only reliable tint base is a **white/light-grey
+face** - the pack's `Colored/grey.png` is (238,238,238), so panels tint exactly to their token colour.
+
+### Applied to the battle page (2026-09-30, live in Main.unity)
+
+The pick hit the real scene, not another lab:
+
+- **Tokens**: new `Scripts/UI/UiTheme.cs` - palette + fonts + type sizes in one file. Every battle-page
+  colour/size in the scene builder now reads from it (header, chips, HP bars, damage numbers, log, nav).
+- **Fonts**: Silkscreen 40 for currency, 34 stage, 24 nav/Hp/enemy names; VT323 **34** for the log (was 22),
+  line height 46. Damage floats 42, crits **1.4x bigger + gold**. Mixed sizes (numbers vs sentences) are the
+  "chunky but readable" contract the owner asked for.
+- **Palette**: panels slate `(37,43,62)` family, active nav gold `(214,158,66)` with dark ink, text
+  `(236,240,248)`. Hero HP bar labels and hero names (runtime-created by the formation board) are themed too.
+- **Fonts moved to `Assets/IdleRPG/Resources/Fonts/`** so runtime-created text (log pool, hero bars, damage
+  pool) can load them - a path-only change, GUIDs preserved.
+- **Bug found + fixed on the way**: `MvpSceneBuilder.PersistUiActionsAsset` saved the UI input-actions file
+  with `AssetDatabase.CreateAsset`, which leaves a dangling reference - `InputSystemUIInputModule` asserted on
+  enable ("Map must be contained in state") and play mode froze on frame 1. Writes `.inputactions` via
+  `ToJson()` + import now, and binds the persistent asset.
+- **Second pass (2026-09-30, owner: "much darker than the image")**: the first application tinted the theme
+  over the OLD placeholder sprites, whose grey faces are only 0.10-0.20 brightness - so slate rendered
+  near-black and gold nav rendered muddy. All battle-page surfaces (header, chips, boost chip, log strip, nav
+  bar, nav buttons) now use the kit's **white-face** sprite (`Colored/grey.png`) via `KitPanel(...)`; a tint now
+  lands **exactly** on its token. Nav reworked in the same pass: selected tab = **bright gold** (247,203,110)
+  with dark ink (c.11:1 contrast), unselected = light slate, labels 26px. Verified live + on rendered pixels
+  (header (35,39,57) vs the old (10,13,20); nav active gold).
+- **Verified live** (play mode): currency font `Silkscreen Pixel @40`, log template `VT323 Pixel @34`, nav
+  active colour gold; regression console 0 errors, save loaded, combat resumed.
+- **Sixth pass - battle-log repair (2026-09-30):** combat feed had gone structurally silent. Three orphaned
+  raise sites (WaveCompleted/BossFailed were dead after the director refactor; PartyWiped fired twice) plus all
+  structural lines sharing the 5-line/s hit budget. Fix: CombatManager now bridges WaveCleared ->
+  GameEvents.RaiseWaveCompleted and BossFailed -> GameEvents.RaiseBossFailed; the GameManager no longer
+  double-raises PartyWiped (one source in CombatManager). New one-sentence news channel `GameEvents.CombatMessage`
+  (LogMessage{Text, Kind}) raised from CombatManager for wave headers/summaries (via EncounterFactory.Describe),
+  wave-cleared, boss-fail and wipe. CombatLogUI dropped 11 handlers to 8, appends alwaysShow lines on a separate
+  4/s priority budget so progression punctuation can never starve, and clears the feed on SaveLoaded with a
+  "-- session resumed --" divider (restart/offline loads start visibly fresh). FUTURE MECHANICS RULE: systems
+  that want to say something in the feed (item drops etc.) call GameEvents.RaiseCombatMessage - zero UI wiring.
+  Verified live: wave headers, "Stage X wave Y cleared", kills/crits flow; SaveLoaded clears + divider appears.
+  Screenshot `Assets/Screenshots/battle-page-v8-log.png`.
+
+- **Fifth pass - battle-page bugfixes (2026-09-30):** damage numbers smaller (32px, crit 1.3x, shorter travel),
+  and spawns now adopt the unit anchor's anchors/pivot + clamp inside the battle view (numbers can no longer
+derive below the sim); empty hero seats are fully invisible (resting colour alpha 0 - `Update()` was
+re-painting the old white ghost); enemy health bars are sprite-less solid colour fills with the players' exact
+styling and the same relative placement/size; the BOSS gets a bigger name (1.3x) while its
+health bar stays the standard size (reverted same day - owner call). Verified live: enemy name y 0.14-0.32 + bar anchors (0.10,0.02)-(0.90,0.12) + fill sprite=none,
+empty seats alpha 0, damage template 32px. Screenshot `Assets/Screenshots/battle-page-v7.png`.
+- **Fourth pass - battle-page cleanup part 2 (2026-09-30):** currency header slimmed (12% -> ~7% of screen,
+  chips fill it tightly, boost into the same band); formation slot tiles set to transparent (no white layers /
+  row indicators on the battle view - the Party page keeps its board); enemy names moved **below** the sprite
+  (same as players), HP bar at the bottom; the full-slot boss frame panel **removed** (boss = red BOSS name tag
+  + larger sprite only); floating damage numbers now pop from the enemy's top-LEFT and the hero's top-RIGHT.
+  Verified live (anchors/colors/null checks) + screenshot `Assets/Screenshots/battle-page-v6.png`.
+- **Third pass - battle-page cleanup (2026-09-30, owner-directed):** proper static stand-in art so the
+  layout can be judged: heroes = three Soldier frames (`Soldier_Idle_0/3`, `Soldier_Attack01_2`) tinted
+  white/steel-blue/violet; enemies Goblin = goblin art, Ogre = Orc art. **Slime + Bat keep the procedural
+  silhouette until 2 PixelLab generations are spent** (blocked: `Temp/pixellab.token` not present; 30/40
+  generations remain). Hero slots 132x150 -> **160x176**, enemy icon cap 170 -> **200**. Layout moves:
+  Stage/wave now lives in its own **centered row between the header and the battle sim** (was overlapping the
+  tokens chip); the header's duplicate "Ascend: X" is **deleted** (the Ascend page already shows the yield);
+  a **"BATTLE LOG" row** now separates the sim from the log (future tab anchor). Verified live: actor + data
+  checks + screenshot `Assets/Screenshots/battle-page-v5.png`.
+
+Not in this pass (still open below): other pages (Shop/Upgrades/Ascend still use their old colours - `UiTheme`
+exists, wiring them in is mechanical), currency icons, and unit art.
+
+### Open items this pass did not close
+
+- [x] **The pick (2026-09-30).** **Font A (Silkscreen)** for numbers, buttons, currency, damage/crits;
+      **font B (VT323)** for the battle log and sentences, at **34px** (bigger than the lab's 32); **palette A**
+      (dark slate + gold). Applied to the real battle page the same day - see "Applied to the battle page" below.
+- [ ] **Currency icons** (gold, gem, token, scroll, ad). The kit has none. Needs one CC0 pixel icon set, or the
+      existing procedural generator redrawn at pixel scale.
+- [ ] **Unit art** in the viewport is deliberately out of scope: hero/enemy sprites come from `HeroData`/`EnemyData`
+      and are a character pass, not a UI pass.
+- [~] **Design tokens.** ~109 colour values were hard-coded across 21 files (88 distinct). **Started 2026-09-30:
+      `Scripts/UI/UiTheme.cs`** (palette + fonts + sizes) exists and the battle page reads from it; the other
+      pages (Shop/Upgrades/Ascend) and their runtime views are the mechanical remainder.
+- [ ] **Mobile import check.** Uncompressed UI textures and the 2-3 heavy post effects need a texture-memory
+      measurement on device before the reskin is called done (§6 budgets).
+
+## 18. Tiny RPG character pass - animated units (2026-09-30)
+
+Four pack characters replace the placeholder/lab art in the battle view: **Soldier** (all three heroes),
+**Orc** (boss), **Demon_A + Blood Monster_A** (the goblin wave slot, rotated by stage `index = stage % 2`,
+stage-1 = Demon). Slime/Bat/Goblin placeholders are untouched.
+
+- **Folder**: canonical shadowed strips at `Assets/IdleRPG/Art/Characters/TinyRPG/<Char>/<Char>_<Action>.png`;
+  the raw drop + aseprite sources live under `TinyRPG/_Source/` for traceability. `.DS_Store` files removed.
+- **Import**: `Tools > Idle RPG > Art > Import TinyRPG Characters` slices every `N x 100px` strip on the
+  100px grid (Point/NoMips/Uncompressed/PPU100) and (re)generates `Data/Characters/<Char>_Art.asset`
+  (`CharacterArtSet`: Idle/Walk/Attack01-03/Hurt/Death + fps). Width is read from the PNG header so the
+  frame count can never depend on a stale imported-texture cache.
+- **Runtime**: `CharacterAnimator` swaps frames on the unit icon `Image` (no AnimatorController). Idle loops,
+  Attack/Hurt/Death are one-shots back to Idle. Facing rule is constructed so heroes always face right and
+  enemies always face left from the art's own facing.
+- **Data**: `HeroData.artSet`, `EnemyData.artSet` + `EnemyData.stageAlternates` (rotation). Generator
+  (`DataAssetGenerator`) wires these at build time - pasted SerializedObject edits do NOT survive a rebuild.
+- **Verified live**: idle/attack/hurt/death all observed (death frame `Blood Monster_A_Death_3`, hurt
+  `Blood Monster_A_Hurt_1`, hero mid-swing `Soldier_Attack02_2`); boss = Orc; alternation Demon/Blood Monster
+  by stage parity; stale-animator clearance on placeholder waves; enemies face left. Screenshot
+  `Assets/Screenshots/battle-page-v9-tinyrpg.png`.
+- **Licence**: TESTING ONLY until the pack's terms are confirmed (no licence text shipped) - see PROVENANCE.
+
+### Verification notes (2026-09-30)
+
+- Live-feed/runtime checks: with the IDE focused the Editor can stop rendering Play frames (combat, logs and
+  damage numbers all look frozen even though `eval` still answers - `Time.frameCount` stuck near 1 is the tell).
+  Call `unity-mcp editor_focus` (plus set_autotick if you prefer headless ticking) before any live observation.
+

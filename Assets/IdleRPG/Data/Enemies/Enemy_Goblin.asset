@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.EnemyData
   enemyName: Goblin
   enemyID: enemy_goblin
-  enemySprite: {fileID: 21300000, guid: 9d3e38c42da8942f0b04152a201d32f2, type: 3}
+  enemySprite: {fileID: -2840254520044827204, guid: ead3621bbe01944279c3c731413bf1fc, type: 3}
   baseHealth: 130
   baseAttack: 12
   baseDefense: 3
@@ -24,4 +24,8 @@ MonoBehaviour:
   targetRule: 3
   bossHealthMultiplier: 1
   bossGoldMultiplier: 1
-  placeholderTint: {r: 0.4, g: 0.75, b: 0.35, a: 1}
+  placeholderTint: {r: 1, g: 1, b: 1, a: 1}
+  artSet: {fileID: 0}
+  stageAlternates:
+  - {fileID: 11400000, guid: 85659e16459da4c319b93a849aa45671, type: 2}
+  - {fileID: 11400000, guid: d2d4b005a5a5a4be2a16b751d8abcc29, type: 2}

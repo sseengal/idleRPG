@@ -17,7 +17,7 @@
 | v1.0 gate | **the loop + money**, and **MVP = store-submittable** (§1p). No statuses/abilities/zones/affixes/gear/roster/relics before the base is done |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
 | Last completed | B7 S5 - the monetisation guard + shop readout on F3 (planted cheats refused by the build; see §1o), 2026-09-27 |
-| Next after this | the B8' proof lap (you: battle-log + shop-beat play check, F3 in hand); then the B9' shipping checklist, B10 live store wiring (AdMob + Unity Ads), B10b store packet, B1a/B1b device passes |
+| Next after this | the B8' proof lap (you: battle-log + shop-beat play check, F3 in hand); then the B9' shipping checklist, B10 live store wiring (AdMob + Unity Ads), B10b store packet, B1a/B1b device passes. **Art/UI runs alongside (§1s / `Art-Pipeline.md` §17): open `Scenes/UiLab.unity` or `Assets/Screenshots/ui-lab/uilab.png` and pick look A, B or C.** |
 | MVP decisions (owner, 2026-09-27) | gate = **store-submittable**; **3 playable heroes** (a 4th needs the v1.1 roster UI); both stores at once; **art + audio = the final pass before submission**; no analytics SDK; full record + cuts in §1p |
 | Save schema | v5 (v3 -> v4 adds `runBestStage`; v4 -> v5 = one keyed `levels` list; additive migrations, no data loss - see §1h / B35-B36) |
 | Shipped build | `Builds/IdleRPG-mac.app` verified (boot, save, offline, combat) |
@@ -1136,6 +1136,60 @@ lives in **`Docs/Manual-Tests.md` §3**. The save-compat policy is part 1 item 6
 
 **The rule from here on:** a release build is allowed only when `Go or No-Go` is green first.
 
+## 1s. Art + UI pass — pixel/retro  ·  **kit + tools + UI Lab built + verified 2026-09-29** (owner pick next)
+
+Owner decision 2026-09-29: the look is **pixel/retro** (matches the locked pixel goblin) and the work starts with the
+**UI on the battle screen** (top bar, viewport frame, combat log, nav) because that shell already exists - it is a
+**reskin, not a rebuild**. Detail, measured numbers and open items: `Art-Pipeline.md` §17.
+
+Built and verified in the editor:
+
+- One **CC0** UI pack imported (`Assets/ThirdParty/Kenney_PixelUI/`, 35 PNGs) behind a single import policy:
+  `Tools > Idle RPG > Art > Apply UI-Art Presets` - Point, no mips, **uncompressed**, PPU 100, **12px** 9-slice
+  border. The border was **measured from the pack's pixels** (1-2px outlines, square corners, inlay lines at y=16/32),
+  not guessed. The character tool (`Apply Pixel-Art Presets`) now skips UI art.
+- Three **OFL** pixel fonts (Silkscreen / VT323 / Jersey 10) become TMP **SDF** font assets sampled at 64px:
+  `Tools > Idle RPG > Art > Generate Pixel Fonts`. (A first pass used raster/bitmap fonts to keep crisp pixels,
+  but the game's scaled canvas smeared them - documented in `Art-Pipeline.md` §17.)
+- `Scenes/UiLab.unity` (**not in build settings**) holds three full-screen looks (only A is active in the scene);
+  `Tools > Idle RPG > Capture UI Lab Snapshot` writes one 1:1 1080x1920 PNG per look to
+  `Assets/Screenshots/ui-lab/uilab-{A,B,C}.png`. Each look = a font + a distinct palette (slate+gold, parchment+amber,
+  indigo+cyan); unit slabs mirror the real battle layout. The pick is the whole look.
+- Licence record: `Assets/ThirdParty/PROVENANCE.md` - also names the two known gaps (Tiny RPG pack has **no licence
+  file**; PixelLab generated art needs its account terms recorded).
+
+Two defects the lab caught and fixed: labels were never anchored (text drifted over its neighbours), and a fractional
+canvas scale (**0.667**) smeared pixel glyphs - so pixel-text verdicts must be made at **1:1**, not from an editor
+window screenshot.
+
+TinyRPG characters (2026-09-30): Soldier for all heroes, Orc for the boss, Demon/Blood Monster rotating
+on the goblin slot by stage; all steps point-filtered + grid-sliced by `Import TinyRPG Characters`;
+`CharacterAnimator` drives idle/attack/hurt/death on the icon Images (enemies face left, baked shadows);
+placeholder slime/bat/goblin untouched. Screenshot `battle-page-v9-tinyrpg.png`.
+
+Battle-log repair round (2026-09-30): WaveCompleted/BossFailed bridged back onto the bus (were orphaned since
+the director refactor), PartyWiped de-duplicated, new one-event news channel `GameEvents.CombatMessage` for
+wave/clear/wipe/boss/news lines (alwaysShow priority budget so feed punctuation can't starve), feed resets with
+a "-- session resumed --" divider on SaveLoaded. Future mechanics speak via RaiseCombatMessage - no UI wiring.
+
+Battle-page bugfix round (2026-09-30): damage numbers 32px + clamped inside the sim, empty hero seats invisible,
+enemy HP bars now identical styling/placement to players, boss bar+name bigger (same colours).
+
+Battle-page cleanup round 2 (2026-09-30): slim currency header (no dead space), hero slot tiles -> transparent,
+enemy names + HP now below sprites like players, boss frame panel removed, directional damage numbers (heroes
+= top-right, enemies = top-left).
+
+Same-day polish (battle page, 2026-09-30): proper static stand-in art for units (Soldier/Orc/Goblin frames;
+slime/bat wait on the PixelLab token), stage/wave row centered below the header (overlap gone), "Ascend: X"
+header duplicate removed (Ascend page already owns the yield), new "BATTLE LOG" row above the log, bigger hero
+slots (160x176) + enemy icon cap 200. Screenshot `Assets/Screenshots/battle-page-v5.png`.
+
+Next, in order: (1) **owner pick** = done 2026-09-30 (font A for display, font B for sentences at 34px, palette A);
+(2) **design tokens** - `Scripts/UI/UiTheme.cs` created and the battle page converted; the rest of the ~109
+hard-coded colours (Shop/Upgrades/Ascend) still wait; (3) **battle page** sworn in live with the theme (verified in
+play mode); (4) currency icons (the pack has none), then a device texture-memory check. **Unit art is
+deliberately not in this pass.**
+
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 
 Base gate: every step below names the loop beat or money path it serves. Anything that cannot is not in the base.
@@ -1149,6 +1203,7 @@ Base gate: every step below names the loop beat or money path it serves. Anythin
 | **B7** | Monetisation pass (`Monetisation.md`) | money path: ad placements + gem sinks + mock IAP | `[x]` 2026-09-27 (see §1k-§1o): every payout goes through the ledger rate, per-day caps enforced, mock IAP swaps for a real store with one implementation, and the build now refuses a sink that beats its own time-value | done |
 | **B8'** | **Monster-making kit + polish** (**no new monsters**) | first-run clarity + content that can scale later | the 3 tools (§1q): (1) the drawing tool gives every card a picture with no code, (2) content checks that shout at a missing picture / a monster nobody ever meets / a stray family word, (3) a map showing who appears where and what shifts if a card is added. Plus the recipe (`Content.md` §8a), **3 first-run hints** (once each, saved, no schema change) and **empty formation seats that look empty**. Launch roster stays **3 heroes / 4 monsters**; real monsters are a post-launch update | `[~]` all built 2026-09-27; owner's proof lap (battle log + shop beat) remains | small-med |
 | **B9'** | The **shipping checklist** (get the game into the stores' hands, both targets) | ship it | version stamp, real app + company names, building as a phone app for Apple and Android (with signing), portrait-only screen, app icon + launch screen, Android back button behaviour, crash diary file, written save-compat policy, and **one build command that only runs when every check passes** | `[~]` part 1 built + verified 2026-09-27 (see §1r); part 2 = owner phone tests + installs | med |
+| **Art** | **Art + UI pass** (`Art-Pipeline.md` §17) | the store's first impression, and the look every later asset copies | look locked (pixel/retro); UI reskinned from **one** CC0 pack behind an import policy + licence record; pixel fonts sampled at their native grid and used only at whole multiples; the lab compares **real** art + font before anything is locked | `[~]` kit + fonts + 2 tools + UI Lab built + verified 2026-09-29 (§1s); **owner picks one of 3 looks next**, then tokens, then the battle-screen reskin | med |
 | **B10** | **Live store wiring** (new, §1p) | the real money path | real rewarded ads (**AdMob marketplace + Unity Ads bidding, both live**) + Unity IAP behind the existing seams; **Restore Purchases UI**; minimal settings (Restore + privacy link + mute); iOS ATT + EEA consent (Google's message form covers both sellers) - **skipped entirely for No Ads owners**; `PrivacyInfo.xcprivacy` + Play Data Safety for **both** sellers; an ad that fails or is skipped must not consume a daily cap; a no-fill from either seller never costs a player their reward | **large** |
 | **B10b** | **Store packet** (new, §1p) | a build the stores accept | screenshots (iPhone 6.7" + Play phone + 1024x500 feature graphic), listing copy, age/content rating, Data Safety answers, product records matched to `IapCatalog`, sandbox end-to-end on both platforms | med-large |
 | **B1a** | **Device pass 1 - logic (owner-run)** | does the *logic* hold on hardware | 60fps idle with 3v3, safe area clean, offline CLAIM by touch, back button behaves. Runs as soon as a developer phone build exists - **in parallel with the art pass** (logic does not care about looks) | ½ day |

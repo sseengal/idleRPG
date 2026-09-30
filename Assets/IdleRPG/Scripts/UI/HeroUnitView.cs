@@ -27,6 +27,8 @@ namespace IdleRPG.UI
         private Color baseColor = Color.white;
         private float flashTimer;
 
+        private CharacterAnimator animator;
+
         public int HeroIndex => heroIndex;
 
         public void Configure(int index)
@@ -64,17 +66,22 @@ namespace IdleRPG.UI
         {
             heroIndex = -1;
             flashTimer = 0f;
-            baseColor = Color.white;
+            baseColor = new Color(1f, 1f, 1f, 0f);   // empty seats rest invisible (Update() honours this)
 
             if (iconImage != null)
             {
                 iconImage.sprite = null;
-                iconImage.color = new Color(1f, 1f, 1f, 0.12f);
+                iconImage.color = baseColor;
             }
 
             if (nameLabel != null)
             {
                 nameLabel.SetText(label);
+            }
+
+            if (animator != null)
+            {
+                animator.Clear();
             }
 
             if (canvasGroup != null)
@@ -102,13 +109,21 @@ namespace IdleRPG.UI
 
             if (iconImage != null)
             {
-                if (data.HeroIcon != null)
+                if (data.ArtSet != null)
+                {
+                    // Real art: animated frames, no tint (coloured sprites go muddy when tinted).
+                    CharacterAnimator art = EnsureAnimator();
+                    art.FacingLeft = false;
+                    art.SetArt(data.ArtSet);
+                    baseColor = Color.white;
+                    iconImage.color = baseColor;
+                }
+                else if (data.HeroIcon != null)
                 {
                     iconImage.sprite = data.HeroIcon;
+                    baseColor = data.PlaceholderTint;
+                    iconImage.color = baseColor;
                 }
-
-                baseColor = data.PlaceholderTint;
-                iconImage.color = baseColor;
             }
 
             if (nameLabel != null)
@@ -121,6 +136,7 @@ namespace IdleRPG.UI
         {
             GameEvents.HeroDamaged += OnHeroDamaged;
             GameEvents.HeroDied += OnHeroDied;
+            GameEvents.EnemyDamaged += OnAllyAttackLanded;
             GameEvents.HeroStatsChanged += OnHeroStatsChanged;
             GameEvents.WaveCompleted += OnWaveChanged;
             GameEvents.StageChanged += OnStageChangedHandler;
@@ -130,6 +146,7 @@ namespace IdleRPG.UI
         {
             GameEvents.HeroDamaged -= OnHeroDamaged;
             GameEvents.HeroDied -= OnHeroDied;
+            GameEvents.EnemyDamaged -= OnAllyAttackLanded;
             GameEvents.HeroStatsChanged -= OnHeroStatsChanged;
             GameEvents.WaveCompleted -= OnWaveChanged;
             GameEvents.StageChanged -= OnStageChangedHandler;
@@ -150,6 +167,21 @@ namespace IdleRPG.UI
             }
 
             flashTimer = hitFlashDurationSec;
+
+            if (animator != null && animator.HasArt)
+            {
+                animator.PlayHurt();
+            }
+        }
+
+        private void OnAllyAttackLanded(EnemyDamagedInfo info)
+        {
+            if (info.AttackerIndex != heroIndex || animator == null || !animator.HasArt)
+            {
+                return;
+            }
+
+            animator.PlayAttack();
         }
 
         private void OnHeroDied(int index)
@@ -162,6 +194,11 @@ namespace IdleRPG.UI
             if (canvasGroup != null)
             {
                 canvasGroup.alpha = deadAlpha;
+            }
+
+            if (animator != null && animator.HasArt)
+            {
+                animator.PlayDeath();
             }
         }
 
@@ -206,6 +243,11 @@ namespace IdleRPG.UI
                 return;
             }
 
+            if (hero.IsAlive && animator != null && animator.HasArt)
+            {
+                animator.PlayIdle();
+            }
+
             if (canvasGroup != null)
             {
                 canvasGroup.alpha = hero.IsAlive ? 1f : deadAlpha;
@@ -230,6 +272,23 @@ namespace IdleRPG.UI
                 hpBar.SetFill(0f, instant: true);
                 hpBar.SetValueLabel(0d, 1d);
             }
+        }
+
+        private CharacterAnimator EnsureAnimator()
+        {
+            if (animator == null && iconImage != null)
+            {
+                animator = iconImage.GetComponent<CharacterAnimator>();
+                if (animator == null)
+                {
+                    animator = iconImage.gameObject.AddComponent<CharacterAnimator>();
+                }
+
+                iconImage.preserveAspect = true;
+                animator.FacingLeft = false;
+            }
+
+            return animator;
         }
 
         private void Update()

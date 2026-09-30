@@ -99,8 +99,9 @@ namespace IdleRPG.UI
             Image icon = UiRuntime.CreateIcon("Icon", slot.transform);
             UiRuntime.CenterOn(icon.rectTransform, new Vector2(0.5f, 0.62f), new Vector2(slotSize.x * 0.62f, slotSize.x * 0.62f));
 
-            TextMeshProUGUI nameLabel = UiRuntime.CreateText(slot.transform, "Name", string.Empty, 16f,
-                TextAlignmentOptions.Center, Color.white);
+            TextMeshProUGUI nameLabel = UiRuntime.CreateText(slot.transform, "Name", string.Empty, 20f,
+                TextAlignmentOptions.Center, UiTheme.Text);
+            UiTheme.ApplyFont(nameLabel, UiTheme.Display, 20f);
             UiRuntime.Anchor(nameLabel.rectTransform, new Vector2(0f, 0.14f), new Vector2(1f, 0.32f));
 
             HpBarView hpBar = BuildHpBar(slot.transform);
@@ -126,8 +127,9 @@ namespace IdleRPG.UI
             Image ghost = UiRuntime.CreateFilledImage("Ghost", bar.transform, new Color(1f, 0.85f, 0.35f, 0.5f));
             Image fill = UiRuntime.CreateFilledImage("Fill", bar.transform, new Color(0.35f, 0.85f, 0.45f, 1f));
 
-            TextMeshProUGUI value = UiRuntime.CreateText(bar.transform, "Value", string.Empty, 13f,
-                TextAlignmentOptions.Center, Color.white);
+            TextMeshProUGUI value = UiRuntime.CreateText(bar.transform, "Value", string.Empty, 20f,
+                TextAlignmentOptions.Center, UiTheme.Text);
+            UiTheme.ApplyFont(value, UiTheme.Display, 20f);
             UiRuntime.Stretch(value.rectTransform);
 
             HpBarView view = bar.AddComponent<HpBarView>();

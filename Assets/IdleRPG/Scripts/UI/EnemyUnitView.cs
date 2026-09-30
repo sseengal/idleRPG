@@ -23,6 +23,10 @@ namespace IdleRPG.UI
         [SerializeField] private RectTransform root;
         [SerializeField] private Image bossFrame;
 
+        [Header("Boss scale")]
+        [SerializeField] private float bossNameSizeScale = 1.3f;
+        private float baseNameSize = 24f;
+
         [Header("Feedback")]
         [SerializeField] private float spawnPopScale = 0.65f;
         [SerializeField] private float spawnPopDurationSec = 0.18f;
@@ -31,6 +35,8 @@ namespace IdleRPG.UI
         private int enemyIndex;
         private float popTimer;
         private float deathTimer = -1f;
+
+        private CharacterAnimator animator;
 
         /// <summary>Which enemy of the wave this view shows (0-based).</summary>
         public int EnemyIndex => enemyIndex;
@@ -50,6 +56,11 @@ namespace IdleRPG.UI
             nameLabel = label;
             root = rect;
             bossFrame = frame;
+
+            if (nameLabel != null)
+            {
+                baseNameSize = nameLabel.fontSize;
+            }
         }
 
         private void OnEnable()
@@ -57,6 +68,7 @@ namespace IdleRPG.UI
             GameEvents.EnemySpawned += OnEnemySpawned;
             GameEvents.EnemyDamaged += OnEnemyDamaged;
             GameEvents.EnemyKilled += OnEnemyKilled;
+            GameEvents.HeroDamaged += OnEnemyAttackLanded;
         }
 
         private void OnDisable()
@@ -64,6 +76,7 @@ namespace IdleRPG.UI
             GameEvents.EnemySpawned -= OnEnemySpawned;
             GameEvents.EnemyDamaged -= OnEnemyDamaged;
             GameEvents.EnemyKilled -= OnEnemyKilled;
+            GameEvents.HeroDamaged -= OnEnemyAttackLanded;
         }
 
         private void OnEnemySpawned(string enemyName, double maxHealth, bool isBoss, int index)
@@ -96,20 +109,45 @@ namespace IdleRPG.UI
         {
             EnemyData data = ResolveEnemyData();
 
+            CharacterArtSet art = data != null ? data.ResolveArt(CurrentStage()) : null;
+
             if (spriteImage != null)
             {
-                if (data != null && data.EnemySprite != null)
+                if (art != null)
                 {
-                    spriteImage.sprite = data.EnemySprite;
+                    // Real art: animated frames, flipped to face the heroes, no tint.
+                    CharacterAnimator animation = EnsureAnimator();
+                    animation.FacingLeft = true;
+                    animation.SetArt(art);
+                    spriteImage.color = Color.white;
+                }
+                else
+                {
+                    // Placeholder art: a stale animator from a previous archetype must not keep swapping
+                    // frames over the placeholder, so it is cleared before the static sprite is shown.
+                    if (animator != null)
+                    {
+                        animator.Clear();
+                    }
+
+                    if (data != null && data.EnemySprite != null)
+                    {
+                        spriteImage.sprite = data.EnemySprite;
+                        spriteImage.color = data.PlaceholderTint;
+                    }
+                    else
+                    {
+                        spriteImage.color = data != null ? data.PlaceholderTint : Color.white;
+                    }
                 }
 
-                spriteImage.color = data != null ? data.PlaceholderTint : Color.white;
                 spriteImage.enabled = true;
             }
 
             if (nameLabel != null)
             {
                 nameLabel.SetText(isBoss ? $"{enemyName} <size=70%>BOSS</size>" : enemyName);
+                nameLabel.fontSize = isBoss ? baseNameSize * bossNameSizeScale : baseNameSize;
             }
 
             if (bossFrame != null)
@@ -137,11 +175,36 @@ namespace IdleRPG.UI
 
             hpBar.SetFill(info.NormalizedHealth);
             hpBar.SetValueLabel(info.CurrentHealth, info.MaxHealth);
+
+            if (animator != null && animator.HasArt)
+            {
+                animator.PlayHurt();
+            }
+        }
+
+        private void OnEnemyAttackLanded(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex)
+        {
+            if (attackerEnemyIndex != enemyIndex || animator == null || !animator.HasArt)
+            {
+                return;
+            }
+
+            animator.PlayAttack();
         }
 
         private void OnEnemyKilled(string enemyName, double goldReward, int index)
         {
-            if (index == enemyIndex)
+            if (index != enemyIndex)
+            {
+                return;
+            }
+
+            if (animator != null && animator.HasArt)
+            {
+                // Play the death clip first; the alpha fade runs when it finishes.
+                animator.PlayDeath(() => deathTimer = deathFadeDurationSec);
+            }
+            else
             {
                 deathTimer = deathFadeDurationSec;
             }
@@ -187,6 +250,29 @@ namespace IdleRPG.UI
             {
                 root.localScale = Vector3.one;
             }
+        }
+
+        private static int CurrentStage()
+        {
+            GameManager manager = HudController.Instance != null ? HudController.Instance.GameManager : null;
+            return manager != null ? manager.CurrentStage : 1;
+        }
+
+        private CharacterAnimator EnsureAnimator()
+        {
+            if (animator == null && spriteImage != null)
+            {
+                animator = spriteImage.GetComponent<CharacterAnimator>();
+                if (animator == null)
+                {
+                    animator = spriteImage.gameObject.AddComponent<CharacterAnimator>();
+                }
+
+                spriteImage.preserveAspect = true;
+                animator.FacingLeft = true;
+            }
+
+            return animator;
         }
 
         private EnemyData ResolveEnemyData()

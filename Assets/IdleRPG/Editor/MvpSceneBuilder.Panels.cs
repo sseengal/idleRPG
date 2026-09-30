@@ -68,7 +68,7 @@ namespace IdleRPG.EditorTools
         private static ScreenController BuildNavBar(RectTransform safeArea, GameObject battlePage,
             GameObject managementPage, TabController tabs, GameObject damageCanvas)
         {
-            Image bar = UiFactory.Panel("NavBar", safeArea, "ui_panel_light", new Color(1f, 1f, 1f, 0.98f));
+            Image bar = KitPanel("NavBar", safeArea, UiTheme.Panel);
             UiFactory.Anchor(bar.rectTransform, Vector2.zero, new Vector2(1f, NavBarTop), 14f, 10f, 14f, 6f);
             ScreenController controller = bar.gameObject.AddComponent<ScreenController>();
 
@@ -82,14 +82,27 @@ namespace IdleRPG.EditorTools
                 float width = 1f / labels.Length;
                 float xMin = i * width;
 
-                Button button = UiFactory.Button("Nav" + labels[i], bar.transform, labels[i], "ui_tab_off", 24f, TextColor, null);
-                UiFactory.Anchor(button.GetComponent<RectTransform>(), new Vector2(xMin, 0.08f), new Vector2(xMin + width, 0.92f), 4f, 0f, 4f, 0f);
+                Image buttonImage = KitPanel("Nav" + labels[i], bar.transform, UiTheme.PanelLight, raycast: true);
+                UiFactory.Anchor(buttonImage.rectTransform, new Vector2(xMin, 0.08f), new Vector2(xMin + width, 0.92f), 6f, 0f, 6f, 0f);
+
+                Button button = buttonImage.gameObject.AddComponent<Button>();
+                button.targetGraphic = buttonImage;
+
+                TextMeshProUGUI label = UiFactory.Text("Label", buttonImage.transform, labels[i], 26f,
+                    TextAlignmentOptions.Center, UiTheme.Text);
+                UiTheme.ApplyFont(label, UiTheme.Display, 26f);
+                UiFactory.Stretch(label.rectTransform, 8f, 4f, 8f, 4f);
 
                 buttons[i] = button;
                 backgrounds[i] = button.targetGraphic as Image;
-                buttonLabels[i] = button.GetComponentInChildren<TextMeshProUGUI>();
+                buttonLabels[i] = label;
             }
 
+            // Palette A: the active tab is gold with dark ink; the rest are raised slate on the deep bar.
+            SceneWiringUtility.SetField(controller, "activeNavColor", UiTheme.AccentLight);
+            SceneWiringUtility.SetField(controller, "inactiveNavColor", UiTheme.PanelLight);
+            SceneWiringUtility.SetField(controller, "activeNavLabelColor", UiTheme.InkOnAccent);
+            SceneWiringUtility.SetField(controller, "inactiveNavLabelColor", UiTheme.TextDim);
             SceneWiringUtility.SetField(controller, "battlePage", battlePage);
             SceneWiringUtility.SetField(controller, "managementPage", managementPage);
             SceneWiringUtility.SetField(controller, "tabs", tabs);

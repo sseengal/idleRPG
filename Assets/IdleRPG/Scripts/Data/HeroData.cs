@@ -30,6 +30,9 @@ namespace IdleRPG.Data
         [Tooltip("Optional tint for the placeholder sprite while real art is pending.")]
         [SerializeField] private Color placeholderTint = Color.white;
 
+        [Tooltip("Animated frames (Idle/Attack/Hurt/Death). When set, the unit is rendered from these frames and the tint above is ignored (real art is coloured).")]
+        [SerializeField] private CharacterArtSet artSet;
+
         public string HeroID => string.IsNullOrEmpty(heroID) ? name : heroID;
 
         public string HeroName => string.IsNullOrEmpty(heroName) ? name : heroName;
@@ -45,6 +48,9 @@ namespace IdleRPG.Data
         public float AttackIntervalSec => Mathf.Max(MinAttackIntervalSec, attackIntervalSec);
 
         public Color PlaceholderTint => placeholderTint;
+
+        /// <summary>Animated frames when real art is wired; null for placeholders/fallbacks.</summary>
+        public CharacterArtSet ArtSet => artSet;
 
         public HeroRole Role => role;
 

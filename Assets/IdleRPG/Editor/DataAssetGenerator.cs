@@ -24,6 +24,14 @@ namespace IdleRPG.EditorTools
         private const string EnemyFolder = DataRoot + "/Enemies";
         private const string ArtFolder = PlaceholderSpriteGenerator.ArtFolder;
 
+        // Test-pass stand-in art (2026-09-30): real sprites for the layout test, static idle frames.
+        // Licence for both packs still to be sorted before release - see Assets/ThirdParty/PROVENANCE.md.
+        // Slime + Bat keep procedural art until two PixelLab generations are spent (token = Temp/pixellab.token).
+        private const string SoldierIdleSheet = "Assets/ThirdParty/TinyRPG_01_SoldierOrc/Characters(100x100 split)/Soldier/Soldier/Soldier_Idle.png";
+        private const string SoldierAttack01Sheet = "Assets/ThirdParty/TinyRPG_01_SoldierOrc/Characters(100x100 split)/Soldier/Soldier/Soldier_Attack01.png";
+        private const string OrcIdleSheet = "Assets/ThirdParty/TinyRPG_01_SoldierOrc/Characters(100x100 split)/Orc/Orc/Orc_Idle.png";
+        private const string GoblinIdleSheet = "Assets/ThirdParty/PixelLab/goblin/Goblin_Idle_anim.png";
+
         [MenuItem("Tools/Idle RPG/Generate Data Assets")]
         public static void GenerateAll()
         {
@@ -227,8 +235,8 @@ namespace IdleRPG.EditorTools
                 .Set("baseDefense", 12f)
                 .Set("attackIntervalSec", 1.5f)
                 .SetEnum("role", IdleRPG.Data.HeroRole.Tank)
-                .SetSprite("heroIcon", "hero_knight")
-                .SetColor("placeholderTint", new Color(0.35f, 0.55f, 0.95f, 1f))
+                .SetSpriteRef("heroIcon", LoadFrame(SoldierIdleSheet, "Soldier_Idle_0"))
+                .SetColor("placeholderTint", Color.white)
                 .Apply();
             heroes.Add(knight);
 
@@ -241,8 +249,8 @@ namespace IdleRPG.EditorTools
                 .Set("baseDefense", 4f)
                 .Set("attackIntervalSec", 1f)
                 .SetEnum("role", IdleRPG.Data.HeroRole.Damage)
-                .SetSprite("heroIcon", "hero_archer")
-                .SetColor("placeholderTint", new Color(0.35f, 0.85f, 0.45f, 1f))
+                .SetSpriteRef("heroIcon", LoadFrame(SoldierIdleSheet, "Soldier_Idle_3"))
+                .SetColor("placeholderTint", new Color(0.62f, 0.76f, 1f, 1f))
                 .Apply();
             heroes.Add(archer);
 
@@ -255,8 +263,8 @@ namespace IdleRPG.EditorTools
                 .Set("baseDefense", 5f)
                 .Set("attackIntervalSec", 2f)
                 .SetEnum("role", IdleRPG.Data.HeroRole.Damage)
-                .SetSprite("heroIcon", "hero_mage")
-                .SetColor("placeholderTint", new Color(0.75f, 0.4f, 0.95f, 1f))
+                .SetSpriteRef("heroIcon", LoadFrame(SoldierAttack01Sheet, "Soldier_Attack01_2"))
+                .SetColor("placeholderTint", new Color(0.78f, 0.62f, 1f, 1f))
                 .Apply();
             heroes.Add(mage);
 
@@ -270,21 +278,23 @@ namespace IdleRPG.EditorTools
             // Baseline: a fresh party (8 DPS) clears a wave in ~8s and a stage in ~90s.
             enemies.Add(CreateEnemy("Enemy_Slime", "Slime", 60f, 6f, 0f, 8f, 2f, false, 1f, 1f, new Color(0.5f, 0.9f, 0.4f, 1f)));
             enemies.Add(CreateEnemy("Enemy_Bat", "Bat", 90f, 9f, 1f, 12f, 1.6f, false, 1f, 1f, new Color(0.6f, 0.4f, 0.3f, 1f)));
-            enemies.Add(CreateEnemy("Enemy_Goblin", "Goblin", 130f, 12f, 3f, 18f, 1.8f, false, 1f, 1f, new Color(0.4f, 0.75f, 0.35f, 1f)));
+            enemies.Add(CreateEnemy("Enemy_Goblin", "Goblin", 130f, 12f, 3f, 18f, 1.8f, false, 1f, 1f, Color.white, LoadFrame(GoblinIdleSheet, "Goblin_Idle_anim_0")));
 
             // Stage-1 boss: 100 x4 = 400 HP (about a third of the stage) and ~150 gold.
-            enemies.Add(CreateEnemy("Boss_Ogre", "Ogre Chieftain", 100f, 20f, 5f, 25f, 2.5f, true, 4f, 6f, new Color(0.85f, 0.25f, 0.2f, 1f)));
+            enemies.Add(CreateEnemy("Boss_Ogre", "Ogre Chieftain", 100f, 20f, 5f, 25f, 2.5f, true, 4f, 6f, Color.white, LoadFrame(OrcIdleSheet, "Orc_Idle_0")));
 
             return enemies;
         }
 
         private static EnemyData CreateEnemy(string fileName, string displayName, float health, float attack,
             float defense, float gold, float interval, bool isBoss, float bossHealthMultiplier,
-            float bossGoldMultiplier, Color tint)
+            float bossGoldMultiplier, Color tint, Sprite spriteOverride = null)
         {
             EnemyData enemy = CreateOrLoad<EnemyData>(EnemyFolder + "/" + fileName + ".asset");
             string spriteName = fileName.ToLowerInvariant();
-            new Editable(enemy)
+
+            Editable editable = new Editable(enemy);
+            editable
                 .Set("enemyName", displayName)
                 .Set("baseHealth", health)
                 .Set("baseAttack", attack)
@@ -293,12 +303,37 @@ namespace IdleRPG.EditorTools
                 .Set("attackIntervalSec", interval)
                 .Set("isBoss", isBoss)
                 .Set("bossHealthMultiplier", bossHealthMultiplier)
-                .Set("bossGoldMultiplier", bossGoldMultiplier)
-                .SetSprite("enemySprite", spriteName)
+                .Set("bossGoldMultiplier", bossGoldMultiplier);
+
+            if (spriteOverride != null)
+            {
+                editable.SetSpriteRef("enemySprite", spriteOverride);
+            }
+            else
+            {
+                editable.SetSprite("enemySprite", spriteName);
+            }
+
+            editable
                 .SetColor("placeholderTint", tint)
                 .Apply();
 
             return enemy;
+        }
+
+        /// <summary>Finds one frame sub-sprite by name inside an imported sheet (ArtPresetApplier sliced frames).</summary>
+        private static Sprite LoadFrame(string sheetPath, string frameName)
+        {
+            foreach (Object asset in AssetDatabase.LoadAllAssetsAtPath(sheetPath))
+            {
+                if (asset is Sprite sprite && sprite.name == frameName)
+                {
+                    return sprite;
+                }
+            }
+
+            Debug.LogWarning($"[DataAssetGenerator] Frame '{frameName}' not found in '{sheetPath}'.");
+            return null;
         }
 
         private static void CreateStatUpgrades()

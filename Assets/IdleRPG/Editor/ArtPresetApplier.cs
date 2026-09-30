@@ -66,6 +66,13 @@ namespace IdleRPG.EditorTools
                     continue;
                 }
 
+                // UI art is not character art: it is never a frame strip, must keep a 9-slice border and
+                // is sized in canvas pixels, not metres. UiArtPresetApplier owns those files.
+                if (path.Contains("Kenney_PixelUI"))
+                {
+                    continue;
+                }
+
                 if (AssetImporter.GetAtPath(path) is not TextureImporter importer)
                 {
                     continue;
