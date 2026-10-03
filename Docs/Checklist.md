@@ -1173,6 +1173,14 @@ enemies leaned left (lower slots +24x). Screenshot battle-page-v11.png.
 
 Battle-page cleanup round 4 (2026-09-30): heroes now genuinely lean right (front column raised -28y), enemy slots rebuilt to hero geometry (160x176, 188px pitch, 128px icon + bar) so the stacks group alike. Screenshot battle-page-v12.png.
 
+Party page MVP (2026-09-30): the page now has a ROSTER | FORMATION sub-nav. Roster = three animated idle
+portrait cards (selector strip), a big animated selected hero on the left and a live stats card on the right
+(HP/ATK/DEF/cadence from the Resolver, integers), with gear (4) and ability (3) slots drawn and locked for
+later steps. Formation = the existing board + rank mechanics line. Verified live: 5 taps on a card leave the
+portrait rect/pixelScale constant; switching heroes updates name+stats; a move mirrors to the battle board
+with live HP (no zero flash); only the intentional descriptor (back-row weight 0.35x) carries a decimal.
+Vision recorded in Docs/Party-Page.md. Screenshots party-page-roster.png / party-page-formation.png.
+
 Battle-page cleanup round 5 (2026-09-30): heroes lean as one block (rows drift left going down - front slash), enemy group vertically centered to align with the heroes (world-space mid match). Screenshot battle-page-v13.png.
 
 Battle-log reliability (2026-09-30): subscribe Awake/OnDestroy (hidden page loses nothing), log scroll Clamped + no inertia + drag-only follow pause, drop-budget removed (one action = one line, 100-line scrollback). Verified: 28 events while hidden -> +29 lines; follow delta 0.00.

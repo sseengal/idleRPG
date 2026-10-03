@@ -108,6 +108,9 @@ Concrete numbers only (gold, seconds, wave, cost) - never one opaque "power" val
 
 ## 6. Team & hero detail
 
+> The full party vision, information architecture and phasing now live in **`Docs/Party-Page.md`**
+> (`ROSTER | FORMATION` sub-nav; Inventory/Abilities arrive later). The sketch below stays as the summary.
+
 ```
 TEAM: roster grid (owned + silhouettes) | formation board | presets | auto-arrange
 HERO: icon, role/tags, stars, stat rows (from StatDefinition), ability loadout + levels, relics,
