@@ -78,7 +78,7 @@ ROSTER
   selector strip:  3 animated portrait cards (tap = select)
   big animated selected hero (left)   |   hero card (right):
                                             name, role chips, stars (reserved)
-                                            stat rows (HP/ATK/DEF/cadence) - live from the Resolver
+                                            stat rows (HP/ATK/DEF - displayed as a role header + labelled rows; DPS = ATK + attack interval) - live from the Resolver
                                             GEAR row (4 slots, locked)
                                             ABILITIES row (3 slots, locked)
 
