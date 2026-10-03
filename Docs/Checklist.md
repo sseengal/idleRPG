@@ -1175,6 +1175,8 @@ Battle-page cleanup round 4 (2026-09-30): heroes now genuinely lean right (front
 
 Battle-page cleanup round 5 (2026-09-30): heroes lean as one block (rows drift left going down - front slash), enemy group vertically centered to align with the heroes (world-space mid match). Screenshot battle-page-v13.png.
 
+Battle-log reliability (2026-09-30): subscribe Awake/OnDestroy (hidden page loses nothing), log scroll Clamped + no inertia + drag-only follow pause, drop-budget removed (one action = one line, 100-line scrollback). Verified: 28 events while hidden -> +29 lines; follow delta 0.00.
+
 Battle-log repair round (2026-09-30): WaveCompleted/BossFailed bridged back onto the bus (were orphaned since
 the director refactor), PartyWiped de-duplicated, new one-event news channel `GameEvents.CombatMessage` for
 wave/clear/wipe/boss/news lines (alwaysShow priority budget so feed punctuation can't starve), feed resets with

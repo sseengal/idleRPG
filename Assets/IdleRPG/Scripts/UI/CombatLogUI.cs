@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,9 +9,14 @@ using IdleRPG.Utils;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// Live battle feed ("Mage hits Ogre for 24"). Reads the combat events, aggregates rapid
-    /// repeats from the same attacker and keeps a bounded, scrollable ring of lines.
-    /// Labels are pooled: nothing is instantiated per hit.
+    /// Live battle feed ("Mage hits Ogre for 24").
+    ///
+    /// ONE RULE: every action the game raises becomes its own line. Nothing is aggregated, throttled or
+    /// dropped. The visible list is a fixed-length scrollback (oldest lines are recycled) purely so a long
+    /// idle session cannot grow label memory without bound - the logging itself is total.
+    ///
+    /// The feed subscribes once for the component's lifetime (Awake/OnDestroy) so hiding the battle page can
+    /// never make it miss events, and it follows the newest line unless the player is genuinely dragging.
     /// </summary>
     public sealed partial class CombatLogUI : MonoBehaviour
     {
@@ -22,17 +26,11 @@ namespace IdleRPG.UI
         [SerializeField] private TextMeshProUGUI lineTemplate;
 
         [Header("Limits")]
-        [Tooltip("Maximum lines kept on screen.")]
-        [SerializeField] private int maxLines = 60;
+        [Tooltip("Visible scrollback length. Older lines recycle; logging itself is never capped.")]
+        [SerializeField] private int maxLines = 100;
 
-        [Tooltip("Labels created up front.")]
-        [SerializeField] private int poolSize = 24;
-
-        [Tooltip("New lines allowed per second; extras are summarised.")]
-        [SerializeField] private int maxLinesPerSecond = 3;
-
-        [Tooltip("Repeated hits from the same attacker within this window merge into one line.")]
-        [SerializeField] private float aggregateWindowSec = 0.35f;
+        [Tooltip("Labels created up front (the pool grows on demand up to the scrollback length).")]
+        [SerializeField] private int poolSize = 40;
 
         [Tooltip("Line height in reference pixels.")]
         [SerializeField] private float lineHeight = 34f;
@@ -42,16 +40,6 @@ namespace IdleRPG.UI
 
         [Tooltip("Padding above and below the list.")]
         [SerializeField] private float contentPadding = 12f;
-
-        [Header("Bottom follow")]
-        [Tooltip("Slide new lines in smoothly instead of snapping to the bottom.")]
-        [SerializeField] private bool smoothFollow = true;
-
-        [Tooltip("How quickly the feed settles on the newest line.")]
-        [SerializeField] private float followSpeed = 10f;
-
-        [Tooltip("Distance from the bottom (px) at which auto-follow re-engages.")]
-        [SerializeField] private float reengageDistance = 32f;
 
         [Header("Colours")]
         [SerializeField] private Color heroHitColor = new Color(0.95f, 0.95f, 1f, 1f);
@@ -64,114 +52,77 @@ namespace IdleRPG.UI
         private readonly List<TextMeshProUGUI> liveLines = new List<TextMeshProUGUI>();
         private readonly Queue<TextMeshProUGUI> pool = new Queue<TextMeshProUGUI>();
 
-        private float lineBudget;
-        private int droppedLines;
-        private string aggregateKey = string.Empty;
-        private double aggregateDamage;
-        private int aggregateCount;
-        private float aggregateAge;
-        private TextMeshProUGUI aggregateLabel;
-        private bool pinnedToBottom = true;
+        /// <summary>True only while the player is physically dragging the feed (set by the drag relay).</summary>
+        public bool UserDragging { get; set; }
 
-        /// <summary>Allowance for alwaysShow lines: never budget-dropped, capped so a buggy raiser cannot flood.</summary>
-        private float priorityBudget;
-
-        private const float MaxPriorityPerSecond = 4f;
-
-        /// <summary>Scroll position we wrote last: anything else moving the content is the player.</summary>
-        private float lastAppliedY = -1f;
+        /// <summary>Lines were added this frame; the content height is recomputed once per frame, not per line.</summary>
+        private bool contentDirty;
 
         private void Awake()
         {
             if (lineTemplate == null || content == null)
             {
-                Debug.LogError("[CombatLogUI] lineTemplate/content not assigned; log disabled.");
-                enabled = false;
-                return;
+                // Never disable the feed: log loudly, but keep the component alive so a late wire-up still works.
+                Debug.LogError("[CombatLogUI] lineTemplate/content not assigned; the feed shows nothing until wired.");
             }
-
-            lineTemplate.gameObject.SetActive(false);
-
-            for (int i = 0; i < Mathf.Max(1, poolSize); i++)
+            else
             {
-                pool.Enqueue(CreateLine());
+                lineTemplate.gameObject.SetActive(false);
+
+                for (int i = 0; i < Mathf.Max(1, poolSize); i++)
+                {
+                    pool.Enqueue(CreateLine());
+                }
             }
+
+            // Subscribe once for the whole lifetime. A hidden battle page must not lose events.
+            GameEvents.EnemyDamaged += OnEnemyDamaged;
+            GameEvents.EnemyKilled += OnEnemyKilled;
+            GameEvents.HeroDamaged += OnHeroDamaged;
+            GameEvents.HeroDied += OnHeroDied;
+            GameEvents.AscensionCompleted += OnAscensionCompleted;
+            GameEvents.UpgradePurchased += OnUpgradePurchased;
+            GameEvents.OfflineRewardsClaimed += OnOfflineRewardsClaimed;
+            GameEvents.CombatMessage += OnCombatMessage;
+            GameEvents.SaveLoaded += OnSaveLoaded;
+        }
+
+        private void OnDestroy()
+        {
+            GameEvents.EnemyDamaged -= OnEnemyDamaged;
+            GameEvents.EnemyKilled -= OnEnemyKilled;
+            GameEvents.HeroDamaged -= OnHeroDamaged;
+            GameEvents.HeroDied -= OnHeroDied;
+            GameEvents.AscensionCompleted -= OnAscensionCompleted;
+            GameEvents.UpgradePurchased -= OnUpgradePurchased;
+            GameEvents.OfflineRewardsClaimed -= OnOfflineRewardsClaimed;
+            GameEvents.CombatMessage -= OnCombatMessage;
+            GameEvents.SaveLoaded -= OnSaveLoaded;
         }
 
         private void Update()
         {
-            lineBudget = Mathf.Min(lineBudget + maxLinesPerSecond * Time.deltaTime, maxLinesPerSecond);
-            priorityBudget = Mathf.Min(priorityBudget + MaxPriorityPerSecond * Time.deltaTime, MaxPriorityPerSecond);
-
-            if (aggregateCount > 0)
+            if (contentDirty)
             {
-                aggregateAge += Time.deltaTime;
-
-                if (aggregateAge > aggregateWindowSec)
-                {
-                    CloseAggregate();
-                }
+                RefreshContentSize();
+                contentDirty = false;
             }
 
-            if (droppedLines > 0 && lineBudget >= 1f)
-            {
-                int summarized = droppedLines;
-                droppedLines = 0;
-                Append(string.Format("... {0} more hit{1}", summarized, summarized == 1 ? string.Empty : "s"), eventColor, alwaysShow: true);
-            }
-
-            FollowNewest(Time.deltaTime);
+            FollowNewest();
         }
 
         /// <summary>
-        /// Keeps the newest line in view. Auto-follow pauses while the player scrolls back through
-        /// history and re-engages as soon as they return to the bottom.
+        /// Pins the newest line into view. Only a real drag pauses this - the ScrollRect nudging the content
+        /// itself (clamping, momentum) is never mistaken for the player.
         /// </summary>
-        /// <summary>
-        /// Keeps the newest line in view. The content grows every time a line is added, so growth
-        /// must NOT be mistaken for the player scrolling: only a position we did not write counts as
-        /// user input. Scrolling up pauses the follow until they come back to the bottom.
-        /// </summary>
-        private void FollowNewest(float deltaTime)
+        private void FollowNewest()
         {
-            if (scrollRect == null || content == null)
+            if (scrollRect == null || content == null || UserDragging)
             {
                 return;
             }
 
-            float target = OverflowY();
-            float currentY = content.anchoredPosition.y;
-
-            if (lastAppliedY >= 0f && Mathf.Abs(currentY - lastAppliedY) > 0.5f)
-            {
-                // Something other than us moved the feed: a drag, a wheel scroll or the scrollbar.
-                pinnedToBottom = target - currentY <= reengageDistance;
-            }
-
-            if (!pinnedToBottom)
-            {
-                if (target - currentY <= reengageDistance)
-                {
-                    pinnedToBottom = true;
-                }
-                else
-                {
-                    lastAppliedY = currentY;
-                    return;
-                }
-            }
-
-            float y = smoothFollow
-                ? Mathf.Lerp(currentY, target, Mathf.Clamp01(followSpeed * deltaTime))
-                : target;
-
-            if (Mathf.Abs(target - y) < 0.5f)
-            {
-                y = target;
-            }
-
-            content.anchoredPosition = new Vector2(content.anchoredPosition.x, y);
-            lastAppliedY = y;
+            content.anchoredPosition = new Vector2(content.anchoredPosition.x, OverflowY());
         }
 
         /// <summary>How far the content can scroll; 0 when everything already fits.</summary>
@@ -187,65 +138,15 @@ namespace IdleRPG.UI
         }
 
         // ------------------------------------------------------------------
-        // Event handlers
-        // ------------------------------------------------------------------
-        private void OnEnable()
-        {
-            GameEvents.EnemyDamaged += OnEnemyDamaged;
-            GameEvents.EnemyKilled += OnEnemyKilled;
-            GameEvents.HeroDamaged += OnHeroDamaged;
-            GameEvents.HeroDied += OnHeroDied;
-            GameEvents.AscensionCompleted += OnAscensionCompleted;
-            GameEvents.UpgradePurchased += OnUpgradePurchased;
-            GameEvents.OfflineRewardsClaimed += OnOfflineRewardsClaimed;
-            GameEvents.CombatMessage += OnCombatMessage;
-            GameEvents.SaveLoaded += OnSaveLoaded;
-        }
-
-        private void OnDisable()
-        {
-            GameEvents.EnemyDamaged -= OnEnemyDamaged;
-            GameEvents.EnemyKilled -= OnEnemyKilled;
-            GameEvents.HeroDamaged -= OnHeroDamaged;
-            GameEvents.HeroDied -= OnHeroDied;
-            GameEvents.AscensionCompleted -= OnAscensionCompleted;
-            GameEvents.UpgradePurchased -= OnUpgradePurchased;
-            GameEvents.OfflineRewardsClaimed -= OnOfflineRewardsClaimed;
-            GameEvents.CombatMessage -= OnCombatMessage;
-            GameEvents.SaveLoaded -= OnSaveLoaded;
-        }
-
-        // ------------------------------------------------------------------
         // Line plumbing
         // ------------------------------------------------------------------
-        /// <summary>
-        /// Adds a line. Per-hit lines pay the per-second budget (extras are summarised later); alwaysShow lines
-        /// (wave/stage/wipe/news) are rare and never budget-dropped, so progression punctuation in the feed can
-        /// never starve under hot combat - and their own small cap keeps a buggy raiser from flooding the log.
-        /// </summary>
-        private void Append(string text, Color color, bool alwaysShow = false)
+        /// <summary>Adds one line. No budget, no merging - every call writes a line.</summary>
+        private void Append(string text, Color color)
         {
-            if (alwaysShow)
+            if (lineTemplate == null || content == null)
             {
-                if (priorityBudget < 1f)
-                {
-                    return;
-                }
-
-                priorityBudget -= 1f;
-            }
-            else if (lineBudget < 1f)
-            {
-                droppedLines++;
                 return;
             }
-            else
-            {
-                lineBudget -= 1f;
-            }
-
-            // A new line ends the current aggregate run.
-            CloseAggregate();
 
             TextMeshProUGUI label = Rent();
             label.gameObject.SetActive(true);
@@ -254,56 +155,7 @@ namespace IdleRPG.UI
             liveLines.Add(label);
 
             TrimToMax();
-            RefreshContentSize();
-        }
-
-        /// <summary>
-        /// Merges repeated hits from the same attacker into the last line while the window is
-        /// open, otherwise appends a fresh line. Keeps the feed readable during fast fights.
-        /// </summary>
-        private void AddOrAggregate(string key, double damage, Color color, System.Func<int, string> format)
-        {
-            if (aggregateCount > 0 && aggregateKey == key && aggregateLabel != null && aggregateAge <= aggregateWindowSec)
-            {
-                aggregateCount++;
-                aggregateDamage += damage;
-                aggregateAge = 0f;
-                aggregateLabel.SetText(format(aggregateCount));
-                return;
-            }
-
-            if (lineBudget < 1f)
-            {
-                droppedLines++;
-                return;
-            }
-
-            lineBudget -= 1f;
-            CloseAggregate();
-
-            TextMeshProUGUI label = Rent();
-            label.gameObject.SetActive(true);
-            label.color = color;
-            label.SetText(format(1));
-            liveLines.Add(label);
-
-            aggregateKey = key;
-            aggregateDamage = damage;
-            aggregateCount = 1;
-            aggregateAge = 0f;
-            aggregateLabel = label;
-
-            TrimToMax();
-            RefreshContentSize();
-        }
-
-        private void CloseAggregate()
-        {
-            aggregateCount = 0;
-            aggregateDamage = 0d;
-            aggregateAge = 0f;
-            aggregateLabel = null;
-            aggregateKey = string.Empty;
+            contentDirty = true;
         }
 
         // ------------------------------------------------------------------

@@ -10,7 +10,8 @@ using IdleRPG.Utils;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// Line pooling: labels are created once, rented, returned and trimmed here.
+    /// Line pooling: labels are created once, rented, returned and trimmed here. The trim is a scrollback
+    /// window only - logging itself is never dropped.
     /// </summary>
     public sealed partial class CombatLogUI : MonoBehaviour
     {
@@ -47,11 +48,6 @@ namespace IdleRPG.UI
 
             label.gameObject.SetActive(false);
             pool.Enqueue(label);
-
-            if (aggregateLabel == label)
-            {
-                CloseAggregate();
-            }
         }
 
         /// <summary>
@@ -66,16 +62,13 @@ namespace IdleRPG.UI
             }
 
             liveLines.Clear();
-            CloseAggregate();
             RefreshContentSize();
+            contentDirty = false;
 
             if (content != null)
             {
                 content.anchoredPosition = Vector2.zero;
             }
-
-            pinnedToBottom = true;
-            lastAppliedY = -1f;
         }
 
         private TextMeshProUGUI CreateLine()

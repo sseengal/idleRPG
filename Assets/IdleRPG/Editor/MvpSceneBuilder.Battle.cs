@@ -308,6 +308,15 @@ namespace IdleRPG.EditorTools
 
             ScrollRect scroll = UiFactory.CreateScrollView(strip.transform, "Scroll", 2f, new RectOffset(10, 10, 6, 6), out RectTransform content, autoSizeContent: false);
 
+        // The feed drives its own scroll position, so the ScrollRect must never spring the content back:
+        // Clamped, no inertia.
+        scroll.movementType = ScrollRect.MovementType.Clamped;
+        scroll.inertia = false;
+
+        // Real drags pause auto-follow; nothing else does.
+        LogScrollDragRelay dragRelay = scroll.gameObject.AddComponent<LogScrollDragRelay>();
+        dragRelay.Bind(ui);
+
             // The whole pool copies this template, so the font and the bigger VT323 size land everywhere.
             TextMeshProUGUI template = UiFactory.Text("LineTemplate", content, "line", UiTheme.LogSize,
                 TextAlignmentOptions.MidlineLeft, UiTheme.Text);
@@ -321,16 +330,13 @@ namespace IdleRPG.EditorTools
             SceneWiringUtility.SetField(ui, "content", content);
             SceneWiringUtility.SetField(ui, "lineTemplate", template);
 
-            // Feed tuning for multi-enemy waves (Step 11e): a bigger font needs taller lines, and the
-            // event colours map onto the picked palette.
+            // Feed tuning (one line per action; the list is a 100-line scrollback window).
+            SceneWiringUtility.SetField(ui, "maxLines", 100);
             SceneWiringUtility.SetField(ui, "lineHeight", UiTheme.LogLineHeight);
             SceneWiringUtility.SetField(ui, "lineSpacing", 2);
             SceneWiringUtility.SetField(ui, "heroHitColor", UiTheme.Text);
             SceneWiringUtility.SetField(ui, "criticalColor", UiTheme.AccentLight);
             SceneWiringUtility.SetField(ui, "goldColor", UiTheme.AccentLight);
-            SceneWiringUtility.SetField(ui, "maxLinesPerSecond", 5);
-            SceneWiringUtility.SetField(ui, "aggregateWindowSec", 0.5f);
-            SceneWiringUtility.SetField(ui, "poolSize", 36);
             return ui;
         }
     }

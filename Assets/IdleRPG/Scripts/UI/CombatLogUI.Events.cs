@@ -10,7 +10,7 @@ using IdleRPG.Utils;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// Game-event handlers: every line the battle log writes, and the wave summary that names each enemy.
+    /// Game-event handlers: every line the battle log writes. One event, one line.
     /// </summary>
     public sealed partial class CombatLogUI : MonoBehaviour
     {
@@ -18,29 +18,22 @@ namespace IdleRPG.UI
         {
             string attacker = HeroName(info.AttackerIndex);
             string target = EnemyName(info.EnemyIndex);
-            string key = string.Format("enemy:{0}:{1}", info.AttackerIndex, info.IsCritical);
 
-            AddOrAggregate(key, info.Damage, info.IsCritical ? criticalColor : heroHitColor,
-                count => info.IsCritical
-                    ? string.Format("{0} CRITS {1} for {2}", attacker, target, NumberFormatter.Format(info.Damage))
-                    : string.Format("{0} hits {1} for {2}{3}", attacker, target,
-                        NumberFormatter.Format(info.Damage), count > 1 ? string.Format(" x{0}", count) : string.Empty));
+            Append(info.IsCritical
+                ? string.Format("{0} CRITS {1} for {2}", attacker, target, NumberFormatter.Format(info.Damage))
+                : string.Format("{0} hits {1} for {2}", attacker, target, NumberFormatter.Format(info.Damage)),
+                info.IsCritical ? criticalColor : heroHitColor);
         }
 
         private void OnHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex)
         {
-            // Keyed per (hero, enemy): hits from different enemies must never merge into one line, and the
-            // attacker index is what names the enemy that actually swung.
             string attacker = EnemyName(attackerEnemyIndex);
             string target = HeroName(heroIndex);
-            string key = string.Format("hero:{0}:{1}", heroIndex, attackerEnemyIndex);
 
-            AddOrAggregate(key, damage, incomingColor,
-                count => string.Format("{0} hits {1} for {2}  ({3}/{4}){5}", attacker, target,
-                    NumberFormatter.Format(damage),
-                    NumberFormatter.Format(currentHealth),
-                    NumberFormatter.Format(maxHealth),
-                    count > 1 ? string.Format(" x{0}", count) : string.Empty));
+            Append(string.Format("{0} hits {1} for {2}  ({3}/{4})", attacker, target,
+                NumberFormatter.Format(damage),
+                NumberFormatter.Format(currentHealth),
+                NumberFormatter.Format(maxHealth)), incomingColor);
         }
 
         private void OnEnemyKilled(string enemyName, double goldReward, int enemyIndex)
@@ -85,19 +78,14 @@ namespace IdleRPG.UI
                     break;
             }
 
-            Append(message.Text, colour, alwaysShow: true);
+            Append(message.Text, colour);
         }
 
         /// <summary>New session (restart / offline load): clean feed plus a visible divider.</summary>
         private void OnSaveLoaded()
         {
             ClearLines();
-
-            lineBudget = maxLinesPerSecond;
-            priorityBudget = MaxPriorityPerSecond;
-            droppedLines = 0;
-
-            Append("-- session resumed --", eventColor, alwaysShow: true);
+            Append("-- session resumed --", eventColor);
         }
     }
 }
