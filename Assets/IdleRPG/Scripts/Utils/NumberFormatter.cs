@@ -16,15 +16,22 @@ namespace IdleRPG.Utils
             "Ud", "Dd", "Td", "Qad", "Qid", "Sxd", "Spd", "Ocd", "Nod", "Vg"
         };
 
-        /// <summary>Formats with 1 decimal below 1000 of a tier, 0 decimals above.</summary>
+        /// <summary>Compact label with NO decimal point. See <see cref="Format(double, int)"/>.</summary>
         public static string Format(double value)
         {
-            return Format(value, 1);
+            return Format(value, 0);
         }
 
         /// <summary>
-        /// Compact format. Values under 1000 render as integers; above that they are
-        /// divided by 1000 per tier and suffixed.
+        /// Compact, integer-only label: "7", "234", "1K", "2M". This is the ONE place game numbers become
+        /// text, so the whole UI is decimal-free by construction.
+        ///
+        /// Rules:
+        ///  - values under 1000 round to the nearest whole number (a positive value never shows as 0);
+        ///  - bigger values round to a whole mantissa and carry tiers (999,600 -> "1M", never "1000K").
+        ///
+        /// The <paramref name="decimals"/> argument is kept for call-site compatibility and ignored on purpose:
+        /// upgrade/multiplier descriptors that genuinely need fractions format themselves.
         /// </summary>
         public static string Format(double value, int decimals)
         {
@@ -43,12 +50,14 @@ namespace IdleRPG.Utils
 
             if (magnitude < 1000d)
             {
-                // Small values: plain integer (or one decimal for sub-10 fractions).
-                string small = magnitude < 10d && magnitude % 1d > 0.0001d
-                    ? magnitude.ToString("0.#", CultureInfo.InvariantCulture)
-                    : Math.Floor(magnitude).ToString("0", CultureInfo.InvariantCulture);
+                long small = (long)Math.Round(magnitude, MidpointRounding.AwayFromZero);
+                if (small == 0L && magnitude > 0d)
+                {
+                    small = 1L;   // a live value never reads as zero
+                }
 
-                return negative ? "-" + small : small;
+                string body = small.ToString("0", CultureInfo.InvariantCulture);
+                return negative ? "-" + body : body;
             }
 
             int tier = 0;
@@ -60,10 +69,14 @@ namespace IdleRPG.Utils
                 tier++;
             }
 
-            int safeDecimals = scaled >= 100d ? 0 : (decimals < 0 ? 0 : decimals);
-            string body = scaled.ToString("0." + new string('#', safeDecimals), CultureInfo.InvariantCulture);
-            string result = body + Suffixes[tier];
+            long mantissa = (long)Math.Round(scaled, MidpointRounding.AwayFromZero);
+            if (mantissa >= 1000L && tier < Suffixes.Length - 1)
+            {
+                mantissa /= 1000L;
+                tier++;
+            }
 
+            string result = mantissa.ToString("0", CultureInfo.InvariantCulture) + Suffixes[tier];
             return negative ? "-" + result : result;
         }
 

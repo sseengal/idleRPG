@@ -136,7 +136,7 @@ namespace IdleRPG.UI
                 if (formation.HeroAt(slotIndex) >= 0)
                 {
                     selectedSlot = slotIndex;
-                    Refresh();
+                    RefreshSelection();
                 }
 
                 return;
@@ -145,19 +145,42 @@ namespace IdleRPG.UI
             if (selectedSlot == slotIndex)
             {
                 selectedSlot = -1;
-                Refresh();
+                RefreshSelection();
                 return;
             }
 
+            // Names are read BEFORE the move: afterwards the board already reads the new layout.
             int heroIndex = formation.HeroAt(selectedSlot);
+            string movingHero = Describe(selectedSlot);
+            string destination = Describe(slotIndex);
+            selectedSlot = -1;
 
             if (heroIndex >= 0 && formation.TryMove(heroIndex, slotIndex))
             {
-                GameEvents.RaiseToast(Describe(heroIndex) + " -> " + Describe(slotIndex));
+                // TryMove fires Formation.Changed, which repaints the whole board - nothing else needed.
+                GameEvents.RaiseToast(movingHero + " -> " + destination);
+                return;
             }
 
-            selectedSlot = -1;
-            Refresh();
+            RefreshSelection();
+        }
+
+        /// <summary>Repaints only the highlight backgrounds (tap feedback). Never touches the views - a tap must
+        /// not rebind a hero, restart its animation or resize its sprite.</summary>
+        private void RefreshSelection()
+        {
+            if (slotBackgrounds == null)
+            {
+                return;
+            }
+
+            for (int slot = 0; slot < slotBackgrounds.Length; slot++)
+            {
+                if (slotBackgrounds[slot] != null)
+                {
+                    slotBackgrounds[slot].color = selectedSlot == slot ? selectedColor : slotColor;
+                }
+            }
         }
 
         private string Describe(int slotIndex)

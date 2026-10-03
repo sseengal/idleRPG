@@ -25,8 +25,12 @@ namespace IdleRPG.UI
         private float timer;
         private int cursor;
 
-        /// <summary>Icon rect size as wired by the scene - actions scale *around* this reference.</summary>
-        private Vector2 baseSizeDelta;
+        /// <summary>
+        /// The icon rect size the SLOT wants (announced once via SetSlotSize; never read back from the live rect).
+        /// Reading the live rect made repeated re-binds ratchet the sprite bigger, because a wider action pose
+        /// got captured as the new base.
+        /// </summary>
+        private Vector2 slotSize;
 
         /// <summary>Pixels-per-sprite-pixel so every action renders its body at the same size (the pack's
         /// attack/death frames have much wider windows than idle; a fixed rect would shrink those poses).</summary>
@@ -40,6 +44,15 @@ namespace IdleRPG.UI
         public bool HasArt => art != null && art.HasAnimation;
 
         public CharacterArtSet Art => art;
+
+        /// <summary>Announces the icon size this slot wants. Idempotent - call again only on a real resize.</summary>
+        public void SetSlotSize(Vector2 size)
+        {
+            if (size.x > 0f && size.y > 0f)
+            {
+                slotSize = size;
+            }
+        }
 
         private void Awake()
         {
@@ -63,12 +76,17 @@ namespace IdleRPG.UI
 
             if (target != null)
             {
-                baseSizeDelta = target.rectTransform.sizeDelta;
+                if (slotSize == Vector2.zero)
+                {
+                    // Safety: a slot that never announced its size falls back to the built rect once.
+                    slotSize = target.rectTransform.sizeDelta;
+                }
+
                 Sprite[] reference = art.Idle != null && art.Idle.Length > 0 ? art.Idle : art.GetAttack();
                 if (reference != null && reference.Length > 0)
                 {
                     Rect r = reference[0].rect;
-                    pixelScale = Mathf.Max(baseSizeDelta.x, baseSizeDelta.y)
+                    pixelScale = Mathf.Max(slotSize.x, slotSize.y)
                                  / Mathf.Max(1f, Mathf.Max(r.width, r.height));
                 }
             }
@@ -86,7 +104,7 @@ namespace IdleRPG.UI
             if (target != null)
             {
                 target.sprite = null;
-                target.rectTransform.sizeDelta = baseSizeDelta;
+                target.rectTransform.sizeDelta = slotSize;
             }
         }
 
@@ -207,7 +225,7 @@ namespace IdleRPG.UI
             }
 
             Rect r = clip[0].rect;
-            float baseMax = Mathf.Max(1f, Mathf.Max(baseSizeDelta.x, baseSizeDelta.y));
+            float baseMax = Mathf.Max(1f, Mathf.Max(slotSize.x, slotSize.y));
             float cap = baseMax * 1.5f;
             float natural = Mathf.Max(r.width, r.height) * pixelScale;
             float mul = Mathf.Min(1f, cap / Mathf.Max(1f, natural));

@@ -27,6 +27,7 @@ namespace IdleRPG.UI
         private float flashTimer;
 
         private CharacterAnimator animator;
+        private HeroData appliedData;
 
         public int HeroIndex => heroIndex;
 
@@ -64,6 +65,7 @@ namespace IdleRPG.UI
         public void ClearVisual(string label = "")
         {
             heroIndex = -1;
+            appliedData = null;
             flashTimer = 0f;
             baseColor = new Color(1f, 1f, 1f, 0f);   // empty seats rest invisible (Update() honours this)
 
@@ -101,10 +103,13 @@ namespace IdleRPG.UI
         /// <summary>Applies the static data (icon, tint, name) once at setup.</summary>
         public void Apply(HeroData data)
         {
-            if (data == null)
+            if (data == null || data == appliedData)
             {
+                // Idempotent: repeated repaints (selection taps, refreshes) must not re-bind or resize anything.
                 return;
             }
+
+            appliedData = data;
 
             if (iconImage != null)
             {
@@ -205,21 +210,23 @@ namespace IdleRPG.UI
                 return;
             }
 
-            RefreshFromSimulator();
+            RefreshStats();
         }
 
         private void OnWaveChanged(int stage, int wave)
         {
-            RefreshFromSimulator();
+            RefreshStats();
         }
 
         private void OnStageChangedHandler(int stage, int wave, bool isBoss)
         {
-            RefreshFromSimulator();
+            RefreshStats();
         }
 
         /// <summary>Pulls current HP from the simulation (after healing or an upgrade).</summary>
-        private void RefreshFromSimulator()
+        /// <summary>Pulls the live HP from the simulation into the bar. Public so a board can refresh a seat the
+        /// moment it (re)binds it, instead of waiting for the next combat event.</summary>
+        public void RefreshStats()
         {
             GameManager manager = HudController.Instance != null ? HudController.Instance.GameManager : null;
             if (manager == null || manager.Combat == null || manager.Combat.Simulator == null)
@@ -276,6 +283,8 @@ namespace IdleRPG.UI
                     animator = iconImage.gameObject.AddComponent<CharacterAnimator>();
                 }
 
+                // Captured while the rect is still the built one; the animator owns it from here on.
+                animator.SetSlotSize(iconImage.rectTransform.sizeDelta);
                 iconImage.preserveAspect = true;
                 animator.FacingLeft = false;
             }

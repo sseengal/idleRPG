@@ -35,6 +35,7 @@ namespace IdleRPG.UI
         private float popTimer;
 
         private CharacterAnimator animator;
+        private Vector2 iconSlotSize;
 
         /// <summary>Which enemy of the wave this view shows (0-based).</summary>
         public int EnemyIndex => enemyIndex;
@@ -96,6 +97,12 @@ namespace IdleRPG.UI
             if (spriteImage != null)
             {
                 spriteImage.rectTransform.sizeDelta = new Vector2(pixels, pixels);
+                iconSlotSize = new Vector2(pixels, pixels);
+
+                if (animator != null)
+                {
+                    animator.SetSlotSize(iconSlotSize);
+                }
             }
         }
 
@@ -253,6 +260,8 @@ namespace IdleRPG.UI
                     animator = spriteImage.gameObject.AddComponent<CharacterAnimator>();
                 }
 
+                // The stack sizes the slot per wave; the animator scales around that, never around its own output.
+                animator.SetSlotSize(iconSlotSize != Vector2.zero ? iconSlotSize : spriteImage.rectTransform.sizeDelta);
                 spriteImage.preserveAspect = true;
                 animator.FacingLeft = true;
             }

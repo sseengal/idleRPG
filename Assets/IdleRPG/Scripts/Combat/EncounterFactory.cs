@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using IdleRPG.Data;
 using IdleRPG.Sim;
+using IdleRPG.Utils;
 
 namespace IdleRPG.Combat
 {
@@ -128,7 +129,9 @@ namespace IdleRPG.Combat
                 }
 
                 builder.Append($"{enemy.DisplayName}#{i} ")
-                       .Append($"{enemy.MaxHealth:0.#}hp {enemy.Attack:0.#}atk {enemy.GoldReward:0.#}g");
+                       .Append($"{NumberFormatter.Format(enemy.MaxHealth)}hp ")
+                       .Append($"{NumberFormatter.Format(enemy.Attack)}atk ")
+                       .Append($"{NumberFormatter.Format(enemy.GoldReward)}g");
             }
 
             return builder.ToString();

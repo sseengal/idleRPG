@@ -1177,6 +1177,8 @@ Battle-page cleanup round 5 (2026-09-30): heroes lean as one block (rows drift l
 
 Battle-log reliability (2026-09-30): subscribe Awake/OnDestroy (hidden page loses nothing), log scroll Clamped + no inertia + drag-only follow pause, drop-budget removed (one action = one line, 100-line scrollback). Verified: 28 events while hidden -> +29 lines; follow delta 0.00.
 
+Numbers + positioning (2026-09-30): NumberFormatter is integer-only (one owner, no decimals for hp/damage/gold; descriptors exempt), and positioning bugs fixed at the source - slot owns icon size, Apply idempotent, rebind pulls live HP, taps only repaint selection. Verified: 5 taps size-stable; move shows live HP with no zero flash; 0 decimal labels on battle/ascend/shop.
+
 Battle-log repair round (2026-09-30): WaveCompleted/BossFailed bridged back onto the bus (were orphaned since
 the director refactor), PartyWiped de-duplicated, new one-event news channel `GameEvents.CombatMessage` for
 wave/clear/wipe/boss/news lines (alwaysShow priority budget so feed punctuation can't starve), feed resets with

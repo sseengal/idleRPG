@@ -175,6 +175,7 @@ namespace IdleRPG.UI
                 view.Configure(heroIndex);
                 view.Apply(hero);
                 view.SetHealthVisible(true);   // a filled seat shows its health bar (it is hidden while empty)
+                view.RefreshStats();           // and it shows the LIVE hp immediately - no zero flash after a move
                 anchors[Mathf.Clamp(heroIndex, 0, anchors.Length - 1)] = slotRects[slot];
             }
 
