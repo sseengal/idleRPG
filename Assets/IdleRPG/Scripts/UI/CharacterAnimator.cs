@@ -192,7 +192,7 @@ namespace IdleRPG.UI
             }
 
             clip = frames;
-            loop = loop;
+            this.loop = loop;
             frameDuration = Mathf.Max(0.01f, duration);
             timer = 0f;
             cursor = 0;

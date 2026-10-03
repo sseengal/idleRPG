@@ -41,6 +41,10 @@ namespace IdleRPG.UI
         private readonly Color bodyText = new Color(1f, 1f, 1f, 0.92f);
         private readonly Color dimText = new Color(1f, 1f, 1f, 0.55f);
         private readonly Color hintColor = new Color(1f, 0.92f, 0.7f);
+        private readonly Color accentColor = new Color(1f, 0.82f, 0.3f, 1f);
+
+        private const int StatRowCount = 4;
+        private static readonly string[] StatKeyNames = { "HP", "ATK", "DEF", "DPS" };
 
         private GameManager manager;
         private PartyBoardUI board;
@@ -57,7 +61,9 @@ namespace IdleRPG.UI
         private Image bigPortrait;
         private CharacterAnimator bigAnimator;
         private TextMeshProUGUI bigNameLabel;
-        private TextMeshProUGUI statsLabel;
+        private TextMeshProUGUI roleLabel;
+        private TextMeshProUGUI[] statKeys;
+        private TextMeshProUGUI[] statValues;
         private TextMeshProUGUI formationLabel;
 
         private int selectedHeroIndex = -1;
@@ -68,10 +74,20 @@ namespace IdleRPG.UI
             Build();
         }
 
+        private bool built;
+
         private void OnEnable()
         {
-            // Levels and formation can change while the tab is closed, so re-read on open.
-            RefreshAll();
+            if (!built)
+            {
+                // Boot can race: Start/OnEnable may fire before GameManager exists.
+                Build();
+            }
+            else
+            {
+                // Levels and formation can change while the tab is closed, so re-read on open.
+                RefreshAll();
+            }
         }
 
         private void OnDestroy()
@@ -84,6 +100,11 @@ namespace IdleRPG.UI
 
         private void Build()
         {
+            if (built)
+            {
+                return;
+            }
+
             HudController hud = HudController.Instance;
             manager = hud != null ? hud.GameManager : null;
 
@@ -102,6 +123,7 @@ namespace IdleRPG.UI
             ShowTab(0);
 
             manager.Formation.Changed += RefreshAll;
+            built = true;
 
             // Open on the first real hero so the stand + card are never empty on arrival.
             if (selectedHeroIndex < 0)
@@ -236,10 +258,29 @@ namespace IdleRPG.UI
                 TextAlignmentOptions.Center, Color.white);
             UiRuntime.Anchor(bigNameLabel.rectTransform, new Vector2(0.02f, 0.28f), new Vector2(0.46f, 0.36f), 6f, 0f, 6f, 0f);
 
-            // Its card, on the right: stats now, gear and abilities reserved below.
-            statsLabel = UiRuntime.CreateText(root, "Stats", string.Empty, 18f,
-                TextAlignmentOptions.TopLeft, bodyText);
-            UiRuntime.Anchor(statsLabel.rectTransform, new Vector2(0.48f, 0.50f), new Vector2(0.97f, 0.79f), 4f, 0f, 6f, 0f);
+            // Its card, on the right: role + stat rows up top, gear/abilities reserved below it.
+            Image statsPanel = UiRuntime.CreatePanel(root, null, cardColor);
+            UiRuntime.Anchor(statsPanel.rectTransform, new Vector2(0.48f, 0.44f), new Vector2(0.97f, 0.795f));
+
+            roleLabel = UiRuntime.CreateText(root, "Role", string.Empty, 15f,
+                TextAlignmentOptions.MidlineLeft, accentColor);
+            UiRuntime.Anchor(roleLabel.rectTransform, new Vector2(0.50f, 0.745f), new Vector2(0.95f, 0.783f), 2f, 0f, 0f, 0f);
+
+            statKeys = new TextMeshProUGUI[StatRowCount];
+            statValues = new TextMeshProUGUI[StatRowCount];
+
+            for (int i = 0; i < StatRowCount; i++)
+            {
+                float yTop = 0.68f - i * 0.055f;
+
+                statKeys[i] = UiRuntime.CreateText(root, "Key" + StatKeyNames[i], StatKeyNames[i], 17f,
+                    TextAlignmentOptions.MidlineLeft, dimText);
+                UiRuntime.Anchor(statKeys[i].rectTransform, new Vector2(0.50f, yTop), new Vector2(0.68f, yTop + 0.045f), 0f, 0f, 0f, 0f);
+
+                statValues[i] = UiRuntime.CreateText(root, "Val" + StatKeyNames[i], string.Empty, 17f,
+                    TextAlignmentOptions.MidlineRight, bodyText);
+                UiRuntime.Anchor(statValues[i].rectTransform, new Vector2(0.70f, yTop), new Vector2(0.95f, yTop + 0.045f), 0f, 0f, 0f, 0f);
+            }
 
             BuildSlotRow(root, "GEAR", gearSlotPlaceholders, 0.335f, 0.415f);
             BuildSlotRow(root, "ABILITIES", abilitySlotPlaceholders, 0.175f, 0.255f);
@@ -399,37 +440,32 @@ namespace IdleRPG.UI
 
         private void RefreshStats()
         {
-            if (statsLabel == null)
+            if (statValues == null || statKeys == null || roleLabel == null)
             {
                 return;
             }
 
-            if (selectedHeroIndex < 0)
+            if (selectedHeroIndex < 0 || manager.Party.GetHero(selectedHeroIndex) == null)
             {
-                statsLabel.SetText("Select a hero");
+                roleLabel.SetText("select a hero");
+                for (int i = 0; i < statValues.Length; i++)
+                {
+                    statValues[i].SetText("-");
+                }
                 return;
             }
 
             HeroData hero = manager.Party.GetHero(selectedHeroIndex);
-
-            if (hero == null)
-            {
-                statsLabel.SetText("no hero in that cell");
-                return;
-            }
-
             double health = Resolve(i => manager.Resolver.GetMaxHealth(hero, i), selectedHeroIndex, hero.BaseHealth);
             double attack = Resolve(i => manager.Resolver.GetAttack(hero, i), selectedHeroIndex, hero.BaseAttack);
             double defense = Resolve(i => manager.Resolver.GetDefense(hero, i), selectedHeroIndex, hero.BaseDefense);
+            double dps = hero.AttackIntervalSec > 0.05d ? attack / hero.AttackIntervalSec : attack;
 
-            StringBuilder builder = new StringBuilder(160);
-            builder.AppendLine(hero.Role.ToString().ToUpperInvariant());
-            builder.AppendLine();
-            builder.AppendLine("HP     " + NumberFormatter.Format(health));
-            builder.AppendLine("ATK    " + NumberFormatter.Format(attack));
-            builder.AppendLine("DEF    " + NumberFormatter.Format(defense));
-            builder.Append("EVERY  " + hero.AttackIntervalSec.ToString("0.#") + "s");
-            statsLabel.SetText(builder.ToString());
+            roleLabel.SetText(hero.Role.ToString().ToUpperInvariant());
+            statValues[0].SetText(NumberFormatter.Format(health));
+            statValues[1].SetText(NumberFormatter.Format(attack));
+            statValues[2].SetText(NumberFormatter.Format(defense));
+            statValues[3].SetText(NumberFormatter.Format(dps));
         }
 
         private void RefreshFormationText()
