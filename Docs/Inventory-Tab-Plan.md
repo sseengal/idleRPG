@@ -10,6 +10,14 @@
 
 - Party page top bar: `ROSTER | FORMATION | INVENTORY` (3 equal tabs, 44px+ tall).
 
+**Round 3 (2026-10-04):** dropdowns rebuilt (tap-outside dismisses, options apply + close in the SAME
+frame - no leftover tap-swallowing window, pressed-tint on the open dropdown) and the item popup became a
+DOCKED, non-modal bottom sheet: no full-page scrim (the old backdrop was built with a non-raycasting
+graphic so it never blocked clicks - the source of "I can still tap things behind it"). The sheet covers
+only its own rect above the bag's lower rows; tiles above it stay tappable and re-target the sheet; an
+empty-slot tap closes it. Also fixed a data bug: the Mage was configured as Damage, so Support-class gear
+had NO hero to equip to (Hero_Mage role 1 -> 2).
+
 **Round 2 (2026-10-04):** the bag moved to a FIXED 4x5 (20-slot) grid and the two chip rows became two
 DROPDOWNS (`SLOT: ALL v`, `SORT: NEWEST v`) - the page felt heavy/cramped. Empty slots render as dark,
 non-interactive tiles, so the bag never shifts shape. The Roster is now fully view-only (a slot tap does
@@ -26,6 +34,8 @@ nothing) and each stat row on the Roster card shows its equipped gear bonus righ
   - **equipped tiles:** a small **'E' badge** (top-left) + a **bright border ring**
 - **equip gating:** the EQUIP button is only offered when it can genuinely succeed (bag item + its class
   hero exists, resolved fresh at tap time); the impossible "cannot do that" fallback is deleted.
+- **no modal:** the detail is a docked sheet over the bag's lower rows, not a modal - the grid stays
+  interactive; tapping another tile retargets the sheet, an empty slot closes it, X/action closes it.
   - tap a tile → **bottom-sheet popup**: big sprite, class ("TANK ONLY"), slot + stat ("Armor · +3.2% DEF"),
     source ("stage 4 drop · 11 gold"), **[EQUIP → KNIGHT]** / **[UNEQUIP]**, **[DISCARD]** with a two-tap
     guard ("TAP AGAIN"), close via X or tapping the dimmed backdrop
@@ -57,4 +67,5 @@ Discard` + `Changed` events drive everything; the battle-log lines and toasts we
 ## 5. Fast-follow (recorded, not built)
 
 Class-filter dropdown entry, drag-to-reorder favourites, compare arrows against the equipped piece, sort by
-hero instead of slot. Placeholder letter tiles swap to real square sprites later.
+hero instead of slot. Duplicate-class rosters need a smarter HeroFor (pick the hero with the weakest slot,
+not just the first). Placeholder letter tiles swap to real square sprites later.

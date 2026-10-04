@@ -1179,7 +1179,13 @@ FORMATION | INVENTORY): two DROPDOWNS (SLOT, SORT) + a FIXED 4x5 = 20 slot bag (
 'E' badge + bright ring on equipped tiles, bottom-sheet popup (class/slot/stat/source, EQUIP -> <hero> /
 UNEQUIP, two-tap DISCARD). The equip button is only offered when it can succeed (impossible "cannot do
 that" fallback deleted). Roster is fully view-only for gear and shows the equipped bonus next to each stat
-(e.g. DEF 13 +4.8%). Mobile minimums measured: dropdowns 105px, slots 106px, tiles 150px (1080x1920). Two token upgrades on the
+(e.g. DEF 13 +4.8%). Round 3 (2026-10-04): dropdowns now dismiss on tap-outside + on option select in the
+same frame (overlay + catcher pattern; no leftover tap-swallowing frames; pressed tint on the open
+dropdown). The item detail became a DOCKED non-modal bottom sheet over the bag (no scrim - the old one was
+a non-raycasting graphic so it never blocked); tiles above it stay tappable, taps retarget the sheet,
+empty slots close it. Data bug fixed: Hero_Mage role Damage -> Support so Support-class gear finally has
+an owner (previously those drops were un-equippable). Mobile minimums measured: dropdowns 105px, slots
+106px, tiles 150px (1080x1920). Two token upgrades on the
 Ascension tree: Auto-Equip (25 tok) wears drops automatically,
 Auto-Salvage (18 tok) turns full-bag overflow into gold. Every step writes a battle-log line. Save schema v6
 (additive; worn + bag items round-trip). Resolver folds gear into hero stats; combat never knows items exist.
