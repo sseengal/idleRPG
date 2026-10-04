@@ -10,10 +10,10 @@ using IdleRPG.Utils;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// The INVENTORY tab of the Party page: a FIXED 4x5 (20-slot) bag of square tiles, with two dropdowns for
-    /// slot filter + sort instead of chip rows. Tapping a filled tile opens a bottom sheet with the item's
-    /// info plus EQUIP/UNEQUIP and a two-tap DISCARD. Equipped tiles carry an 'E' badge + a bright ring.
-    /// Built at runtime by PartyPanelUI; refreshes from ItemService.Changed.
+    /// The INVENTORY tab of the Party page: a FIXED 4x5 (20-slot) bag of square tiles, two dropdowns
+    /// (slot filter + sort) and a docked, non-modal item sheet. Built at runtime by PartyPanelUI;
+    /// refreshes from ItemService.Changed. Transient UI comes from the shared kit (DropdownMenu,
+    /// UiDockedSheet, UiTransient, ItemVisuals) so nothing here hand-rolls popups.
     /// </summary>
     public sealed class InventoryTabUI : MonoBehaviour
     {
@@ -26,7 +26,6 @@ namespace IdleRPG.UI
 
         private readonly Color dropdownColor = new Color(0.11f, 0.13f, 0.19f, 1f);
         private readonly Color optionActiveColor = new Color(0.24f, 0.34f, 0.55f, 1f);
-        private readonly Color optionColor = new Color(0.14f, 0.16f, 0.23f, 0.95f);
         private readonly Color cardColor = new Color(0.16f, 0.19f, 0.28f, 0.95f);
         private readonly Color dimText = new Color(1f, 1f, 1f, 0.55f);
         private readonly Color bodyText = new Color(1f, 1f, 1f, 0.92f);
@@ -50,27 +49,22 @@ namespace IdleRPG.UI
         private int sortMode = SortNewest;
 
         private TextMeshProUGUI countLabel;
-        private Button slotDropdownButton;
+        private DropdownMenu slotDropdown;
+        private DropdownMenu sortDropdown;
         private TextMeshProUGUI slotDropdownLabel;
-        private Button sortDropdownButton;
         private TextMeshProUGUI sortDropdownLabel;
-        private GameObject optionsRoot;
-        private bool optionsIsSort;
-        private Image slotDropdownImage;
-        private Image sortDropdownImage;
-        private Image lastOpenedDropdownImage;
         private RectTransform gridRoot;
 
-        private GameObject popupRoot;
-        private TextMeshProUGUI popupName;
-        private TextMeshProUGUI popupInfo;
-        private TextMeshProUGUI popupEquipLabel;
-        private TextMeshProUGUI popupDiscardLabel;
-
+        private UiDockedSheet itemSheet;
         private ItemInstance activeItem;
         private int activeHeroIndex = -1;
         private bool activeIsEquipped;
         private string armedInstanceId;
+
+        private TextMeshProUGUI sheetName;
+        private TextMeshProUGUI sheetInfo;
+        private TextMeshProUGUI sheetEquipLabel;
+        private TextMeshProUGUI sheetDiscardLabel;
 
         private bool subscribed;
 
@@ -106,7 +100,7 @@ namespace IdleRPG.UI
             Rebuild();
         }
 
-        /// <summary>Applies a slot filter (kept for callers; the dropdown drives it in the UI).</summary>
+        /// <summary>Kept for tooling; the dropdown drives the filter in the UI.</summary>
         public void SetSlotFilter(int slotIndex)
         {
             slotFilter = slotIndex >= 0 && slotIndex < 3 ? slotIndex : SlotFilterAll;
@@ -128,19 +122,29 @@ namespace IdleRPG.UI
         {
             Button slotBtn = UiRuntime.CreateButton(root, "SlotDropdown", string.Empty,
                 new Vector2(0.03f, 0.85f), new Vector2(0.50f, 0.905f), null, dropdownColor);
-            slotDropdownButton = slotBtn;
             slotDropdownLabel = LabelOf(slotBtn, 16f);
-            slotDropdownImage = slotBtn.GetComponent<Image>();
+            slotDropdown = new DropdownMenu(root, slotBtn, alignRight: false, SlotOptionLabels,
+                index =>
+                {
+                    slotFilter = SlotOptionValues[index];
+                    RefreshDropdownLabels();
+                    Rebuild();
+                },
+                dropdownColor, optionActiveColor,
+                index => SlotOptionValues[index] == slotFilter);
 
             Button sortBtn = UiRuntime.CreateButton(root, "SortDropdown", string.Empty,
                 new Vector2(0.52f, 0.85f), new Vector2(0.97f, 0.905f), null, dropdownColor);
-            sortDropdownButton = sortBtn;
             sortDropdownLabel = LabelOf(sortBtn, 16f);
-            sortDropdownImage = sortBtn.GetComponent<Image>();
-
-            // onClick wired after creation (needs the capture-safe helper).
-            slotBtn.onClick.AddListener(() => ToggleOptions(false));
-            sortBtn.onClick.AddListener(() => ToggleOptions(true));
+            sortDropdown = new DropdownMenu(root, sortBtn, alignRight: true, SortOptionLabels,
+                index =>
+                {
+                    sortMode = index;
+                    RefreshDropdownLabels();
+                    Rebuild();
+                },
+                dropdownColor, optionActiveColor,
+                index => index == sortMode);
 
             RefreshDropdownLabels();
         }
@@ -160,122 +164,12 @@ namespace IdleRPG.UI
         {
             if (slotDropdownLabel != null)
             {
-                slotDropdownLabel.SetText("SLOT: " + SlotName(slotFilter) + "  ▾");
+                slotDropdownLabel.SetText("SLOT: " + (slotFilter < 0 ? "ALL" : SlotOptionLabels[slotFilter + 1]) + "  ▾");
             }
 
             if (sortDropdownLabel != null)
             {
-                sortDropdownLabel.SetText("SORT: " + SortName(sortMode) + "  ▾");
-            }
-        }
-
-        private static string SlotName(int slotIndex)
-        {
-            return SlotOptionLabels[slotIndex < 0 ? 0 : slotIndex + 1];
-        }
-
-        private static string SortName(int mode)
-        {
-            return mode >= 0 && mode < SortOptionLabels.Length ? SortOptionLabels[mode] : SortOptionLabels[0];
-        }
-
-        // ------------------------------------------------------------------
-        // Dropdown options (one shared panel for both dropdowns)
-        // ------------------------------------------------------------------
-        /// <summary>
-        /// Opens the options menu for one dropdown. The menu lives on a full-page catch-all overlay so
-        /// tapping ANYWHERE outside the panel dismisses it instantly (SetActive(false) + Destroy, so it
-        /// cannot swallow a tap for a leftover frame). Only one transient is open at a time.
-        /// </summary>
-        private void ToggleOptions(bool isSort)
-        {
-            if (optionsRoot != null)
-            {
-                CloseOptions();
-                return;
-            }
-
-            optionsIsSort = isSort;
-
-            // Full-page touch catcher: a tap outside the menu closes it. The menu panel and its rows are
-            // later siblings, so they render above and stay clickable.
-            GameObject overlay = UiRuntime.CreateNode("OptionsOverlay", root);
-            UiRuntime.Anchor(overlay.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
-            optionsRoot = overlay;
-
-            Image catcher = overlay.AddComponent<Image>();
-            catcher.color = new Color(0f, 0f, 0f, 0f);
-            catcher.raycastTarget = true;
-            Button catcherButton = overlay.AddComponent<Button>();
-            catcherButton.targetGraphic = catcher;
-            catcherButton.onClick.AddListener(CloseOptions);
-
-            Image dropdownImage = isSort ? sortDropdownImage : slotDropdownImage;
-            if (dropdownImage != null)
-            {
-                dropdownImage.color = optionActiveColor;
-                lastOpenedDropdownImage = dropdownImage;
-            }
-
-            string[] labels = isSort ? SortOptionLabels : SlotOptionLabels;
-            float xMin = isSort ? 0.52f : 0.03f;
-            float xMax = isSort ? 0.97f : 0.50f;
-            float rowHeight = 0.055f;
-            float panelHeight = labels.Length * rowHeight + 0.008f;
-
-            GameObject panel = UiRuntime.CreateNode("OptionsPanel", overlay.transform);
-            UiRuntime.Anchor(panel.GetComponent<RectTransform>(), new Vector2(xMin, 0.85f - panelHeight), new Vector2(xMax, 0.85f));
-            Image panelBg = panel.AddComponent<Image>();
-            panelBg.color = new Color(0.08f, 0.10f, 0.15f, 0.98f);
-            panelBg.raycastTarget = true;   // eats taps on the menu's own frame (between rows)
-
-            for (int i = 0; i < labels.Length; i++)
-            {
-                int captured = i;
-                float yMin = 0.85f - panelHeight + 0.004f + i * rowHeight;
-                float yMax = yMin + rowHeight - 0.008f;
-                bool selected = isSort ? i == sortMode : SlotOptionValues[i] == slotFilter;
-                Button row = UiRuntime.CreateButton(overlay.transform, "Opt" + labels[i], labels[i],
-                    new Vector2(xMin + 0.004f, yMin), new Vector2(xMax - 0.004f, yMax),
-                    () => SelectOption(captured), selected ? optionActiveColor : optionColor);
-                TextMeshProUGUI rowLabel = row.GetComponentInChildren<TextMeshProUGUI>();
-                if (rowLabel != null)
-                {
-                    rowLabel.fontSize = 15f;
-                    rowLabel.SetText((selected ? "• " : "") + labels[i]);
-                }
-            }
-        }
-
-        private void SelectOption(int index)
-        {
-            if (optionsIsSort)
-            {
-                sortMode = index;
-            }
-            else
-            {
-                slotFilter = SlotOptionValues[index];
-            }
-
-            CloseOptions();
-            RefreshDropdownLabels();
-            Rebuild();
-        }
-
-        private void CloseOptions()
-        {
-            if (optionsRoot != null)
-            {
-                optionsRoot.SetActive(false);
-                Destroy(optionsRoot);
-                optionsRoot = null;
-            }
-
-            if (lastOpenedDropdownImage != null)
-            {
-                lastOpenedDropdownImage.color = dropdownColor;
-                lastOpenedDropdownImage = null;
+                sortDropdownLabel.SetText("SORT: " + SortOptionLabels[sortMode] + "  ▾");
             }
         }
 
@@ -291,8 +185,9 @@ namespace IdleRPG.UI
         // ------------------------------------------------------------------
         private void Rebuild()
         {
-            CloseOptions();
-            TearDownSheet();
+            slotDropdown?.Close();
+            sortDropdown?.Close();
+            CloseItemSheet();
 
             if (manager == null || manager.Gear == null || gridRoot == null)
             {
@@ -375,8 +270,9 @@ namespace IdleRPG.UI
 
             if (item == null)
             {
-                Button emptySlot = UiRuntime.CreateButton(tileNode.transform, "EmptySlot", string.Empty, Vector2.zero, Vector2.one,
-                    () => TearDownSheet(), new Color(0.10f, 0.12f, 0.17f, 0.9f));
+                // Empty slot: closes the sheet if one is open (bag stays non-modal).
+                Button emptySlot = UiRuntime.CreateButton(tileNode.transform, "EmptySlot", string.Empty,
+                    Vector2.zero, Vector2.one, () => CloseItemSheet(), new Color(0.10f, 0.12f, 0.17f, 0.9f));
                 emptySlot.transform.localPosition = Vector3.zero;
                 TextMeshProUGUI empty = UiRuntime.CreateText(tileNode.transform, "Empty", "empty", 13f,
                     TextAlignmentOptions.Center, new Color(1f, 1f, 1f, 0.22f));
@@ -386,24 +282,24 @@ namespace IdleRPG.UI
 
             bool equipped = manager.Gear.IsEquipped(item.InstanceId, out _, out _);
 
-            // Equipped: a bright ring sits behind the tile (visible on all four edges).
             Image ring = UiRuntime.CreatePanel(tileNode.transform, null, equipped ? equippedRingColor : new Color(0f, 0f, 0f, 0f));
             UiRuntime.Stretch(ring.rectTransform, -5f, -5f, -5f, -5f);
             ring.raycastTarget = false;
 
             Button tile = UiRuntime.CreateButton(tileNode.transform, "TileButton", string.Empty, Vector2.zero, Vector2.one,
-                () => OpenPopup(item), PartyPanelUI.RarityColor(item.Rarity));
+                () => OpenItemSheet(item), ItemVisuals.RarityColor(item.Rarity));
             tile.transform.localPosition = Vector3.zero;
 
-            TextMeshProUGUI letter = UiRuntime.CreateText(tile.transform, "Letter", GearSlotLetter(item.SlotType), 30f,
+            TextMeshProUGUI letter = UiRuntime.CreateText(tile.transform, "Letter", ItemVisuals.SlotLetter(item.SlotType), 30f,
                 TextAlignmentOptions.Center, Color.white);
             UiRuntime.Stretch(letter.rectTransform, 0f, 18f, 0f, 8f);
 
-            TextMeshProUGUI stat = UiRuntime.CreateText(tile.transform, "Stat", "+" + item.PercentText + " " + ItemSlotTypeExtensions.PrimaryStatLabel(item.SlotType), 14f,
+            TextMeshProUGUI stat = UiRuntime.CreateText(tile.transform, "Stat",
+                "+" + item.PercentText + " " + ItemVisuals.StatLabel(item.SlotType), 14f,
                 TextAlignmentOptions.Center, bodyText);
             UiRuntime.Anchor(stat.rectTransform, new Vector2(0.05f, 0.04f), new Vector2(0.95f, 0.22f), 0f, 0f, 0f, 0f);
 
-            TextMeshProUGUI classTag = UiRuntime.CreateText(tile.transform, "Role", RoleLetter(item.Role).ToString(), 12f,
+            TextMeshProUGUI classTag = UiRuntime.CreateText(tile.transform, "Role", ItemVisuals.RoleLetter(item.Role).ToString(), 12f,
                 TextAlignmentOptions.MidlineRight, dimText);
             UiRuntime.Anchor(classTag.rectTransform, new Vector2(0.72f, 0.78f), new Vector2(0.97f, 0.93f), 0f, 0f, 0f, 0f);
 
@@ -416,31 +312,14 @@ namespace IdleRPG.UI
             }
         }
 
-        private static string GearSlotLetter(ItemSlotType slot)
-        {
-            switch (slot)
-            {
-                case ItemSlotType.Weapon:
-                    return "W";
-                case ItemSlotType.Armor:
-                    return "A";
-                default:
-                    return "T";
-            }
-        }
-
-        private static char RoleLetter(HeroRole role)
-        {
-            return role.ToString()[0];
-        }
-
         // ------------------------------------------------------------------
-        // Item sheet (docked over the bag's lower rows - NOT a modal)
+        // Item sheet (docked by UiDockedSheet - non-modal, only its rect eats taps)
         // ------------------------------------------------------------------
-        private void OpenPopup(ItemInstance item)
+        private void OpenItemSheet(ItemInstance item)
         {
-            CloseOptions();
-            TearDownSheet();
+            slotDropdown?.Close();
+            sortDropdown?.Close();
+            CloseItemSheet();
 
             if (item == null)
             {
@@ -452,45 +331,30 @@ namespace IdleRPG.UI
             activeHeroIndex = activeIsEquipped ? heroIndex : manager.Gear.HeroFor(item);
             armedInstanceId = null;
 
-            // Docked sheet: a later-sibling panel over the bag's bottom rows. No full-page scrim, so the
-            // tiles above it stay touchable; only this rect consumes taps.
-            GameObject sheet = UiRuntime.CreateNode("ItemSheet", root);
-            UiRuntime.Anchor(sheet.GetComponent<RectTransform>(), new Vector2(0.03f, 0.04f), new Vector2(0.97f, 0.41f));
-            popupRoot = sheet;
+            itemSheet = UiDockedSheet.Create(root, "ItemSheet", new Vector2(0.03f, 0.04f), new Vector2(0.97f, 0.41f), cardColor);
+            Transform content = itemSheet.Content;
 
-            Image sheetBg = sheet.AddComponent<Image>();
-            sheetBg.color = cardColor;
-            sheetBg.raycastTarget = true;
-
-            Image tile = UiRuntime.CreatePanel(sheet.transform, null, PartyPanelUI.RarityColor(item.Rarity), true);
+            Image tile = UiRuntime.CreatePanel(content, null, ItemVisuals.RarityColor(item.Rarity), true);
             UiRuntime.Anchor(tile.rectTransform, new Vector2(0.05f, 0.30f), new Vector2(0.31f, 0.62f));
-            TextMeshProUGUI popupLetter = UiRuntime.CreateText(sheet.transform, "Letter", GearSlotLetter(item.SlotType), 42f,
+            TextMeshProUGUI letter = UiRuntime.CreateText(content, "Letter", ItemVisuals.SlotLetter(item.SlotType), 42f,
                 TextAlignmentOptions.Center, Color.white);
-            UiRuntime.Anchor(popupLetter.rectTransform, new Vector2(0.05f, 0.30f), new Vector2(0.31f, 0.62f), 0f, 0f, 0f, 0f);
+            UiRuntime.Anchor(letter.rectTransform, new Vector2(0.05f, 0.30f), new Vector2(0.31f, 0.62f), 0f, 0f, 0f, 0f);
 
-            popupName = UiRuntime.CreateText(sheet.transform, "Name", string.Empty, 18f,
+            sheetName = UiRuntime.CreateText(content, "Name", string.Empty, 18f,
                 TextAlignmentOptions.MidlineLeft, Color.white);
-            UiRuntime.Anchor(popupName.rectTransform, new Vector2(0.36f, 0.56f), new Vector2(0.84f, 0.66f), 0f, 0f, 0f, 0f);
+            UiRuntime.Anchor(sheetName.rectTransform, new Vector2(0.36f, 0.56f), new Vector2(0.84f, 0.66f), 0f, 0f, 0f, 0f);
 
-            popupInfo = UiRuntime.CreateText(sheet.transform, "Info", string.Empty, 14f,
+            sheetInfo = UiRuntime.CreateText(content, "Info", string.Empty, 14f,
                 TextAlignmentOptions.TopLeft, bodyText);
-            UiRuntime.Anchor(popupInfo.rectTransform, new Vector2(0.36f, 0.30f), new Vector2(0.95f, 0.53f), 0f, 0f, 0f, 0f);
+            UiRuntime.Anchor(sheetInfo.rectTransform, new Vector2(0.36f, 0.30f), new Vector2(0.95f, 0.53f), 0f, 0f, 0f, 0f);
 
-            popupEquipLabel = BuildPopupButton(sheet.transform, "EquipButton", new Vector2(0.05f, 0.07f), new Vector2(0.63f, 0.25f), EquipAction);
-            popupDiscardLabel = BuildPopupButton(sheet.transform, "DiscardButton", new Vector2(0.67f, 0.07f), new Vector2(0.95f, 0.25f), DiscardAction);
+            sheetEquipLabel = BuildSheetButton(content, "EquipButton", new Vector2(0.05f, 0.07f), new Vector2(0.63f, 0.25f), EquipAction);
+            sheetDiscardLabel = BuildSheetButton(content, "DiscardButton", new Vector2(0.67f, 0.07f), new Vector2(0.95f, 0.25f), DiscardAction);
 
-            Button close = UiRuntime.CreateButton(sheet.transform, "CloseButton", "X", new Vector2(0.84f, 0.83f), new Vector2(0.94f, 0.93f),
-                () => TearDownSheet(), new Color(0.30f, 0.36f, 0.50f, 1f));
-            TextMeshProUGUI closeLabel = close.GetComponentInChildren<TextMeshProUGUI>();
-            if (closeLabel != null)
-            {
-                closeLabel.fontSize = 14f;
-            }
-
-            RefreshPopup();
+            RefreshSheet();
         }
 
-        private static TextMeshProUGUI BuildPopupButton(Transform parent, string name, Vector2 min, Vector2 max,
+        private static TextMeshProUGUI BuildSheetButton(Transform parent, string name, Vector2 min, Vector2 max,
             UnityEngine.Events.UnityAction onClick)
         {
             Button button = UiRuntime.CreateButton(parent, name, string.Empty, min, max, onClick, new Color(0.24f, 0.34f, 0.55f, 1f));
@@ -503,55 +367,51 @@ namespace IdleRPG.UI
             return label;
         }
 
-        private void RefreshPopup()
+        private void RefreshSheet()
         {
-            if (activeItem == null || popupName == null)
+            if (activeItem == null || sheetName == null)
             {
                 return;
             }
 
-            popupName.SetText(activeItem.ShortLabel);
-            popupInfo.SetText(
+            sheetName.SetText(activeItem.ShortLabel);
+            sheetInfo.SetText(
                 activeItem.Role.ToString().ToUpperInvariant() + " ONLY\n" +
-                activeItem.SlotType.DisplayName() + "  ·  +" + activeItem.PercentText + " " + ItemSlotTypeExtensions.PrimaryStatLabel(activeItem.SlotType) + "\n" +
+                activeItem.SlotType.DisplayName() + "  ·  +" + activeItem.PercentText + " " + ItemVisuals.StatLabel(activeItem.SlotType) + "\n" +
                 "stage " + activeItem.Level + " drop      " + (activeItem.Price > 0d ? NumberFormatter.Format(activeItem.Price) + " gold" : string.Empty));
 
-            // The equip action is ONLY offered when it can genuinely succeed (bag item + its class exists),
-            // so the player is never pointed at an action that fails.
+            // Equip is only offered when it can genuinely succeed (bag item + its class exists).
             bool canEquip = !activeIsEquipped
                 && activeHeroIndex >= 0
                 && manager.Gear != null
                 && manager.Gear.FindFor(activeItem.InstanceId) != null;
 
-            popupEquipLabel.text = activeIsEquipped
+            sheetEquipLabel.text = activeIsEquipped
                 ? "UNEQUIP"
                 : canEquip && activeHeroIndex >= 0
                     ? "EQUIP  →  " + manager.Party.GetHero(activeHeroIndex).HeroName.ToUpperInvariant()
                     : "EQUIP";
-            Button equipButton = FindButton("EquipButton");
+
+            Button equipButton = FindSheetButton("EquipButton");
             if (equipButton != null)
             {
                 equipButton.interactable = canEquip || activeIsEquipped;
             }
 
             bool armed = armedInstanceId == activeItem.InstanceId;
-            popupDiscardLabel.SetText(armed ? "TAP AGAIN" : "DISCARD");
-            Button discard = FindButton("DiscardButton");
+            sheetDiscardLabel.SetText(armed ? "TAP AGAIN" : "DISCARD");
+            Button discard = FindSheetButton("DiscardButton");
             if (discard != null)
             {
                 discard.GetComponent<Image>().color = armed ? new Color(0.75f, 0.18f, 0.18f, 1f) : armedColor;
             }
         }
 
-        private Button FindButton(string name)
+        private Button FindSheetButton(string name)
         {
-            if (popupRoot == null)
-            {
-                return null;
-            }
-
-            Transform found = popupRoot.transform.Find(name);
-            return found != null ? found.GetComponent<Button>() : null;
+            return itemSheet != null && itemSheet.Content.Find(name) != null
+                ? itemSheet.Content.Find(name).GetComponent<Button>()
+                : null;
         }
 
         private void EquipAction()
@@ -570,7 +430,6 @@ namespace IdleRPG.UI
             }
             else
             {
-                // Resolve the hero freshly at tap time; the button is only shown when this is >= 0.
                 int hero = manager.Gear.HeroFor(activeItem);
                 ok = hero >= 0 && manager.Gear.Equip(hero, activeItem.InstanceId, out message);
             }
@@ -580,11 +439,11 @@ namespace IdleRPG.UI
                 GameEvents.RaiseToast(message);
             }
 
-            TearDownSheet();
+            CloseItemSheet();
             Rebuild();
         }
 
-        /// <summary>Two-tap discard: the first tap arms the button, the second actually deletes.</summary>
+        /// <summary>Two-tap discard: first tap arms the button, the second actually deletes.</summary>
         private void DiscardAction()
         {
             if (activeItem == null || manager.Gear == null)
@@ -595,35 +454,28 @@ namespace IdleRPG.UI
             if (armedInstanceId == activeItem.InstanceId)
             {
                 manager.Gear.Discard(activeItem.InstanceId, out _);
-                TearDownSheet();
+                CloseItemSheet();
                 Rebuild();
             }
             else
             {
                 armedInstanceId = activeItem.InstanceId;
-                RefreshPopup();
+                RefreshSheet();
             }
         }
 
-        /// <summary>Closes the sheet instantly: deactivate first so it can never swallow a tap, then destroy.</summary>
-        private void TearDownSheet()
+        private void CloseItemSheet()
         {
-            if (popupRoot != null)
+            if (itemSheet != null)
             {
-                popupRoot.SetActive(false);
-                Destroy(popupRoot);
-                popupRoot = null;
+                UiTransient.Close(itemSheet.Root);
+                itemSheet = null;
             }
 
             activeItem = null;
             activeHeroIndex = -1;
             activeIsEquipped = false;
             armedInstanceId = null;
-        }
-
-        private void ClosePopup()
-        {
-            TearDownSheet();
         }
     }
 }

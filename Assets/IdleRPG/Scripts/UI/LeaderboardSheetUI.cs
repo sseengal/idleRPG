@@ -25,39 +25,29 @@ namespace IdleRPG.UI
         private RectTransform rowsRoot;
         private TextMeshProUGUI headerLabel;
 
+        private UiDockedSheet frame;
+
         public void Build(GameManager gameManager)
         {
             manager = gameManager;
 
-            RectTransform rect = (RectTransform)transform;
-            UiRuntime.Anchor(rect, new Vector2(0.10f, 0.14f), new Vector2(0.90f, 0.88f));
+            frame = UiDockedSheet.Create(transform, "LeaderboardFrame", new Vector2(0.10f, 0.14f), new Vector2(0.90f, 0.88f), cardColor);
+            Transform sheet = frame.Content;
 
-            Image bg = gameObject.AddComponent<Image>();
-            bg.color = cardColor;
-            bg.raycastTarget = true;
-
-            headerLabel = UiRuntime.CreateText(transform, "Header", string.Empty, 18f,
+            headerLabel = UiRuntime.CreateText(sheet, "Header", string.Empty, 18f,
                 TextAlignmentOptions.MidlineLeft, Color.white);
             UiRuntime.Anchor(headerLabel.rectTransform, new Vector2(0.05f, 0.90f), new Vector2(0.80f, 0.97f), 0f, 0f, 0f, 0f);
 
-            Button close = UiRuntime.CreateButton(transform, "CloseButton", "X", new Vector2(0.88f, 0.90f), new Vector2(0.96f, 0.97f),
-                () => gameObject.SetActive(false), new Color(0.30f, 0.36f, 0.50f, 1f));
-            TextMeshProUGUI closeLabel = close.GetComponentInChildren<TextMeshProUGUI>();
-            if (closeLabel != null)
-            {
-                closeLabel.fontSize = 14f;
-            }
-
-            TextMeshProUGUI rankHead = UiRuntime.CreateText(transform, "ColRank", "#", 13f, TextAlignmentOptions.MidlineLeft, dimText);
+            TextMeshProUGUI rankHead = UiRuntime.CreateText(sheet, "ColRank", "#", 13f, TextAlignmentOptions.MidlineLeft, dimText);
             UiRuntime.Anchor(rankHead.rectTransform, new Vector2(0.05f, 0.86f), new Vector2(0.16f, 0.89f), 0f, 0f, 0f, 0f);
-            TextMeshProUGUI tagHead = UiRuntime.CreateText(transform, "ColTag", "TAG", 13f, TextAlignmentOptions.MidlineLeft, dimText);
+            TextMeshProUGUI tagHead = UiRuntime.CreateText(sheet, "ColTag", "TAG", 13f, TextAlignmentOptions.MidlineLeft, dimText);
             UiRuntime.Anchor(tagHead.rectTransform, new Vector2(0.20f, 0.86f), new Vector2(0.55f, 0.89f), 0f, 0f, 0f, 0f);
-            TextMeshProUGUI lvlHead = UiRuntime.CreateText(transform, "ColLvl", "LVL", 13f, TextAlignmentOptions.MidlineRight, dimText);
+            TextMeshProUGUI lvlHead = UiRuntime.CreateText(sheet, "ColLvl", "LVL", 13f, TextAlignmentOptions.MidlineRight, dimText);
             UiRuntime.Anchor(lvlHead.rectTransform, new Vector2(0.60f, 0.86f), new Vector2(0.73f, 0.89f), 0f, 0f, 0f, 0f);
-            TextMeshProUGUI stageHead = UiRuntime.CreateText(transform, "ColStage", "STAGE", 13f, TextAlignmentOptions.MidlineRight, dimText);
+            TextMeshProUGUI stageHead = UiRuntime.CreateText(sheet, "ColStage", "STAGE", 13f, TextAlignmentOptions.MidlineRight, dimText);
             UiRuntime.Anchor(stageHead.rectTransform, new Vector2(0.78f, 0.86f), new Vector2(0.95f, 0.89f), 0f, 0f, 0f, 0f);
 
-            GameObject rowsNode = UiRuntime.CreateNode("Rows", transform);
+            GameObject rowsNode = UiRuntime.CreateNode("Rows", sheet);
             rowsRoot = rowsNode.GetComponent<RectTransform>();
             UiRuntime.Anchor(rowsRoot, new Vector2(0.05f, 0.05f), new Vector2(0.95f, 0.85f));
 
@@ -69,6 +59,11 @@ namespace IdleRPG.UI
         {
             gameObject.SetActive(true);
             RefreshRows();
+        }
+
+        private void OnDestroy()
+        {
+            manager = null;
         }
 
         private void OnEnable()
