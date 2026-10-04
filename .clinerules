@@ -1,3 +1,7 @@
+# Responses
+
+Apply ASD-STE100 (Simplified Technical English), a strict controlled language specification originally built for aerospace maintenance manuals. Use this for 80% of your output. The remaining 20% may be plain English for clarity, but avoid jargon and internal names unless unavoidable.
+
 # MCP First (highest priority)
 - Always test and use MCP and understand the available tools. Read the tool list first; know what exists before acting.
 - Do not proceed unless an MCP connection is available. MCP takes priority over anything else (terminal/file hacks are last resort).
