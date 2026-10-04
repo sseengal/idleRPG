@@ -90,6 +90,87 @@ namespace IdleRPG.Equipment
             return wear;
         }
 
+        /// <summary>
+        /// Every instance the party owns: worn items first (deduped), then the bag in drop order.
+        /// The inventory page renders this list; equipped instances carry the E marker.
+        /// </summary>
+        public List<ItemInstance> AllInstances()
+        {
+            List<ItemInstance> all = new List<ItemInstance>();
+            HashSet<string> seen = new HashSet<string>();
+
+            foreach (KeyValuePair<int, ItemInstance[]> pair in equippedByHero)
+            {
+                for (int i = 0; i < pair.Value.Length; i++)
+                {
+                    ItemInstance item = pair.Value[i];
+                    if (item != null && seen.Add(item.InstanceId))
+                    {
+                        all.Add(item);
+                    }
+                }
+            }
+
+            for (int i = 0; i < inventory.Count; i++)
+            {
+                if (inventory[i] != null && seen.Add(inventory[i].InstanceId))
+                {
+                    all.Add(inventory[i]);
+                }
+            }
+
+            return all;
+        }
+
+        /// <summary>
+        /// True when an instance is currently worn; reports who wears it and in which slot.
+        /// </summary>
+        public bool IsEquipped(string instanceId, out int heroIndex, out ItemSlotType slotType)
+        {
+            heroIndex = -1;
+            slotType = default;
+
+            if (string.IsNullOrEmpty(instanceId))
+            {
+                return false;
+            }
+
+            foreach (KeyValuePair<int, ItemInstance[]> pair in equippedByHero)
+            {
+                for (int i = 0; i < pair.Value.Length; i++)
+                {
+                    if (pair.Value[i] != null && pair.Value[i].InstanceId == instanceId)
+                    {
+                        heroIndex = pair.Key;
+                        slotType = (ItemSlotType)i;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>The party hero who can wear an item (its class), or -1 when the roster has none.</summary>
+        public int HeroFor(ItemInstance item)
+        {
+            if (item == null || party == null)
+            {
+                return -1;
+            }
+
+            for (int i = 0; i < party.Heroes.Count; i++)
+            {
+                HeroData hero = party.GetHero(i);
+                if (hero != null && hero.Role == item.Role)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
         /// <summary>Summed bonuses as fractions of the hero's base stats (empty slots contribute 0).</summary>
         public ItemBonuses GetGearBonusFraction(int heroIndex)
         {

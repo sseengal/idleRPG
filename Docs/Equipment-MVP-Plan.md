@@ -66,10 +66,10 @@ Equipment/
 
 ## 4. UX (the tap loop)
 
-- GEAR row: 3 typed slots. Empty = "empty" + W/A/T letter; filled = rarity-tinted tile + "+X% ATK/DEF/HP".
-- Tap a slot -> picker drawer (that hero's matching, class-fitting items) -> tap to equip.
-- "INVENTORY n/20" button -> picker of ALL items (dimmed when the class doesn't fit) -> tap row to equip,
-  tap **X** twice to discard (first tap arms the row red, second deletes).
+- Roster: the three equipped slots (display only, tap jumps to the filtered inventory tab).
+- INVENTORY tab (live since 2026-10-04, see Docs/Inventory-Tab-Plan.md): square tile grid, slot filter +
+  sort chips, E badge + ring on equipped, bottom-sheet popup with EQUIP-><hero> / UNEQUIP and a two-tap
+  DISCARD (first tap arms the button, second deletes).
 - Every drop/equip/discard/salvage writes a line into the battle log (Reward = gold colour); Legendary drops,
   discards and salvages also toast.
 - The two upgrades appear as normal Ascension cards (token prices, one-time).
