@@ -126,6 +126,23 @@ namespace IdleRPG.Save
                 Debug.Log("[SaveMigrations] Applied one-time additive-era level compensation (power preserved).");
             }
 
+            if (version < 6)
+            {
+                // v5 -> v6: equipment (gear) added. No conversion: the new lists are additive and JsonUtility
+                // defaults them to empty, so an older save simply has no gear yet.
+                if (data.inventory == null)
+                {
+                    data.inventory = new List<ItemSaveRecord>();
+                }
+
+                if (data.equippedGear == null)
+                {
+                    data.equippedGear = new List<EquippedGearRecord>();
+                }
+
+                Debug.Log("[SaveMigrations] Migrated save v5 -> v6 (equipment; empty = no gear).");
+            }
+
             data.schemaVersion = SaveData.CurrentVersion;
             return data;
         }

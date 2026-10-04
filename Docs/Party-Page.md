@@ -46,10 +46,13 @@ The board - the only place heroes are moved (`PartyBoardUI`), plus the *why*.
   abilities (taunts, back-row auras), adjacency synergies.
 - MVP keeps: tap a hero -> tap a slot, and the rank-mechanics line. No presets, no auto-arrange (3 heroes).
 
-### 2.3 Inventory  *(v1.1)*
+### 2.3 Inventory  *(gear LIVE in the MVP; items v1.1)*
 Equipment and items.
 
-- Per-hero slots: weapon / armour / accessory / relic (the four placeholders are already drawn on the sheet).
+- **Equipment M1 (2026-10-04):** three typed slots per hero (Weapon/Armor/Trinket -> ATK/DEF/HP) with boss
+drops, class locks, manual equip via a picker, and the Inventory drawer inside the Roster row. Full design
+record: Docs/Equipment-MVP-Plan.md.
+- Later slots: relic and other expansions as they ship. The typed-slot model replaces the four placeholders.
 - Items as data: slot, rarity, affix rows, level; drops from stages/bosses (the reserved `Materials`,
   `Essence`, `Scrolls` currencies are the crafting/upgrade inputs).
 - Quality-of-life that an idle game cannot live without: **auto-equip best**, **auto-salvage with locks**,
@@ -79,7 +82,7 @@ ROSTER
   big animated selected hero (left)   |   hero card (right):
                                             name, role chips, stars (reserved)
                                             stat rows (HP/ATK/DEF - displayed as a role header + labelled rows; DPS = ATK + attack interval) - live from the Resolver
-                                            GEAR row (4 slots, locked)
+                                            GEAR row (3 typed slots, LIVE: drops/equip/discard)
                                             ABILITIES row (3 slots, locked)
 
 FORMATION
@@ -100,8 +103,8 @@ Rules that keep it scalable:
 
 - **Shell**: Party page with a `ROSTER | FORMATION` sub-nav. Inventory/Abilities are *not* shown (no dead
   buttons).
-- **Roster**: 3 animated portrait cards; big animated selected hero; stats panel with live derived stats;
-  reserved stars line; gear row (4 locked) and ability row (3 locked).
+- **Roster**: 3 animated portrait cards; big animated selected hero; stats panel with live derived stats
+  (gear boosts included); reserved stars line; gear row (3 typed slots, live equipment) and ability row (3 locked).
 - **Formation**: the existing board + rank readout + hint. No presets/auto-arrange.
 - 3 heroes, no add/remove/bench.
 - Known cosmetic: all three portraits share the Soldier art until distinct hero art exists.
@@ -110,7 +113,7 @@ Rules that keep it scalable:
 
 | Phase | Contents |
 |---|---|
-| **M1 (now)** | Shell + Roster (stats) + Formation (board) |
+| **M1 (now)** | Shell + Roster (stats) + Formation (board) + Equipment v1 (boss drops, 3 typed slots, manual equip, auto-equip/auto-salvage upgrades) |
 | **M2** | Presets, rank tooltips, roster silhouettes (data hook only) |
 | **v1.1** | Roster growth (owned/stars/shards), Inventory (items/drops/auto-equip), Abilities (Step 13), Expeditions (Step 17), Relics (Step 18) |
 

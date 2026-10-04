@@ -1173,6 +1173,16 @@ enemies leaned left (lower slots +24x). Screenshot battle-page-v11.png.
 
 Battle-page cleanup round 4 (2026-09-30): heroes now genuinely lean right (front column raised -28y), enemy slots rebuilt to hero geometry (160x176, 188px pitch, 128px icon + bar) so the stacks group alike. Screenshot battle-page-v12.png.
 
+Equipment MVP (2026-10-04): bosses roll a 35% chance to drop class-locked gear (Weapon/Armor/Trinket ->
+ATK/DEF/HP, stage + rarity scaled in BalanceConfig). Party Roster now has 3 functional typed slots: tap a slot
+for the picker, tap to equip (swap returns the old piece), INVENTORY n/20 opens the all-items drawer, X twice
+discards. Two token upgrades on the Ascension tree: Auto-Equip (25 tok) wears drops automatically,
+Auto-Salvage (18 tok) turns full-bag overflow into gold. Every step writes a battle-log line. Save schema v6
+(additive; worn + bag items round-trip). Resolver folds gear into hero stats; combat never knows items exist.
+Verified: drops/math, class gate, HP 240->245 on equip, worn-item save reload, auto-equip routes to the best
+hero, salvage pays price x 40%. Plan: Docs/Equipment-MVP-Plan.md. Screenshots party-gear-equip.png /
+party-inventory-picker.png.
+
 Party page MVP (2026-09-30): the page now has a ROSTER | FORMATION sub-nav. Roster = three animated idle
 portrait cards (selector strip), a big animated selected hero on the left and a styled stats card on the right
 (role header + HP/ATK/DEF/DPS rows from the Resolver, integers), sitting above reserved-but-locked gear (4)

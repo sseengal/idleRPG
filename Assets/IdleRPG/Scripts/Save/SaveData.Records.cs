@@ -108,6 +108,49 @@ namespace IdleRPG.Save
         }
     }
     [Serializable]
+    public class ItemSaveRecord
+    {
+        public string instanceId = "";
+        public int slotType;
+        public int rarity;
+        public int role;
+        public int level;
+        public double statValue;
+        public double price;
+
+        public ItemSaveRecord()
+        {
+        }
+
+        public ItemSaveRecord(string instanceId, int slotType, int rarity, int role, int level, double statValue, double price)
+        {
+            this.instanceId = instanceId;
+            this.slotType = slotType;
+            this.rarity = rarity;
+            this.role = role;
+            this.level = level;
+            this.statValue = statValue;
+            this.price = price;
+        }
+    }
+    [Serializable]
+    public class EquippedGearRecord
+    {
+        public int heroIndex;
+        public string weaponId = "";
+        public string armorId = "";
+        public string trinketId = "";
+
+        public EquippedGearRecord()
+        {
+        }
+
+        public EquippedGearRecord(int heroIndex)
+        {
+            this.heroIndex = heroIndex;
+        }
+    }
+    [Serializable]
     public class PrestigeUpgradeRecord
     {
         public string upgradeID = "";

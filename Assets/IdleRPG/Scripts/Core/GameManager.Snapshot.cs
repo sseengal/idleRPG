@@ -48,6 +48,7 @@ namespace IdleRPG.Core
             }
 
             Shop?.WriteToSave(data);
+            Gear?.WriteToSave(data);
 
             if (Formation != null)
             {
@@ -102,6 +103,7 @@ namespace IdleRPG.Core
             Boost?.Restore(data.goldBoostActive, data.goldBoostExpiresAtBinary);
             Ledger?.SeedGoldPerSecond(data.lastGoldPerSecond);
             Shop?.Restore(data.offlineEquivalentCapBonusSeconds, data.offlineCapExtensionsPurchased);
+            Gear?.FillFromSave(data);
             DailyStreak?.Restore(data.dailyStreakLastDate, data.dailyStreakCount);
             AdCaps?.Restore(data.adRedemptions);
             FirstRunTips?.Restore(data.GetLevel(SaveData.SaveKeys.TipMask()));

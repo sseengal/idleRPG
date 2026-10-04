@@ -219,6 +219,38 @@ namespace IdleRPG.Data
         [SerializeField] private float adGoldBoostDurationSec = 3600f;
 
         // ------------------------------------------------------------------
+        // Equipment (gear from boss drops)
+        // ------------------------------------------------------------------
+        [Header("Equipment")]
+        [Tooltip("Chance each cleared boss drops a piece of gear (0.35 = 35%).")]
+        [SerializeField] private float bossGearDropChance = 0.35f;
+
+        [Tooltip("How many unequipped items the bag can hold before drops start being overwritten.")]
+        [SerializeField] private int inventoryCap = 20;
+
+        [Tooltip("Gear stat formula (a fraction of the hero BASE stat): baseFraction + perStage * itemLevel, capped."
+                 + " 0.015 = +1.5% at level 0.")]
+        [SerializeField] private float gearStatBaseFraction = 0.015f;
+
+        [Tooltip("Adds this fraction of a percent per item level to the base stat formula (0.0012 = +0.12%/level).")]
+        [SerializeField] private float gearStatPerStage = 0.0012f;
+
+        [Tooltip("Upper bound on one item's stat bonus before rarity (0.25 = +25% of base).")]
+        [SerializeField] private float gearStatMaxFraction = 0.25f;
+
+        [Tooltip("Rarity weights for a drop (Common / Rare / Epic / Legendary). Relative, must stay in order.")]
+        [SerializeField] private float[] gearRarityWeights = { 55f, 28f, 12f, 5f };
+
+        [Tooltip("Gold price of a Common item at stage 1 (2 + 0.9 * level, times rarity multiplier).")]
+        [SerializeField] private double gearPriceBase = 2d;
+
+        [Tooltip("Price grows this much per item level (0.9 = +0.9 gold/level).")]
+        [SerializeField] private double gearPricePerStage = 0.9d;
+
+        [Tooltip("Fraction of the item's price paid by auto-salvage (0.4 = 40%).")]
+        [SerializeField] private float gearSalvageFraction = 0.4f;
+
+        // ------------------------------------------------------------------
         // Save
         // ------------------------------------------------------------------
         [Header("Save")]
@@ -228,6 +260,24 @@ namespace IdleRPG.Data
         // ------------------------------------------------------------------
         // Accessors (clamped so a bad inspector value can never break the sim)
         // ------------------------------------------------------------------
+        public float GearDropChance => Mathf.Clamp01(bossGearDropChance);
+
+        public int InventoryCap => Mathf.Max(1, inventoryCap);
+
+        public float GearStatBaseFraction => Mathf.Max(0f, gearStatBaseFraction);
+
+        public float GearStatPerStage => Mathf.Max(0f, gearStatPerStage);
+
+        public float GearStatMaxFraction => Mathf.Max(0f, gearStatMaxFraction);
+
+        public float[] GearRarityWeights => gearRarityWeights != null ? gearRarityWeights : System.Array.Empty<float>();
+
+        public double GearPriceBase => gearPriceBase < 0d ? 0d : gearPriceBase;
+
+        public double GearPricePerStage => gearPricePerStage < 0d ? 0d : gearPricePerStage;
+
+        public float GearSalvageFraction => Mathf.Clamp01(gearSalvageFraction);
+
         public float EnemyHealthGrowth => Mathf.Max(1f, enemyHealthGrowth);
 
         public float EnemyGoldGrowth => Mathf.Max(1f, enemyGoldGrowth);

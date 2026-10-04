@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using IdleRPG.Combat;
 using IdleRPG.Core;
+using IdleRPG.Equipment;
 using IdleRPG.Data;
 using IdleRPG.Utils;
 
@@ -27,9 +29,6 @@ namespace IdleRPG.UI
         [SerializeField] private Vector2 boardOffset = new Vector2(14f, -24f);
 
         [Header("Placeholders")]
-        [Tooltip("Equipment slots drawn but not usable yet (Step 18). Reserving the space now keeps the layout stable.")]
-        [SerializeField] private int gearSlotPlaceholders = 4;
-
         [Tooltip("Ability slots drawn but not usable yet (Step 13).")]
         [SerializeField] private int abilitySlotPlaceholders = 3;
 
@@ -45,6 +44,18 @@ namespace IdleRPG.UI
 
         private const int StatRowCount = 4;
         private static readonly string[] StatKeyNames = { "HP", "ATK", "DEF", "DPS" };
+
+        private const int GearSlotCount = 3;
+        private const int PickerPageSize = 4;
+        private static readonly string[] GearSlotLetters = { "W", "A", "T" };
+        private static readonly string[] GearSlotNames = { "Weapon", "Armor", "Trinket" };
+
+        private static readonly Color RarityCommonColor = new Color(0.60f, 0.63f, 0.68f, 1f);
+        private static readonly Color RarityRareColor = new Color(0.35f, 0.68f, 0.95f, 1f);
+        private static readonly Color RarityEpicColor = new Color(0.72f, 0.52f, 0.92f, 1f);
+        private static readonly Color RarityLegendaryColor = new Color(0.95f, 0.72f, 0.30f, 1f);
+        private static readonly Color PickerRowColor = new Color(0.14f, 0.16f, 0.23f, 0.95f);
+        private static readonly Color PickerRowArmedColor = new Color(0.52f, 0.16f, 0.16f, 0.95f);
 
         private GameManager manager;
         private PartyBoardUI board;
@@ -65,6 +76,16 @@ namespace IdleRPG.UI
         private TextMeshProUGUI[] statKeys;
         private TextMeshProUGUI[] statValues;
         private TextMeshProUGUI formationLabel;
+
+        // --- Gear (3 typed slots + inventory picker) ---
+        private Image[] gearSlotBackgrounds;
+        private TextMeshProUGUI[] gearSlotStatLabels;
+        private TextMeshProUGUI inventoryButtonLabel;
+        private GameObject pickerRoot;
+        private string pickerTitle;
+        private int pickerFilterSlot = -1;
+        private int pickerPage;
+        private string pickerArmedInstanceId;
 
         private int selectedHeroIndex = -1;
         private int boundBigHero = -2;   // -2 = never bound, -1 = bound to "nothing"
@@ -92,9 +113,17 @@ namespace IdleRPG.UI
 
         private void OnDestroy()
         {
-            if (manager != null && manager.Formation != null)
+            if (manager != null)
             {
-                manager.Formation.Changed -= RefreshAll;
+                if (manager.Formation != null)
+                {
+                    manager.Formation.Changed -= RefreshAll;
+                }
+
+                if (manager.Gear != null)
+                {
+                    manager.Gear.Changed -= RefreshAll;
+                }
             }
         }
 
@@ -123,6 +152,10 @@ namespace IdleRPG.UI
             ShowTab(0);
 
             manager.Formation.Changed += RefreshAll;
+            if (manager.Gear != null)
+            {
+                manager.Gear.Changed += RefreshAll;
+            }
             built = true;
 
             // Open on the first real hero so the stand + card are never empty on arrival.
@@ -174,6 +207,11 @@ namespace IdleRPG.UI
 
         private void ShowTab(int index)
         {
+            if (activeTab != index && index != 0)
+            {
+                ClosePicker();
+            }
+
             activeTab = index;
 
             if (tabPanels != null)
@@ -282,7 +320,7 @@ namespace IdleRPG.UI
                 UiRuntime.Anchor(statValues[i].rectTransform, new Vector2(0.70f, yTop), new Vector2(0.95f, yTop + 0.045f), 0f, 0f, 0f, 0f);
             }
 
-            BuildSlotRow(root, "GEAR", gearSlotPlaceholders, 0.335f, 0.415f);
+            BuildGearRow(root);
             BuildSlotRow(root, "ABILITIES", abilitySlotPlaceholders, 0.175f, 0.255f);
         }
 
@@ -310,6 +348,301 @@ namespace IdleRPG.UI
             }
         }
 
+        // ------------------------------------------------------------------
+// ------------------------------------------------------------------
+        // Gear: 3 typed slots + inventory picker
+        // ------------------------------------------------------------------
+        /// <summary>The GEAR row: three typed slots (Weapon/Armor/Trinket) + the inventory caption button.</summary>
+        private void BuildGearRow(RectTransform root)
+        {
+            TextMeshProUGUI caption = UiRuntime.CreateText(root, "GearCaption", "GEAR", 15f,
+                TextAlignmentOptions.MidlineLeft, dimText);
+            UiRuntime.Anchor(caption.rectTransform, new Vector2(0.48f, 0.415f), new Vector2(0.72f, 0.45f), 4f, 0f, 0f, 0f);
+
+            Button inventoryButton = UiRuntime.CreateButton(root, "InventoryButton", string.Empty,
+                new Vector2(0.60f, 0.415f), new Vector2(0.97f, 0.45f), OpenInventoryPicker,
+                new Color(0.10f, 0.12f, 0.18f, 0.9f));
+            inventoryButtonLabel = inventoryButton != null ? inventoryButton.GetComponentInChildren<TextMeshProUGUI>() : null;
+
+            const float xMin = 0.48f;
+            const float xMax = 0.97f;
+            const float gap = 0.012f;
+            float width = (xMax - xMin - gap * (GearSlotCount - 1)) / GearSlotCount;
+
+            gearSlotBackgrounds = new Image[GearSlotCount];
+            gearSlotStatLabels = new TextMeshProUGUI[GearSlotCount];
+
+            for (int i = 0; i < GearSlotCount; i++)
+            {
+                float x0 = xMin + i * (width + gap);
+                int captured = i;
+
+                Button slot = UiRuntime.CreateButton(root, "GearSlot" + i, GearSlotLetters[i],
+                    new Vector2(x0, 0.335f), new Vector2(x0 + width, 0.412f), () => OpenSlotPicker(captured), slotColor);
+                gearSlotBackgrounds[i] = slot != null ? slot.GetComponent<Image>() : null;
+
+                TextMeshProUGUI stat = UiRuntime.CreateText(slot.transform, "Stat", "empty", 12f,
+                    TextAlignmentOptions.Center, dimText);
+                UiRuntime.Anchor(stat.rectTransform, new Vector2(0.03f, 0.02f), new Vector2(0.97f, 0.30f), 0f, 0f, 0f, 0f);
+                gearSlotStatLabels[i] = stat;
+            }
+        }
+
+        /// <summary>Refreshes the 3 gear slots and the inventory count for the selected hero.</summary>
+        private void RefreshGear()
+        {
+            if (manager == null || manager.Gear == null || gearSlotBackgrounds == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < GearSlotCount; i++)
+            {
+                ItemInstance item = selectedHeroIndex >= 0
+                    ? manager.Gear.GetEquipped(selectedHeroIndex, (ItemSlotType)i)
+                    : null;
+
+                gearSlotBackgrounds[i].color = item != null ? RarityColor(item.Rarity) : slotColor;
+
+                if (gearSlotStatLabels[i] != null)
+                {
+                    gearSlotStatLabels[i].color = item != null ? Color.white : dimText;
+                    gearSlotStatLabels[i].SetText(item != null
+                        ? "+" + item.PercentText + " " + item.SlotType.PrimaryStatLabel()
+                        : "empty");
+                }
+            }
+
+            if (inventoryButtonLabel != null)
+            {
+                inventoryButtonLabel.SetText("INVENTORY " + manager.Gear.InventoryCount + "/" + manager.Gear.InventoryCap);
+            }
+        }
+
+        private static Color RarityColor(ItemRarity rarity)
+        {
+            switch (rarity)
+            {
+                case ItemRarity.Rare:
+                    return RarityRareColor;
+                case ItemRarity.Epic:
+                    return RarityEpicColor;
+                case ItemRarity.Legendary:
+                    return RarityLegendaryColor;
+                default:
+                    return RarityCommonColor;
+            }
+        }
+// ------------------------------------------------------------------
+        // Inventory picker (slot picker + all-items picker share one drawer)
+        // ------------------------------------------------------------------
+        private void OpenSlotPicker(int slotIndex)
+        {
+            if (manager == null || manager.Gear == null || selectedHeroIndex < 0)
+            {
+                return;
+            }
+
+            if (manager.Party.GetHero(selectedHeroIndex) == null)
+            {
+                return;
+            }
+
+            pickerFilterSlot = slotIndex;
+            pickerPage = 0;
+            pickerArmedInstanceId = null;
+            pickerTitle = GearSlotNames[slotIndex] + "  -  tap an item to equip";
+            BuildPicker();
+        }
+
+        private void OpenInventoryPicker()
+        {
+            if (manager == null || manager.Gear == null)
+            {
+                return;
+            }
+
+            pickerFilterSlot = -1;
+            pickerPage = 0;
+            pickerArmedInstanceId = null;
+            pickerTitle = "INVENTORY  -  tap to equip,  X twice to discard";
+            BuildPicker();
+        }
+
+        private void ClosePicker()
+        {
+            TearDownPicker();
+            pickerArmedInstanceId = null;
+            pickerTitle = null;
+        }
+
+        private void TearDownPicker()
+        {
+            if (pickerRoot != null)
+            {
+                Destroy(pickerRoot.gameObject);
+                pickerRoot = null;
+            }
+        }
+
+        private void BuildPicker()
+        {
+            TearDownPicker();
+
+            if (tabPanels == null || pickerTitle == null)
+            {
+                return;
+            }
+
+            GameObject panel = UiRuntime.CreateNode("GearPicker", tabPanels[0].transform);
+            UiRuntime.Anchor(panel.GetComponent<RectTransform>(), new Vector2(0.47f, 0.09f), new Vector2(0.98f, 0.335f));
+            panel.AddComponent<Image>().color = new Color(0.08f, 0.10f, 0.15f, 0.97f);
+            pickerRoot = panel;
+
+            TextMeshProUGUI title = UiRuntime.CreateText(panel.transform, "Title", pickerTitle, 14f,
+                TextAlignmentOptions.MidlineLeft, hintColor);
+            UiRuntime.Anchor(title.rectTransform, new Vector2(0.02f, 0.855f), new Vector2(0.70f, 0.985f), 4f, 0f, 0f, 0f);
+
+            Button prev = UiRuntime.CreateButton(panel.transform, "Prev", "<", new Vector2(0.72f, 0.86f), new Vector2(0.80f, 0.985f),
+                () =>
+                {
+                    pickerPage = Mathf.Max(0, pickerPage - PickerPageSize);
+                    BuildPicker();
+                }, new Color(0.20f, 0.24f, 0.34f, 1f));
+            TextMeshProUGUI prevLabel = prev.GetComponentInChildren<TextMeshProUGUI>();
+            if (prevLabel != null)
+            {
+                prevLabel.fontSize = 16f;
+            }
+
+            Button next = UiRuntime.CreateButton(panel.transform, "Next", ">", new Vector2(0.81f, 0.86f), new Vector2(0.89f, 0.985f),
+                () =>
+                {
+                    pickerPage += PickerPageSize;
+                    BuildPicker();
+                }, new Color(0.20f, 0.24f, 0.34f, 1f));
+            TextMeshProUGUI nextLabel = next.GetComponentInChildren<TextMeshProUGUI>();
+            if (nextLabel != null)
+            {
+                nextLabel.fontSize = 16f;
+            }
+
+            Button close = UiRuntime.CreateButton(panel.transform, "Close", "X", new Vector2(0.90f, 0.86f), new Vector2(0.98f, 0.985f),
+                ClosePicker, new Color(0.20f, 0.24f, 0.34f, 1f));
+            TextMeshProUGUI closeLabel = close.GetComponentInChildren<TextMeshProUGUI>();
+            if (closeLabel != null)
+            {
+                closeLabel.fontSize = 14f;
+            }
+List<ItemInstance> items = PickerItems();
+            int totalPages = Mathf.Max(1, (items.Count + PickerPageSize - 1) / PickerPageSize);
+            int pageIndex = Mathf.Clamp(pickerPage / PickerPageSize, 0, totalPages - 1);
+            pickerPage = pageIndex * PickerPageSize;
+
+            TextMeshProUGUI pageLabel = UiRuntime.CreateText(panel.transform, "Page", (pageIndex + 1) + "/" + totalPages, 12f,
+                TextAlignmentOptions.Center, dimText);
+            UiRuntime.Anchor(pageLabel.rectTransform, new Vector2(0.72f, 0.70f), new Vector2(0.89f, 0.80f), 0f, 0f, 0f, 0f);
+
+            int shown = 0;
+            for (int i = pickerPage; i < items.Count && shown < PickerPageSize; i++, shown++)
+            {
+                ItemInstance item = items[i];
+                float yTop = 0.70f - shown * 0.155f;
+                float yBottom = yTop - 0.125f;
+
+                Color rowColor = pickerArmedInstanceId == item.InstanceId ? PickerRowArmedColor : PickerRowColor;
+                Button row = UiRuntime.CreateButton(panel.transform, "Row" + i, string.Empty,
+                    new Vector2(0.02f, yBottom), new Vector2(0.98f, yTop), () => EquipFromPicker(item), rowColor);
+                TextMeshProUGUI rowText = UiRuntime.CreateText(row.transform, "Item", string.Empty, 13f,
+                    TextAlignmentOptions.MidlineLeft, bodyText);
+                UiRuntime.Anchor(rowText.rectTransform, new Vector2(0.04f, 0f), new Vector2(0.80f, 1f), 4f, 0f, 0f, 0f);
+                bool usable = selectedHeroIndex >= 0
+                    && manager.Party.GetHero(selectedHeroIndex) != null
+                    && manager.Party.GetHero(selectedHeroIndex).Role == item.Role;
+                rowText.SetText(item.ShortLabel + "  +" + item.PercentText + " " + item.SlotType.PrimaryStatLabel()
+                    + (pickerFilterSlot < 0 ? "  (" + item.Role + ")" : string.Empty));
+                rowText.color = usable ? Color.white : dimText;
+
+                Button trash = UiRuntime.CreateButton(row.transform, "Trash", pickerArmedInstanceId == item.InstanceId ? "again?" : "X",
+                    new Vector2(0.84f, 0.12f), new Vector2(0.97f, 0.88f), () => ToggleDiscard(item), new Color(0.32f, 0.20f, 0.20f, 0.95f));
+                TextMeshProUGUI trashLabel = trash.GetComponentInChildren<TextMeshProUGUI>();
+                if (trashLabel != null)
+                {
+                    trashLabel.fontSize = 11f;
+                }
+            }
+
+            if (items.Count == 0)
+            {
+                TextMeshProUGUI empty = UiRuntime.CreateText(panel.transform, "Empty", "no items here yet", 13f,
+                    TextAlignmentOptions.Center, dimText);
+                UiRuntime.Anchor(empty.rectTransform, new Vector2(0.02f, 0.40f), new Vector2(0.98f, 0.60f), 0f, 0f, 0f, 0f);
+            }
+        }
+
+        private List<ItemInstance> PickerItems()
+        {
+            List<ItemInstance> list = new List<ItemInstance>();
+            if (manager == null || manager.Gear == null)
+            {
+                return list;
+            }
+
+            IReadOnlyList<ItemInstance> inventory = manager.Gear.Inventory;
+            for (int i = 0; i < inventory.Count; i++)
+            {
+                ItemInstance item = inventory[i];
+                if (item == null)
+                {
+                    continue;
+                }
+
+                if (pickerFilterSlot >= 0)
+                {
+                    HeroData hero = selectedHeroIndex >= 0 ? manager.Party.GetHero(selectedHeroIndex) : null;
+                    if (hero == null || (int)item.SlotType != pickerFilterSlot || item.Role != hero.Role)
+                    {
+                        continue;
+                    }
+                }
+
+                list.Add(item);
+            }
+
+            return list;
+        }
+
+        private void EquipFromPicker(ItemInstance item)
+        {
+            if (manager.Gear.Equip(selectedHeroIndex, item.InstanceId, out string message))
+            {
+                ClosePicker();
+                RefreshAll();
+            }
+            else
+            {
+                GameEvents.RaiseToast(message);
+            }
+        }
+
+        /// <summary>Two-tap delete: first tap arms the row (red), the second actually discards.</summary>
+        private void ToggleDiscard(ItemInstance item)
+        {
+            if (pickerArmedInstanceId == item.InstanceId)
+            {
+                manager.Gear.Discard(item.InstanceId, out _);
+                pickerArmedInstanceId = null;
+                BuildPicker();
+            }
+            else
+            {
+                pickerArmedInstanceId = item.InstanceId;
+                BuildPicker();
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Formation
         // ------------------------------------------------------------------
         // Formation
         // ------------------------------------------------------------------
@@ -355,6 +688,7 @@ namespace IdleRPG.UI
             RefreshBigPortrait();
             RefreshStats();
             RefreshFormationText();
+            RefreshGear();
         }
 
         /// <summary>Binds each card's idle clip once; later refreshes only touch colours and names.</summary>

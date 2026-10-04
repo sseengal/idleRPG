@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using IdleRPG.Data;
+using IdleRPG.Equipment;
 using IdleRPG.Save;
 
 namespace IdleRPG.Progression
@@ -34,6 +35,12 @@ namespace IdleRPG.Progression
 
         /// <summary>Raised whenever any level or multiplier changes (combat should refresh).</summary>
         public event Action StatsChanged;
+
+        /// <summary>
+        /// Optional per-hero gear reader (set by the composition root). Returns flat
+        /// bonuses as fractions of the hero's base stats; null means no gear yet.
+        /// </summary>
+        public Func<int, ItemBonuses> GearBonusReader { get; set; }
 
         // ------------------------------------------------------------------
         // Hero levels
@@ -69,6 +76,32 @@ namespace IdleRPG.Progression
         }
 
         /// <summary>Wipes every hero level (ascension reset).</summary>
+        /// <summary>Equipment changed: combat and the party sheet re-read final stats.</summary>
+        public void NotifyGearChanged()
+        {
+            StatsChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// Total level of all utility (unlock) upgrades of one type. 0 = not owned;
+        /// these carry no multiplier - they are gates the equipment layer queries.
+        /// </summary>
+        public int GetUtilityLevel(PrestigeEffectType effectType)
+        {
+            int level = 0;
+
+            for (int i = 0; i < prestigeUpgrades.Count; i++)
+            {
+                PrestigeUpgradeData upgrade = prestigeUpgrades[i];
+                if (upgrade != null && upgrade.EffectType == effectType)
+                {
+                    level += GetPrestigeLevel(upgrade);
+                }
+            }
+
+            return level;
+        }
+
         public void ResetHeroLevels()
         {
             heroLevels.Clear();
@@ -218,7 +251,7 @@ namespace IdleRPG.Progression
             }
 
             return FormulaUtility.HeroStatValue(
-                hero.BaseHealth,
+                hero.BaseHealth * (1d + Math.Max(0d, GearFraction(b => b.Hp, heroIndex))),
                 GetHeroLevel(hero, HeroStatType.Health),
                 GetStatGainFraction(HeroStatType.Health),
                 GlobalHealthMultiplier,
@@ -233,7 +266,7 @@ namespace IdleRPG.Progression
             }
 
             return FormulaUtility.HeroStatValue(
-                hero.BaseAttack,
+                hero.BaseAttack * (1d + Math.Max(0d, GearFraction(b => b.Atk, heroIndex))),
                 GetHeroLevel(hero, HeroStatType.Attack),
                 GetStatGainFraction(HeroStatType.Attack),
                 GlobalDamageMultiplier,
@@ -248,11 +281,29 @@ namespace IdleRPG.Progression
             }
 
             return FormulaUtility.HeroStatValue(
-                hero.BaseDefense,
+                hero.BaseDefense * (1d + Math.Max(0d, GearFraction(b => b.Def, heroIndex))),
                 GetHeroLevel(hero, HeroStatType.Defense),
                 GetStatGainFraction(HeroStatType.Defense),
                 1d,
                 GetEffectMode(HeroStatType.Defense));
+        }
+
+        /// <summary>Gear bonus fraction for one stat, safe against a missing/rolling reader.</summary>
+        private double GearFraction(System.Func<ItemBonuses, double> read, int heroIndex)
+        {
+            if (GearBonusReader == null)
+            {
+                return 0d;
+            }
+
+            try
+            {
+                return read(GearBonusReader(heroIndex));
+            }
+            catch (System.Exception)
+            {
+                return 0d;
+            }
         }
 
         public double GetAttackInterval(HeroData hero, int heroIndex)

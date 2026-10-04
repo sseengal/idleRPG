@@ -209,6 +209,10 @@ namespace IdleRPG.Core
                 LogFlow($"Milestone: stage {stage} cleared for the first time -> +{gems} gems.");
             }
 
+            // A gear drop is rolled on EVERY boss clear (boss gems stay first-clear only so they cannot be
+            // farmed; drops are the repeatable reward).
+            Gear?.TryBossDrop(stage);
+
             SetState(GameState.Boss, GameState.Combat);
             combatManager.SetStage(CurrentStage, healParty: balanceConfig != null && balanceConfig.HealHeroesOnStageAdvance);
             RaiseStageChanged();
@@ -300,6 +304,13 @@ namespace IdleRPG.Core
         private void OnAutomationChanged()
         {
             Save?.MarkDirty("automation");
+        }
+
+        /// <summary>Item landed/equipped/discarded: write it soon and refresh combat + party stats.</summary>
+        private void OnGearChanged()
+        {
+            Save?.MarkDirty("gear");
+            Resolver?.NotifyGearChanged();
         }
     }
 }

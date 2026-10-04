@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using IdleRPG.Combat;
 using IdleRPG.Data;
 using IdleRPG.DebugTools;
+using IdleRPG.Equipment;
 using IdleRPG.Economy;
 using IdleRPG.Sim;
 using IdleRPG.Progression;
@@ -183,6 +184,9 @@ namespace IdleRPG.Core
 
         /// <summary>The single payout till: multipliers + wallet + ledger receipt.</summary>
         public RewardService Rewards { get; private set; }
+
+        /// <summary>Gear the party owns and wears (boss drops, inventory, slots). Schema v6.</summary>
+        public ItemService Gear { get; private set; }
 
         /// <summary>Gem sinks (Step 9b: the offline income cap extension + instant income).</summary>
         public ShopService Shop { get; private set; }

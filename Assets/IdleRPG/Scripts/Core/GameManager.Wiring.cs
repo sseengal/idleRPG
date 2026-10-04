@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using IdleRPG.Combat;
 using IdleRPG.Data;
 using IdleRPG.DebugTools;
+using IdleRPG.Equipment;
 using IdleRPG.Economy;
 using IdleRPG.Sim;
 using IdleRPG.Progression;
@@ -45,6 +46,11 @@ namespace IdleRPG.Core
 
             Resolver = new StatResolver(balanceConfig, statUpgrades, prestigeUpgrades);
             Resolver.StatsChanged += OnStatsChanged;
+
+            // Step M1.6: gear owns boss drops + the inventory. The resolver reads its summed bonuses.
+            Gear = new ItemService(balanceConfig, partyConfig, Economy, Resolver.GetUtilityLevel);
+            Gear.Changed += OnGearChanged;
+            Resolver.GearBonusReader = heroIndex => Gear != null ? Gear.GetGearBonusFraction(heroIndex) : default;
 
             // Step 14a (B5 session 1): one checkout for every progression row. StatResolver still owns the levels.
             float fallbackGrowth = balanceConfig != null ? balanceConfig.UpgradeCostGrowth : 1.07f;
@@ -189,6 +195,7 @@ namespace IdleRPG.Core
                 Ledger = Ledger,
                 Rewards = Rewards,
                 Shop = Shop,
+                Gear = Gear,
                 Save = Save,
                 Idle = Idle
             };

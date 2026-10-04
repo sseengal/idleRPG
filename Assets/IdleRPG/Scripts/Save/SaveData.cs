@@ -29,7 +29,7 @@ namespace IdleRPG.Save
     public class SaveData
     {
         /// <summary>Bumped whenever the schema changes; drives migration (see SaveMigrations).</summary>
-        public const int CurrentVersion = 5;
+        public const int CurrentVersion = 6;
 
         public int schemaVersion = CurrentVersion;
 
@@ -72,6 +72,11 @@ namespace IdleRPG.Save
         /// "compounding" default failed exactly here: it stamped legacy files as modern and compensation never ran.)
         /// </summary>
         public bool powerCompensated;
+
+        // --- Equipment (schema v6, additive): every gear instance the party owns. Worn items live in the same
+        // list (the equipped records reference them by instance id); the bag = all minus those worn. ---
+        public List<ItemSaveRecord> inventory = new List<ItemSaveRecord>();
+        public List<EquippedGearRecord> equippedGear = new List<EquippedGearRecord>();
 
         // --- Legacy (schema <= v4): kept ONLY as migration input; new saves always write these empty. ---
         public List<HeroProgressRecord> heroes = new List<HeroProgressRecord>();
@@ -132,7 +137,9 @@ namespace IdleRPG.Save
                 gold = 0d,
                 gems = 0d,
                 prestigeTokens = 0d,
-                powerCompensated = true
+                powerCompensated = true,
+                inventory = new List<ItemSaveRecord>(),
+                equippedGear = new List<EquippedGearRecord>()
             };
         }
 

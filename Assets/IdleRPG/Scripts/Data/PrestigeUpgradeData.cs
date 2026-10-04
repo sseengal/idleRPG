@@ -8,7 +8,13 @@ namespace IdleRPG.Data
     {
         GoldPercent = 0,
         DamagePercent = 1,
-        HealthPercent = 2
+        HealthPercent = 2,
+
+        /// <summary>Utility unlock (level >= 1 = owned): dropped gear auto-equips when better. No multiplier.</summary>
+        AutoEquipGear = 3,
+
+        /// <summary>Utility unlock (level >= 1 = owned): overflowing gear becomes gold. No multiplier.</summary>
+        AutoSalvageGear = 4
     }
 
     public static class PrestigeEffectTypeExtensions
@@ -23,6 +29,10 @@ namespace IdleRPG.Data
                     return "+% Damage";
                 case PrestigeEffectType.HealthPercent:
                     return "+% HP";
+                case PrestigeEffectType.AutoEquipGear:
+                    return "Auto-Equip";
+                case PrestigeEffectType.AutoSalvageGear:
+                    return "Auto-Salvage";
                 default:
                     return effectType.ToString();
             }
