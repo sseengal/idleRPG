@@ -46,12 +46,6 @@ namespace IdleRPG.UI
             }
         }
 
-        /// <summary>Full slot name (Weapon / Armor / Trinket).</summary>
-        public static string SlotName(ItemSlotType slot)
-        {
-            return slot.DisplayName();
-        }
-
         /// <summary>Compact stat label for the slot's primary stat (ATK / DEF / HP).</summary>
         public static string StatLabel(ItemSlotType slot)
         {

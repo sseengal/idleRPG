@@ -164,12 +164,12 @@ namespace IdleRPG.UI
         {
             if (slotDropdownLabel != null)
             {
-                slotDropdownLabel.SetText("SLOT: " + (slotFilter < 0 ? "ALL" : SlotOptionLabels[slotFilter + 1]) + "  ▾");
+                slotDropdownLabel.SetText("SLOT: " + (slotFilter < 0 ? "ALL" : SlotOptionLabels[slotFilter + 1]) + " " + UiGlyphs.Forward);
             }
 
             if (sortDropdownLabel != null)
             {
-                sortDropdownLabel.SetText("SORT: " + SortOptionLabels[sortMode] + "  ▾");
+                sortDropdownLabel.SetText("SORT: " + SortOptionLabels[sortMode] + " " + UiGlyphs.Forward);
             }
         }
 
@@ -389,7 +389,7 @@ namespace IdleRPG.UI
             sheetEquipLabel.text = activeIsEquipped
                 ? "UNEQUIP"
                 : canEquip && activeHeroIndex >= 0
-                    ? "EQUIP  →  " + manager.Party.GetHero(activeHeroIndex).HeroName.ToUpperInvariant()
+                    ? "EQUIP  " + UiGlyphs.Forward + "  " + manager.Party.GetHero(activeHeroIndex).HeroName.ToUpperInvariant()
                     : "EQUIP";
 
             Button equipButton = FindSheetButton("EquipButton");

@@ -1420,3 +1420,22 @@ Found while reviewing progress against the design docs. Each needs a home in `Ro
 - [ ] `Roadmap.md` status board + this checklist updated in the same iteration
 - [ ] manual Unity test handed off at the end of every sub-step (`.clinerules`)
 
+
+---
+
+## 7. Automated regression (EditMode, headless)
+
+- [ ] run the pure-logic suites before any commit that touches `Save/`, `Equipment/`, `Economy/`,
+      `Progression/`, or `Sim/` - one command, ~40s:
+
+      `Unity -batchmode -projectPath . -runTests -testPlatform EditMode -testResults Tests/results.xml -quit`
+
+      (or in-editor: Window > General > Test Runner > Run All - EditMode)
+
+- [ ] `SaveRoundTripTests` - the non-negotiable suite: worn ids + bag contents + dedupe across
+      WriteToSave -> FillFromSave. Add a test in the SAME commit as any schema bump or load rule.
+- [ ] `DropRoutingTests` - bag cap, class ownership, worn-matches-class invariants. Add a test in the
+      SAME commit as any drop/equip/salvage rule change.
+- [ ] `FormulaUtilityTests` - stage/upgrade curve shapes + label tiers. Renumber freely; these pin the shape.
+- [ ] UI, animation and scene wiring stay on the manual smoke checklist - do NOT grow the suite into
+      play-mode territory unless a second person joins the project.

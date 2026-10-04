@@ -215,8 +215,11 @@ namespace IdleRPG.Core
                 }
             }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            // Dev instrumentation - nothing reads Telemetry in a release build (only the gated overlay does).
             Telemetry = new TelemetryFeed();
             Telemetry.Attach();
+#endif
 
             runner.Attach(Context, true);
 

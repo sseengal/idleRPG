@@ -162,7 +162,7 @@ namespace IdleRPG.UI
                 TextAlignmentOptions.MidlineLeft, color);
             UiRuntime.Anchor(rank.rectTransform, new Vector2(0f, slotBottom), new Vector2(0.12f, slotTop), 0f, 0f, 0f, 0f);
 
-            TextMeshProUGUI tag = UiRuntime.CreateText(rowsRoot, "Tag" + slotIndex, (isYou ? "◆ " : "") + entry.Tag, 15f,
+            TextMeshProUGUI tag = UiRuntime.CreateText(rowsRoot, "Tag" + slotIndex, (isYou ? UiGlyphs.Marker + " " : "") + entry.Tag, 15f,
                 TextAlignmentOptions.MidlineLeft, color);
             UiRuntime.Anchor(tag.rectTransform, new Vector2(0.16f, slotBottom), new Vector2(0.58f, slotTop), 0f, 0f, 0f, 0f);
 

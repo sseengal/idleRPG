@@ -326,10 +326,12 @@ namespace IdleRPG.Core
                 runner.Detach();
             }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (Telemetry != null)
             {
                 Telemetry.Detach();
             }
+#endif
         }
 
 
