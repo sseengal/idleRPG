@@ -4,6 +4,7 @@
     "references": [
         "IdleRPG.Runtime",
         "IdleRPG.Sim",
+        "IdleRPG.Utils",
         "UnityEngine.UI",
         "Unity.TextMeshPro",
         "Unity.InputSystem"
