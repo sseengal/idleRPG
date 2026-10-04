@@ -1193,6 +1193,14 @@ Verified: drops/math, class gate, HP 240->245 on equip, worn-item save reload, a
 hero, salvage pays price x 40%. Plan: Docs/Equipment-MVP-Plan.md. Screenshots party-gear-equip.png /
 party-inventory-picker.png.
 
+Leaderboard MVP (2026-10-04): a mock global ranks board (no backend yet) - 40 deterministic mock
+players + the local player (tag "YOU", party level = total hero levels, best stage = HighestStageReached),
+sorted by best stage desc (ties keep the mock ahead so the climb is visible). Entry point: a runtime
+"RANKS" button on the Battle HUD top bar (HudHeaderUI, no scene edits) opening LeaderboardSheetUI - a
+docked panel over the battle page, header shows "you are #k of 41", top-12 rows + pinned highlighted YOU
+row, refreshes on StageChanged. Verified live: #40 of 41 default, jumps to #1 when best stage bumped to
+500, rows/labels render. Plan + mock->real roadmap: Docs/Leaderboard-MVP.md. Screenshot leaderboard.png.
+
 Party page MVP (2026-09-30): the page now has a ROSTER | FORMATION sub-nav. Roster = three animated idle
 portrait cards (selector strip), a big animated selected hero on the left and a styled stats card on the right
 (role header + HP/ATK/DEF/DPS rows from the Resolver, integers), sitting above reserved-but-locked gear (4)

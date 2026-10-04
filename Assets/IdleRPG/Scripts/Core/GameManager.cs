@@ -7,6 +7,7 @@ using IdleRPG.Combat;
 using IdleRPG.Data;
 using IdleRPG.DebugTools;
 using IdleRPG.Equipment;
+using IdleRPG.Leaderboard;
 using IdleRPG.Economy;
 using IdleRPG.Sim;
 using IdleRPG.Progression;
@@ -187,6 +188,9 @@ namespace IdleRPG.Core
 
         /// <summary>Gear the party owns and wears (boss drops, inventory, slots). Schema v6.</summary>
         public ItemService Gear { get; private set; }
+
+        /// <summary>Global ranks (mock field + the local player), for the leaderboard sheet.</summary>
+        public LeaderboardService Leaderboard { get; private set; }
 
         /// <summary>Gem sinks (Step 9b: the offline income cap extension + instant income).</summary>
         public ShopService Shop { get; private set; }

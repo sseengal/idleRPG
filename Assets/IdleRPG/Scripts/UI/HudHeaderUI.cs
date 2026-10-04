@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using IdleRPG.Core;
 using IdleRPG.Economy;
 using IdleRPG.Utils;
@@ -25,12 +26,15 @@ namespace IdleRPG.UI
         [SerializeField] private TextMeshProUGUI boostText;
 
         private EconomyManager economy;
+        private GameManager manager;
+        private LeaderboardSheetUI leaderboardSheet;
 
         private void Start()
         {
             HudController hud = HudController.Instance;
             GameManager manager = hud != null ? hud.GameManager : null;
 
+            this.manager = manager;
             economy = manager != null ? manager.Economy : null;
 
             if (economy == null)
@@ -39,6 +43,7 @@ namespace IdleRPG.UI
                 return;
             }
 
+            BuildLeaderboardButton();
             RefreshAll();
         }
 
@@ -54,6 +59,45 @@ namespace IdleRPG.UI
             GameEvents.CurrencyChanged -= OnCurrencyChanged;
             GameEvents.StageChanged -= OnStageChanged;
             GameEvents.GoldBoostChanged -= OnGoldBoostChanged;
+        }
+
+        /// <summary>Runtime trophy button (right edge of the top bar) - opens the global ranks sheet.</summary>
+        private void BuildLeaderboardButton()
+        {
+            Button trophy = UiRuntime.CreateButton(transform, "LeaderboardButton", "RANKS",
+                new Vector2(0.90f, 0.10f), new Vector2(0.985f, 0.90f), OpenLeaderboard,
+                new Color(0.30f, 0.36f, 0.50f, 1f));
+            TextMeshProUGUI label = trophy.GetComponentInChildren<TextMeshProUGUI>();
+            if (label != null)
+            {
+                label.fontSize = 13f;
+            }
+        }
+
+        private void OpenLeaderboard()
+        {
+            if (manager == null || manager.Leaderboard == null)
+            {
+                return;
+            }
+
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null)
+            {
+                return;
+            }
+
+            if (leaderboardSheet == null)
+            {
+                GameObject node = new GameObject("LeaderboardSheet", typeof(RectTransform));
+                node.transform.SetParent(canvas.transform, false);
+                leaderboardSheet = node.AddComponent<LeaderboardSheetUI>();
+                leaderboardSheet.Build(manager);
+            }
+            else
+            {
+                leaderboardSheet.Show();
+            }
         }
 
         private void OnCurrencyChanged(CurrencyType currencyType, double amount)

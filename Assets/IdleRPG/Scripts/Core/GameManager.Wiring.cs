@@ -7,6 +7,7 @@ using IdleRPG.Combat;
 using IdleRPG.Data;
 using IdleRPG.DebugTools;
 using IdleRPG.Equipment;
+using IdleRPG.Leaderboard;
 using IdleRPG.Economy;
 using IdleRPG.Sim;
 using IdleRPG.Progression;
@@ -51,6 +52,9 @@ namespace IdleRPG.Core
             Gear = new ItemService(balanceConfig, partyConfig, Economy, Resolver.GetUtilityLevel);
             Gear.Changed += OnGearChanged;
             Resolver.GearBonusReader = heroIndex => Gear != null ? Gear.GetGearBonusFraction(heroIndex) : default;
+
+            // Leaderboard: deterministic mock field + the local player (real backend comes later).
+            Leaderboard = new LeaderboardService(() => Resolver != null ? Resolver.TotalHeroLevels : 0, () => HighestStageReached);
 
             // Step 14a (B5 session 1): one checkout for every progression row. StatResolver still owns the levels.
             float fallbackGrowth = balanceConfig != null ? balanceConfig.UpgradeCostGrowth : 1.07f;
@@ -196,6 +200,7 @@ namespace IdleRPG.Core
                 Rewards = Rewards,
                 Shop = Shop,
                 Gear = Gear,
+                Leaderboard = Leaderboard,
                 Save = Save,
                 Idle = Idle
             };

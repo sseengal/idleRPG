@@ -2,6 +2,7 @@ using IdleRPG.Combat;
 using IdleRPG.Data;
 using IdleRPG.Economy;
 using IdleRPG.Equipment;
+using IdleRPG.Leaderboard;
 using IdleRPG.Progression;
 using IdleRPG.Save;
 using IdleRPG.Services;
@@ -52,6 +53,9 @@ namespace IdleRPG.Core
 
         /// <summary>Gear the party owns and wears (boss drops, inventory, slots). Schema v6.</summary>
         public ItemService Gear { get; set; }
+
+        /// <summary>Global ranks (mock field + the local player).</summary>
+        public LeaderboardService Leaderboard { get; set; }
 
         public SaveManager Save { get; set; }
 
