@@ -1174,11 +1174,12 @@ enemies leaned left (lower slots +24x). Screenshot battle-page-v11.png.
 Battle-page cleanup round 4 (2026-09-30): heroes now genuinely lean right (front column raised -28y), enemy slots rebuilt to hero geometry (160x176, 188px pitch, 128px icon + bar) so the stacks group alike. Screenshot battle-page-v12.png.
 
 Equipment MVP (2026-10-04): bosses roll a 35% chance to drop class-locked gear (Weapon/Armor/Trinket ->
-ATK/DEF/HP, stage + rarity scaled in BalanceConfig). Inventory gained its OWN Party tab (ROSTER |
-FORMATION | INVENTORY): square tile grid (4 cols, scroll), slot + sort chips, 'E' badge + bright ring on
-equipped tiles, bottom-sheet popup with info (class/slot/stat/source), EQUIP -> <hero> / UNEQUIP and a
-two-tap DISCARD. The Roster now only SHOWS equipped gear (tap a slot to jump to that filtered inventory).
-Mobile minimums measured: chips 96px, slots 106px, tiles 150px (1080x1920). Two token upgrades on the
+ATK/DEF/HP, stage + rarity scaled in BalanceConfig). Inventory lives on its OWN Party tab (ROSTER |
+FORMATION | INVENTORY): two DROPDOWNS (SLOT, SORT) + a FIXED 4x5 = 20 slot bag (empty slots visible),
+'E' badge + bright ring on equipped tiles, bottom-sheet popup (class/slot/stat/source, EQUIP -> <hero> /
+UNEQUIP, two-tap DISCARD). The equip button is only offered when it can succeed (impossible "cannot do
+that" fallback deleted). Roster is fully view-only for gear and shows the equipped bonus next to each stat
+(e.g. DEF 13 +4.8%). Mobile minimums measured: dropdowns 105px, slots 106px, tiles 150px (1080x1920). Two token upgrades on the
 Ascension tree: Auto-Equip (25 tok) wears drops automatically,
 Auto-Salvage (18 tok) turns full-bag overflow into gold. Every step writes a battle-log line. Save schema v6
 (additive; worn + bag items round-trip). Resolver folds gear into hero stats; combat never knows items exist.

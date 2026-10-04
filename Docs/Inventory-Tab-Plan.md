@@ -9,15 +9,23 @@
 ## 1. What changed
 
 - Party page top bar: `ROSTER | FORMATION | INVENTORY` (3 equal tabs, 44px+ tall).
-- **Roster** now shows ONLY the equipped gear: the three typed slots stay display-only (rarity tint + stat)
-  and a tap on a slot jumps to the INVENTORY tab pre-filtered to that slot type. All pickers/drawers deleted.
-- **INVENTORY tab** (new `InventoryTabUI` component, built by `PartyPanelUI` like `PartyBoardUI`):
-  - header "INVENTORY n/20"
-  - slot filter chips: ALL / WEAPON / ARMOR / TRINKET
-  - sort chips: NEWEST / RARITY / BONUS
-  - a square tile grid (4 columns, ~150px tiles, vertical ScrollRect + mask) — rarity tinted tile, slot
-    letter (placeholder art), stat line, class corner tag
+
+**Round 2 (2026-10-04):** the bag moved to a FIXED 4x5 (20-slot) grid and the two chip rows became two
+DROPDOWNS (`SLOT: ALL v`, `SORT: NEWEST v`) - the page felt heavy/cramped. Empty slots render as dark,
+non-interactive tiles, so the bag never shifts shape. The Roster is now fully view-only (a slot tap does
+nothing) and each stat row on the Roster card shows its equipped gear bonus right next to the value
+(e.g. `ATK  12  +3.2%`).
+- **Roster** shows ONLY the equipped gear: three typed slots, fully view-only (rarity tint + stat); the
+  equipped bonus appears next to the stat it boosts in the stats card (e.g. DEF 13 +4.8%). The old tap-jump
+  and every picker/drawer are gone.
+- **INVENTORY tab** (`InventoryTabUI`, built by `PartyPanelUI` like `PartyBoardUI`):
+  - header "INVENTORY n/20" (accent when full)
+  - two dropdowns (one option-sheet helper): SLOT: ALL/WEAPON/ARMOR/TRINKET, SORT: NEWEST/RARITY/BONUS
+  - a FIXED square-tile bag: 4x5 = 20 slots always visible (~150px tiles, no scroll); filled tiles show
+    rarity tint + slot letter (placeholder art) + stat line + class corner tag; empty slots are dark + inert
   - **equipped tiles:** a small **'E' badge** (top-left) + a **bright border ring**
+- **equip gating:** the EQUIP button is only offered when it can genuinely succeed (bag item + its class
+  hero exists, resolved fresh at tap time); the impossible "cannot do that" fallback is deleted.
   - tap a tile → **bottom-sheet popup**: big sprite, class ("TANK ONLY"), slot + stat ("Armor · +3.2% DEF"),
     source ("stage 4 drop · 11 gold"), **[EQUIP → KNIGHT]** / **[UNEQUIP]**, **[DISCARD]** with a two-tap
     guard ("TAP AGAIN"), close via X or tapping the dimmed backdrop
@@ -26,7 +34,8 @@
 
 ## 2. Mobile minimums (measured on the 1080×1920 canvas)
 
-- Chips: **96px** tall · Roster gear slots: **106px** · Tiles: **150px** (all far above the 44px floor).
+- Dropdowns: **~105px** tall · Option rows: **~55px** · Roster gear slots: **106px** · Tiles: **150px**
+  (all far above the 44px floor).
 - Fonts: body 14px, titles 16–18px; the only sub-14px text is the non-interactive E badge / class tag (12px).
 
 ## 3. Backend
@@ -47,5 +56,5 @@ Discard` + `Changed` events drive everything; the battle-log lines and toasts we
 
 ## 5. Fast-follow (recorded, not built)
 
-Class filter chips (same builder as the slot chips), drag-to-reorder favorites, compare arrows against the
-equipped piece, sort by hero instead of slot. Placeholder letter tiles swap to real square sprites later.
+Class-filter dropdown entry, drag-to-reorder favourites, compare arrows against the equipped piece, sort by
+hero instead of slot. Placeholder letter tiles swap to real square sprites later.

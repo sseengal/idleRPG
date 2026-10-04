@@ -66,10 +66,11 @@ Equipment/
 
 ## 4. UX (the tap loop)
 
-- Roster: the three equipped slots (display only, tap jumps to the filtered inventory tab).
-- INVENTORY tab (live since 2026-10-04, see Docs/Inventory-Tab-Plan.md): square tile grid, slot filter +
-  sort chips, E badge + ring on equipped, bottom-sheet popup with EQUIP-><hero> / UNEQUIP and a two-tap
-  DISCARD (first tap arms the button, second deletes).
+- Roster: the three equipped slots, view-only, with the equipped bonus shown next to each stat in the
+  stats card (e.g. DEF 13 +4.8%).
+- INVENTORY tab (live since 2026-10-04, see Docs/Inventory-Tab-Plan.md): two dropdowns (SLOT, SORT), a
+  fixed 4x5 = 20 slot bag (empty slots visible), E badge + ring on equipped, bottom-sheet popup with
+  EQUIP-><hero> / UNEQUIP and a two-tap DISCARD. Equip is only offered when it can succeed.
 - Every drop/equip/discard/salvage writes a line into the battle log (Reward = gold colour); Legendary drops,
   discards and salvages also toast.
 - The two upgrades appear as normal Ascension cards (token prices, one-time).

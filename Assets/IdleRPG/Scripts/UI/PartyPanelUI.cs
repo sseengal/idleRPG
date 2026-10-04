@@ -39,6 +39,7 @@ namespace IdleRPG.UI
         private readonly Color bodyText = new Color(1f, 1f, 1f, 0.92f);
         private readonly Color dimText = new Color(1f, 1f, 1f, 0.55f);
         private readonly Color hintColor = new Color(1f, 0.92f, 0.7f);
+        private readonly Color bonusColor = new Color(0.55f, 0.9f, 0.6f, 1f);
         private readonly Color accentColor = new Color(1f, 0.82f, 0.3f, 1f);
 
         private const int StatRowCount = 4;
@@ -72,6 +73,7 @@ namespace IdleRPG.UI
         private TextMeshProUGUI roleLabel;
         private TextMeshProUGUI[] statKeys;
         private TextMeshProUGUI[] statValues;
+        private TextMeshProUGUI[] statBonusLabels;
         private TextMeshProUGUI formationLabel;
 
         private Image[] gearSlotBackgrounds;
@@ -227,17 +229,6 @@ namespace IdleRPG.UI
             }
         }
 
-        /// <summary>From the Roster: opens the INVENTORY tab pre-filtered to one slot type.</summary>
-        private void OpenInventoryFiltered(int slotIndex)
-        {
-            if (inventoryTab == null)
-            {
-                return;
-            }
-
-            inventoryTab.SetSlotFilter(slotIndex);
-            ShowTab(2);
-        }
 // ------------------------------------------------------------------
         // Roster
         // ------------------------------------------------------------------
@@ -300,6 +291,7 @@ namespace IdleRPG.UI
 
             statKeys = new TextMeshProUGUI[StatRowCount];
             statValues = new TextMeshProUGUI[StatRowCount];
+            statBonusLabels = new TextMeshProUGUI[StatRowCount];
 
             for (int i = 0; i < StatRowCount; i++)
             {
@@ -307,11 +299,16 @@ namespace IdleRPG.UI
 
                 statKeys[i] = UiRuntime.CreateText(root, "Key" + StatKeyNames[i], StatKeyNames[i], 17f,
                     TextAlignmentOptions.MidlineLeft, dimText);
-                UiRuntime.Anchor(statKeys[i].rectTransform, new Vector2(0.50f, yTop), new Vector2(0.68f, yTop + 0.045f), 0f, 0f, 0f, 0f);
+                UiRuntime.Anchor(statKeys[i].rectTransform, new Vector2(0.50f, yTop), new Vector2(0.62f, yTop + 0.045f), 0f, 0f, 0f, 0f);
 
                 statValues[i] = UiRuntime.CreateText(root, "Val" + StatKeyNames[i], string.Empty, 17f,
                     TextAlignmentOptions.MidlineRight, bodyText);
-                UiRuntime.Anchor(statValues[i].rectTransform, new Vector2(0.70f, yTop), new Vector2(0.95f, yTop + 0.045f), 0f, 0f, 0f, 0f);
+                UiRuntime.Anchor(statValues[i].rectTransform, new Vector2(0.62f, yTop), new Vector2(0.79f, yTop + 0.045f), 0f, 0f, 0f, 0f);
+
+                // Equipped gear bonus sits right next to the stat it boosts (empty for derived rows like DPS).
+                statBonusLabels[i] = UiRuntime.CreateText(root, "Bonus" + StatKeyNames[i], string.Empty, 13f,
+                    TextAlignmentOptions.MidlineRight, bonusColor);
+                UiRuntime.Anchor(statBonusLabels[i].rectTransform, new Vector2(0.79f, yTop), new Vector2(0.95f, yTop + 0.045f), 0f, 0f, 0f, 0f);
             }
 
             BuildGearRow(root);
@@ -338,15 +335,17 @@ namespace IdleRPG.UI
 
             for (int i = 0; i < GearSlotCount; i++)
             {
+                // View-only: the roster shows what is worn; all equipping happens on the INVENTORY tab.
                 float x0 = xMin + i * (width + gap);
-                int captured = i;
+                Image slot = UiRuntime.CreatePanel(root, null, slotColor);
+                UiRuntime.Anchor(slot.rectTransform, new Vector2(x0, 0.335f), new Vector2(x0 + width, 0.412f));
+                gearSlotBackgrounds[i] = slot;
 
-                Button slot = UiRuntime.CreateButton(root, "GearSlot" + i, GearSlotLetters[i],
-                    new Vector2(x0, 0.335f), new Vector2(x0 + width, 0.412f), () => OpenInventoryFiltered(captured), slotColor);
-                gearSlotBackgrounds[i] = slot != null ? slot.GetComponent<Image>() : null;
+                TextMeshProUGUI letter = UiRuntime.CreateText(slot.transform, "Letter", GearSlotLetters[i], 18f,
+                    TextAlignmentOptions.Center, Color.white);
+                UiRuntime.Anchor(letter.rectTransform, new Vector2(0.02f, 0.38f), new Vector2(0.98f, 0.95f), 0f, 0f, 0f, 0f);
 
-                TextMeshProUGUI stat = UiRuntime.CreateText(slot.transform, "Stat", "empty", 12f,
-                    TextAlignmentOptions.Center, dimText);
+                TextMeshProUGUI stat = UiRuntime.CreateText(slot.transform, "Stat", "empty", 12f,                    TextAlignmentOptions.Center, dimText);
                 UiRuntime.Anchor(stat.rectTransform, new Vector2(0.03f, 0.02f), new Vector2(0.97f, 0.30f), 0f, 0f, 0f, 0f);
                 gearSlotStatLabels[i] = stat;
             }
@@ -569,6 +568,14 @@ private void RefreshStats()
                     statValues[i].SetText("-");
                 }
 
+                if (statBonusLabels != null)
+                {
+                    for (int i = 0; i < statBonusLabels.Length; i++)
+                    {
+                        statBonusLabels[i].SetText(string.Empty);
+                    }
+                }
+
                 return;
             }
 
@@ -583,6 +590,27 @@ private void RefreshStats()
             statValues[1].SetText(NumberFormatter.Format(attack));
             statValues[2].SetText(NumberFormatter.Format(defense));
             statValues[3].SetText(NumberFormatter.Format(dps));
+
+            if (statBonusLabels != null && statBonusLabels.Length >= 4 && manager.Gear != null)
+            {
+                ItemBonuses bonuses = manager.Gear.GetGearBonusFraction(selectedHeroIndex);
+                double[] fractions = { bonuses.Hp, bonuses.Atk, bonuses.Def };
+
+                for (int i = 0; i < 3 && i < statBonusLabels.Length; i++)
+                {
+                    if (fractions[i] > 0.0005d)
+                    {
+                        statBonusLabels[i].SetText("+" + (fractions[i] * 100d).ToString("0.#") + "%");
+                        statBonusLabels[i].color = bonusColor;
+                    }
+                    else
+                    {
+                        statBonusLabels[i].SetText(string.Empty);
+                    }
+                }
+
+                statBonusLabels[3].SetText(string.Empty);
+            }
         }
 
         private void RefreshFormationText()

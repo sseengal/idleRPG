@@ -413,6 +413,12 @@ namespace IdleRPG.Equipment
         // ------------------------------------------------------------------
         // Internals
         // ------------------------------------------------------------------
+        /// <summary>Finds an instance in the BAG (not equipped). Used by the UI to gate equip actions.</summary>
+        public ItemInstance FindFor(string instanceId)
+        {
+            return Find(instanceId);
+        }
+
         private ItemInstance Find(string instanceId)
         {
             if (string.IsNullOrEmpty(instanceId))

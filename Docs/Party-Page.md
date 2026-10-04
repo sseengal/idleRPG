@@ -82,7 +82,7 @@ ROSTER
   big animated selected hero (left)   |   hero card (right):
                                             name, role chips, stars (reserved)
                                             stat rows (HP/ATK/DEF - displayed as a role header + labelled rows; DPS = ATK + attack interval) - live from the Resolver
-                                            GEAR row (3 typed slots, equipped only - tap to jump to INVENTORY)
+                                            GEAR row (3 typed slots, equipped only - view-only)
                                             ABILITIES row (3 slots, locked)
 
 FORMATION
@@ -90,8 +90,8 @@ FORMATION
   rank readout + hint
 
 INVENTORY  (live: see Docs/Inventory-Tab-Plan.md)
-  chip filters (slot) + sort (newest / rarity / bonus)
-  square tile grid (4 cols, scroll) - rarity tint, letter tile, stat, class tag
+  two dropdowns (SLOT: all/weapon/armor/trinket, SORT: newest/rarity/bonus)
+  fixed 4x5 = 20 slot bag - rarity tint, letter tile, stat, class tag; empty slots visible
   equip/unequip + 2-tap discard on a bottom sheet (class-locked hero named in the button)
   'E' badge + bright ring on equipped tiles
 ```
