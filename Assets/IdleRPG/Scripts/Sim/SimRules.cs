@@ -45,9 +45,11 @@ namespace IdleRPG.Sim
         public double SwingDurationSec;
 
         /// <summary>
-        /// Sim-seconds after a swing lands before the next attacker may start - the "blink home" window for the
-        /// unit that just hit. A fight runs one action at a time, so this plus <see cref="SwingDurationSec"/> is
-        /// the minimum time between two attacks' announcements.
+        /// Sim-seconds after a swing lands before the next attacker may start. It covers the hitter's blink home
+        /// (~0.7 s) PLUS a deliberate turn-beat of stillness, the way a turn-based RPG lets the last action
+        /// "land" before the next one commits. This plus <see cref="SwingDurationSec"/> is the minimum time
+        /// between two attacks' announcements; a unit whose interval is shorter is capped to that floor
+        /// (balance-deferred - see Checklist.md 1x).
         /// </summary>
         public double SwingRecoverySec;
 
@@ -78,7 +80,7 @@ namespace IdleRPG.Sim
                     CriticalDamageMultiplier = 2d,
                     PaceMultiplier = 1d,
                     SwingDurationSec = 0.35d,
-                    SwingRecoverySec = 0.5d,
+                    SwingRecoverySec = 1.0d,
                     BackRowTargetWeight = 0.35d
                 };
             }

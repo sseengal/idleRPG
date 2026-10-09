@@ -109,7 +109,7 @@ includes them (enforced at build time from B10).
       unit starts running.
 - [ ] **Same damage truth**: HP bar, damage number and battle log still arrive together at impact — the sequencing
       changed nothing about when damage is real.
-- [ ] **Fast attackers aren't lost**: at x1.6 a fast hero still gets its ~0.85 s quota (swing + recovery) — it is
+- [ ] **Fast attackers aren't lost**: at x1.6 a fast hero still gets its ~1.35 s quota (swing + recovery) — it is
       sequenced, never skipped.
 
 ### Lunge-position + animation checks (v2, added 2026-10-09)
@@ -120,6 +120,9 @@ includes them (enforced at build time from B10).
       frames never play on after the character is already back in position.
 - [ ] **Full swing plays**: the attack clip runs to its LAST frame (strike + follow-through) before the blink —
       no mid-swing teleport cut, no missing final frames (a ~0.5 s pose on the pack's art).
+- [ ] **Turn beat**: after the attacker pops home there is a noticeable beat of stillness before the next runner
+      starts (~0.3 s) — the hit and its spoils read, then the next unit commits. Like a turn-based RPG, not a
+      conveyor belt.
 
 ---
 
