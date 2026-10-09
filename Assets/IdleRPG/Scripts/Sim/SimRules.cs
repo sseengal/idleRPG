@@ -36,6 +36,21 @@ namespace IdleRPG.Sim
         /// <summary>Multiplies every attack interval. Wall-clock feel only, never balance.</summary>
         public double PaceMultiplier;
 
+        /// <summary>
+        /// Sim-seconds a swing travels before its damage lands. Purely the attack "commit" window: the attacker
+        /// announces, the UI runs the unit in, and <see cref="Encounter"/> resolves damage at the end of this
+        /// window. The attacker's cooldown re-arms at impact (a full interval, via <c>EndSwing</c>), so the
+        /// steady-state hit rate (and DPS) is preserved.
+        /// </summary>
+        public double SwingDurationSec;
+
+        /// <summary>
+        /// Sim-seconds after a swing lands before the next attacker may start - the "blink home" window for the
+        /// unit that just hit. A fight runs one action at a time, so this plus <see cref="SwingDurationSec"/> is
+        /// the minimum time between two attacks' announcements.
+        /// </summary>
+        public double SwingRecoverySec;
+
         // --- Formation (used from Step 10) ---
         /// <summary>
         /// How attractive the back rank is relative to the front rank (1 = front) when an attacker picks a target.
@@ -62,6 +77,8 @@ namespace IdleRPG.Sim
                     CriticalChance = 0.05d,
                     CriticalDamageMultiplier = 2d,
                     PaceMultiplier = 1d,
+                    SwingDurationSec = 0.35d,
+                    SwingRecoverySec = 0.5d,
                     BackRowTargetWeight = 0.35d
                 };
             }
@@ -92,6 +109,24 @@ namespace IdleRPG.Sim
             else if (safe.PaceMultiplier > 10d)
             {
                 safe.PaceMultiplier = 10d;
+            }
+
+            if (safe.SwingDurationSec < 0.1d)
+            {
+                safe.SwingDurationSec = 0.1d;
+            }
+            else if (safe.SwingDurationSec > 2d)
+            {
+                safe.SwingDurationSec = 2d;
+            }
+
+            if (safe.SwingRecoverySec < 0d)
+            {
+                safe.SwingRecoverySec = 0d;
+            }
+            else if (safe.SwingRecoverySec > 3d)
+            {
+                safe.SwingRecoverySec = 3d;
             }
 
             return safe;

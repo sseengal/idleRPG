@@ -82,6 +82,38 @@ includes them (enforced at build time from B10).
 
 ---
 
+## 2d. Face-to-face combat — visual review (run-in, blur-back, 2026-10-09)
+
+> Check in Play at normal **and** x1.6. The damage events fire exactly as before — the surprise to verify is the
+> *visible* choreography on top of them.
+
+- [ ] **Heroes run in**: when a hero attacks an enemy, the hero's icon runs at the enemy's slot (walk clip) before
+      the damage lands.
+- [ ] **Enemies run in**: when an enemy attacks a hero, it runs at the hero's slot.
+- [ ] **Damage at impact**: the damage number, HP bar drop and battle-log line all appear as the run makes contact —
+      no number floating before the swing, no delayed-lie (nothing the player can "catch lying").
+- [ ] **Swing pose at contact**: after the run-in, the attacker plays its attack animation at the target.
+- [ ] **Blink back**: the attacker squash-fades at the target, teleports to its slot, pops back in — a readable
+      "anime blink", not a slow walk home.
+- [ ] **No stranded units**: after a wave ends, a death, or a fast x1.6 burst, every unit is back in its slot
+      (no one frozen mid-field).
+- [ ] **Console clean**: no `IndexOutOfRange` on slot lookups, no null rects during the fight. (`Run All Checks`
+      goldens are intentionally NOT re-measured in this pass — see Checklist §1x, balance-deferred.)
+
+### Turn-sequence checks (ATB-style, one unit at a time — added 2026-10-09)
+- [ ] **One runner at a time**: at any moment only ONE unit is running/hitting — never two heroes or a hero+enemy
+      mid-swing together.
+- [ ] **Exchanges, not a brawl**: swings alternate hero → enemy → hero when both sides are ready; when the enemy is
+      alone it still acts on its own cadence.
+- [ ] **Reset between actions**: a unit finishes its full dance (hit → swing pose → blink home) before the next
+      unit starts running.
+- [ ] **Same damage truth**: HP bar, damage number and battle log still arrive together at impact — the sequencing
+      changed nothing about when damage is real.
+- [ ] **Fast attackers aren't lost**: at x1.6 a fast hero still gets its ~0.85 s quota (swing + recovery) — it is
+      sequenced, never skipped.
+
+---
+
 ## 3. B9' part 2 — phone checklist (needs the first real phone build)
 
 - [ ] **Portrait lock** — turn the phone while playing; game stays one way up; nothing clipped at the notch /

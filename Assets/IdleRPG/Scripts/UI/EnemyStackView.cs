@@ -58,6 +58,17 @@ namespace IdleRPG.UI
             damagePool?.SetEnemyAnchors(anchors);
         }
 
+        /// <summary>Slot rect of one enemy (for run-to-target effects, e.g. a hero lunging this enemy).</summary>
+        public RectTransform GetEnemySlotRect(int enemyIndex)
+        {
+            if (slots == null || enemyIndex < 0 || enemyIndex >= slots.Length || slots[enemyIndex] == null)
+            {
+                return null;
+            }
+
+            return slots[enemyIndex].transform as RectTransform;
+        }
+
         private void OnEnable()
         {
             GameEvents.EnemySpawned += OnEnemySpawned;

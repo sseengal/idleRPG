@@ -30,6 +30,30 @@ namespace IdleRPG.Sim
         public bool IsCritical;
     }
 
+    /// <summary>
+    /// An attack was announced: the attacker commits, is arming its next swing, and the blow will land after
+    /// <see cref="SimRules.SwingDurationSec"/> sim-seconds. Damage is NOT applied here - the UI uses this to run
+    /// the unit in visually; the actual hit (and its <see cref="DamageEvent"/>) arrives at impact.
+    /// </summary>
+    public struct SwingStartedEvent
+    {
+        public CombatantSide AttackerSide;
+        public int AttackerIndex;
+        public CombatantSide TargetSide;
+        public int TargetIndex;
+    }
+
+    /// <summary>A blow travelling from announcement to impact.</summary>
+    internal struct PendingSwing
+    {
+        public Combatant Attacker;
+        public Combatant Target;
+        public CombatantSide AttackerSide;
+        public double Damage;
+        public bool IsCritical;
+        public double Remaining;
+    }
+
     /// <summary>A combatant died.</summary>
     public struct DeathEvent
     {
@@ -54,6 +78,15 @@ namespace IdleRPG.Sim
         private Combatant[] enemies = Array.Empty<Combatant>();
         private bool partyWipeRaised;
 
+        // Single-action flow (ATB-style): exactly one swing may be in flight. `activeSwing` is that blow while
+        // it is travelling, then `recoveryRemaining` is the blink-home window before the next attacker may start.
+        private bool hasActiveSwing;
+        private PendingSwing activeSwing;
+        private double recoveryRemaining;
+
+        /// <summary>Which side committed last - the soft alternation preference ("other side goes next").</summary>
+        private CombatantSide? lastActorSide;
+
         public Encounter(SimContext context)
         {
             this.context = context ?? SimContext.CreateDefault();
@@ -63,6 +96,7 @@ namespace IdleRPG.Sim
 
         // --- Events (indices included; the runtime maps them onto GameEvents) ---
         public event Action<DamageEvent> Damaged;
+        public event Action<SwingStartedEvent> SwingStarted;
         public event Action<DeathEvent> Died;
         public event Action<int, double> EnemyKilled;
         public event Action PartyWiped;
@@ -149,6 +183,7 @@ namespace IdleRPG.Sim
         {
             enemies = enemyMembers ?? Array.Empty<Combatant>();
             partyWipeRaised = false;
+            ResetCombatFlow();
 
             int cap = context.Caps.MaxEnemiesPerEncounter;
 
@@ -175,6 +210,7 @@ namespace IdleRPG.Sim
         public void Clear()
         {
             enemies = Array.Empty<Combatant>();
+            ResetCombatFlow();
         }
 
         /// <summary>Full heal for the whole party (stage advance, retry, new run).</summary>
@@ -186,11 +222,29 @@ namespace IdleRPG.Sim
             }
 
             partyWipeRaised = false;
+            ResetCombatFlow();
+        }
+
+        /// <summary>Aborts the in-flight action: no swing flying, no recovery, no alternation memory.</summary>
+        private void ResetCombatFlow()
+        {
+            hasActiveSwing = false;
+            activeSwing = default;
+            recoveryRemaining = 0d;
+            lastActorSide = null;
         }
 
         /// <summary>
-        /// Advances the fight. Order preserved from the MVP: every living hero swings first, then the enemies.
-        /// If the last enemy dies during the hero phase, the enemy phase is skipped entirely.
+        /// Advances the fight one beat - an ATB-style single-action fight: exactly ONE unit is ever running or
+        /// hitting at a time. What Step does per beat, in priority order:
+        /// <list type="number">
+        /// <item>every living combatant's cooldown ticks;</item>
+        /// <item>a swing already in flight moves one beat (and its damage lands at impact);</item>
+        /// <item>the recovery window after a hit counts down;</item>
+        /// <item>only when the arena is otherwise empty does the next ready attacker start its swing.</item>
+        /// </list>
+        /// Who acts next is whoever has been ready longest, with a soft preference for the side that did NOT act
+        /// last - so the fight reads as hero/enemy exchanges instead of a simultaneous mosh pit.
         /// </summary>
         public void Step(double deltaTime)
         {
@@ -199,14 +253,124 @@ namespace IdleRPG.Sim
                 return;
             }
 
-            ResolvePhase(party, enemies, CombatantSide.Party, PartyTargetRule, deltaTime);
+            TickAllTimers(deltaTime);
 
-            if (AliveEnemyCount == 0 || AlivePartyCount == 0)
+            if (!IsActive)
             {
                 return;
             }
 
-            ResolvePhase(enemies, party, CombatantSide.Enemy, EnemyTargetRule, deltaTime);
+            if (hasActiveSwing)
+            {
+                AdvanceActiveSwing(deltaTime);
+                return;
+            }
+
+            if (recoveryRemaining > 0d)
+            {
+                recoveryRemaining -= deltaTime;
+                if (recoveryRemaining < 0d)
+                {
+                    recoveryRemaining = 0d;
+                }
+
+                return;
+            }
+
+            AnnounceNext();
+        }
+
+        private void TickAllTimers(double deltaTime)
+        {
+            for (int i = 0; i < party.Length; i++)
+            {
+                party[i]?.Tick(deltaTime);
+            }
+
+            for (int i = 0; i < enemies.Length; i++)
+            {
+                enemies[i]?.Tick(deltaTime);
+            }
+        }
+
+        /// <summary>Advances the single in-flight swing; the one that finishes applies its damage now (impact).</summary>
+        private void AdvanceActiveSwing(double deltaTime)
+        {
+            activeSwing.Remaining -= deltaTime;
+            if (activeSwing.Remaining > 0d)
+            {
+                return;
+            }
+
+            hasActiveSwing = false;
+            PendingSwing landed = activeSwing;
+            activeSwing = default;
+
+            ApplySwing(landed);
+
+            if (!IsActive)
+            {
+                return;
+            }
+
+            // The hit landed; the attacker blinks home for a beat before the next unit may start.
+            double recoverySec = context.Rules.SwingRecoverySec;
+            recoveryRemaining = recoverySec > 0d ? recoverySec : 0d;
+        }
+
+        /// <summary>Applies one landed swing: damage, threat, the impact event, and any death that follows.</summary>
+        private void ApplySwing(PendingSwing swing)
+        {
+            Combatant attacker = swing.Attacker;
+            Combatant target = swing.Target;
+
+            // No free hits from the grave or on corpses: a flight that ended after either side vanished does nothing
+            // (a surviving attacker whose blow was wasted still re-arms, so it is not stuck "ready" forever).
+            if (attacker == null || target == null || !attacker.IsAlive || !target.IsAlive)
+            {
+                if (attacker != null && attacker.IsAlive)
+                {
+                    attacker.EndSwing();
+                }
+
+                return;
+            }
+
+            double applied = target.TakeDamage(swing.Damage);
+            attacker.Threat += applied;
+
+            Damaged?.Invoke(new DamageEvent
+            {
+                AttackerIndex = attacker.SlotIndex,
+                AttackerSide = swing.AttackerSide,
+                TargetIndex = target.SlotIndex,
+                TargetSide = target.Side,
+                Damage = applied,
+                TargetHealth = target.CurrentHealth,
+                TargetMaxHealth = target.MaxHealth,
+                IsCritical = swing.IsCritical
+            });
+
+            // The swing is over: the attacker's cooldown starts counting a full interval from this impact.
+            attacker.EndSwing();
+
+            if (target.IsAlive)
+            {
+                return;
+            }
+
+            Died?.Invoke(new DeathEvent
+            {
+                Index = target.SlotIndex,
+                Side = target.Side,
+                DisplayName = target.DisplayName,
+                GoldReward = target.GoldReward
+            });
+
+            if (target.Side == CombatantSide.Enemy)
+            {
+                EnemyKilled?.Invoke(target.SlotIndex, target.GoldReward);
+            }
 
             if (AlivePartyCount == 0 && !partyWipeRaised)
             {
@@ -216,21 +380,28 @@ namespace IdleRPG.Sim
         }
 
         // --- Internals ---
-        private void ResolvePhase(Combatant[] attackers, Combatant[] defenders, CombatantSide attackerSide, TargetRule rule, double deltaTime)
+        /// <summary>Starts the next ready attacker's swing: picks who, rolls the hit (crit + damage) and announces it.</summary>
+        private void AnnounceNext()
         {
-            for (int i = 0; i < attackers.Length; i++)
+            int maxAttempts = party.Length + enemies.Length + 1;
+            int attempts = 0;
+
+            while (attempts++ < maxAttempts)
             {
-                Combatant attacker = attackers[i];
-                if (attacker == null || !attacker.IsAlive || !attacker.Tick(deltaTime))
+                Combatant attacker = PickNextReadyAttacker(out CombatantSide side);
+                if (attacker == null)
                 {
-                    continue;
+                    return;
                 }
 
                 // An archetype with its own preference uses it; everybody else uses the side rule (Step 11a).
+                Combatant[] defenders = side == CombatantSide.Party ? enemies : party;
+                TargetRule rule = side == CombatantSide.Party ? PartyTargetRule : EnemyTargetRule;
                 Combatant target = SelectTarget(defenders, attacker.TargetRule ?? rule);
                 if (target == null)
                 {
-                    return;
+                    attacker.EndSwing();
+                    continue;
                 }
 
                 bool isCritical = context.Rules.CriticalChance > 0d
@@ -239,51 +410,85 @@ namespace IdleRPG.Sim
                 double multiplier = isCritical ? context.Rules.CriticalDamageMultiplier : 1d;
                 double damage = FormulaUtility.Damage(attacker.Attack, target.Defense, context.Rules.MinDamageRatio, multiplier);
 
+                // MVP parity: a turn that would deal no damage is a wasted turn (no swing, no stuck "ready").
                 if (damage <= 0d)
                 {
+                    attacker.EndSwing();
                     continue;
                 }
 
-                double applied = target.TakeDamage(damage);
-                attacker.Threat += applied;
-
-                Damaged?.Invoke(new DamageEvent
+                activeSwing = new PendingSwing
                 {
+                    Attacker = attacker,
+                    Target = target,
+                    AttackerSide = side,
+                    Damage = damage,
+                    IsCritical = isCritical,
+                    Remaining = context.Rules.SwingDurationSec
+                };
+                hasActiveSwing = true;
+                lastActorSide = side;
+
+                SwingStarted?.Invoke(new SwingStartedEvent
+                {
+                    AttackerSide = side,
                     AttackerIndex = attacker.SlotIndex,
-                    AttackerSide = attackerSide,
-                    TargetIndex = target.SlotIndex,
                     TargetSide = target.Side,
-                    Damage = applied,
-                    TargetHealth = target.CurrentHealth,
-                    TargetMaxHealth = target.MaxHealth,
-                    IsCritical = isCritical
+                    TargetIndex = target.SlotIndex
                 });
+                return;
+            }
+        }
 
-                if (target.IsAlive)
+        /// <summary>
+        /// Who acts next: the ready attacker with the longest-standing timer. Soft alternation - if a unit of the
+        /// side that did NOT act last is ready, it is picked first, so the fight reads as hero/enemy exchanges.
+        /// The first pick of a wave goes to a hero, matching the MVP "heroes go first" convention.
+        /// </summary>
+        private Combatant PickNextReadyAttacker(out CombatantSide side)
+        {
+            CombatantSide preferred = lastActorSide.HasValue
+                ? (lastActorSide.Value == CombatantSide.Party ? CombatantSide.Enemy : CombatantSide.Party)
+                : CombatantSide.Party;
+            CombatantSide fallback = preferred == CombatantSide.Party ? CombatantSide.Enemy : CombatantSide.Party;
+
+            Combatant pick = FindReadyAttacker(preferred);
+            if (pick == null)
+            {
+                pick = FindReadyAttacker(fallback);
+            }
+
+            if (pick != null)
+            {
+                side = pick.Side;
+                return pick;
+            }
+
+            side = default;
+            return null;
+        }
+
+        private Combatant FindReadyAttacker(CombatantSide side)
+        {
+            Combatant[] row = side == CombatantSide.Party ? party : enemies;
+            Combatant best = null;
+
+            for (int i = 0; i < row.Length; i++)
+            {
+                Combatant candidate = row[i];
+                if (candidate == null || !candidate.IsAlive || !candidate.IsSwingReady)
                 {
                     continue;
                 }
 
-                Died?.Invoke(new DeathEvent
+                // Most-negative timer = has been ready (waiting) the longest.
+                if (best == null || candidate.AttackTimer < best.AttackTimer)
                 {
-                    Index = target.SlotIndex,
-                    Side = target.Side,
-                    DisplayName = target.DisplayName,
-                    GoldReward = target.GoldReward
-                });
-
-                if (target.Side == CombatantSide.Enemy)
-                {
-                    EnemyKilled?.Invoke(target.SlotIndex, target.GoldReward);
-
-                    // MVP parity: the target died inside this phase, so if nothing is left alive the rest of
-                    // the phase (and the enemy phase) never happens.
-                    if (AliveEnemyCount == 0)
-                    {
-                        return;
-                    }
+                    best = candidate;
                 }
             }
+
+            return best;
         }
 
         private static int CountAlive(Combatant[] combatants)

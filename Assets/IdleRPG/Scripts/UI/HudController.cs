@@ -29,6 +29,8 @@ namespace IdleRPG.UI
         /// <summary>The damage-number pool (the Team board feeds it its anchors too).</summary>
         public FloatingDamageTextPool DamageTextPool => damageTextPool;
 
+        public EnemyStackView EnemyStack => enemyStack;
+
         /// <summary>The battle board (display only; the Party tab owns editing).</summary>
         public FormationBoardView FormationBoard => formationBoard;
 

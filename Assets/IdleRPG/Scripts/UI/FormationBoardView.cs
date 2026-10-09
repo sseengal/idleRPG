@@ -32,6 +32,7 @@ namespace IdleRPG.UI
         private Image[] slotBackgrounds;
         private HeroUnitView[] slotViews;
         private RectTransform[] slotRects;
+        private RectTransform[] heroSlotRects;
 
         /// <summary>Builds the board and keeps it in sync with the formation and the fight.</summary>
         public void Build(GameManager gameManager, FloatingDamageTextPool pool)
@@ -138,6 +139,17 @@ namespace IdleRPG.UI
             return view;
         }
 
+        /// <summary>Slot rect of one hero (formation slot the hero currently stands in), for run-to-target effects.</summary>
+        public RectTransform GetHeroSlotRect(int heroIndex)
+        {
+            if (heroSlotRects == null || heroIndex < 0 || heroIndex >= heroSlotRects.Length)
+            {
+                return null;
+            }
+
+            return heroSlotRects[heroIndex];
+        }
+
         /// <summary>
         /// Repaints every slot from the board. Empty slots are explicitly **blanked** (icon + name cleared), which
         /// is the bug that made a hero appear in two slots after a move.
@@ -152,6 +164,9 @@ namespace IdleRPG.UI
             PartyConfig party = manager != null ? manager.Party : null;
             int heroCount = party != null ? party.Heroes.Count : 0;
             RectTransform[] anchors = new RectTransform[Mathf.Max(1, heroCount)];
+
+            // hero index -> the slot rect he stands in (for run-to-target effects, e.g. an enemy lunging a hero).
+            heroSlotRects = new RectTransform[Mathf.Max(1, heroCount)];
 
             for (int slot = 0; slot < slotViews.Length; slot++)
             {
@@ -177,6 +192,7 @@ namespace IdleRPG.UI
                 view.SetHealthVisible(true);   // a filled seat shows its health bar (it is hidden while empty)
                 view.RefreshStats();           // and it shows the LIVE hp immediately - no zero flash after a move
                 anchors[Mathf.Clamp(heroIndex, 0, anchors.Length - 1)] = slotRects[slot];
+                heroSlotRects[Mathf.Clamp(heroIndex, 0, heroSlotRects.Length - 1)] = slotRects[slot];
             }
 
             // Damage numbers follow the hero, so the pool gets fresh anchors after every board change.

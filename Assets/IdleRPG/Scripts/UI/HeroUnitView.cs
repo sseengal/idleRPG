@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using IdleRPG.Core;
 using IdleRPG.Data;
+using IdleRPG.Sim;
 
 namespace IdleRPG.UI
 {
@@ -31,6 +32,7 @@ namespace IdleRPG.UI
         private float punchTimer;
 
         private CharacterAnimator animator;
+        private CharacterLunge lunge;
         private HeroData appliedData;
 
         public int HeroIndex => heroIndex;
@@ -74,6 +76,11 @@ namespace IdleRPG.UI
             punchTimer = 0f;
             transform.localScale = Vector3.one;
             baseColor = new Color(1f, 1f, 1f, 0f);   // empty seats rest invisible (Update() honours this)
+
+            if (lunge != null)
+            {
+                lunge.ResetToHome();
+            }
 
             if (iconImage != null)
             {
@@ -134,6 +141,14 @@ namespace IdleRPG.UI
                     baseColor = data.PlaceholderTint;
                     iconImage.color = baseColor;
                 }
+
+                // A hero landing in this (possibly re-laid-out) seat re-captures its home anchor for the lunge.
+                CharacterLunge lunge = EnsureLunge();
+                if (lunge != null)
+                {
+                    lunge.RefreshHome();
+                    lunge.ResetToHome();
+                }
             }
 
             if (nameLabel != null)
@@ -147,6 +162,7 @@ namespace IdleRPG.UI
             GameEvents.HeroDamaged += OnHeroDamaged;
             GameEvents.HeroDied += OnHeroDied;
             GameEvents.EnemyDamaged += OnAllyAttackLanded;
+            GameEvents.SwingStarted += OnSwingStarted;
             GameEvents.HeroStatsChanged += OnHeroStatsChanged;
             GameEvents.WaveCompleted += OnWaveChanged;
             GameEvents.StageChanged += OnStageChangedHandler;
@@ -157,9 +173,36 @@ namespace IdleRPG.UI
             GameEvents.HeroDamaged -= OnHeroDamaged;
             GameEvents.HeroDied -= OnHeroDied;
             GameEvents.EnemyDamaged -= OnAllyAttackLanded;
+            GameEvents.SwingStarted -= OnSwingStarted;
             GameEvents.HeroStatsChanged -= OnHeroStatsChanged;
             GameEvents.WaveCompleted -= OnWaveChanged;
             GameEvents.StageChanged -= OnStageChangedHandler;
+        }
+
+        /// <summary>This hero committed a swing: run to the target slot; the hit lands after the swing window.</summary>
+        private void OnSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide)
+        {
+            if (attackerSide != CombatantSide.Party || attackerIndex != heroIndex)
+            {
+                return;
+            }
+
+            HudController hud = HudController.Instance;
+            EnemyStackView stack = hud != null ? hud.EnemyStack : null;
+            RectTransform targetSlot = stack != null ? stack.GetEnemySlotRect(targetIndex) : null;
+
+            if (targetSlot == null)
+            {
+                return;
+            }
+
+            EnsureAnimator();
+            CharacterLunge lunge = EnsureLunge();
+
+            if (lunge != null && !lunge.IsBusy)
+            {
+                lunge.BeginRun(targetSlot);
+            }
         }
 
         private void OnHeroDamaged(int index, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex)
@@ -193,6 +236,12 @@ namespace IdleRPG.UI
             }
 
             animator.PlayAttack();
+
+            // The damage just landed: if the hero was running in, plant them at the target for the swing pose.
+            if (lunge != null)
+            {
+                lunge.Impact();
+            }
         }
 
         private void OnHeroDied(int index)
@@ -204,6 +253,11 @@ namespace IdleRPG.UI
 
             // No fade after death: the death animation is the whole visual. The hero stays fully opaque
             // on the death pose until the wave revives them (RefreshFromSimulator flips back to Idle).
+            if (lunge != null)
+            {
+                lunge.ResetToHome();   // die in your own slot, never mid-run
+            }
+
             if (animator != null && animator.HasArt)
             {
                 animator.PlayDeath();
@@ -258,6 +312,13 @@ namespace IdleRPG.UI
                 animator.PlayIdle();
             }
 
+            // Alive again (revived seat, fresh wave): park the hero at home in case a lunge left them mid-run.
+            if (hero.IsAlive && lunge != null)
+            {
+                lunge.RefreshHome();
+                lunge.ResetToHome();
+            }
+
             if (canvasGroup != null)
             {
                 canvasGroup.alpha = 1f;
@@ -299,6 +360,23 @@ namespace IdleRPG.UI
             return animator;
         }
 
+        /// <summary>The lunge (run-to-target + blink) rides on the same icon so it tracks the art's pivot.</summary>
+        private CharacterLunge EnsureLunge()
+        {
+            if (lunge == null && iconImage != null)
+            {
+                lunge = iconImage.GetComponent<CharacterLunge>();
+                if (lunge == null)
+                {
+                    lunge = iconImage.gameObject.AddComponent<CharacterLunge>();
+                }
+
+                lunge.RefreshHome();
+            }
+
+            return lunge;
+        }
+
         private void Update()
         {
             if (iconImage == null)
@@ -311,9 +389,13 @@ namespace IdleRPG.UI
                 flashTimer -= Time.deltaTime;
                 iconImage.color = Color.Lerp(baseColor, hitFlashColor, Mathf.Clamp01(flashTimer / hitFlashDurationSec));
             }
-            else if (iconImage.color != baseColor)
+            else if (lunge == null || !lunge.IsBusy)
             {
-                iconImage.color = baseColor;
+                // Not mid-blink (the lunge owns alpha while it fades in/out); return to the resting tint.
+                if (iconImage.color != baseColor)
+                {
+                    iconImage.color = baseColor;
+                }
             }
 
             if (punchTimer > 0f)

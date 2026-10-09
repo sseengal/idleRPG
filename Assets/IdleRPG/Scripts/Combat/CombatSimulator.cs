@@ -53,6 +53,9 @@ namespace IdleRPG.Combat
         // --- Events (mirrors the old API so UI/log keep working) ---
         public event Action<EnemyDamagedInfo> EnemyDamaged;
 
+        /// <summary>An attack was announced (attacker committed; damage lands after the swing window).</summary>
+        public event Action<int, CombatantSide, int, CombatantSide> SwingStarted;
+
         /// <summary>(enemyIndex, goldReward) - one call per enemy, so the UI can attribute a 1-3 enemy wave.</summary>
         public event Action<int, double> EnemyKilled;
 
@@ -307,9 +310,15 @@ namespace IdleRPG.Combat
         private void WireEncounterEvents()
         {
             encounter.Damaged += OnEncounterDamaged;
+            encounter.SwingStarted += OnEncounterSwingStarted;
             encounter.Died += OnEncounterDied;
             encounter.EnemyKilled += (index, gold) => EnemyKilled?.Invoke(index, gold);
             encounter.PartyWiped += () => PartyWiped?.Invoke();
+        }
+
+        private void OnEncounterSwingStarted(SwingStartedEvent swing)
+        {
+            SwingStarted?.Invoke(swing.AttackerIndex, swing.AttackerSide, swing.TargetIndex, swing.TargetSide);
         }
 
         private void OnEncounterDamaged(DamageEvent damage)

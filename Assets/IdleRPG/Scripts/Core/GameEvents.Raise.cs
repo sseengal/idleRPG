@@ -3,6 +3,7 @@ using UnityEngine;
 using IdleRPG.Data;
 using IdleRPG.Economy;
 using IdleRPG.Save;
+using IdleRPG.Sim;
 
 namespace IdleRPG.Core
 {
@@ -67,6 +68,11 @@ namespace IdleRPG.Core
         internal static void RaiseEnemyDamaged(EnemyDamagedInfo info)
         {
             SafeInvoke(EnemyDamaged, info, nameof(EnemyDamaged));
+        }
+
+        internal static void RaiseSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide)
+        {
+            SafeInvoke(SwingStarted, attackerIndex, attackerSide, targetIndex, targetSide, nameof(SwingStarted));
         }
 
         internal static void RaiseEnemyKilled(string enemyName, double goldReward, int enemyIndex)

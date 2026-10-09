@@ -90,6 +90,7 @@ namespace IdleRPG.Combat
             simulator = new CombatSimulator(statProvider, balanceConfig.EnemyTargeting, SimContext.CreateDefault(), 20240919);
             simulator.ApplyScaling(SimRulesFactory.ScalingFromBalance(balanceConfig));
             simulator.EnemyDamaged += OnSimEnemyDamaged;
+            simulator.SwingStarted += OnSimSwingStarted;
             simulator.EnemyKilled += OnSimEnemyKilled;
             simulator.HeroDamaged += OnSimHeroDamaged;
             simulator.HeroDied += OnSimHeroDied;
@@ -182,6 +183,7 @@ namespace IdleRPG.Combat
             }
 
             simulator.EnemyDamaged -= OnSimEnemyDamaged;
+            simulator.SwingStarted -= OnSimSwingStarted;
             simulator.EnemyKilled -= OnSimEnemyKilled;
             simulator.HeroDamaged -= OnSimHeroDamaged;
             simulator.HeroDied -= OnSimHeroDied;
@@ -227,6 +229,11 @@ namespace IdleRPG.Combat
                 Debug.Log($"[Combat] {EnemyLabel(info.EnemyIndex)} took {info.Damage:0.#}" +
                           $"{(info.IsCritical ? " CRIT" : string.Empty)} -> {info.CurrentHealth:0}/{info.MaxHealth:0}");
             }
+        }
+
+        private void OnSimSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide)
+        {
+            GameEvents.RaiseSwingStarted(attackerIndex, attackerSide, targetIndex, targetSide);
         }
 
         private void OnSimEnemyKilled(int enemyIndex, double goldReward)

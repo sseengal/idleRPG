@@ -1296,6 +1296,79 @@ arrive into it.
 - [x] brace balance + field presence read back clean
 - [ ] visual review pending — see `Manual-Tests.md` §2c
 
+## 1w. Face-to-face combat — run-in, hit at impact, blink back  ·  **built 2026-10-09** (visual review pending — see `Manual-Tests.md` §2d)
+
+> **Superseded in part by §1x** (ATB-style sequential flow, 2026-10-09). The run-in/animation architecture below
+> still stands; only the *parallel* swing scheduling was replaced — a fight is now one action at a time.
+
+> The fight now shows commitment: units no longer attack in place. When a hero/enemy commits a swing, the sim
+> announces it, the attacker runs at the target, the **damage genuinely resolves at impact** (HP bar, damage
+> number, battle log all arrive together — no UI holds, no number-tricks), the swing pose plays, then the unit
+> blinks back to its slot.
+
+### Sim change — a real swing window (the correct place for the delay)
+| File | What |
+|---|---|
+| `Sim/SimRules.cs` | new `SwingDurationSec` (default 0.35 s, sanitized 0.1..2) — the attack commit window |
+| `Sim/Combatant.cs` | `BeginSwing(swing)`: after announcing, re-arms the cooldown to `interval − swing` so the **total cycle stays exactly one interval** (steady-state hit rate / DPS unchanged by construction) |
+| `Sim/Encounter.cs` | `AnnouncePhase` (was `ResolvePhase`): attack reads crit/damage now, queues a `PendingSwing`, fires **`SwingStarted`**, does **not** apply damage. `AdvanceSwings` ticks flights; `ApplySwing` resolves damage at impact (same events as before — `Damaged`, `DeathEvent`, `EnemyKilled`). Guards: a flight ending after the attacker or target died does nothing (no free hits, no corpse-hits). `Clear()`/`SpawnEnemies` drop pending swings |
+| `CombatSimulator.cs` + `CombatManager.cs` + `GameEvents(.Raise).cs` | forward `SwingStarted(attackerIndex, attackerSide, targetIndex, targetSide)` |
+
+Offline replay and fast-downscale step the same `Encounter`, so results stay deterministic; goldens must be re-measured once (first-hit timing shifts one swing; steady state identical).
+
+### Presentation change
+| File | What |
+|---|---|
+| **new** `UI/CharacterLunge.cs` | the dance on the unit icon: **Advance** (fast `PlayWalk`, ease-out, ~0.2 s) → at **impact** plant at contact + swing pose → hold ~0.3 s → **blink out** (squash + fade at target) → teleport home → pop-in. Busy-gate: a swing arriving mid-dance attacks in place. `RefreshHome`/`ResetToHome` for wave changes, deaths, re-layouts |
+| `UI/HeroUnitView.cs` | subscribe `SwingStarted`; run at the enemy slot; `Impact()` when own attack lands; resets on Apply/ClearVisual/death/refresh |
+| `UI/EnemyUnitView.cs` | mirror (enemies run at heroes); resets on Show/death |
+| `UI/FormationBoardView.cs` | expose `GetHeroSlotRect(heroIndex)` |
+| `UI/EnemyStackView.cs` | expose `GetEnemySlotRect(enemyIndex)` |
+| `UI/HudController.cs` | public `EnemyStack` accessor |
+
+### Verified (2026-10-09)
+- [x] recompiled clean (0 errors)
+- [x] brace balance + files read back
+- [ ] **visual review pending** — see `Manual-Tests.md` §2d; also re-run `Run All Checks`/goldens after the swing change
+- [ ] golden numbers re-measured (first-hit +1 swing; hit rate identical)
+
+### Deliberately NOT in this pass
+- Real jump-back — no jump clip exists in the pack; the blink is the anime squash-fade + teleport substitute.
+- Range/melee distinctions — every attack lunges the same distance today.
+
+## 1x. ATB-style sequential combat — one unit acts at a time  ·  **built 2026-10-09** (goldens deferred)
+
+> §1w shipped a *parallel* fight: every ready unit announced a swing, so several heroes and enemies were
+> running/hitting/blinking at once — a mosh pit. This step replaces that with the turn-game norm: **Active Time
+> Battle** (Final Fantasy IV–IX, Chrono Trigger). One attacker is always in flight; when its hit lands and it
+> blinks home, the next ready unit starts. The fight reads as hero/enemy **exchanges**, not a brawl.
+
+### The sim change (single-action flow)
+| File | What |
+|---|---|
+| `Sim/Encounter.cs` | **One swing in flight** (`activeSwing`), then a recovery window (`recoveryRemaining`) before the next attacker may start. `Step` priority: tick all cooldowns → advance the in-flight blow (damage lands at impact) → count down recovery → start the next swing. No swings overlap, ever. Wipe/wave-clear checks moved into `ApplySwing` (kills only happen at impact). |
+| `Sim/Combatant.cs` | `Tick` now parks a ready combatant at **ready-wait** (`IsSwingReady`, timer keeps counting down = "how long overdue"). `BeginSwing` (announce-rearm) is gone; `EndSwing` re-arms the **full interval at impact**, so steady-state hit rate stays one swing per interval per unit. |
+| `Sim/SimRules.cs` | new `SwingRecoverySec` (default 0.5 s) — the blink-home window between a hit and the next announcement, sized so the previous unit's full dance (run 0.2 + hold 0.3 + blink 0.16 ≈ 0.81 s from announce) finishes before the next runner starts. Minimum time between two actions ≈ `SwingDurationSec` (0.35) + recovery (0.5) ≈ **0.85 s**; a unit whose interval is shorter than that is capped to the action time. |
+
+### Who goes next
+- The ready unit with the **most-overdue timer** (longest waiting).
+- **Soft alternation**: if a unit of the side that did *not* act last is ready, it goes first — hero/enemy exchanges, matching "CTB-lite" feel. First pick of a wave is a hero (MVP convention kept).
+- Zero-damage turns and missing targets disarm the unit so nobody is ever stuck "ready".
+
+### Balance + goldens (deferred, NOT done here)
+- **Goldens were NOT re-measured** and the balance is **NOT retuned** — the simulation's turn economy changed (sequential rather than parallel; the cadence cap above). First-hit timing still shifts by one swing.
+- Next balance pass should: re-run `Run All Checks`/goldens, then retune intervals vs. `SwingDurationSec + SwingRecoverySec`.
+
+### Verified (2026-10-09)
+- [x] recompiled clean (0 errors)
+- [x] no stale refs to the old swing list (`pendingSwings`, `BeginSwing`, `AnnouncePhase`)
+- [ ] **visual review pending** — see `Manual-Tests.md` §2d (turn-sequence items)
+- [ ] goldens + balance pass pending (above)
+
+### Deliberately NOT in this pass
+- A visible turn-order display/queue — the order is emergent (readiness), not a scheduled list. Worth a later polish pass.
+- Per-ability cast times / casting bars — all attacks share the same swing window today.
+
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 
 Base gate: every step below names the loop beat or money path it serves. Anything that cannot is not in the base.

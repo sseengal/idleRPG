@@ -3,6 +3,7 @@ using UnityEngine;
 using IdleRPG.Data;
 using IdleRPG.Economy;
 using IdleRPG.Save;
+using IdleRPG.Sim;
 
 namespace IdleRPG.Core
 {
@@ -64,6 +65,12 @@ namespace IdleRPG.Core
 
         /// <summary>Per-hit damage detail (carries the enemy index).</summary>
         public static event Action<EnemyDamagedInfo> EnemyDamaged;
+
+        /// <summary>
+        /// (attackerIndex, attackerSide, targetIndex, targetSide) — an attack was announced. The damage itself
+        /// lands later via <see cref="EnemyDamaged"/>/<see cref="HeroDamaged"/>; this is the visual "commit" beat.
+        /// </summary>
+        public static event Action<int, CombatantSide, int, CombatantSide> SwingStarted;
 
         /// <summary>(enemyName, goldReward, enemyIndex). One call per enemy.</summary>
         public static event Action<string, double, int> EnemyKilled;
@@ -128,6 +135,7 @@ namespace IdleRPG.Core
             WaveCompleted = null;
             EnemySpawned = null;
             EnemyDamaged = null;
+            SwingStarted = null;
             EnemyKilled = null;
             HeroDamaged = null;
             HeroDied = null;

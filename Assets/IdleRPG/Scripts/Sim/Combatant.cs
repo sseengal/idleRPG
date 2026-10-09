@@ -101,28 +101,19 @@ namespace IdleRPG.Sim
         public string Key => (Side == CombatantSide.Party ? "party:" : "enemy:") + SlotIndex;
 
         // --- Behaviour ---
-        /// <summary>Advances the attack cooldown; true when a swing is ready this step.</summary>
-        public bool Tick(double deltaTime)
+        /// <summary>Advances the attack cooldown.</summary>
+        public void Tick(double deltaTime)
         {
             if (!IsAlive || deltaTime <= 0d)
             {
-                return false;
+                return;
             }
 
             attackTimer -= deltaTime;
-            if (attackTimer > 0d)
-            {
-                return false;
-            }
-
-            // Carry the overshoot so cadence never drifts, and clamp to avoid death spirals.
-            attackTimer += AttackIntervalSec;
             if (attackTimer <= 0d)
             {
-                attackTimer = AttackIntervalSec;
+                IsSwingReady = true;
             }
-
-            return true;
         }
 
         /// <summary>Applies damage (shield first, then health). Returns the amount actually removed.</summary>
@@ -189,6 +180,26 @@ namespace IdleRPG.Sim
         public void RestartTimer()
         {
             attackTimer = AttackIntervalSec * 0.5d;
+            IsSwingReady = false;
+        }
+
+        /// <summary>
+        /// This combatant's cooldown has finished and it is waiting for its turn. The fight picks exactly one
+        /// ready unit at a time, so a unit can stay ready through other people's swings; the timer keeps counting
+        /// down while it waits, so the most-negative timer is the one that has waited longest (used to break ties).
+        /// </summary>
+        public bool IsSwingReady { get; private set; }
+
+        /// <summary>
+        /// Called when this combatant's swing lands (impact). The full interval is re-armed from now: the next
+        /// swing is ready a full <see cref="AttackIntervalSec"/> later, which keeps the steady-state hit rate
+        /// (and DPS) at exactly one swing per interval. Nothing is subtracted for the flight time - the swing
+        /// already occupied that time, so the next one starts counting from impact.
+        /// </summary>
+        public void EndSwing()
+        {
+            IsSwingReady = false;
+            attackTimer = AttackIntervalSec;
         }
 
         /// <summary>Applies a new stat set, keeping the current health percentage.</summary>

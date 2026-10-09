@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using IdleRPG.Core;
 using IdleRPG.Data;
+using IdleRPG.Sim;
 
 namespace IdleRPG.UI
 {
@@ -50,6 +51,7 @@ namespace IdleRPG.UI
         private float punchDuration;
 
         private CharacterAnimator animator;
+        private CharacterLunge lunge;
         private Vector2 iconSlotSize;
 
         /// <summary>Which enemy of the wave this view shows (0-based).</summary>
@@ -83,6 +85,7 @@ namespace IdleRPG.UI
             GameEvents.EnemyDamaged += OnEnemyDamaged;
             GameEvents.EnemyKilled += OnEnemyKilled;
             GameEvents.HeroDamaged += OnEnemyAttackLanded;
+            GameEvents.SwingStarted += OnSwingStarted;
         }
 
         private void OnDisable()
@@ -91,6 +94,7 @@ namespace IdleRPG.UI
             GameEvents.EnemyDamaged -= OnEnemyDamaged;
             GameEvents.EnemyKilled -= OnEnemyKilled;
             GameEvents.HeroDamaged -= OnEnemyAttackLanded;
+            GameEvents.SwingStarted -= OnSwingStarted;
         }
 
         private void OnEnemySpawned(string enemyName, double maxHealth, bool isBoss, int index)
@@ -190,6 +194,15 @@ namespace IdleRPG.UI
             }
 
             popTimer = spawnPopDurationSec;
+
+            // The stack re-laid out this slot: re-capture home and park the unit there (mid-lunge units snap back).
+            EnsureAnimator();
+            CharacterLunge runner = EnsureLunge();
+            if (runner != null)
+            {
+                runner.RefreshHome();
+                runner.ResetToHome();
+            }
         }
 
         private void OnEnemyDamaged(EnemyDamagedInfo info)
@@ -223,6 +236,38 @@ namespace IdleRPG.UI
             }
 
             animator.PlayAttack();
+
+            // The damage just landed: if the enemy was running in, plant it at the target for the swing pose.
+            if (lunge != null)
+            {
+                lunge.Impact();
+            }
+        }
+
+        /// <summary>This enemy committed a swing: run to the hero it is about to hit.</summary>
+        private void OnSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide)
+        {
+            if (attackerSide != CombatantSide.Enemy || attackerIndex != enemyIndex)
+            {
+                return;
+            }
+
+            HudController hud = HudController.Instance;
+            FormationBoardView board = hud != null ? hud.FormationBoard : null;
+            RectTransform targetSlot = board != null ? board.GetHeroSlotRect(targetIndex) : null;
+
+            if (targetSlot == null)
+            {
+                return;
+            }
+
+            EnsureAnimator();
+            CharacterLunge runner = EnsureLunge();
+
+            if (runner != null && !runner.IsBusy)
+            {
+                runner.BeginRun(targetSlot);
+            }
         }
 
         private void OnEnemyKilled(string enemyName, double goldReward, int index)
@@ -232,7 +277,12 @@ namespace IdleRPG.UI
                 return;
             }
 
-            // No fade after death: the death clip plays, then the sprite snaps off.
+            // No fade after death: the death clip plays, then the sprite snaps off. Die in your slot, not mid-run.
+            if (lunge != null)
+            {
+                lunge.ResetToHome();
+            }
+
             if (animator != null && animator.HasArt)
             {
                 animator.PlayDeath(HideSprite);
@@ -290,9 +340,13 @@ namespace IdleRPG.UI
                 float t = Mathf.Clamp01(flashTimer / Mathf.Max(0.0001f, flashDuration));
                 spriteImage.color = Color.Lerp(hitFlashColor, baseColor, t);
             }
-            else if (spriteImage.color != baseColor)
+            else if (lunge == null || !lunge.IsBusy)
             {
-                spriteImage.color = baseColor;
+                // Not mid-blink (the lunge owns alpha while it fades in/out); return to the resting tint.
+                if (spriteImage.color != baseColor)
+                {
+                    spriteImage.color = baseColor;
+                }
             }
         }
 
@@ -319,6 +373,23 @@ namespace IdleRPG.UI
             }
 
             return animator;
+        }
+
+        /// <summary>The lunge (run-to-target + blink) rides on the same icon so it tracks the art's pivot.</summary>
+        private CharacterLunge EnsureLunge()
+        {
+            if (lunge == null && spriteImage != null)
+            {
+                lunge = spriteImage.GetComponent<CharacterLunge>();
+                if (lunge == null)
+                {
+                    lunge = spriteImage.gameObject.AddComponent<CharacterLunge>();
+                }
+
+                lunge.RefreshHome();
+            }
+
+            return lunge;
         }
 
         private EnemyData ResolveEnemyData()
