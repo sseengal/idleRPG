@@ -1370,8 +1370,13 @@ Offline replay and fast-downscale step the same `Encounter`, so results stay det
   from the slot's world centre + the `(0.5, 0.60)` icon rule (then half-widths + `contactPaddingPx` of 18). Both
   slot pivots sit at the TOP (`(0,1)` hero / `(0.5,1)` enemy), so raw `slot.position` was the head/shoulder line —
   that is what drove the old "diagonally on top" read. Now the icons stand side-by-side at the same height.
-- The **swing clip is cut at the teleport** (unit is invisible there) — the idle pose fades in back home instead
-  of the attack's tail frames, so nothing "plays on" after the character returns.
+- The **swing pose lasts until the attack clip completes** (strike + follow-through both play, ~0.5 s for the
+  pack's 6-frame/12-fps strips) — NOT a fixed timer. `holdSeconds` became a *minimum* pose, and a new
+  `maxHoldSeconds` (0.7) caps it so a long/broken clip or an aborted swing (whose damage event never fires) can
+  never stall the queue. The animator's existing one-shot callback (`PlayAttack(Action)`) signals the lunge via
+  `CompleteSwing()` — no polling, no timers for the art.
+- After the pose, the unit blinks home; the **cut-to-idle at the teleport** stays as a safety so nothing "plays
+  on" once the character is back.
 
 ### Deliberately NOT in this pass
 - A visible turn-order display/queue — the order is emergent (readiness), not a scheduled list. Worth a later polish pass.

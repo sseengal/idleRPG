@@ -118,6 +118,8 @@ includes them (enforced at build time from B10).
       landing above the head, and breathing room (bosses get more).
 - [ ] **No attack tail at home**: when a unit teleports back, the fade-in shows the idle pose — the swing's last
       frames never play on after the character is already back in position.
+- [ ] **Full swing plays**: the attack clip runs to its LAST frame (strike + follow-through) before the blink —
+      no mid-swing teleport cut, no missing final frames (a ~0.5 s pose on the pack's art).
 
 ---
 

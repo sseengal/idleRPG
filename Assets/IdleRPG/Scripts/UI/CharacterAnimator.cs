@@ -134,15 +134,19 @@ namespace IdleRPG.UI
             Play(art.Walk, loop: true, Second(art.WalkFps), idleOnDone: false);
         }
 
-        /// <summary>One-shot attack (prefers the character's second attack strip). Returns to Idle after.</summary>
-        public void PlayAttack()
+        /// <summary>
+        /// One-shot attack (prefers the character's second attack strip). When <paramref name="onFinished"/> is
+        /// given it is invoked when the clip completes (the caller decides what comes next, e.g. the blink home);
+        /// without it the animator returns to Idle on its own, as before.
+        /// </summary>
+        public void PlayAttack(Action onFinished = null)
         {
             if (art == null)
             {
                 return;
             }
 
-            Play(art.GetAttack(), loop: false, Second(art.AttackFps), idleOnDone: true);
+            Play(art.GetAttack(), loop: false, Second(art.AttackFps), idleOnDone: onFinished == null, done: onFinished);
         }
 
         public void PlayHurt()

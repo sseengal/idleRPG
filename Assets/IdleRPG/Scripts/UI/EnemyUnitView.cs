@@ -235,7 +235,13 @@ namespace IdleRPG.UI
                 return;
             }
 
-            animator.PlayAttack();
+            animator.PlayAttack(() =>
+            {
+                if (lunge != null)
+                {
+                    lunge.CompleteSwing();
+                }
+            });
 
             // The damage just landed: if the enemy was running in, plant it at the target for the swing pose.
             if (lunge != null)

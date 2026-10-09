@@ -34,8 +34,12 @@ namespace IdleRPG.UI
         [SerializeField] private float contactPaddingPx = 18f;
 
         [Header("Swing + blink")]
-        [Tooltip("How long (s) the unit poses at the target after impact before blinking home.")]
+        [Tooltip("MINIMUM pose time at the target after impact (s). The pose actually lasts until the attack clip " +
+                 "finishes (whichever is later) so the full swing plays; capped by maxHoldSeconds.")]
         [SerializeField] private float holdSeconds = 0.3f;
+
+        [Tooltip("Hard ceiling for the pose (s): a long/broken clip or an aborted swing can never stall the fight.")]
+        [SerializeField] private float maxHoldSeconds = 0.7f;
 
         [Tooltip("Blink-out duration: squash + fade at the target.")]
         [SerializeField] private float blinkOutSeconds = 0.06f;
@@ -55,6 +59,9 @@ namespace IdleRPG.UI
         private Vector3 contact;
         private Vector3 from;
         private float clock;
+
+        /// <summary>Set when the attack clip finishes during the pose; Holding waits for this before blinking.</summary>
+        private bool blinkQueued;
 
         private void Awake()
         {
@@ -86,6 +93,8 @@ namespace IdleRPG.UI
             {
                 return;
             }
+
+            blinkQueued = false;
 
             if (animator != null && animator.HasArt)
             {
@@ -127,13 +136,27 @@ namespace IdleRPG.UI
 
             rect.position = contact;
             clock = 0f;
+            blinkQueued = false;
             state = State.Holding;
+        }
+
+        /// <summary>
+        /// The attack clip finished - the full swing (strike + follow-through) has played out. The unit blinks
+        /// home once the minimum pose (<see cref="holdSeconds"/>) is also satisfied.
+        /// </summary>
+        public void CompleteSwing()
+        {
+            if (state == State.Holding)
+            {
+                blinkQueued = true;
+            }
         }
 
         /// <summary>Snaps the unit straight back home (wave change, death, re-layout).</summary>
         public void ResetToHome()
         {
             state = State.Idle;
+            blinkQueued = false;
 
             if (rect != null)
             {
@@ -177,7 +200,14 @@ private void Update()
                 case State.Holding:
                     clock += Time.deltaTime;
 
-                    if (clock >= Mathf.Max(0.05f, holdSeconds))
+                    // The swing pose lasts until the attack clip finishes (the full strike AND follow-through
+                    // must play), subject to a minimum pose and a hard ceiling so nothing can stall the queue
+                    // (a long/broken clip, or an aborted swing whose damage event never fired). Placeholders
+                    // (no art) have no clip, so they blink on the minimum alone.
+                    bool clipDone = (animator == null || !animator.HasArt) || blinkQueued;
+                    bool minPoseDone = clock >= Mathf.Max(0.05f, holdSeconds);
+
+                    if ((clipDone && minPoseDone) || clock >= Mathf.Max(0.05f, maxHoldSeconds))
                     {
                         state = State.BlinkOut;
                         clock = 0f;
