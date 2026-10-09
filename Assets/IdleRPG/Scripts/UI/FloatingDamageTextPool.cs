@@ -68,6 +68,20 @@ namespace IdleRPG.UI
             enemyAnchors = anchors;
         }
 
+        /// <summary>
+        /// Anchor rect for one enemy slot, for effects that need to fly out of the right enemy
+        /// (the gold-fly effect). Returns null when no per-slot anchors are wired.
+        /// </summary>
+        public RectTransform GetEnemyAnchor(int enemyIndex)
+        {
+            if (enemyAnchors == null || enemyAnchors.Length == 0)
+            {
+                return null;
+            }
+
+            return enemyAnchors[Mathf.Clamp(enemyIndex, 0, enemyAnchors.Length - 1)];
+        }
+
         private void OnEnemyDamaged(EnemyDamagedInfo info)
         {
             if (info.Damage <= 0d)

@@ -48,6 +48,40 @@ includes them (enforced at build time from B10).
 
 ---
 
+## 2b. Juice pass — visual review (new combat feel, 2026-10-09)
+
+> Everything below is cosmetic. Check in Play at normal **and** x1.6 pace (the fast-forward card). If any single feel
+> is too much or invisible, name it — each value is one Inspector field (list in `Checklist.md` §1u).
+
+- [ ] **Enemy hit flash**: placeholder sprites flash white and fade back on every hit; crits flash longer.
+- [ ] **Enemy hit punch**: the enemy dips to ~0.94 on a hit; crits dip to ~0.88 (barely deeper, visibly different).
+- [ ] **Crit shake**: on a crit the whole enemy column jitters once (~1 px) and settles; normal hits do NOT shake.
+- [ ] **Wave-clear pop**: when a wave clears, the enemy column springs up 4% and settles before the new wave lays out.
+- [ ] **Hero hit punch**: a hit on a hero dips that seat (icon + HP bar) to 0.94 with the red flash; scene has no
+      leftovers (seats return to exact size, no squashed empties).
+- [ ] No errors in the console at any point.
+
+---
+
+## 2c. Gold fly — coins into the counter (new, 2026-10-09)
+
+> Check in Play at normal **and** x1.6 pace. The kill reward was already granted before the effect runs — this is
+> only the visible "money travel" moment.
+
+- [ ] **Coins fly on kill**: each kill spawns ~8 gold dots from that enemy's slot, bursting outward with their own
+      scatter directions, decelerating, then being sucked into the top-bar counter **immediately** (no paused
+      bounce). The gold number only starts rising when the first coin LANDs.
+- [ ] **Multiple distinct coins + comet tails**: coins are clearly separate (each has its own path + 8 ghost dots
+      trailing it); a kill does not look like one dot.
+- [ ] **Bounce + magnet**: coins decelerate naturally and the magnet pull starts the instant the burst decays (no
+      settle/bounce pause, no clipping).
+- [ ] **Multi-kill waves at x1.6**: 3 kills still keep the screen readable (throttled, capped at 32 active coins).
+- [ ] **Spends still snap**: buying an upgrade drops the counter instantly, then the next coin-burst rises it again.
+- [ ] **Coin-less gains still show**: offline claim / ad / debug scenes surface their gold within the 0.6 s grace.
+- [ ] No errors in the console; F3 money line matches the counter after coins settle.
+
+---
+
 ## 3. B9' part 2 — phone checklist (needs the first real phone build)
 
 - [ ] **Portrait lock** — turn the phone while playing; game stays one way up; nothing clipped at the notch /

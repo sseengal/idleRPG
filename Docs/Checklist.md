@@ -12,7 +12,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **B8' proof lap NEXT** (all kit + polish built + verified 2026-09-27, §1q; only the owner's battle-log + shop-beat play session remains). **MVP = store-submittable** (§1p): then B9' shipping checklist -> **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
+| Current step | **B8' proof lap NEXT** (all kit + polish built + verified 2026-09-27, §1q; only the owner's battle-log + shop-beat play session remains, + the juice-pass visual review §1u / `Manual-Tests.md` §2b). **MVP = store-submittable** (§1p): then B9' shipping checklist -> **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money**, and **MVP = store-submittable** (§1p). No statuses/abilities/zones/affixes/gear/roster/relics before the base is done |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
@@ -1241,6 +1241,60 @@ Next, in order: (1) **owner pick** = done 2026-09-30 (font A for display, font B
 hard-coded colours (Shop/Upgrades/Ascend) still wait; (3) **battle page** sworn in live with the theme (verified in
 play mode); (4) currency icons (the pack has none), then a device texture-memory check. **Unit art is
 deliberately not in this pass.**
+
+## 1u. Combat juice pass — hit flash, punch, shake  ·  **built 2026-10-09** (visual review pending — see `Manual-Tests.md` §2b)
+
+> This is the cheap feel-first slice of step 20's polish. All code-only: no scene edits, no new packages, no prefab
+> overrides, no sound (audio stays the placeholder service until the outsourced clips land). Every value below is a
+> serialized default, editable in the Inspector without touching code.
+
+### What was added
+
+| File | Effect | Default value | Triggers on |
+|---|---|---|---|
+| `UI/EnemyUnitView.cs` | enemy **hit flash**: sprite lerps to white, then back to its resting tint | 0.14 s (crit: 0.24 s) | `EnemyDamaged` (this enemy) |
+| `UI/EnemyUnitView.cs` | enemy **hit punch**: whole enemy squashes to 0.94, springs back | `hitPunchScale 0.94` / `critPunchScale 0.88`, 0.12 s | crit punches deeper |
+| `UI/EnemyStackView.cs` | **crit shake**: the whole enemy column jitters 1.25 px and settles | 1.25 px, 0.18 s, fast dampen | crits only — never normal hits (no blur at pace x1.6) |
+| `UI/EnemyStackView.cs` | **wave-clear pop**: column springs to 1.04 and back | 0.2 s | `WaveCompleted` |
+| `UI/HeroUnitView.cs` | hero **hit punch**: whole seat (icon + bar) squashes to 0.94 | 0.12 s | `HeroDamaged` (red flash already existed) |
+
+Rules that keep it subtle: shake fires on crits only; flash is multiplicative with the existing tint (placeholder
+art only — real art keeps its own `PlayHurt`); punch resets to `Vector3.one` in `ClearVisual` so pooled seats never
+rest squashed.
+
+### Verified (2026-10-09)
+- [x] recompiled clean (0 errors) after all three files
+- [x] files read back: fields, timers, Update() paths all present
+- [ ] **visual review pending** — see `Manual-Tests.md` §2b (the 5 checks). Uncheck when run.
+
+### Not in this pass (deliberate)
+- kill pop (enemy pops taller, then hides) — next candidate, needs a timer + death path change
+- crit punch on the big damage number — next candidate
+- real sound — outsourced queue, `Art-Pipeline.md` §17 list
+
+## 1v. Gold fly effect — coins into the counter  ·  **built 2026-10-09** (visual review pending — see `Manual-Tests.md` §2c)
+
+> When an enemy dies, gold coins launch from its slot and arc into the top-bar counter; the counter rises smoothly
+> to the new value (spends snap). Pure cosmetics: the real balance is granted by the kill event exactly as before.
+
+| File | What |
+|---|---|
+| **new** `UI/GoldFlyVfx.cs` | pooled coin burst on `EnemyKilled`; single `Update()` drives every coin; procedural 16px gold dot sprite (no texture asset). **Two acts per coin**: (1) **burst** — each coin pops out of the enemy with its own fan direction + fake gravity and **damping (decelerates fast)**; (2) **magnet** — the instant the burst decays the coin is pulled to the counter (ease-in, ease-out landing, no settle/bounce/pause), then shrinks+fades in. **8 ghost dots** follow each coin as a comet tail (older ghosts smaller + fainter). Burst throttle (0.04 s gap) + hard cap (32 active) |
+| `UI/FloatingDamageTextPool.cs` | public `GetEnemyAnchor(int)` so the effect can start coins at the dead enemy's slot |
+| `UI/HudHeaderUI.cs` | static `Instance`, `GoldAnchor` rect, and a gold count-up tween (gain rises over 0.35 s; spend/reset snaps instantly) |
+| `UI/HudController.cs` | creates the `GoldFlyVfx` node on the battle canvas at Start |
+
+Every value is a serialized default (`coinsPerKill 8`, `burstDurationSec 0.3`, `burstSpeedMin/Max 90/190`,
+`burstGravity 260`, `burstDamping 4.5`, `magnetDurationSec 0.6`, `magnetStaggerSec 0.06`, `coinSize 18`,
+`trailGhosts 8`, `trailAlpha 0.55`, `trailGhostSize 12`). No scene edits, no packages, no sound. New behavior here:
+the gold counter now **waits for the first coin to land** before its count-up starts (grace 0.6 s for coin-less
+gains). The real balance is still granted at the kill event — the number just delays its rise so coins visibly
+arrive into it.
+
+### Verified (2026-03-10)
+- [x] recompiled clean (0 errors)
+- [x] brace balance + field presence read back clean
+- [ ] visual review pending — see `Manual-Tests.md` §2c
 
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 

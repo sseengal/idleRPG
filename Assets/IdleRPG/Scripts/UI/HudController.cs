@@ -60,6 +60,23 @@ namespace IdleRPG.UI
             {
                 enemyStack.Build(gameManager, damageTextPool);
             }
+
+            // Gold-fly effect: coins launch from a dead enemy into the top-bar counter. The node is created on the
+            // same canvas that hosts the damage numbers, so coordinate space is shared.
+            if (damageTextPool != null)
+            {
+                Transform hostParent = damageTextPool.transform.parent != null ? damageTextPool.transform.parent : transform;
+                GameObject host = UiRuntime.CreateNode("GoldFlyVfx", hostParent);
+
+                // Coin positions are resolved as local points of this rect, so give it the full parent size.
+                if (host.transform is RectTransform hostRect)
+                {
+                    UiRuntime.Stretch(hostRect);
+                }
+
+                GoldFlyVfx vfx = host.AddComponent<GoldFlyVfx>();
+                vfx.Initialize(damageTextPool);
+            }
         }
 
         private void OnDestroy()
