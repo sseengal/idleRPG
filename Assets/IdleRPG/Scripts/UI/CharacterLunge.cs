@@ -30,8 +30,8 @@ namespace IdleRPG.UI
         [Tooltip("How long (s) the run-in takes. Keep it well under the sim swing window.")]
         [SerializeField] private float advanceSeconds = 0.2f;
 
-        [Tooltip("How far in front of the target's slot the unit stops, world units.")]
-        [SerializeField] private float contactDistance = 30f;
+        [Tooltip("Extra breathing room between the attacker's icon edge and the target's icon edge, world units.")]
+        [SerializeField] private float contactPaddingPx = 18f;
 
         [Header("Swing + blink")]
         [Tooltip("How long (s) the unit poses at the target after impact before blinking home.")]
@@ -94,16 +94,17 @@ namespace IdleRPG.UI
 
             home = rect.position;
 
-            // Stop just in front of the target, facing it. The contact point is nudged toward home so the
-            // icon overlaps the enemy slot instead of landing exactly on its pivot.
-            Vector2 toTarget = targetSlot.position - rect.position;
-            float overshoot = toTarget.magnitude > contactDistance ? contactDistance : 0f;
-            if (overshoot > 0f)
-            {
-                toTarget = toTarget.normalized * overshoot;
-            }
+            // Stop on the near-side flank of the target, horizontally aligned with it: the gap is both icons'
+            // half-widths plus a little breathing room, so the attacker stands BESIDE the target (same height),
+            // never on top of it or into its feet.
+            float dirX = targetSlot.position.x >= rect.position.x ? 1f : -1f;
+            float selfHalf = rect.rect.width * 0.5f;
+            float targetHalf = targetSlot.rect.width * 0.5f;
+            float gap = selfHalf + targetHalf + contactPaddingPx;
 
-            contact = targetSlot.position - (Vector3)toTarget;
+            Vector3 targetPosition = targetSlot.position;
+            contact = new Vector3(targetPosition.x - (dirX * gap), targetPosition.y, targetPosition.z);
+
             from = rect.position;
             clock = 0f;
             state = State.Advancing;
@@ -195,6 +196,14 @@ private void Update()
                     if (clock >= blinkOutSeconds)
                     {
                         rect.position = home;
+
+                        // Cut the swing clip at the teleport (the unit is invisible now): fade in the idle pose,
+                        // never the attack's tail frames.
+                        if (animator != null && animator.HasArt)
+                        {
+                            animator.PlayIdle();
+                        }
+
                         state = State.BlinkIn;
                         clock = 0f;
                     }
@@ -221,11 +230,6 @@ private void Update()
                         rect.localScale = new Vector3(rect.localScale.x, 1f, 1f);
                         state = State.Idle;
                         clock = 0f;
-
-                        if (animator != null && animator.HasArt)
-                        {
-                            animator.PlayIdle();
-                        }
                     }
 
                     break;

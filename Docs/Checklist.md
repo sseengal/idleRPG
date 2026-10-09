@@ -1365,6 +1365,13 @@ Offline replay and fast-downscale step the same `Encounter`, so results stay det
 - [ ] **visual review pending** — see `Manual-Tests.md` §2d (turn-sequence items)
 - [ ] goldens + balance pass pending (above)
 
+### Lunge polish v2 (same pass, 2026-10-09)
+- Attacker now stops on the **near-side flank** of the target: contact gap = attacker half-width + target
+  half-width + `contactPaddingPx` (18), so icons stand side-by-side at the same height — no more landing on top
+  of / too close to the victim. Bosses (wider slots) automatically get more room.
+- The **swing clip is cut at the teleport** (unit is invisible there) — the idle pose fades in back home instead
+  of the attack's tail frames, so nothing "plays on" after the character returns.
+
 ### Deliberately NOT in this pass
 - A visible turn-order display/queue — the order is emergent (readiness), not a scheduled list. Worth a later polish pass.
 - Per-ability cast times / casting bars — all attacks share the same swing window today.

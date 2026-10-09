@@ -112,6 +112,12 @@ includes them (enforced at build time from B10).
 - [ ] **Fast attackers aren't lost**: at x1.6 a fast hero still gets its ~0.85 s quota (swing + recovery) — it is
       sequenced, never skipped.
 
+### Lunge-position + animation checks (v2, added 2026-10-09)
+- [ ] **Side-by-side flank**: a lunging unit stops BESIDE its target at the same height with a clear gap — icons
+      do not overlap, do not land above the target's body, and there is breathing room (bosses get more).
+- [ ] **No attack tail at home**: when a unit teleports back, the fade-in shows the idle pose — the swing's last
+      frames never play on after the character is already back in position.
+
 ---
 
 ## 3. B9' part 2 — phone checklist (needs the first real phone build)
