@@ -34,7 +34,22 @@ namespace IdleRPG.UI
         [SerializeField] private EnemyUnitView[] slots;
         [SerializeField] private RectTransform[] anchors;
 
+        [Header("Juice (subtle)")]
+        [Tooltip("Peak horizontal/vertical jitter of the whole column on a crit, in px.")]
+        [SerializeField] private float critShakePixels = 1.25f;
+        [SerializeField] private float critShakeDurationSec = 0.18f;
+        [Tooltip("Squash-and-recover amount on wave clear (1.0 = no pop).")]
+        [SerializeField] private float clearPopScale = 1.04f;
+        [SerializeField] private float clearPopDurationSec = 0.2f;
+
         private GameManager manager;
+
+        private Vector2 restPosition;
+        private bool restPositionCaptured;
+        private float shakeTimer;
+        private float shakePixels;
+        private float shakeDuration;
+        private float clearPopTimer;
 
         /// <summary>Wires the manager and pushes fresh damage anchors into the floating-text pool.</summary>
         public void Build(GameManager gameManager, FloatingDamageTextPool damagePool)
@@ -46,17 +61,93 @@ namespace IdleRPG.UI
         private void OnEnable()
         {
             GameEvents.EnemySpawned += OnEnemySpawned;
+            GameEvents.EnemyDamaged += OnEnemyDamaged;
+            GameEvents.WaveCompleted += OnWaveCompleted;
         }
 
         private void OnDisable()
         {
             GameEvents.EnemySpawned -= OnEnemySpawned;
+            GameEvents.EnemyDamaged -= OnEnemyDamaged;
+            GameEvents.WaveCompleted -= OnWaveCompleted;
         }
 
         /// <summary>Any spawn event means "a new wave started" - the whole stack is re-laid out from the sim.</summary>
         private void OnEnemySpawned(string enemyName, double maxHealth, bool isBoss, int enemyIndex)
         {
             Refresh();
+        }
+
+        /// <summary>Only crits shake the column - a shake per hit would be a jitter blur.</summary>
+        private void OnEnemyDamaged(EnemyDamagedInfo info)
+        {
+            if (!info.IsCritical || container == null)
+            {
+                return;
+            }
+
+            CaptureRestPosition();
+            shakePixels = critShakePixels;
+            shakeDuration = critShakeDurationSec;
+            shakeTimer = critShakeDurationSec;
+        }
+
+        private void OnWaveCompleted(int stage, int wave)
+        {
+            if (container == null)
+            {
+                return;
+            }
+
+            clearPopTimer = clearPopDurationSec;
+        }
+
+        private void CaptureRestPosition()
+        {
+            if (!restPositionCaptured && container != null)
+            {
+                restPosition = container.anchoredPosition;
+                restPositionCaptured = true;
+            }
+        }
+
+        private void Update()
+        {
+            if (container == null)
+            {
+                return;
+            }
+
+            if (shakeTimer > 0f)
+            {
+                shakeTimer -= Time.deltaTime;
+                float t = 1f - Mathf.Clamp01(shakeTimer / Mathf.Max(0.0001f, shakeDuration));
+                // Faster than linear falloff: sharp attack, quick settle.
+                float dampen = 1f - t;
+                Vector2 offset = new Vector2(
+                    Mathf.Sin(t * Mathf.PI * 16f) * shakePixels * dampen,
+                    Mathf.Cos(t * Mathf.PI * 10f) * shakePixels * dampen);
+                container.anchoredPosition = restPosition + offset;
+
+                if (shakeTimer <= 0f)
+                {
+                    container.anchoredPosition = restPosition;
+                }
+            }
+
+            if (clearPopTimer > 0f)
+            {
+                clearPopTimer -= Time.deltaTime;
+                float t = 1f - Mathf.Clamp01(clearPopTimer / Mathf.Max(0.0001f, clearPopDurationSec));
+                // 1 -> peak -> 1: a squash that springs back, then the stack is immediately re-laid out anyway.
+                float scale = 1f + (clearPopScale - 1f) * Mathf.Sin(t * Mathf.PI * 0.5f);
+                container.localScale = new Vector3(scale, scale, 1f);
+
+                if (clearPopTimer <= 0f)
+                {
+                    container.localScale = Vector3.one;
+                }
+            }
         }
 
         /// <summary>

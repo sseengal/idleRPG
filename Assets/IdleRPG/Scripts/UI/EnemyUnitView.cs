@@ -31,8 +31,23 @@ namespace IdleRPG.UI
         [SerializeField] private float spawnPopScale = 0.65f;
         [SerializeField] private float spawnPopDurationSec = 0.18f;
 
+        [Header("Hit juice (subtle)")]
+        [SerializeField] private Color hitFlashColor = new Color(1f, 1f, 1f, 1f);
+        [SerializeField] private float hitFlashDurationSec = 0.14f;
+        [SerializeField] private float critFlashDurationSec = 0.24f;
+        [SerializeField] private float hitPunchScale = 0.94f;
+        [SerializeField] private float critPunchScale = 0.88f;
+        [SerializeField] private float punchDurationSec = 0.12f;
+
         private int enemyIndex;
         private float popTimer;
+
+        private Color baseColor = Color.white;
+        private float flashTimer;
+        private float flashDuration;
+        private float punchTimer;
+        private float punchStartScale;
+        private float punchDuration;
 
         private CharacterAnimator animator;
         private Vector2 iconSlotSize;
@@ -147,6 +162,13 @@ namespace IdleRPG.UI
                 }
 
                 spriteImage.enabled = true;
+
+                // Fresh state: capture the resting tint (flash lerps off it) and cancel any stale feedback.
+                baseColor = spriteImage.color;
+                flashTimer = 0f;
+                punchTimer = 0f;
+                punchStartScale = 1f;
+                punchDuration = punchDurationSec;
             }
 
             if (nameLabel != null)
@@ -179,6 +201,13 @@ namespace IdleRPG.UI
 
             hpBar.SetFill(info.NormalizedHealth);
             hpBar.SetValueLabel(info.CurrentHealth, info.MaxHealth);
+
+            // Hit juice: white flash + a small squash. Crits flash longer and punch deeper.
+            flashDuration = info.IsCritical ? critFlashDurationSec : hitFlashDurationSec;
+            flashTimer = flashDuration;
+            punchStartScale = info.IsCritical ? critPunchScale : hitPunchScale;
+            punchDuration = punchDurationSec;
+            punchTimer = punchDurationSec;
 
             if (animator != null && animator.HasArt)
             {
@@ -229,18 +258,41 @@ namespace IdleRPG.UI
                 return;
             }
 
+            // Spawn pop wins over a hit punch (they basically never overlap anyway).
             if (popTimer > 0f)
             {
                 popTimer -= Time.deltaTime;
                 float t = 1f - Mathf.Clamp01(popTimer / Mathf.Max(0.0001f, spawnPopDurationSec));
                 float scale = Mathf.Lerp(spawnPopScale, 1f, t);
                 root.localScale = new Vector3(scale, scale, 1f);
+            }
+            else if (punchTimer > 0f)
+            {
+                punchTimer -= Time.deltaTime;
+                float t = 1f - Mathf.Clamp01(punchTimer / Mathf.Max(0.0001f, punchDuration));
+                float scale = Mathf.Lerp(punchStartScale, 1f, t);
+                root.localScale = new Vector3(scale, scale, 1f);
+            }
+            else if (root.localScale != Vector3.one)
+            {
+                root.localScale = Vector3.one;
+            }
+
+            // White flash cross-fades to the resting tint (placeholder sprites pop against it).
+            if (spriteImage == null)
+            {
                 return;
             }
 
-            if (root.localScale != Vector3.one)
+            if (flashTimer > 0f)
             {
-                root.localScale = Vector3.one;
+                flashTimer -= Time.deltaTime;
+                float t = Mathf.Clamp01(flashTimer / Mathf.Max(0.0001f, flashDuration));
+                spriteImage.color = Color.Lerp(hitFlashColor, baseColor, t);
+            }
+            else if (spriteImage.color != baseColor)
+            {
+                spriteImage.color = baseColor;
             }
         }
 

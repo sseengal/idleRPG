@@ -22,9 +22,13 @@ namespace IdleRPG.UI
         [Header("Feedback")]
         [SerializeField] private Color hitFlashColor = new Color(1f, 0.45f, 0.45f, 1f);
         [SerializeField] private float hitFlashDurationSec = 0.12f;
+        [Tooltip("Squash-to value on a hit (1.0 = no punch). Subtle: whole seat dips, icon and bar together.")]
+        [SerializeField] private float hitPunchScale = 0.94f;
+        [SerializeField] private float hitPunchDurationSec = 0.12f;
 
         private Color baseColor = Color.white;
         private float flashTimer;
+        private float punchTimer;
 
         private CharacterAnimator animator;
         private HeroData appliedData;
@@ -67,6 +71,8 @@ namespace IdleRPG.UI
             heroIndex = -1;
             appliedData = null;
             flashTimer = 0f;
+            punchTimer = 0f;
+            transform.localScale = Vector3.one;
             baseColor = new Color(1f, 1f, 1f, 0f);   // empty seats rest invisible (Update() honours this)
 
             if (iconImage != null)
@@ -171,6 +177,7 @@ namespace IdleRPG.UI
             }
 
             flashTimer = hitFlashDurationSec;
+            punchTimer = hitPunchDurationSec;
 
             if (animator != null && animator.HasArt)
             {
@@ -303,12 +310,22 @@ namespace IdleRPG.UI
             {
                 flashTimer -= Time.deltaTime;
                 iconImage.color = Color.Lerp(baseColor, hitFlashColor, Mathf.Clamp01(flashTimer / hitFlashDurationSec));
-                return;
             }
-
-            if (iconImage.color != baseColor)
+            else if (iconImage.color != baseColor)
             {
                 iconImage.color = baseColor;
+            }
+
+            if (punchTimer > 0f)
+            {
+                punchTimer -= Time.deltaTime;
+                float t = 1f - Mathf.Clamp01(punchTimer / Mathf.Max(0.0001f, hitPunchDurationSec));
+                float scale = Mathf.Lerp(hitPunchScale, 1f, t);
+                transform.localScale = new Vector3(scale, scale, 1f);
+            }
+            else if (transform.localScale != Vector3.one)
+            {
+                transform.localScale = Vector3.one;
             }
         }
     }
