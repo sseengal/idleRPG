@@ -1366,9 +1366,10 @@ Offline replay and fast-downscale step the same `Encounter`, so results stay det
 - [ ] goldens + balance pass pending (above)
 
 ### Lunge polish v2 (same pass, 2026-10-09)
-- Attacker now stops on the **near-side flank** of the target: contact gap = attacker half-width + target
-  half-width + `contactPaddingPx` (18), so icons stand side-by-side at the same height — no more landing on top
-  of / too close to the victim. Bosses (wider slots) automatically get more room.
+- Attacker now stops on the **near-side flank** of the target, **aligned to the target's BODY**: contact is built
+  from the slot's world centre + the `(0.5, 0.60)` icon rule (then half-widths + `contactPaddingPx` of 18). Both
+  slot pivots sit at the TOP (`(0,1)` hero / `(0.5,1)` enemy), so raw `slot.position` was the head/shoulder line —
+  that is what drove the old "diagonally on top" read. Now the icons stand side-by-side at the same height.
 - The **swing clip is cut at the teleport** (unit is invisible there) — the idle pose fades in back home instead
   of the attack's tail frames, so nothing "plays on" after the character returns.
 

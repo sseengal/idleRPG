@@ -94,16 +94,23 @@ namespace IdleRPG.UI
 
             home = rect.position;
 
-            // Stop on the near-side flank of the target, horizontally aligned with it: the gap is both icons'
-            // half-widths plus a little breathing room, so the attacker stands BESIDE the target (same height),
-            // never on top of it or into its feet.
-            float dirX = targetSlot.position.x >= rect.position.x ? 1f : -1f;
-            float selfHalf = rect.rect.width * 0.5f;
-            float targetHalf = targetSlot.rect.width * 0.5f;
+            // Stop on the near-side flank of the target, aligned to the target's BODY height. The slot builders place
+            // every icon with CenterOn(0.5, 0.60) inside its slot, while the slot rect's pivot sits at the TOP
+            // (hero: (0,1), enemy: (0.5,1)) - so `slot.position` alone is the slot's top edge, not the body.
+            // Un-bias the slot's pivot to the icon's world centre, then gap by both icons' half-widths plus
+            // breathing room (all world units; lossyScale converts the local rect sizes).
+            float worldW = targetSlot.rect.width * Mathf.Abs(targetSlot.lossyScale.x);
+            float worldH = targetSlot.rect.height * Mathf.Abs(targetSlot.lossyScale.y);
+            float bodyX = targetSlot.position.x + (0.5f - targetSlot.pivot.x) * worldW;
+            float bodyY = targetSlot.position.y - (0.40f - (1f - targetSlot.pivot.y)) * worldH;
+            Vector3 bodyCenter = new Vector3(bodyX, bodyY, targetSlot.position.z);
+
+            float dirX = bodyCenter.x >= rect.position.x ? 1f : -1f;
+            float selfHalf = rect.rect.width * 0.5f * Mathf.Abs(rect.lossyScale.x);
+            float targetHalf = targetSlot.rect.width * 0.5f * Mathf.Abs(targetSlot.lossyScale.x);
             float gap = selfHalf + targetHalf + contactPaddingPx;
 
-            Vector3 targetPosition = targetSlot.position;
-            contact = new Vector3(targetPosition.x - (dirX * gap), targetPosition.y, targetPosition.z);
+            contact = new Vector3(bodyCenter.x - (dirX * gap), bodyCenter.y, bodyCenter.z);
 
             from = rect.position;
             clock = 0f;
