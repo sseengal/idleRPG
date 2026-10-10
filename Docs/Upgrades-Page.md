@@ -128,6 +128,8 @@ read - never trust a forced outer rebuild as proof that the inner groups are cor
 
 ---
 
+## 4. Currency rules (recorded, apply to every future upgrade here)
+
 | Currency | Buys | Why this line |
 |---|---|---|
 | **Gold** | Power and comfort: hero stat levels, and future account/offline upgrades | Gold is the run-long resource. Every gold sink competes with hero stats - that is the interesting choice |
