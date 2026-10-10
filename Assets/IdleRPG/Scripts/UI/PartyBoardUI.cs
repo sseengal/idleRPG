@@ -31,7 +31,7 @@ namespace IdleRPG.UI
         private Formation formation;
 
         private Image[] slotBackgrounds;
-        private HeroUnitView[] slotViews;
+        private FormationSlotView[] slotViews;
         private Button[] slotButtons;
 
         private int selectedSlot = -1;
@@ -75,7 +75,7 @@ namespace IdleRPG.UI
             int slots = formation.SlotCount;
 
             slotBackgrounds = new Image[slots];
-            slotViews = new HeroUnitView[slots];
+            slotViews = new FormationSlotView[slots];
             slotButtons = new Button[slots];
 
             for (int slot = 0; slot < slots; slot++)
@@ -111,10 +111,10 @@ namespace IdleRPG.UI
                 TextAlignmentOptions.Center, Color.white);
             UiRuntime.Anchor(nameLabel.rectTransform, new Vector2(0f, 0.10f), new Vector2(1f, 0.28f));
 
-            CanvasGroup group = slot.AddComponent<CanvasGroup>();
-            HeroUnitView view = slot.AddComponent<HeroUnitView>();
-            view.ConfigureRuntime(-1, icon, null, nameLabel, group);
-            view.ClearVisual("empty");
+            // The board shows heroes; it does not fight. A dedicated presenter keeps this page free of battle
+            // events, so nothing here lunges or flashes while the real fight runs behind the menu.
+            FormationSlotView view = slot.AddComponent<FormationSlotView>();
+            view.ConfigureRuntime(icon, nameLabel);
 
             slotBackgrounds[slotIndex] = background;
             slotViews[slotIndex] = view;
@@ -207,7 +207,7 @@ namespace IdleRPG.UI
 
             for (int slot = 0; slot < slotViews.Length; slot++)
             {
-                HeroUnitView view = slotViews[slot];
+                FormationSlotView view = slotViews[slot];
 
                 if (view == null)
                 {
@@ -224,13 +224,11 @@ namespace IdleRPG.UI
 
                 if (hero == null)
                 {
-                    view.ClearVisual("empty");
+                    view.Clear("empty");
                     continue;
                 }
 
-                view.enabled = true;
-                view.Configure(heroIndex);
-                view.Apply(hero);
+                view.Show(hero);
             }
         }
 

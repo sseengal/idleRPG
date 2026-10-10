@@ -30,7 +30,8 @@ namespace IdleRPG.Data
         [SerializeField] private float baseCritDamage = 2f;
 
         [Header("Combat role (Step 10)")]
-        [Tooltip("Used by auto-arrange: tanks are pushed to the front row first.")]
+        [Tooltip("Role tag on the party screen. NOTE: auto-arrange is NOT implemented (deferred to M2) - do not " +
+                 "read this as 'tanks are placed for you'.")]
         [SerializeField] private HeroRole role = HeroRole.Damage;
 
         [Header("Presentation")]

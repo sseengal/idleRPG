@@ -133,3 +133,78 @@ Rules that keep it scalable:
 | Gear / items | none (`Materials`/`Essence`/`Scrolls` currencies reserved) | v1.1 |
 | Abilities | none | Roadmap Step 13 |
 | Formation presets | none (`Formation` has one layout) | M2 |
+
+---
+
+## 7. Revision 2026-10-10 — MVP lock, formation fix, corrections
+
+### 7.1 Decision: the INVENTORY tab is PARKED for MVP (reverses the Equipment-v1 split)
+
+§2.3 and §5's M1 row had Equipment/inventory LIVE. That is now reversed: the loot loop is complete but untuned,
+and an untuned loot economy distorts an idle game's numbers, so it waits.
+
+Both halves are switched off (hiding only one is a trap):
+
+1. `PartyPanelUI.InventoryEnabled = false` - the tab is not built, so the sub-nav is `ROSTER | FORMATION` again
+   (which is what §4 originally scoped) and the bar re-spreads evenly.
+2. `BalanceConfig.bossGearDropChance = 0` - bosses stop dropping.
+
+Why both: `ItemService.TryBossDrop` **auto-equips** the first items into empty slots, so with drops left on, heroes
+would quietly gain stats from gear nobody could see or manage.
+
+What stays: `ItemService`, the save schema (v6) and old saves - worn gear keeps loading and keeps scoring its
+bonuses. Deliberate: it is harmless, and removing it would need a migration for no player-visible gain.
+
+Restore is two lines: `InventoryEnabled = true` and `bossGearDropChance = 0.35`.
+
+### 7.2 The formation board no longer fights
+
+`PartyBoardUI` hosted a `HeroUnitView` - the **battle** view - in every slot, and that class subscribes to
+`SwingStarted`, `EnemyDamaged`, `HeroDamaged`, `HeroDied`, `WaveCompleted`, `StageChanged`. So every slot lunged,
+blinked, flashed and played hurt poses whenever a fight ran behind the menu. The board is a changing room.
+
+Fixed with `UI/FormationSlotView.cs`: icon + name + idle pose only, no event subscriptions. The stale gear hint
+("tap a slot to manage" - those tiles were never buttons) now reads "gear: coming soon".
+
+**New rule: page views never subscribe to battle events.**
+
+
+### 7.3 Corrections to proposals made on 2026-10-10 (read before adding UI)
+
+- **"Add a power score" - WITHDRAWN.** It contradicts pillar 3 and `UI-UX` §5 (C7): *concrete numbers only,
+  never one opaque "power" value*. Do not add it. Comparisons come from the concrete rows we already show
+  (DPS, ATK, DEF, HP), not from an invented index.
+- **Auto-arrange is still deferred** (§2.2 puts it in M2), **but the tooltip lied**: `HeroData.role` said "used by
+  auto-arrange: tanks are pushed to the front row first" and nothing calls it. Tooltip corrected; the feature
+  stays M2.
+- Everything in §7.4 is a **proposal**, not a decision.
+
+### 7.4 Improvement backlog (proposals, 2026-10-10)
+
+Designer lens:
+
+| # | Change | Why | Size |
+|---|---|---|---|
+| P1 | Hero cards are icon + name only. Add a role chip and an empty-gear badge | The roster is a scan screen: judge every hero without tapping each one | S |
+| P2 | Stat rows do not explain themselves ("CRIT - chance to hit for x2") | ATK vs DPS vs CRIT is unclear to a new player | S |
+| P3 | Front/back has no visual cue on the board (only the text readout) | Rank choice is invisible; a warm/cool tint would make it readable | S |
+| P4 | No upgrade from the roster - tapping a stat row should jump to UPGRADES at that hero + stat | Reading here and buying elsewhere breaks the idle rhythm | M |
+| P5 | Party header: total HP, party DPS, role coverage ("no Tank") | Team-building at a glance | M |
+| P6 | All three heroes share one art set, so the page reads as three clones | Needs art; interim could be a subtle per-hero hue shift | art |
+
+Architect lens:
+
+| # | Change | Why | Size |
+|---|---|---|---|
+| S1 | Split `PartyRosterView` (542 lines) into `HeroCardView` / `HeroStatSheet` / `GearSlotRow` | Reusable cards, testable sheet; keeps "add a stat = one line" true as it grows | M |
+| S2 | One `HeroSummary` (hp/atk/def/crit/dps) read by cards, formation and future screens | The sheet's DPS had drifted because it derived numbers locally | S |
+| S3 | Extract pure formulas (DPS, crit factor) and pin them with EditMode tests | This maths has drifted once already; the repo already tests `FormulaUtility` | S |
+| S4 | Tab availability as data (`InventoryEnabled`) | Parking or restoring a feature is one line | done |
+
+### 7.5 Known gaps (tracked, not scheduled)
+
+- No auto-arrange, no party totals, no upgrade shortcut from the roster.
+- One art set for all three heroes - no visual identity.
+- Ability slots on the roster are three tiles labelled "(coming soon)". Each character has one unused attack strip
+  (the Soldier has two) - see `Checklist.md` 1y pending list for the ability plan.
+

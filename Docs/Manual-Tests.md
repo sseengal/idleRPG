@@ -158,6 +158,37 @@ includes them (enforced at build time from B10).
 
 ---
 
+## 2f. Party page — formation + bag lock (added 2026-10-10)
+
+> The formation tab should look like a changing room, not a battle screen, and the bag is parked. Open PARTY and
+> let a fight run behind the menu while you check the first item.
+
+### Formation tab (the bug that was fixed)
+- [ ] **Nothing moves.** With combat running, stand on FORMATION for ~20 s: no slot runs, blinks, flashes, or plays
+      an attack/hurt pose. Heroes stand in idle only.
+- [ ] **No battle chrome**: no health bars, no damage flashes on the formation board.
+- [ ] **Still works**: tap a hero (it highlights), tap a slot, the two swap; the rank readout and hint still read.
+- [ ] Empty slots say `empty`; a hero who moves leaves no ghost behind in the old slot.
+
+### Party sub-nav + bag lock
+- [ ] PARTY shows **two** tabs: `ROSTER` and `FORMATION` — no INVENTORY button, and the two tabs are evenly spread
+      (not bunched on the left).
+- [ ] No `Inventory` panel or dead button is left behind; the page opens on ROSTER as before.
+
+### Roster gear row
+- [ ] The gear hint reads **"gear: coming soon"** (it used to say "tap a slot to manage", which was never true).
+- [ ] The three gear tiles are not buttons: tapping them does nothing.
+
+### Drops are off
+- [ ] Beat a boss (or several): **no item toast, no new gear, no gold bonus from gear** — nothing drops.
+- [ ] If a save already carries worn gear from before this change, it still loads (bonuses stay). That is expected.
+
+### Regression sweep
+- [ ] Upgrades still work (buy a stat, the roster sheet updates live), crit rows still read correctly, battle log
+      still marks crits, and the lunge/turn-beat behaviour on the BATTLE page is untouched.
+
+---
+
 ## 3. B9' part 2 — phone checklist (needs the first real phone build)
 
 - [ ] **Portrait lock** — turn the phone while playing; game stays one way up; nothing clipped at the notch /

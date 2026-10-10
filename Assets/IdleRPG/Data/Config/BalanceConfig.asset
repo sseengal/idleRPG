@@ -73,4 +73,5 @@ MonoBehaviour:
   goldPerSecondSampleWindowSec: 60
   adGoldBoostMultiplier: 2
   adGoldBoostDurationSec: 1800
+  bossGearDropChance: 0
   autosaveIntervalSec: 15

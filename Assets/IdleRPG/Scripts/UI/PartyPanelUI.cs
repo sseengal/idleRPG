@@ -23,6 +23,13 @@ namespace IdleRPG.UI
         [SerializeField] private RectTransform boardRoot;
         [SerializeField] private Vector2 boardOffset = new Vector2(14f, -24f);
 
+        /// <summary>
+        /// The INVENTORY sub-tab (the "bag": dropped loot, equip / salvage) is PARKED for MVP, so the tab is not
+        /// built and boss drops are switched off in BalanceConfig (see Docs/Party-Page.md). The whole feature is
+        /// intact - set this to true and re-enable the drop chance to bring it back.
+        /// </summary>
+        private const bool InventoryEnabled = false;
+
         private readonly Color activeTabColor = new Color(0.24f, 0.34f, 0.55f, 1f);
         private readonly Color inactiveTabColor = new Color(0.11f, 0.13f, 0.19f, 1f);
         private readonly Color bodyText = new Color(1f, 1f, 1f, 0.92f);
@@ -94,7 +101,11 @@ namespace IdleRPG.UI
             rosterView = tabPanels[0].AddComponent<PartyRosterView>();
             rosterView.Build(manager);
             BuildFormation((RectTransform)tabPanels[1].transform);
-            BuildInventory((RectTransform)tabPanels[2].transform);
+
+            if (InventoryEnabled)
+            {
+                BuildInventory((RectTransform)tabPanels[2].transform);
+            }
 
             ShowTab(0);
 
@@ -113,14 +124,24 @@ namespace IdleRPG.UI
         // ------------------------------------------------------------------
         private void BuildTabs(RectTransform root)
         {
-            string[] names = { "ROSTER", "FORMATION", "INVENTORY" };
+            // Tab set is data, not a fixed array: parking the bag removes one tab and the layout re-spreads
+            // itself evenly (no re-authoring, no left-heavy bar).
+            string[] names = InventoryEnabled
+                ? new[] { "ROSTER", "FORMATION", "INVENTORY" }
+                : new[] { "ROSTER", "FORMATION" };
+
             tabBackgrounds = new Image[names.Length];
             tabPanels = new GameObject[names.Length];
 
+            const float barLeft = 0.03f;
+            const float barRight = 0.97f;
+            const float barGap = 0.012f;
+            float width = ((barRight - barLeft) - barGap * (names.Length - 1)) / names.Length;
+
             for (int i = 0; i < names.Length; i++)
             {
-                float xMin = 0.03f + i * 0.315f;
-                float xMax = xMin + 0.30f;
+                float xMin = barLeft + i * (width + barGap);
+                float xMax = xMin + width;
                 int captured = i;
 
                 Button tab = UiRuntime.CreateButton(root, "Tab" + names[i], names[i],

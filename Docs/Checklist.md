@@ -1456,6 +1456,40 @@ clobber. Deeper issue to revisit: there are two generators (`DataAssetGenerator`
 - **Incoming crit numbers**: the floating-text pool receives the crit flag but still renders the normal style.
 - **Roster shortcuts**: no "buy this stat" affordance on the ROSTER tab yet - you still hop to UPGRADES.
 
+## 1z. Party page: formation fix + the bag parked for MVP  ·  **built 2026-10-10**
+
+> Full spec, rules and backlog: **`Docs/Party-Page.md` §7** (a design record for this page already existed from
+> 2026-09-30 - this is a revision to it, not a second doc).
+
+### The formation tab fought like a battle screen (bug)
+`PartyBoardUI` put a **`HeroUnitView`** - the *battle* view - in every slot. That class subscribes to `SwingStarted`,
+`EnemyDamaged`, `HeroDamaged`, `HeroDied`, `WaveCompleted` and `StageChanged`, so while a fight ran behind the menu
+every formation slot **lunged, blinked, flashed and played hurt poses**. The board is a changing room.
+- **Fixed:** new `UI/FormationSlotView.cs` - icon + name + idle pose only, no event subscriptions;
+  `PartyBoardUI` now uses it. Removed the board's unused `CanvasGroup`/HP wiring.
+- **Rule for the future (documented):** *page views never subscribe to battle events.*
+
+### The INVENTORY tab ("the bag") is parked
+- `PartyPanelUI.InventoryEnabled = false` - the tab is not built; the sub-nav is `ROSTER | FORMATION` again and the
+  tab bar re-spreads evenly (the layout maths is now count-driven, not a hardcoded 3-tab stride).
+- `BalanceConfig.bossGearDropChance = 0` - bosses stop dropping.
+- **Both halves on purpose:** `ItemService.TryBossDrop` *auto-equips* early items, so hiding the tab with drops on
+  would have handed heroes invisible stat bonuses.
+- Still running: `ItemService`, save v6 and old saves (worn gear keeps loading and keeps its bonuses).
+- Restore = two lines (`InventoryEnabled = true`, `bossGearDropChance = 0.35`). See `Docs/Party-Page.md` §7.1 and
+  the parked banner in `Docs/Inventory-AS-BUILT.md`.
+
+### Corrections found while documenting
+- The roster's gear hint said **"tap a slot to manage"** - those tiles were never buttons. Now "gear: coming soon".
+- `HeroData.role`'s tooltip claimed **auto-arrange** uses it. Auto-arrange is **not implemented** (deferred to M2);
+  the tooltip is corrected so nobody reads the role tag as an arrangement promise.
+- **A proposal of mine was withdrawn:** "add a power score" contradicts the locked rule `UI-UX` §5 (C7) - *concrete
+  numbers only, never one opaque "power" value*. Recorded as withdrawn in `Party-Page.md` §7.3.
+
+### Verified (2026-10-10)
+- [x] compiles clean
+- [ ] in-Play check: `Manual-Tests.md` §2f
+
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 
 Base gate: every step below names the loop beat or money path it serves. Anything that cannot is not in the base.

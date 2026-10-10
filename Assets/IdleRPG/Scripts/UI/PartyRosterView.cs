@@ -257,7 +257,7 @@ namespace IdleRPG.UI
                 TextAlignmentOptions.MidlineLeft, dimText);
             UiRuntime.Anchor(caption.rectTransform, new Vector2(0.48f, 0.415f), new Vector2(0.72f, 0.45f), 4f, 0f, 0f, 0f);
 
-            TextMeshProUGUI hint = UiRuntime.CreateText(root, "GearHint", "tap a slot to manage", 13f,
+            TextMeshProUGUI hint = UiRuntime.CreateText(root, "GearHint", "gear: coming soon", 13f,
                 TextAlignmentOptions.MidlineRight, dimText);
             UiRuntime.Anchor(hint.rectTransform, new Vector2(0.62f, 0.415f), new Vector2(0.97f, 0.45f), 0f, 0f, 4f, 0f);
 

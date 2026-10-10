@@ -1,5 +1,9 @@
 # Inventory — as-built implementation record
 
+> **PARKED for MVP (2026-10-10).** The INVENTORY tab is not built (`PartyPanelUI.InventoryEnabled = false`) and
+> boss drops are off (`BalanceConfig.bossGearDropChance = 0`). The code below is intact and correct - it is simply
+> not reachable. Rationale, restoration steps and what still runs: `Docs/Party-Page.md` §7.1.
+
 > (2026-10-04). How the equipment/inventory feature ACTUALLY works today: the authoritative reference for
 > anyone touching this code. Design rationale lives in `Docs/Equipment-MVP-Plan.md` and the change history in
 > `Docs/Inventory-Tab-Plan.md`; this doc is the map of what exists, how data flows, and where the knobs are.
