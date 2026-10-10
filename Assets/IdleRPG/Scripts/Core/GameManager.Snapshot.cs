@@ -30,6 +30,10 @@ namespace IdleRPG.Core
             data.currentWave = combatManager != null ? combatManager.CurrentWave : 1;
             data.highestStageReached = HighestStageReached;
             data.runBestStage = RunBestStage;
+            data.runGoldEarned = RunGoldEarned;
+            data.runKills = RunKills;
+            data.runStagesCleared = RunStagesCleared;
+            data.runStartBinary = runStartBinary;
 
             data.gold = Economy != null ? Economy.Gold : 0d;
             data.gems = Economy != null ? Economy.Gems : 0d;
@@ -90,6 +94,11 @@ namespace IdleRPG.Core
             RestoredWave = Mathf.Max(1, data.currentWave);
             HighestStageReached = Mathf.Max(1, data.highestStageReached, CurrentStage);
             RunBestStage = Mathf.Clamp(Mathf.Max(1, data.runBestStage), 1, HighestStageReached);
+
+            RunGoldEarned = data.runGoldEarned < 0d ? 0d : data.runGoldEarned;
+            RunKills = Mathf.Max(0, data.runKills);
+            RunStagesCleared = Mathf.Max(0, data.runStagesCleared);
+            runStartBinary = data.runStartBinary > 0d ? data.runStartBinary : GameClock.NowBinary;
 
             TotalKills = data.totalKills;
             TotalGoldEarned = data.totalGoldEarned;

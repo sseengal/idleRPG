@@ -142,7 +142,7 @@ Automation rules are `AutomationDef` rows with per-rule `enabled` + `threshold`,
 | First upgrade | <= 30s of play |
 | Stage 1 clear | 90-180s |
 | Frontier stage clear | 2-3 min |
-| Wall behaviour | **the bounce**: wipe -> fall back one stage -> clear it -> push again, forever, no input. A failed push costs seconds; farmed income is never zero |
+| Wall behaviour | **the bounce**: wipe -> fall back one stage -> clear it -> push again, forever, no input. A failed push costs seconds; farmed income is never zero. A wipe now shows a short **defeat card** (see `Run-Identity.md`) that auto-restarts - the beat is longer on new stages but still needs no input |
 | Frontier movement | a push succeeds within ~3 min of accumulated frontier income (measured by the robot player) |
 | First ascension | 30-60 min |
 | Offline cap reached | 2h equivalent (locked - see `Idle-Economy.md`) |

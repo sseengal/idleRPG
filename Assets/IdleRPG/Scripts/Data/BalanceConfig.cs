@@ -126,6 +126,13 @@ namespace IdleRPG.Data
                  "The party always keeps fighting - the loop never waits for input.")]
         [SerializeField] private float defeatPauseSeconds = 0.75f;
 
+        [Tooltip("How long the defeat summary modal stays up before the run restarts on its own, in seconds.")]
+        [SerializeField] private float defeatModalSeconds = 4f;
+
+        [Tooltip("Minimum gap between full defeat modals, in seconds. Wipes inside this window use the quick beat " +
+                 "instead, so a hard wall does not show a card every few seconds.")]
+        [SerializeField] private float defeatModalCooldownSeconds = 60f;
+
         [Tooltip("Also scale enemy defence with the stage.")]
         [SerializeField] private bool scaleEnemyDefenseWithStage = false;
 
@@ -292,6 +299,12 @@ namespace IdleRPG.Data
 
         /// <summary>Seconds between a wipe and the automatic fallback fight (0 = instant).</summary>
         public float DefeatPauseSeconds => Mathf.Max(0f, defeatPauseSeconds);
+
+        /// <summary>How long the defeat summary modal stays up before the run restarts on its own.</summary>
+        public float DefeatModalSeconds => Mathf.Max(0.5f, defeatModalSeconds);
+
+        /// <summary>Minimum gap between full defeat modals; faster wipes use the quick beat.</summary>
+        public float DefeatModalCooldownSeconds => Mathf.Max(0f, defeatModalCooldownSeconds);
 
         public bool ScaleEnemyDefenseWithStage => scaleEnemyDefenseWithStage;
 

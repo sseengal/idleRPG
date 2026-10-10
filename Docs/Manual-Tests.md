@@ -237,6 +237,29 @@ includes them (enforced at build time from B10).
 - [ ] ROSTER still updates live when a stat is bought here; DPS still moves with crit.
 - [ ] The BATTLE page, the turn order and the lunge behaviour are untouched by this change.
 
+## 2h. Run identity — the defeat card and run summary (added 2026-10-10)
+
+> The run now has a visible edge. The loop itself is unchanged: a wipe still falls back one stage and keeps fighting,
+> and ASCEND still resets the run. Full record: `Docs/Run-Identity.md`.
+
+### The defeat card
+- [ ] Lose a fight (let the party wipe): a card appears over a dimmed battlefield - "DEFEAT — stage N", the run's best
+      stage and gold so far, and a countdown ("resuming in 4…").
+- [ ] The run restarts on its own when the countdown ends - no tap needed.
+- [ ] Tap CONTINUE: the run restarts immediately.
+- [ ] Tap ASCEND (stage 10+): the run ends there; the "Run ended" toast appears; you go back to stage 1 with tokens.
+- [ ] Below stage 10, the ASCEND button is greyed and reads "reach stage 10 to ascend".
+- [ ] At a hard wall, the full card does NOT open on every single bounce (a 60 s cooldown shows the quick beat
+      instead) - but a genuinely new stage shows it again.
+
+### Run stats
+- [ ] Kill an enemy and clear a stage: the "best this run / gold this run" numbers on the next card grow.
+- [ ] Ascend: the next card (and the toast) read from the NEW run, not the old one.
+
+### Regression
+- [ ] Bounce still works: wipe -> one stage back -> auto-resume.
+- [ ] No NullReferenceException in the console; no "Combat tick threw".
+
 ---
 
 ## 3. B9' part 2 — phone checklist (needs the first real phone build)

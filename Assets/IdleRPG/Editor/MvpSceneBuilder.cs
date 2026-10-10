@@ -112,6 +112,7 @@ namespace IdleRPG.EditorTools
             TabController tabs = BuildManagementPage(managementPage.GetComponent<RectTransform>(), partyConfig, prestigeUpgrades);
             ScreenController screens = BuildNavBar(safeArea, battlePage, managementPage, tabs, damageRoot.gameObject);
             OfflineRewardsPopup offlinePopup = BuildOfflinePopup(modalRoot);
+            DefeatModalUI defeatModal = BuildDefeatModal(modalRoot);
             ToastUI toast = BuildToast(canvasRoot);
             EnsureEventSystem();
 
@@ -128,6 +129,7 @@ namespace IdleRPG.EditorTools
             EditorUtility.SetDirty(header);
             EditorUtility.SetDirty(tabs);
             EditorUtility.SetDirty(offlinePopup);
+            EditorUtility.SetDirty(defeatModal);
             EditorUtility.SetDirty(toast);
 
             EnsureFolder(Path.GetDirectoryName(ScenePath).Replace('\\', '/'));

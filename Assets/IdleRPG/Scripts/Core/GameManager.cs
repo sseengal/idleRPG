@@ -81,11 +81,34 @@ namespace IdleRPG.Core
         /// </summary>
         public int RunBestStage { get; private set; } = 1;
 
+        /// <summary>Gold earned in the CURRENT run (resets to zero on ascension).</summary>
+        public double RunGoldEarned { get; private set; }
+
+        /// <summary>Enemies killed in the current run.</summary>
+        public int RunKills { get; private set; }
+
+        /// <summary>Stages cleared in the current run.</summary>
+        public int RunStagesCleared { get; private set; }
+
+        /// <summary>Wall-clock seconds since the current run began (offline time included, like the idle rate).</summary>
+        public double RunElapsedSeconds => runStartBinary > 0d
+            ? GameClock.SecondsBetween(runStartBinary, GameClock.NowBinary)
+            : 0d;
+
+        /// <summary>GameClock binary of when the current run began; 0 = not started yet.</summary>
+        private double runStartBinary;
+
         /// <summary>True while the short post-wipe beat is running (the loop resumes when it ends).</summary>
         private bool defeatBeatActive;
 
         /// <summary>Seconds left in the post-wipe beat.</summary>
         private float defeatBeatRemaining;
+
+        /// <summary>Stage of the last defeat that opened the modal, for the once-per-stage part of the cooldown.</summary>
+        private int lastDefeatModalStage = -1;
+
+        /// <summary>Unscaled time of the last defeat modal, for the time part of the cooldown.</summary>
+        private float lastDefeatModalAt = -999f;
 
         public CombatManager Combat => combatManager;
 
@@ -239,6 +262,8 @@ namespace IdleRPG.Core
             {
                 return;
             }
+
+            EnsureRunStarted();
 
             if (LoadedFromSave)
             {

@@ -54,6 +54,12 @@ namespace IdleRPG.Core
         /// <summary>Raised when all heroes are dead.</summary>
         public static event Action PartyWiped;
 
+        /// <summary>
+        /// (defeatedStage, resumeStage) when the party wipes and the run-summary modal should open. Raised only when
+        /// the cooldown allows the full modal; a quick beat wipe raises <see cref="PartyWiped"/> alone.
+        /// </summary>
+        public static event Action<int, int> DefeatShown;
+
         /// <summary>(stage, wave) after a wave is cleared.</summary>
         public static event Action<int, int> WaveCompleted;
 
@@ -135,6 +141,7 @@ namespace IdleRPG.Core
             StageChanged = null;
             BossFailed = null;
             PartyWiped = null;
+            DefeatShown = null;
             WaveCompleted = null;
             EnemySpawned = null;
             EnemyDamaged = null;

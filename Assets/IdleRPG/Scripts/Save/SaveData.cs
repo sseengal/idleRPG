@@ -45,6 +45,14 @@ namespace IdleRPG.Save
         /// </summary>
         public int runBestStage = 1;
 
+        // --- Run-scoped stats (Run-Identity pass): reset to zero on ascension. Additive and default-safe, so an
+        //     older save (no version bump) simply reads 0 gold / 0 kills / 0 stages and re-seeds the run clock.
+        public double runGoldEarned;
+        public int runKills;
+        public int runStagesCleared;
+        /// <summary>GameClock binary of when the current run began; 0 = not started yet (seeded on load).</summary>
+        public double runStartBinary;
+
         // --- Level records (schema v5): one "key -> level" list for the whole game ---
         /// <summary>
         /// Every progression level as {key, level}. Keys are stable strings, never enum values (AD5): a hero stat is

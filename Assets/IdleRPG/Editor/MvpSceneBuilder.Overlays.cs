@@ -89,6 +89,67 @@ namespace IdleRPG.EditorTools
             return ui;
         }
 
+        /// <summary>
+        /// The defeat summary card (Run-Identity pass): a real modal over a dimmed scrim. The run restarts on its own
+        /// after a short beat - this card makes that beat legible and offers the two run endings: "continue" (skip the
+        /// wait) or "ascend" (cash the run in now, right where the player is already thinking about it).
+        /// </summary>
+        private static DefeatModalUI BuildDefeatModal(RectTransform modalRoot)
+        {
+            GameObject host = UiFactory.Node("DefeatModal", modalRoot);
+            UiFactory.Stretch(host.GetComponent<RectTransform>());
+            DefeatModalUI ui = host.AddComponent<DefeatModalUI>();
+
+            Image scrim = UiFactory.Panel("Scrim", host.transform, null, new Color(0f, 0f, 0f, 0.65f), raycast: true);
+            UiFactory.Stretch(scrim.rectTransform);
+
+            GameObject dialog = UiFactory.Node("Dialog", scrim.transform);
+            UiFactory.Anchor(dialog.GetComponent<RectTransform>(), new Vector2(0.08f, 0.34f), new Vector2(0.92f, 0.68f));
+
+            Image background = UiFactory.Panel("Background", dialog.transform, "ui_panel_light", Color.white, raycast: true);
+            UiFactory.Stretch(background.rectTransform);
+            Image frame = UiFactory.Panel("Frame", dialog.transform, "ui_panel_bordered", Color.white);
+            UiFactory.Stretch(frame.rectTransform);
+
+            TextMeshProUGUI title = UiFactory.Text("Title", dialog.transform, "DEFEAT", 40f,
+                TextAlignmentOptions.Center, TextColor);
+            UiFactory.Anchor(title.rectTransform, new Vector2(0.06f, 0.78f), new Vector2(0.94f, 0.94f));
+
+            TextMeshProUGUI summary = UiFactory.Text("Summary", dialog.transform, "", 24f,
+                TextAlignmentOptions.Center, DimTextColor);
+            UiFactory.Anchor(summary.rectTransform, new Vector2(0.06f, 0.56f), new Vector2(0.94f, 0.76f));
+
+            TextMeshProUGUI ascend = UiFactory.Text("Ascend", dialog.transform, "", 24f,
+                TextAlignmentOptions.Center, new Color(0.98f, 0.82f, 0.30f, 1f));
+            UiFactory.Anchor(ascend.rectTransform, new Vector2(0.06f, 0.40f), new Vector2(0.94f, 0.55f));
+
+            TextMeshProUGUI countdown = UiFactory.Text("Countdown", dialog.transform, "", 20f,
+                TextAlignmentOptions.Center, DimTextColor);
+            UiFactory.Anchor(countdown.rectTransform, new Vector2(0.06f, 0.22f), new Vector2(0.94f, 0.38f));
+
+            Button ascendButton = UiFactory.Button("AscendButton", dialog.transform, "ASCEND", "ui_button_gold", 26f, TextColor, null);
+            UiFactory.Anchor(ascendButton.GetComponent<RectTransform>(), new Vector2(0.06f, 0.06f), new Vector2(0.47f, 0.20f));
+
+            Button continueButton = UiFactory.Button("ContinueButton", dialog.transform, "CONTINUE", "ui_button", 26f, TextColor, null);
+            UiFactory.Anchor(continueButton.GetComponent<RectTransform>(), new Vector2(0.53f, 0.06f), new Vector2(0.94f, 0.20f));
+
+            summary.overflowMode = TextOverflowModes.Ellipsis;
+            ascend.overflowMode = TextOverflowModes.Ellipsis;
+            countdown.overflowMode = TextOverflowModes.Ellipsis;
+
+            SceneWiringUtility.SetField(ui, "root", scrim.gameObject);
+            SceneWiringUtility.SetField(ui, "titleLabel", title);
+            SceneWiringUtility.SetField(ui, "summaryLabel", summary);
+            SceneWiringUtility.SetField(ui, "ascendLabel", ascend);
+            SceneWiringUtility.SetField(ui, "countdownLabel", countdown);
+            SceneWiringUtility.SetField(ui, "continueButton", continueButton);
+            SceneWiringUtility.SetField(ui, "ascendButton", ascendButton);
+
+            // The scrim is the modal's root: it starts hidden and one SetActive shows dim + dialog together.
+            scrim.gameObject.SetActive(false);
+            return ui;
+        }
+
         private static ToastUI BuildToast(RectTransform canvasRoot)
         {
             GameObject host = UiFactory.Node("Toast", canvasRoot);

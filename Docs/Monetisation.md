@@ -108,3 +108,9 @@ store-submittable** (see `Checklist.md` §1p), the real wiring is its own step a
 
 Season pass, timed bundles, gacha/pity, gear monetisation, "pay to skip stage", ads between fights, energy systems.
 All of those either break the ledger rule or turn the loop into a chore.
+
+Also rejected (2026-10-10, Run-Identity pass): **an ad on the defeat card** ("watch an ad to double your gold").
+Three reasons: it re-pays already-granted gold (breaks the one-measured-rate rule, AD6/AD7); its value is wrong at
+both ends (the failed wave pays pennies, the whole run is a balance bomb); and it is a consolation ad (you lost, here
+is pity gold). If a run-boundary ad is ever wanted, it is **"double your ascension tokens"** on the ASCEND action -
+aspirational, one clean grant point - and it belongs to B7/B10.

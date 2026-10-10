@@ -75,11 +75,18 @@ namespace IdleRPG.Core
                 return false;
             }
 
-            GameEvents.RaiseAscensionCompleted(tokens, RunBestStage);
-            LogFlow($"Ascended for {tokens:0} token(s) from run best stage {RunBestStage} | " +
+            // Snapshot the just-ended run BEFORE the reset wipes the counters, so the summary reads the run that ended.
+            int endedStage = RunBestStage;
+            double endedGold = RunGoldEarned;
+
+            GameEvents.RaiseAscensionCompleted(tokens, endedStage);
+            LogFlow($"Ascended for {tokens:0} token(s) from run best stage {endedStage} | " +
                     $"{Ascension.DescribeMultipliers()} | {Economy}");
 
             ResetProgressForAscension(HighestStageReached);
+
+            GameEvents.RaiseToast(string.Format("Run ended - stage {0}  ·  +{1:0} tokens  ·  {2} gold",
+                endedStage, tokens, NumberFormatter.Format(endedGold)));
             return true;
         }
 
@@ -93,10 +100,41 @@ namespace IdleRPG.Core
             RunBestStage = 1;
             HighestStageReached = Mathf.Max(1, highestStageToKeep);
 
+            // A new run starts now: the per-run counters go back to zero.
+            RunGoldEarned = 0d;
+            RunKills = 0;
+            RunStagesCleared = 0;
+            runStartBinary = GameClock.NowBinary;
+
             SetState(State, GameState.Combat);
             combatManager.SetStage(CurrentStage, healParty: true);
             combatManager.StartRun();
             RaiseStageChanged();
+        }
+
+        /// <summary>Restarts the fight now, skipping the rest of the post-defeat beat (the modal's "Continue").</summary>
+        public void ResumeAfterDefeat()
+        {
+            if (!defeatBeatActive)
+            {
+                return;
+            }
+
+            defeatBeatActive = false;
+
+            if (isWired)
+            {
+                StartRun(CurrentStage);
+            }
+        }
+
+        /// <summary>Seeds the run clock the first time a run begins (fresh install or a save with no run record).</summary>
+        private void EnsureRunStarted()
+        {
+            if (runStartBinary <= 0d)
+            {
+                runStartBinary = GameClock.NowBinary;
+            }
         }
 
         // ------------------------------------------------------------------
@@ -166,6 +204,8 @@ namespace IdleRPG.Core
 
             TotalKills++;
             TotalGoldEarned += awarded;
+            RunKills++;
+            RunGoldEarned += awarded;
             Save?.MarkDirty("kill");
         }
 
@@ -217,6 +257,7 @@ namespace IdleRPG.Core
             combatManager.SetStage(CurrentStage, healParty: balanceConfig != null && balanceConfig.HealHeroesOnStageAdvance);
             RaiseStageChanged();
 
+            RunStagesCleared++;
             Save?.MarkDirty("stage");
             LogFlow($"Stage {stage} complete -> now stage {CurrentStage} | {Economy}");
         }
@@ -239,7 +280,22 @@ namespace IdleRPG.Core
 
             LogFlow($"DEFEAT on stage {defeatedStage}. Falling back to stage {CurrentStage} (wave 1) - resuming automatically.");
 
-            defeatBeatRemaining = balanceConfig != null ? balanceConfig.DefeatPauseSeconds : 0.75f;
+            // The full summary modal only lands on a NEW stage, or after the cooldown - a hard wall bounces over and
+            // over, so a card on every wipe would spam the player (and slow the idle bounce) for nothing.
+            bool showModal = defeatedStage != lastDefeatModalStage ||
+                             Time.unscaledTime - lastDefeatModalAt >=
+                             (balanceConfig != null ? balanceConfig.DefeatModalCooldownSeconds : 60f);
+
+            if (showModal)
+            {
+                lastDefeatModalStage = defeatedStage;
+                lastDefeatModalAt = Time.unscaledTime;
+                GameEvents.RaiseDefeatShown(defeatedStage, CurrentStage);
+            }
+
+            defeatBeatRemaining = showModal
+                ? (balanceConfig != null ? balanceConfig.DefeatModalSeconds : 4f)
+                : (balanceConfig != null ? balanceConfig.DefeatPauseSeconds : 0.75f);
             defeatBeatActive = true;
         }
 
@@ -261,12 +317,7 @@ namespace IdleRPG.Core
                 return;
             }
 
-            defeatBeatActive = false;
-
-            if (isWired)
-            {
-                StartRun(CurrentStage);
-            }
+            ResumeAfterDefeat();
         }
 
         private void OnBossFailed()

@@ -55,6 +55,11 @@ namespace IdleRPG.Core
             SafeInvoke(PartyWiped, nameof(PartyWiped));
         }
 
+        internal static void RaiseDefeatShown(int defeatedStage, int resumeStage)
+        {
+            SafeInvoke(DefeatShown, defeatedStage, resumeStage, nameof(DefeatShown));
+        }
+
         internal static void RaiseWaveCompleted(int stage, int wave)
         {
             SafeInvoke(WaveCompleted, stage, wave, nameof(WaveCompleted));

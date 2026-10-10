@@ -1551,6 +1551,34 @@ uGUI fires a Button click on release *even after a drag* - a row-wide button wou
       the Editor was unfocused the Game View and the canvas disagreed about screen size, so every scripted probe
       missed. The fix is structural - a press inside a list now resolves to the ScrollRect.)
 
+## 1ab. Run identity: defeat modal + run stats (the run you can see)  ·  **built 2026-10-10**
+
+> Full record: **`Docs/Run-Identity.md`**. Scope: give the run a visible edge - NO change to the core loop (the
+> bounce and voluntary ASCEND stay exactly as they were).
+
+### Why
+Death was a silent 0.75 s pause and a run had no boundary, so the page felt weightless even though the mechanics were
+right. The fix is framing, not a new reset rule.
+
+### What changed
+- **Run stats** (Phase 0): `RunGoldEarned` / `RunKills` / `RunStagesCleared` / `RunElapsedSeconds`, reset on
+  ascension and persisted. Additive save fields - no version bump (same convention as the daily-streak fields).
+- **Defeat modal** (Phase 1): on a wipe a card shows the run so far + a countdown + CONTINUE (restart now) + ASCEND
+  (end the run). It auto-restarts when the countdown ends, so the idle promise holds. A cooldown (new stage or 60 s)
+  keeps a hard wall from spamming the card.
+- **Run-ended toast** (Phase 2): ascending shows "Run ended - stage N · +T tokens · G gold".
+
+### Recorded decisions (do not re-litigate silently)
+- The card is a **modal** (the owner's call) because a toast cannot carry the ASCEND choice.
+- **No ad on the defeat card** - rejected; reason in `Monetisation.md` §7. A run-boundary ad is "double ascension
+  tokens" on ASCEND, and belongs to B7/B10.
+- **Phase 3 (content beats: walls / zones / archetypes / affixes) is deferred to Step 15** - recorded with its
+  decision gate in `Run-Identity.md` §6.
+
+### Verified (2026-10-10)
+- [x] compiles clean, scene rebuilt, card opens on wipe, `ResumeAfterDefeat()` restarts the run, ascend gating correct
+- [ ] frame-driven check by hand: `Manual-Tests.md` §2h
+
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 
 Base gate: every step below names the loop beat or money path it serves. Anything that cannot is not in the base.
