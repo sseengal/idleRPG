@@ -1579,6 +1579,22 @@ right. The fix is framing, not a new reset rule.
 - [x] compiles clean, scene rebuilt, card opens on wipe, `ResumeAfterDefeat()` restarts the run, ascend gating correct
 - [ ] frame-driven check by hand: `Manual-Tests.md` §2h
 
+## 1ac. Enemy sprite fixes: blank area + death pose  ·  **fixed 2026-10-10**
+
+Two bugs reported from play, both in the enemy views.
+
+| # | Symptom | Cause | Fix |
+|---|---|---|---|
+| 1 | The enemy area was **blank** sometimes at a session start / reset | `EnemyStackView.Refresh()` could run before `HudController.Start` bound its manager: with a null manager `ResolveEnemies()` returned null, so `count = 0` and **every slot was switched off** - and nothing refreshed again until the next wave spawn. Verified live: manager null + spawn -> all slots off; bind + `Refresh()` -> healed | `ResolveEnemies()` resolves the manager lazily (via `HudController.Instance`); `HudController` also calls `enemyStack.Refresh()` once after `Build` |
+| 2 | The enemy **disappeared on death** | `EnemyUnitView` passed `HideSprite` to `PlayDeath`, so the sprite was switched off when the clip ended (placeholder enemies were hidden instantly, with no death beat at all) | `PlayDeath()` with no callback - the last frame stays on screen, exactly like a hero's death pose; the next wave's `Show()` re-binds the slot |
+
+Also hardened while in there: an art set with **no frames** now counts as "no art" (it would animate nothing and
+leave the unit invisible), and `Show()` with unknown sim data leaves the current look alone instead of clearing it.
+
+- [x] verified live: the race probe leaves the slots ACTIVE (was: all off); after killing the whole wave all three
+      slots keep a visible sprite (the animated enemy holds its Death frame, Slime/Bat hold their placeholder sprite)
+- [ ] in-Play check by hand: `Manual-Tests.md` §2i
+
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 
 Base gate: every step below names the loop beat or money path it serves. Anything that cannot is not in the base.

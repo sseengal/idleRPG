@@ -137,7 +137,10 @@ namespace IdleRPG.UI
 
             if (spriteImage != null)
             {
-                if (art != null)
+                // An art set with no frames would animate nothing and leave the unit invisible, so it counts as "no art".
+                bool hasAnimatedArt = art != null && art.HasAnimation;
+
+                if (hasAnimatedArt)
                 {
                     // Real art: animated frames, flipped to face the heroes, no tint.
                     CharacterAnimator animation = EnsureAnimator();
@@ -145,7 +148,7 @@ namespace IdleRPG.UI
                     animation.SetArt(art);
                     spriteImage.color = Color.white;
                 }
-                else
+                else if (data != null && data.EnemySprite != null)
                 {
                     // Placeholder art: a stale animator from a previous archetype must not keep swapping
                     // frames over the placeholder, so it is cleared before the static sprite is shown.
@@ -154,16 +157,12 @@ namespace IdleRPG.UI
                         animator.Clear();
                     }
 
-                    if (data != null && data.EnemySprite != null)
-                    {
-                        spriteImage.sprite = data.EnemySprite;
-                        spriteImage.color = data.PlaceholderTint;
-                    }
-                    else
-                    {
-                        spriteImage.color = data != null ? data.PlaceholderTint : Color.white;
-                    }
+                    spriteImage.sprite = data.EnemySprite;
+                    spriteImage.color = data.PlaceholderTint;
                 }
+
+                // else: nothing is known about this slot yet (a spawn that lands before the simulator holds it).
+                // The look is deliberately LEFT ALONE - clearing it here is what made the unit vanish.
 
                 spriteImage.enabled = true;
 
@@ -283,7 +282,8 @@ namespace IdleRPG.UI
                 return;
             }
 
-            // No fade after death: the death clip plays, then the sprite snaps off. Die in your slot, not mid-run.
+            // No fade after death, and nothing is hidden: the death clip plays and its last frame stays on screen,
+            // exactly like a hero's death pose. The next wave's Show() re-binds this slot.
             if (lunge != null)
             {
                 lunge.ResetToHome();
@@ -291,19 +291,7 @@ namespace IdleRPG.UI
 
             if (animator != null && animator.HasArt)
             {
-                animator.PlayDeath(HideSprite);
-            }
-            else
-            {
-                HideSprite();
-            }
-        }
-
-        private void HideSprite()
-        {
-            if (spriteImage != null)
-            {
-                spriteImage.enabled = false;
+                animator.PlayDeath();
             }
         }
 

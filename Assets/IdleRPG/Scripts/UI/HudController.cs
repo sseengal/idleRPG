@@ -61,6 +61,11 @@ namespace IdleRPG.UI
             if (enemyStack != null)
             {
                 enemyStack.Build(gameManager, damageTextPool);
+
+                // The first wave can already have spawned (this Start may run after the GameManager's), so lay the
+                // stack out now instead of waiting for the next spawn - otherwise the enemy area stays blank for a
+                // whole wave. Refresh() is safe when nothing has spawned yet: it just leaves the slots off.
+                enemyStack.Refresh();
             }
 
             // Gold-fly effect: coins launch from a dead enemy into the top-bar counter. The node is created on the

@@ -260,6 +260,26 @@ includes them (enforced at build time from B10).
 - [ ] Bounce still works: wipe -> one stage back -> auto-resume.
 - [ ] No NullReferenceException in the console; no "Combat tick threw".
 
+## 2i. Enemy sprites — blank area + death pose (fixed 2026-10-10)
+
+> Two bugs reported from play. Both were in the enemy views; nothing else changed.
+
+### The enemy area was blank sometimes (start-order race)
+The stack lays itself out from the simulator, but the first wave can spawn *before* the HUD binds the stack. With no
+manager it found no enemies, switched every slot off, and nothing refreshed it again until the next wave - so the
+right side stayed empty for a whole wave.
+- [ ] Start a session: enemies are visible straight away, never a blank right side.
+- [ ] Press `F8` (full reset) and let it reload: enemies visible straight away again.
+- [ ] Do both a few times (the race depends on Start order): visible every time.
+- [ ] Force a defeat (`D`) and let the run resume: the new wave's enemies appear.
+
+### The enemy vanished when it died (it now holds the pose, like heroes)
+- [ ] Let an enemy die: it plays its death clip and **stays on screen** on the last frame (it used to pop off).
+- [ ] Placeholder enemies (Slime, Bat) stay on screen as-is - they have no death strip to play.
+- [ ] A dead enemy keeps its slot until the next spawn: it must not hide, float, or drift around.
+- [ ] The next wave re-uses the slot cleanly: new sprite, new name, full HP bar.
+- [ ] With 2-3 enemies, killing one leaves the corpse in place while the others keep fighting.
+
 ---
 
 ## 3. B9' part 2 — phone checklist (needs the first real phone build)

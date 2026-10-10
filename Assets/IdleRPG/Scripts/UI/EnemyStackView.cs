@@ -225,8 +225,18 @@ namespace IdleRPG.UI
             }
         }
 
+        /// <summary>
+        /// The wave from the simulator. The manager is resolved lazily rather than only through <see cref="Build"/>:
+        /// the first wave of a session can spawn before HudController.Start binds this view, and refreshing with no
+        /// manager switched every slot off - leaving the enemy area blank until the next wave spawn.
+        /// </summary>
         private EnemyCombatant[] ResolveEnemies()
         {
+            if (manager == null)
+            {
+                manager = HudController.Instance != null ? HudController.Instance.GameManager : null;
+            }
+
             if (manager == null || manager.Combat == null || manager.Combat.Simulator == null)
             {
                 return null;
