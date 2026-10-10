@@ -49,6 +49,8 @@ MonoBehaviour:
   combatTickIntervalSec: 0.05
   stageRollbackOnDefeat: 1
   defeatPauseSeconds: 0.75
+  defeatModalSeconds: 10
+  defeatModalCooldownSeconds: 60
   scaleEnemyDefenseWithStage: 0
   logCombatToConsole: 1
   combatPaceMultiplier: 1.6

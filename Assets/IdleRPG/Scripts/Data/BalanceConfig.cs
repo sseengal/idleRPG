@@ -127,7 +127,7 @@ namespace IdleRPG.Data
         [SerializeField] private float defeatPauseSeconds = 0.75f;
 
         [Tooltip("How long the defeat summary modal stays up before the run restarts on its own, in seconds.")]
-        [SerializeField] private float defeatModalSeconds = 4f;
+        [SerializeField] private float defeatModalSeconds = 10f;
 
         [Tooltip("Minimum gap between full defeat modals, in seconds. Wipes inside this window use the quick beat " +
                  "instead, so a hard wall does not show a card every few seconds.")]

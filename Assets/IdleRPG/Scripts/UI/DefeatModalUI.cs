@@ -116,7 +116,7 @@ namespace IdleRPG.UI
                 ascendButton.interactable = manager.CanAscend;
             }
 
-            countdownTotal = manager.Balance != null ? manager.Balance.DefeatModalSeconds : 4f;
+            countdownTotal = manager.Balance != null ? manager.Balance.DefeatModalSeconds : 10f;
             countdownRemaining = countdownTotal;
 
             if (countdownLabel != null)

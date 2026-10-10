@@ -303,7 +303,7 @@ namespace IdleRPG.Core
             }
 
             defeatBeatRemaining = showModal
-                ? (balanceConfig != null ? balanceConfig.DefeatModalSeconds : 4f)
+                ? (balanceConfig != null ? balanceConfig.DefeatModalSeconds : 10f)
                 : (balanceConfig != null ? balanceConfig.DefeatPauseSeconds : 0.75f);
             defeatBeatActive = true;
         }

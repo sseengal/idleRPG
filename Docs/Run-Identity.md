@@ -33,8 +33,9 @@ keeps the idle promise ("the loop never waits for input") intact - an idle playe
 ### The card does not appear on every wipe (cooldown)
 A hard wall bounces over and over: fail stage 47, fall to 46, clear it, push 47, fail again. A card on every bounce
 would spam the player and slow the idle bounce. So the full card only opens on a **new defeated stage** or after a
-**60 s cooldown**; faster repeat wipes use the old 0.75 s beat. (`defeatModalSeconds` 4, `defeatModalCooldownSeconds`
-60, both `BalanceConfig` knobs.)
+**60 s cooldown**; faster repeat wipes use the old 0.75 s beat. (`defeatModalSeconds` **10**, `defeatModalCooldownSeconds`
+60, both `BalanceConfig` knobs.) The timer is 10 s on purpose: a first pass at 4 s was too short to read the card or
+make the ascend choice (owner's call, 2026-10-10).
 
 ### No ad on the defeat card (explicitly rejected)
 "Watch an ad to double your gold" was considered and cut, for three reasons recorded in `Monetisation.md` §7: it
@@ -52,7 +53,7 @@ The four run fields default to 0 and re-seed the clock on load, so an older save
 - **"Never waits for input"** - the card auto-restarts; CONTINUE just skips the wait.
 - **"Farmed income is never zero"** - death still costs only the one-stage fallback; no gold is taken or re-paid.
 - **The bounce is still the game** - a failed push still drops one stage and re-clears.
-- **The robot player / golden numbers** - untouched by this pass; the extra 4 s beat only lands on new stages, so the
+- **The robot player / golden numbers** - untouched by this pass; the extra 10 s beat only lands on new stages, so the
   climb cadence is effectively unchanged (verify with `Run All Checks`).
 
 ## 5. Files
@@ -86,6 +87,6 @@ re-tune.
 - [x] compiles clean; scene rebuilt; card opens on wipe (stage rolls back, state → Defeat, scrim shows)
 - [x] `ResumeAfterDefeat()` restarts the run (state → Combat, card hides) - the CONTINUE button and the timer both call it
 - [x] ascend gating correct (button disabled below stage 10, shows "reach stage 10 to ascend")
-- [ ] frame-driven check by hand (the tooling cannot run frames while the editor is unfocused): the 4 s countdown
+- [ ] frame-driven check by hand (the tooling cannot run frames while the editor is unfocused): the 10 s countdown
       decrements and auto-resumes; run counters climb on kill/stage-clear; the "Run ended" toast fires on ascend
       (`Manual-Tests.md` §2h)

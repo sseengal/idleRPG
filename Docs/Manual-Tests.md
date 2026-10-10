@@ -244,7 +244,7 @@ includes them (enforced at build time from B10).
 
 ### The defeat card
 - [ ] Lose a fight (let the party wipe): a card appears over a dimmed battlefield - "DEFEAT — stage N", the run's best
-      stage and gold so far, and a countdown ("resuming in 4…").
+      stage and gold so far, and a countdown ("resuming in 10…").
 - [ ] The run restarts on its own when the countdown ends - no tap needed.
 - [ ] Tap CONTINUE: the run restarts immediately.
 - [ ] Tap ASCEND (stage 10+): the run ends there; the "Run ended" toast appears; you go back to stage 1 with tokens.
