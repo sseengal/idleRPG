@@ -228,7 +228,7 @@ namespace IdleRPG.UI
             }
         }
 
-        private void OnEnemyAttackLanded(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex)
+        private void OnEnemyAttackLanded(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical)
         {
             if (attackerEnemyIndex != enemyIndex || animator == null || !animator.HasArt)
             {

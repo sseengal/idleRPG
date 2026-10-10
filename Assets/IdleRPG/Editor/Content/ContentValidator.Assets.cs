@@ -216,13 +216,13 @@ namespace IdleRPG.EditorTools.Content
                     continue;
                 }
 
-                bool specUsesCompounding = (entry.effectMode ?? "").Trim().ToLowerInvariant() is "multiplicative" or "compounding";
-                bool assetUsesCompounding = upgrade.EffectMode == StatEffectMode.Multiplicative;
+                StatEffectMode specMode = ParseSpecEffectMode(entry.effectMode);
+                StatEffectMode assetMode = upgrade.EffectMode;
 
-                if (specUsesCompounding != assetUsesCompounding)
+                if (specMode != assetMode)
                 {
                     Add(Severity.Error, "refs",
-                        $"{upgrade.name}: effectMode is {(assetUsesCompounding ? "multiplicative" : "additive")} in the asset but " +
+                        $"{upgrade.name}: effectMode is {assetMode} in the asset but " +
                         $"\"{(string.IsNullOrEmpty(entry.effectMode) ? "additive" : entry.effectMode)}\" in upgrades.json. " +
                         "Re-run Export/Generate so the card and the asset tell the same story.");
                 }
@@ -292,6 +292,24 @@ namespace IdleRPG.EditorTools.Content
             }
 
             return false;
+        }
+
+        /// <summary>Spec spelling -> effect mode. Mirrors ContentGenerator.ParseEffectMode (single source of truth).</summary>
+        private static StatEffectMode ParseSpecEffectMode(string value)
+        {
+            switch ((value ?? "").Trim().ToLowerInvariant())
+            {
+                case "multiplicative":
+                case "compounding":
+                    return StatEffectMode.Multiplicative;
+
+                case "flat":
+                case "flatadditive":
+                    return StatEffectMode.FlatAdditive;
+
+                default:
+                    return StatEffectMode.AdditiveBase;
+            }
         }
     }
 }

@@ -11,6 +11,19 @@ namespace IdleRPG.Progression
     /// </summary>
     public sealed partial class StatResolver : ICombatStatProvider
     {
+        /// <summary>
+        /// Every upgradeable hero stat, in a stable order. The save round-trip walks this list, so adding a stat
+        /// track needs no edit here (save keys are name-based: "knight.critrate").
+        /// </summary>
+        private static readonly HeroStatType[] HeroStatTypes =
+        {
+            HeroStatType.Attack,
+            HeroStatType.Health,
+            HeroStatType.Defense,
+            HeroStatType.CritRate,
+            HeroStatType.CritDamage
+        };
+
 
         // ------------------------------------------------------------------
         // Save integration (Step 5 wires the file I/O; nothing here needs rework then)
@@ -38,10 +51,12 @@ namespace IdleRPG.Progression
 
                     if (data.levels != null && data.levels.Count > 0)
                     {
-                        // Schema v5 (B5 session 2): one keyed list is the source of truth.
-                        SetHeroLevel(hero, HeroStatType.Attack, data.GetLevel(SaveData.SaveKeys.HeroStat(hero.HeroID, HeroStatType.Attack)));
-                        SetHeroLevel(hero, HeroStatType.Health, data.GetLevel(SaveData.SaveKeys.HeroStat(hero.HeroID, HeroStatType.Health)));
-                        SetHeroLevel(hero, HeroStatType.Defense, data.GetLevel(SaveData.SaveKeys.HeroStat(hero.HeroID, HeroStatType.Defense)));
+                        // Schema v5 (B5 session 2): one keyed list is the source of truth. Every HeroStatType is
+                        // read generically so a new stat track needs no edit here (keys are name-based).
+                        foreach (HeroStatType statType in HeroStatTypes)
+                        {
+                            SetHeroLevel(hero, statType, data.GetLevel(SaveData.SaveKeys.HeroStat(hero.HeroID, statType)));
+                        }
                     }
                     else
                     {
@@ -85,9 +100,10 @@ namespace IdleRPG.Progression
                         continue;
                     }
 
-                    data.SetLevel(SaveData.SaveKeys.HeroStat(hero.HeroID, HeroStatType.Attack), GetHeroLevel(hero, HeroStatType.Attack));
-                    data.SetLevel(SaveData.SaveKeys.HeroStat(hero.HeroID, HeroStatType.Health), GetHeroLevel(hero, HeroStatType.Health));
-                    data.SetLevel(SaveData.SaveKeys.HeroStat(hero.HeroID, HeroStatType.Defense), GetHeroLevel(hero, HeroStatType.Defense));
+                    foreach (HeroStatType statType in HeroStatTypes)
+                    {
+                        data.SetLevel(SaveData.SaveKeys.HeroStat(hero.HeroID, statType), GetHeroLevel(hero, statType));
+                    }
                 }
             }
 

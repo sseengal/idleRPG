@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -28,8 +29,38 @@ namespace IdleRPG.UI
         private readonly Color bonusColor = new Color(0.55f, 0.9f, 0.6f, 1f);
         private readonly Color accentColor = new Color(1f, 0.82f, 0.3f, 1f);
 
-        private const int StatRowCount = 4;
-        private static readonly string[] StatKeyNames = { "HP", "ATK", "DEF", "DPS" };
+        /// <summary>One stat line on the roster sheet. Adding a stat = adding one row here (layout follows).</summary>
+        private struct StatRow
+        {
+            public string Key;
+            public HeroStatMetric Metric;
+
+            /// <summary>True for HP/ATK/DEF: gear applies a percentage bonus that is worth showing.</summary>
+            public bool ShowGearBonus;
+        }
+
+        /// <summary>Which number a roster row reads.</summary>
+        private enum HeroStatMetric
+        {
+            Health,
+            Attack,
+            Defense,
+            CritChance,
+            CritDamage,
+            Dps
+        }
+
+        // Rows render top-to-bottom; the layout maths adapts to the count (4, 6 or 10 - no re-anchoring).
+        private static readonly StatRow[] Rows =
+        {
+            new StatRow { Key = "HP", Metric = HeroStatMetric.Health, ShowGearBonus = true },
+            new StatRow { Key = "ATK", Metric = HeroStatMetric.Attack, ShowGearBonus = true },
+            new StatRow { Key = "DEF", Metric = HeroStatMetric.Defense, ShowGearBonus = true },
+            new StatRow { Key = "CRIT", Metric = HeroStatMetric.CritChance },
+            new StatRow { Key = "CRIT DMG", Metric = HeroStatMetric.CritDamage },
+            new StatRow { Key = "DPS", Metric = HeroStatMetric.Dps }
+        };
+
         private const int GearSlotCount = 3;
 
         private GameManager manager;
@@ -73,7 +104,23 @@ namespace IdleRPG.UI
                 selectedHeroIndex = FirstHeroIndex();
             }
 
+            // A gold purchase on the UPGRADES page must be visible the moment this page is looked at again -
+            // and immediately if it is already open. Without this the sheet only refreshed on tab open.
+            if (manager.Resolver != null)
+            {
+                manager.Resolver.StatsChanged -= RefreshAll;
+                manager.Resolver.StatsChanged += RefreshAll;
+            }
+
             RefreshAll();
+        }
+
+        private void OnDestroy()
+        {
+            if (manager != null && manager.Resolver != null)
+            {
+                manager.Resolver.StatsChanged -= RefreshAll;
+            }
         }
 
         private int FirstHeroIndex()
@@ -171,25 +218,33 @@ namespace IdleRPG.UI
                 TextAlignmentOptions.MidlineLeft, accentColor);
             UiRuntime.Anchor(roleLabel.rectTransform, new Vector2(0.50f, 0.745f), new Vector2(0.95f, 0.783f), 2f, 0f, 0f, 0f);
 
-            statKeys = new TextMeshProUGUI[StatRowCount];
-            statValues = new TextMeshProUGUI[StatRowCount];
-            statBonusLabels = new TextMeshProUGUI[StatRowCount];
+            statKeys = new TextMeshProUGUI[Rows.Length];
+            statValues = new TextMeshProUGUI[Rows.Length];
+            statBonusLabels = new TextMeshProUGUI[Rows.Length];
 
-            for (int i = 0; i < StatRowCount; i++)
+            // The sheet band: roles sit above, gear below. The pitch adapts to the row count, so adding a stat
+            // never means re-anchoring anything.
+            const float rowsTop = 0.72f;
+            const float rowsBottom = 0.47f;
+            float pitch = (rowsTop - rowsBottom) / Rows.Length;
+            float rowHeight = pitch * 0.82f;
+
+            for (int i = 0; i < Rows.Length; i++)
             {
-                float yTop = 0.68f - i * 0.055f;
+                // Bottom of this row, climbing as the index grows (anchors are bottom-based).
+                float yBottom = rowsTop - (i + 1) * pitch;
 
-                statKeys[i] = UiRuntime.CreateText(root, "Key" + StatKeyNames[i], StatKeyNames[i], 17f,
+                statKeys[i] = UiRuntime.CreateText(root, "Key" + i, Rows[i].Key, 17f,
                     TextAlignmentOptions.MidlineLeft, dimText);
-                UiRuntime.Anchor(statKeys[i].rectTransform, new Vector2(0.50f, yTop), new Vector2(0.62f, yTop + 0.045f), 0f, 0f, 0f, 0f);
+                UiRuntime.Anchor(statKeys[i].rectTransform, new Vector2(0.50f, yBottom), new Vector2(0.62f, yBottom + rowHeight), 2f, 0f, 0f, 0f);
 
-                statValues[i] = UiRuntime.CreateText(root, "Val" + StatKeyNames[i], string.Empty, 17f,
+                statValues[i] = UiRuntime.CreateText(root, "Val" + i, string.Empty, 17f,
                     TextAlignmentOptions.MidlineRight, bodyText);
-                UiRuntime.Anchor(statValues[i].rectTransform, new Vector2(0.62f, yTop), new Vector2(0.79f, yTop + 0.045f), 0f, 0f, 0f, 0f);
+                UiRuntime.Anchor(statValues[i].rectTransform, new Vector2(0.62f, yBottom), new Vector2(0.79f, yBottom + rowHeight), 0f, 0f, 0f, 0f);
 
-                statBonusLabels[i] = UiRuntime.CreateText(root, "Bonus" + StatKeyNames[i], string.Empty, 13f,
+                statBonusLabels[i] = UiRuntime.CreateText(root, "Bonus" + i, string.Empty, 13f,
                     TextAlignmentOptions.MidlineRight, bonusColor);
-                UiRuntime.Anchor(statBonusLabels[i].rectTransform, new Vector2(0.79f, yTop), new Vector2(0.95f, yTop + 0.045f), 0f, 0f, 0f, 0f);
+                UiRuntime.Anchor(statBonusLabels[i].rectTransform, new Vector2(0.79f, yBottom), new Vector2(0.95f, yBottom + rowHeight), 0f, 0f, 0f, 0f);
             }
         }
 
@@ -368,53 +423,107 @@ namespace IdleRPG.UI
             if (selectedHeroIndex < 0 || manager.Party.GetHero(selectedHeroIndex) == null)
             {
                 roleLabel.SetText("select a hero");
-                for (int i = 0; i < statValues.Length; i++)
-                {
-                    statValues[i].SetText("-");
-                }
-
-                if (statBonusLabels != null)
-                {
-                    for (int i = 0; i < statBonusLabels.Length; i++)
-                    {
-                        statBonusLabels[i].SetText(string.Empty);
-                    }
-                }
-
+                ClearStatRows();
                 return;
             }
 
             HeroData hero = manager.Party.GetHero(selectedHeroIndex);
-            double health = Resolve(i => manager.Resolver.GetMaxHealth(hero, i), selectedHeroIndex, hero.BaseHealth);
-            double attack = Resolve(i => manager.Resolver.GetAttack(hero, i), selectedHeroIndex, hero.BaseAttack);
-            double defense = Resolve(i => manager.Resolver.GetDefense(hero, i), selectedHeroIndex, hero.BaseDefense);
-            double dps = hero.AttackIntervalSec > 0.05d ? attack / hero.AttackIntervalSec : attack;
+            int index = selectedHeroIndex;
+
+            double health = Resolve(i => manager.Resolver.GetMaxHealth(hero, i), index, hero.BaseHealth);
+            double attack = Resolve(i => manager.Resolver.GetAttack(hero, i), index, hero.BaseAttack);
+            double defense = Resolve(i => manager.Resolver.GetDefense(hero, i), index, hero.BaseDefense);
+            double crit = Resolve(i => manager.Resolver.GetCritChance(hero, i), index, hero.BaseCritChance);
+            double critDamage = Resolve(i => manager.Resolver.GetCritDamage(hero, i), index, hero.BaseCritDamage);
+            double interval = Resolve(i => manager.Resolver.GetAttackInterval(hero, i), index, hero.AttackIntervalSec);
+
+            // True expected DPS: the resolved swing rate times the crit-weighted hit. The old line used the
+            // BASE interval and ignored crit entirely, so it overstated nothing and understated crit builds.
+            double critFactor = 1d + crit * Math.Max(0d, critDamage - 1d);
+            double dps = (interval > 0.05d ? attack / interval : attack) * critFactor;
+
+            ItemBonuses bonuses = manager.Gear != null
+                ? manager.Gear.GetGearBonusFraction(index)
+                : default;
 
             roleLabel.SetText(hero.Role.ToString().ToUpperInvariant());
-            statValues[0].SetText(NumberFormatter.Format(health));
-            statValues[1].SetText(NumberFormatter.Format(attack));
-            statValues[2].SetText(NumberFormatter.Format(defense));
-            statValues[3].SetText(NumberFormatter.Format(dps));
 
-            if (statBonusLabels != null && statBonusLabels.Length >= 4 && manager.Gear != null)
+            for (int i = 0; i < Rows.Length && i < statValues.Length; i++)
             {
-                ItemBonuses bonuses = manager.Gear.GetGearBonusFraction(selectedHeroIndex);
-                double[] fractions = { bonuses.Hp, bonuses.Atk, bonuses.Def };
+                statValues[i].SetText(FormatMetric(Rows[i].Metric, health, attack, defense, crit, critDamage, dps));
+                SetGearBonus(Rows[i], i, bonuses);
+            }
+        }
 
-                for (int i = 0; i < 3 && i < statBonusLabels.Length; i++)
+        /// <summary>How one roster row renders its number (numbers, a percent, or a multiplier).</summary>
+        private static string FormatMetric(HeroStatMetric metric, double health, double attack, double defense,
+            double crit, double critDamage, double dps)
+        {
+            switch (metric)
+            {
+                case HeroStatMetric.Health:
+                    return NumberFormatter.Format(health);
+                case HeroStatMetric.Attack:
+                    return NumberFormatter.Format(attack);
+                case HeroStatMetric.Defense:
+                    return NumberFormatter.Format(defense);
+                case HeroStatMetric.CritChance:
+                    return (crit * 100d).ToString("0.#") + "%";
+                case HeroStatMetric.CritDamage:
+                    return "x" + critDamage.ToString("0.##");
+                default:
+                    return NumberFormatter.Format(dps);
+            }
+        }
+
+        /// <summary>Gear shows as "+12%" of base - only meaningful for HP/ATK/DEF, so other rows stay blank.</summary>
+        private void SetGearBonus(StatRow row, int rowIndex, ItemBonuses bonuses)
+        {
+            if (statBonusLabels == null || rowIndex >= statBonusLabels.Length || statBonusLabels[rowIndex] == null)
+            {
+                return;
+            }
+
+            if (!row.ShowGearBonus)
+            {
+                statBonusLabels[rowIndex].SetText(string.Empty);
+                return;
+            }
+
+            double fraction = row.Metric == HeroStatMetric.Health ? bonuses.Hp
+                : row.Metric == HeroStatMetric.Attack ? bonuses.Atk
+                : bonuses.Def;
+
+            if (fraction > 0.0005d)
+            {
+                statBonusLabels[rowIndex].SetText("+" + (fraction * 100d).ToString("0.#") + "%");
+                statBonusLabels[rowIndex].color = bonusColor;
+            }
+            else
+            {
+                statBonusLabels[rowIndex].SetText(string.Empty);
+            }
+        }
+
+        private void ClearStatRows()
+        {
+            if (statValues != null)
+            {
+                for (int i = 0; i < statValues.Length; i++)
                 {
-                    if (fractions[i] > 0.0005d)
-                    {
-                        statBonusLabels[i].SetText("+" + (fractions[i] * 100d).ToString("0.#") + "%");
-                        statBonusLabels[i].color = bonusColor;
-                    }
-                    else
+                    statValues[i].SetText("-");
+                }
+            }
+
+            if (statBonusLabels != null)
+            {
+                for (int i = 0; i < statBonusLabels.Length; i++)
+                {
+                    if (statBonusLabels[i] != null)
                     {
                         statBonusLabels[i].SetText(string.Empty);
                     }
                 }
-
-                statBonusLabels[3].SetText(string.Empty);
             }
         }
 

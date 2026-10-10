@@ -80,9 +80,9 @@ namespace IdleRPG.Core
             SafeInvoke(EnemyKilled, enemyName, goldReward, enemyIndex, nameof(EnemyKilled));
         }
 
-        internal static void RaiseHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex)
+        internal static void RaiseHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical)
         {
-            SafeInvoke(HeroDamaged, heroIndex, damage, currentHealth, maxHealth, attackerEnemyIndex, nameof(HeroDamaged));
+            SafeInvoke(HeroDamaged, heroIndex, damage, currentHealth, maxHealth, attackerEnemyIndex, isCritical, nameof(HeroDamaged));
         }
 
         internal static void RaiseHeroDied(int heroIndex)
@@ -243,6 +243,23 @@ namespace IdleRPG.Core
             try
             {
                 handler(arg1, arg2, arg3, arg4, arg5);
+            }
+            catch (Exception exception)
+            {
+                LogSubscriberException(eventName, exception);
+            }
+        }
+
+        private static void SafeInvoke<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> handler, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, string eventName)
+        {
+            if (handler == null)
+            {
+                return;
+            }
+
+            try
+            {
+                handler(arg1, arg2, arg3, arg4, arg5, arg6);
             }
             catch (Exception exception)
             {

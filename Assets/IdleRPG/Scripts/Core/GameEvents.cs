@@ -75,8 +75,11 @@ namespace IdleRPG.Core
         /// <summary>(enemyName, goldReward, enemyIndex). One call per enemy.</summary>
         public static event Action<string, double, int> EnemyKilled;
 
-        /// <summary>(heroIndex, damage, currentHealth, maxHealth, attackerEnemyIndex). See <see cref="HeroDamaged"/> above.</summary>
-        public static event Action<int, double, double, double, int> HeroDamaged;
+        /// <summary>
+        /// (heroIndex, damage, currentHealth, maxHealth, attackerEnemyIndex, isCritical).
+        /// The crit flag lets the battle log mark INCOMING crits too, matching the outgoing lines.
+        /// </summary>
+        public static event Action<int, double, double, double, int, bool> HeroDamaged;
 
         /// <summary>(heroIndex).</summary>
         public static event Action<int> HeroDied;

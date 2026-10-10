@@ -22,6 +22,13 @@ namespace IdleRPG.Data
         [Tooltip("Seconds between attacks. Default 1.5s per design spec.")]
         [SerializeField] private float attackIntervalSec = 1.5f;
 
+        [Header("Crit (level 0)")]
+        [Tooltip("Base critical-hit chance, 0..1. 0.05 matches the MVP global default, so level 0 changes nothing.")]
+        [SerializeField] private float baseCritChance = 0.05f;
+
+        [Tooltip("Base critical damage multiplier. 2 = double damage (the MVP global default).")]
+        [SerializeField] private float baseCritDamage = 2f;
+
         [Header("Combat role (Step 10)")]
         [Tooltip("Used by auto-arrange: tanks are pushed to the front row first.")]
         [SerializeField] private HeroRole role = HeroRole.Damage;
@@ -47,6 +54,12 @@ namespace IdleRPG.Data
 
         public float AttackIntervalSec => Mathf.Max(MinAttackIntervalSec, attackIntervalSec);
 
+        /// <summary>Base critical-hit chance at level 0 (0..1).</summary>
+        public float BaseCritChance => Mathf.Clamp(baseCritChance, 0f, 1f);
+
+        /// <summary>Base critical-hit damage multiplier at level 0 (1 = never crits harder).</summary>
+        public float BaseCritDamage => Mathf.Max(1f, baseCritDamage);
+
         public Color PlaceholderTint => placeholderTint;
 
         /// <summary>Animated frames when real art is wired; null for placeholders/fallbacks.</summary>
@@ -63,6 +76,8 @@ namespace IdleRPG.Data
             baseAttack = Mathf.Max(0f, baseAttack);
             baseDefense = Mathf.Max(0f, baseDefense);
             attackIntervalSec = Mathf.Max(MinAttackIntervalSec, attackIntervalSec);
+            baseCritChance = Mathf.Clamp(baseCritChance, 0f, 1f);
+            baseCritDamage = Mathf.Max(1f, baseCritDamage);
 
             if (string.IsNullOrEmpty(heroID))
             {

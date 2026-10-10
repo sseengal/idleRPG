@@ -31,6 +31,16 @@ namespace IdleRPG.Progression
             return hero == null ? HeroData.MinAttackIntervalSec : hero.AttackIntervalSec;
         }
 
+        public double GetCritChance(HeroData hero, int heroIndex)
+        {
+            return hero == null ? 0d : hero.BaseCritChance;
+        }
+
+        public double GetCritDamage(HeroData hero, int heroIndex)
+        {
+            return hero == null ? 1d : hero.BaseCritDamage;
+        }
+
         public double GlobalDamageMultiplier => 1d;
 
         public double GlobalHealthMultiplier => 1d;

@@ -72,6 +72,14 @@ namespace IdleRPG.Sim
         /// <summary>Absorbs damage before health (the pipeline fills this from Step 12 on).</summary>
         public double Shield { get; set; }
 
+        /// <summary>
+        /// This unit's critical-hit chance (0..1) and damage multiplier. 0 chance = "use the rules' global crit"
+        /// (enemies), so per-hero crit can be added without touching a single enemy asset.
+        /// </summary>
+        public double CritChance { get; set; }
+
+        public double CritDamageMultiplier { get; set; } = 1d;
+
         public double AttackIntervalSec { get; private set; }
 
         /// <summary>Aggro weight used by threat-based targeting from Step 11 on.</summary>

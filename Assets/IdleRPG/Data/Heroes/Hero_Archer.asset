@@ -19,6 +19,8 @@ MonoBehaviour:
   baseAttack: 8
   baseDefense: 4
   attackIntervalSec: 1
+  baseCritChance: 0.05
+  baseCritDamage: 2
   role: 1
   placeholderTint: {r: 0.62, g: 0.76, b: 1, a: 1}
   artSet: {fileID: 11400000, guid: fb0452c54a0e649af8eb7f52aedd3ea0, type: 2}

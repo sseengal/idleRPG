@@ -36,6 +36,30 @@
       "statGainPerLevelFraction": 0.09000000357627869,
       "effectMode": "multiplicative",
       "maxLevel": 0
+    },
+    {
+      "id": "StatUpgrade_CritRate",
+      "asset": "StatUpgrade_CritRate",
+      "statType": "critrate",
+      "displayName": "CRIT",
+      "description": "+0.5% critical chance per level. Capped at 75%.",
+      "baseCost": 20.0,
+      "costGrowth": 1.07,
+      "statGainPerLevelFraction": 0.005,
+      "effectMode": "flatadditive",
+      "maxLevel": 0
+    },
+    {
+      "id": "StatUpgrade_CritDamage",
+      "asset": "StatUpgrade_CritDamage",
+      "statType": "critdamage",
+      "displayName": "CRIT DMG",
+      "description": "+0.05 crit damage multiplier per level (x2.0 at level 0, x2.5 at level 10). Capped at x6.",
+      "baseCost": 25.0,
+      "costGrowth": 1.07,
+      "statGainPerLevelFraction": 0.05,
+      "effectMode": "flatadditive",
+      "maxLevel": 0
     }
   ],
   "prestigeUpgrades": [

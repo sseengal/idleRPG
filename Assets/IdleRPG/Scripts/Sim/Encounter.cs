@@ -404,10 +404,16 @@ namespace IdleRPG.Sim
                     continue;
                 }
 
-                bool isCritical = context.Rules.CriticalChance > 0d
-                                  && context.Rng.NextDouble() < context.Rules.CriticalChance;
+                // Crit comes from the ATTACKER when it has its own values (heroes); enemies fall back to the
+                // rules' global crit, so no enemy asset needs touching.
+                double critChance = attacker.CritChance > 0d ? attacker.CritChance : context.Rules.CriticalChance;
+                double critDamage = attacker.CritDamageMultiplier > 1d
+                    ? attacker.CritDamageMultiplier
+                    : context.Rules.CriticalDamageMultiplier;
 
-                double multiplier = isCritical ? context.Rules.CriticalDamageMultiplier : 1d;
+                bool isCritical = critChance > 0d && context.Rng.NextDouble() < critChance;
+
+                double multiplier = isCritical ? critDamage : 1d;
                 double damage = FormulaUtility.Damage(attacker.Attack, target.Defense, context.Rules.MinDamageRatio, multiplier);
 
                 // MVP parity: a turn that would deal no damage is a wasted turn (no swing, no stuck "ready").

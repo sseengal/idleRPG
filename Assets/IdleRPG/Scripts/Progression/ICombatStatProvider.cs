@@ -21,6 +21,12 @@ namespace IdleRPG.Progression
         /// <summary>Seconds between attacks.</summary>
         double GetAttackInterval(HeroData hero, int heroIndex);
 
+        /// <summary>Critical-hit chance after hero levels (0..1). Enemies use the rules' global value instead.</summary>
+        double GetCritChance(HeroData hero, int heroIndex);
+
+        /// <summary>Critical-hit damage multiplier after hero levels (1 = no bonus).</summary>
+        double GetCritDamage(HeroData hero, int heroIndex);
+
         /// <summary>Global damage multiplier from permanent upgrades (1 = none).</summary>
         double GlobalDamageMultiplier { get; }
 

@@ -108,11 +108,11 @@ namespace IdleRPG.Debugging
             }
         }
 
-        private void OnHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex)
+        private void OnHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical)
         {
             if (logHeroDamage)
             {
-                Debug.Log($"[Hero {heroIndex}] -{damage:0.#} from enemy #{attackerEnemyIndex} -> {currentHealth:0}/{maxHealth:0}");
+                Debug.Log($"[Hero {heroIndex}] -{damage:0.#}{(isCritical ? " CRIT" : string.Empty)} from enemy #{attackerEnemyIndex} -> {currentHealth:0}/{maxHealth:0}");
             }
         }
 

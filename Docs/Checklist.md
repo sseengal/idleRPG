@@ -1382,6 +1382,80 @@ Offline replay and fast-downscale step the same `Encounter`, so results stay det
 - A visible turn-order display/queue — the order is emergent (readiness), not a scheduled list. Worth a later polish pass.
 - Per-ability cast times / casting bars — all attacks share the same swing window today.
 
+## 1y. Per-hero crit stats + party page cleanup  ·  **built 2026-10-10** (balance deferred, see below)
+
+> Adds the first *per-hero* stats beyond ATK/HP/DEF: **Crit Rate** and **Crit Damage** (upgradeable with gold),
+> and rewrites the ROSTER sheet so a new stat is one line of data. Battle log now marks incoming crits too.
+
+### Data model
+| File | Change |
+|---|---|
+| `Sim/FormulaUtility.cs` | new `StatEffectMode.FlatAdditive`: `base + level * perLevel`. Crit is **points**, not a fraction of a base (the old additive/compounding models cannot express "+0.5% per level"). |
+| `Data/StatUpgradeData.cs` | `HeroStatType` += `CritRate`, `CritDamage` (appended: save keys are name-based, so old saves read 0 with no migration); `ToDisplayName` += CRIT / CRIT DMG; `IsFlatAdditive`. |
+| `Data/HeroData.cs` | `baseCritChance` (0.05) and `baseCritDamage` (2.0) per hero, matched to the old global values so **level 0 changes nothing**. |
+| `Progression/ICombatStatProvider.cs` + `DefaultStatProvider` + `StatResolver` | `GetCritChance` / `GetCritDamage`; the resolver caps them at **75%** and **x6** (`MaxCritChance` / `MaxCritDamage`). |
+| `Progression/StatResolver.Save.cs` | the save round-trip now walks **every** `HeroStatType` instead of the hardcoded three. |
+| `Sim/Combatant.cs` + `Combat/CombatSimulator.cs` | per-unit `CritChance` / `CritDamageMultiplier`; heroes get theirs from the provider (build **and** `RefreshHeroStats`). |
+| `Sim/Encounter.cs` | the crit roll reads the **attacker**; enemies keep `0` and fall back to `SimRules`, so no enemy asset changed. |
+| Spec pipeline | `tracks.json` += the two rows (`effectMode: flatadditive`); `ContentGenerator.Parse` (`critrate`/`critdamage`, `flatadditive`) and both validator checks understand the third mode. |
+
+### Party page (ROSTER) cleanup
+- The sheet is now **data-driven**: a `StatRow[]` list (HP, ATK, DEF, CRIT, CRIT DMG, DPS) with row pitch computed
+  from the count — adding a stat no longer means re-anchoring four hardcoded labels.
+- **DPS was wrong**: it used the *base* interval and ignored crit. Now `atk / resolvedInterval x (1 + crit x (critDmg - 1))`.
+- **Crit rows**: chance shows `12.5%`, damage shows `x2.40`.
+- Gear bonus column: explicit rule — shown only for HP/ATK/DEF (where gear grants a fraction), blank otherwise.
+- **Live refresh**: the roster subscribes to `Resolver.StatsChanged`, so a purchase on the UPGRADES page updates
+  the sheet immediately (previously it only refreshed when the tab was opened).
+
+### Upgrades page + battle log
+- Hero rows now carry **5 blocks** in a 2-row grid (3 + 2, with a spacer so tiles stay equal), row height 240 -> 320.
+- Title is stat-agnostic ("raise each hero's stats") so future stats need no copy change.
+- Effect label reads per mode: `x1.09 / lvl`, `+10% base / lvl`, or `+0.5% / lvl` / `+0.05x / lvl` for flat stats.
+- **Log**: incoming crits now read `Goblin CRITS Knight for 42 (180/300)` — the `HeroDamaged` payload gained an
+  `isCritical` flag (all subscribers updated).
+
+### Verified (2026-10-10)
+- [x] compiles clean; content validator: the two crit tracks validate (only the pre-existing balance error remains)
+- [x] assets generated (`StatUpgrade_CritRate` / `StatUpgrade_CritDamage`, effectMode 2 = flat)
+- [x] scene rebuilt (`Build MVP Scene`): GameManager holds 5 tracks, each upgrade row bakes 5 blocks
+- [ ] **in-Play visual check** — see `Manual-Tests.md` 2e
+
+### BALANCE CHECK — the big finding (needs a pass)
+Ran the content validator's headless robots. **Stage 1 now takes 330 s against a 90-180 s band** (it was ~124 s before
+the sequential-combat work). Cause: ATB serialization + the turn beat means **one action per 1.35 s** (swing 0.35 +
+recovery 1.0) for the whole fight, where the old model ran every unit in parallel. Crit upgrades recover only part of
+it (5% -> 50% crit at x2 is +45% DPS, nowhere near 2.7x).
+
+| Probe | Result | Verdict |
+|---|---|---|
+| Stage 1 clear | 330 s, 22 kills, 272 gold, 0.83 gold/s | **ERROR** (band 90-180 s) |
+| Robot climb | stage 31 in 181.7 min, worst wall **17.9 min** | warning (target < 12 min) |
+| TTK at levels 25/50/75/100 | 12.6-13.7 s | ok (band 8-240 s) |
+| Money (instant / offline cap) | x1.00 / x0.42 | ok |
+
+Fix options for the balance pass (not done here): trim the beat, **or** rescale content (enemy HP x~0.4 / hero damage
+x~2.4), **or** shorten base intervals. Goldens must be re-measured in that pass (standing deferral).
+
+### Bug found + fixed on the way (unrelated, but real)
+Rebuilding the MVP scene silently reverted **Hero_Mage's role back to Damage**. Cause:
+`MvpSceneBuilder.cs:63` calls the legacy `DataAssetGenerator.GenerateAll()`, which hardcoded Mage = Damage - so it
+kept overwriting the deliberate Support role from commit `ffabbf4` (whose whole point was "Support drops need an
+owner"). Fixed in `DataAssetGenerator`: Mage is **Support**. Worth remembering: *any* MVP scene rebuild ran this
+clobber. Deeper issue to revisit: there are two generators (`DataAssetGenerator` and the spec-driven
+`ContentGenerator`) and `heroes.json` has **no `role` field** at all, so the spec cannot express it.
+
+### Pending / missing (agreed to revisit after this)
+- **Attack Speed** — blocked by the turn floor: minimum action time is `swing + recovery` = 1.35 s, so haste does
+  nothing for the 1.0 s Archer and only bites 1.5 s+ units. Do **not** make haste shrink the animation window — that
+  re-breaks the full-swing rule (Checklist 1x).
+- **Evasion** — needs a *miss outcome*, not a number: an impact event that fires on a miss (or the attacker freezes
+  at the target with no swing), a log line, and the UI playing the swing with no floating number. Pair with accuracy.
+- **Items**: `ItemBonuses` still only has HP/ATK/DEF, so gear cannot roll crit yet.
+- **Enemies**: no crit/evasion data of their own (they use the global rules).
+- **Incoming crit numbers**: the floating-text pool receives the crit flag but still renders the normal style.
+- **Roster shortcuts**: no "buy this stat" affordance on the ROSTER tab yet - you still hop to UPGRADES.
+
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 
 Base gate: every step below names the loop beat or money path it serves. Anything that cannot is not in the base.

@@ -262,7 +262,10 @@ namespace IdleRPG.EditorTools
                 .Set("baseAttack", 16f)
                 .Set("baseDefense", 5f)
                 .Set("attackIntervalSec", 2f)
-                .SetEnum("role", IdleRPG.Data.HeroRole.Damage)
+                // Support, NOT Damage: the Tank/Damage/Support trinity maps 1:1 to Knight/Archer/Mage, and this
+                // generator runs on every MVP scene rebuild - a Damage Mage here silently re-breaks Support item
+                // drops (they would have no hero to equip to).
+                .SetEnum("role", IdleRPG.Data.HeroRole.Support)
                 .SetSpriteRef("heroIcon", LoadFrame(SoldierAttack01Sheet, "Soldier_Attack01_2"))
                 .SetColor("placeholderTint", new Color(0.78f, 0.62f, 1f, 1f))
                 .Apply();
@@ -346,13 +349,20 @@ namespace IdleRPG.EditorTools
             //   DEF races enemy ATK     (1.08) -> 0.047 exact, data uses 0.05 (same margin; damage is ATK - DEF,
             //                                   so defence only has to keep up with 1.08^stage, not 1.15^stage)
             // Recompute both if BalanceConfig health/attack/gold growth or the 1.07 cost curve ever change.
-            CreateStatUpgrade("StatUpgrade_ATK", HeroStatType.Attack, 10d, 0.09f, "ATK x1.09 per level (compounds).");
-            CreateStatUpgrade("StatUpgrade_HP", HeroStatType.Health, 12d, 0.09f, "HP x1.09 per level (compounds).");
-            CreateStatUpgrade("StatUpgrade_DEF", HeroStatType.Defense, 15d, 0.05f, "DEF x1.05 per level (compounds).");
+            CreateStatUpgrade("StatUpgrade_ATK", HeroStatType.Attack, 10d, 0.09f, StatEffectMode.Multiplicative, "ATK x1.09 per level (compounds).");
+            CreateStatUpgrade("StatUpgrade_HP", HeroStatType.Health, 12d, 0.09f, StatEffectMode.Multiplicative, "HP x1.09 per level (compounds).");
+            CreateStatUpgrade("StatUpgrade_DEF", HeroStatType.Defense, 15d, 0.05f, StatEffectMode.Multiplicative, "DEF x1.05 per level (compounds).");
+
+            // Crit stats are FLAT points, not fraction-of-base: +0.5% chance and +0.05x damage per level.
+            // The resolver caps them (75% / x6) whatever the level says.
+            CreateStatUpgrade("StatUpgrade_CritRate", HeroStatType.CritRate, 20d, 0.005f, StatEffectMode.FlatAdditive,
+                "+0.5% critical chance per level. Capped at 75%.");
+            CreateStatUpgrade("StatUpgrade_CritDamage", HeroStatType.CritDamage, 25d, 0.05f, StatEffectMode.FlatAdditive,
+                "+0.05 crit damage multiplier per level. Capped at x6.");
         }
 
         private static void CreateStatUpgrade(string fileName, HeroStatType statType, double baseCost,
-            float gainPerLevelFraction, string description)
+            float gainPerLevelFraction, StatEffectMode effectMode, string description)
         {
             StatUpgradeData upgrade = CreateOrLoad<StatUpgradeData>(ConfigFolder + "/" + fileName + ".asset");
             new Editable(upgrade)
@@ -361,7 +371,7 @@ namespace IdleRPG.EditorTools
                 .Set("description", description)
                 .Set("baseCost", baseCost)
                 .Set("costGrowthMultiplier", 1.07f)
-                .Set("effectMode", (int)StatEffectMode.Multiplicative)
+                .Set("effectMode", (int)effectMode)
                 .Set("statGainPerLevelFraction", gainPerLevelFraction)
                 .Set("maxLevel", 0)
                 .Apply();

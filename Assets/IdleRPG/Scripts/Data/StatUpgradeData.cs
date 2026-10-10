@@ -3,12 +3,18 @@ using IdleRPG.Progression;
 
 namespace IdleRPG.Data
 {
-    /// <summary>The three upgradeable hero stats.</summary>
+    /// <summary>The upgradeable hero stats (each gets its own gold-bought track).</summary>
     public enum HeroStatType
     {
         Attack = 0,
         Health = 1,
-        Defense = 2
+        Defense = 2,
+
+        /// <summary>Critical-hit chance. A FLAT-point stat (percent), not a fraction of a base.</summary>
+        CritRate = 3,
+
+        /// <summary>Critical-hit damage multiplier. A FLAT-point stat (x per level).</summary>
+        CritDamage = 4
     }
 
     public static class HeroStatTypeExtensions
@@ -24,6 +30,10 @@ namespace IdleRPG.Data
                     return "HP";
                 case HeroStatType.Defense:
                     return "DEF";
+                case HeroStatType.CritRate:
+                    return "CRIT";
+                case HeroStatType.CritDamage:
+                    return "CRIT DMG";
                 default:
                     return statType.ToString();
             }
@@ -55,11 +65,12 @@ namespace IdleRPG.Data
         [Header("Effect")]
         [Tooltip("How the per-level gain composes. AdditiveBase = base * (1 + level * gain) - linear (shipped MVP). " +
                  "Multiplicative = base * (1 + gain)^level - compounding, required to race the exponential " +
-                 "content curve (enemy HP x1.15 per stage). Level 0 returns the base stat in both modes.")]
+                 "content curve (enemy HP x1.15 per stage). FlatAdditive = base + level * gain - flat points, for " +
+                 "stats with no meaningful base to scale (crit chance / crit damage).")]
         [SerializeField] private StatEffectMode effectMode = StatEffectMode.AdditiveBase;
 
-        [Tooltip("Stat gain per level as a fraction. AdditiveBase: +10% of base per level. " +
-                 "Multiplicative: x1.10 per level (use 0.09 for the derived x1.09 target).")]
+        [Tooltip("Stat gain per level. AdditiveBase: +10% of base per level. Multiplicative: x1.10 per level " +
+                 "(use 0.09 for the derived x1.09 target). FlatAdditive: +0.005 = +0.5 percentage points per level.")]
         [SerializeField] private float statGainPerLevelFraction = 0.1f;
 
         [Tooltip("Level cap. 0 = unlimited.")]
@@ -91,6 +102,9 @@ namespace IdleRPG.Data
 
         /// <summary>True when this track compounds: value = base * (1 + gain)^level.</summary>
         public bool IsCompounding => effectMode == StatEffectMode.Multiplicative;
+
+        /// <summary>True when this track adds flat points: value = base + level * gain (crit stats).</summary>
+        public bool IsFlatAdditive => effectMode == StatEffectMode.FlatAdditive;
 
         /// <summary>int.MaxValue when unlimited.</summary>
         public int MaxLevel => maxLevel <= 0 ? int.MaxValue : maxLevel;

@@ -140,7 +140,7 @@ namespace IdleRPG.EditorTools
             UpgradePanelUI ui = panel.AddComponent<UpgradePanelUI>();
 
             TextMeshProUGUI title = UiFactory.Text("Title", panel.transform,
-                "Spend gold to raise hero ATK / HP / DEF (scroll for more)", 22f,
+                "Spend gold to raise each hero's stats (scroll for more)", 22f,
                 TextAlignmentOptions.MidlineLeft, DimTextColor);
             UiFactory.Anchor(title.rectTransform, new Vector2(0.02f, 0.93f), new Vector2(0.98f, 1f));
 
@@ -169,8 +169,8 @@ namespace IdleRPG.EditorTools
         {
             GameObject row = UiFactory.Node($"HeroRow{index}", parent);
             LayoutElement layout = row.AddComponent<LayoutElement>();
-            layout.minHeight = 240f;
-            layout.preferredHeight = 240f;
+            layout.minHeight = 320f;
+            layout.preferredHeight = 320f;
 
             Image background = UiFactory.Panel("Background", row.transform, "ui_panel", new Color(1f, 1f, 1f, 0.30f));
             UiFactory.Stretch(background.rectTransform);
@@ -182,14 +182,26 @@ namespace IdleRPG.EditorTools
 
             GameObject blocks = UiFactory.Node("Blocks", row.transform);
             UiFactory.Anchor(blocks.GetComponent<RectTransform>(), new Vector2(0.02f, 0.04f), new Vector2(0.98f, 0.74f));
-            UiFactory.HorizontalStack(blocks, 8f);
+
+            // Five stats: three across the top row, two on the second (a spacer keeps the tile width equal).
+            UiFactory.VerticalStack(blocks, 6f, new RectOffset(0, 0, 0, 0), expandChildren: true);
+
+            GameObject rowTop = UiFactory.Node("RowTop", blocks.transform);
+            UiFactory.HorizontalStack(rowTop, 8f);
+
+            GameObject rowBottom = UiFactory.Node("RowBottom", blocks.transform);
+            UiFactory.HorizontalStack(rowBottom, 8f);
 
             HeroUpgradeRowUI.StatBlock[] statBlocks =
             {
-                CreateStatBlock(blocks.transform, HeroStatType.Attack, "ui_icon_gold"),
-                CreateStatBlock(blocks.transform, HeroStatType.Health, "ui_icon_gem"),
-                CreateStatBlock(blocks.transform, HeroStatType.Defense, "ui_icon_token")
+                CreateStatBlock(rowTop.transform, HeroStatType.Attack, "ui_icon_gold"),
+                CreateStatBlock(rowTop.transform, HeroStatType.Health, "ui_icon_gem"),
+                CreateStatBlock(rowTop.transform, HeroStatType.Defense, "ui_icon_token"),
+                CreateStatBlock(rowBottom.transform, HeroStatType.CritRate, "ui_icon_gold"),
+                CreateStatBlock(rowBottom.transform, HeroStatType.CritDamage, "ui_icon_gem")
             };
+
+            UiFactory.Node("Spacer", rowBottom.transform);
 
             HeroUpgradeRowUI ui = row.AddComponent<HeroUpgradeRowUI>();
             SceneWiringUtility.SetField(ui, "heroIndex", index);

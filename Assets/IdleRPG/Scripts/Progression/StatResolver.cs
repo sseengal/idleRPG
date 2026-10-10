@@ -311,6 +311,45 @@ namespace IdleRPG.Progression
             return hero == null ? HeroData.MinAttackIntervalSec : hero.AttackIntervalSec;
         }
 
+        /// <summary>Crit caps: past these the maths stops being a "lucky hit" and becomes the baseline.</summary>
+        public const double MaxCritChance = 0.75d;
+
+        public const double MaxCritDamage = 6d;
+
+        public double GetCritChance(HeroData hero, int heroIndex)
+        {
+            if (hero == null)
+            {
+                return 0d;
+            }
+
+            double value = FormulaUtility.HeroStatValue(
+                hero.BaseCritChance,
+                GetHeroLevel(hero, HeroStatType.CritRate),
+                GetStatGainFraction(HeroStatType.CritRate),
+                1d,
+                GetEffectMode(HeroStatType.CritRate));
+
+            return value < 0d ? 0d : (value > MaxCritChance ? MaxCritChance : value);
+        }
+
+        public double GetCritDamage(HeroData hero, int heroIndex)
+        {
+            if (hero == null)
+            {
+                return 1d;
+            }
+
+            double value = FormulaUtility.HeroStatValue(
+                hero.BaseCritDamage,
+                GetHeroLevel(hero, HeroStatType.CritDamage),
+                GetStatGainFraction(HeroStatType.CritDamage),
+                1d,
+                GetEffectMode(HeroStatType.CritDamage));
+
+            return value < 1d ? 1d : (value > MaxCritDamage ? MaxCritDamage : value);
+        }
+
         public double GlobalDamageMultiplier => GetEffectMultiplier(PrestigeEffectType.DamagePercent);
 
         public double GlobalHealthMultiplier => GetEffectMultiplier(PrestigeEffectType.HealthPercent);

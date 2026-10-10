@@ -27,7 +27,13 @@ namespace IdleRPG.Progression
         AdditiveBase = 0,
 
         /// <summary>base * (1 + gain)^level - compounding.</summary>
-        Multiplicative = 1
+        Multiplicative = 1,
+
+        /// <summary>
+        /// value = base + level * gain - flat points. For stats that have no meaningful "base to scale"
+        /// (crit chance, crit damage): +0.5% per level means exactly that, not +0.5% of a base.
+        /// </summary>
+        FlatAdditive = 2
     }
 
     /// <summary>
@@ -127,14 +133,21 @@ namespace IdleRPG.Progression
         public static double HeroStatValue(double baseStat, int level, double gainPerLevelFraction,
             double globalMultiplier, StatEffectMode mode)
         {
+            int safeLevel = level < 0 ? 0 : level;
+            double safeGain = gainPerLevelFraction < 0d ? 0d : gainPerLevelFraction;
+            double safeMultiplier = globalMultiplier < 0d ? 0d : globalMultiplier;
+
+            // Flat points: base + level * perLevel. A stat with a zero base (an item-only stat) still grows.
+            if (mode == StatEffectMode.FlatAdditive)
+            {
+                double flat = Math.Max(0d, baseStat) + safeLevel * safeGain;
+                return flat * safeMultiplier;
+            }
+
             if (baseStat <= 0d)
             {
                 return 0d;
             }
-
-            int safeLevel = level < 0 ? 0 : level;
-            double safeGain = gainPerLevelFraction < 0d ? 0d : gainPerLevelFraction;
-            double safeMultiplier = globalMultiplier < 0d ? 0d : globalMultiplier;
 
             double byLevel = mode == StatEffectMode.Multiplicative
                 ? Math.Pow(1d + safeGain, safeLevel)

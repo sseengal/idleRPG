@@ -146,13 +146,31 @@ namespace IdleRPG.UI
 
                 if (block.effectLabel != null && resolver != null)
                 {
-                    double gain = resolver.GetStatGainFraction(statType);
-
-                    // B3d: a compounding track reads as a multiplier (x1.09 / lvl); additive stays a flat share.
-                    block.effectLabel.SetText(resolver.GetEffectMode(statType) == StatEffectMode.Multiplicative
-                        ? string.Format("x{0:0.###} / lvl", 1d + gain)
-                        : string.Format("+{0:0.#}% base / lvl", gain * 100d));
+                    block.effectLabel.SetText(FormatEffect(statType, resolver.GetEffectMode(statType),
+                        resolver.GetStatGainFraction(statType)));
                 }
+            }
+        }
+
+        /// <summary>
+        /// How one level reads, per effect mode: compounding shows a multiplier, flat points show the actual
+        /// points gained (crit chance in % points, crit damage in x), and the shipped additive model shows the
+        /// share of base it adds.
+        /// </summary>
+        private static string FormatEffect(HeroStatType statType, StatEffectMode mode, double gain)
+        {
+            switch (mode)
+            {
+                case StatEffectMode.Multiplicative:
+                    return string.Format("x{0:0.###} / lvl", 1d + gain);
+
+                case StatEffectMode.FlatAdditive:
+                    return statType == HeroStatType.CritRate
+                        ? string.Format("+{0:0.#}% / lvl", gain * 100d)
+                        : string.Format("+{0:0.##}x / lvl", gain);
+
+                default:
+                    return string.Format("+{0:0.#}% base / lvl", gain * 100d);
             }
         }
     }

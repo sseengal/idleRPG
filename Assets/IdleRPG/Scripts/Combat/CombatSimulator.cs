@@ -60,11 +60,11 @@ namespace IdleRPG.Combat
         public event Action<int, double> EnemyKilled;
 
         /// <summary>
-        /// (heroIndex, damage, currentHealth, maxHealth, attackerEnemyIndex).
+        /// (heroIndex, damage, currentHealth, maxHealth, attackerEnemyIndex, isCritical).
         /// The attacker index is what lets the battle log and the models say *which* enemy swung - with 1-3
         /// enemies a line like "Goblin A hits Knight" must never be guesswork.
         /// </summary>
-        public event Action<int, double, double, double, int> HeroDamaged;
+        public event Action<int, double, double, double, int, bool> HeroDamaged;
 
         public event Action<int> HeroDied;
 
@@ -183,7 +183,11 @@ namespace IdleRPG.Combat
                     statProvider.GetMaxHealth(data, index),
                     statProvider.GetAttack(data, index),
                     statProvider.GetDefense(data, index),
-                    ScaledInterval(statProvider.GetAttackInterval(data, index)));
+                    ScaledInterval(statProvider.GetAttackInterval(data, index)))
+                {
+                    CritChance = statProvider.GetCritChance(data, index),
+                    CritDamageMultiplier = statProvider.GetCritDamage(data, index)
+                };
 
                 index++;
             }
@@ -251,6 +255,10 @@ namespace IdleRPG.Combat
                     statProvider.GetAttack(hero.Data, hero.Index),
                     statProvider.GetDefense(hero.Data, hero.Index),
                     ScaledInterval(statProvider.GetAttackInterval(hero.Data, hero.Index)));
+
+                // Crit levels can change too (a purchase refreshes the fight's unit, not just the UI).
+                hero.CritChance = statProvider.GetCritChance(hero.Data, hero.Index);
+                hero.CritDamageMultiplier = statProvider.GetCritDamage(hero.Data, hero.Index);
             }
         }
 
@@ -331,7 +339,7 @@ namespace IdleRPG.Combat
                 return;
             }
 
-            HeroDamaged?.Invoke(damage.TargetIndex, damage.Damage, damage.TargetHealth, damage.TargetMaxHealth, damage.AttackerIndex);
+            HeroDamaged?.Invoke(damage.TargetIndex, damage.Damage, damage.TargetHealth, damage.TargetMaxHealth, damage.AttackerIndex, damage.IsCritical);
         }
 
         private void OnEncounterDied(DeathEvent death)

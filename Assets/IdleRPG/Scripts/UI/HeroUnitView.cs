@@ -205,7 +205,7 @@ namespace IdleRPG.UI
             }
         }
 
-        private void OnHeroDamaged(int index, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex)
+        private void OnHeroDamaged(int index, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical)
         {
             if (index != heroIndex)
             {

@@ -244,16 +244,17 @@ namespace IdleRPG.EditorTools.Content
                 // instead of being swallowed.
                 string mode = (upgrade.effectMode ?? "").Trim().ToLowerInvariant();
                 bool compounding = mode == "multiplicative" || mode == "compounding";
+                bool flat = mode == "flat" || mode == "flatadditive";
 
                 if (mode.Length == 0)
                 {
                     Add(Severity.Warning, "upgrades",
                         $"{upgrade.id}: spec has no effectMode (treated as additive). Re-run Export Specs From Assets.");
                 }
-                else if (!compounding && mode != "additive")
+                else if (!compounding && !flat && mode != "additive")
                 {
                     Add(Severity.Error, "upgrades",
-                        $"{upgrade.id}: unknown effectMode '{upgrade.effectMode}' (use \"additive\" or \"multiplicative\").");
+                        $"{upgrade.id}: unknown effectMode '{upgrade.effectMode}' (use \"additive\", \"multiplicative\" or \"flatadditive\").");
                 }
                 else if (compounding && upgrade.statGainPerLevelFraction <= 0f)
                 {

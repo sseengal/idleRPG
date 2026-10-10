@@ -126,6 +126,38 @@ includes them (enforced at build time from B10).
 
 ---
 
+## 2e. Crit stats + party page (added 2026-10-10)
+
+> The party page (PARTY > ROSTER) and the UPGRADES page both gained two stats. Check that the numbers agree
+> everywhere and that buying is understood.
+
+### Party page — ROSTER sheet
+- [ ] Six rows read cleanly: **HP, ATK, DEF, CRIT, CRIT DMG, DPS** — no overlap with the role label above or the
+      gear row below, at any hero count.
+- [ ] **CRIT** shows a percent (`5%` at level 0) and **CRIT DMG** shows a multiplier (`x2`) — not raw fractions.
+- [ ] **DPS changes when crit changes**: buy crit, come back, the DPS row moved (it now includes the crit factor).
+- [ ] **Live update**: with the party page open, buying a stat on the UPGRADES page updates the sheet without
+      re-opening the tab.
+- [ ] Gear bonus % appears only next to HP/ATK/DEF (blank beside CRIT / CRIT DMG / DPS).
+
+### Upgrades page
+- [ ] Each hero row shows **five** tiles in two rows (ATK/HP/DEF, then CRIT/CRIT DMG) — nothing clipped, tiles the
+      same width.
+- [ ] The effect line reads right per stat: `x1.09 / lvl`, `+10% base / lvl`, `+0.5% / lvl` (crit), `+0.05x / lvl`
+      (crit damage).
+- [ ] Buying crit raises CRIT in the battle log's upgrade line and on the roster.
+
+### Battle log
+- [ ] **Incoming crits** read `Goblin CRITS Knight for N (hp/max)` and are marked in the crit colour; normal hits
+      are unchanged.
+- [ ] Outgoing crits still read `Knight CRITS Goblin for N`.
+
+### Combat
+- [ ] A crit still hits harder than the same non-crit (roughly x2 at level 0).
+- [ ] Crit chance caps out: past 75% no more crits appear (buy far enough to check, or trust the resolver cap).
+
+---
+
 ## 3. B9' part 2 — phone checklist (needs the first real phone build)
 
 - [ ] **Portrait lock** — turn the phone while playing; game stays one way up; nothing clipped at the notch /

@@ -25,15 +25,22 @@ namespace IdleRPG.UI
                 info.IsCritical ? criticalColor : heroHitColor);
         }
 
-        private void OnHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex)
+        private void OnHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical)
         {
             string attacker = EnemyName(attackerEnemyIndex);
             string target = HeroName(heroIndex);
 
-            Append(string.Format("{0} hits {1} for {2}  ({3}/{4})", attacker, target,
-                NumberFormatter.Format(damage),
-                NumberFormatter.Format(currentHealth),
-                NumberFormatter.Format(maxHealth)), incomingColor);
+            // Incoming crits read the same as outgoing ones: "<who> CRITS <whom> for N".
+            Append(isCritical
+                ? string.Format("{0} CRITS {1} for {2}  ({3}/{4})", attacker, target,
+                    NumberFormatter.Format(damage),
+                    NumberFormatter.Format(currentHealth),
+                    NumberFormatter.Format(maxHealth))
+                : string.Format("{0} hits {1} for {2}  ({3}/{4})", attacker, target,
+                    NumberFormatter.Format(damage),
+                    NumberFormatter.Format(currentHealth),
+                    NumberFormatter.Format(maxHealth)),
+                isCritical ? criticalColor : incomingColor);
         }
 
         private void OnEnemyKilled(string enemyName, double goldReward, int enemyIndex)

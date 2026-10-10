@@ -42,12 +42,18 @@ namespace IdleRPG.EditorTools.Content
                 case "defence":
                 case "defensepercent":
                     return HeroStatType.Defense;
+                case "crit":
+                case "critrate":
+                    return HeroStatType.CritRate;
+                case "critdamage":
+                case "critdmg":
+                    return HeroStatType.CritDamage;
                 default:
                     return HeroStatType.Attack;
             }
         }
 
-        /// <summary>"multiplicative" | "compounding" | anything else = additive (the shipped model).</summary>
+        /// <summary>"multiplicative" | "compounding" = compounding; "flat" | "flatadditive" = flat points; else additive.</summary>
         private static StatEffectMode ParseEffectMode(string value)
         {
             switch ((value ?? "").Trim().ToLowerInvariant())
@@ -55,6 +61,11 @@ namespace IdleRPG.EditorTools.Content
                 case "multiplicative":
                 case "compounding":
                     return StatEffectMode.Multiplicative;
+
+                case "flat":
+                case "flatadditive":
+                    return StatEffectMode.FlatAdditive;
+
                 default:
                     return StatEffectMode.AdditiveBase;
             }
