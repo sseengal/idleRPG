@@ -109,10 +109,11 @@ app sandbox. Set a real `companyName` before store submission (it moves that pat
 | `F5` / `F9` | Save now / delete the save file |
 | `F10` | Rewind the logout clock by 3h **and** re-run the offline calculation (payout + popup) |
 | `G` / `T` / `C` | Grant test gold / prestige tokens / gems |
-| `B` / `A` / `S` | Watch ad for the gold boost, request ascension, skip to the next stage |
+| `D` | Force a party wipe (opens the defeat card) |
+| `B` / `A` / `R` / `S` | Watch ad for the gold boost, request ascension, resume after defeat, skip to the next stage |
 | `F` | Buy instant income (gem sink #2) through the real shop path |
 | `M` | Mute / unmute the placeholder SFX |
-| `L` | Log live state (stage, economy, rates, save info) |
+| `L` | Log live state (stage, economy, rates, run stats, save info) |
 | `F8` / `F9` | **Full reset** (save + backups + PlayerPrefs + scene reload) / delete the save file only |
 
 The list above is generated from `DebugHotkeyCatalog`; the same legend is printed by the `F3` overlay and by

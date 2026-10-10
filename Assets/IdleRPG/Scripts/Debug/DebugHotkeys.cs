@@ -123,6 +123,18 @@ namespace IdleRPG.Debugging
                 Log(ascended ? "Ascension requested." : "Ascension refused (stage gate or no tokens).");
             }
 
+            if (keyboard.dKey.wasPressedThisFrame)
+            {
+                gameManager.DebugForceDefeat();
+                Log("Forced a party wipe (D) - the defeat card should open.");
+            }
+
+            if (keyboard.rKey.wasPressedThisFrame)
+            {
+                gameManager.ResumeAfterDefeat();
+                Log("Resume after defeat (R).");
+            }
+
             if (keyboard.sKey.wasPressedThisFrame)
             {
                 int nextStage = gameManager.CurrentStage + 1;
@@ -191,7 +203,9 @@ namespace IdleRPG.Debugging
             Log($"Stage {gameManager.CurrentStage} (best {gameManager.HighestStageReached}) state={gameManager.State} | " +
                 $"{gameManager.Economy} | {gameManager.Ascension.DescribeMultipliers()} | " +
                 $"hero levels={resolver.TotalHeroLevels} | token yield={gameManager.PrestigeTokenYield:0} | " +
-                $"boost={(gameManager.Boost.IsActive ? "ON " + gameManager.Boost.RemainingSeconds + "s" : "off")}");
+                $"boost={(gameManager.Boost.IsActive ? "ON " + gameManager.Boost.RemainingSeconds + "s" : "off")} | " +
+                $"run: gold={NumberFormatter.Format(gameManager.RunGoldEarned)} kills={gameManager.RunKills} " +
+                $"stages={gameManager.RunStagesCleared} secs={gameManager.RunElapsedSeconds:0}");
         }
 
         private void Log(string message)

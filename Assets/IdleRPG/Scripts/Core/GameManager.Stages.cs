@@ -128,6 +128,15 @@ namespace IdleRPG.Core
             }
         }
 
+        /// <summary>Debug/cheat: force the real party-wipe path (rolls back a stage and opens the defeat card).</summary>
+        public void DebugForceDefeat()
+        {
+            if (isWired)
+            {
+                OnPartyWiped();
+            }
+        }
+
         /// <summary>Seeds the run clock the first time a run begins (fresh install or a save with no run record).</summary>
         private void EnsureRunStarted()
         {
