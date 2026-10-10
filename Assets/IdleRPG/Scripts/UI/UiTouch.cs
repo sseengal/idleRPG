@@ -22,9 +22,6 @@ namespace IdleRPG.UI
         /// <summary>Gap between rows in a stacked list.</summary>
         public const float RowGap = 8f;
 
-        /// <summary>Section header (a hero's name on the upgrades page).</summary>
-        public const float HeaderHeight = 90f;
-
         /// <summary>How tall a list of <paramref name="rows"/> rows is, including the gaps between them.</summary>
         public static float ListHeight(int rows)
         {

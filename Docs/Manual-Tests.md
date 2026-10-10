@@ -194,8 +194,8 @@ includes them (enforced at build time from B10).
 
 ## 2g. Upgrades page — mobile layout pass, Phase 1 (added 2026-10-10)
 
-> Every control was smaller than a fingertip. Now one upgrade is one row and the whole row is the button. Full
-> record: `Docs/Upgrades-Page.md`. **No page content moved** - hero stats are still bought here.
+> Every control was smaller than a fingertip. Now one upgrade is one finger-sized row with `+1` and `x10` buttons.
+> Full record: `Docs/Upgrades-Page.md`. **No page content moved** - hero stats are still bought here.
 
 ### Can I hit it with a thumb?
 - [ ] On UPGRADES, each stat row has two buttons on the right: **`+1`** buys one level, **`x10`** buys ten. Tap them

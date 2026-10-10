@@ -35,7 +35,7 @@ All sizes live in one place: `Assets/IdleRPG/Scripts/UI/UiTouch.cs`.
 |---|---|---|
 | `UiTouch.MinTarget` | 144 | No tappable control may be smaller than this, in units |
 | `UiTouch.RowHeight` | 180 | One upgrade row |
-| `UiTouch.HeaderHeight` | 90 | A section header (a hero's name) |
+| `UiTouch.RowGap` | 8 | Gap between rows |
 | `UiTouch.ListHeight(n)` | n x 180 + gaps | Height of a stack of rows |
 
 A row is laid out as: name (top left), effect (bottom left), level and cost (middle), then `+1` and `x10` on the

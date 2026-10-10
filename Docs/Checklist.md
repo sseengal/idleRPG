@@ -1501,8 +1501,8 @@ the hero `+1` / `+10` buttons were about **139 x 28** units - roughly a quarter 
 tiles had been crammed into one 320-unit row.
 
 ### The rule
-**One upgrade = one row. The whole row is the buy button.** All sizes live in the new
-`Assets/IdleRPG/Scripts/UI/UiTouch.cs`: `MinTarget` 144, `RowHeight` 180, `HeaderHeight` 90.
+**One upgrade = one row, with finger-sized `+1` and `x10` buttons on the right.** All sizes live in the new
+`Assets/IdleRPG/Scripts/UI/UiTouch.cs`: `MinTarget` 144, `RowHeight` 180, `RowGap` 8.
 
 ### What changed
 - `HeroUpgradeRowUI` - five tiles became five stacked rows (ATK, HP, DEF, CRIT, CRIT DMG). The row face is a
