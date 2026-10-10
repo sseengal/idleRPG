@@ -1490,6 +1490,67 @@ every formation slot **lunged, blinked, flashed and played hurt poses**. The boa
 - [x] compiles clean
 - [ ] in-Play check: `Manual-Tests.md` §2f
 
+## 1aa. Upgrades page: mobile layout pass (Phase 1)  ·  **built 2026-10-10**
+
+> Full record: **`Docs/Upgrades-Page.md`**. Scope here is **layout only** - no information-architecture change
+> (hero stat rows stay on this page; account/global upgrades are a later phase).
+
+### The problem
+Every control on the page was smaller than a fingertip. On a 1080 x 1920 canvas where 1 cm is about 114 units,
+the hero `+1` / `+10` buttons were about **139 x 28** units - roughly a quarter of a centimetre tall. Five stat
+tiles had been crammed into one 320-unit row.
+
+### The rule
+**One upgrade = one row. The whole row is the buy button.** All sizes live in the new
+`Assets/IdleRPG/Scripts/UI/UiTouch.cs`: `MinTarget` 144, `RowHeight` 180, `HeaderHeight` 90.
+
+### What changed
+- `HeroUpgradeRowUI` - five tiles became five stacked rows (ATK, HP, DEF, CRIT, CRIT DMG). The row face is a
+  `Button` (the `+1` buy); an `x10` button sits on the right. **Measured in Play: row 979 x 180, x10 245 x 155.**
+- `AutomationPanelUI` - its controls could not reach 144 units inside a pinned 400-unit strip, so the section
+  **moved inside the scroll** as the last section and now **sizes its own rows** (heading + one row per card +
+  a row for the auto-buy reserve dial). The dial's `-5%` / `+5%` buttons get their own row. **Measured in Play:
+  section 1020 x 720; BUY button 182 x 148.**
+- `MvpSceneBuilder.Panels.cs` - `CreateHeroUpgradeRow` builds a header + five `CreateStatRow` rows (the old
+  `CreateStatBlock` is deleted); row heights are derived from `UiTouch`, so 180 is stated once; ascend rows grew
+  from 116 to 180 units with a full-height BUY button.
+- **Trade accepted on purpose:** content is now about 4087 units against a visible 1430 - roughly three screens of
+  scrolling. Hittable buttons beat a short page. A hero selector is the cheap fix if it feels long (Phase 3
+  proposal, not built).
+
+### Gotchas recorded
+- Rows are **baked into the scene**: changing them needs `Tools > Idle RPG > Build MVP Scene`, not just a compile.
+- That builder **refuses to run in Play Mode** (`InvalidOperationException` from `EditorSceneManager.NewScene`), and
+  the menu item still reports success - so stop Play Mode first and re-check the hierarchy.
+- A component that owns a scroll section must **size itself** (`LayoutElement` at runtime); the builder cannot know
+  how many rows an automation card needs until the specs are loaded.
+
+### Verified (2026-10-10)
+- [x] compiles clean, scene rebuilt, hierarchy checked (3 hero sections x 5 stat rows + `AutomationSection` in the
+      scroll content)
+- [x] Play-mode measurement of every target: all at or above 144 units
+- [ ] in-Play visual check: `Manual-Tests.md` §2g
+
+### Revision, 2026-10-10 (same day) - three bugs the first pass shipped
+
+Reported right after the first pass: "scrolling doesn't work", and a `NullReferenceException` on every gold change.
+
+| # | Bug | Cause | Fix |
+|---|---|---|---|
+| 1 | `AutomationPanelUI.Refresh` threw **on every gold change**, aborting the combat tick that paid the gold | it touched the reserve-dial buttons, which only the auto-buy card owns | null-guarded `Show(Button, bool)` helper |
+| 2 | The **lists could not be scrolled** | no raycastable graphic anywhere inside a scroll view, so a press over a row hit nothing and the `ScrollRect` never received a drag. It only looked fine before because the old list was shorter than the window | `UiFactory.CreateScrollView` adds a transparent raycastable hit surface (`ScrollHit`) behind the rows - fixes UPGRADES, ASCEND and SHOP, and revives the battle log's drag-to-pause |
+| 3 | The UPGRADES page **never bound**: placeholder text, and every tap ignored | it bound while the GameManager was still loading (so `Upgrade`/`Resolver` were null) and the `manager != null` guard blocked every retry | the bind now requires `Upgrade`/`Resolver`, and `RefreshAll` retries it |
+
+Also changed: a stat row is **no longer a full-width button**. It carries explicit `+1` and `x10` buttons, because
+uGUI fires a Button click on release *even after a drag* - a row-wide button would spend gold during a scroll flick.
+
+- Full write-up and the layout-measurement gotcha: `Docs/Upgrades-Page.md` §3a.
+- [x] revision verified: compiles clean, scene rebuilt, all three hero sections bind (`x1.09 / lvl`,
+      `10  ·  x10 138`), console error count 0 while playing
+- [ ] drag + tap check by hand: `Manual-Tests.md` §2g. (The input raycast could not be verified from tooling: while
+      the Editor was unfocused the Game View and the canvas disagreed about screen size, so every scripted probe
+      missed. The fix is structural - a press inside a list now resolves to the ScrollRect.)
+
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 
 Base gate: every step below names the loop beat or money path it serves. Anything that cannot is not in the base.

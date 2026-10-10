@@ -179,6 +179,11 @@ Fixed with `UI/FormationSlotView.cs`: icon + name + idle pose only, no event sub
   stays M2.
 - Everything in §7.4 is a **proposal**, not a decision.
 
+> **Cross-ref (2026-10-10, UPGRADES Phase 1):** the hero stat tiles on UPGRADES are now **one finger-sized row per
+> stat** (`Docs/Upgrades-Page.md`). The roster is unchanged and still informational. That means **P4 below (buy
+> from the roster) is now a Phase 3 proposal that would reverse §2.1** - it needs that line rewritten in the same
+> commit, and `PartyRosterView` split first (item S1).
+
 ### 7.4 Improvement backlog (proposals, 2026-10-10)
 
 Designer lens:

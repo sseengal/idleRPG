@@ -9,32 +9,42 @@ using IdleRPG.Utils;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// One hero's upgrade row: name plus ATK/HP/DEF blocks, each with +1 and +10 buttons,
-    /// current level and the cost of the next purchase.
+    /// One hero's upgrade section: the hero's name, then ONE ROW PER STAT (ATK / HP / DEF / CRIT / CRIT DMG).
+    ///
+    /// ELI5: each row is one stat, with two big buttons on the right - "+1" buys one level, "x10" buys ten. The row
+    /// itself is not a button, so dragging the list past a row can never buy by accident. It used to be five little
+    /// tiles crammed into a row, which left every button about 9 dp tall (a quarter of a centimetre) - impossible
+    /// to hit on a phone. See <see cref="UiTouch"/>.
     /// </summary>
     public sealed class HeroUpgradeRowUI : MonoBehaviour
     {
-        /// <summary>One stat column (ATK / HP / DEF).</summary>
-        /// <summary>One stat column (ATK / HP / DEF), public so scene builders can create it.</summary>
+        /// <summary>One stat row. Public so scene builders can create it.</summary>
         [System.Serializable]
-        public sealed class StatBlock
+        public sealed class StatRow
         {
             public HeroStatType statType = HeroStatType.Attack;
-            public Button plusOneButton;
+
+            /// <summary>The row's face. Decoration only: it is not clickable, so a scroll flick cannot buy.</summary>
+            public Image background;
+
+            /// <summary>Buys one level. Finger-sized (see <see cref="UiTouch"/>).</summary>
+            public Button buyOneButton;
+
             public Button plusTenButton;
+            public TextMeshProUGUI nameLabel;
+            public TextMeshProUGUI effectLabel;
             public TextMeshProUGUI levelLabel;
             public TextMeshProUGUI costLabel;
-            public TextMeshProUGUI effectLabel;
-            public Image iconImage;
-            public Sprite iconSprite;
         }
 
         [Header("Wiring")]
         [SerializeField] private int heroIndex;
         [SerializeField] private TextMeshProUGUI heroNameLabel;
-        [SerializeField] private StatBlock[] blocks = new StatBlock[3];
+        [SerializeField] private StatRow[] rows = new StatRow[5];
         [SerializeField] private Color affordableColor = Color.white;
         [SerializeField] private Color unaffordableColor = new Color(1f, 1f, 1f, 0.45f);
+        [SerializeField] private Color rowReadyColor = new Color(0.20f, 0.30f, 0.46f, 0.95f);
+        [SerializeField] private Color rowDimColor = new Color(0.15f, 0.17f, 0.23f, 0.9f);
 
         private UpgradeManager upgrades;
         private StatResolver resolver;
@@ -51,32 +61,28 @@ namespace IdleRPG.UI
             upgrades = upgradeManager;
             resolver = statResolver;
 
-            for (int i = 0; i < blocks.Length; i++)
+            for (int i = 0; i < rows.Length; i++)
             {
-                StatBlock block = blocks[i];
+                StatRow row = rows[i];
 
-                if (block == null)
+                if (row == null)
                 {
                     continue;
                 }
 
-                HeroStatType statType = block.statType;
+                HeroStatType statType = row.statType;
 
-                if (block.plusOneButton != null)
+                // "+1" buys one level; the right-hand button buys ten.
+                if (row.buyOneButton != null)
                 {
-                    block.plusOneButton.onClick.RemoveAllListeners();
-                    block.plusOneButton.onClick.AddListener(() => Buy(statType, 1));
+                    row.buyOneButton.onClick.RemoveAllListeners();
+                    row.buyOneButton.onClick.AddListener(() => Buy(statType, 1));
                 }
 
-                if (block.plusTenButton != null)
+                if (row.plusTenButton != null)
                 {
-                    block.plusTenButton.onClick.RemoveAllListeners();
-                    block.plusTenButton.onClick.AddListener(() => Buy(statType, 10));
-                }
-
-                if (block.iconImage != null && block.iconSprite != null)
-                {
-                    block.iconImage.sprite = block.iconSprite;
+                    row.plusTenButton.onClick.RemoveAllListeners();
+                    row.plusTenButton.onClick.AddListener(() => Buy(statType, 10));
                 }
             }
         }
@@ -99,55 +105,65 @@ namespace IdleRPG.UI
                 heroNameLabel.SetText(heroName);
             }
 
-            if (upgrades == null)
+            if (upgrades == null || rows == null)
             {
                 return;
             }
 
-            for (int i = 0; i < blocks.Length; i++)
+            for (int i = 0; i < rows.Length; i++)
             {
-                StatBlock block = blocks[i];
-                if (block == null)
+                StatRow row = rows[i];
+                if (row == null)
                 {
                     continue;
                 }
 
-                int level = upgrades.GetLevel(heroIndex, block.statType);
-                HeroStatType statType = block.statType;
-
-                if (block.levelLabel != null)
-                {
-                    block.levelLabel.SetText(string.Format("Lv {0}", level));
-                }
-
+                HeroStatType statType = row.statType;
                 bool maxed = upgrades.IsAtMaxLevel(heroIndex, statType);
-
-                double costOne = upgrades.GetCost(heroIndex, statType, 1);
-                double costTen = upgrades.GetCost(heroIndex, statType, 10);
                 bool canAffordOne = !maxed && upgrades.CanAfford(heroIndex, statType, 1);
                 bool canAffordTen = !maxed && upgrades.CanAfford(heroIndex, statType, 10);
 
-                if (block.costLabel != null)
+                if (row.levelLabel != null)
                 {
-                    block.costLabel.SetText(string.Format(maxed ? "MAX" : "{0}  |  x10 {1}",
-                        NumberFormatter.Format(costOne), NumberFormatter.Format(costTen)));
-                    block.costLabel.color = canAffordOne ? affordableColor : unaffordableColor;
+                    row.levelLabel.SetText(maxed
+                        ? "MAX"
+                        : string.Format("Lv {0}", upgrades.GetLevel(heroIndex, statType)));
                 }
 
-                if (block.plusOneButton != null)
+                if (row.costLabel != null)
                 {
-                    block.plusOneButton.interactable = canAffordOne;
+                    row.costLabel.SetText(maxed
+                        ? string.Empty
+                        : string.Format("{0}  ·  x10 {1}",
+                            NumberFormatter.Format(upgrades.GetCost(heroIndex, statType, 1)),
+                            NumberFormatter.Format(upgrades.GetCost(heroIndex, statType, 10))));
+                    row.costLabel.color = canAffordOne ? affordableColor : unaffordableColor;
                 }
 
-                if (block.plusTenButton != null)
+                if (row.effectLabel != null && resolver != null)
                 {
-                    block.plusTenButton.interactable = canAffordTen;
-                }
-
-                if (block.effectLabel != null && resolver != null)
-                {
-                    block.effectLabel.SetText(FormatEffect(statType, resolver.GetEffectMode(statType),
+                    row.effectLabel.SetText(FormatEffect(statType, resolver.GetEffectMode(statType),
                         resolver.GetStatGainFraction(statType)));
+                }
+
+                if (row.nameLabel != null)
+                {
+                    row.nameLabel.color = canAffordOne ? affordableColor : unaffordableColor;
+                }
+
+                if (row.background != null)
+                {
+                    row.background.color = canAffordOne ? rowReadyColor : rowDimColor;
+                }
+
+                if (row.buyOneButton != null)
+                {
+                    row.buyOneButton.interactable = canAffordOne;
+                }
+
+                if (row.plusTenButton != null)
+                {
+                    row.plusTenButton.interactable = canAffordTen;
                 }
             }
         }

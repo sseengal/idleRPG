@@ -34,8 +34,11 @@ namespace IdleRPG.UI
             public Button buyButton;
             public Button minusButton;
             public Button plusButton;
-            public TextMeshProUGUI dialLabel;
+            public TextMeshProUGUI dialHintLabel;
         }
+
+        /// <summary>The one automation whose budget can be dialled (how much gold the auto-buy manager may spend).</summary>
+        private const string DialAutomationId = "autoBuy";
 
         private void Start()
         {
@@ -111,48 +114,125 @@ namespace IdleRPG.UI
         private void Build(AutomationService automation)
         {
             rows.Clear();
-            int count = Mathf.Max(1, automation.Defs.Count);
 
-            for (int i = 0; i < automation.Defs.Count; i++)
+            int cardCount = automation.Defs.Count;
+            int dialCount = 0;
+
+            for (int i = 0; i < cardCount; i++)
+            {
+                if (IsDialAutomation(automation.Defs[i]))
+                {
+                    dialCount++;
+                }
+            }
+
+            // One band per row: a heading, one card per automation, plus a reserve-dial row where one exists.
+            int bands = 1 + cardCount + dialCount;
+            Resize(bands);
+            CreateHeading(bands);
+
+            int band = 1;
+
+            for (int i = 0; i < cardCount; i++)
             {
                 AutomationDef def = automation.Defs[i];
-                GameObject row = UiRuntime.CreateNode("Card" + def.AutomationID, transform);
-                float minY = 1f - (i + 1) * (1f / count);
-                float maxY = 1f - i * (1f / count);
-                UiRuntime.Anchor(row.GetComponent<RectTransform>(),
-                    new Vector2(0f, minY), new Vector2(1f, maxY), 4f, 2f, 4f, 2f);
+                CardRow cardRow = CreateCardBand(def, band++, bands);
 
-                TextMeshProUGUI title = UiRuntime.CreateText(row.transform, "Title", def.DisplayName, 24f,
-                    TextAlignmentOptions.MidlineLeft, textColor);
-                UiRuntime.Anchor(title.rectTransform, new Vector2(0.02f, 0.72f), new Vector2(0.6f, 0.98f));
-
-                TextMeshProUGUI info = UiRuntime.CreateText(row.transform, "Info", "", 15f,
-                    TextAlignmentOptions.TopLeft, dimColor);
-                info.textWrappingMode = TextWrappingModes.Normal;
-                UiRuntime.Anchor(info.rectTransform, new Vector2(0.02f, 0.36f), new Vector2(0.75f, 0.70f));
-
-                CardRow cardRow = new CardRow
+                if (IsDialAutomation(def))
                 {
-                    def = def,
-                    titleLabel = title,
-                    infoLabel = info,
-                    toggleButton = UiRuntime.CreateButton(row.transform, "Toggle", "ON",
-                        new Vector2(0.79f, 0.70f), new Vector2(0.98f, 0.96f), () => OnToggle(def)),
-                    buyButton = UiRuntime.CreateButton(row.transform, "Buy", "Buy",
-                        new Vector2(0.79f, 0.34f), new Vector2(0.98f, 0.64f), () => OnBuy(def)),
-                    minusButton = UiRuntime.CreateButton(row.transform, "Minus", "-",
-                        new Vector2(0.74f, 0.34f), new Vector2(0.86f, 0.64f), () => OnDial(def, -0.05f)),
-                    plusButton = UiRuntime.CreateButton(row.transform, "Plus", "+",
-                        new Vector2(0.90f, 0.34f), new Vector2(0.98f, 0.64f), () => OnDial(def, 0.05f)),
-                    dialLabel = UiRuntime.CreateText(row.transform, "Dial", "Keep 50% gold", 14f,
-                        TextAlignmentOptions.MidlineRight, textColor)
-                };
+                    CreateDialBand(transform, cardRow, band++, bands);
+                }
 
-                UiRuntime.Anchor(cardRow.dialLabel.rectTransform, new Vector2(0.74f, 0.02f), new Vector2(0.98f, 0.30f));
                 rows.Add(cardRow);
             }
 
             Refresh();
+        }
+
+        /// <summary>The one automation with a dial (how much gold the auto-buy manager may spend).</summary>
+        private static bool IsDialAutomation(AutomationDef def)
+        {
+            return def != null && def.AutomationID == DialAutomationId;
+        }
+
+        /// <summary>
+        /// Grows the section so every band is exactly <see cref="UiTouch.RowHeight"/>. The component owns its own
+        /// height because it is the only thing that knows how many rows it will build (cards + dial rows).
+        /// </summary>
+        private void Resize(int bands)
+        {
+            float height = bands * UiTouch.RowHeight;
+
+            LayoutElement layout = GetComponent<LayoutElement>();
+            if (layout == null)
+            {
+                layout = gameObject.AddComponent<LayoutElement>();
+            }
+
+            layout.minHeight = height;
+            layout.preferredHeight = height;
+        }
+
+        private static void AnchorBand(RectTransform rect, int bandIndex, int bands, float pad = 4f, float vPad = 2f)
+        {
+            float band = 1f / bands;
+            float minY = 1f - (bandIndex + 1) * band;
+            float maxY = 1f - bandIndex * band;
+            UiRuntime.Anchor(rect, new Vector2(0f, minY), new Vector2(1f, maxY), pad, vPad, pad, vPad);
+        }
+
+        private void CreateHeading(int bands)
+        {
+            TextMeshProUGUI heading = UiRuntime.CreateText(transform, "Heading", "AUTOMATION", 20f,
+                TextAlignmentOptions.MidlineLeft, dimColor);
+            AnchorBand(heading.rectTransform, 0, bands, 8f, 0f);
+        }
+
+        /// <summary>A card band: title + description on the left, ON/OFF and BUY on the right (both finger-sized).</summary>
+        private CardRow CreateCardBand(AutomationDef def, int bandIndex, int bands)
+        {
+            GameObject row = UiRuntime.CreateNode("Card" + def.AutomationID, transform);
+            AnchorBand(row.GetComponent<RectTransform>(), bandIndex, bands);
+
+            TextMeshProUGUI title = UiRuntime.CreateText(row.transform, "Title", def.DisplayName, 24f,
+                TextAlignmentOptions.MidlineLeft, textColor);
+            UiRuntime.Anchor(title.rectTransform, new Vector2(0.02f, 0.56f), new Vector2(0.58f, 0.96f));
+
+            TextMeshProUGUI info = UiRuntime.CreateText(row.transform, "Info", string.Empty, 15f,
+                TextAlignmentOptions.TopLeft, dimColor);
+            info.textWrappingMode = TextWrappingModes.Normal;
+            UiRuntime.Anchor(info.rectTransform, new Vector2(0.02f, 0.08f), new Vector2(0.58f, 0.54f));
+
+            CardRow cardRow = new CardRow
+            {
+                def = def,
+                titleLabel = title,
+                infoLabel = info,
+                toggleButton = UiRuntime.CreateButton(row.transform, "Toggle", "ON",
+                    new Vector2(0.60f, 0.08f), new Vector2(0.78f, 0.92f), () => OnToggle(def)),
+                buyButton = UiRuntime.CreateButton(row.transform, "Buy", "Buy",
+                    new Vector2(0.80f, 0.08f), new Vector2(0.98f, 0.92f), () => OnBuy(def))
+            };
+
+            return cardRow;
+        }
+
+        /// <summary>The reserve dial's own band, so its two buttons can also be finger-sized.</summary>
+        private void CreateDialBand(Transform parent, CardRow cardRow, int bandIndex, int bands)
+        {
+            GameObject row = UiRuntime.CreateNode("Dial" + cardRow.def.AutomationID, parent);
+            AnchorBand(row.GetComponent<RectTransform>(), bandIndex, bands);
+
+            TextMeshProUGUI hint = UiRuntime.CreateText(row.transform, "Hint", string.Empty, 16f,
+                TextAlignmentOptions.MidlineLeft, dimColor);
+            hint.textWrappingMode = TextWrappingModes.Normal;
+            UiRuntime.Anchor(hint.rectTransform, new Vector2(0.02f, 0.20f), new Vector2(0.58f, 0.80f));
+            cardRow.dialHintLabel = hint;
+
+            cardRow.minusButton = UiRuntime.CreateButton(row.transform, "Minus", "-5%",
+                new Vector2(0.60f, 0.08f), new Vector2(0.75f, 0.92f), () => OnDial(cardRow.def, -0.05f));
+            cardRow.plusButton = UiRuntime.CreateButton(row.transform, "Plus", "+5%",
+                new Vector2(0.77f, 0.08f), new Vector2(0.92f, 0.92f), () => OnDial(cardRow.def, 0.05f));
         }
 
         private void OnToggle(AutomationDef def)
@@ -208,15 +288,16 @@ namespace IdleRPG.UI
                     Label(row.toggleButton, enabled ? "ON" : "OFF");
                     row.buyButton.gameObject.SetActive(false);
 
-                    bool isAutoBuy = row.def.AutomationID == "autoBuy";
-                    row.minusButton.gameObject.SetActive(isAutoBuy);
-                    row.plusButton.gameObject.SetActive(isAutoBuy);
-                    row.dialLabel.gameObject.SetActive(isAutoBuy);
+                    bool isAutoBuy = row.def.AutomationID == DialAutomationId;
+                    Show(row.minusButton, isAutoBuy);
+                    Show(row.plusButton, isAutoBuy);
 
-                    if (isAutoBuy)
+                    if (row.dialHintLabel != null)
                     {
-                        int keepPct = Mathf.RoundToInt(automation.BudgetFraction(row.def) * 100f);
-                        row.dialLabel.text = "Keep " + keepPct + "% gold";
+                        row.dialHintLabel.gameObject.SetActive(true);
+                        row.dialHintLabel.text = isAutoBuy
+                            ? "Auto-buy keeps " + Mathf.RoundToInt(automation.BudgetFraction(row.def) * 100f) + "% of your gold in reserve."
+                            : string.Empty;
                     }
 
                     continue;
@@ -231,15 +312,33 @@ namespace IdleRPG.UI
                                          ? " after " + row.def.MinAscensions + " rebirth(s)"
                                          : "");
                 row.toggleButton.gameObject.SetActive(false);
-                row.minusButton.gameObject.SetActive(false);
-                row.plusButton.gameObject.SetActive(false);
-                row.dialLabel.gameObject.SetActive(false);
+                Show(row.minusButton, false);
+                Show(row.plusButton, false);
+
+                if (row.dialHintLabel != null)
+                {
+                    row.dialHintLabel.gameObject.SetActive(true);
+                    row.dialHintLabel.text = "Buy the card above to unlock this reserve.";
+                }
 
                 bool canBuy = automation.CanBuy(row.def, manager.AscensionCount) &&
                               manager.Economy.CanAfford(Economy.CurrencyType.PrestigeTokens, automation.Cost(row.def));
                 row.buyButton.gameObject.SetActive(true);
                 row.buyButton.interactable = canBuy;
                 Label(row.buyButton, canBuy ? "BUY  " + automation.Cost(row.def).ToString("0") : "BUY");
+            }
+        }
+
+        /// <summary>
+        /// Shows or hides a button that a row may not own. Only the auto-buy card gets a reserve dial, so every
+        /// other card row has no dial buttons at all - touching them unchecked threw a NullReferenceException on
+        /// every gold change, which aborted the combat tick that paid the gold.
+        /// </summary>
+        private static void Show(Button button, bool show)
+        {
+            if (button != null)
+            {
+                button.gameObject.SetActive(show);
             }
         }
 

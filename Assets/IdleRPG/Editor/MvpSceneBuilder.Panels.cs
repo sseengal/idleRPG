@@ -142,10 +142,10 @@ namespace IdleRPG.EditorTools
             TextMeshProUGUI title = UiFactory.Text("Title", panel.transform,
                 "Spend gold to raise each hero's stats (scroll for more)", 22f,
                 TextAlignmentOptions.MidlineLeft, DimTextColor);
-            UiFactory.Anchor(title.rectTransform, new Vector2(0.02f, 0.93f), new Vector2(0.98f, 1f));
+            UiFactory.Anchor(title.rectTransform, new Vector2(0.02f, 0.945f), new Vector2(0.98f, 1f));
 
             ScrollRect scroll = UiFactory.CreateScrollView(panel.transform, "UpgradeScroll", 10f, new RectOffset(4, 4, 4, 4), out RectTransform list);
-            UiFactory.Anchor(scroll.GetComponent<RectTransform>(), new Vector2(0f, 0.26f), new Vector2(1f, 0.90f), 2f, 2f, 2f, 0f);
+            UiFactory.Anchor(scroll.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, 0.93f), 2f, 2f, 2f, 2f);
 
             HeroUpgradeRowUI[] rows = new HeroUpgradeRowUI[Mathf.Max(1, partyConfig != null ? partyConfig.ValidHeroCount : 1)];
 
@@ -156,21 +156,29 @@ namespace IdleRPG.EditorTools
 
             SceneWiringUtility.SetField(ui, "rows", rows);
 
-            // B6 Step 2: the AUTO strip (auto-buy + speed cards) sits at the bottom of the page.
-            GameObject automationStrip = UiFactory.Node("AutomationStrip", panel.transform);
-            UiFactory.Anchor(automationStrip.GetComponent<RectTransform>(),
-                new Vector2(0f, 0f), new Vector2(1f, 0.24f), 4f, 2f, 4f, 2f);
-            automationStrip.AddComponent<AutomationPanelUI>();
+            // AUTOMATION is the last section INSIDE the scroll. It used to be a pinned strip at the bottom of the
+            // page, but its controls cannot reach finger size (UiTouch.MinTarget) inside a short strip - and an
+            // owning component sizes its own rows (cards + the auto-buy reserve dial).
+            GameObject automationSection = UiFactory.Node("AutomationSection", list);
+            automationSection.AddComponent<AutomationPanelUI>();
 
             return panel;
         }
 
         private static HeroUpgradeRowUI CreateHeroUpgradeRow(Transform parent, int index, PartyConfig partyConfig)
         {
+            const int statCount = 5;
+
             GameObject row = UiFactory.Node($"HeroRow{index}", parent);
+
+            // The list band is 0.02..0.86 of the section: size the section so five finger-sized rows fit exactly.
+            const float listTop = 0.86f;
+            const float listBottom = 0.02f;
+            float height = UiTouch.ListHeight(statCount) / (listTop - listBottom);
+
             LayoutElement layout = row.AddComponent<LayoutElement>();
-            layout.minHeight = 320f;
-            layout.preferredHeight = 320f;
+            layout.minHeight = height;
+            layout.preferredHeight = height;
 
             Image background = UiFactory.Panel("Background", row.transform, "ui_panel", new Color(1f, 1f, 1f, 0.30f));
             UiFactory.Stretch(background.rectTransform);
@@ -178,73 +186,80 @@ namespace IdleRPG.EditorTools
             HeroData hero = partyConfig != null ? partyConfig.GetHero(index) : null;
             TextMeshProUGUI nameLabel = UiFactory.Text("Name", row.transform,
                 hero != null ? hero.HeroName : $"Hero {index + 1}", 28f, TextAlignmentOptions.MidlineLeft, TextColor);
-            UiFactory.Anchor(nameLabel.rectTransform, new Vector2(0.03f, 0.76f), new Vector2(0.97f, 0.99f));
+            UiFactory.Anchor(nameLabel.rectTransform, new Vector2(0.03f, 0.87f), new Vector2(0.97f, 0.99f));
 
-            GameObject blocks = UiFactory.Node("Blocks", row.transform);
-            UiFactory.Anchor(blocks.GetComponent<RectTransform>(), new Vector2(0.02f, 0.04f), new Vector2(0.98f, 0.74f));
+            // ONE ROW PER STAT, stacked. Each row is a single big tap target (see UiTouch): the old five-tiles-in-a-row
+            // layout left buttons about 9 dp tall.
+            GameObject list = UiFactory.Node("Stats", row.transform);
+            UiFactory.Anchor(list.GetComponent<RectTransform>(), new Vector2(0.02f, listBottom), new Vector2(0.98f, listTop));
+            UiFactory.VerticalStack(list, UiTouch.RowGap, new RectOffset(0, 0, 0, 0));
 
-            // Five stats: three across the top row, two on the second (a spacer keeps the tile width equal).
-            UiFactory.VerticalStack(blocks, 6f, new RectOffset(0, 0, 0, 0), expandChildren: true);
-
-            GameObject rowTop = UiFactory.Node("RowTop", blocks.transform);
-            UiFactory.HorizontalStack(rowTop, 8f);
-
-            GameObject rowBottom = UiFactory.Node("RowBottom", blocks.transform);
-            UiFactory.HorizontalStack(rowBottom, 8f);
-
-            HeroUpgradeRowUI.StatBlock[] statBlocks =
+            HeroUpgradeRowUI.StatRow[] statRows =
             {
-                CreateStatBlock(rowTop.transform, HeroStatType.Attack, "ui_icon_gold"),
-                CreateStatBlock(rowTop.transform, HeroStatType.Health, "ui_icon_gem"),
-                CreateStatBlock(rowTop.transform, HeroStatType.Defense, "ui_icon_token"),
-                CreateStatBlock(rowBottom.transform, HeroStatType.CritRate, "ui_icon_gold"),
-                CreateStatBlock(rowBottom.transform, HeroStatType.CritDamage, "ui_icon_gem")
+                CreateStatRow(list.transform, HeroStatType.Attack),
+                CreateStatRow(list.transform, HeroStatType.Health),
+                CreateStatRow(list.transform, HeroStatType.Defense),
+                CreateStatRow(list.transform, HeroStatType.CritRate),
+                CreateStatRow(list.transform, HeroStatType.CritDamage)
             };
-
-            UiFactory.Node("Spacer", rowBottom.transform);
 
             HeroUpgradeRowUI ui = row.AddComponent<HeroUpgradeRowUI>();
             SceneWiringUtility.SetField(ui, "heroIndex", index);
             SceneWiringUtility.SetField(ui, "heroNameLabel", nameLabel);
-            SceneWiringUtility.SetField(ui, "blocks", statBlocks);
+            SceneWiringUtility.SetField(ui, "rows", statRows);
             return ui;
         }
 
-        private static HeroUpgradeRowUI.StatBlock CreateStatBlock(Transform parent, HeroStatType statType, string iconSprite)
+        /// <summary>
+        /// One stat row: name + effect on the left, level + cost in the middle, and TWO finger-sized buttons on the
+        /// right - "+1" and "x10" (each at least <see cref="UiTouch.MinTarget"/> wide).
+        ///
+        /// The row face is decoration, not a button: a full-width button inside a scrolling list also fires when the
+        /// player flicks the list and lets go over the same row, which would buy upgrades by accident.
+        /// </summary>
+        private static HeroUpgradeRowUI.StatRow CreateStatRow(Transform parent, HeroStatType statType)
         {
-            GameObject block = UiFactory.Node($"Stat{statType}", parent);
+            GameObject rowObject = UiFactory.Node($"Stat{statType}", parent);
 
-            Image background = UiFactory.Panel("Background", block.transform, "ui_panel_light", new Color(1f, 1f, 1f, 0.28f));
+            LayoutElement layout = rowObject.AddComponent<LayoutElement>();
+            layout.minHeight = UiTouch.RowHeight;
+            layout.preferredHeight = UiTouch.RowHeight;
+
+            Image background = UiFactory.Panel("Background", rowObject.transform, "ui_panel_light", new Color(1f, 1f, 1f, 0.28f));
             UiFactory.Stretch(background.rectTransform);
 
-            TextMeshProUGUI levelLabel = UiFactory.Text("Level", block.transform, "Lv 0", 26f,
-                TextAlignmentOptions.Center, TextColor);
-            UiFactory.Anchor(levelLabel.rectTransform, new Vector2(0.04f, 0.70f), new Vector2(0.96f, 0.98f));
+            TextMeshProUGUI name = UiFactory.Text("Name", rowObject.transform, statType.ToDisplayName(), 26f,
+                TextAlignmentOptions.MidlineLeft, TextColor);
+            UiFactory.Anchor(name.rectTransform, new Vector2(0.03f, 0.52f), new Vector2(0.40f, 0.94f));
 
-            TextMeshProUGUI effectLabel = UiFactory.Text("Effect", block.transform, "+0%", 18f,
+            TextMeshProUGUI effect = UiFactory.Text("Effect", rowObject.transform, string.Empty, 19f,
+                TextAlignmentOptions.MidlineLeft, DimTextColor);
+            UiFactory.Anchor(effect.rectTransform, new Vector2(0.03f, 0.06f), new Vector2(0.40f, 0.48f));
+
+            TextMeshProUGUI level = UiFactory.Text("Level", rowObject.transform, "Lv 0", 26f,
+                TextAlignmentOptions.Center, TextColor);
+            UiFactory.Anchor(level.rectTransform, new Vector2(0.41f, 0.52f), new Vector2(0.56f, 0.94f));
+
+            TextMeshProUGUI cost = UiFactory.Text("Cost", rowObject.transform, "0", 19f,
                 TextAlignmentOptions.Center, DimTextColor);
-            UiFactory.Anchor(effectLabel.rectTransform, new Vector2(0.04f, 0.52f), new Vector2(0.96f, 0.70f));
+            UiFactory.Anchor(cost.rectTransform, new Vector2(0.41f, 0.06f), new Vector2(0.65f, 0.48f));
 
-            TextMeshProUGUI costLabel = UiFactory.Text("Cost", block.transform, "0", 20f,
-                TextAlignmentOptions.Center, TextColor);
-            UiFactory.Anchor(costLabel.rectTransform, new Vector2(0.04f, 0.32f), new Vector2(0.96f, 0.52f));
+            Button plusOne = UiFactory.Button("PlusOne", rowObject.transform, "+1", "ui_button", 24f, TextColor, null);
+            UiFactory.Anchor(plusOne.GetComponent<RectTransform>(), new Vector2(0.67f, 0.06f), new Vector2(0.82f, 0.94f));
 
-            Button plusOne = UiFactory.Button("PlusOne", block.transform, "+1", "ui_button", 22f, TextColor, null);
-            UiFactory.Anchor(plusOne.GetComponent<RectTransform>(), new Vector2(0.05f, 0.04f), new Vector2(0.47f, 0.30f));
+            Button plusTen = UiFactory.Button("PlusTen", rowObject.transform, "x10", "ui_button_gold", 22f, TextColor, null);
+            UiFactory.Anchor(plusTen.GetComponent<RectTransform>(), new Vector2(0.84f, 0.06f), new Vector2(0.99f, 0.94f));
 
-            Button plusTen = UiFactory.Button("PlusTen", block.transform, "+10", "ui_button_gold", 22f, TextColor, null);
-            UiFactory.Anchor(plusTen.GetComponent<RectTransform>(), new Vector2(0.53f, 0.04f), new Vector2(0.95f, 0.30f));
-
-            return new HeroUpgradeRowUI.StatBlock
+            return new HeroUpgradeRowUI.StatRow
             {
                 statType = statType,
-                plusOneButton = plusOne,
+                background = background,
+                buyOneButton = plusOne,
                 plusTenButton = plusTen,
-                levelLabel = levelLabel,
-                costLabel = costLabel,
-                effectLabel = effectLabel,
-                iconImage = null,
-                iconSprite = UiFactory.LoadSprite(iconSprite)
+                nameLabel = name,
+                effectLabel = effect,
+                levelLabel = level,
+                costLabel = cost
             };
         }
 
@@ -321,8 +336,8 @@ namespace IdleRPG.EditorTools
         {
             GameObject row = UiFactory.Node($"PrestigeRow{index}", parent);
             LayoutElement layout = row.AddComponent<LayoutElement>();
-            layout.minHeight = 116f;
-            layout.preferredHeight = 116f;
+            layout.minHeight = UiTouch.RowHeight;
+            layout.preferredHeight = UiTouch.RowHeight;
 
             Image background = UiFactory.Panel("Background", row.transform, "ui_panel", new Color(1f, 1f, 1f, 0.30f));
             UiFactory.Stretch(background.rectTransform);
@@ -343,8 +358,9 @@ namespace IdleRPG.EditorTools
                 TextAlignmentOptions.Center, DimTextColor);
             UiFactory.Anchor(costLabel.rectTransform, new Vector2(0.56f, 0.12f), new Vector2(0.76f, 0.55f));
 
+            // A full-height buy button: at least UiTouch.MinTarget tall so a thumb can hit it.
             Button buyButton = UiFactory.Button("BuyButton", row.transform, "BUY", "ui_button", 24f, TextColor, null);
-            UiFactory.Anchor(buyButton.GetComponent<RectTransform>(), new Vector2(0.78f, 0.16f), new Vector2(0.97f, 0.86f));
+            UiFactory.Anchor(buyButton.GetComponent<RectTransform>(), new Vector2(0.78f, 0.05f), new Vector2(0.97f, 0.95f));
 
             PrestigeUpgradeRowUI ui = row.AddComponent<PrestigeUpgradeRowUI>();
             SceneWiringUtility.SetField(ui, "nameLabel", nameLabel);

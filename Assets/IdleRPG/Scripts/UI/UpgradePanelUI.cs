@@ -23,23 +23,28 @@ namespace IdleRPG.UI
         /// <summary>
         /// Binds to the game systems the first time it can. Called from Start *and* OnEnable because
         /// this panel lives on a page that starts hidden, so activation order is not guaranteed.
+        ///
+        /// "The GameManager exists" is NOT enough: this page can be enabled while the manager is still loading a
+        /// save, so <c>Upgrade</c>/<c>Resolver</c> are still null. Binding then left every row with a null upgrade
+        /// manager and the old <c>if (manager != null) return;</c> guard blocked every later retry, so the page
+        /// showed placeholder text and its buttons did nothing for the rest of the session.
         /// </summary>
         private void EnsureBound()
         {
-            if (manager != null)
+            if (manager != null && manager.Upgrade != null && manager.Resolver != null)
             {
                 return;
             }
 
             HudController hud = HudController.Instance;
-            manager = hud != null ? hud.GameManager : null;
+            GameManager candidate = hud != null ? hud.GameManager : null;
 
-            if (manager == null)
+            if (candidate == null || candidate.Upgrade == null || candidate.Resolver == null)
             {
-                Debug.LogWarning("[UpgradePanelUI] GameManager not ready yet; will bind on next open.");
                 return;
             }
 
+            manager = candidate;
             BindRows();
             RefreshAll();
         }
@@ -103,6 +108,10 @@ namespace IdleRPG.UI
 
         public void RefreshAll()
         {
+            // Retry the bind from here too: this is the method the live events (gold changed, purchase made) call,
+            // so a page that was enabled too early still comes alive on its own within a second or two.
+            EnsureBound();
+
             if (rows == null || manager == null)
             {
                 return;

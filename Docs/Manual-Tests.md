@@ -141,10 +141,13 @@ includes them (enforced at build time from B10).
 - [ ] Gear bonus % appears only next to HP/ATK/DEF (blank beside CRIT / CRIT DMG / DPS).
 
 ### Upgrades page
-- [ ] Each hero row shows **five** tiles in two rows (ATK/HP/DEF, then CRIT/CRIT DMG) — nothing clipped, tiles the
-      same width.
+- [ ] Each hero section shows **five stacked rows** (ATK, HP, DEF, CRIT, CRIT DMG) under the hero's name - one row
+      per stat, not tiles side by side.
+- [ ] **Every row is easy to hit with a thumb**: tapping anywhere on a row buys one level; the `x10` button on the
+      right buys ten. Nothing needs a careful aim.
 - [ ] The effect line reads right per stat: `x1.09 / lvl`, `+10% base / lvl`, `+0.5% / lvl` (crit), `+0.05x / lvl`
       (crit damage).
+- [ ] At max level the row reads `MAX`, the cost line goes blank and the row stops responding to taps.
 - [ ] Buying crit raises CRIT in the battle log's upgrade line and on the roster.
 
 ### Battle log
@@ -186,6 +189,53 @@ includes them (enforced at build time from B10).
 ### Regression sweep
 - [ ] Upgrades still work (buy a stat, the roster sheet updates live), crit rows still read correctly, battle log
       still marks crits, and the lunge/turn-beat behaviour on the BATTLE page is untouched.
+
+---
+
+## 2g. Upgrades page — mobile layout pass, Phase 1 (added 2026-10-10)
+
+> Every control was smaller than a fingertip. Now one upgrade is one row and the whole row is the button. Full
+> record: `Docs/Upgrades-Page.md`. **No page content moved** - hero stats are still bought here.
+
+### Can I hit it with a thumb?
+- [ ] On UPGRADES, each stat row has two buttons on the right: **`+1`** buys one level, **`x10`** buys ten. Tap them
+      on all five rows on all three heroes - neither needs a careful aim.
+- [ ] Tapping the row's **face** (name, level, cost) does nothing by design - the face is decoration, so a scroll
+      flick cannot buy. Only the two buttons buy.
+- [ ] With 0 gold, rows are dimmed and the buttons do nothing (no sound, no purchase).
+- [ ] Buy a stat to level 1: the row stops being dim, the level and cost text update immediately.
+- [ ] The console shows **no** `NullReferenceException` and **no** "Combat tick threw" after opening this page and
+      killing an enemy (the page used to throw on every gold change).
+
+### Can I scroll it? (this was broken - check carefully)
+- [ ] Drag the UPGRADES list **starting on top of a row**: the list moves.
+- [ ] Drag it starting on a hero's name, on empty space, and on the AUTOMATION section: the list moves too.
+- [ ] Flick it hard: the list keeps moving and slows down (soft landing, not a snap back).
+- [ ] Drag the ASCEND list: it moves.
+- [ ] On the BATTLE page, drag the combat feed: auto-follow pauses, and it resumes when you let go.
+- [ ] Nothing gets bought while you drag (flick over a row, release, check gold and levels did not change).
+
+### Nothing overlaps or clips
+- [ ] Row text does not collide: stat name and effect on the left, level and cost in the middle, buttons on the
+      right. Costs in the millions (`1.2 M`) still fit.
+- [ ] The five rows fit inside their hero panel with even spacing; the hero's name sits above them.
+- [ ] Scrolling: the page scrolls smoothly from the first hero to the bottom of AUTOMATION. Content is about three
+      screens tall - that is expected, not a bug.
+
+### Automation section (it moved)
+- [ ] AUTOMATION is now the **last section inside the page**, below the last hero - not a pinned strip at the
+      bottom of the screen.
+- [ ] Each card has ON/OFF and BUY buttons that are comfortable to hit; unowned cards read `LOCKED` with the token
+      cost.
+- [ ] Auto-buy (once owned) shows its own row: the reserve text plus finger-sized `-5%` / `+5%` buttons. Before it
+      is owned, that row says the reserve unlocks with the card.
+
+### Ascend rows
+- [ ] ASCEND rows are taller than before and the `BUY` button is easy to hit.
+
+### Regression sweep
+- [ ] ROSTER still updates live when a stat is bought here; DPS still moves with crit.
+- [ ] The BATTLE page, the turn order and the lunge behaviour are untouched by this change.
 
 ---
 
