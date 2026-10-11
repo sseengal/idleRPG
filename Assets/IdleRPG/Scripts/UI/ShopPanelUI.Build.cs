@@ -73,16 +73,17 @@ namespace IdleRPG.UI
             card.type = Image.Type.Sliced;
             card.color = CardColor;
 
-            TextMeshProUGUI name = UiText("Name", row.transform,
-                new Vector2(0.03f, 0.58f), new Vector2(0.56f, 0.96f), UiType.Role.Section, TextAlignmentOptions.MidlineLeft, TextColor);
-            name.SetText(displayName);
+            TextMeshProUGUI name = UiRuntime.CreateText(row.transform, "Name", displayName, UiType.Role.Section,
+                TextAlignmentOptions.MidlineLeft, TextColor);
+            UiRuntime.Anchor(name.rectTransform, new Vector2(0.03f, 0.58f), new Vector2(0.56f, 0.96f));
 
-            TextMeshProUGUI effect = UiText("Effect", row.transform,
-                new Vector2(0.03f, 0.12f), new Vector2(0.56f, 0.55f), UiType.Role.Sentence, TextAlignmentOptions.MidlineLeft, DimTextColor);
-            effect.SetText(description);
+            TextMeshProUGUI effect = UiRuntime.CreateText(row.transform, "Effect", description, UiType.Role.Sentence,
+                TextAlignmentOptions.MidlineLeft, DimTextColor);
+            UiRuntime.Anchor(effect.rectTransform, new Vector2(0.03f, 0.12f), new Vector2(0.56f, 0.55f));
 
-            TextMeshProUGUI value = UiText("Value", row.transform,
-                new Vector2(0.56f, 0.58f), new Vector2(0.76f, 0.96f), UiType.Role.Section, TextAlignmentOptions.Center, TextColor);
+            TextMeshProUGUI value = UiRuntime.CreateText(row.transform, "Value", string.Empty, UiType.Role.Section,
+                TextAlignmentOptions.Center, TextColor);
+            UiRuntime.Anchor(value.rectTransform, new Vector2(0.56f, 0.58f), new Vector2(0.76f, 0.96f));
             // The value cell is only ~207 units wide and a price can grow ("100 gems" -> "1.2K gems"), so it shrinks.
             UiType.ApplyAuto(value, UiType.Role.Section);
 
@@ -99,26 +100,6 @@ namespace IdleRPG.UI
             return capped
                 ? string.Format("{0} (max +{1:0.#}%)", perLevel, track.GainPerLevel * 100f * track.RawMaxLevel)
                 : perLevel;
-        }
-
-        private TextMeshProUGUI UiText(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax,
-            UiType.Role role, TextAlignmentOptions alignment, Color color)
-        {
-            GameObject labelObject = new GameObject(name);
-            labelObject.transform.SetParent(parent, false);
-
-            RectTransform rect = labelObject.AddComponent<RectTransform>();
-            rect.anchorMin = anchorMin;
-            rect.anchorMax = anchorMax;
-            rect.offsetMin = Vector2.zero;
-            rect.offsetMax = Vector2.zero;
-
-            TextMeshProUGUI label = labelObject.AddComponent<TextMeshProUGUI>();
-            UiType.Apply(label, role);
-            label.alignment = alignment;
-            label.color = color;
-            label.raycastTarget = false;
-            return label;
         }
 
         /// <summary>The BUY button on the right of each card (ui_button sprite, like the prestige rows).</summary>
@@ -143,21 +124,9 @@ namespace IdleRPG.UI
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(onClick);
 
-            GameObject labelObject = new GameObject("Label");
-            labelObject.transform.SetParent(buttonObject.transform, false);
-
-            RectTransform labelRect = labelObject.AddComponent<RectTransform>();
-            labelRect.anchorMin = Vector2.zero;
-            labelRect.anchorMax = Vector2.one;
-            labelRect.offsetMin = new Vector2(4f, 4f);
-            labelRect.offsetMax = new Vector2(-4f, -4f);
-
-            TextMeshProUGUI label = labelObject.AddComponent<TextMeshProUGUI>();
-            UiType.Apply(label, UiType.Role.Section);
-            label.alignment = TextAlignmentOptions.Center;
-            label.color = TextColor;
-            label.raycastTarget = false;
-            label.SetText("BUY");
+            TextMeshProUGUI label = UiRuntime.CreateText(buttonObject.transform, "Label", "BUY", UiType.Role.Section,
+                TextAlignmentOptions.Center, TextColor);
+            UiRuntime.Stretch(label.rectTransform, 4f, 4f, 4f, 4f);
             // The button shows the price, whose length grows ("25 gems" -> "1.2K gems"), so it shrinks to fit.
             UiType.ApplyAuto(label, UiType.Role.Section);
             return button;
