@@ -58,6 +58,46 @@ Deferred migration path (only if compile isolation ever dominates):
 - Editor tooling files (scene builders, balance/assignment menus) - cohesive, already
   isolated in `Editor/`.
 
+## Phase D - GameManager (analysed, NOT started)
+
+`GameManager` is 1520 lines across six partial files, and `Architecture.md` §1.2 D1 already flags it: *"Every
+feature edits the same file."* The partial split hides that - the six files are one class that owns the
+composition root, the state machine, saving, offline pay, monetisation and lifetime stats. The target names
+already exist in `Architecture.md` §2.1 (`SaveCoordinator`, `OfflineCoordinator`, `RunController`, `GameContext`);
+`GameContext` and `RunController` are already real.
+
+### What the analysis found (2026-10-11), before any code was moved
+
+1. **The initialisation order is load-bearing and was undocumented.** Three separate constraints, now written
+   into `GameManager.Wiring.cs` above `WireUp()`:
+   - `Formation` and `SaveManager` must exist before the load (the load restores the party layout and the shop's
+     offline cap bonus).
+   - `IdleTimeService` must be created **after** the load: it copies `Shop.OfflineCapBonusSeconds` into its own
+     cap, so creating it earlier silently ignores a bought cap extension.
+   - `Context` is filled **last** because it needs every service, `Save` and `Idle` included - so nothing may
+     read `Context` during the load. The backup-recovery path saves from inside `WireUp()`.
+2. **Every extraction therefore needs either an explicit dependency bundle or an order change.** The snapshot
+   capture is the obvious first candidate (pure mapping, and the save is the one surface that must never
+   regress) but it cannot take `GameContext` without hitting constraint 1.3.
+3. **The god object has no cheap seam.** Everything hangs off `GameManager`, so each extraction carries
+   plumbing. That is the finding, not a reason to force it.
+
+### Planned order (each its own commit, each verified)
+
+| Step | What | Why first / risk |
+|---|---|---|
+| D1 | Snapshot mapping -> `SaveSnapshotMapper`, taking a small explicit service bundle built at the call site + a `RunState` struct | Pure mapping, no control flow. Makes the save contract testable without a live scene, which is the project's own "must never silently regress" surface. Verify by round-tripping a real captured payload. |
+| D2 | Offline evaluation -> `OfflineCoordinator` (idle window, caps, reward) | Real logic but no event wiring; verify with a fixed clock override. |
+| D3 | Monetisation -> `MonetizationService` (ads, iap, boost) | Has mock services + `AdCapsSelfCheck` to lean on. |
+| D4 | Stage/combat flow -> a stage-flow controller | The event-wiring heart. Last, and only with its own plan. |
+
+**Not planned:** flattening the ~40 service properties (a facade is the right shape, and touching every call
+site is churn with no payoff); assembly re-splitting (already deferred in Phase C with measured reasons).
+
+**Verification limit, stated plainly:** the golden-number net is currently red (the balance is still being
+built), so it is not a usable signal for these steps. They lean on: compile, the 12 edit-mode tests, a
+round-trip of a real save payload captured from the live game, and a play smoke.
+
 ## House verification checklist (every phase)
 
 1. Recompile clean (0 errors) - console `groundTruth.compilationFailed == false`.

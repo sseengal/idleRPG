@@ -23,6 +23,21 @@ namespace IdleRPG.Core
     public sealed partial class GameManager : MonoBehaviour
     {
 
+        /// <summary>
+        /// Builds every system. THE ORDER MATTERS - do not reorder these blocks:
+        ///
+        ///   1. the services: economy, resolver, gear, tracks, upgrade, ascension, automation, boost, ads, iap,
+        ///      audio, ledger, rewards, shop, daily streak, ad caps, first-run tips.
+        ///   2. Formation, then SaveManager, then the load. The load restores the shop's offline cap bonus and the
+        ///      party's saved layout, so both must exist before it runs.
+        ///   3. IdleTimeService is created AFTER the load on purpose: it copies Shop.OfflineCapBonusSeconds into
+        ///      its own cap, so creating it earlier would silently ignore a bought cap extension.
+        ///   4. combat initialise + progress restore, then the event subscriptions, then the context.
+        ///
+        /// <see cref="Context"/> is filled last because it needs every service, Save and Idle included. Nothing
+        /// may read Context during the load - the backup-recovery path saves from inside this method - which is
+        /// why the snapshot capture reads the manager's own fields and not the context.
+        /// </summary>
         private bool WireUp()
         {
             if (formationConfig == null)
