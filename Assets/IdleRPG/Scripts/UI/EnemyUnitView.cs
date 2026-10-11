@@ -50,11 +50,7 @@ namespace IdleRPG.UI
         private float popTimer;
 
         private Color baseColor = Color.white;
-        private float flashTimer;
-        private float flashDuration;
-        private float punchTimer;
-        private float punchStartScale;
-        private float punchDuration;
+        private readonly UnitHitJuice hitJuice = new UnitHitJuice();
 
         private CharacterAnimator animator;
         private CharacterLunge lunge;
@@ -172,10 +168,7 @@ namespace IdleRPG.UI
 
                 // Fresh state: capture the resting tint (flash lerps off it) and cancel any stale feedback.
                 baseColor = spriteImage.color;
-                flashTimer = 0f;
-                punchTimer = 0f;
-                punchStartScale = 1f;
-                punchDuration = punchDurationSec;
+                hitJuice.Clear();
             }
 
             if (nameLabel != null)
@@ -223,11 +216,8 @@ namespace IdleRPG.UI
             hpBar.SetValueLabel(info.CurrentHealth, info.MaxHealth);
 
             // Hit juice: white flash + a small squash. Crits flash longer and punch deeper.
-            flashDuration = info.IsCritical ? critFlashDurationSec : hitFlashDurationSec;
-            flashTimer = flashDuration;
-            punchStartScale = info.IsCritical ? critPunchScale : hitPunchScale;
-            punchDuration = punchDurationSec;
-            punchTimer = punchDurationSec;
+            hitJuice.Flash(hitFlashColor, baseColor, info.IsCritical ? critFlashDurationSec : hitFlashDurationSec);
+            hitJuice.Punch(info.IsCritical ? critPunchScale : hitPunchScale, punchDurationSec);
 
             if (animator != null && animator.HasArt)
             {
@@ -329,16 +319,9 @@ namespace IdleRPG.UI
                 float scale = Mathf.Lerp(spawnPopScale, 1f, t);
                 root.localScale = new Vector3(scale, scale, 1f);
             }
-            else if (punchTimer > 0f)
+            else
             {
-                punchTimer -= Time.deltaTime;
-                float t = 1f - Mathf.Clamp01(punchTimer / Mathf.Max(0.0001f, punchDuration));
-                float scale = Mathf.Lerp(punchStartScale, 1f, t);
-                root.localScale = new Vector3(scale, scale, 1f);
-            }
-            else if (root.localScale != Vector3.one)
-            {
-                root.localScale = Vector3.one;
+                hitJuice.TickPunch(Time.deltaTime, root);
             }
 
             // White flash cross-fades to the resting tint (placeholder sprites pop against it).
@@ -347,18 +330,15 @@ namespace IdleRPG.UI
                 return;
             }
 
-            if (flashTimer > 0f)
-            {
-                flashTimer -= Time.deltaTime;
-                float t = Mathf.Clamp01(flashTimer / Mathf.Max(0.0001f, flashDuration));
-                spriteImage.color = Color.Lerp(hitFlashColor, baseColor, t);
-            }
-            else if (lunge == null || !lunge.IsBusy)
+            if (!hitJuice.TickFlash(Time.deltaTime, spriteImage))
             {
                 // Not mid-blink (the lunge owns alpha while it fades in/out); return to the resting tint.
-                if (spriteImage.color != baseColor)
+                if (lunge == null || !lunge.IsBusy)
                 {
-                    spriteImage.color = baseColor;
+                    if (spriteImage.color != baseColor)
+                    {
+                        spriteImage.color = baseColor;
+                    }
                 }
             }
         }
