@@ -493,7 +493,7 @@ namespace IdleRPG.EditorTools
         private static TextMeshProUGUI PixelText(Transform parent, string name, string content, float size,
             TextAlignmentOptions alignment, Color color, TMP_FontAsset font)
         {
-            TextMeshProUGUI text = UiFactory.Text(name, parent, content, size, alignment, color);
+            TextMeshProUGUI text = UiFactory.RawText(name, parent, content, size, alignment, color);
 
             if (font != null)
             {

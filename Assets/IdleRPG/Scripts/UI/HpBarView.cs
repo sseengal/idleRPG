@@ -58,12 +58,15 @@ namespace IdleRPG.UI
             ApplyVisuals();
         }
 
-        /// <summary>Sets the label, e.g. "240 / 360".</summary>
+        /// <summary>
+        /// Sets the label, e.g. "240/360". No spaces around the slash: the enemy bar's value box is only about 116
+        /// units wide, and at the type scale the spaces alone cost more width than the bar has to spare.
+        /// </summary>
         public void SetValueLabel(double current, double max)
         {
             if (valueLabel != null)
             {
-                valueLabel.SetText(string.Format("{0} / {1}", NumberFormatter.Format(current), NumberFormatter.Format(max)));
+                valueLabel.SetText(string.Format("{0}/{1}", NumberFormatter.Format(current), NumberFormatter.Format(max)));
             }
         }
 

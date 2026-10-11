@@ -38,7 +38,7 @@ namespace IdleRPG.UI
 
         private readonly List<ShopRow> rows = new List<ShopRow>();
 
-        private const float OfferRowHeight = 116f;
+        private const float OfferRowHeight = 150f;
 
         // Palette shared with the scene builder (MvpSceneBuilder.TextColor / DimTextColor).
         private static readonly Color TextColor = new Color(0.94f, 0.96f, 1f, 1f);

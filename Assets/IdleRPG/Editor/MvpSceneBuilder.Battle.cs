@@ -39,9 +39,8 @@ namespace IdleRPG.EditorTools
             Image boostChip = KitPanel("BoostChip", header.transform, UiTheme.Accent);
             UiFactory.Anchor(boostChip.rectTransform, new Vector2(0.03f, 0.20f), new Vector2(0.53f, 0.92f));
 
-            TextMeshProUGUI boostText = UiFactory.Text("BoostLabel", boostChip.transform, "x2", 28f,
+            TextMeshProUGUI boostText = UiFactory.Text("BoostLabel", boostChip.transform, "x2", UiType.Role.Section,
                 TextAlignmentOptions.Center, UiTheme.InkOnAccent);
-            UiTheme.ApplyFont(boostText, UiTheme.Display, 28f);
             UiFactory.Stretch(boostText.rectTransform, 12f, 4f, 12f, 4f);
             boostChip.gameObject.SetActive(false);
 
@@ -65,9 +64,8 @@ namespace IdleRPG.EditorTools
             icon.sprite = UiFactory.LoadSprite(iconSprite);
             UiFactory.Anchor(icon.rectTransform, new Vector2(0.04f, 0.12f), new Vector2(0.30f, 0.88f));
 
-            TextMeshProUGUI value = UiFactory.Text("Value", chip.transform, "0", UiTheme.NumberSize,
+            TextMeshProUGUI value = UiFactory.Text("Value", chip.transform, "0", UiType.Role.Display,
                 TextAlignmentOptions.MidlineLeft, UiTheme.Text);
-            UiTheme.ApplyFont(value, UiTheme.Display, UiTheme.NumberSize);
             UiFactory.Anchor(value.rectTransform, new Vector2(0.32f, 0f), new Vector2(0.98f, 1f));
 
             return value;
@@ -87,10 +85,14 @@ namespace IdleRPG.EditorTools
             Image ghost = CreateFilledImage("Ghost", background.transform, new Color(1f, 0.85f, 0.35f, 0.5f));
             Image fill = CreateFilledImage("Fill", background.transform, new Color(0.35f, 0.85f, 0.45f, 1f));
 
-            TextMeshProUGUI value = UiFactory.Text("Value", barObject.transform, "0 / 0", 20f,
+            TextMeshProUGUI value = UiFactory.Text("Value", barObject.transform, "0 / 0", UiType.Role.Micro,
                 TextAlignmentOptions.Center, UiTheme.Text);
-            UiTheme.ApplyFont(value, UiTheme.Display, 20f);
-            UiFactory.Stretch(value.rectTransform, 6f, 0f, 6f, 0f);
+            // The bar's value box is dynamic (it shrinks as the enemy stack grows), so an extreme pair must degrade
+            // with an ellipsis instead of spilling over the sprite.
+            // Masking, not Ellipsis: with NoWrap, TMP's Ellipsis AND Truncate modes render ZERO characters when the
+            // text does not fit, so the label goes blank. Masking draws the text and clips it at the box edge.
+            value.overflowMode = TextOverflowModes.Masking;
+            UiFactory.Stretch(value.rectTransform);
 
             SceneWiringUtility.SetField(view, "fillImage", fill);
             SceneWiringUtility.SetField(view, "ghostImage", ghost);
@@ -194,9 +196,8 @@ namespace IdleRPG.EditorTools
             Image row = KitPanel("StageRow", pageRoot, UiTheme.Panel);
             UiFactory.Anchor(row.rectTransform, new Vector2(0f, StageRowMinY), new Vector2(1f, StageRowMaxY));
 
-            TextMeshProUGUI label = UiFactory.Text("StageLabel", row.transform, "Stage 1", 30f,
+            TextMeshProUGUI label = UiFactory.Text("StageLabel", row.transform, "Stage 1", UiType.Role.Section,
                 TextAlignmentOptions.Center, UiTheme.Text);
-            UiTheme.ApplyFont(label, UiTheme.Display, 30f);
             UiFactory.Stretch(label.rectTransform, 24f, 0f, 24f, 0f);
 
             // Same field HudHeaderUI already drives on StageChanged - just relocated out of the header.
@@ -209,9 +210,8 @@ namespace IdleRPG.EditorTools
             Image row = KitPanel("BattleLogHeader", pageRoot, UiTheme.Panel);
             UiFactory.Anchor(row.rectTransform, new Vector2(0f, LogTop), new Vector2(1f, BattleViewportBottom), 14f, 0f, 14f, 0f);
 
-            TextMeshProUGUI label = UiFactory.Text("LogTitle", row.transform, "BATTLE LOG", 26f,
+            TextMeshProUGUI label = UiFactory.Text("LogTitle", row.transform, "BATTLE LOG", UiType.Role.Section,
                 TextAlignmentOptions.MidlineLeft, UiTheme.TextDim);
-            UiTheme.ApplyFont(label, UiTheme.Display, 26f);
             UiFactory.Stretch(label.rectTransform, 28f, 0f, 28f, 0f);
         }
 
@@ -250,14 +250,18 @@ namespace IdleRPG.EditorTools
             UiFactory.CenterOn(icon.rectTransform, new Vector2(0.5f, 0.60f), new Vector2(128f, 128f));
             icon.enabled = false;
 
-            TextMeshProUGUI nameLabel = UiFactory.Text("Name", slot.transform, "Enemy", 20f,
+            TextMeshProUGUI nameLabel = UiFactory.Text("Name", slot.transform, "Enemy", UiType.Role.Small,
                 TextAlignmentOptions.Center, UiTheme.Text);
-            UiTheme.ApplyFont(nameLabel, UiTheme.Display, 20f);
+            // Fixed size + Masking, NOT auto-size and NOT Ellipsis: the slot narrows as the enemy stack grows, and
+            // with NoWrap an auto-sized or ellipsized label whose floor still does not fit renders NOTHING at all -
+            // a blank name plate. Masking draws the name and clips it at the slot edge.
+            nameLabel.overflowMode = TextOverflowModes.Masking;
             UiFactory.Anchor(nameLabel.rectTransform, new Vector2(0f, 0.14f), new Vector2(1f, 0.32f));
 
-            // Hero-identical bar layout: the slot is 160px wide, so 0.10..0.90 of it is the same ~128px bar.
+            // Hero-identical bar layout: the slot is 160px wide, so the bar takes nearly the whole of it - the value
+            // text needs the width at the type scale.
             HpBarView hpBar = CreateHpBar(slot.transform, "HpBar");
-            UiFactory.Anchor(hpBar.GetComponent<RectTransform>(), new Vector2(0.10f, 0.02f), new Vector2(0.90f, 0.12f));
+            UiFactory.Anchor(hpBar.GetComponent<RectTransform>(), new Vector2(0.02f, 0.02f), new Vector2(0.98f, 0.12f));
 
             EnemyUnitView view = slot.AddComponent<EnemyUnitView>();
             view.ConfigureRuntime(index, icon, hpBar, nameLabel, slotRect, null);
@@ -284,9 +288,8 @@ namespace IdleRPG.EditorTools
         {
             GameObject template = UiFactory.Node("DamageTextTemplate", damageRoot);
             FloatingDamageTextView textView = template.AddComponent<FloatingDamageTextView>();
-            TextMeshProUGUI label = UiFactory.Text("Label", template.transform, "0", UiTheme.DamageSize,
+            TextMeshProUGUI label = UiFactory.Text("Label", template.transform, "0", UiType.Role.Damage,
                 TextAlignmentOptions.Center, Color.white);
-            UiTheme.ApplyFont(label, UiTheme.Display, UiTheme.DamageSize);
             UiFactory.Stretch(label.rectTransform);
 
             SceneWiringUtility.SetField(textView, "label", label);
@@ -317,10 +320,9 @@ namespace IdleRPG.EditorTools
         LogScrollDragRelay dragRelay = scroll.gameObject.AddComponent<LogScrollDragRelay>();
         dragRelay.Bind(ui);
 
-            // The whole pool copies this template, so the font and the bigger VT323 size land everywhere.
-            TextMeshProUGUI template = UiFactory.Text("LineTemplate", content, "line", UiTheme.LogSize,
+            // The whole pool copies this template, so the font and the sentence size land everywhere.
+            TextMeshProUGUI template = UiFactory.Text("LineTemplate", content, "line", UiType.Role.Sentence,
                 TextAlignmentOptions.MidlineLeft, UiTheme.Text);
-            UiTheme.ApplyFont(template, UiTheme.Sentence, UiTheme.LogSize);
             LayoutElement element = template.gameObject.AddComponent<LayoutElement>();
             element.minHeight = UiTheme.LogLineHeight;
             element.preferredHeight = UiTheme.LogLineHeight;

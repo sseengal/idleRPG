@@ -2,6 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using IdleRPG.UI;
 
 namespace IdleRPG.EditorTools
 {
@@ -60,8 +61,24 @@ namespace IdleRPG.EditorTools
             return image;
         }
 
-        /// <summary>A text label using the shared TMP font.</summary>
-        public static TextMeshProUGUI Text(string name, Transform parent, string content, float size,
+        /// <summary>
+        /// A text label on a role from <see cref="UiType"/>: the scene builder says what the text IS (a title, a
+        /// sentence, a small label) and never how big it is. The role supplies the font and the size together.
+        /// </summary>
+        public static TextMeshProUGUI Text(string name, Transform parent, string content, UiType.Role role,
+            TextAlignmentOptions alignment, Color color)
+        {
+            TextMeshProUGUI text = RawText(name, parent, content, UiType.Size(role), alignment, color);
+            UiType.Apply(text, role);
+            return text;
+        }
+
+        /// <summary>
+        /// A label with an explicit size and the default font. For the design labs only - they compare looks, so they
+        /// must pick a font and a size per look. The game scene uses
+        /// <see cref="Text(string,Transform,string,UiType.Role,TextAlignmentOptions,Color)"/>.
+        /// </summary>
+        public static TextMeshProUGUI RawText(string name, Transform parent, string content, float size,
             TextAlignmentOptions alignment, Color color)
         {
             GameObject node = Node(name, parent);
@@ -81,15 +98,15 @@ namespace IdleRPG.EditorTools
             return text;
         }
 
-        /// <summary>A button using a placeholder sprite, with an optional listener.</summary>
+        /// <summary>A button using a placeholder sprite, with an optional listener. The label takes a role too.</summary>
         public static Button Button(string name, Transform parent, string label, string spriteName,
-            float fontSize, Color textColor, UnityAction onClick)
+            UiType.Role role, Color textColor, UnityAction onClick)
         {
             Image background = Panel(name, parent, spriteName, Color.white, raycast: true);
             Button button = background.gameObject.AddComponent<Button>();
             button.targetGraphic = background;
 
-            TextMeshProUGUI text = Text("Label", background.transform, label, fontSize,
+            TextMeshProUGUI text = Text("Label", background.transform, label, role,
                 TextAlignmentOptions.Center, textColor);
             Stretch(text.rectTransform, 8f, 4f, 8f, 4f);
 

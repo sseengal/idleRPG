@@ -26,7 +26,13 @@ namespace IdleRPG.UI
 
         [Header("Boss scale")]
         [SerializeField] private float bossNameSizeScale = 1.3f;
-        private float baseNameSize = 24f;
+
+        /// <summary>
+        /// The name's size, taken from the type scale so a role change carries here. A boss scales it up (below).
+        /// The label is NOT auto-sized and NOT ellipsized: with NoWrap, either of those renders nothing at all when
+        /// the name cannot fit the slot, and the name plate goes blank. It is masked (clipped) instead.
+        /// </summary>
+        private float baseNameSize = UiType.Size(UiType.Role.Small);
 
         [Header("Feedback")]
         [SerializeField] private float spawnPopScale = 0.65f;
@@ -73,10 +79,8 @@ namespace IdleRPG.UI
             root = rect;
             bossFrame = frame;
 
-            if (nameLabel != null)
-            {
-                baseNameSize = nameLabel.fontSize;
-            }
+            // baseNameSize comes from UiType (the label auto-sizes, so reading nameLabel.fontSize here would read a
+            // computed value, not the role's ceiling).
         }
 
         private void OnEnable()
@@ -177,6 +181,10 @@ namespace IdleRPG.UI
             if (nameLabel != null)
             {
                 nameLabel.SetText(isBoss ? $"{enemyName} <size=70%>BOSS</size>" : enemyName);
+
+                // A boss gets the bigger size. NOT auto-size and NOT ellipsis: see baseNameSize above - either one
+                // blanks the name plate when even the floor does not fit the slot. It is masked (clipped) instead.
+                nameLabel.enableAutoSizing = false;
                 nameLabel.fontSize = isBoss ? baseNameSize * bossNameSizeScale : baseNameSize;
             }
 

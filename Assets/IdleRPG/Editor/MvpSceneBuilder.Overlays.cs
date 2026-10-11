@@ -47,27 +47,30 @@ namespace IdleRPG.EditorTools
             Image frame = UiFactory.Panel("Frame", dialog.transform, "ui_panel_bordered", Color.white);
             UiFactory.Stretch(frame.rectTransform);
 
-            TextMeshProUGUI title = UiFactory.Text("Title", dialog.transform, "Welcome back!", 36f,
+            TextMeshProUGUI title = UiFactory.Text("Title", dialog.transform, "Welcome back!", UiType.Role.Title,
                 TextAlignmentOptions.Center, TextColor);
             UiFactory.Anchor(title.rectTransform, new Vector2(0.06f, 0.84f), new Vector2(0.94f, 0.97f));
 
-            TextMeshProUGUI timeLabel = UiFactory.Text("Time", dialog.transform, "You were away for 1h", 24f,
+            TextMeshProUGUI timeLabel = UiFactory.Text("Time", dialog.transform, "You were away for 1h", UiType.Role.Sentence,
                 TextAlignmentOptions.Center, DimTextColor);
             UiFactory.Anchor(timeLabel.rectTransform, new Vector2(0.06f, 0.68f), new Vector2(0.94f, 0.83f));
 
-            TextMeshProUGUI goldLabel = UiFactory.Text("Gold", dialog.transform, "+0 gold", 40f,
+            TextMeshProUGUI goldLabel = UiFactory.Text("Gold", dialog.transform, "+0 gold", UiType.Role.Display,
                 TextAlignmentOptions.Center, new Color(0.98f, 0.82f, 0.30f, 1f));
             UiFactory.Anchor(goldLabel.rectTransform, new Vector2(0.06f, 0.47f), new Vector2(0.94f, 0.67f));
 
-            TextMeshProUGUI capNote = UiFactory.Text("CapNote", dialog.transform, "", 19f,
+            TextMeshProUGUI capNote = UiFactory.Text("CapNote", dialog.transform, "", UiType.Role.Sentence,
                 TextAlignmentOptions.Center, DimTextColor);
             UiFactory.Anchor(capNote.rectTransform, new Vector2(0.08f, 0.31f), new Vector2(0.92f, 0.46f));
 
-            Button doubleButton = UiFactory.Button("DoubleButton", dialog.transform, "DOUBLE WITH AD", "ui_button", 22f, TextColor, null);
-            UiFactory.Anchor(doubleButton.GetComponent<RectTransform>(), new Vector2(0.06f, 0.07f), new Vector2(0.47f, 0.27f));
+            // Wider than the old pair: "DOUBLE WITH AD" at the section size needs the room, and the label still says
+            // an ad is involved (auto-sized as a safety net).
+            Button doubleButton = UiFactory.Button("DoubleButton", dialog.transform, "DOUBLE WITH AD", "ui_button", UiType.Role.Section, TextColor, null);
+            UiFactory.Anchor(doubleButton.GetComponent<RectTransform>(), new Vector2(0.04f, 0.07f), new Vector2(0.48f, 0.27f));
+            UiType.ApplyAuto(doubleButton.GetComponentInChildren<TextMeshProUGUI>(), UiType.Role.Section);
 
-            Button claimButton = UiFactory.Button("ClaimButton", dialog.transform, "CLAIM", "ui_button_gold", 30f, TextColor, null);
-            UiFactory.Anchor(claimButton.GetComponent<RectTransform>(), new Vector2(0.53f, 0.07f), new Vector2(0.94f, 0.27f));
+            Button claimButton = UiFactory.Button("ClaimButton", dialog.transform, "CLAIM", "ui_button_gold", UiType.Role.Section, TextColor, null);
+            UiFactory.Anchor(claimButton.GetComponent<RectTransform>(), new Vector2(0.52f, 0.07f), new Vector2(0.96f, 0.27f));
 
             title.overflowMode = TextOverflowModes.Ellipsis;
             timeLabel.overflowMode = TextOverflowModes.Ellipsis;
@@ -104,34 +107,36 @@ namespace IdleRPG.EditorTools
             UiFactory.Stretch(scrim.rectTransform);
 
             GameObject dialog = UiFactory.Node("Dialog", scrim.transform);
-            UiFactory.Anchor(dialog.GetComponent<RectTransform>(), new Vector2(0.08f, 0.34f), new Vector2(0.92f, 0.68f));
+            // Taller than the old 0.34..0.68 band: at the type scale the two buttons need >= UiTouch.MinTarget of
+            // height (144 units) to be a fair thumb target, and the four text bands need their room above them.
+            UiFactory.Anchor(dialog.GetComponent<RectTransform>(), new Vector2(0.08f, 0.30f), new Vector2(0.92f, 0.72f));
 
             Image background = UiFactory.Panel("Background", dialog.transform, "ui_panel_light", Color.white, raycast: true);
             UiFactory.Stretch(background.rectTransform);
             Image frame = UiFactory.Panel("Frame", dialog.transform, "ui_panel_bordered", Color.white);
             UiFactory.Stretch(frame.rectTransform);
 
-            TextMeshProUGUI title = UiFactory.Text("Title", dialog.transform, "DEFEAT", 40f,
+            TextMeshProUGUI title = UiFactory.Text("Title", dialog.transform, "DEFEAT", UiType.Role.Title,
                 TextAlignmentOptions.Center, TextColor);
             UiFactory.Anchor(title.rectTransform, new Vector2(0.06f, 0.78f), new Vector2(0.94f, 0.94f));
 
-            TextMeshProUGUI summary = UiFactory.Text("Summary", dialog.transform, "", 24f,
+            TextMeshProUGUI summary = UiFactory.Text("Summary", dialog.transform, "", UiType.Role.Sentence,
                 TextAlignmentOptions.Center, DimTextColor);
             UiFactory.Anchor(summary.rectTransform, new Vector2(0.06f, 0.56f), new Vector2(0.94f, 0.76f));
 
-            TextMeshProUGUI ascend = UiFactory.Text("Ascend", dialog.transform, "", 24f,
+            TextMeshProUGUI ascend = UiFactory.Text("Ascend", dialog.transform, "", UiType.Role.Sentence,
                 TextAlignmentOptions.Center, new Color(0.98f, 0.82f, 0.30f, 1f));
             UiFactory.Anchor(ascend.rectTransform, new Vector2(0.06f, 0.40f), new Vector2(0.94f, 0.55f));
 
-            TextMeshProUGUI countdown = UiFactory.Text("Countdown", dialog.transform, "", 20f,
+            TextMeshProUGUI countdown = UiFactory.Text("Countdown", dialog.transform, "", UiType.Role.Sentence,
                 TextAlignmentOptions.Center, DimTextColor);
             UiFactory.Anchor(countdown.rectTransform, new Vector2(0.06f, 0.22f), new Vector2(0.94f, 0.38f));
 
-            Button ascendButton = UiFactory.Button("AscendButton", dialog.transform, "ASCEND", "ui_button_gold", 26f, TextColor, null);
-            UiFactory.Anchor(ascendButton.GetComponent<RectTransform>(), new Vector2(0.06f, 0.06f), new Vector2(0.47f, 0.20f));
+            Button ascendButton = UiFactory.Button("AscendButton", dialog.transform, "ASCEND", "ui_button_gold", UiType.Role.Section, TextColor, null);
+            UiFactory.Anchor(ascendButton.GetComponent<RectTransform>(), new Vector2(0.06f, 0.05f), new Vector2(0.47f, 0.23f));
 
-            Button continueButton = UiFactory.Button("ContinueButton", dialog.transform, "CONTINUE", "ui_button", 26f, TextColor, null);
-            UiFactory.Anchor(continueButton.GetComponent<RectTransform>(), new Vector2(0.53f, 0.06f), new Vector2(0.94f, 0.20f));
+            Button continueButton = UiFactory.Button("ContinueButton", dialog.transform, "CONTINUE", "ui_button", UiType.Role.Section, TextColor, null);
+            UiFactory.Anchor(continueButton.GetComponent<RectTransform>(), new Vector2(0.53f, 0.05f), new Vector2(0.94f, 0.23f));
 
             summary.overflowMode = TextOverflowModes.Ellipsis;
             ascend.overflowMode = TextOverflowModes.Ellipsis;
@@ -158,8 +163,10 @@ namespace IdleRPG.EditorTools
             group.alpha = 0f;
             group.blocksRaycasts = false;
 
-            TextMeshProUGUI label = UiFactory.Text("Message", host.transform, "", 26f,
+            TextMeshProUGUI label = UiFactory.Text("Message", host.transform, "", UiType.Role.Section,
                 TextAlignmentOptions.Center, new Color(1f, 0.92f, 0.6f, 1f));
+            // Auto-sized: toast messages vary a lot in length ("Not enough gold" vs a long run summary).
+            UiType.ApplyAuto(label, UiType.Role.Section);
             UiFactory.Anchor(label.rectTransform, new Vector2(0.05f, 0.32f), new Vector2(0.95f, 0.40f));
 
             ToastUI ui = host.AddComponent<ToastUI>();

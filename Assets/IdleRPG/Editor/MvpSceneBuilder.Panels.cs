@@ -88,9 +88,11 @@ namespace IdleRPG.EditorTools
                 Button button = buttonImage.gameObject.AddComponent<Button>();
                 button.targetGraphic = buttonImage;
 
-                TextMeshProUGUI label = UiFactory.Text("Label", buttonImage.transform, labels[i], 26f,
+                TextMeshProUGUI label = UiFactory.Text("Label", buttonImage.transform, labels[i], UiType.Role.Small,
                     TextAlignmentOptions.Center, UiTheme.Text);
-                UiTheme.ApplyFont(label, UiTheme.Display, 26f);
+                // Auto-sized: "UPGRADES" is the longest tab word and a tab is only ~198 units wide, so a longer
+                // label shrinks towards UiType.Micro instead of spilling over its neighbour.
+                UiType.ApplyAuto(label, UiType.Role.Small);
                 UiFactory.Stretch(label.rectTransform, 8f, 4f, 8f, 4f);
 
                 buttons[i] = button;
@@ -140,7 +142,7 @@ namespace IdleRPG.EditorTools
             UpgradePanelUI ui = panel.AddComponent<UpgradePanelUI>();
 
             TextMeshProUGUI title = UiFactory.Text("Title", panel.transform,
-                "Spend gold to raise each hero's stats (scroll for more)", 22f,
+                "Spend gold to raise each hero's stats (scroll for more)", UiType.Role.Sentence,
                 TextAlignmentOptions.MidlineLeft, DimTextColor);
             UiFactory.Anchor(title.rectTransform, new Vector2(0.02f, 0.945f), new Vector2(0.98f, 1f));
 
@@ -185,7 +187,7 @@ namespace IdleRPG.EditorTools
 
             HeroData hero = partyConfig != null ? partyConfig.GetHero(index) : null;
             TextMeshProUGUI nameLabel = UiFactory.Text("Name", row.transform,
-                hero != null ? hero.HeroName : $"Hero {index + 1}", 28f, TextAlignmentOptions.MidlineLeft, TextColor);
+                hero != null ? hero.HeroName : $"Hero {index + 1}", UiType.Role.Section, TextAlignmentOptions.MidlineLeft, TextColor);
             UiFactory.Anchor(nameLabel.rectTransform, new Vector2(0.03f, 0.87f), new Vector2(0.97f, 0.99f));
 
             // ONE ROW PER STAT, stacked. Each row is a single big tap target (see UiTouch): the old five-tiles-in-a-row
@@ -228,26 +230,30 @@ namespace IdleRPG.EditorTools
             Image background = UiFactory.Panel("Background", rowObject.transform, "ui_panel_light", new Color(1f, 1f, 1f, 0.28f));
             UiFactory.Stretch(background.rectTransform);
 
-            TextMeshProUGUI name = UiFactory.Text("Name", rowObject.transform, statType.ToDisplayName(), 26f,
+            TextMeshProUGUI name = UiFactory.Text("Name", rowObject.transform, statType.ToDisplayName(), UiType.Role.Section,
                 TextAlignmentOptions.MidlineLeft, TextColor);
             UiFactory.Anchor(name.rectTransform, new Vector2(0.03f, 0.52f), new Vector2(0.40f, 0.94f));
 
-            TextMeshProUGUI effect = UiFactory.Text("Effect", rowObject.transform, string.Empty, 19f,
+            TextMeshProUGUI effect = UiFactory.Text("Effect", rowObject.transform, string.Empty, UiType.Role.Sentence,
                 TextAlignmentOptions.MidlineLeft, DimTextColor);
+            // The effect and the cost carry data whose length grows with the game (a long effect line, a big price),
+            // so they auto-fit their fixed cells instead of spilling into the buttons beside them.
+            UiType.ApplyAuto(effect, UiType.Role.Sentence);
             UiFactory.Anchor(effect.rectTransform, new Vector2(0.03f, 0.06f), new Vector2(0.40f, 0.48f));
 
-            TextMeshProUGUI level = UiFactory.Text("Level", rowObject.transform, "Lv 0", 26f,
+            TextMeshProUGUI level = UiFactory.Text("Level", rowObject.transform, "Lv 0", UiType.Role.Small,
                 TextAlignmentOptions.Center, TextColor);
             UiFactory.Anchor(level.rectTransform, new Vector2(0.41f, 0.52f), new Vector2(0.56f, 0.94f));
 
-            TextMeshProUGUI cost = UiFactory.Text("Cost", rowObject.transform, "0", 19f,
+            TextMeshProUGUI cost = UiFactory.Text("Cost", rowObject.transform, "0", UiType.Role.Small,
                 TextAlignmentOptions.Center, DimTextColor);
+            UiType.ApplyAuto(cost, UiType.Role.Small);
             UiFactory.Anchor(cost.rectTransform, new Vector2(0.41f, 0.06f), new Vector2(0.65f, 0.48f));
 
-            Button plusOne = UiFactory.Button("PlusOne", rowObject.transform, "+1", "ui_button", 24f, TextColor, null);
+            Button plusOne = UiFactory.Button("PlusOne", rowObject.transform, "+1", "ui_button", UiType.Role.Section, TextColor, null);
             UiFactory.Anchor(plusOne.GetComponent<RectTransform>(), new Vector2(0.67f, 0.06f), new Vector2(0.82f, 0.94f));
 
-            Button plusTen = UiFactory.Button("PlusTen", rowObject.transform, "x10", "ui_button_gold", 22f, TextColor, null);
+            Button plusTen = UiFactory.Button("PlusTen", rowObject.transform, "x10", "ui_button_gold", UiType.Role.Section, TextColor, null);
             UiFactory.Anchor(plusTen.GetComponent<RectTransform>(), new Vector2(0.84f, 0.06f), new Vector2(0.99f, 0.94f));
 
             return new HeroUpgradeRowUI.StatRow
@@ -269,15 +275,15 @@ namespace IdleRPG.EditorTools
             UiFactory.Stretch(panel.GetComponent<RectTransform>());
             AscensionPanelUI ui = panel.AddComponent<AscensionPanelUI>();
 
-            TextMeshProUGUI yieldLabel = UiFactory.Text("Yield", panel.transform, "Ascend for 0 tokens", 30f,
+            TextMeshProUGUI yieldLabel = UiFactory.Text("Yield", panel.transform, "Ascend for 0 tokens", UiType.Role.Section,
                 TextAlignmentOptions.Center, TextColor);
             UiFactory.Anchor(yieldLabel.rectTransform, new Vector2(0.03f, 0.88f), new Vector2(0.97f, 1f));
 
-            TextMeshProUGUI requirementLabel = UiFactory.Text("Requirement", panel.transform, "Best stage 1", 22f,
+            TextMeshProUGUI requirementLabel = UiFactory.Text("Requirement", panel.transform, "Best stage 1", UiType.Role.Sentence,
                 TextAlignmentOptions.Center, DimTextColor);
             UiFactory.Anchor(requirementLabel.rectTransform, new Vector2(0.03f, 0.79f), new Vector2(0.97f, 0.88f));
 
-            Button ascendButton = UiFactory.Button("AscendButton", panel.transform, "ASCEND", "ui_button_gold", 34f, TextColor, null);
+            Button ascendButton = UiFactory.Button("AscendButton", panel.transform, "ASCEND", "ui_button_gold", UiType.Role.Section, TextColor, null);
             UiFactory.Anchor(ascendButton.GetComponent<RectTransform>(), new Vector2(0.24f, 0.60f), new Vector2(0.76f, 0.77f));
             TextMeshProUGUI ascendButtonLabel = ascendButton.GetComponentInChildren<TextMeshProUGUI>();
 
@@ -343,23 +349,23 @@ namespace IdleRPG.EditorTools
             UiFactory.Stretch(background.rectTransform);
 
             TextMeshProUGUI nameLabel = UiFactory.Text("Name", row.transform,
-                data != null ? data.DisplayName : $"Upgrade {index + 1}", 26f, TextAlignmentOptions.MidlineLeft, TextColor);
+                data != null ? data.DisplayName : $"Upgrade {index + 1}", UiType.Role.Section, TextAlignmentOptions.MidlineLeft, TextColor);
             UiFactory.Anchor(nameLabel.rectTransform, new Vector2(0.03f, 0.58f), new Vector2(0.56f, 0.96f));
 
-            TextMeshProUGUI effectLabel = UiFactory.Text("Effect", row.transform, "+0%", 20f,
+            TextMeshProUGUI effectLabel = UiFactory.Text("Effect", row.transform, "+0%", UiType.Role.Sentence,
                 TextAlignmentOptions.MidlineLeft, DimTextColor);
             UiFactory.Anchor(effectLabel.rectTransform, new Vector2(0.03f, 0.12f), new Vector2(0.56f, 0.55f));
 
-            TextMeshProUGUI levelLabel = UiFactory.Text("Level", row.transform, "Lv 0", 24f,
+            TextMeshProUGUI levelLabel = UiFactory.Text("Level", row.transform, "Lv 0", UiType.Role.Small,
                 TextAlignmentOptions.Center, TextColor);
             UiFactory.Anchor(levelLabel.rectTransform, new Vector2(0.56f, 0.58f), new Vector2(0.76f, 0.96f));
 
-            TextMeshProUGUI costLabel = UiFactory.Text("Cost", row.transform, "1 token", 20f,
+            TextMeshProUGUI costLabel = UiFactory.Text("Cost", row.transform, "1 token", UiType.Role.Small,
                 TextAlignmentOptions.Center, DimTextColor);
             UiFactory.Anchor(costLabel.rectTransform, new Vector2(0.56f, 0.12f), new Vector2(0.76f, 0.55f));
 
             // A full-height buy button: at least UiTouch.MinTarget tall so a thumb can hit it.
-            Button buyButton = UiFactory.Button("BuyButton", row.transform, "BUY", "ui_button", 24f, TextColor, null);
+            Button buyButton = UiFactory.Button("BuyButton", row.transform, "BUY", "ui_button", UiType.Role.Section, TextColor, null);
             UiFactory.Anchor(buyButton.GetComponent<RectTransform>(), new Vector2(0.78f, 0.05f), new Vector2(0.97f, 0.95f));
 
             PrestigeUpgradeRowUI ui = row.AddComponent<PrestigeUpgradeRowUI>();
@@ -378,16 +384,16 @@ namespace IdleRPG.EditorTools
             ShopPanelUI ui = panel.AddComponent<ShopPanelUI>();
 
             // Header band, mirroring the ASCEND page: title, sub-line, one big gold action button.
-            TextMeshProUGUI title = UiFactory.Text("Title", panel.transform, "Shop", 30f,
+            TextMeshProUGUI title = UiFactory.Text("Title", panel.transform, "Shop", UiType.Role.Section,
                 TextAlignmentOptions.Center, TextColor);
             UiFactory.Anchor(title.rectTransform, new Vector2(0.03f, 0.88f), new Vector2(0.97f, 1f));
 
-            TextMeshProUGUI gemsLabel = UiFactory.Text("Gems", panel.transform, "0 gems", 22f,
+            TextMeshProUGUI gemsLabel = UiFactory.Text("Gems", panel.transform, "0 gems", UiType.Role.Sentence,
                 TextAlignmentOptions.Center, DimTextColor);
             UiFactory.Anchor(gemsLabel.rectTransform, new Vector2(0.03f, 0.79f), new Vector2(0.97f, 0.88f));
 
             // The headline action (same slot as the ASCEND button): watch an ad for a gold boost.
-            Button watchAdButton = UiFactory.Button("WatchAdButton", panel.transform, "WATCH AD", "ui_button_gold", 30f, TextColor, null);
+            Button watchAdButton = UiFactory.Button("WatchAdButton", panel.transform, "WATCH AD", "ui_button_gold", UiType.Role.Section, TextColor, null);
             UiFactory.Anchor(watchAdButton.GetComponent<RectTransform>(), new Vector2(0.24f, 0.60f), new Vector2(0.76f, 0.77f));
             TextMeshProUGUI watchAdLabel = watchAdButton.GetComponentInChildren<TextMeshProUGUI>();
 
