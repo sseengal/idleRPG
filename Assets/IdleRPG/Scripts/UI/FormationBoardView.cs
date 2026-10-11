@@ -101,9 +101,10 @@ namespace IdleRPG.UI
             // TinyRPG pass: the pack tiles are ~20% body so keep icons big (0.8x slot) or the characters read tiny.
             UiRuntime.CenterOn(icon.rectTransform, new Vector2(0.5f, 0.60f), new Vector2(slotSize.x * 0.80f, slotSize.x * 0.80f));
 
-            TextMeshProUGUI nameLabel = UiRuntime.CreateText(slot.transform, "Name", string.Empty, 20f,
+            TextMeshProUGUI nameLabel = UiRuntime.CreateText(slot.transform, "Name", string.Empty, UiType.Role.Small,
                 TextAlignmentOptions.Center, UiTheme.Text);
-            UiTheme.ApplyFont(nameLabel, UiTheme.Display, 20f);
+            // Hero names vary in length and the slot is a fixed width, so the name shrinks to fit instead of spilling.
+            UiType.ApplyAuto(nameLabel, UiType.Role.Small);
             UiRuntime.Anchor(nameLabel.rectTransform, new Vector2(0f, 0.14f), new Vector2(1f, 0.32f));
 
             HpBarView hpBar = BuildHpBar(slot.transform);
@@ -121,7 +122,7 @@ namespace IdleRPG.UI
         private HpBarView BuildHpBar(Transform parent)
         {
             GameObject bar = UiRuntime.CreateNode("HpBar", parent);
-            UiRuntime.Anchor(bar.GetComponent<RectTransform>(), new Vector2(0.10f, 0.02f), new Vector2(0.90f, 0.12f));
+            UiRuntime.Anchor(bar.GetComponent<RectTransform>(), new Vector2(0.02f, 0.02f), new Vector2(0.98f, 0.12f));
 
             Image track = UiRuntime.CreatePanel(bar.transform, null, new Color(0f, 0f, 0f, 0.5f));
             UiRuntime.Stretch(track.rectTransform);
@@ -129,9 +130,8 @@ namespace IdleRPG.UI
             Image ghost = UiRuntime.CreateFilledImage("Ghost", bar.transform, new Color(1f, 0.85f, 0.35f, 0.5f));
             Image fill = UiRuntime.CreateFilledImage("Fill", bar.transform, new Color(0.35f, 0.85f, 0.45f, 1f));
 
-            TextMeshProUGUI value = UiRuntime.CreateText(bar.transform, "Value", string.Empty, 20f,
+            TextMeshProUGUI value = UiRuntime.CreateText(bar.transform, "Value", string.Empty, UiType.Role.Micro,
                 TextAlignmentOptions.Center, UiTheme.Text);
-            UiTheme.ApplyFont(value, UiTheme.Display, 20f);
             UiRuntime.Stretch(value.rectTransform);
 
             HpBarView view = bar.AddComponent<HpBarView>();

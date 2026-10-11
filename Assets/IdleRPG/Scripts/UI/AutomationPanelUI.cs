@@ -183,7 +183,7 @@ namespace IdleRPG.UI
 
         private void CreateHeading(int bands)
         {
-            TextMeshProUGUI heading = UiRuntime.CreateText(transform, "Heading", "AUTOMATION", 20f,
+            TextMeshProUGUI heading = UiRuntime.CreateText(transform, "Heading", "AUTOMATION", UiType.Role.Section,
                 TextAlignmentOptions.MidlineLeft, dimColor);
             AnchorBand(heading.rectTransform, 0, bands, 8f, 0f);
         }
@@ -194,12 +194,16 @@ namespace IdleRPG.UI
             GameObject row = UiRuntime.CreateNode("Card" + def.AutomationID, transform);
             AnchorBand(row.GetComponent<RectTransform>(), bandIndex, bands);
 
-            TextMeshProUGUI title = UiRuntime.CreateText(row.transform, "Title", def.DisplayName, 24f,
+            TextMeshProUGUI title = UiRuntime.CreateText(row.transform, "Title", def.DisplayName, UiType.Role.Section,
                 TextAlignmentOptions.MidlineLeft, textColor);
+            // Card names vary ("Auto-Buy Manager" vs "Speed Button"), so the title shrinks to fit its cell.
+            UiType.ApplyAuto(title, UiType.Role.Section);
             UiRuntime.Anchor(title.rectTransform, new Vector2(0.02f, 0.56f), new Vector2(0.58f, 0.96f));
 
-            TextMeshProUGUI info = UiRuntime.CreateText(row.transform, "Info", string.Empty, 15f,
+            TextMeshProUGUI info = UiRuntime.CreateText(row.transform, "Info", string.Empty, UiType.Role.Small,
                 TextAlignmentOptions.TopLeft, dimColor);
+            // The description is a paragraph: it wraps AND shrinks to fit its half of the card.
+            UiType.ApplyAuto(info, UiType.Role.Small);
             info.textWrappingMode = TextWrappingModes.Normal;
             UiRuntime.Anchor(info.rectTransform, new Vector2(0.02f, 0.08f), new Vector2(0.58f, 0.54f));
 
@@ -223,8 +227,10 @@ namespace IdleRPG.UI
             GameObject row = UiRuntime.CreateNode("Dial" + cardRow.def.AutomationID, parent);
             AnchorBand(row.GetComponent<RectTransform>(), bandIndex, bands);
 
-            TextMeshProUGUI hint = UiRuntime.CreateText(row.transform, "Hint", string.Empty, 16f,
+            TextMeshProUGUI hint = UiRuntime.CreateText(row.transform, "Hint", string.Empty, UiType.Role.Small,
                 TextAlignmentOptions.MidlineLeft, dimColor);
+            // A paragraph: it wraps AND shrinks to fit its half of the card.
+            UiType.ApplyAuto(hint, UiType.Role.Small);
             hint.textWrappingMode = TextWrappingModes.Normal;
             UiRuntime.Anchor(hint.rectTransform, new Vector2(0.02f, 0.20f), new Vector2(0.58f, 0.80f));
             cardRow.dialHintLabel = hint;

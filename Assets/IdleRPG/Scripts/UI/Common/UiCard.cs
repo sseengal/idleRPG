@@ -63,9 +63,8 @@ namespace IdleRPG.UI
             Image face = UiRuntime.CreatePanel(root.transform, card.Skin.panelSprite, card.Skin.card, raycast: true);
             UiRuntime.Anchor(face.rectTransform, anchorMin, anchorMax);
 
-            card.TitleLabel = UiRuntime.CreateText(face.transform, "Title", title, UiType.Size(UiType.Role.Title),
+            card.TitleLabel = UiRuntime.CreateText(face.transform, "Title", title, UiType.Role.Title,
                 TextAlignmentOptions.MidlineLeft, card.Skin.title);
-            UiType.Apply(card.TitleLabel, UiType.Role.Title);
             UiRuntime.Anchor(card.TitleLabel.rectTransform, new Vector2(0.06f, 0.88f), new Vector2(0.80f, 0.98f));
 
             card.CloseButton = UiRuntime.CreateButton(face.transform, "CloseButton", "X",
@@ -113,8 +112,7 @@ namespace IdleRPG.UI
         public TextMeshProUGUI CreateBodyText(Transform parent, string name, string text, UiType.Role role,
             TextAlignmentOptions alignment, Color color)
         {
-            TextMeshProUGUI label = UiRuntime.CreateText(parent, name, text, UiType.Size(role), alignment, color);
-            UiType.Apply(label, role);
+            TextMeshProUGUI label = UiRuntime.CreateText(parent, name, text, role, alignment, color);
             return label;
         }
 

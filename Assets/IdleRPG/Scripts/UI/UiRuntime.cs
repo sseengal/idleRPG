@@ -56,26 +56,24 @@ namespace IdleRPG.UI
         }
 
         /// <summary>
-        /// A TMP label on the shared font. <paramref name="font"/> defaults to the sentence font (VT323) - the pixel
-        /// look for anything a page writes; pass <c>UiTheme.Display</c> for numbers and short headings.
+        /// A TMP label on a role from <see cref="UiType"/>. The role supplies the font AND the size together, so a
+        /// widget says what the text IS and cannot invent a size.
         ///
         /// Why the font is applied HERE: this builder used to set a size and no font at all, so every label a page
         /// built while the game ran came out in Unity's smooth default (Liberation Sans) while the battle page wore
         /// the pixel fonts - half the game read as a different game. Nothing may set a size without a font.
-        /// Falls back to TMP's default only when no font asset is loaded.
         /// </summary>
-        public static TextMeshProUGUI CreateText(Transform parent, string name, string content, float size,
-            TextAlignmentOptions alignment, Color color, TMP_FontAsset font = null)
+        public static TextMeshProUGUI CreateText(Transform parent, string name, string content, UiType.Role role,
+            TextAlignmentOptions alignment, Color color)
         {
             GameObject node = CreateNode(name, parent);
             TextMeshProUGUI text = node.AddComponent<TextMeshProUGUI>();
             text.SetText(content);
-            text.fontSize = size;   // set first, so a missing font asset still leaves the size correct
+            UiType.Apply(text, role);
             text.alignment = alignment;
             text.color = color;
             text.raycastTarget = false;
             text.textWrappingMode = TextWrappingModes.NoWrap;
-            UiTheme.ApplyFont(text, font != null ? font : UiTheme.Sentence, size);
             return text;
         }
 
@@ -115,9 +113,13 @@ namespace IdleRPG.UI
             rect.anchoredPosition = Vector2.zero;
         }
 
-        /// <summary>A button anchored to a normalised region, with a centred label.</summary>
+        /// <summary>
+        /// A button anchored to a normalised region, with a centred label. The caption takes <paramref name="role"/>
+        /// (section by default - a button caption is chrome the player must read at a glance).
+        /// </summary>
         public static Button CreateButton(Transform parent, string name, string label, Vector2 anchorMin,
-            Vector2 anchorMax, UnityEngine.Events.UnityAction onClick, Color? background = null, Sprite sprite = null)
+            Vector2 anchorMax, UnityEngine.Events.UnityAction onClick, Color? background = null, Sprite sprite = null,
+            UiType.Role role = UiType.Role.Section)
         {
             Image image = CreatePanel(parent, sprite, background ?? new Color(0.22f, 0.32f, 0.5f, 1f), raycast: true);
             image.gameObject.name = name;
@@ -126,8 +128,8 @@ namespace IdleRPG.UI
             Button button = image.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
 
-            TextMeshProUGUI text = CreateText(image.transform, "Label", label, 20f,
-                TextAlignmentOptions.Center, Color.white, UiTheme.Display);
+            TextMeshProUGUI text = CreateText(image.transform, "Label", label, role,
+                TextAlignmentOptions.Center, Color.white);
             Stretch(text.rectTransform, 8f, 4f, 8f, 4f);
             text.textWrappingMode = TextWrappingModes.Normal;
 

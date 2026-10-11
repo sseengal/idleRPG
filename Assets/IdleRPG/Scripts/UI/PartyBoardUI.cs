@@ -107,8 +107,9 @@ namespace IdleRPG.UI
             Image icon = UiRuntime.CreateIcon("Icon", slot.transform);
             UiRuntime.CenterOn(icon.rectTransform, new Vector2(0.5f, 0.60f), new Vector2(slotSize.x * 0.60f, slotSize.x * 0.60f));
 
-            TextMeshProUGUI nameLabel = UiRuntime.CreateText(slot.transform, "Name", string.Empty, 16f,
+            TextMeshProUGUI nameLabel = UiRuntime.CreateText(slot.transform, "Name", string.Empty, UiType.Role.Small,
                 TextAlignmentOptions.Center, Color.white);
+            UiType.ApplyAuto(nameLabel, UiType.Role.Small);
             UiRuntime.Anchor(nameLabel.rectTransform, new Vector2(0f, 0.10f), new Vector2(1f, 0.28f));
 
             // The board shows heroes; it does not fight. A dedicated presenter keeps this page free of battle

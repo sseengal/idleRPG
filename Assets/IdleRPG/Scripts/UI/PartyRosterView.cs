@@ -194,8 +194,9 @@ namespace IdleRPG.UI
                 cardIcons[i] = icon;
                 cardAnimators[i] = animator;
 
-                TextMeshProUGUI name = UiRuntime.CreateText(cardRoot, "Name", string.Empty, 16f,
+                TextMeshProUGUI name = UiRuntime.CreateText(cardRoot, "Name", string.Empty, UiType.Role.Small,
                     TextAlignmentOptions.Center, Color.white);
+                UiType.ApplyAuto(name, UiType.Role.Small);
                 UiRuntime.Anchor(name.rectTransform, new Vector2(0f, 0.02f), new Vector2(1f, 0.32f), 2f, 0f, 2f, 0f);
                 cardNameLabels[i] = name;
             }
@@ -207,14 +208,14 @@ namespace IdleRPG.UI
             bigAnimator.SetSlotSize(new Vector2(300f, 340f));
             bigAnimator.FacingLeft = false;
 
-            bigNameLabel = UiRuntime.CreateText(root, "BigName", string.Empty, 22f,
+            bigNameLabel = UiRuntime.CreateText(root, "BigName", string.Empty, UiType.Role.Section,
                 TextAlignmentOptions.Center, Color.white);
             UiRuntime.Anchor(bigNameLabel.rectTransform, new Vector2(0.02f, 0.28f), new Vector2(0.46f, 0.36f), 6f, 0f, 6f, 0f);
 
             Image statsPanel = UiRuntime.CreatePanel(root, null, cardColor);
             UiRuntime.Anchor(statsPanel.rectTransform, new Vector2(0.48f, 0.44f), new Vector2(0.97f, 0.795f));
 
-            roleLabel = UiRuntime.CreateText(root, "Role", string.Empty, 15f,
+            roleLabel = UiRuntime.CreateText(root, "Role", string.Empty, UiType.Role.Small,
                 TextAlignmentOptions.MidlineLeft, accentColor);
             UiRuntime.Anchor(roleLabel.rectTransform, new Vector2(0.50f, 0.745f), new Vector2(0.95f, 0.783f), 2f, 0f, 0f, 0f);
 
@@ -234,15 +235,19 @@ namespace IdleRPG.UI
                 // Bottom of this row, climbing as the index grows (anchors are bottom-based).
                 float yBottom = rowsTop - (i + 1) * pitch;
 
-                statKeys[i] = UiRuntime.CreateText(root, "Key" + i, Rows[i].Key, 17f,
+                statKeys[i] = UiRuntime.CreateText(root, "Key" + i, Rows[i].Key, UiType.Role.Small,
                     TextAlignmentOptions.MidlineLeft, dimText);
+                // The key column is only about 124 units wide and the keys vary ("HP" vs "CRIT DMG"), so they
+                // shrink to fit rather than running into the value column.
+                UiType.ApplyAuto(statKeys[i], UiType.Role.Small);
                 UiRuntime.Anchor(statKeys[i].rectTransform, new Vector2(0.50f, yBottom), new Vector2(0.62f, yBottom + rowHeight), 2f, 0f, 0f, 0f);
 
-                statValues[i] = UiRuntime.CreateText(root, "Val" + i, string.Empty, 17f,
+                statValues[i] = UiRuntime.CreateText(root, "Val" + i, string.Empty, UiType.Role.Small,
                     TextAlignmentOptions.MidlineRight, bodyText);
+                UiType.ApplyAuto(statValues[i], UiType.Role.Small);
                 UiRuntime.Anchor(statValues[i].rectTransform, new Vector2(0.62f, yBottom), new Vector2(0.79f, yBottom + rowHeight), 0f, 0f, 0f, 0f);
 
-                statBonusLabels[i] = UiRuntime.CreateText(root, "Bonus" + i, string.Empty, 13f,
+                statBonusLabels[i] = UiRuntime.CreateText(root, "Bonus" + i, string.Empty, UiType.Role.Micro,
                     TextAlignmentOptions.MidlineRight, bonusColor);
                 UiRuntime.Anchor(statBonusLabels[i].rectTransform, new Vector2(0.79f, yBottom), new Vector2(0.95f, yBottom + rowHeight), 0f, 0f, 0f, 0f);
             }
@@ -253,11 +258,13 @@ namespace IdleRPG.UI
         // ------------------------------------------------------------------
         private void BuildGearRow(RectTransform root)
         {
-            TextMeshProUGUI caption = UiRuntime.CreateText(root, "GearCaption", "GEAR (equipped)", 15f,
+            TextMeshProUGUI caption = UiRuntime.CreateText(root, "GearCaption", "GEAR (equipped)", UiType.Role.Small,
                 TextAlignmentOptions.MidlineLeft, dimText);
+            // The caption's cell is about 249 units wide and the word is long, so it shrinks to fit.
+            UiType.ApplyAuto(caption, UiType.Role.Small);
             UiRuntime.Anchor(caption.rectTransform, new Vector2(0.48f, 0.415f), new Vector2(0.72f, 0.45f), 4f, 0f, 0f, 0f);
 
-            TextMeshProUGUI hint = UiRuntime.CreateText(root, "GearHint", "gear: coming soon", 13f,
+            TextMeshProUGUI hint = UiRuntime.CreateText(root, "GearHint", "gear: coming soon", UiType.Role.Micro,
                 TextAlignmentOptions.MidlineRight, dimText);
             UiRuntime.Anchor(hint.rectTransform, new Vector2(0.62f, 0.415f), new Vector2(0.97f, 0.45f), 0f, 0f, 4f, 0f);
 
@@ -276,11 +283,11 @@ namespace IdleRPG.UI
                 UiRuntime.Anchor(slot.rectTransform, new Vector2(x0, 0.335f), new Vector2(x0 + width, 0.412f));
                 gearSlotBackgrounds[i] = slot;
 
-                TextMeshProUGUI letter = UiRuntime.CreateText(slot.transform, "Letter", ItemVisuals.SlotLetter((ItemSlotType)i), 18f,
+                TextMeshProUGUI letter = UiRuntime.CreateText(slot.transform, "Letter", ItemVisuals.SlotLetter((ItemSlotType)i), UiType.Role.Section,
                     TextAlignmentOptions.Center, Color.white);
                 UiRuntime.Anchor(letter.rectTransform, new Vector2(0.02f, 0.38f), new Vector2(0.98f, 0.95f), 0f, 0f, 0f, 0f);
 
-                TextMeshProUGUI stat = UiRuntime.CreateText(slot.transform, "Stat", "empty", 12f,
+                TextMeshProUGUI stat = UiRuntime.CreateText(slot.transform, "Stat", "empty", UiType.Role.Micro,
                     TextAlignmentOptions.Center, dimText);
                 UiRuntime.Anchor(stat.rectTransform, new Vector2(0.03f, 0.02f), new Vector2(0.97f, 0.30f), 0f, 0f, 0f, 0f);
                 gearSlotStatLabels[i] = stat;

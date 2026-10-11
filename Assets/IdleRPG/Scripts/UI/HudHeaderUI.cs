@@ -91,12 +91,17 @@ namespace IdleRPG.UI
         private void BuildLeaderboardButton()
         {
             Button trophy = UiRuntime.CreateButton(transform, "LeaderboardButton", "RANKS",
-                new Vector2(0.90f, 0.10f), new Vector2(0.985f, 0.90f), OpenLeaderboard,
-                new Color(0.30f, 0.36f, 0.50f, 1f));
+                new Vector2(0.88f, 0.10f), new Vector2(0.985f, 0.90f), OpenLeaderboard,
+                new Color(0.30f, 0.36f, 0.50f, 1f), null, UiType.Role.Micro);
             TextMeshProUGUI label = trophy.GetComponentInChildren<TextMeshProUGUI>();
             if (label != null)
             {
-                label.fontSize = 13f;
+                // The button is only 89 units wide, so the caption takes the caption role, shrinks to fit, and uses
+                // the full button width (the default 8-unit side padding costs more than the word has to spare).
+                // NoWrap on purpose: the shared button builder allows wrapping, and "RANKS" would break in half.
+                label.textWrappingMode = TextWrappingModes.NoWrap;
+                UiType.ApplyAuto(label, UiType.Role.Micro);
+                UiRuntime.Stretch(label.rectTransform, 2f, 0f, 2f, 0f);
             }
         }
 

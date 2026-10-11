@@ -43,15 +43,15 @@ namespace IdleRPG.UI
             cachedSentence != null ? cachedSentence : (cachedSentence = Resources.Load<TMP_FontAsset>("Fonts/VT323 Pixel"));
 
         // ------------------------------------------------------------------
-        // Type sizes (reference pixels at 1080x1920)
+        // Type sizes
         // ------------------------------------------------------------------
-        public const float NumberSize = 40f;    // currency values
-        public const float LabelSize = 26f;     // short labels
-        public const float RowLabelSize = 22f;  // HP values, small labels
-        public const float LogSize = 34f;       // battle log lines (VT323, user: "bigger")
-        public const float LogLineHeight = 46f;
-        public const float DamageSize = 32f;    // floating damage numbers
-        public const float CritScale = 1.3f;    // crit text is this much bigger
+        // Sizes are NOT here: they live in UiType, one role per job, so a skin can never fork the type hierarchy.
+        // This file owns look only - fonts, colours, sprites.
+
+        /// <summary>
+        /// How tall one line of the combat log is. Derived from the sentence role, so it follows the scale.
+        /// </summary>
+        public static float LogLineHeight => UiType.LineHeight(UiType.Role.Sentence);
 
         /// <summary>Applies a theme font + size to a text object (font, material and size together).</summary>
         public static void ApplyFont(TextMeshProUGUI text, TMP_FontAsset font, float size)

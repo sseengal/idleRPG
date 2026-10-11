@@ -113,7 +113,7 @@ namespace IdleRPG.UI
         // ------------------------------------------------------------------
         private void BuildHeader()
         {
-            countLabel = UiRuntime.CreateText(root, "InventoryCount", string.Empty, 18f,
+            countLabel = UiRuntime.CreateText(root, "InventoryCount", string.Empty, UiType.Role.Small,
                 TextAlignmentOptions.MidlineLeft, bodyText);
             UiRuntime.Anchor(countLabel.rectTransform, new Vector2(0.03f, 0.905f), new Vector2(0.60f, 0.96f), 0f, 0f, 0f, 0f);
         }
@@ -122,7 +122,7 @@ namespace IdleRPG.UI
         {
             Button slotBtn = UiRuntime.CreateButton(root, "SlotDropdown", string.Empty,
                 new Vector2(0.03f, 0.85f), new Vector2(0.50f, 0.905f), null, dropdownColor);
-            slotDropdownLabel = LabelOf(slotBtn, 16f);
+            slotDropdownLabel = LabelOf(slotBtn, UiType.Role.Small);
             slotDropdown = new DropdownMenu(root, slotBtn, alignRight: false, SlotOptionLabels,
                 index =>
                 {
@@ -135,7 +135,7 @@ namespace IdleRPG.UI
 
             Button sortBtn = UiRuntime.CreateButton(root, "SortDropdown", string.Empty,
                 new Vector2(0.52f, 0.85f), new Vector2(0.97f, 0.905f), null, dropdownColor);
-            sortDropdownLabel = LabelOf(sortBtn, 16f);
+            sortDropdownLabel = LabelOf(sortBtn, UiType.Role.Small);
             sortDropdown = new DropdownMenu(root, sortBtn, alignRight: true, SortOptionLabels,
                 index =>
                 {
@@ -149,12 +149,12 @@ namespace IdleRPG.UI
             RefreshDropdownLabels();
         }
 
-        private static TextMeshProUGUI LabelOf(Button button, float size)
+        private static TextMeshProUGUI LabelOf(Button button, UiType.Role role)
         {
             TextMeshProUGUI label = button.GetComponentInChildren<TextMeshProUGUI>();
             if (label != null)
             {
-                label.fontSize = size;
+                UiType.Apply(label, role);
             }
 
             return label;
@@ -274,7 +274,7 @@ namespace IdleRPG.UI
                 Button emptySlot = UiRuntime.CreateButton(tileNode.transform, "EmptySlot", string.Empty,
                     Vector2.zero, Vector2.one, () => CloseItemSheet(), new Color(0.10f, 0.12f, 0.17f, 0.9f));
                 emptySlot.transform.localPosition = Vector3.zero;
-                TextMeshProUGUI empty = UiRuntime.CreateText(tileNode.transform, "Empty", "empty", 13f,
+                TextMeshProUGUI empty = UiRuntime.CreateText(tileNode.transform, "Empty", "empty", UiType.Role.Micro,
                     TextAlignmentOptions.Center, new Color(1f, 1f, 1f, 0.22f));
                 UiRuntime.Stretch(empty.rectTransform, 0f, 56f, 0f, 8f);
                 return;
@@ -290,16 +290,17 @@ namespace IdleRPG.UI
                 () => OpenItemSheet(item), ItemVisuals.RarityColor(item.Rarity));
             tile.transform.localPosition = Vector3.zero;
 
-            TextMeshProUGUI letter = UiRuntime.CreateText(tile.transform, "Letter", ItemVisuals.SlotLetter(item.SlotType), 30f,
+            TextMeshProUGUI letter = UiRuntime.CreateText(tile.transform, "Letter", ItemVisuals.SlotLetter(item.SlotType), UiType.Role.Title,
                 TextAlignmentOptions.Center, Color.white);
             UiRuntime.Stretch(letter.rectTransform, 0f, 18f, 0f, 8f);
 
             TextMeshProUGUI stat = UiRuntime.CreateText(tile.transform, "Stat",
-                "+" + item.PercentText + " " + ItemVisuals.StatLabel(item.SlotType), 14f,
+                "+" + item.PercentText + " " + ItemVisuals.StatLabel(item.SlotType), UiType.Role.Micro,
                 TextAlignmentOptions.Center, bodyText);
+            UiType.ApplyAuto(stat, UiType.Role.Micro);
             UiRuntime.Anchor(stat.rectTransform, new Vector2(0.05f, 0.04f), new Vector2(0.95f, 0.22f), 0f, 0f, 0f, 0f);
 
-            TextMeshProUGUI classTag = UiRuntime.CreateText(tile.transform, "Role", ItemVisuals.RoleLetter(item.Role).ToString(), 12f,
+            TextMeshProUGUI classTag = UiRuntime.CreateText(tile.transform, "Role", ItemVisuals.RoleLetter(item.Role).ToString(), UiType.Role.Micro,
                 TextAlignmentOptions.MidlineRight, dimText);
             UiRuntime.Anchor(classTag.rectTransform, new Vector2(0.72f, 0.78f), new Vector2(0.97f, 0.93f), 0f, 0f, 0f, 0f);
 
@@ -307,7 +308,7 @@ namespace IdleRPG.UI
             {
                 Image badge = UiRuntime.CreatePanel(tile.transform, null, new Color(0.24f, 0.34f, 0.55f, 1f));
                 UiRuntime.Anchor(badge.rectTransform, new Vector2(0.02f, 0.78f), new Vector2(0.14f, 0.95f), 0f, 0f, 0f, 0f);
-                TextMeshProUGUI e = UiRuntime.CreateText(tile.transform, "EBadge", "E", 14f, TextAlignmentOptions.Center, Color.white);
+                TextMeshProUGUI e = UiRuntime.CreateText(tile.transform, "EBadge", "E", UiType.Role.Micro, TextAlignmentOptions.Center, Color.white);
                 UiRuntime.Anchor(e.rectTransform, new Vector2(0.02f, 0.78f), new Vector2(0.14f, 0.95f), 0f, 0f, 0f, 0f);
             }
         }
@@ -336,15 +337,17 @@ namespace IdleRPG.UI
 
             Image tile = UiRuntime.CreatePanel(content, null, ItemVisuals.RarityColor(item.Rarity), true);
             UiRuntime.Anchor(tile.rectTransform, new Vector2(0.05f, 0.30f), new Vector2(0.31f, 0.62f));
-            TextMeshProUGUI letter = UiRuntime.CreateText(content, "Letter", ItemVisuals.SlotLetter(item.SlotType), 42f,
+            TextMeshProUGUI letter = UiRuntime.CreateText(content, "Letter", ItemVisuals.SlotLetter(item.SlotType), UiType.Role.Title,
                 TextAlignmentOptions.Center, Color.white);
             UiRuntime.Anchor(letter.rectTransform, new Vector2(0.05f, 0.30f), new Vector2(0.31f, 0.62f), 0f, 0f, 0f, 0f);
 
-            sheetName = UiRuntime.CreateText(content, "Name", string.Empty, 18f,
+            sheetName = UiRuntime.CreateText(content, "Name", string.Empty, UiType.Role.Section,
                 TextAlignmentOptions.MidlineLeft, Color.white);
+            // Item names vary ("Rare Helm" vs "Legendary Weapon"), so the name shrinks to fit its cell.
+            UiType.ApplyAuto(sheetName, UiType.Role.Section);
             UiRuntime.Anchor(sheetName.rectTransform, new Vector2(0.36f, 0.56f), new Vector2(0.84f, 0.66f), 0f, 0f, 0f, 0f);
 
-            sheetInfo = UiRuntime.CreateText(content, "Info", string.Empty, 14f,
+            sheetInfo = UiRuntime.CreateText(content, "Info", string.Empty, UiType.Role.Sentence,
                 TextAlignmentOptions.TopLeft, bodyText);
             UiRuntime.Anchor(sheetInfo.rectTransform, new Vector2(0.36f, 0.30f), new Vector2(0.95f, 0.53f), 0f, 0f, 0f, 0f);
 
@@ -361,7 +364,7 @@ namespace IdleRPG.UI
             TextMeshProUGUI label = button.GetComponentInChildren<TextMeshProUGUI>();
             if (label != null)
             {
-                label.fontSize = 16f;
+                UiType.Apply(label, UiType.Role.Section);
             }
 
             return label;

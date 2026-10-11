@@ -208,11 +208,11 @@ namespace IdleRPG.UI
             board = boardObject.AddComponent<PartyBoardUI>();
             board.Build(manager);
 
-            formationLabel = UiRuntime.CreateText(root, "FormationInfo", string.Empty, 16f,
+            formationLabel = UiRuntime.CreateText(root, "FormationInfo", string.Empty, UiType.Role.Sentence,
                 TextAlignmentOptions.TopLeft, bodyText);
             UiRuntime.Anchor(formationLabel.rectTransform, new Vector2(0.02f, 0.46f), new Vector2(0.98f, 0.62f), 8f, 0f, 8f, 0f);
 
-            TextMeshProUGUI hint = UiRuntime.CreateText(root, "FormationHint", "tap a hero, then tap a slot", 16f,
+            TextMeshProUGUI hint = UiRuntime.CreateText(root, "FormationHint", "tap a hero, then tap a slot", UiType.Role.Sentence,
                 TextAlignmentOptions.TopLeft, hintColor);
             UiRuntime.Anchor(hint.rectTransform, new Vector2(0.02f, 0.38f), new Vector2(0.98f, 0.46f), 8f, 0f, 8f, 0f);
         }
@@ -268,11 +268,11 @@ namespace IdleRPG.UI
         /// <summary>A caption plus a row of empty, locked slots (abilities, filled by a later step).</summary>
         internal static void BuildSlotRow(RectTransform root, string caption, int count, float yMin, float yMax)
         {
-            TextMeshProUGUI label = UiRuntime.CreateText(root, caption + "Caption", caption, 15f,
+            TextMeshProUGUI label = UiRuntime.CreateText(root, caption + "Caption", caption, UiType.Role.Small,
                 TextAlignmentOptions.MidlineLeft, SlotRowTextColor);
             UiRuntime.Anchor(label.rectTransform, new Vector2(0.48f, yMax), new Vector2(0.72f, yMax + 0.035f), 4f, 0f, 0f, 0f);
 
-            TextMeshProUGUI note = UiRuntime.CreateText(root, caption + "Note", "(coming soon)", 14f,
+            TextMeshProUGUI note = UiRuntime.CreateText(root, caption + "Note", "(coming soon)", UiType.Role.Small,
                 TextAlignmentOptions.MidlineRight, SlotRowTextColor);
             UiRuntime.Anchor(note.rectTransform, new Vector2(0.60f, yMax), new Vector2(0.97f, yMax + 0.035f), 0f, 0f, 4f, 0f);
 

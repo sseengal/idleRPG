@@ -23,8 +23,8 @@ namespace IdleRPG.UI
         [SerializeField] private Color normalColor = Color.white;
         [SerializeField] private Color criticalColor = new Color(1f, 0.85f, 0.25f, 1f);
         [SerializeField] private Color incomingColor = new Color(1f, 0.35f, 0.35f, 1f);
-        [SerializeField] private float baseFontSize = UiTheme.DamageSize;
-        [SerializeField] private float criticalScale = UiTheme.CritScale;
+        [SerializeField] private float baseFontSize = UiType.Damage;
+        [SerializeField] private float criticalScale = UiType.CritScale;
 
         private float elapsed;
         private Vector2 startPosition;

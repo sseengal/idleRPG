@@ -38,14 +38,10 @@ namespace IdleRPG.UI
             UiRuntime.Anchor(content, Vector2.zero, Vector2.one);
             ui.Content = content;
 
-            Button close = UiRuntime.CreateButton(frame.transform, "CloseButton", "X",
+            // The close button's caption takes the builder's default role (section) - no per-sheet size.
+            UiRuntime.CreateButton(frame.transform, "CloseButton", "X",
                 new Vector2(0.88f, 0.90f), new Vector2(0.96f, 0.97f),
                 () => UiTransient.Close(ui.Root), new Color(0.30f, 0.36f, 0.50f, 1f));
-            TextMeshProUGUI closeLabel = close.GetComponentInChildren<TextMeshProUGUI>();
-            if (closeLabel != null)
-            {
-                closeLabel.fontSize = 14f;
-            }
 
             return ui;
         }

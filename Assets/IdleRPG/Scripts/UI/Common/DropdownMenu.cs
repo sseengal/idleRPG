@@ -116,7 +116,9 @@ namespace IdleRPG.UI
                 TextMeshProUGUI rowLabel = row.GetComponentInChildren<TextMeshProUGUI>();
                 if (rowLabel != null)
                 {
-                    rowLabel.fontSize = 15f;
+                    // The caption takes the builder's default role (section). Option labels vary in length, so it
+                    // shrinks to fit rather than spilling out of the row.
+                    UiType.ApplyAuto(rowLabel, UiType.Role.Section);
                     rowLabel.SetText((selected ? "\u2022 " : "") + labels[i]);
                 }
             }
