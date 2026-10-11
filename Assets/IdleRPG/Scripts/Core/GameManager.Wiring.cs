@@ -127,6 +127,10 @@ namespace IdleRPG.Core
                 }
             }
 
+            // One owner for the money door: the rewarded-ad guard and the IAP cash register. Everything it needs
+            // (ads, ad caps, iap, boost, shop, till, save) exists by now.
+            monetization = new MonetizationService(Ads, AdCaps, Iap, Boost, Shop, Rewards, Save, LogFlow);
+
             if (!combatManager.Initialize(balanceConfig, waveConfig, partyConfig, Formation))
             {
                 Debug.LogError("[GameManager] CombatManager failed to initialise (check PartyConfig heroes).");

@@ -62,6 +62,7 @@ namespace IdleRPG.Core
         private bool isWired;
         private RunController runner;
         private OfflineCoordinator offline;
+        private MonetizationService monetization;
 
         /// <summary>(previous, next) state transitions for interested systems/UI.</summary>
         public event Action<GameState, GameState> StateChanged;
