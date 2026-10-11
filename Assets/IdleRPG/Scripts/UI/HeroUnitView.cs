@@ -187,22 +187,40 @@ namespace IdleRPG.UI
                 return;
             }
 
+            // The swing starts on the ANNOUNCE, not on the hit: the sim waits SwingDurationSec before the damage
+            // lands, and the attack strip's strike frame sits inside that window - so the blow connects on the swing's
+            // contact pose instead of on its first frame. It plays even when the target slot is missing (attack in
+            // place), so a swing is never silently dropped.
+            EnsureLunge();
+            StartSwing();
+
             HudController hud = HudController.Instance;
             EnemyStackView stack = hud != null ? hud.EnemyStack : null;
             RectTransform targetSlot = stack != null ? stack.GetEnemySlotRect(targetIndex) : null;
 
-            if (targetSlot == null)
+            if (lunge != null && !lunge.IsBusy && targetSlot != null)
+            {
+                lunge.BeginRun(targetSlot);
+            }
+        }
+
+        /// <summary>Plays the attack strip once; the lunge blinks home when the clip finishes.</summary>
+        private void StartSwing()
+        {
+            CharacterAnimator swing = EnsureAnimator();
+
+            if (swing == null || !swing.HasArt)
             {
                 return;
             }
 
-            EnsureAnimator();
-            CharacterLunge lunge = EnsureLunge();
-
-            if (lunge != null && !lunge.IsBusy)
+            swing.PlayAttack(() =>
             {
-                lunge.BeginRun(targetSlot);
-            }
+                if (lunge != null)
+                {
+                    lunge.CompleteSwing();
+                }
+            });
         }
 
         private void OnHeroDamaged(int index, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical)
@@ -228,22 +246,17 @@ namespace IdleRPG.UI
             }
         }
 
+        /// <summary>
+        /// The blow landed (the sim's impact). The swing clip is already playing - it started on the announce - so
+        /// this only plants the hero on the target and restarts the pose clock at the hit.
+        /// </summary>
         private void OnAllyAttackLanded(EnemyDamagedInfo info)
         {
-            if (info.AttackerIndex != heroIndex || animator == null || !animator.HasArt)
+            if (info.AttackerIndex != heroIndex)
             {
                 return;
             }
 
-            animator.PlayAttack(() =>
-            {
-                if (lunge != null)
-                {
-                    lunge.CompleteSwing();
-                }
-            });
-
-            // The damage just landed: if the hero was running in, plant them at the target for the swing pose.
             if (lunge != null)
             {
                 lunge.Impact();

@@ -10,9 +10,10 @@ namespace IdleRPG.UI
     ///   - <see cref="Impact"/> when the damage actually lands,
     ///   - <see cref="ResetToHome"/> from Show/ClearVisual/Refresh so a wave change can never strand anyone.
     ///
-    /// ELI5: the sim says "this guy is about to attack". We make him run to the target, wait for the real hit,
-    /// then do the anime blink back to his fighting spot. If another swing arrives while he is still busy, he
-    /// attacks in place (late waves stay calm against a sea of blinking).
+    /// ELI5: the sim says "this guy is about to attack" and waits ~0.35 s before the blow actually lands. We make him
+    /// run to the target AND start his swing on that announcement, so the strike lands on the hit; then we do the
+    /// anime blink back to his fighting spot. If another swing arrives while he is still busy, he attacks in place
+    /// (late waves stay calm against a sea of blinking).
     /// </summary>
     public sealed class CharacterLunge : MonoBehaviour
     {
@@ -38,7 +39,8 @@ namespace IdleRPG.UI
                  "finishes (whichever is later) so the full swing plays; capped by maxHoldSeconds.")]
         [SerializeField] private float holdSeconds = 0.3f;
 
-        [Tooltip("Hard ceiling for the pose (s): a long/broken clip or an aborted swing can never stall the fight.")]
+        [Tooltip("Hard ceiling for the pose (s), counted from impact: a long/broken clip, or a swing whose damage " +
+                 "event never fired, can never stall the fight.")]
         [SerializeField] private float maxHoldSeconds = 0.7f;
 
         [Tooltip("Blink-out duration: squash + fade at the target.")]
@@ -86,7 +88,13 @@ namespace IdleRPG.UI
             }
         }
 
-        /// <summary>Starts the run-in toward a target slot. No-op while the unit is already busy.</summary>
+        /// <summary>
+        /// Starts the run-in toward a target slot. No-op while the unit is already busy.
+        ///
+        /// The caller plays the attack strip at the same moment (the sim's swing window is the wind-up), so this does
+        /// NOT play Walk - the swing's own first frames cover the run-in, and a Walk that was overridden one line
+        /// later only ever flickered.
+        /// </summary>
         public void BeginRun(RectTransform targetSlot)
         {
             if (state != State.Idle || rect == null || targetSlot == null)
@@ -95,12 +103,6 @@ namespace IdleRPG.UI
             }
 
             blinkQueued = false;
-
-            if (animator != null && animator.HasArt)
-            {
-                animator.PlayWalk();
-            }
-
             home = rect.position;
 
             // Stop on the near-side flank of the target, aligned to the target's BODY height. The slot builders place
@@ -126,10 +128,17 @@ namespace IdleRPG.UI
             state = State.Advancing;
         }
 
-        /// <summary>Called by the unit view when the real damage event lands: full contact at the target.</summary>
+        /// <summary>
+        /// Called by the unit view when the blow actually lands: plant the unit on the target and restart the pose
+        /// clock at the hit.
+        ///
+        /// Accepts the run-in AND the pose that follows it. The old "only while Advancing" guard made this a no-op in
+        /// practice: the run-in is 0.2 s and the sim's impact lands at 0.35 s, so the lunge was already Holding and
+        /// nothing was ever synced to the hit.
+        /// </summary>
         public void Impact()
         {
-            if (state != State.Advancing || rect == null)
+            if (rect == null || (state != State.Advancing && state != State.Holding))
             {
                 return;
             }
@@ -141,14 +150,23 @@ namespace IdleRPG.UI
         }
 
         /// <summary>
-        /// The attack clip finished - the full swing (strike + follow-through) has played out. The unit blinks
-        /// home once the minimum pose (<see cref="holdSeconds"/>) is also satisfied.
+        /// The attack clip finished - the full swing (strike + follow-through) has played out. The unit blinks home
+        /// once the minimum pose (<see cref="holdSeconds"/>) is also satisfied.
+        ///
+        /// A unit that attacked in place (the lunge was still busy, so no run-in happened) has nothing to blink, so
+        /// it returns to Idle instead of freezing on the swing's last frame.
         /// </summary>
         public void CompleteSwing()
         {
             if (state == State.Holding)
             {
                 blinkQueued = true;
+                return;
+            }
+
+            if (state == State.Idle && animator != null && animator.HasArt)
+            {
+                animator.PlayIdle();
             }
         }
 

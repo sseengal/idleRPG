@@ -1595,6 +1595,39 @@ leave the unit invisible), and `Show()` with unknown sim data leaves the current
       slots keep a visible sprite (the animated enemy holds its Death frame, Slime/Bat hold their placeholder sprite)
 - [ ] in-Play check by hand: `Manual-Tests.md` §2i
 
+## 1ad. Swing timing: the hit lands on the strike, not on the animation's first frame  ·  **fixed 2026-10-10**
+
+The sim was already right; the UI was wired backwards.
+
+| | Before | After |
+|---|---|---|
+| Swing announce | unit runs in (plays Walk) | unit runs in **and** starts the attack clip |
+| Damage lands (0.35 s later) | **the attack clip starts here** | the clip is already at its strike frame; the unit is planted on the target |
+| After | clip plays, then blink home | follow-through plays, then blink home |
+
+The numbers line up by design: the attack strip is 8 frames @ 12 fps, so the strike frame is ~0.33 s, and the sim's
+`SwingDurationSec` is 0.35 s. The sim steps in real time (the pace multiplier only lengthens attack intervals), so the
+two clocks are comparable. No balance change, nothing re-baselined.
+
+### Clean-ups that came with it
+- **`CharacterLunge.Impact()` was dead code.** It only accepted the `Advancing` state, but the run-in (0.2 s) finishes
+  before the sim's impact (0.35 s), so it always returned early - nothing was ever synced to the hit. It now accepts
+  the pose too, plants the unit, and restarts the pose clock at the hit.
+- **`BeginRun` no longer plays Walk.** The attack clip now covers the run-in, so the Walk was overridden one line
+  later (a flicker). `CharacterAnimator.PlayWalk` is now unreferenced - kept as part of the clip API (Idle/Walk/
+  Attack/Hurt/Death), not deleted.
+- **`CompleteSwing` no longer freezes.** A unit that attacked in place (the lunge was still busy) held the swing's
+  last frame forever; it now returns to Idle.
+- **The damage handlers no longer require art.** Both returned early when the unit had no art, which also skipped the
+  impact plant for placeholder units.
+- **The swing starts even with no target slot** (attack in place) instead of being dropped.
+- `UI-UX.md` §3 gained the swing-timing rule, and its defeat bullet was corrected (it still claimed there is no
+  banner - the defeat card landed in §1ab).
+
+- [x] verified live: announce -> `Soldier_Attack02_0` / `Blood Monster_A_Attack02_0` playing and the lunge Advancing;
+      impact -> lunge Holding (was a no-op); placeholder enemy (Bat) correctly has no clip but still lunges
+- [ ] in-Play check by hand: `Manual-Tests.md` §2j
+
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 
 Base gate: every step below names the loop beat or money path it serves. Anything that cannot is not in the base.

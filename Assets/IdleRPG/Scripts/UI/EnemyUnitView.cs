@@ -227,29 +227,24 @@ namespace IdleRPG.UI
             }
         }
 
+        /// <summary>
+        /// The blow landed (the sim's impact). The swing clip is already playing - it started on the announce - so
+        /// this only plants the enemy on the target and restarts the pose clock at the hit.
+        /// </summary>
         private void OnEnemyAttackLanded(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical)
         {
-            if (attackerEnemyIndex != enemyIndex || animator == null || !animator.HasArt)
+            if (attackerEnemyIndex != enemyIndex)
             {
                 return;
             }
 
-            animator.PlayAttack(() =>
-            {
-                if (lunge != null)
-                {
-                    lunge.CompleteSwing();
-                }
-            });
-
-            // The damage just landed: if the enemy was running in, plant it at the target for the swing pose.
             if (lunge != null)
             {
                 lunge.Impact();
             }
         }
 
-        /// <summary>This enemy committed a swing: run to the hero it is about to hit.</summary>
+        /// <summary>This enemy committed a swing: start the swing clip and run to the hero it is about to hit.</summary>
         private void OnSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide)
         {
             if (attackerSide != CombatantSide.Enemy || attackerIndex != enemyIndex)
@@ -257,22 +252,38 @@ namespace IdleRPG.UI
                 return;
             }
 
+            // Same rule as the heroes: the swing starts on the ANNOUNCE, so the strike lands on the hit ~0.35 s later
+            // instead of the hit starting the animation. Plays even with no target slot (attack in place).
+            EnsureLunge();
+            StartSwing();
+
             HudController hud = HudController.Instance;
             FormationBoardView board = hud != null ? hud.FormationBoard : null;
             RectTransform targetSlot = board != null ? board.GetHeroSlotRect(targetIndex) : null;
 
-            if (targetSlot == null)
+            if (lunge != null && !lunge.IsBusy && targetSlot != null)
+            {
+                lunge.BeginRun(targetSlot);
+            }
+        }
+
+        /// <summary>Plays the attack strip once; the lunge blinks home when the clip finishes.</summary>
+        private void StartSwing()
+        {
+            CharacterAnimator swing = EnsureAnimator();
+
+            if (swing == null || !swing.HasArt)
             {
                 return;
             }
 
-            EnsureAnimator();
-            CharacterLunge runner = EnsureLunge();
-
-            if (runner != null && !runner.IsBusy)
+            swing.PlayAttack(() =>
             {
-                runner.BeginRun(targetSlot);
-            }
+                if (lunge != null)
+                {
+                    lunge.CompleteSwing();
+                }
+            });
         }
 
         private void OnEnemyKilled(string enemyName, double goldReward, int index)

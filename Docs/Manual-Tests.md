@@ -280,6 +280,20 @@ right side stayed empty for a whole wave.
 - [ ] The next wave re-uses the slot cleanly: new sprite, new name, full HP bar.
 - [ ] With 2-3 enemies, killing one leaves the corpse in place while the others keep fighting.
 
+## 2j. Swing timing — the hit lands on the strike (fixed 2026-10-10)
+
+> The blow used to be applied at the same instant the attack animation *started*. It now lands on the swing's strike
+> frame. Rule recorded in `UI-UX.md` §3.
+
+- [ ] Watch a hero attack: the swing starts as it leaves its spot, and the enemy's health/flash drops when the swing
+      **connects** - not before the swing begins.
+- [ ] Watch an enemy attack the party: same thing (art enemies only - Slime/Bat have no attack strip, so they only
+      slide and pose).
+- [ ] The unit does not stand still before swinging: the run-in and the wind-up happen together.
+- [ ] After the blow, the swing's follow-through plays, then the unit blinks back to its spot.
+- [ ] Two units in a row: the second attack starts cleanly (no unit stuck holding an attack pose).
+- [ ] Placeholder units (Slime/Bat) still slide in, pose, and blink back - no frozen poses.
+
 ---
 
 ## 3. B9' part 2 — phone checklist (needs the first real phone build)
