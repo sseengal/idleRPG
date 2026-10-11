@@ -1685,6 +1685,56 @@ scrim renders: nav background pixel (0.043, 0.051, 0.086) = its token colour dim
 - [ ] in-Play check by hand: `Manual-Tests.md` §2k
 
 
+## 1af. The type scale: one list of sizes, everywhere  ·  **built + verified 2026-10-11**
+
+The UI carried 15 different text sizes between 13 and 42, written by hand in about 90 places. The runtime builders
+set a size and **no font**, so every widget a page built while the game ran came out in Unity's smooth default
+(Liberation Sans) at roughly half the size a phone needs. No two screens matched; the party page's hero card was
+the worst of it.
+
+**The fix, in four steps (one commit each):**
+
+| Step | Commit | What changed |
+|---|---|---|
+| 1 | `540df2c` | `UiRuntime.CreateText`/`CreateButton` apply a theme font (optional param, no call sites touched) |
+| 2 | `b7890b3` | `UiType.cs` is born: 7 roles, one font rule each; `UiSkin` loses its size fields; the RANKS card migrates |
+| 3a | `154dbd3` | all 41 scene-builder call sites speak roles; `Main.unity` regenerated |
+| 3b | `d3bb3df` | all 48 runtime call sites speak roles; the duplicate sizes leave `UiTheme` |
+| - | `fceb135` | the RANKS subtitle takes the same role as its column heads (it was out-sizing the table it introduces) |
+
+**The scale** (reference canvas 1080x1920): Display 56, Title 48, Section 40, Sentence 36 (VT323), Damage 32,
+Small 30, Micro 26. Chrome is Silkscreen; running sentences are VT323, whose x-height is only 0.41 of its size.
+Micro is the floor - about 1.0 mm of cap height on a 1080-wide phone. The numbers live in `UiType.cs` and nowhere
+else.
+
+**Measured on the rebuilt scene** (`Tools > Idle RPG > UI > Check Type Scale`): 152 labels in the shipping scene,
+sizes 26/30/32/36/40/48/56 only, fonts Silkscreen 124 + VT323 28, **0 in Liberation Sans** (was 136), 0 errors,
+0 warnings. Page by page, labels / blank / overflow: UPGRADES 106/0/0, ASCEND 23/0/0, SHOP 35/0/0, PARTY>ROSTER
+46/0/0, PARTY>FORMATION 46/0/0, INVENTORY + its item sheet 49/0/0.
+
+**Two TMP traps, found by measuring rather than by reading** (each cost a wrong first guess):
+- Auto-size with an unsatisfiable floor renders **nothing** - a blank label, not a clipped one.
+- With `NoWrap`, **both `Ellipsis` and `Truncate` render zero characters**; only `Overflow` and `Masking` draw.
+  The enemy name and HP value use `Masking`, and the HP string lost its spaces (`237/240`).
+
+**Layout forced by the bigger text:** nav tabs auto-fit (`UPGRADES` needs 235 units in a 198-unit tab); header
+currency 40 -> 56; the stage row and `BATTLE LOG` 26/30 -> 40; log lines 34 -> 36; modal titles -> 48 and bodies
+-> 36; the defeat dialog's buttons grew to a 144-unit touch target; the shop offer row 116 -> 150; the hero HP bar
+widened to 0.02-0.98 of its slot; the RANKS button widened to 0.88-0.985 and set to NoWrap (at the caption role the
+word is 101 units in a 106-unit box, and the shared button builder's word-wrap broke it into "RANK"/"S").
+
+**The guard (Step 5):** `Tools > Idle RPG > UI > Check Type Scale` (`Editor/UiTypeScaleCheck.cs`). It opens every
+enabled scene in Build Settings, checks every prefab, reads the code for hand-written sizes, and prints a size and
+font histogram plus one PASS/FAIL line. It is registered in `Run All Checks (regression)`. Seen to fire: a
+throwaway prefab with a 21-unit label in the default font, plus one `fontSize = 21f;` line, produced three errors
+and a FAIL. An auto-sized label is judged by its role (`fontSizeMax`), because `fontSize` holds the last size it
+shrank to.
+
+**Known, and left alone - a separate job:** the header is crowded. The RANKS button sits on top of the token chip's
+panel, and a long currency value (like `1.25M`) can slide under the button. That belongs to a header layout pass,
+not to the type scale.
+
+
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 
 Base gate: every step below names the loop beat or money path it serves. Anything that cannot is not in the base.

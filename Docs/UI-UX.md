@@ -2,7 +2,7 @@
 
 > Owns: everything the player sees and taps.
 > Parent: `Architecture.md` (AD8, E7, E10, C7, D6) and `.clinerules`.
-> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** 2026-10-11 (shared card §1a + the ranks sheet fix).
+> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** 2026-10-11 (the type scale, §1b - every label on one list, plus the guard that keeps it there).
 > Specs the UI side of Steps 10, 11, 13, 15, 17, 20.
 
 ---
@@ -51,6 +51,45 @@ Why this exists: the ranks sheet was hand-built on `UiDockedSheet`, its node was
 the whole card measured **80x74 units on a 1080x1920 screen** (rows ~3.5 units tall, all overlapping), its close
 destroyed the frame instead of the sheet, and it was parented to the base canvas (sort 0, so no scrim and the damage
 numbers drew over it). Details and the live measurements: `Checklist.md` §1ae.
+
+### 1b. The type scale - one list, no hand-written sizes (2026-10-11)
+
+Every piece of text picks a **role**, never a number. The roles live in one file, `Scripts/UI/UiType.cs`:
+
+| Role | Size | Font | What it is for |
+|---|---|---|---|
+| Display | 56 | Silkscreen | currency values, the reward number |
+| Title | 48 | Silkscreen | card / screen / modal titles |
+| Section | 40 | Silkscreen | section heads, button captions |
+| Sentence | 36 | VT323 | running text: the battle log, effect lines |
+| Damage | 32 | Silkscreen | floating damage (crit text is x1.3) |
+| Small | 30 | Silkscreen | nav tabs, tags, costs, column heads |
+| Micro | 26 | Silkscreen | captions - never something the player must act on |
+
+Two rules hold it together:
+- **Chrome is Silkscreen, sentences are VT323.** VT323's x-height is only 0.41 of its size, so it reads smaller
+  than Silkscreen at the same number; it never carries a label the player reads at a glance.
+- **Micro is the floor.** Nothing is smaller. On a 1080-wide phone one canvas unit is about 0.4 dp, so Micro's
+  cap height is about 1.0 mm - the smallest text a phone can carry.
+
+How a screen asks for text:
+- Building the scene: `UiFactory.Text(parent, name, text, UiType.Role.Section, ...)`.
+- Building a widget while the game runs: `UiRuntime.CreateText(parent, name, text, UiType.Role.Small, ...)`. A
+  button caption takes a role too (`CreateButton(..., role)`); section is the default.
+- Text whose length varies (nav tabs, hero names, item names, prices) uses `UiType.ApplyAuto(label, role)`: it
+  starts at the role's size and shrinks towards Micro instead of spilling over its neighbour.
+- The design labs (`UiLab.unity`, `ArtLab.unity`) use `UiFactory.RawText` on purpose - a lab compares looks, so it
+  is allowed to pick a size by hand.
+
+**The guard:** `Tools > Idle RPG > UI > Check Type Scale` walks every shipping scene and every prefab, reads each
+label's size and font, reads the code for hand-written sizes, and prints PASS/FAIL. It also runs inside
+`Run All Checks (regression)`, so the problem cannot come back one label at a time. (Seen to fail on purpose:
+a prefab with a 21-unit label in the default font and one hand-written `fontSize =` line produced three errors.)
+
+Why this exists: sizes were written by hand in about 90 places - 15 different numbers between 13 and 42 - so half
+the game came out in Unity's smooth default font (Liberation Sans) at roughly half the size a phone needs, and no
+two screens matched. Measured before: 136 labels in Liberation Sans. After: 0, and only 26/30/32/36/40/48/56 in use.
+Full record: `Checklist.md` §1af.
 
 ## 2. Navigation model
 

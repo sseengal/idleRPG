@@ -27,7 +27,10 @@ includes them (enforced at build time from B10).
 
 ## 1. Before every build (a few eyeball reads — the heavy lifting is automated)
 
-- [ ] `Tools > Idle RPG > Run All Checks (regression)` → ends **PASS** (drift + validation + golden numbers).
+- [ ] `Tools > Idle RPG > Run All Checks (regression)` → ends **PASS** (drift + validation + golden numbers + the
+      type scale).
+- [ ] `Tools > Idle RPG > UI > Check Type Scale` → **PASS** (every label on the scale, in a theme font, and no code
+      setting a size by hand). It also runs inside the check above; this is the version with the size/font histogram.
 - [ ] `Tools > Idle RPG > Mobile > Verify Settings` → nothing red.
 - [ ] `Tools > Idle RPG > Release > Go or No-Go (checks + stamp)` → **GO**, version stamped, lists no missing
       modules.
@@ -326,6 +329,32 @@ a careful look. It is safe to open while a fight runs.
 - [ ] The rest of the battle page still works (damage numbers, battle log, nav tabs).
 - [ ] Switch tabs, come back, open RANKS again: still fine.
 
+
+## 2l. Type scale — the by-eye pass (added 2026-10-11)
+
+> The numbers are already checked by `Tools > Idle RPG > UI > Check Type Scale`. This is the part a machine cannot
+> judge: does the text actually *look* right on a phone-sized window?
+
+- [ ] **Window shape first**: set the Game view to a phone shape (1080x1920 portrait). Everything below assumes that.
+- [ ] **Battle page**: currency values, `STAGE n  WAVE n`, the hero name plates with their HP (`240/240`), the enemy
+      plates, `BATTLE LOG` and its lines. Nothing clipped, nothing touching its neighbour, nothing too small to read.
+- [ ] **Nav bar**: BATTLE / PARTY / UPGRADES / ASCEND / SHOP — all five the same size, `UPGRADES` clear of the tab edges.
+- [ ] **Party page, ROSTER tab**: the hero card's stat table (keys, values, bonuses) reads without zooming. This was
+      the worst screen before the pass.
+- [ ] **Party page, FORMATION tab**: hero names over their health bars; tap a hero then a slot and check the swap reads.
+- [ ] **UPGRADES page**: hero rows (name, stat cost, effect), then scroll to `AUTOMATION` — card titles and their
+      descriptions fit inside their half of the card.
+- [ ] **ASCEND and SHOP pages**: titles, bodies, and the shop's `BUY` button showing a price.
+- [ ] **RANKS card** (header button): title, the `you are #N of M` line (same size as the column heads), the rows, and
+      the pinned `YOU` row.
+- [ ] **Offline popup** on a fresh start (F8, wait, relaunch): `WELCOME BACK!`, the reward number, and both buttons.
+- [ ] **Inventory (parked feature)**: to see it, set `PartyPanelUI.InventoryEnabled = true`, recompile, open
+      PARTY > INVENTORY. Grid tiles, the filter/sort buttons, and tapping a tile for the item sheet. Set it back to
+      `false` afterwards.
+
+If a size looks wrong, change the number in `UiType.cs` — one place, and every screen follows.
+
+---
 
 ## 3. B9' part 2 — phone checklist (needs the first real phone build)
 

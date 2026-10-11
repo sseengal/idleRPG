@@ -59,6 +59,10 @@ namespace IdleRPG.EditorTools
             //    Printing them was not a gate - a change that halved the party's damage still printed "PASS".
             ok &= CheckGoldenNumbers();
 
+            // 4) UI: every label in the shipping scenes is on the type scale, in a theme font, and no code sets a
+            //    text size by hand. Without this, the 15-sizes-in-90-places problem can come back one label at a time.
+            ok &= UiTypeScaleCheck.RunCheckWithResult();
+
             Debug.Log(ok
                 ? "[Regression] REGRESSION: PASS - save drift, content validation (incl. loop health) and the golden numbers are in line."
                 : "[Regression] REGRESSION: FAIL - see the errors above.");
