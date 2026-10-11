@@ -70,35 +70,11 @@ namespace IdleRPG.Core
         /// <summary>
         /// Offers the offline reward for the time since the last session ended.
         /// Called once on start; also used by the debug tooling to re-run the calculation.
+        /// The errand itself lives in <see cref="OfflineCoordinator"/>.
         /// </summary>
         public OfflineRewardResult EvaluateOffline()
         {
-            if (Idle == null)
-            {
-                return OfflineRewardResult.None;
-            }
-
-            double lastLogout = ResolveLastLogoutBinary();
-
-            if (lastLogout <= 0d)
-            {
-                return OfflineRewardResult.None;
-            }
-
-            double savedRate = Ledger != null ? Ledger.GoldPerSecond : 0d;
-            OfflineRewardResult result = Idle.Evaluate(lastLogout, CurrentStage, savedRate);
-
-            if (result.HasReward)
-            {
-                LogFlow($"Offline: {result.RawSeconds:0}s away -> {result.CappedSeconds:0}s paid, " +
-                        $"{result.Gold:0.#} gold at {result.GoldPerSecond:0.##}/s ({Idle.LastRateSource})");
-
-                // Consume the window straight away so a kill before claiming cannot pay twice.
-                Save?.SaveNow("offline");
-                GameEvents.RaiseOfflineRewardsReady(result);
-            }
-
-            return result;
+            return offline != null ? offline.Evaluate() : OfflineRewardResult.None;
         }
 
         /// <summary>
@@ -139,67 +115,22 @@ namespace IdleRPG.Core
         }
 
         /// <summary>
-        /// Most recent of the two logout timestamps (save file and PlayerPrefs). Taking the newer one
-        /// means a hard process kill can never inflate the offline window.
+        /// A time payout was paid (the offline claim, or a bought fast-forward). The manager owns the lifetime
+        /// total, so <see cref="OfflineCoordinator"/> reports the amount back here.
         /// </summary>
-        private double ResolveLastLogoutBinary()
+        private void OnIdleGoldEarned(double gold)
         {
-            double fromSave = Save != null ? Save.LastLogoutBinary : 0d;
-            double fromPrefs = 0d;
-            bool hasPrefs = SaveManager.TryReadPlayerPrefsLogout(out fromPrefs);
-
-            if (hasPrefs && fromPrefs > fromSave)
-            {
-                return fromPrefs;
-            }
-
-            return fromSave;
-        }
-
-        private void OnIdleRewardPaid(double gold)
-        {
-            // Both time payouts land here: the offline claim and a bought fast-forward.
             TotalGoldEarned += gold;
-            Save?.MarkDirty("idle-income");
         }
 
         /// <summary>
         /// Gem sink #2: buys <c>instantIncomeSeconds</c> of income outright ("fast-forward").
         /// Quote first, then charge, then pay - so gems are never spent on a payout of zero.
+        /// The errand lives in <see cref="OfflineCoordinator"/>.
         /// </summary>
         public bool BuyInstantIncome()
         {
-            if (Shop == null || Idle == null)
-            {
-                return false;
-            }
-
-            double savedRate = Ledger != null ? Ledger.GoldPerSecond : 0d;
-            double quote = Idle.QuoteInstantIncome(CurrentStage, savedRate);
-
-            if (quote <= 0d)
-            {
-                GameEvents.RaiseToast("No income to fast-forward yet");
-                return false;
-            }
-
-            if (!Shop.CanAffordInstantIncome)
-            {
-                GameEvents.RaiseToast($"Needs {Shop.InstantIncomeGemCost:0} gems");
-                return false;
-            }
-
-            double gold = Idle.TryGrantInstantIncome(CurrentStage, savedRate, Shop.TrySpendInstantIncomeGems);
-
-            if (gold <= 0d)
-            {
-                return false;
-            }
-
-            GameEvents.RaiseToast($"+{NumberFormatter.Format(gold)} gold");
-            LogFlow($"Instant income: {Shop.InstantIncomeSeconds / 60d:0} min for {Shop.InstantIncomeGemCost:0} gems" +
-                    $" -> {gold:0.#} gold (purchase #{Idle.InstantIncomePurchases})");
-            return true;
+            return offline != null && offline.BuyInstantIncome();
         }
 
         /// <summary>Remembers which management tab the player was on.</summary>

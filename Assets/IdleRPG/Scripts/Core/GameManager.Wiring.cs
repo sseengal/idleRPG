@@ -151,7 +151,10 @@ namespace IdleRPG.Core
                 BonusEquivalentCapSeconds = Shop != null ? Shop.OfflineCapBonusSeconds : 0d
             };
             Idle.Attach();
-            Idle.RewardPaid += OnIdleRewardPaid;
+
+            // One owner for the two time payouts: the offline window and instant income. It subscribes to
+            // Idle.RewardPaid itself, so both reach the lifetime total through OnIdleGoldEarned.
+            offline = new OfflineCoordinator(Idle, Ledger, Save, Shop, () => CurrentStage, OnIdleGoldEarned, LogFlow);
 
             SubscribeCombat();
             SubscribeProgression();

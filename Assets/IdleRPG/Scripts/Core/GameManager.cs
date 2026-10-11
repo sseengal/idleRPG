@@ -61,6 +61,7 @@ namespace IdleRPG.Core
 
         private bool isWired;
         private RunController runner;
+        private OfflineCoordinator offline;
 
         /// <summary>(previous, next) state transitions for interested systems/UI.</summary>
         public event Action<GameState, GameState> StateChanged;
@@ -330,9 +331,13 @@ namespace IdleRPG.Core
                 Ledger.ResetSession();
             }
 
+            if (offline != null)
+            {
+                offline.Detach();
+            }
+
             if (Idle != null)
             {
-                Idle.RewardPaid -= OnIdleRewardPaid;
                 Idle.Detach();
             }
 

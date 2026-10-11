@@ -86,10 +86,18 @@ already exist in `Architecture.md` §2.1 (`SaveCoordinator`, `OfflineCoordinator
 
 | Step | What | Why first / risk |
 |---|---|---|
-| D1 | Snapshot mapping -> `SaveSnapshotMapper`, taking a small explicit service bundle built at the call site + a `RunState` struct | Pure mapping, no control flow. Makes the save contract testable without a live scene, which is the project's own "must never silently regress" surface. Verify by round-tripping a real captured payload. |
-| D2 | Offline evaluation -> `OfflineCoordinator` (idle window, caps, reward) | Real logic but no event wiring; verify with a fixed clock override. |
+| D1 | **DONE** (`f7b0ae2`) Snapshot mapping -> `SaveSnapshotMapper`, taking an explicit service bundle built at the call site + a `RunState` struct | Pure mapping, no control flow. `GameManager.Snapshot.cs` 141 -> 124, mapper 174 - net lines go UP by ~90 and that is the honest cost; the win is the seam, not the count. Proof: old and new bodies normalise to 76 identical lines; a live capture -> apply -> capture round-trip is byte-identical. |
+| D2 | **DONE** Offline pay -> `OfflineCoordinator` (offline window, instant income, the logout-stamp rule) | `GameManager.Save.cs` 214 -> 145, coordinator 167 - net lines go UP again (~+100) for the same reason as D1. Proof: the moved bodies normalise to 62 byte-identical lines (only the two private helpers swapped order); a fixed-clock run (logout stamp an hour back) pays 991.33 gold, the hand check `3600.1s x 0.3934/s x 0.7 x 1.0` matches to the cent, the claim adds the same to the wallet AND to the lifetime total (proving the moved `RewardPaid` hook), the window is consumed so a second call pays nothing, and both guards (under the 30s floor, no stamp) refuse. |
 | D3 | Monetisation -> `MonetizationService` (ads, iap, boost) | Has mock services + `AdCapsSelfCheck` to lean on. |
 | D4 | Stage/combat flow -> a stage-flow controller | The event-wiring heart. Last, and only with its own plan. |
+
+### Finding recorded during D2, not fixed (pre-existing)
+
+`IdleTimeService.Evaluate()` clears `Pending` on entry. So calling `GameManager.EvaluateOffline()` while the offline
+popup is open **cancels the pending claim**: the next claim finds nothing pending and pays nothing (it logs a
+warning). The debug hotkey and the save-debug menu both call `EvaluateOffline()` on demand, so this is reachable
+today. It is not a defect introduced by this refactor, and it was left alone - but a debug re-run while the popup is
+open will silently void the popup's claim.
 
 **Not planned:** flattening the ~40 service properties (a facade is the right shape, and touching every call
 site is churn with no payoff); assembly re-splitting (already deferred in Phase C with measured reasons).
