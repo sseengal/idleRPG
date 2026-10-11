@@ -89,7 +89,7 @@ already exist in `Architecture.md` §2.1 (`SaveCoordinator`, `OfflineCoordinator
 | D1 | **DONE** (`f7b0ae2`) Snapshot mapping -> `SaveSnapshotMapper`, taking an explicit service bundle built at the call site + a `RunState` struct | Pure mapping, no control flow. `GameManager.Snapshot.cs` 141 -> 124, mapper 174 - net lines go UP by ~90 and that is the honest cost; the win is the seam, not the count. Proof: old and new bodies normalise to 76 identical lines; a live capture -> apply -> capture round-trip is byte-identical. |
 | D2 | **DONE** Offline pay -> `OfflineCoordinator` (offline window, instant income, the logout-stamp rule) | `GameManager.Save.cs` 214 -> 145, coordinator 167 - net lines go UP again (~+100) for the same reason as D1. Proof: the moved bodies normalise to 62 byte-identical lines (only the two private helpers swapped order); a fixed-clock run (logout stamp an hour back) pays 991.33 gold, the hand check `3600.1s x 0.3934/s x 0.7 x 1.0` matches to the cent, the claim adds the same to the wallet AND to the lifetime total (proving the moved `RewardPaid` hook), the window is consumed so a second call pays nothing, and both guards (under the 30s floor, no stamp) refuse. |
 | D3 | **DONE** Monetisation -> `MonetizationService` (ad gate, IAP register, gold-boost ad) | `GameManager.Monetization.cs` 149 -> 51, service 172 - net lines up again (~+80). Nothing here subscribes to events, so no teardown moved. Proof: the moved surface normalises to 98 byte-identical lines; a live run drove every synchronous branch and produced the old toasts exactly - ad started (no toast), the same ad still playing -> "Ad not ready yet.", no-ads owned -> "Ads removed - enjoy the quiet!", placement just marked shown -> "Ad recently used - try again in about 5 min.", unknown sku -> "Unknown product.". The two async grant bodies (ad completion, IAP grant) are covered by the line-for-line proof instead. |
-| D4 | Stage/combat flow -> a stage-flow controller | The event-wiring heart. Last, and only with its own plan. |
+| D4 | **DONE** The rules of the bounce -> `StageRules` (four pure functions). The handlers stay as glue, as agreed. | `StageRules.cs` 55 lines; `GameManager.Stages.cs` 376 -> 379. Only the decisions moved, not the sequencing. Proof: compile clean; **981 cases swept against the old inline expressions, 0 mismatches**; a live run wiped at stage 3 -> 2 and opened the card `3->2`, resumed to Combat, refused to fall below stage 1, advanced 3 -> 4 without moving the best, then 4 -> 5 moving it - so the argument order at both call sites is right; 12/12 edit-mode tests; console clean. |
 
 ### Finding recorded during D2, not fixed (pre-existing)
 
@@ -105,6 +105,46 @@ site is churn with no payoff); assembly re-splitting (already deferred in Phase 
 **Verification limit, stated plainly:** the golden-number net is currently red (the balance is still being
 built), so it is not a usable signal for these steps. They lean on: compile, the 12 edit-mode tests, a
 round-trip of a real save payload captured from the live game, and a play smoke.
+
+### D4 plan: the stage flow - and why most of it must stay
+
+`GameManager.Stages.cs` is 376 lines in four parts: run control (the public API), the combat/progression
+subscriptions, the event handlers that react to them, and the defeat-beat countdown inside `Update()`.
+
+**What must NOT move, and why.** A `StageFlowController` was the plan. On inspection it is the wrong shape:
+
+- the handlers write the manager's own run numbers (`CurrentStage`, `RunBestStage`, `HighestStageReached`, the
+  run counters) and drive its state machine (`SetState`, `RaiseStageChanged`);
+- moving them needs either ~15 delegates (a callback bag - a worse design than the class we started with) or a
+  public-API rewrite to `manager.Run.CurrentStage` at ~40 call sites (churn with no payoff);
+- the handlers are glue by nature: combat event in, manager state out. That is what a composition root is for.
+
+**What DOES move: the rules of the bounce.** The decisions inside those handlers are pure functions:
+
+| rule | what it decides |
+|---|---|
+| `NextStage(stage)` | the advance after a boss |
+| `RollbackStage(stage, rollback)` | the fallback after a wipe, clamped at stage 1 |
+| `IsNewBest(next, highest)` | a first-time clear (the only case that pays gems) |
+| `ShouldShowDefeatModal(defeatedStage, lastShownStage, nowSeconds, lastShownAt, cooldown)` | whether the summary card opens |
+
+They become `Core/StageRules.cs`: static functions, no state, no callbacks. The handlers keep the sequencing -
+events, combat calls, save, logging - exactly as they are. (`CombatRewardCalculator.CalculateMilestoneGems` is
+already a pure helper of this kind; this finishes the job.)
+
+**Why this is the right cut:** the rules are where balance lives (the rollback size, the card's cooldown), and
+balance is exactly what the project is rebuilding. As pure functions they can be swept exhaustively instead of
+being watched in a run.
+
+**Verification - all four ran, all passed**
+
+1. compile + the 12 edit-mode tests;
+2. equivalence sweep: for a spread of inputs (stages 1..20, rollback 1..3, the cooldown boundary on both sides)
+   the new function must equal the old expression evaluated inline, in every case;
+3. live: `DebugForceDefeat()` drops the stage by the rollback, enters Defeat, opens the card, and
+   `ResumeAfterDefeat()` puts the party back in the fight; a forced stage clear advances the stage and the
+   first-clear gem rule still holds;
+4. console clean.
 
 ## House verification checklist (every phase)
 

@@ -234,8 +234,8 @@ namespace IdleRPG.Core
         /// </summary>
         private void OnStageCleared(int stage)
         {
-            int nextStage = stage + 1;
-            bool isNewBest = nextStage > HighestStageReached;
+            int nextStage = StageRules.NextStage(stage);
+            bool isNewBest = StageRules.IsNewBest(nextStage, HighestStageReached);
 
             CurrentStage = nextStage;
 
@@ -281,7 +281,7 @@ namespace IdleRPG.Core
             int rollback = balanceConfig != null ? balanceConfig.StageRollbackOnDefeat : 1;
             int defeatedStage = CurrentStage;
 
-            CurrentStage = Mathf.Max(1, CurrentStage - rollback);
+            CurrentStage = StageRules.RollbackStage(CurrentStage, rollback);
 
             combatManager.StopRun();
             SetState(GameState.Boss, GameState.Defeat);
@@ -291,9 +291,12 @@ namespace IdleRPG.Core
 
             // The full summary modal only lands on a NEW stage, or after the cooldown - a hard wall bounces over and
             // over, so a card on every wipe would spam the player (and slow the idle bounce) for nothing.
-            bool showModal = defeatedStage != lastDefeatModalStage ||
-                             Time.unscaledTime - lastDefeatModalAt >=
-                             (balanceConfig != null ? balanceConfig.DefeatModalCooldownSeconds : 60f);
+            bool showModal = StageRules.ShouldShowDefeatModal(
+                defeatedStage,
+                lastDefeatModalStage,
+                Time.unscaledTime,
+                lastDefeatModalAt,
+                balanceConfig != null ? balanceConfig.DefeatModalCooldownSeconds : 60f);
 
             if (showModal)
             {
