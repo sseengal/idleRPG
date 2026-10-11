@@ -531,6 +531,13 @@ empty seats alpha 0, damage template 32px. Screenshot `Assets/Screenshots/battle
 Not in this pass (still open below): other pages (Shop/Upgrades/Ascend still use their old colours - `UiTheme`
 exists, wiring them in is mechanical), currency icons, and unit art.
 
+**Update 2026-10-11 - the shared card reads the kit too.** The ranks sheet is now a `UiCard` whose 9-slice face comes from
+`Resources/UiSkin.asset`, pointing at `ThirdParty/Kenney_PixelUI/9-Slice/Colored/grey.png`. **No art file moved and
+nothing was duplicated**: the skin asset holds the sprite reference, so a replacement PNG is imported with the same preset
+(`Tools > Idle RPG > Art > Apply UI-Art Presets`) and then pointed at from that one asset. Cards are built in code and
+load the skin with `Resources.Load` - the same trick as the pixel fonts (§ "Font policy"). A missing skin asset is not an
+error: the code defaults draw flat-coloured cards.
+
 ### Open items this pass did not close
 
 - [x] **The pick (2026-09-30).** **Font A (Silkscreen)** for numbers, buttons, currency, damage/crits;
@@ -542,7 +549,9 @@ exists, wiring them in is mechanical), currency icons, and unit art.
       and are a character pass, not a UI pass.
 - [~] **Design tokens.** ~109 colour values were hard-coded across 21 files (88 distinct). **Started 2026-09-30:
       `Scripts/UI/UiTheme.cs`** (palette + fonts + sizes) exists and the battle page reads from it; the other
-      pages (Shop/Upgrades/Ascend) and their runtime views are the mechanical remainder.
+      pages (Shop/Upgrades/Ascend) and their runtime views are the mechanical remainder. **2026-10-11:** overlay cards
+      now take their faces, colours and text sizes from `Resources/UiSkin.asset` (`UiSkin`), so a new card cannot
+      introduce a new literal - it picks up the skin or adds one field to it.
 - [ ] **Mobile import check.** Uncompressed UI textures and the 2-3 heavy post effects need a texture-memory
       measurement on device before the reskin is called done (§6 budgets).
 

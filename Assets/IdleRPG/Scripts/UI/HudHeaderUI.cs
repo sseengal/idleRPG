@@ -117,6 +117,12 @@ namespace IdleRPG.UI
             {
                 GameObject node = new GameObject("LeaderboardSheet", typeof(RectTransform));
                 node.transform.SetParent(canvas.transform, false);
+
+                // The host is only a home for the component - the card itself is parented to the overlay canvas by
+                // UiCard, so the host's rect does not matter. Stretched anyway: a default 100x100 node here is the
+                // kind of thing that quietly shrinks a whole screen.
+                UiRuntime.Stretch((RectTransform)node.transform);
+
                 leaderboardSheet = node.AddComponent<LeaderboardSheetUI>();
                 leaderboardSheet.Build(manager);
             }

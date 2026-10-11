@@ -2,7 +2,7 @@
 
 > Owns: everything the player sees and taps.
 > Parent: `Architecture.md` (AD8, E7, E10, C7, D6) and `.clinerules`.
-> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** Step 11e (2026-09-21).
+> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** 2026-10-11 (shared card §1a + the ranks sheet fix).
 > Specs the UI side of Steps 10, 11, 13, 15, 17, 20.
 
 ---
@@ -19,6 +19,38 @@
 | No scene lookups | References come from `UiContext`/`GameContext` (E5) |
 | Pool anything spawned | Damage text, rows, enemy views, toast lines |
 | Idle-safe screens | Every screen is safe to open while combat runs; nothing pauses the fight |
+| One overlay component | Every card that floats over the game is a `UiCard` on the modal canvas (§1a) - no screen builds its own panel |
+
+### 1a. Cards - the one overlay component (2026-10-11)
+
+Everything that floats over the game (ranks, defeat, offline claim, later the item sheet) is **`UiCard`**
+(`Scripts/UI/Common/UiCard.cs`). The card builds a fixed set of parts, so every overlay looks the same and a page only
+fills the middle:
+
+| Part | Name | What it is |
+|---|---|---|
+| Root | the card's own name | **Stretched** over the overlay canvas, so every anchor inside is a fraction of the SCREEN |
+| Scrim | `Panel` (first child) | full-screen dim + tap eater; tapping it closes the card |
+| Face | `Panel` (second child) | one 9-slice sprite, anchored to the card's rectangle |
+| Title | `Title` | the skin's display font |
+| Content | `Content` | where the page builds its rows |
+| Close | `CloseButton` | `X`; **hides** the card |
+
+Rules:
+- **The card owns show/hide** (`Show()` / `Hide()`). A page must never destroy a card's frame - that is exactly how the
+  ranks sheet went dead after one close.
+- **Cards live on the modal canvas** (`HudController.ModalRoot`, sorting 100), so they sit above the HUD and the damage
+  numbers. The reference comes from the HUD, not from a scene lookup (E5).
+- **The look comes from one asset**: `Resources/UiSkin.asset` - 9-slice faces, colours, text sizes. Swapping the UI art is
+  meant to be that file. A missing asset is not an error: the code defaults draw flat-coloured cards.
+- **Rows are pooled** (`Pool anything spawned`): build the slots once, then only fill them.
+- **The 9-slice border is not set in code.** It comes from the sprite's import preset (12 px, `Art-Pipeline.md` §17), so a
+  replacement PNG only has to be imported the same way.
+
+Why this exists: the ranks sheet was hand-built on `UiDockedSheet`, its node was left at Unity's default 100x100 rect, so
+the whole card measured **80x74 units on a 1080x1920 screen** (rows ~3.5 units tall, all overlapping), its close
+destroyed the frame instead of the sheet, and it was parented to the base canvas (sort 0, so no scrim and the damage
+numbers drew over it). Details and the live measurements: `Checklist.md` §1ae.
 
 ## 2. Navigation model
 

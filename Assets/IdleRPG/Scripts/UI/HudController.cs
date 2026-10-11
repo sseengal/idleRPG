@@ -17,6 +17,10 @@ namespace IdleRPG.UI
         [Header("Systems")]
         [SerializeField] private GameManager gameManager;
 
+        [Tooltip("The modal canvas: every card (ranks, defeat, offline) is parented here so it sits above the HUD " +
+                 "and the damage numbers.")]
+        [SerializeField] private RectTransform modalRoot;
+
         [Header("Views")]
         [Tooltip("The battle board (display only): one view per formation slot, built at runtime.")]
         [SerializeField] private FormationBoardView formationBoard;
@@ -25,6 +29,9 @@ namespace IdleRPG.UI
         [SerializeField] private FloatingDamageTextPool damageTextPool;
 
         public GameManager GameManager => gameManager;
+
+        /// <summary>The modal canvas - where every card belongs (above the HUD and the damage numbers).</summary>
+        public RectTransform ModalRoot => modalRoot;
 
         /// <summary>The damage-number pool (the Team board feeds it its anchors too).</summary>
         public FloatingDamageTextPool DamageTextPool => damageTextPool;

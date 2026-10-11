@@ -1,4 +1,3 @@
-using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,61 +8,90 @@ using IdleRPG.Utils;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// The global ranks sheet: a docked panel over the battle page with the mock leaderboard rows
-    /// (rank, tag, party level, best stage) and the local player's own row highlighted. Runtime-built;
-    /// opened from the trophy button on the battle HUD. Rows are informational (not buttons).
+    /// The global ranks sheet: a shared card (<see cref="UiCard"/>) over the battle page with the mock leaderboard rows
+    /// (rank, tag, party level, best stage) and the local player's own row highlighted. Runtime-built; opened from the
+    /// trophy button on the battle HUD. Rows are informational (not buttons) and pooled, so refreshing while open is
+    /// free.
     /// </summary>
     public sealed class LeaderboardSheetUI : MonoBehaviour
     {
         private const int TopRows = 12;
 
-        private readonly Color cardColor = new Color(0.10f, 0.12f, 0.18f, 0.98f);
         private readonly Color dimText = new Color(1f, 1f, 1f, 0.55f);
         private readonly Color youHighlight = new Color(1f, 0.82f, 0.3f, 1f);
 
         private GameManager manager;
         private RectTransform rowsRoot;
-        private TextMeshProUGUI headerLabel;
+        private TextMeshProUGUI subtitleLabel;
 
-        private UiDockedSheet frame;
+        /// <summary>
+        /// Pooled rows: built once, only filled afterwards. Rows used to be destroyed and recreated on every refresh,
+        /// which stacked duplicates whenever two refreshes landed in one frame, and cost allocations while the sheet
+        /// was open (UI-UX §1: "pool anything spawned").
+        /// </summary>
+        private GameObject[] rowSlots;
+        private TextMeshProUGUI[] rowRanks;
+        private TextMeshProUGUI[] rowTags;
+        private TextMeshProUGUI[] rowLevels;
+        private TextMeshProUGUI[] rowStages;
+
+        private UiCard card;
 
         public void Build(GameManager gameManager)
         {
             manager = gameManager;
 
-            frame = UiDockedSheet.Create(transform, "LeaderboardFrame", new Vector2(0.10f, 0.14f), new Vector2(0.90f, 0.88f), cardColor);
-            Transform sheet = frame.Content;
+            // The shared card: stretched overlay, scrim, 9-slice face, title and X (see UiCard). It owns the look
+            // (UiSkin) and its own show/hide, so this page only fills the content area.
+            card = UiCard.Create("LeaderboardCard", "GLOBAL RANKS", new Vector2(0.08f, 0.14f), new Vector2(0.92f, 0.88f));
+            Transform sheet = card.Content;
 
-            headerLabel = UiRuntime.CreateText(sheet, "Header", string.Empty, 18f,
-                TextAlignmentOptions.MidlineLeft, Color.white);
-            UiRuntime.Anchor(headerLabel.rectTransform, new Vector2(0.05f, 0.90f), new Vector2(0.80f, 0.97f), 0f, 0f, 0f, 0f);
+            subtitleLabel = card.CreateBodyText(sheet, "Subtitle", string.Empty, card.Skin.bodySize,
+                TextAlignmentOptions.MidlineLeft, card.Skin.body);
+            UiRuntime.Anchor(subtitleLabel.rectTransform, new Vector2(0f, 0.90f), new Vector2(0.95f, 0.99f));
 
-            TextMeshProUGUI rankHead = UiRuntime.CreateText(sheet, "ColRank", "#", 13f, TextAlignmentOptions.MidlineLeft, dimText);
-            UiRuntime.Anchor(rankHead.rectTransform, new Vector2(0.05f, 0.86f), new Vector2(0.16f, 0.89f), 0f, 0f, 0f, 0f);
-            TextMeshProUGUI tagHead = UiRuntime.CreateText(sheet, "ColTag", "TAG", 13f, TextAlignmentOptions.MidlineLeft, dimText);
-            UiRuntime.Anchor(tagHead.rectTransform, new Vector2(0.20f, 0.86f), new Vector2(0.55f, 0.89f), 0f, 0f, 0f, 0f);
-            TextMeshProUGUI lvlHead = UiRuntime.CreateText(sheet, "ColLvl", "LVL", 13f, TextAlignmentOptions.MidlineRight, dimText);
-            UiRuntime.Anchor(lvlHead.rectTransform, new Vector2(0.60f, 0.86f), new Vector2(0.73f, 0.89f), 0f, 0f, 0f, 0f);
-            TextMeshProUGUI stageHead = UiRuntime.CreateText(sheet, "ColStage", "STAGE", 13f, TextAlignmentOptions.MidlineRight, dimText);
-            UiRuntime.Anchor(stageHead.rectTransform, new Vector2(0.78f, 0.86f), new Vector2(0.95f, 0.89f), 0f, 0f, 0f, 0f);
+            float headSize = Mathf.Max(12f, card.Skin.bodySize - 5f);
+            TextMeshProUGUI rankHead = card.CreateBodyText(sheet, "ColRank", "#", headSize, TextAlignmentOptions.MidlineLeft, dimText);
+            UiRuntime.Anchor(rankHead.rectTransform, new Vector2(0f, 0.84f), new Vector2(0.12f, 0.88f));
+            TextMeshProUGUI tagHead = card.CreateBodyText(sheet, "ColTag", "TAG", headSize, TextAlignmentOptions.MidlineLeft, dimText);
+            UiRuntime.Anchor(tagHead.rectTransform, new Vector2(0.16f, 0.84f), new Vector2(0.58f, 0.88f));
+            TextMeshProUGUI lvlHead = card.CreateBodyText(sheet, "ColLvl", "LVL", headSize, TextAlignmentOptions.MidlineRight, dimText);
+            UiRuntime.Anchor(lvlHead.rectTransform, new Vector2(0.60f, 0.84f), new Vector2(0.74f, 0.88f));
+            TextMeshProUGUI stageHead = card.CreateBodyText(sheet, "ColStage", "STAGE", headSize, TextAlignmentOptions.MidlineRight, dimText);
+            UiRuntime.Anchor(stageHead.rectTransform, new Vector2(0.78f, 0.84f), new Vector2(0.96f, 0.88f));
 
             GameObject rowsNode = UiRuntime.CreateNode("Rows", sheet);
             rowsRoot = rowsNode.GetComponent<RectTransform>();
-            UiRuntime.Anchor(rowsRoot, new Vector2(0.05f, 0.05f), new Vector2(0.95f, 0.85f));
+            UiRuntime.Anchor(rowsRoot, new Vector2(0f, 0f), new Vector2(1f, 0.82f));
+            CreateRowPool();
 
             Show();
         }
 
-        /// <summary>Rebuilds the board and shows the sheet.</summary>
+        /// <summary>Rebuilds the board and shows the card.</summary>
         public void Show()
         {
-            gameObject.SetActive(true);
+            if (card == null)
+            {
+                return;
+            }
+
+            card.Show();
             RefreshRows();
         }
 
         private void OnDestroy()
         {
             manager = null;
+
+            // The card lives on the overlay canvas, not under this component, so it would outlive us - and a recreated
+            // sheet would leave a second card behind on the modal canvas. Take it with us.
+            if (card != null && card.Root != null)
+            {
+                Destroy(card.Root);
+            }
+
+            card = null;
         }
 
         private void OnEnable()
@@ -93,7 +121,7 @@ namespace IdleRPG.UI
 
             manager.Leaderboard.Refresh();
 
-            if (headerLabel != null)
+            if (subtitleLabel != null)
             {
                 int yourRank = 1;
                 LeaderboardEntry you = manager.Leaderboard.You;
@@ -106,17 +134,12 @@ namespace IdleRPG.UI
                     }
                 }
 
-                headerLabel.SetText("GLOBAL RANKS   ·   you are #" + yourRank + " of " + manager.Leaderboard.Ranked.Count);
+                subtitleLabel.SetText("you are #" + yourRank + " of " + manager.Leaderboard.Ranked.Count);
             }
 
-            if (rowsRoot == null)
+            if (rowSlots == null)
             {
                 return;
-            }
-
-            for (int i = rowsRoot.childCount - 1; i >= 0; i--)
-            {
-                Destroy(rowsRoot.GetChild(i).gameObject);
             }
 
             int yourIndex = -1;
@@ -130,7 +153,7 @@ namespace IdleRPG.UI
             }
 
             int rows = Mathf.Min(TopRows, manager.Leaderboard.Ranked.Count);
-            StringBuilder builder = new StringBuilder(rows * 32);
+            int slot = 0;
 
             for (int i = 0; i < rows; i++)
             {
@@ -139,40 +162,88 @@ namespace IdleRPG.UI
                     continue; // the player row is pinned below the top cut
                 }
 
-                BuildRow(i, manager.Leaderboard.Ranked[i], isYou: false);
+                FillRow(slot++, i, manager.Leaderboard.Ranked[i], isYou: false);
             }
 
             if (yourIndex >= rows)
             {
-                BuildRow(rows, manager.Leaderboard.You, isYou: true);
+                FillRow(slot++, yourIndex, manager.Leaderboard.You, isYou: true);
             }
             else if (yourIndex >= 0)
             {
-                BuildRow(yourIndex, manager.Leaderboard.Ranked[yourIndex], isYou: true);
+                FillRow(slot++, yourIndex, manager.Leaderboard.Ranked[yourIndex], isYou: true);
+            }
+
+            for (int i = slot; i < rowSlots.Length; i++)
+            {
+                rowSlots[i].SetActive(false);
             }
         }
 
-        private void BuildRow(int slotIndex, LeaderboardEntry entry, bool isYou)
+        /// <summary>
+        /// Builds every row slot once (up to <see cref="TopRows"/> plus the pinned player row). RefreshRows only fills
+        /// them, so the sheet costs nothing to reopen and can never stack duplicate rows.
+        /// </summary>
+        private void CreateRowPool()
         {
-            float slotTop = 0.80f - slotIndex * 0.058f;
-            float slotBottom = slotTop - 0.048f;
+            int count = TopRows + 1;
+            rowSlots = new GameObject[count];
+            rowRanks = new TextMeshProUGUI[count];
+            rowTags = new TextMeshProUGUI[count];
+            rowLevels = new TextMeshProUGUI[count];
+            rowStages = new TextMeshProUGUI[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                GameObject slot = UiRuntime.CreateNode("Row" + i, rowsRoot);
+                UiRuntime.Stretch((RectTransform)slot.transform);
+                rowSlots[i] = slot;
+
+                // Rows start at the very top of their band, i.e. directly under the column heads (the old docked sheet
+                // had a taller header area, which left a dead gap here).
+                float slotTop = 1f - i * 0.058f;
+                float slotBottom = slotTop - 0.048f;
+
+                rowRanks[i] = CreateRowLabel(slot.transform, "R", new Vector2(0f, slotBottom), new Vector2(0.12f, slotTop), TextAlignmentOptions.MidlineLeft);
+                rowTags[i] = CreateRowLabel(slot.transform, "Tag", new Vector2(0.16f, slotBottom), new Vector2(0.58f, slotTop), TextAlignmentOptions.MidlineLeft);
+                rowLevels[i] = CreateRowLabel(slot.transform, "Lvl", new Vector2(0.60f, slotBottom), new Vector2(0.74f, slotTop), TextAlignmentOptions.MidlineRight);
+                rowStages[i] = CreateRowLabel(slot.transform, "Stage", new Vector2(0.78f, slotBottom), new Vector2(0.96f, slotTop), TextAlignmentOptions.MidlineRight);
+
+                slot.SetActive(false);
+            }
+        }
+
+        private TextMeshProUGUI CreateRowLabel(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax,
+            TextAlignmentOptions alignment)
+        {
+            TextMeshProUGUI label = card.CreateBodyText(parent, name, string.Empty, card.Skin.bodySize, alignment, Color.white);
+            UiRuntime.Anchor(label.rectTransform, anchorMin, anchorMax);
+            return label;
+        }
+
+        /// <summary>
+        /// Fills one pooled row. <paramref name="displaySlot"/> is where it sits on screen; <paramref name="rank"/> is
+        /// the entry's real rank - the pinned player row shows their true number, not its screen position.
+        /// </summary>
+        private void FillRow(int displaySlot, int rank, LeaderboardEntry entry, bool isYou)
+        {
+            if (displaySlot < 0 || displaySlot >= rowSlots.Length)
+            {
+                return;
+            }
+
             Color color = isYou ? youHighlight : Color.white;
 
-            TextMeshProUGUI rank = UiRuntime.CreateText(rowsRoot, "R" + slotIndex, (slotIndex + 1).ToString(), 15f,
-                TextAlignmentOptions.MidlineLeft, color);
-            UiRuntime.Anchor(rank.rectTransform, new Vector2(0f, slotBottom), new Vector2(0.12f, slotTop), 0f, 0f, 0f, 0f);
+            rowSlots[displaySlot].SetActive(true);
+            rowRanks[displaySlot].SetText((rank + 1).ToString());
+            rowTags[displaySlot].SetText((isYou ? UiGlyphs.Marker + " " : "") + entry.Tag);
+            rowLevels[displaySlot].SetText(entry.PartyLevel.ToString());
+            rowStages[displaySlot].SetText(entry.MaxStage.ToString());
 
-            TextMeshProUGUI tag = UiRuntime.CreateText(rowsRoot, "Tag" + slotIndex, (isYou ? UiGlyphs.Marker + " " : "") + entry.Tag, 15f,
-                TextAlignmentOptions.MidlineLeft, color);
-            UiRuntime.Anchor(tag.rectTransform, new Vector2(0.16f, slotBottom), new Vector2(0.58f, slotTop), 0f, 0f, 0f, 0f);
-
-            TextMeshProUGUI lvl = UiRuntime.CreateText(rowsRoot, "Lvl" + slotIndex, entry.PartyLevel.ToString(), 15f,
-                TextAlignmentOptions.MidlineRight, color);
-            UiRuntime.Anchor(lvl.rectTransform, new Vector2(0.60f, slotBottom), new Vector2(0.74f, slotTop), 0f, 0f, 0f, 0f);
-
-            TextMeshProUGUI stage = UiRuntime.CreateText(rowsRoot, "Stage" + slotIndex, entry.MaxStage.ToString(), 15f,
-                TextAlignmentOptions.MidlineRight, color);
-            UiRuntime.Anchor(stage.rectTransform, new Vector2(0.78f, slotBottom), new Vector2(0.96f, slotTop), 0f, 0f, 0f, 0f);
+            rowRanks[displaySlot].color = color;
+            rowTags[displaySlot].color = color;
+            rowLevels[displaySlot].color = color;
+            rowStages[displaySlot].color = color;
         }
     }
 }

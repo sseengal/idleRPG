@@ -1628,6 +1628,63 @@ two clocks are comparable. No balance change, nothing re-baselined.
       impact -> lunge Holding (was a no-op); placeholder enemy (Bat) correctly has no clip but still lunges
 - [ ] in-Play check by hand: `Manual-Tests.md` §2j
 
+## 1ae. UI standardisation: the shared card (`UiCard`) + the ranks sheet bug  ·  **built 2026-10-11**
+
+The RANKS sheet was the proof case: it was broken in three ways at once, and every one of them came from building a panel
+by hand. It is now the first screen on the shared component.
+
+### What was wrong (measured on a 1080x1920 screen, not guessed)
+
+| Fault | Cause | Measured before |
+|---|---|---|
+| The card was microscopic | `HudHeaderUI.OpenLeaderboard` never stretched the sheet root, so it kept Unity's default 100x100 rect | card **80x74** units; rows **3.5** units tall, all on top of each other |
+| Dead after one close | the X destroyed the *frame* (`UiTransient.Close(frame.Root)`), not the sheet, so the next open found a sheet with no frame | reopening showed nothing |
+| No scrim, drawn under the numbers | the sheet was parented to the base canvas (sort 0) | floating damage numbers drew over the sheet |
+
+### What it is now
+
+| Piece | Where | What it does |
+|---|---|---|
+| `UiCard` | `Scripts/UI/Common/UiCard.cs` | the one overlay: stretched root, scrim, 9-slice face, title, content area, X. Show/hide is the card's own business |
+| `UiSkin` | `Resources/UiSkin.asset` + `Scripts/UI/Common/UiSkin.cs` | the look in one asset: 9-slice faces, colours, text sizes. A missing asset is **not** an error - the defaults draw flat-coloured cards |
+| `HudController.ModalRoot` | scene-wired by `MvpSceneBuilder` | the modal canvas (sort 100): where every card belongs |
+
+Rules, now in `UI-UX.md` §1a: the card owns show/hide; cards live on the modal canvas and are reached through the HUD (not
+by hunting the scene); the look comes from the skin; rows are pooled; and the 9-slice border comes from the sprite's
+import preset (12 px), never from code.
+
+### Two more defects found while verifying
+
+- **Rows stacked up.** `RefreshRows` destroyed and recreated every row, and because `Destroy` is deferred, two refreshes in
+  one frame left both sets alive (measured 104 -> 156 children). Rows are now **pooled**: 13 slots built once, then only
+  filled.
+- **The pinned player row showed the wrong rank.** It printed its *screen position* (13) instead of its real rank (41).
+  It now shows 41 - verified live.
+
+### Verified live (play mode, by measurement - the same probe that found the bug)
+
+```
+root rect=(1080, 1920) on ModalCanvas        card face=(907, 1421) sprite=grey type=Sliced
+title 'GLOBAL RANKS' size=30 font=Silkscreen Pixel
+content=(816, 1151)   pool slots=13   active rows=13
+row 0 rect=(98, 45) rank '1' tag 'StoneWall'  ...  slot 12 rank '41' tag '• YOU' gold=True
+2x Show in one frame -> slots=13 active=13        (was 104 -> 156)
+closed -> reopened=True slots=13 activeRows=13    (was dead after one close)
+scrim renders: nav background pixel (0.043, 0.051, 0.086) = its token colour dimmed to 35%
+```
+
+### Migration queue (one commit each)
+
+- [x] ranks sheet
+- [ ] defeat card (`DefeatModalUI`)
+- [ ] offline popup (`OfflineRewardsPopup`)
+- [ ] hero / prestige / shop rows
+- [ ] automation / roster / leaderboard rows
+- [ ] parked: the inventory tab's `UiDockedSheet` item sheet has the same "close destroys the frame" pattern
+
+- [ ] in-Play check by hand: `Manual-Tests.md` §2k
+
+
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 
 Base gate: every step below names the loop beat or money path it serves. Anything that cannot is not in the base.

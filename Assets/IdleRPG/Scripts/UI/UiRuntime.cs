@@ -108,9 +108,9 @@ namespace IdleRPG.UI
 
         /// <summary>A button anchored to a normalised region, with a centred label.</summary>
         public static Button CreateButton(Transform parent, string name, string label, Vector2 anchorMin,
-            Vector2 anchorMax, UnityEngine.Events.UnityAction onClick, Color? background = null)
+            Vector2 anchorMax, UnityEngine.Events.UnityAction onClick, Color? background = null, Sprite sprite = null)
         {
-            Image image = CreatePanel(parent, null, background ?? new Color(0.22f, 0.32f, 0.5f, 1f), raycast: true);
+            Image image = CreatePanel(parent, sprite, background ?? new Color(0.22f, 0.32f, 0.5f, 1f), raycast: true);
             image.gameObject.name = name;
             Anchor(image.rectTransform, anchorMin, anchorMax);
 

@@ -296,6 +296,37 @@ right side stayed empty for a whole wave.
 
 ---
 
+## 2k. Ranks card — the shared card standard (added 2026-10-11)
+
+Open RANKS (the trophy button, top right of the header). This sheet was the test case for the shared card, so it is worth
+a careful look. It is safe to open while a fight runs.
+
+### The card fills the screen
+- [ ] The card is a large panel in the middle of the screen (about 4/5 of the width) - **not** a small square. Text is as
+      big as the rest of the game's text.
+- [ ] The game behind the card is dimmed (compare a nav tab before and after opening it).
+- [ ] Nothing behind the card can be tapped: try tapping a nav tab through the card - the card stays, the tab does not
+      change.
+- [ ] The card draws **above** the floating damage numbers.
+- [ ] `GLOBAL RANKS` reads at the top left, `X` at the top right, `you are #N of M` under the title.
+
+### The rows read
+- [ ] 12 rows plus your own gold row at the bottom.
+- [ ] The column heads (#, TAG, LVL, STAGE) sit right above row 1, not floating in the middle.
+- [ ] Your row shows your **real** rank number (the same number as in `you are #N of M`) and is gold.
+- [ ] Rows use the same pixel font as the rest of the game (not a smooth default font).
+
+### It opens again (this was broken)
+- [ ] Close with the `X` -> it goes away. **Open it again** -> it comes back with its rows intact. The second open used
+      to show nothing at all.
+- [ ] Tap the dim background -> it closes as well.
+- [ ] Open and close it 3 times in a row while a fight runs: rows never double up and nothing flickers.
+
+### Regression
+- [ ] The rest of the battle page still works (damage numbers, battle log, nav tabs).
+- [ ] Switch tabs, come back, open RANKS again: still fine.
+
+
 ## 3. B9' part 2 — phone checklist (needs the first real phone build)
 
 - [ ] **Portrait lock** — turn the phone while playing; game stays one way up; nothing clipped at the notch /

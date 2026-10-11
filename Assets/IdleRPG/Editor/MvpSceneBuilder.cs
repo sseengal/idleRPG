@@ -117,6 +117,7 @@ namespace IdleRPG.EditorTools
             EnsureEventSystem();
 
             SceneWiringUtility.SetField(hud, "gameManager", gameManager);
+            SceneWiringUtility.SetField(hud, "modalRoot", modalRoot);
             SceneWiringUtility.SetField(hud, "formationBoard", formationBoard);
             SceneWiringUtility.SetField(hud, "enemyStack", enemyStack);
             SceneWiringUtility.SetField(hud, "damageTextPool", damagePool);

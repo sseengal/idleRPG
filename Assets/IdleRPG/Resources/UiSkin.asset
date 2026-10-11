@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 135f6a547457145ee9eee193424f2216, type: 3}
+  m_Name: UiSkin
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.UI.UiSkin
+  panelSprite: {fileID: 21300000, guid: 9b21d483ff4704037b8fcd64eddb31e2, type: 3}
+  buttonSprite: {fileID: 21300000, guid: 9b21d483ff4704037b8fcd64eddb31e2, type: 3}
+  scrim: {r: 0, g: 0, b: 0, a: 0.65}
+  card: {r: 0.1, g: 0.12, b: 0.18, a: 0.98}
+  title: {r: 0.94, g: 0.96, b: 1, a: 1}
+  body: {r: 1, g: 1, b: 1, a: 0.75}
+  button: {r: 0.3, g: 0.36, b: 0.5, a: 1}
+  accent: {r: 0.84, g: 0.62, b: 0.26, a: 1}
+  titleSize: 30
+  bodySize: 20
+  buttonSize: 22
