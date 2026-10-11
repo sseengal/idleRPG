@@ -46,7 +46,9 @@ namespace IdleRPG.UI
             card = UiCard.Create("LeaderboardCard", "GLOBAL RANKS", new Vector2(0.08f, 0.14f), new Vector2(0.92f, 0.88f));
             Transform sheet = card.Content;
 
-            subtitleLabel = card.CreateBodyText(sheet, "Subtitle", string.Empty, UiType.Role.Sentence,
+            // Same role as the column heads below it: the subtitle is a quiet line above the table, so it must not
+            // out-size the table's own headings.
+            subtitleLabel = card.CreateBodyText(sheet, "Subtitle", string.Empty, UiType.Role.Small,
                 TextAlignmentOptions.MidlineLeft, card.Skin.body);
             UiRuntime.Anchor(subtitleLabel.rectTransform, new Vector2(0f, 0.90f), new Vector2(0.95f, 0.99f));
 
