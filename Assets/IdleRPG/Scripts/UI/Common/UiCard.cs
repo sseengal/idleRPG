@@ -17,6 +17,9 @@ namespace IdleRPG.UI
     ///  * the root is STRETCHED over the overlay, so child anchors are fractions of the SCREEN (a default 100x100
     ///    rect made the whole card microscopic);
     ///  * the card owns show/hide, so a page can never destroy the wrong object and leave itself dead.
+    ///
+    /// A card's text comes from <see cref="UiType"/> (roles, never numbers); its faces and colours come from
+    /// <see cref="UiSkin"/>. Both are one file, so a card is tweaked in one place.
     /// </summary>
     public sealed class UiCard
     {
@@ -60,9 +63,9 @@ namespace IdleRPG.UI
             Image face = UiRuntime.CreatePanel(root.transform, card.Skin.panelSprite, card.Skin.card, raycast: true);
             UiRuntime.Anchor(face.rectTransform, anchorMin, anchorMax);
 
-            card.TitleLabel = UiRuntime.CreateText(face.transform, "Title", title, card.Skin.titleSize,
+            card.TitleLabel = UiRuntime.CreateText(face.transform, "Title", title, UiType.Size(UiType.Role.Title),
                 TextAlignmentOptions.MidlineLeft, card.Skin.title);
-            UiTheme.ApplyFont(card.TitleLabel, UiTheme.Display, card.Skin.titleSize);
+            UiType.Apply(card.TitleLabel, UiType.Role.Title);
             UiRuntime.Anchor(card.TitleLabel.rectTransform, new Vector2(0.06f, 0.88f), new Vector2(0.80f, 0.98f));
 
             card.CloseButton = UiRuntime.CreateButton(face.transform, "CloseButton", "X",
@@ -72,7 +75,7 @@ namespace IdleRPG.UI
             TextMeshProUGUI closeLabel = card.CloseButton.GetComponentInChildren<TextMeshProUGUI>();
             if (closeLabel != null)
             {
-                UiTheme.ApplyFont(closeLabel, UiTheme.Display, 18f);
+                UiType.Apply(closeLabel, UiType.Role.Small);
             }
 
             GameObject content = UiRuntime.CreateNode("Content", face.transform);
@@ -103,12 +106,15 @@ namespace IdleRPG.UI
             }
         }
 
-        /// <summary>Body text in the skin's sentence font - the pixel look for anything a page writes.</summary>
-        public TextMeshProUGUI CreateBodyText(Transform parent, string name, string text, float size,
+        /// <summary>
+        /// Body text on a role from <see cref="UiType"/> - a page picks the job (a sentence, a small label) and never
+        /// a number.
+        /// </summary>
+        public TextMeshProUGUI CreateBodyText(Transform parent, string name, string text, UiType.Role role,
             TextAlignmentOptions alignment, Color color)
         {
-            TextMeshProUGUI label = UiRuntime.CreateText(parent, name, text, size, alignment, color);
-            UiTheme.ApplyFont(label, UiTheme.Sentence, size);
+            TextMeshProUGUI label = UiRuntime.CreateText(parent, name, text, UiType.Size(role), alignment, color);
+            UiType.Apply(label, role);
             return label;
         }
 
@@ -122,7 +128,9 @@ namespace IdleRPG.UI
             TextMeshProUGUI buttonLabel = button.GetComponentInChildren<TextMeshProUGUI>();
             if (buttonLabel != null)
             {
-                UiTheme.ApplyFont(buttonLabel, UiTheme.Display, Skin.buttonSize);
+                // Auto-sized: card buttons carry words of very different lengths ("CLAIM", "DOUBLE WITH AD"), so a
+                // long caption shrinks towards UiType.Micro instead of spilling out of its button.
+                UiType.ApplyAuto(buttonLabel, UiType.Role.Section);
             }
 
             return button;

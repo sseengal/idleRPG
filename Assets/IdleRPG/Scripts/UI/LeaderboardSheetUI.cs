@@ -46,18 +46,17 @@ namespace IdleRPG.UI
             card = UiCard.Create("LeaderboardCard", "GLOBAL RANKS", new Vector2(0.08f, 0.14f), new Vector2(0.92f, 0.88f));
             Transform sheet = card.Content;
 
-            subtitleLabel = card.CreateBodyText(sheet, "Subtitle", string.Empty, card.Skin.bodySize,
+            subtitleLabel = card.CreateBodyText(sheet, "Subtitle", string.Empty, UiType.Role.Sentence,
                 TextAlignmentOptions.MidlineLeft, card.Skin.body);
             UiRuntime.Anchor(subtitleLabel.rectTransform, new Vector2(0f, 0.90f), new Vector2(0.95f, 0.99f));
 
-            float headSize = Mathf.Max(12f, card.Skin.bodySize - 5f);
-            TextMeshProUGUI rankHead = card.CreateBodyText(sheet, "ColRank", "#", headSize, TextAlignmentOptions.MidlineLeft, dimText);
+            TextMeshProUGUI rankHead = card.CreateBodyText(sheet, "ColRank", "#", UiType.Role.Small, TextAlignmentOptions.MidlineLeft, dimText);
             UiRuntime.Anchor(rankHead.rectTransform, new Vector2(0f, 0.84f), new Vector2(0.12f, 0.88f));
-            TextMeshProUGUI tagHead = card.CreateBodyText(sheet, "ColTag", "TAG", headSize, TextAlignmentOptions.MidlineLeft, dimText);
+            TextMeshProUGUI tagHead = card.CreateBodyText(sheet, "ColTag", "TAG", UiType.Role.Small, TextAlignmentOptions.MidlineLeft, dimText);
             UiRuntime.Anchor(tagHead.rectTransform, new Vector2(0.16f, 0.84f), new Vector2(0.58f, 0.88f));
-            TextMeshProUGUI lvlHead = card.CreateBodyText(sheet, "ColLvl", "LVL", headSize, TextAlignmentOptions.MidlineRight, dimText);
+            TextMeshProUGUI lvlHead = card.CreateBodyText(sheet, "ColLvl", "LVL", UiType.Role.Small, TextAlignmentOptions.MidlineRight, dimText);
             UiRuntime.Anchor(lvlHead.rectTransform, new Vector2(0.60f, 0.84f), new Vector2(0.74f, 0.88f));
-            TextMeshProUGUI stageHead = card.CreateBodyText(sheet, "ColStage", "STAGE", headSize, TextAlignmentOptions.MidlineRight, dimText);
+            TextMeshProUGUI stageHead = card.CreateBodyText(sheet, "ColStage", "STAGE", UiType.Role.Small, TextAlignmentOptions.MidlineRight, dimText);
             UiRuntime.Anchor(stageHead.rectTransform, new Vector2(0.78f, 0.84f), new Vector2(0.96f, 0.88f));
 
             GameObject rowsNode = UiRuntime.CreateNode("Rows", sheet);
@@ -216,7 +215,7 @@ namespace IdleRPG.UI
         private TextMeshProUGUI CreateRowLabel(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax,
             TextAlignmentOptions alignment)
         {
-            TextMeshProUGUI label = card.CreateBodyText(parent, name, string.Empty, card.Skin.bodySize, alignment, Color.white);
+            TextMeshProUGUI label = card.CreateBodyText(parent, name, string.Empty, UiType.Role.Sentence, alignment, Color.white);
             UiRuntime.Anchor(label.rectTransform, anchorMin, anchorMax);
             return label;
         }

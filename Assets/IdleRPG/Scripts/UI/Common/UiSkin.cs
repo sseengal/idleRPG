@@ -4,11 +4,14 @@ using UnityEngine;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// The look of every shared card, in one asset: the 9-slice faces from the pixel kit, the colours and the text
-    /// sizes. Nothing else may hard-code a card's sprite or colour - swapping the UI art is meant to be THIS file.
+    /// The look of every shared card, in one asset: the 9-slice faces from the pixel kit and the colours. Nothing
+    /// else may hard-code a card's sprite or colour - swapping the UI art is meant to be THIS file.
     ///
     /// ELI5: a recipe card for how a panel looks. The code that builds a card asks this for its pictures and colours;
     /// when real art lands, point these fields at the new PNGs and every card in the game changes at once.
+    ///
+    /// Text sizes are NOT here - they belong to <see cref="UiType"/>, which owns the whole type hierarchy. A skin is
+    /// look only, so a reskin can never fork the game's font sizes.
     ///
     /// It lives in a Resources folder (like the pixel fonts) so runtime-built UI can load it. A missing asset is NOT
     /// an error: the defaults below draw flat-coloured cards, which is exactly what the old screens did.
@@ -36,11 +39,6 @@ namespace IdleRPG.UI
         public Color body = new Color(1f, 1f, 1f, 0.75f);
         public Color button = new Color(0.30f, 0.36f, 0.50f, 1f);
         public Color accent = new Color(0.84f, 0.62f, 0.26f, 1f);
-
-        [Header("Text sizes")]
-        public float titleSize = 30f;
-        public float bodySize = 20f;
-        public float buttonSize = 22f;
 
         private static UiSkin current;
 
