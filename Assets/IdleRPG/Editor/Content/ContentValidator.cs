@@ -64,6 +64,7 @@ namespace IdleRPG.EditorTools.Content
             CheckEnemies(enemies);
             CheckParty(party, heroes);
             CheckWaves(waves, enemies);
+            CheckLadder(enemies, waves);
             CheckUpgrades(upgrades);
             CheckAssetsAgainstSpecs(heroes, enemies);
             CheckAssetReferences(enemies, heroes);

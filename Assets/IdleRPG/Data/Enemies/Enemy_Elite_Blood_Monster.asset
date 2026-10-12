@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec2cfe7cf2cb64fa9b4fa3c722078478, type: 3}
+  m_Name: Enemy_Elite_Blood_Monster
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.EnemyData
+  enemyName: Elite Blood Monster
+  enemyID: enemy_elite_blood_monster
+  enemySprite: {fileID: 0}
+  baseHealth: 169.65001
+  baseAttack: 11.8575
+  baseDefense: 7.36
+  baseGoldDrop: 16
+  isBoss: 0
+  attackIntervalSec: 2.325
+  targetRule: 3
+  bossHealthMultiplier: 1
+  bossGoldMultiplier: 1
+  bossSizeScale: 1.6
+  placeholderTint: {r: 0.5568628, g: 0.16862746, b: 0.16862746, a: 1}
+  artSet: {fileID: 11400000, guid: d2d4b005a5a5a4be2a16b751d8abcc29, type: 2}
+  stageAlternates: []
+  firstStage: 65
+  lastStage: 90

@@ -37,6 +37,9 @@ namespace IdleRPG.Data
         [SerializeField] private float bossHealthMultiplier = 10f;
         [SerializeField] private float bossGoldMultiplier = 5f;
 
+        [Tooltip("How much bigger a boss draws than a normal enemy of the same art. 1 = same size. 1.6 = 60% bigger, which is the old hard-coded boss box (128 -> 205 px). Written from the content spec.")]
+        [SerializeField] private float bossSizeScale = 1.6f;
+
         [Header("Presentation")]
         [SerializeField] private Color placeholderTint = new Color(0.85f, 0.3f, 0.3f, 1f);
 
@@ -106,6 +109,9 @@ namespace IdleRPG.Data
         public float BossHealthMultiplier => Mathf.Max(1f, bossHealthMultiplier);
 
         public float BossGoldMultiplier => Mathf.Max(1f, bossGoldMultiplier);
+
+        /// <summary>How much bigger a boss draws than a normal enemy of the same art (1 = same size).</summary>
+        public float BossSizeScale => Mathf.Max(1f, bossSizeScale);
 
         public Color PlaceholderTint => placeholderTint;
 

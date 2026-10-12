@@ -215,7 +215,16 @@ namespace IdleRPG.UI
 
                 EnemyCombatant enemy = enemies[i];
                 slot.Configure(i);
-                slot.SetIconSize(enemy.IsBoss ? Mathf.Min(200f, slotHeight * 0.9f) : SlotWidth * 0.8f);
+
+                // Bosses draw bigger by the asset's own scale (spec-driven, so "make bosses 40% bigger" is one
+                // number), kept inside the slot so a short 3-enemy stack still fits.
+                float iconSize = SlotWidth * 0.8f;
+                if (enemy.IsBoss && enemy.Data != null)
+                {
+                    iconSize = Mathf.Min(iconSize * enemy.Data.BossSizeScale, slotHeight * 0.9f);
+                }
+
+                slot.SetIconSize(iconSize);
                 slot.Show(enemy.DisplayName, enemy.MaxHealth, enemy.IsBoss);
 
                 if (anchors != null && i < anchors.Length && anchors[i] != null)

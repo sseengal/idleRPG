@@ -81,12 +81,19 @@ namespace IdleRPG.EditorTools.Content
                     bosses++;
                 }
 
-                if (enemy.baseHealth <= 0f)
+                // 0 = "derive from the band table" (the ladder's normal case, see EnemySpec): the number only has to
+                // be positive when the card actually carries one, and the ladder check asserts that a band row
+                // exists for every row that wants to derive.
+                if (enemy.baseHealth < 0f)
                 {
-                    Add(Severity.Error, "enemies", $"{enemy.id}: baseHealth must be > 0 (is {enemy.baseHealth}).");
+                    Add(Severity.Error, "enemies", $"{enemy.id}: baseHealth cannot be negative (is {enemy.baseHealth}).");
                 }
 
-                if (enemy.attackIntervalSec < 0.1f)
+                if (enemy.attackIntervalSec < 0f)
+                {
+                    Add(Severity.Error, "enemies", $"{enemy.id}: attackIntervalSec cannot be negative (is {enemy.attackIntervalSec}).");
+                }
+                else if (enemy.attackIntervalSec > 0f && enemy.attackIntervalSec < 0.1f)
                 {
                     Add(Severity.Error, "enemies", $"{enemy.id}: attackIntervalSec must be >= 0.1 (is {enemy.attackIntervalSec}).");
                 }

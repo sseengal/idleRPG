@@ -15,17 +15,18 @@ MonoBehaviour:
   enemyName: Bat
   enemyID: enemy_bat
   enemySprite: {fileID: 21300000, guid: 359611c60077a4b78b7b8a31c1ef68b4, type: 3}
-  baseHealth: 90
-  baseAttack: 9
-  baseDefense: 1
-  baseGoldDrop: 12
+  baseHealth: 48
+  baseAttack: 8.099999
+  baseDefense: 0
+  baseGoldDrop: 8
   isBoss: 0
-  attackIntervalSec: 1.6
+  attackIntervalSec: 1.4
   targetRule: 3
   bossHealthMultiplier: 1
   bossGoldMultiplier: 1
-  placeholderTint: {r: 0.6, g: 0.4, b: 0.29803923, a: 1}
-  artSet: {fileID: 0}
+  bossSizeScale: 1.6
+  placeholderTint: {r: 0.5411765, g: 0.41568628, b: 0.22745098, a: 1}
+  artSet: {fileID: 11400000, guid: 8fffee5c157dc4a14a5a9489f299b29b, type: 2}
   stageAlternates: []
   firstStage: 1
-  lastStage: 0
+  lastStage: 24

@@ -35,7 +35,7 @@ namespace IdleRPG.EditorTools.Content
                 {
                     HeroSpec hero = heroFile.heroes[i];
                     checkedCards++;
-                    missing += CheckOneCardPicture("heroes", hero.id, hero.icon, false);
+                    missing += CheckOneCardPicture("heroes", hero.id, hero.icon, false, !string.IsNullOrEmpty(hero.art));
                 }
             }
 
@@ -45,7 +45,9 @@ namespace IdleRPG.EditorTools.Content
                 {
                     EnemySpec enemy = enemyFile.enemies[i];
                     checkedCards++;
-                    missing += CheckOneCardPicture("enemies", enemy.id, enemy.sprite, enemy.isBoss);
+                    bool hasArt = !string.IsNullOrEmpty(enemy.art) ||
+                                  (enemy.stageAlternates != null && enemy.stageAlternates.Count > 0);
+                    missing += CheckOneCardPicture("enemies", enemy.id, enemy.sprite, enemy.isBoss, hasArt);
                 }
             }
 
@@ -56,7 +58,7 @@ namespace IdleRPG.EditorTools.Content
         /// Checks one card's picture. Returns 1 when the picture file is missing. Empty ids are skipped here because
         /// they are already reported by the per-area checks.
         /// </summary>
-        private static int CheckOneCardPicture(string area, string cardId, string pictureName, bool isBoss)
+        private static int CheckOneCardPicture(string area, string cardId, string pictureName, bool isBoss, bool hasArt = false)
         {
             if (string.IsNullOrEmpty(cardId))
             {
@@ -80,7 +82,9 @@ namespace IdleRPG.EditorTools.Content
                     $"{cardId}: {path} exists but is not imported as a sprite, so the fight will show an empty space.");
             }
 
-            if (!isBoss && PlaceholderSpriteGenerator.FamilyOf(cardId, false) == "unknown")
+            // The family word exists only to shape the DRAWN picture. A card with real animated art never shows that
+            // drawing, so its id does not need a family word (the whole ladder roster would warn otherwise).
+            if (!isBoss && !hasArt && PlaceholderSpriteGenerator.FamilyOf(cardId, false) == "unknown")
             {
                 Add(Severity.Warning, area,
                     $"{cardId}: the id carries no family word, so its drawn picture falls back to a plain blob. " +

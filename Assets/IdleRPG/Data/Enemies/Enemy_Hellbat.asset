@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec2cfe7cf2cb64fa9b4fa3c722078478, type: 3}
+  m_Name: Enemy_Hellbat
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.EnemyData
+  enemyName: Hellbat
+  enemyID: enemy_hellbat
+  enemySprite: {fileID: 0}
+  baseHealth: 67.2
+  baseAttack: 10.125
+  baseDefense: 1.08
+  baseGoldDrop: 11.6
+  isBoss: 0
+  attackIntervalSec: 1.344
+  targetRule: 3
+  bossHealthMultiplier: 1
+  bossGoldMultiplier: 1
+  bossSizeScale: 1.6
+  placeholderTint: {r: 0.5568628, g: 0.16862746, b: 0.16862746, a: 1}
+  artSet: {fileID: 11400000, guid: 237bcc364e9d44a738a53de2fa607403, type: 2}
+  stageAlternates: []
+  firstStage: 36
+  lastStage: 68

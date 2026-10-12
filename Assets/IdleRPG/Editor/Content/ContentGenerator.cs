@@ -97,11 +97,25 @@ namespace IdleRPG.EditorTools.Content
         private static void ExportEnemies()
         {
             EnemySpecFile file = new EnemySpecFile();
+            // The numbers and the band table are OWNED BY THE SPEC, not by the assets: the generator derives them,
+            // so writing the derived values back would turn every derived row into a hand-tuned one and the band
+            // table would stop reaching it. Export therefore carries the card's own numbers (and the whole band
+            // table) forward, and writes only what the assets really own - identity plus what wiring the assets add.
+            EnemySpecFile previous = ContentSpecIO.Load<EnemySpecFile>(ContentSpecIO.EnemiesPath);
+            file.bands = previous.bands ?? new List<EnemyBandSpec>();
+
+            var cardById = new Dictionary<string, EnemySpec>();
+            for (int i = 0; i < previous.enemies.Count; i++)
+            {
+                cardById[previous.enemies[i].id] = previous.enemies[i];
+            }
+
             List<EnemyData> assets = ContentSpecIO.LoadAll<EnemyData>(ContentSpecIO.EnemyFolder);
 
             for (int i = 0; i < assets.Count; i++)
             {
                 EnemyData enemy = assets[i];
+                cardById.TryGetValue(SoField.Text(enemy, "enemyID", enemy.name), out EnemySpec card);
 
                 file.enemies.Add(new EnemySpec
                 {
@@ -112,14 +126,20 @@ namespace IdleRPG.EditorTools.Content
                     art = ArtCharacterName(SoField.Reference(enemy, "artSet")),
                     firstStage = SoField.Int(enemy, "firstStage", 1),
                     lastStage = SoField.Int(enemy, "lastStage", 0),
-                    baseHealth = SoField.Float(enemy, "baseHealth", 60f),
-                    baseAttack = SoField.Float(enemy, "baseAttack", 9f),
-                    baseDefense = SoField.Float(enemy, "baseDefense", 0f),
-                    baseGoldDrop = SoField.Float(enemy, "baseGoldDrop", 8f),
-                    attackIntervalSec = SoField.Float(enemy, "attackIntervalSec", 2f),
+
+                    // Numbers and archetype ride the card forward (see the note at the top of this method).
+                    archetype = card != null ? card.archetype : string.Empty,
+                    baseHealth = card != null ? card.baseHealth : 0f,
+                    baseAttack = card != null ? card.baseAttack : 0f,
+                    baseDefense = card != null ? card.baseDefense : 0f,
+                    baseGoldDrop = card != null ? card.baseGoldDrop : 0f,
+                    attackIntervalSec = card != null ? card.attackIntervalSec : 0f,
+
+                    stageAlternates = AlternatesOf(enemy),
                     isBoss = SoField.Bool(enemy, "isBoss"),
                     bossHealthMultiplier = SoField.Float(enemy, "bossHealthMultiplier", 1f),
                     bossGoldMultiplier = SoField.Float(enemy, "bossGoldMultiplier", 1f),
+                    bossSizeScale = SoField.Float(enemy, "bossSizeScale", 1.35f),
                     tint = ContentSpecIO.ToHex(SoField.Color(enemy, "placeholderTint", Color.white)),
                     targetRule = ((EnemyTargetingMode)SoField.Int(enemy, "targetRule", (int)EnemyTargetingMode.Inherit))
                         .ToString().ToLowerInvariant()
@@ -128,6 +148,29 @@ namespace IdleRPG.EditorTools.Content
 
             file.enemies.Sort((a, b) => string.CompareOrdinal(a.id, b.id));
             ContentSpecIO.Save(ContentSpecIO.EnemiesPath, file);
+        }
+
+        /// <summary>
+        /// The alternate art names wired on an enemy asset, in order. This is S6b: the generator writes the
+        /// alternates onto the asset and Export reads them back, so a regeneration round-trips them instead of
+        /// quietly dropping the skins (the Goblin's Demon / Blood Monster sheets).
+        /// </summary>
+        private static List<string> AlternatesOf(EnemyData enemy)
+        {
+            var names = new List<string>();
+            int count = SoField.Count(enemy, "stageAlternates");
+
+            for (int i = 0; i < count; i++)
+            {
+                string name = ArtCharacterName(SoField.ElementAt(enemy, "stageAlternates", i));
+
+                if (!string.IsNullOrEmpty(name))
+                {
+                    names.Add(name);
+                }
+            }
+
+            return names;
         }
 
         /// <summary>

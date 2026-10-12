@@ -42,7 +42,42 @@ namespace IdleRPG.EditorTools.Content
     public class EnemySpecFile
     {
         public int version = 1;
+
+        /// <summary>
+        /// The ladder's scaling table: one row per band, ten bands for the 100-stage run.
+        ///
+        /// This is THE place enemy difficulty is tuned. A row is a multiplier for that band's whole roster, so
+        /// "bands 8-10 hit 20% harder" is one number here plus a regeneration - never forty rows of hand-edited
+        /// enemies. The per-stage curve (BalanceConfig.EnemyHealthGrowth) still runs on top, so this table only
+        /// says how much stronger a band's roster is than band 1's.
+        /// </summary>
+        public List<EnemyBandSpec> bands = new List<EnemyBandSpec>();
+
         public List<EnemySpec> enemies = new List<EnemySpec>();
+    }
+
+    /// <summary>
+    /// One band's scaling. Band 1 covers stages 1-10, band 2 stages 11-20, and so on (band = (firstStage - 1) / 10 + 1).
+    ///
+    /// Multipliers, not absolute numbers: 1 = "the same as band 1". Health 2.5 means that band's roster has two
+    /// and a half times band 1's health, before the per-stage curve is applied.
+    /// </summary>
+    [Serializable]
+    public class EnemyBandSpec
+    {
+        /// <summary>Band number, 1-based (1 = stages 1-10).</summary>
+        public int band = 1;
+
+        public float health = 1f;
+        public float attack = 1f;
+
+        /// <summary>Defence is an absolute add rather than a multiplier, because band 1 sits at zero.</summary>
+        public float defense = 0f;
+
+        public float gold = 1f;
+
+        /// <summary>Attack-interval multiplier: below 1 swings faster, which is how the late bands feel harder.</summary>
+        public float interval = 1f;
     }
 
     [Serializable]
@@ -62,14 +97,40 @@ namespace IdleRPG.EditorTools.Content
 
         /// <summary>Last stage this enemy may appear on. 0 = no limit.</summary>
         public int lastStage = 0;
-        public float baseHealth = 60f;
-        public float baseAttack = 9f;
+        /// <summary>
+        /// Which archetype shape the numbers take (see EnemyArchetypes in the generator): "brute" is a slow
+        /// wall, "skirmisher" hits fast and light, "caster" hits hard but is fragile, "beast" is quick, plus
+        /// "undead" and "humanoid" as the neutral shapes. Empty = "humanoid".
+        /// </summary>
+        public string archetype = "";
+
+        /// <summary>
+        /// Alternate art folders rotated by stage (index = stage % count), so one enemy archetype wears several
+        /// skins across a run - e.g. the Goblin showing Demon / Blood Monster sheets. Empty = just <see cref="art"/>.
+        /// </summary>
+        public List<string> stageAlternates = new List<string>();
+
+        /// <summary>
+        /// These four are DERIVED from the band table when left at 0, which is the normal case: the generator
+        /// writes band x archetype. A non-zero value is used exactly as written - the escape hatch for a
+        /// hand-tuned special case (the four original enemies keep their hand numbers).
+        /// </summary>
+        public float baseHealth = 0f;
+        public float baseAttack = 0f;
         public float baseDefense = 0f;
-        public float baseGoldDrop = 8f;
-        public float attackIntervalSec = 2f;
+        public float baseGoldDrop = 0f;
+        public float attackIntervalSec = 0f;
+
         public bool isBoss;
         public float bossHealthMultiplier = 1f;
         public float bossGoldMultiplier = 1f;
+
+        /// <summary>
+        /// How much bigger a boss draws than a normal enemy of the same art. 1.6 = 60% bigger, which is the size the
+        /// old hard-coded boss box produced (128 px -> 205 px). Change it here and every boss follows.
+        /// </summary>
+        public float bossSizeScale = 1.6f;
+
         public string tint = "#FFFFFFFF";
         /// <summary>"inherit" | "frontmost" | "lowesthealthpercent" | "random" | "backlinefirst".</summary>
         public string targetRule = "inherit";

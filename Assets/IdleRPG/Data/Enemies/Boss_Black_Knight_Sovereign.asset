@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec2cfe7cf2cb64fa9b4fa3c722078478, type: 3}
+  m_Name: Boss_Black_Knight_Sovereign
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.EnemyData
+  enemyName: Black Knight Sovereign
+  enemyID: boss_black_knight_c
+  enemySprite: {fileID: 0}
+  baseHealth: 239.25002
+  baseAttack: 14.535
+  baseDefense: 13.6
+  baseGoldDrop: 22.4
+  isBoss: 1
+  attackIntervalSec: 2.2
+  targetRule: 3
+  bossHealthMultiplier: 4
+  bossGoldMultiplier: 6
+  bossSizeScale: 1.6
+  placeholderTint: {r: 0.8509804, g: 0.2509804, b: 0.2, a: 1}
+  artSet: {fileID: 11400000, guid: 62c76eea3698d44c99876c50d7d4fd5c, type: 2}
+  stageAlternates: []
+  firstStage: 100
+  lastStage: 100

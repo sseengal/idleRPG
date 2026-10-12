@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec2cfe7cf2cb64fa9b4fa3c722078478, type: 3}
+  m_Name: Boss_Hellbat_Swarmlord
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.EnemyData
+  enemyName: Hellbat Swarmlord
+  enemyID: boss_hellbat_swarmlord
+  enemySprite: {fileID: 0}
+  baseHealth: 74.4
+  baseAttack: 10.854
+  baseDefense: 1.5600001
+  baseGoldDrop: 12.8
+  isBoss: 1
+  attackIntervalSec: 1.3299999
+  targetRule: 3
+  bossHealthMultiplier: 4
+  bossGoldMultiplier: 6
+  bossSizeScale: 1.6
+  placeholderTint: {r: 0.8509804, g: 0.2509804, b: 0.2, a: 1}
+  artSet: {fileID: 11400000, guid: 237bcc364e9d44a738a53de2fa607403, type: 2}
+  stageAlternates: []
+  firstStage: 41
+  lastStage: 43

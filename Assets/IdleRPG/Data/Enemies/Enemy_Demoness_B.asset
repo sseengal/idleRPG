@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec2cfe7cf2cb64fa9b4fa3c722078478, type: 3}
+  m_Name: Enemy_Demoness_B
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.EnemyData
+  enemyName: Demoness B
+  enemyID: enemy_demoness_b
+  enemySprite: {fileID: 0}
+  baseHealth: 87.75
+  baseAttack: 20.2275
+  baseDefense: 1.84
+  baseGoldDrop: 16
+  isBoss: 0
+  attackIntervalSec: 2.139
+  targetRule: 3
+  bossHealthMultiplier: 1
+  bossGoldMultiplier: 1
+  bossSizeScale: 1.6
+  placeholderTint: {r: 0.5568628, g: 0.16862746, b: 0.16862746, a: 1}
+  artSet: {fileID: 11400000, guid: bafb3d33025f04e2db111d7fd944b87b, type: 2}
+  stageAlternates: []
+  firstStage: 61
+  lastStage: 94

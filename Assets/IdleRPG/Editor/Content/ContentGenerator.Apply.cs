@@ -52,22 +52,25 @@ namespace IdleRPG.EditorTools.Content
                 EnemySpec spec = file.enemies[i];
                 string assetName = string.IsNullOrEmpty(spec.asset) ? DeriveAssetName(spec.id) : spec.asset;
                 EnemyData enemy = ContentSpecIO.CreateOrLoad<EnemyData>(ContentSpecIO.EnemyFolder + "/" + assetName + ".asset");
+                EnemyNumbers numbers = EnemyNumbersFor(spec, file);
 
                 new Editable(enemy)
                     .Set("enemyID", spec.id)
                     .Set("enemyName", spec.displayName)
-                    .Set("baseHealth", spec.baseHealth)
-                    .Set("baseAttack", spec.baseAttack)
-                    .Set("baseDefense", spec.baseDefense)
-                    .Set("baseGoldDrop", spec.baseGoldDrop)
-                    .Set("attackIntervalSec", spec.attackIntervalSec)
+                    .Set("baseHealth", numbers.Health)
+                    .Set("baseAttack", numbers.Attack)
+                    .Set("baseDefense", numbers.Defense)
+                    .Set("baseGoldDrop", numbers.Gold)
+                    .Set("attackIntervalSec", numbers.Interval)
                     .Set("isBoss", spec.isBoss)
                     .Set("bossHealthMultiplier", spec.bossHealthMultiplier)
                     .Set("bossGoldMultiplier", spec.bossGoldMultiplier)
+                    .Set("bossSizeScale", spec.bossSizeScale)
                     .Set("targetRule", (int)ParseTargetRule(spec.targetRule))
                     .SetColor("placeholderTint", ContentSpecIO.FromHex(spec.tint, Color.white))
                     .SetSprite("enemySprite", spec.sprite)
                     .SetAsset("artSet", ResolveArtSet(spec.art))
+                    .SetObjectList("stageAlternates", ResolveArtSets(spec.stageAlternates))
                     .Set("firstStage", spec.firstStage)
                     .Set("lastStage", spec.lastStage)
                     .Apply();
@@ -86,6 +89,165 @@ namespace IdleRPG.EditorTools.Content
         /// An empty name means "no animated art" - the behaviour every asset had before art could be specified - and a
         /// name with no matching asset warns instead of failing silently.
         /// </summary>
+        // ------------------------------------------------------------------
+        // The ladder's number model
+        // ------------------------------------------------------------------
+        /// <summary>Stages per band. The ladder is 100 stages in 10 bands.</summary>
+        private const int BandWidth = 10;
+
+        /// <summary>
+        /// Band 1's anchor: what a band-1 humanoid gets. These match the four original enemies (Slime 60 hp / 6 atk,
+        /// Goblin 130 / 12), so the ladder grew out of the numbers the game already had.
+        /// </summary>
+        private const float BaseHealth = 60f;
+        private const float BaseAttack = 9f;
+        private const float BaseDefense = 0f;
+        private const float BaseGold = 8f;
+        private const float BaseInterval = 2f;
+
+        /// <summary>One enemy's final base numbers, after the band table and its archetype shape.</summary>
+        private readonly struct EnemyNumbers
+        {
+            public readonly float Health;
+            public readonly float Attack;
+            public readonly float Defense;
+            public readonly float Gold;
+            public readonly float Interval;
+
+            public EnemyNumbers(float health, float attack, float defense, float gold, float interval)
+            {
+                Health = health;
+                Attack = attack;
+                Defense = defense;
+                Gold = gold;
+                Interval = interval;
+            }
+        }
+
+        /// <summary>
+        /// The numbers one enemy row ends up with: band x archetype, unless the row carries its own value.
+        ///
+        /// This is why a band tweak is one number in one table: every enemy row stores identity, and its numbers
+        /// are computed here at generation time. A non-zero value on the row wins - the escape hatch for the four
+        /// original enemies and for any deliberate special case.
+        /// </summary>
+        private static EnemyNumbers EnemyNumbersFor(EnemySpec spec, EnemySpecFile file)
+        {
+            EnemyBandSpec band = BandFor(spec, file);
+            ArchetypeShape(spec.archetype, out float shapeHealth, out float shapeAttack, out float shapeDefense, out float shapeInterval);
+
+            float health = BaseHealth * band.health * shapeHealth;
+            float attack = BaseAttack * band.attack * shapeAttack;
+            float defense = BaseDefense + band.defense * shapeDefense;
+            float gold = BaseGold * band.gold;
+            float interval = BaseInterval * band.interval * shapeInterval;
+
+            return new EnemyNumbers(
+                spec.baseHealth > 0f ? spec.baseHealth : health,
+                spec.baseAttack > 0f ? spec.baseAttack : attack,
+                spec.baseDefense > 0f ? spec.baseDefense : defense,
+                spec.baseGoldDrop > 0f ? spec.baseGoldDrop : gold,
+                spec.attackIntervalSec > 0f ? spec.attackIntervalSec : interval);
+        }
+
+        /// <summary>
+        /// The band a row scales with: stages 1-10 are band 1, 11-20 band 2, and so on. A missing row means "no
+        /// scaling" (1x), so a half-written table can never produce a zero-health enemy.
+        /// </summary>
+        private static EnemyBandSpec BandFor(EnemySpec spec, EnemySpecFile file)
+        {
+            int band = (Mathf.Max(1, spec.firstStage) - 1) / BandWidth + 1;
+
+            if (file.bands != null)
+            {
+                for (int i = 0; i < file.bands.Count; i++)
+                {
+                    if (file.bands[i] != null && file.bands[i].band == band)
+                    {
+                        return file.bands[i];
+                    }
+                }
+            }
+
+            return new EnemyBandSpec { band = band };
+        }
+
+        /// <summary>
+        /// The archetype's shape: multipliers on the band's numbers. Style, not difficulty - the band table says how
+        /// strong a band is, the archetype says how an enemy expresses it (a brute is a slow wall, a skirmisher is
+        /// fast and light, a caster hits hard and dies fast). Empty or unknown = the neutral humanoid shape.
+        /// </summary>
+        private static void ArchetypeShape(string archetype, out float health, out float attack, out float defense, out float interval)
+        {
+            switch ((archetype ?? string.Empty).Trim().ToLowerInvariant())
+            {
+                case "brute":
+                    health = 1.45f;
+                    attack = 0.85f;
+                    defense = 1.6f;
+                    interval = 1.25f;
+                    return;
+
+                case "skirmisher":
+                    health = 0.80f;
+                    attack = 0.90f;
+                    defense = 0.6f;
+                    interval = 0.70f;
+                    return;
+
+                case "caster":
+                    health = 0.75f;
+                    attack = 1.45f;
+                    defense = 0.4f;
+                    interval = 1.15f;
+                    return;
+
+                case "beast":
+                    health = 0.95f;
+                    attack = 1.10f;
+                    defense = 0.8f;
+                    interval = 0.85f;
+                    return;
+
+                case "undead":
+                    health = 1.10f;
+                    attack = 1.00f;
+                    defense = 1.0f;
+                    interval = 1.00f;
+                    return;
+
+                default:
+                    health = 1.00f;
+                    attack = 1.00f;
+                    defense = 1.0f;
+                    interval = 1.00f;
+                    return;
+            }
+        }
+
+        /// <summary>Resolves a row's alternate art names to art sets, skipping names that resolve to nothing.</summary>
+        private static List<CharacterArtSet> ResolveArtSets(List<string> characterNames)
+        {
+            var sets = new List<CharacterArtSet>();
+
+            if (characterNames == null)
+            {
+                return sets;
+            }
+
+            for (int i = 0; i < characterNames.Count; i++)
+            {
+                CharacterArtSet art = ResolveArtSet(characterNames[i]);
+
+                if (art != null)
+                {
+                    sets.Add(art);
+                }
+            }
+
+            return sets;
+        }
+
         private static CharacterArtSet ResolveArtSet(string characterName)
         {
             if (string.IsNullOrEmpty(characterName))

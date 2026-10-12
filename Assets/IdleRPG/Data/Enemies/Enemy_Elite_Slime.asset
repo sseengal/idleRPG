@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec2cfe7cf2cb64fa9b4fa3c722078478, type: 3}
+  m_Name: Enemy_Elite_Slime
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.EnemyData
+  enemyName: Elite Slime
+  enemyID: enemy_elite_slime
+  enemySprite: {fileID: 0}
+  baseHealth: 63.84
+  baseAttack: 10.692
+  baseDefense: 0.4
+  baseGoldDrop: 9.2
+  isBoss: 0
+  attackIntervalSec: 1.7
+  targetRule: 3
+  bossHealthMultiplier: 1
+  bossGoldMultiplier: 1
+  bossSizeScale: 1.6
+  placeholderTint: {r: 0.43529412, g: 0.7490196, b: 0.3529412, a: 1}
+  artSet: {fileID: 11400000, guid: 37502ee7c33104a7482f7a988123a521, type: 2}
+  stageAlternates: []
+  firstStage: 20
+  lastStage: 45
