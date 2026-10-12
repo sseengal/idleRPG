@@ -44,8 +44,10 @@ while the previous band's fade out.
 
 ## Bosses — the villain cast, in order
 
-Eleven bosses, all drawn from the packs. Three of them are the **same family** (Black Knight A, B, C), which is how one
-archetype becomes a three-part villain arc.
+**Twelve boss-capable characters; ten fill the milestone slots below.** The two spares are **Demon_E** and
+**Eyeball Monster** — the bands above list them as normal enemies, so promote either one if you want more boss variety.
+Three milestones are the **same family** (Black Knight A, B, C), which is how one archetype becomes a three-part
+villain arc.
 
 | Stage | Boss | Note |
 |---|---|---|

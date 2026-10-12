@@ -18,6 +18,35 @@ shadow variants were deliberately skipped (they bake a fake drop shadow; the sce
 
 ---
 
+## Pack 01 — 22 characters
+
+| Character | Role | Actions (name : frames) |
+|---|---|---|
+| Archer | HERO | Attack01:9 Attack02:12 Death:4 Hurt:4 Idle:6 Walk:8 |
+| Knight | HERO | Attack01:7 Attack02:10 Attack03:11 **Block:4** Death:4 Hurt:4 Idle:6 Walk:8 |
+| Wizard | HERO | Attack01:6 **Attack01_Effect:10** Attack01(With magic effects):15 Attack02:9 **Attack02_Effect:7** Attack02(With magic effects):14 Death:4 Hurt:4 Idle:6 Walk:8 |
+| Priest | HERO | Attack:9 **Attack_effect:5** Attack(With magic effects):9 **Heal:6** **Heal_effect:4** Heal(With magic effects):6 Death:4 Hurt:4 Idle:6 Walk:8 |
+| Knight Templar | HERO | Attack01:7 Attack02:8 Attack03:11 **Block:4** Death:4 Hurt:4 Idle:6 **Walk01:8 Walk02:8** |
+| Lancer | HERO | Attack01:6 Attack02:9 Attack03:8 Death:4 Hurt:4 Idle:6 **Walk01:8 Walk02:8** |
+| Slime | NORMAL | Attack01:6 Attack02:12 Death:4 Hurt:4 Idle:6 Walk:6 |
+| Bat | NORMAL | Attack01:6 Attack02:7 Death:4 **Flying:6** Hurt:4 |
+| Werewolf | NORMAL | Attack01:9 Attack02:13 Death:4 Hurt:4 Idle:6 Walk:8 |
+| Werebear | NORMAL | Attack01:9 Attack02:13 Attack03:9 Death:4 Hurt:4 Idle:6 Walk:8 |
+| Skeleton | NORMAL | Attack01:6 Attack02:7 **Block:4** Death:4 Hurt:4 Idle:6 **Summon:5** Walk:8 |
+| Armored Skeleton | NORMAL | Attack01:8 Attack02:9 Death:4 Hurt:4 Idle:6 **Summon:5** Walk:8 |
+| Greatsword Skeleton | NORMAL | Attack01:9 Attack02:12 Attack03:8 Death:4 Hurt:4 Idle:6 **Summon:5** Walk:9 |
+| Orc | NORMAL | Attack01:6 Attack02:6 Death:4 Hurt:4 Idle:6 Walk:8 |
+| Armored Orc | NORMAL | Attack01:7 Attack02:8 Attack03:9 **Block:4** Death:4 Hurt:4 Idle:6 Walk:8 |
+| Elite Orc | BOSS | Attack01:7 Attack02:11 Attack03:9 Death:4 Hurt:4 Idle:6 Walk:8 |
+| Orc rider | BOSS | Attack01:8 Attack02:9 Attack03:11 **Block:4** Death:4 Hurt:4 Idle:6 Walk:8 |
+| Armored Axeman | NORMAL | Attack01:9 Attack02:9 Attack03:12 Death:4 Hurt:4 Idle:6 Walk:8 |
+| Soldier | NORMAL | Attack01:6 Attack02:6 Attack03:9 Death:4 Hurt:4 Idle:6 Walk:8 |
+| Swordsman | NORMAL | Attack01:7 Attack02:15 **Attack3:12** Death:4 **Hurt:5** Idle:6 Walk:8 |
+| Necromancer | BOSS | Attack01:9 Attack02:10 **Attack02_Effect:6** Attack02(With magic effects):10 **DEATH:9** Hurt:4 Idle:6 **Summon:10** **Sumon_Effect:7** Summon(With magic effects):13 Walk:6 |
+| Skeleton Archer | SUMMON | **Attack:9** Death:4 Hurt:4 Idle:6 **Summon:5** Walk:8 |
+
+---
+
 ## Pack 02 — 20 characters (all enemy-side)
 
 | Character | Role | Actions (name : frames) |
@@ -73,30 +102,3 @@ plays three times faster than an 18-frame one. Either accept the variance or sto
 1. **Nothing is imported until this file is complete and the validator reports no unknown action names.**
 2. It is **regenerated, never hand-edited** — the validator walks the pack folders and rewrites this table.
 3. The roles here are the single source for `Stage-Ladder.md`; a character with no role is a planning gap.
-
-## Pack 01 — 22 characters
-
-| Character | Role | Actions (name : frames) |
-|---|---|---|
-| Archer | HERO | Attack01:9 Attack02:12 Death:4 Hurt:4 Idle:6 Walk:8 |
-| Knight | HERO | Attack01:7 Attack02:10 Attack03:11 **Block:4** Death:4 Hurt:4 Idle:6 Walk:8 |
-| Wizard | HERO | Attack01:6 **Attack01_Effect:10** Attack01(With magic effects):15 Attack02:9 **Attack02_Effect:7** Attack02(With magic effects):14 Death:4 Hurt:4 Idle:6 Walk:8 |
-| Priest | HERO | Attack:9 **Attack_effect:5** Attack(With magic effects):9 **Heal:6** **Heal_effect:4** Heal(With magic effects):6 Death:4 Hurt:4 Idle:6 Walk:8 |
-| Knight Templar | HERO | Attack01:7 Attack02:8 Attack03:11 **Block:4** Death:4 Hurt:4 Idle:6 **Walk01:8 Walk02:8** |
-| Lancer | HERO | Attack01:6 Attack02:9 Attack03:8 Death:4 Hurt:4 Idle:6 **Walk01:8 Walk02:8** |
-| Slime | NORMAL | Attack01:6 Attack02:12 Death:4 Hurt:4 Idle:6 Walk:6 |
-| Bat | NORMAL | Attack01:6 Attack02:7 Death:4 **Flying:6** Hurt:4 |
-| Werewolf | NORMAL | Attack01:9 Attack02:13 Death:4 Hurt:4 Idle:6 Walk:8 |
-| Werebear | NORMAL | Attack01:9 Attack02:13 Attack03:9 Death:4 Hurt:4 Idle:6 Walk:8 |
-| Skeleton | NORMAL | Attack01:6 Attack02:7 **Block:4** Death:4 Hurt:4 Idle:6 **Summon:5** Walk:8 |
-| Armored Skeleton | NORMAL | Attack01:8 Attack02:9 Death:4 Hurt:4 Idle:6 **Summon:5** Walk:8 |
-| Greatsword Skeleton | NORMAL | Attack01:9 Attack02:12 Attack03:8 Death:4 Hurt:4 Idle:6 **Summon:5** Walk:9 |
-| Orc | NORMAL | Attack01:6 Attack02:6 Death:4 Hurt:4 Idle:6 Walk:8 |
-| Armored Orc | NORMAL | Attack01:7 Attack02:8 Attack03:9 **Block:4** Death:4 Hurt:4 Idle:6 Walk:8 |
-| Elite Orc | BOSS | Attack01:7 Attack02:11 Attack03:9 Death:4 Hurt:4 Idle:6 Walk:8 |
-| Orc rider | BOSS | Attack01:8 Attack02:9 Attack03:11 **Block:4** Death:4 Hurt:4 Idle:6 Walk:8 |
-| Armored Axeman | NORMAL | Attack01:9 Attack02:9 Attack03:12 Death:4 Hurt:4 Idle:6 Walk:8 |
-| Soldier | NORMAL | Attack01:6 Attack02:6 Attack03:9 Death:4 Hurt:4 Idle:6 Walk:8 |
-| Swordsman | NORMAL | Attack01:7 Attack02:15 **Attack3:12** Death:4 **Hurt:5** Idle:6 Walk:8 |
-| Necromancer | BOSS | Attack01:9 Attack02:10 **Attack02_Effect:6** Attack02(With magic effects):10 **DEATH:9** Hurt:4 Idle:6 **Summon:10** **Sumon_Effect:7** Summon(With magic effects):13 Walk:6 |
-| Skeleton Archer | SUMMON | **Attack:9** Death:4 Hurt:4 Idle:6 **Summon:5** Walk:8 |
