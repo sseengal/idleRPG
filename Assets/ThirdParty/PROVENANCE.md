@@ -48,7 +48,9 @@ attributions (the store packet pass, B10b, owns that).
 | id | `tinyrpg_pack01_full` |
 | source | `~/Downloads/Tiny RPG Character Asset Pack 01 v2.0 -Full 22 Characters.zip` |
 | drop location | `TinyRPGAssets/` — **project root, outside `Assets/`**, so Unity and the build cannot see it yet |
-| author / licence | **UNRESOLVED.** No licence, readme, `.txt` or `.pdf` exists anywhere in the zip — verified by listing the archive |
+| author / licence | **Zerie** — verified 2026-10-11 from the store page. No licence file ships inside the zip; the terms live on the listing |
+| licence terms | ✔ commercial and personal game projects · ✔ may edit or modify · ❌ no redistribute, resell or re-upload (modified or unmodified) · ❌ **no AI training, no NFT** · credit appreciated, not required · "No generative AI was used" |
+| source page | https://zerie.itch.io/tiny-rpg-character-asset-pack |
 | grid | 100 px cells; a plain set and a `with shadows` set; Aseprite sources included |
 | contents | 22 characters + `Arrow01-03` and `Magic` projectile art |
 | used for | heroes, bosses and normal enemies — see `Docs/Character-Catalog.md` and `Docs/Stage-Ladder.md` |
@@ -61,21 +63,43 @@ attributions (the store packet pass, B10b, owns that).
 | id | `tinyrpg_pack02` |
 | source | `~/Downloads/Tiny RPG Character Asset Pack 02 v1.01-Free Demon_A&Blood Monster_A.zip` |
 | drop location | `TinyRPGAssets2/` — **project root, outside `Assets/`** |
-| author / licence | **UNRESOLVED.** No licence file in the zip |
+| author / licence | **Zerie** — verified 2026-10-11 from the store page (identical wording to Pack 01). No licence file in the zip |
+| licence terms | ✔ commercial and personal game projects · ✔ may edit or modify · ❌ no redistribute, resell or re-upload · ❌ **no AI training, no NFT** · credit appreciated, not required · "No generative AI was used" |
+| source page | https://zerie.itch.io/tiny-rpg-character-asset-pack-02 |
 | grid | 100 px cells; plain + shadowed sets; Aseprite sources |
 | contents | 20 enemy-side characters (demons, hell, undead, Black Knights) |
 | used for | bands 4–10 of the stage ladder |
 
 ---
 
+## Compliance rules these packs impose (binding)
+
+Both packs are **licensed for commercial use** — verified from the store pages on 2026-10-11. Two clauses change how we
+work, so they are recorded as rules rather than notes.
+
+| Rule | Why |
+|---|---|
+| **Never feed the packs to any AI tool** — no reference images, no "match this style" prompts, no training of any kind | "You may not use these assets for AI training or NFT projects." **This retires the earlier idea of reference-conditioning a generator on the pack's sprites.** |
+| **Keep the packs out of any repository that is shared** | "You may not redistribute, resell, or re-upload these assets, whether modified or unmodified." A repository is a distribution channel. |
+| **Attribution: optional, but do it anyway** | "Credit is appreciated but not required." A line in the store packet costs nothing and the author is a one-person shop |
+| The Aseprite sources carry the same terms | they ship inside the pack |
+
+### Open question for the owner (found while recording this)
+
+The **first** pack's imported art — `Assets/IdleRPG/Art/Characters/TinyRPG/{Soldier,Orc,Demon_A,Blood Monster_A}` — is
+**already tracked in git** (it was imported before this licence review). That is redistribution of the pack inside the
+repository. It is harmless while the repository is private, but it must be resolved before the repository is shared or
+made public: either keep it private, or remove the art from git and import it locally from the zip.
+
 ## Known gaps (must be closed before submission)
 
 | Pack | Gap |
 |---|---|
-| `TinyRPG_01_SoldierOrc` | **No licence file in the pack.** This art is **live on the battle page** — all three heroes, the boss, and the goblin slot — so it must be licensed before release, or replaced. |
-| `tinyrpg_pack01_full` | **No licence file.** The store receipt is the only source. |
-| `tinyrpg_pack02` | **No licence file.** The store receipt is the only source. |
+| `TinyRPG_01_SoldierOrc` | **Licence now verified** (commercial use allowed). Remaining issue: the art is tracked in git — see above. |
+| `tinyrpg_pack01_full` | **Licence now verified.** Not in git (deliberate). |
+| `tinyrpg_pack02` | **Licence now verified.** Not in git (deliberate). |
 | `PixelLab` (generated goblin) | Generated with the trial account; the account terms and the generation ledger need recording before shipping. **Not used in the game** — lab benchmark only. |
+
 
 
 ---
