@@ -25,6 +25,10 @@ namespace IdleRPG.Combat
         {
             Data = data;
             SlotIndex = index;
+
+            // The art owns the swing length, so the blow lands on this hero's own strike frame. No art = 0,
+            // which means "use the rules' window" (a placeholder).
+            SwingSeconds = data != null && data.ArtSet != null ? data.ArtSet.SwingSeconds : 0d;
         }
 
         /// <summary>Lane index (legacy alias for <see cref="Combatant.SlotIndex"/>).</summary>

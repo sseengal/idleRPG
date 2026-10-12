@@ -8,7 +8,7 @@ namespace IdleRPG.Sim
     //
     //   TargetRule        how a side picks whom to hit
     //   DamageEvent       one blow landed (with indices, so views and the log can attribute it)
-    //   SwingStartedEvent an attack was announced - the blow lands SwingDurationSec later
+    //   SwingStartedEvent an attack was announced - the blow lands after that unit's own swing window
     //   PendingSwing      a blow travelling from announcement to impact (internal)
     //   DeathEvent        a combatant died, and what it paid
     //
@@ -44,8 +44,9 @@ namespace IdleRPG.Sim
 
     /// <summary>
     /// An attack was announced: the attacker commits, is arming its next swing, and the blow will land after
-    /// <see cref="SimRules.SwingDurationSec"/> sim-seconds. Damage is NOT applied here - the UI uses this to run
-    /// the unit in visually; the actual hit (and its <see cref="DamageEvent"/>) arrives at impact.
+    /// <see cref="Combatant.SwingSeconds"/> sim-seconds - up to and including that unit's own strike frame, or
+    /// <see cref="SimRules.SwingDurationSec"/> when it has no art. Damage is NOT applied here - the UI uses this
+    /// to run the unit in visually; the actual hit (and its <see cref="DamageEvent"/>) arrives at impact.
     /// </summary>
     public struct SwingStartedEvent
     {

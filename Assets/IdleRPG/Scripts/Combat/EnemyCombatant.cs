@@ -70,9 +70,14 @@ namespace IdleRPG.Combat
 
             double interval = data.AttackIntervalSec * rules.PaceMultiplier;   // parity: no extra clamp
 
+            // The art (or the stage alternate) owns the swing length: the blow lands on this enemy's own strike
+            // frame. A placeholder enemy has no art set and falls back to the rules' window.
+            CharacterArtSet art = data.ResolveArt(safeStage);
+
             EnemyCombatant enemy = new EnemyCombatant(data.EnemyID, data.EnemyName, data, safeStage, stats, interval)
             {
                 IsBoss = isBoss,
+                SwingSeconds = art != null ? art.SwingSeconds : 0d,
                 GoldReward = legacyScaling.HasValue
                     ? CombatRewardCalculator.CalculateGold(data, safeStage, isBoss, legacyScaling.Value, externalGoldMultiplier)
                     : CombatRewardCalculator.CalculateGold(data, safeStage, isBoss, rules, externalGoldMultiplier)

@@ -185,10 +185,10 @@ namespace IdleRPG.UI
                 return;
             }
 
-            // The swing starts on the ANNOUNCE, not on the hit: the sim waits SwingDurationSec before the damage
-            // lands, and the attack strip's strike frame sits inside that window - so the blow connects on the swing's
-            // contact pose instead of on its first frame. It plays even when the target slot is missing (attack in
-            // place), so a swing is never silently dropped.
+            // The swing starts on the ANNOUNCE, not on the hit: the sim waits out this unit's attack strip up to its
+            // own strike frame before the damage lands, so the blow connects on the frame the sword is at full reach
+            // (measured from the art, not guessed) with no gap after it. It plays even when the target slot is
+            // missing (attack in place), so a swing is never silently dropped.
             EnsureLunge();
             StartSwing();
 

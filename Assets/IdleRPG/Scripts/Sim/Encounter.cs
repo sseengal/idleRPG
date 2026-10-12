@@ -319,6 +319,29 @@ namespace IdleRPG.Sim
             }
         }
 
+        /// <summary>
+        /// How long this attacker's swing travels before its damage lands.
+        ///
+        /// The attacker's own art decides it: <see cref="Combatant.SwingSeconds"/> covers that unit's attack strip up
+        /// to and including its strike frame (measured from the pixels - the sword at full reach, the bow released),
+        /// so the damage lands exactly when the swing connects. A unit with no art (a placeholder) has 0 there and
+        /// uses the rules' window instead. Clamped to the same 0.1-2 s range the rules use, so a broken clip can
+        /// never stall the fight.
+        /// </summary>
+        private double SwingWindow(Combatant attacker)
+        {
+            double window = attacker != null && attacker.SwingSeconds > 0d
+                ? attacker.SwingSeconds
+                : context.Rules.SwingDurationSec;
+
+            if (window < 0.1d)
+            {
+                return 0.1d;
+            }
+
+            return window > 2d ? 2d : window;
+        }
+
         // --- Internals ---
         /// <summary>Starts the next ready attacker's swing: picks who, rolls the hit (crit + damage) and announces it.</summary>
         private void AnnounceNext()
@@ -370,7 +393,7 @@ namespace IdleRPG.Sim
                     AttackerSide = side,
                     Damage = damage,
                     IsCritical = isCritical,
-                    Remaining = context.Rules.SwingDurationSec
+                    Remaining = SwingWindow(attacker)
                 };
                 hasActiveSwing = true;
                 lastActorSide = side;

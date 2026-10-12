@@ -80,6 +80,14 @@ namespace IdleRPG.Sim
 
         public double CritDamageMultiplier { get; set; } = 1d;
 
+        /// <summary>
+        /// How long THIS unit's swing travels before its damage lands, in seconds. 0 = "use the rules' window"
+        /// (a placeholder with no art). Set from the unit's art at spawn, exactly like <see cref="CritChance"/>:
+        /// it is the time up to and including the art's own strike frame, so the damage lands when that unit's
+        /// swing connects instead of on a global constant.
+        /// </summary>
+        public double SwingSeconds { get; set; }
+
         public double AttackIntervalSec { get; private set; }
 
         /// <summary>Aggro weight used by threat-based targeting from Step 11 on.</summary>

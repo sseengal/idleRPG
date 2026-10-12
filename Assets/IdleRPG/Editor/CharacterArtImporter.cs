@@ -375,7 +375,123 @@ namespace IdleRPG.EditorTools
             // and enemies get mirrored, so both end up facing the opponent.
             art.ArtFacesLeft = false;
 
+            // Which frame the blow lands on, measured from the pixels (see MeasureStrikeFrame). Without this the
+            // sim has to guess a fraction of the clip, and every character whose strike is not at that fraction
+            // shows a visible gap between the swing connecting and the enemy reacting.
+            art.StrikeFrame = MeasureStrikeFrame(dir, character);
+
             EditorUtility.SetDirty(art);
+        }
+
+        /// <summary>
+        /// The frame the blow lands on, measured from the art: the FIRST frame whose opaque content is within 95%
+        /// of the strip's widest frame.
+        ///
+        /// The widest frame is the most extended pose - the sword at full reach, the bow released, the spell burst
+        /// - which is the moment a player reads as the hit. The FIRST such frame is used, so a strip that holds the
+        /// extended pose for several frames strikes on the frame it first reaches full extension.
+        ///
+        /// Returns -1 when the strip cannot be read (the art set then falls back to its last frame), so a
+        /// measurement failure can never make the hit land early.
+        /// </summary>
+        private static int MeasureStrikeFrame(string dir, string character)
+        {
+            // Same preference order as CharacterArtSet.GetAttack: the primary attack strip first.
+            string strip = CharacterActionResolver.FindStrip(dir, character, "Attack01");
+
+            if (strip == null)
+            {
+                strip = CharacterActionResolver.FindStrip(dir, character, "Attack02");
+            }
+
+            if (strip == null)
+            {
+                strip = CharacterActionResolver.FindStrip(dir, character, "Attack03");
+            }
+
+            if (strip == null)
+            {
+                return -1;
+            }
+
+            string path = ToAssetPath(strip);
+            int cols = ReadPngWidth(path) / Tile;
+
+            if (cols <= 0)
+            {
+                return -1;
+            }
+
+            var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            bool wasReadable = importer != null && importer.isReadable;
+
+            if (importer != null && !wasReadable)
+            {
+                importer.isReadable = true;
+                (importer as AssetImporter).SaveAndReimport();
+            }
+
+            Texture2D tex = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            int strike = -1;
+
+            if (tex != null && tex.isReadable)
+            {
+                Color[] px = tex.GetPixels();
+                int width = tex.width;
+                int[] widths = new int[cols];
+                int widest = 0;
+
+                for (int frame = 0; frame < cols; frame++)
+                {
+                    int minX = int.MaxValue;
+                    int maxX = -1;
+
+                    for (int x = frame * Tile; x < Mathf.Min((frame + 1) * Tile, width); x++)
+                    {
+                        for (int y = 0; y < tex.height; y++)
+                        {
+                            if (px[y * width + x].a < 12f / 255f)
+                            {
+                                continue;
+                            }
+
+                            if (x < minX)
+                            {
+                                minX = x;
+                            }
+
+                            if (x > maxX)
+                            {
+                                maxX = x;
+                            }
+                        }
+                    }
+
+                    widths[frame] = maxX >= minX ? maxX - minX + 1 : 0;
+
+                    if (widths[frame] > widest)
+                    {
+                        widest = widths[frame];
+                    }
+                }
+
+                for (int frame = 0; frame < cols && widest > 0; frame++)
+                {
+                    if (widths[frame] * 100 >= widest * 95)
+                    {
+                        strike = frame;
+                        break;
+                    }
+                }
+            }
+
+            if (!wasReadable && importer != null)
+            {
+                importer.isReadable = false;
+                (importer as AssetImporter).SaveAndReimport();
+            }
+
+            return strike;
         }
 
         private static Sprite[] LoadFrames(string character, string slot, string dir)
