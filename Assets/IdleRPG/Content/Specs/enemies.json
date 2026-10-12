@@ -6,6 +6,7 @@
             "asset": "Boss_Ogre",
             "displayName": "Ogre Chieftain",
             "sprite": "boss_ogre",
+            "art": "Orc",
             "baseHealth": 100.0,
             "baseAttack": 20.0,
             "baseDefense": 5.0,

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.HeroData
   heroID: hero_archer
   heroName: Archer
-  heroIcon: {fileID: 6659727407018504118, guid: 0f2fc1ad1f2b64d80879e1c78aee7dfa, type: 3}
+  heroIcon: {fileID: 21300000, guid: e6ade3addd7674bafba2a131098a9250, type: 3}
   baseHealth: 110
   baseAttack: 8
   baseDefense: 4
@@ -22,5 +22,5 @@ MonoBehaviour:
   baseCritChance: 0.05
   baseCritDamage: 2
   role: 1
-  placeholderTint: {r: 0.62, g: 0.76, b: 1, a: 1}
-  artSet: {fileID: 11400000, guid: fb0452c54a0e649af8eb7f52aedd3ea0, type: 2}
+  placeholderTint: {r: 0.34901962, g: 0.8509804, b: 0.4509804, a: 1}
+  artSet: {fileID: 11400000, guid: 825fb0e2c51c641e48a3e0ee7318f958, type: 2}

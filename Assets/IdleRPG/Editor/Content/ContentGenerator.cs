@@ -81,6 +81,7 @@ namespace IdleRPG.EditorTools.Content
                     asset = hero.name,
                     displayName = SoField.Text(hero, "heroName", hero.name),
                     icon = SoField.AssetName(SoField.Reference(hero, "heroIcon")),
+                    art = ArtCharacterName(SoField.Reference(hero, "artSet")),
                     baseHealth = SoField.Float(hero, "baseHealth", 100f),
                     baseAttack = SoField.Float(hero, "baseAttack", 10f),
                     baseDefense = SoField.Float(hero, "baseDefense", 5f),
@@ -108,6 +109,9 @@ namespace IdleRPG.EditorTools.Content
                     asset = enemy.name,
                     displayName = SoField.Text(enemy, "enemyName", enemy.name),
                     sprite = SoField.AssetName(SoField.Reference(enemy, "enemySprite")),
+                    art = ArtCharacterName(SoField.Reference(enemy, "artSet")),
+                    firstStage = SoField.Int(enemy, "firstStage", 1),
+                    lastStage = SoField.Int(enemy, "lastStage", 0),
                     baseHealth = SoField.Float(enemy, "baseHealth", 60f),
                     baseAttack = SoField.Float(enemy, "baseAttack", 9f),
                     baseDefense = SoField.Float(enemy, "baseDefense", 0f),
@@ -124,6 +128,25 @@ namespace IdleRPG.EditorTools.Content
 
             file.enemies.Sort((a, b) => string.CompareOrdinal(a.id, b.id));
             ContentSpecIO.Save(ContentSpecIO.EnemiesPath, file);
+        }
+
+        /// <summary>
+        /// "Knight_Art" -> "Knight": the character folder name behind a resolved art set, so an Export followed by a
+        /// Generate keeps the art wiring instead of quietly dropping it.
+        /// </summary>
+        private static string ArtCharacterName(Object reference)
+        {
+            string assetName = SoField.AssetName(reference);
+
+            if (string.IsNullOrEmpty(assetName))
+            {
+                return "";
+            }
+
+            const string suffix = "_Art";
+            return assetName.EndsWith(suffix, System.StringComparison.Ordinal)
+                ? assetName.Substring(0, assetName.Length - suffix.Length)
+                : assetName;
         }
 
         private static void ExportParty()

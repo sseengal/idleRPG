@@ -27,6 +27,9 @@ namespace IdleRPG.EditorTools.Content
         public string asset = "";
         public string displayName = "";
         public string icon = "";
+
+        /// <summary>Character folder name under Art/Characters/TinyRPG ("Knight"). Empty = no animated art.</summary>
+        public string art = "";
         public float baseHealth = 100f;
         public float baseAttack = 10f;
         public float baseDefense = 5f;
@@ -50,6 +53,15 @@ namespace IdleRPG.EditorTools.Content
         public string asset = "";
         public string displayName = "";
         public string sprite = "";
+
+        /// <summary>Character folder name under Art/Characters/TinyRPG ("Black Knight_A"). Empty = placeholder art.</summary>
+        public string art = "";
+
+        /// <summary>First stage this enemy may appear on (see the stage ladder).</summary>
+        public int firstStage = 1;
+
+        /// <summary>Last stage this enemy may appear on. 0 = no limit.</summary>
+        public int lastStage = 0;
         public float baseHealth = 60f;
         public float baseAttack = 9f;
         public float baseDefense = 0f;

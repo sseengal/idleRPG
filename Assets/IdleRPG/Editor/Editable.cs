@@ -151,6 +151,21 @@ namespace IdleRPG.EditorTools
             return this;
         }
 
+        /// <summary>
+        /// Assigns any asset reference by field name (art sets, configs). Used by the content pipeline to wire
+        /// CharacterArtSet assets from the spec, so hero and enemy art survives a regeneration.
+        /// </summary>
+        public Editable SetAsset(string fieldName, Object value)
+        {
+            SerializedProperty property = Find(fieldName);
+            if (property != null)
+            {
+                property.objectReferenceValue = value;
+            }
+
+            return this;
+        }
+
         /// <summary>Assigns a generated placeholder sprite by art file name (optional).</summary>
         public Editable SetSprite(string fieldName, string spriteName)
         {
