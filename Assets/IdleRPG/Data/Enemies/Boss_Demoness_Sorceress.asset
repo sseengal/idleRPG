@@ -15,12 +15,12 @@ MonoBehaviour:
   enemyName: Demoness Sorceress
   enemyID: boss_demoness_sorceress
   enemySprite: {fileID: 0}
-  baseHealth: 87.75
-  baseAttack: 20.2275
-  baseDefense: 1.84
-  baseGoldDrop: 16
+  baseHealth: 110.25
+  baseAttack: 23.229
+  baseDefense: 2.8
+  baseGoldDrop: 20
   isBoss: 1
-  attackIntervalSec: 2.139
+  attackIntervalSec: 2.07
   targetRule: 3
   bossHealthMultiplier: 4
   bossGoldMultiplier: 6
@@ -28,5 +28,5 @@ MonoBehaviour:
   placeholderTint: {r: 0.8509804, g: 0.2509804, b: 0.2, a: 1}
   artSet: {fileID: 11400000, guid: bafb3d33025f04e2db111d7fd944b87b, type: 2}
   stageAlternates: []
-  firstStage: 67
-  lastStage: 69
+  firstStage: 87
+  lastStage: 89

@@ -15,12 +15,12 @@ MonoBehaviour:
   enemyName: Armored Orc
   enemyID: enemy_armored_orc
   enemySprite: {fileID: 0}
-  baseHealth: 97.44
-  baseAttack: 8.262
-  baseDefense: 0.8
-  baseGoldDrop: 9.2
+  baseHealth: 93.75
+  baseAttack: 9.396
+  baseDefense: 1.25
+  baseGoldDrop: 10.4
   isBoss: 0
-  attackIntervalSec: 2.5
+  attackIntervalSec: 2.254
   targetRule: 3
   bossHealthMultiplier: 1
   bossGoldMultiplier: 1
@@ -28,5 +28,5 @@ MonoBehaviour:
   placeholderTint: {r: 0.37254903, g: 0.5411765, b: 0.2901961, a: 1}
   artSet: {fileID: 11400000, guid: f3825c1e2d53a4b66aa234b59f8ed3dc, type: 2}
   stageAlternates: []
-  firstStage: 17
-  lastStage: 50
+  firstStage: 21
+  lastStage: 30

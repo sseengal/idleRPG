@@ -15,10 +15,10 @@ MonoBehaviour:
   enemyName: Skeleton Archer
   enemyID: enemy_skeleton_archer
   enemySprite: {fileID: 0}
-  baseHealth: 48
-  baseAttack: 8.099999
-  baseDefense: 0
-  baseGoldDrop: 8
+  baseHealth: 53.760002
+  baseAttack: 8.748
+  baseDefense: 0.3
+  baseGoldDrop: 9.2
   isBoss: 0
   attackIntervalSec: 1.4
   targetRule: 3
@@ -28,5 +28,5 @@ MonoBehaviour:
   placeholderTint: {r: 0.7490196, g: 0.7882353, b: 0.81960785, a: 1}
   artSet: {fileID: 11400000, guid: c397894611d5f4612b7ae0a5da5e2558, type: 2}
   stageAlternates: []
-  firstStage: 1
-  lastStage: 0
+  firstStage: 14
+  lastStage: 20

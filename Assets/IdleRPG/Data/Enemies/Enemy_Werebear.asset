@@ -15,12 +15,12 @@ MonoBehaviour:
   enemyName: Werebear
   enemyID: enemy_werebear
   enemySprite: {fileID: 0}
-  baseHealth: 108.75
-  baseAttack: 8.874
-  baseDefense: 1.6
-  baseGoldDrop: 10.4
+  baseHealth: 105
+  baseAttack: 10.125
+  baseDefense: 2.25
+  baseGoldDrop: 11.6
   isBoss: 0
-  attackIntervalSec: 2.45
+  attackIntervalSec: 2.208
   targetRule: 3
   bossHealthMultiplier: 1
   bossGoldMultiplier: 1
@@ -28,5 +28,5 @@ MonoBehaviour:
   placeholderTint: {r: 0.5411765, g: 0.41568628, b: 0.22745098, a: 1}
   artSet: {fileID: 11400000, guid: b51a422e53c4d477799ec1479f2034a5, type: 2}
   stageAlternates: []
-  firstStage: 29
-  lastStage: 62
+  firstStage: 31
+  lastStage: 40

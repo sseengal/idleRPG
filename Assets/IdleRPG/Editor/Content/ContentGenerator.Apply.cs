@@ -182,10 +182,12 @@ namespace IdleRPG.EditorTools.Content
             switch ((archetype ?? string.Empty).Trim().ToLowerInvariant())
             {
                 case "brute":
-                    health = 1.45f;
-                    attack = 0.85f;
-                    defense = 1.6f;
-                    interval = 1.25f;
+                    // Softened after the loop robot stalled on stage 25: a whole band of brutes is a wall, and
+                    // 1.45x health on every one of them out-grew the player's income. Still the toughest shape.
+                    health = 1.25f;
+                    attack = 0.90f;
+                    defense = 1.25f;
+                    interval = 1.15f;
                     return;
 
                 case "skirmisher":

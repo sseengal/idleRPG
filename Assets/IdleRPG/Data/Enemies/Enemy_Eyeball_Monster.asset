@@ -15,18 +15,18 @@ MonoBehaviour:
   enemyName: Eyeball Monster
   enemyID: enemy_eyeball_monster
   enemySprite: {fileID: 0}
-  baseHealth: 99
-  baseAttack: 21.663
-  baseDefense: 2.3200002
-  baseGoldDrop: 18
+  baseHealth: 87.75
+  baseAttack: 20.2275
+  baseDefense: 1.84
+  baseGoldDrop: 16
   isBoss: 0
-  attackIntervalSec: 2.116
+  attackIntervalSec: 2.139
   targetRule: 3
   bossHealthMultiplier: 1
   bossGoldMultiplier: 1
   bossSizeScale: 1.6
-  placeholderTint: {r: 0.5568628, g: 0.16862746, b: 0.16862746, a: 1}
+  placeholderTint: {r: 0.47843137, g: 0.37254903, b: 0.7490196, a: 1}
   artSet: {fileID: 11400000, guid: 744027728098d4b168004178c5ff2d33, type: 2}
   stageAlternates: []
-  firstStage: 74
-  lastStage: 100
+  firstStage: 61
+  lastStage: 70

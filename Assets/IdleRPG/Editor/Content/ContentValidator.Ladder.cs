@@ -21,11 +21,14 @@ namespace IdleRPG.EditorTools.Content
         /// <summary>Stages per band: band 1 is stages 1-10, band 10 is 91-100.</summary>
         private const int LadderBandWidth = 10;
 
-        /// <summary>Fewer than this many distinct enemies on a stage reads as a monotonous wave.</summary>
+        /// <summary>
+        /// Fewer than this many distinct enemies on a stage reads as a monotonous wave. Three is the design's own
+        /// floor: each band owns a small themed cast (3-4 faces) instead of every earlier band bleeding into it.
+        /// </summary>
         private const int MinPoolPerStage = 3;
 
         /// <summary>Above this, a stage repeats faces too rarely for the player to learn them.</summary>
-        private const int MaxPoolPerStage = 18;
+        private const int MaxPoolPerStage = 6;
 
         private static void CheckLadder(EnemySpecFile enemies, WaveSpecFile waves)
         {
@@ -95,14 +98,11 @@ namespace IdleRPG.EditorTools.Content
                         $"stage {stage}: only {normal} pooled enemy/enemies cover it (need {MinPoolPerStage}). " +
                         "Widen an enemy's window so the wave picker has something to choose from.");
                 }
-                else if (normal < 6)
-                {
-                    Add(Severity.Warning, "ladder", $"stage {stage}: pool of {normal} - thin; the doc promises 6-14.");
-                }
 
                 if (normal > MaxPoolPerStage)
                 {
-                    Add(Severity.Warning, "ladder", $"stage {stage}: pool of {normal} - wide; the doc promises 6-14.");
+                    Add(Severity.Warning, "ladder",
+                        $"stage {stage}: pool of {normal} - wide. Each band owns a small cast (3-4); this stage mixes bands.");
                 }
 
                 if (bosses == 0)

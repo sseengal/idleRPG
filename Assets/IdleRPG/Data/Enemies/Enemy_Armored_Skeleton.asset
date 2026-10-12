@@ -15,12 +15,12 @@ MonoBehaviour:
   enemyName: Armored Skeleton
   enemyID: enemy_armored_skeleton
   enemySprite: {fileID: 0}
-  baseHealth: 87
-  baseAttack: 7.65
-  baseDefense: 0
-  baseGoldDrop: 8
+  baseHealth: 84
+  baseAttack: 8.748
+  baseDefense: 0.625
+  baseGoldDrop: 9.2
   isBoss: 0
-  attackIntervalSec: 2.5
+  attackIntervalSec: 2.3
   targetRule: 3
   bossHealthMultiplier: 1
   bossGoldMultiplier: 1
@@ -28,5 +28,5 @@ MonoBehaviour:
   placeholderTint: {r: 0.7490196, g: 0.7882353, b: 0.81960785, a: 1}
   artSet: {fileID: 11400000, guid: 9b8746ad2ecd84a72bfb98a9fc1ddff3, type: 2}
   stageAlternates: []
-  firstStage: 8
-  lastStage: 34
+  firstStage: 11
+  lastStage: 20

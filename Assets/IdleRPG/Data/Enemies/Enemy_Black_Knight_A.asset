@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec2cfe7cf2cb64fa9b4fa3c722078478, type: 3}
+  m_Name: Enemy_Black_Knight_A
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.EnemyData
+  enemyName: Black Knight
+  enemyID: enemy_black_knight_a
+  enemySprite: {fileID: 0}
+  baseHealth: 206.25
+  baseAttack: 15.389999
+  baseDefense: 10.625
+  baseGoldDrop: 22.4
+  isBoss: 0
+  attackIntervalSec: 2.024
+  targetRule: 3
+  bossHealthMultiplier: 1
+  bossGoldMultiplier: 1
+  bossSizeScale: 1.6
+  placeholderTint: {r: 0.41960785, g: 0.12156863, b: 0.16470589, a: 1}
+  artSet: {fileID: 11400000, guid: 21671c5e6bb7c402f875c593560f8860, type: 2}
+  stageAlternates: []
+  firstStage: 91
+  lastStage: 100

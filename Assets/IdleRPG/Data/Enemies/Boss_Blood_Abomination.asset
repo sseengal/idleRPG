@@ -15,12 +15,12 @@ MonoBehaviour:
   enemyName: Blood Abomination
   enemyID: boss_blood_abomination
   enemySprite: {fileID: 0}
-  baseHealth: 191.40001
-  baseAttack: 12.699
-  baseDefense: 9.280001
-  baseGoldDrop: 18
+  baseHealth: 206.25
+  baseAttack: 15.389999
+  baseDefense: 10.625
+  baseGoldDrop: 22.4
   isBoss: 1
-  attackIntervalSec: 2.3
+  attackIntervalSec: 2.024
   targetRule: 3
   bossHealthMultiplier: 4
   bossGoldMultiplier: 6
@@ -28,5 +28,5 @@ MonoBehaviour:
   placeholderTint: {r: 0.8509804, g: 0.2509804, b: 0.2, a: 1}
   artSet: {fileID: 11400000, guid: 995b4da3b3bb94260a7a761c84123a5d, type: 2}
   stageAlternates: []
-  firstStage: 77
-  lastStage: 79
+  firstStage: 94
+  lastStage: 96

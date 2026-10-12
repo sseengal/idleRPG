@@ -15,12 +15,12 @@ MonoBehaviour:
   enemyName: Demon
   enemyID: enemy_demon_a
   enemySprite: {fileID: 0}
-  baseHealth: 93
-  baseAttack: 12.06
-  baseDefense: 2.6
-  baseGoldDrop: 12.8
+  baseHealth: 132
+  baseAttack: 14.94
+  baseDefense: 5.8
+  baseGoldDrop: 18
   isBoss: 0
-  attackIntervalSec: 1.9
+  attackIntervalSec: 1.84
   targetRule: 3
   bossHealthMultiplier: 1
   bossGoldMultiplier: 1
@@ -28,5 +28,5 @@ MonoBehaviour:
   placeholderTint: {r: 0.5568628, g: 0.16862746, b: 0.16862746, a: 1}
   artSet: {fileID: 11400000, guid: 85659e16459da4c319b93a849aa45671, type: 2}
   stageAlternates: []
-  firstStage: 47
-  lastStage: 82
+  firstStage: 71
+  lastStage: 80

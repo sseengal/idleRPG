@@ -29,4 +29,4 @@ MonoBehaviour:
   artSet: {fileID: 11400000, guid: 37502ee7c33104a7482f7a988123a521, type: 2}
   stageAlternates: []
   firstStage: 1
-  lastStage: 24
+  lastStage: 10

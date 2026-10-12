@@ -15,10 +15,10 @@ MonoBehaviour:
   enemyName: Skeleton
   enemyID: enemy_skeleton
   enemySprite: {fileID: 0}
-  baseHealth: 66
-  baseAttack: 9
-  baseDefense: 0
-  baseGoldDrop: 8
+  baseHealth: 73.92
+  baseAttack: 9.72
+  baseDefense: 0.5
+  baseGoldDrop: 9.2
   isBoss: 0
   attackIntervalSec: 2
   targetRule: 3
@@ -28,5 +28,5 @@ MonoBehaviour:
   placeholderTint: {r: 0.7490196, g: 0.7882353, b: 0.81960785, a: 1}
   artSet: {fileID: 11400000, guid: d8752169956bb47f19c2c633b2191085, type: 2}
   stageAlternates: []
-  firstStage: 1
-  lastStage: 34
+  firstStage: 11
+  lastStage: 20

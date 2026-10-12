@@ -25,8 +25,8 @@ MonoBehaviour:
   bossHealthMultiplier: 1
   bossGoldMultiplier: 1
   bossSizeScale: 1.6
-  placeholderTint: {r: 0.5568628, g: 0.16862746, b: 0.16862746, a: 1}
+  placeholderTint: {r: 0.8509804, g: 0.4392157, b: 0.16862746, a: 1}
   artSet: {fileID: 11400000, guid: 0cb7007d79a8c4d27a56ad5d7694613f, type: 2}
   stageAlternates: []
-  firstStage: 42
-  lastStage: 72
+  firstStage: 41
+  lastStage: 50

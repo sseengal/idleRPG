@@ -15,12 +15,12 @@ MonoBehaviour:
   enemyName: Greatsword Warden
   enemyID: boss_greatsword_warden
   enemySprite: {fileID: 0}
-  baseHealth: 97.44
-  baseAttack: 8.262
-  baseDefense: 0.8
+  baseHealth: 84
+  baseAttack: 8.748
+  baseDefense: 0.625
   baseGoldDrop: 9.2
   isBoss: 1
-  attackIntervalSec: 2.5
+  attackIntervalSec: 2.3
   targetRule: 3
   bossHealthMultiplier: 4
   bossGoldMultiplier: 6

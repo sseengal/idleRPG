@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Boss_Black_Knight_Sovereign
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.EnemyData
   enemyName: Black Knight Sovereign
-  enemyID: boss_black_knight_c
+  enemyID: boss_black_knight_sovereign
   enemySprite: {fileID: 0}
-  baseHealth: 239.25002
-  baseAttack: 14.535
-  baseDefense: 13.6
+  baseHealth: 206.25
+  baseAttack: 15.389999
+  baseDefense: 10.625
   baseGoldDrop: 22.4
   isBoss: 1
-  attackIntervalSec: 2.2
+  attackIntervalSec: 2.024
   targetRule: 3
   bossHealthMultiplier: 4
   bossGoldMultiplier: 6

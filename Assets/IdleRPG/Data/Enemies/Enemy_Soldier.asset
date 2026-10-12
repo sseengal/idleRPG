@@ -15,18 +15,18 @@ MonoBehaviour:
   enemyName: Soldier
   enemyID: enemy_soldier
   enemySprite: {fileID: 0}
-  baseHealth: 60
-  baseAttack: 9
-  baseDefense: 0
-  baseGoldDrop: 8
+  baseHealth: 105
+  baseAttack: 12.960001
+  baseDefense: 3.6
+  baseGoldDrop: 14.4
   isBoss: 0
-  attackIntervalSec: 2
+  attackIntervalSec: 1.88
   targetRule: 3
   bossHealthMultiplier: 1
   bossGoldMultiplier: 1
   bossSizeScale: 1.6
-  placeholderTint: {r: 0.5411765, g: 0.5411765, b: 0.5411765, a: 1}
+  placeholderTint: {r: 0.6039216, g: 0.64705884, b: 0.69411767, a: 1}
   artSet: {fileID: 11400000, guid: fb0452c54a0e649af8eb7f52aedd3ea0, type: 2}
   stageAlternates: []
-  firstStage: 1
-  lastStage: 26
+  firstStage: 51
+  lastStage: 60

@@ -15,18 +15,18 @@ MonoBehaviour:
   enemyName: Lava Slime
   enemyID: enemy_lava_slime
   enemySprite: {fileID: 0}
-  baseHealth: 79.799995
-  baseAttack: 12.375
-  baseDefense: 1.4399999
-  baseGoldDrop: 11.6
+  baseHealth: 88.35
+  baseAttack: 13.266001
+  baseDefense: 2.08
+  baseGoldDrop: 12.8
   isBoss: 0
-  attackIntervalSec: 1.632
+  attackIntervalSec: 1.615
   targetRule: 3
   bossHealthMultiplier: 1
   bossGoldMultiplier: 1
   bossSizeScale: 1.6
-  placeholderTint: {r: 0.5568628, g: 0.16862746, b: 0.16862746, a: 1}
+  placeholderTint: {r: 0.8509804, g: 0.4392157, b: 0.16862746, a: 1}
   artSet: {fileID: 11400000, guid: 5137a6d7183ee43d4a56804fec085fd7, type: 2}
   stageAlternates: []
-  firstStage: 39
-  lastStage: 70
+  firstStage: 41
+  lastStage: 50

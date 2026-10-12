@@ -15,12 +15,12 @@ MonoBehaviour:
   enemyName: Armored Axeman
   enemyID: enemy_armored_axeman
   enemySprite: {fileID: 0}
-  baseHealth: 108.75
-  baseAttack: 8.874
-  baseDefense: 1.6
+  baseHealth: 93.75
+  baseAttack: 9.396
+  baseDefense: 1.25
   baseGoldDrop: 10.4
   isBoss: 0
-  attackIntervalSec: 2.45
+  attackIntervalSec: 2.254
   targetRule: 3
   bossHealthMultiplier: 1
   bossGoldMultiplier: 1
@@ -29,4 +29,4 @@ MonoBehaviour:
   artSet: {fileID: 11400000, guid: 3b1d604bc2d1c45e496dcd11a88adfd7, type: 2}
   stageAlternates: []
   firstStage: 21
-  lastStage: 52
+  lastStage: 30

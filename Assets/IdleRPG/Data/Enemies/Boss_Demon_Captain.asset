@@ -15,18 +15,18 @@ MonoBehaviour:
   enemyName: Demon Captain
   enemyID: boss_demon_captain
   enemySprite: {fileID: 0}
-  baseHealth: 117
-  baseAttack: 13.95
-  baseDefense: 4.6
-  baseGoldDrop: 16
+  baseHealth: 165
+  baseAttack: 13.445999
+  baseDefense: 7.25
+  baseGoldDrop: 18
   isBoss: 1
-  attackIntervalSec: 1.86
+  attackIntervalSec: 2.116
   targetRule: 3
   bossHealthMultiplier: 4
   bossGoldMultiplier: 6
   bossSizeScale: 1.6
   placeholderTint: {r: 0.8509804, g: 0.2509804, b: 0.2, a: 1}
-  artSet: {fileID: 11400000, guid: 110716522ca224ba088ab3a02037ade3, type: 2}
+  artSet: {fileID: 11400000, guid: a9d52efa6a6dd46aa9ae7c4af3081ee5, type: 2}
   stageAlternates: []
-  firstStage: 61
-  lastStage: 63
+  firstStage: 77
+  lastStage: 79

@@ -15,12 +15,12 @@ MonoBehaviour:
   enemyName: Orc
   enemyID: enemy_orc
   enemySprite: {fileID: 0}
-  baseHealth: 67.2
-  baseAttack: 9.72
-  baseDefense: 0.5
-  baseGoldDrop: 9.2
+  baseHealth: 75
+  baseAttack: 10.44
+  baseDefense: 1
+  baseGoldDrop: 10.4
   isBoss: 0
-  attackIntervalSec: 2
+  attackIntervalSec: 1.96
   targetRule: 3
   bossHealthMultiplier: 1
   bossGoldMultiplier: 1
@@ -28,5 +28,5 @@ MonoBehaviour:
   placeholderTint: {r: 0.37254903, g: 0.5411765, b: 0.2901961, a: 1}
   artSet: {fileID: 11400000, guid: 5c45de94717384a6d8d8018f3593ae9a, type: 2}
   stageAlternates: []
-  firstStage: 14
-  lastStage: 48
+  firstStage: 21
+  lastStage: 30

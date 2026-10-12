@@ -15,12 +15,12 @@ MonoBehaviour:
   enemyName: Demoness B
   enemyID: enemy_demoness_b
   enemySprite: {fileID: 0}
-  baseHealth: 87.75
-  baseAttack: 20.2275
-  baseDefense: 1.84
-  baseGoldDrop: 16
+  baseHealth: 110.25
+  baseAttack: 23.229
+  baseDefense: 2.8
+  baseGoldDrop: 20
   isBoss: 0
-  attackIntervalSec: 2.139
+  attackIntervalSec: 2.07
   targetRule: 3
   bossHealthMultiplier: 1
   bossGoldMultiplier: 1
@@ -28,5 +28,5 @@ MonoBehaviour:
   placeholderTint: {r: 0.5568628, g: 0.16862746, b: 0.16862746, a: 1}
   artSet: {fileID: 11400000, guid: bafb3d33025f04e2db111d7fd944b87b, type: 2}
   stageAlternates: []
-  firstStage: 61
-  lastStage: 94
+  firstStage: 85
+  lastStage: 90

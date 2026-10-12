@@ -15,18 +15,18 @@ MonoBehaviour:
   enemyName: Blood Horror
   enemyID: boss_blood_horror
   enemySprite: {fileID: 0}
-  baseHealth: 152.25
-  baseAttack: 11.016001
-  baseDefense: 5.7599998
-  baseGoldDrop: 14.4
+  baseHealth: 206.25
+  baseAttack: 15.389999
+  baseDefense: 10.625
+  baseGoldDrop: 22.4
   isBoss: 1
-  attackIntervalSec: 2.35
+  attackIntervalSec: 2.024
   targetRule: 3
   bossHealthMultiplier: 4
   bossGoldMultiplier: 6
   bossSizeScale: 1.6
   placeholderTint: {r: 0.8509804, g: 0.2509804, b: 0.2, a: 1}
-  artSet: {fileID: 11400000, guid: 995b4da3b3bb94260a7a761c84123a5d, type: 2}
+  artSet: {fileID: 11400000, guid: d2d4b005a5a5a4be2a16b751d8abcc29, type: 2}
   stageAlternates: []
-  firstStage: 57
-  lastStage: 59
+  firstStage: 91
+  lastStage: 93

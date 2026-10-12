@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec2cfe7cf2cb64fa9b4fa3c722078478, type: 3}
+  m_Name: Boss_Lancer_Vanguard
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.EnemyData
+  enemyName: Lancer Vanguard
+  enemyID: boss_lancer_vanguard
+  enemySprite: {fileID: 0}
+  baseHealth: 105
+  baseAttack: 12.960001
+  baseDefense: 3.6
+  baseGoldDrop: 14.4
+  isBoss: 1
+  attackIntervalSec: 1.88
+  targetRule: 3
+  bossHealthMultiplier: 4
+  bossGoldMultiplier: 6
+  bossSizeScale: 1.6
+  placeholderTint: {r: 0.8509804, g: 0.2509804, b: 0.2, a: 1}
+  artSet: {fileID: 11400000, guid: 0970ceb73938c4bd6bda5c7c394332cc, type: 2}
+  stageAlternates: []
+  firstStage: 57
+  lastStage: 59

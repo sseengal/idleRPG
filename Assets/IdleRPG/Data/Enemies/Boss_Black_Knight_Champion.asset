@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Boss_Black_Knight_Champion
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.EnemyData
   enemyName: Black Knight Champion
-  enemyID: boss_black_knight_b
+  enemyID: boss_black_knight_champion
   enemySprite: {fileID: 0}
-  baseHealth: 213.15001
-  baseAttack: 13.617001
-  baseDefense: 11.2
-  baseGoldDrop: 20
+  baseHealth: 206.25
+  baseAttack: 15.389999
+  baseDefense: 10.625
+  baseGoldDrop: 22.4
   isBoss: 1
-  attackIntervalSec: 2.25
+  attackIntervalSec: 2.024
   targetRule: 3
   bossHealthMultiplier: 4
   bossGoldMultiplier: 6
@@ -28,5 +28,5 @@ MonoBehaviour:
   placeholderTint: {r: 0.8509804, g: 0.2509804, b: 0.2, a: 1}
   artSet: {fileID: 11400000, guid: 9b582ac23905e4b329b4182e4b2c00f1, type: 2}
   stageAlternates: []
-  firstStage: 90
-  lastStage: 90
+  firstStage: 97
+  lastStage: 99

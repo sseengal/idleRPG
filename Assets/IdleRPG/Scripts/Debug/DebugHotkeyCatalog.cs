@@ -39,6 +39,7 @@ namespace IdleRPG.Debugging
             new DebugHotkeyEntry("D", "force a party wipe (opens the defeat card)"),
             new DebugHotkeyEntry("A / R / S", "ascend / resume after defeat / skip a stage"),
             new DebugHotkeyEntry("] / [", "stage +1 / -1 (walk the ladder without playing it)"),
+            new DebugHotkeyEntry(". / ,", "wave +1 / -1 inside the stage (the last wave is the boss)"),
             new DebugHotkeyEntry("F", "buy instant income (gem sink)"),
             new DebugHotkeyEntry("M", "mute / unmute placeholder SFX"),
             new DebugHotkeyEntry("L", "log live state to the console"),

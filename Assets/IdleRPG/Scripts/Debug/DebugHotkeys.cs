@@ -68,6 +68,32 @@ namespace IdleRPG.Debugging
                 $"boss {gameManager.WaveData?.BossEnemyCount ?? 0}).");
         }
 
+        /// <summary>
+        /// Moves the run by <paramref name="delta"/> waves inside the current stage, clamped to that stage's waves
+        /// (the last one is the boss wave). Dev builds only.
+        ///
+        /// Why this exists: a boss wave is the ELEVENTH wave of a stage, so stage stepping alone cannot reach one -
+        /// you would have to fight ten waves to see a single boss. This jumps straight to it (and back).
+        ///
+        /// It calls the same <see cref="CombatManager.SetProgress"/> the resume path uses, so it adds no new state.
+        /// </summary>
+        public void StepWave(int delta)
+        {
+            if (gameManager == null || gameManager.Combat == null)
+            {
+                return;
+            }
+
+            int normalWaves = gameManager.Balance != null ? gameManager.Balance.NormalWavesPerStage : 10;
+            int wavesPerStage = Mathf.Max(1, normalWaves) + 1;
+            int wave = Mathf.Clamp(gameManager.Combat.CurrentWave + delta, 1, wavesPerStage);
+
+            gameManager.Combat.SetProgress(gameManager.CurrentStage, wave, healParty: true);
+
+            Log($"Wave {(delta >= 0 ? "+" : "-")}{Mathf.Abs(delta)} -> {wave}/{wavesPerStage} " +
+                $"(stage {gameManager.CurrentStage}{(wave >= wavesPerStage ? " - BOSS WAVE" : string.Empty)}).");
+        }
+
         private void Update()
         {
             Keyboard keyboard = Keyboard.current;
@@ -171,6 +197,18 @@ namespace IdleRPG.Debugging
             if (keyboard.leftBracketKey.wasPressedThisFrame)
             {
                 StepStage(-1);
+            }
+
+            // Wave stepper: `.` forward, `,` back, inside the current stage (the last wave is the boss). Stage
+            // stepping cannot reach a boss - it is the eleventh wave - so this is how a boss fight gets tested.
+            if (keyboard.periodKey.wasPressedThisFrame)
+            {
+                StepWave(1);
+            }
+
+            if (keyboard.commaKey.wasPressedThisFrame)
+            {
+                StepWave(-1);
             }
 
             if (keyboard.mKey.wasPressedThisFrame)

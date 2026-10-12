@@ -15,18 +15,18 @@ MonoBehaviour:
   enemyName: Demon Brute
   enemyID: boss_demon_brute
   enemySprite: {fileID: 0}
-  baseHealth: 152.25
-  baseAttack: 11.016001
-  baseDefense: 5.7599998
-  baseGoldDrop: 14.4
+  baseHealth: 165
+  baseAttack: 13.445999
+  baseDefense: 7.25
+  baseGoldDrop: 18
   isBoss: 1
-  attackIntervalSec: 2.35
+  attackIntervalSec: 2.116
   targetRule: 3
   bossHealthMultiplier: 4
   bossGoldMultiplier: 6
   bossSizeScale: 1.6
   placeholderTint: {r: 0.8509804, g: 0.2509804, b: 0.2, a: 1}
-  artSet: {fileID: 11400000, guid: 6506e081f6eb04139b40491a400f6020, type: 2}
+  artSet: {fileID: 11400000, guid: 85659e16459da4c319b93a849aa45671, type: 2}
   stageAlternates: []
-  firstStage: 51
-  lastStage: 53
+  firstStage: 71
+  lastStage: 73

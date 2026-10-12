@@ -15,12 +15,12 @@ MonoBehaviour:
   enemyName: Werebear Titan
   enemyID: boss_werebear_titan
   enemySprite: {fileID: 0}
-  baseHealth: 121.8
-  baseAttack: 9.5625
-  baseDefense: 2.8799999
+  baseHealth: 105
+  baseAttack: 10.125
+  baseDefense: 2.25
   baseGoldDrop: 11.6
   isBoss: 1
-  attackIntervalSec: 2.3999999
+  attackIntervalSec: 2.208
   targetRule: 3
   bossHealthMultiplier: 4
   bossGoldMultiplier: 6

@@ -15,12 +15,12 @@ MonoBehaviour:
   enemyName: Hellhound
   enemyID: enemy_hellhound
   enemySprite: {fileID: 0}
-  baseHealth: 71.25
-  baseAttack: 11.484
-  baseDefense: 0.8
-  baseGoldDrop: 10.4
+  baseHealth: 79.799995
+  baseAttack: 12.375
+  baseDefense: 1.4399999
+  baseGoldDrop: 11.6
   isBoss: 0
-  attackIntervalSec: 1.6660001
+  attackIntervalSec: 1.632
   targetRule: 3
   bossHealthMultiplier: 1
   bossGoldMultiplier: 1
@@ -28,5 +28,5 @@ MonoBehaviour:
   placeholderTint: {r: 0.5568628, g: 0.16862746, b: 0.16862746, a: 1}
   artSet: {fileID: 11400000, guid: e9bf6b3aec0ca4825adc73f06b8fa1bd, type: 2}
   stageAlternates: []
-  firstStage: 24
-  lastStage: 62
+  firstStage: 31
+  lastStage: 40
