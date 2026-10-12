@@ -46,6 +46,41 @@ namespace IdleRPG.Data
         [Tooltip("Alternate looks rotated by stage (index = stage % length). Used to give one archetype several skins across a run, e.g. Demon/Blood Monster on the goblin wave.")]
         [SerializeField] private CharacterArtSet[] stageAlternates;
 
+        [Header("Stage window")]
+        [Tooltip("First stage this enemy may appear on. 1 = available from the start.")]
+        [SerializeField] private int firstStage = 1;
+
+        [Tooltip("Last stage this enemy may appear on. 0 = no limit (available to the end).")]
+        [SerializeField] private int lastStage = 0;
+
+        /// <summary>First stage this enemy may appear on (never below 1).</summary>
+        public int FirstStage => Mathf.Max(1, firstStage);
+
+        /// <summary>Last stage this enemy may appear on, or 0 for no limit.</summary>
+        public int LastStage => Mathf.Max(0, lastStage);
+
+        /// <summary>
+        /// True when this enemy may be picked at <paramref name="stage"/>.
+        /// With the defaults (1 and 0) every enemy is available at every stage, which is exactly how the wave pool
+        /// behaved before stage windows existed - so an asset that never sets these fields is unaffected.
+        /// </summary>
+        public bool IsAvailableAt(int stage)
+        {
+            if (stage < FirstStage)
+            {
+                return false;
+            }
+
+            return LastStage == 0 || stage <= LastStage;
+        }
+
+        /// <summary>Set by the editor data generator from the content spec.</summary>
+        public void EditorSetStageWindow(int first, int last)
+        {
+            firstStage = Mathf.Max(1, first);
+            lastStage = Mathf.Max(0, last);
+        }
+
         public string EnemyName => string.IsNullOrEmpty(enemyName) ? name : enemyName;
 
         /// <summary>Stable string id (save keys, encounter specs). Falls back to the asset name.</summary>

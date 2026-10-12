@@ -32,14 +32,14 @@ namespace IdleRPG.Data
         public EnemyData GetEnemyFor(int stage, int wave, int normalWavesPerStage)
         {
             bool isBossWave = IsBossWave(wave, normalWavesPerStage);
-            List<EnemyData> pool = isBossWave ? bossEnemies : normalEnemies;
+            List<EnemyData> pool = PoolForStage(isBossWave ? bossEnemies : normalEnemies, stage);
 
             EnemyData picked = PickFromPool(pool, stage, wave);
 
             if (picked == null && isBossWave)
             {
                 // Boss list empty -> fall back to a normal enemy so the run can continue.
-                picked = PickFromPool(normalEnemies, stage, wave);
+                picked = PickFromPool(PoolForStage(normalEnemies, stage), stage, wave);
                 Debug.LogWarning($"[WaveConfig] No boss configured for stage {stage} wave {wave}; falling back to a normal enemy.");
             }
 
@@ -80,7 +80,7 @@ namespace IdleRPG.Data
                 return team;
             }
 
-            List<EnemyData> pool = IsBossWave(wave, normalWavesPerStage) ? bossEnemies : normalEnemies;
+            List<EnemyData> pool = PoolForStage(IsBossWave(wave, normalWavesPerStage) ? bossEnemies : normalEnemies, stage);
             if (pool == null || pool.Count == 0)
             {
                 return team;
@@ -132,6 +132,39 @@ namespace IdleRPG.Data
 
             int seed = (Mathf.Max(1, stage) - 1) * 31 + (Mathf.Max(1, wave) - 1);
             return seed % poolSize;
+        }
+
+        /// <summary>
+        /// The pool a stage may draw from: the same list with any enemy whose stage window excludes this stage taken
+        /// out. The rotation maths is untouched - it simply counts through a shorter list when a band narrows.
+        ///
+        /// With default windows (first 1, last 0) nothing is removed and the ORIGINAL list is handed straight back,
+        /// so behaviour, ordering and allocation are exactly what they were before windows existed.
+        /// </summary>
+        private static List<EnemyData> PoolForStage(List<EnemyData> pool, int stage)
+        {
+            if (pool == null || pool.Count == 0)
+            {
+                return pool;
+            }
+
+            var filtered = new List<EnemyData>(pool.Count);
+            bool removed = false;
+
+            for (int i = 0; i < pool.Count; i++)
+            {
+                EnemyData enemy = pool[i];
+
+                if (enemy != null && !enemy.IsAvailableAt(stage))
+                {
+                    removed = true;
+                    continue;
+                }
+
+                filtered.Add(enemy);
+            }
+
+            return removed ? filtered : pool;
         }
 
         private static EnemyData PickFromPool(List<EnemyData> pool, int stage, int wave)
