@@ -129,7 +129,7 @@ villains. The three Black Knights are one family used three times — a three-pa
 | **A boss size field** — so `isBoss` art renders larger | **the only code addition** | builder |
 | A palette-recolour tool plus a curated palette table | small tool; the palettes are an art call | builder + owner |
 | Licence record | already verified: modification allowed, redistribution not | done |
-| **Art wiring in the SPEC** — `heroes.json` has **no art field**, so all three heroes were hand-wired to `Soldier_Art`, and `Enemy_Slime` / `Enemy_Bat` / `Enemy_Goblin` have **no art set at all** | a spec field plus a generator line, per hero and per enemy | builder |
+| **Art wiring in the SPEC** — `heroes.json` has **no art field**, so all three heroes were hand-wired to `Soldier_Art`, and `Enemy_Slime` / `Enemy_Bat` / `Enemy_Goblin` have **no art set at all** | **DONE (S6a, `ce0675a`)** — specs carry an `art` field; the generator resolves it to `Data/Characters/<name>_Art.asset` and Export writes it back, so the wiring survives regeneration. Heroes are now Archer / Knight / Wizard and `Boss_Ogre` is Orc (all three heroes previously pointed at `Soldier_Art`). **Still hand-set: enemy `stageAlternates`** (alternation art is not in the spec yet — S6b) | builder |
 
 ## How we will know it works
 

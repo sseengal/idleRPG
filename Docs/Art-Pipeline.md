@@ -570,8 +570,9 @@ stage-1 = Demon). Slime/Bat/Goblin placeholders are untouched.
 - **Runtime**: `CharacterAnimator` swaps frames on the unit icon `Image` (no AnimatorController). Idle loops,
   Attack/Hurt/Death are one-shots back to Idle. Facing rule is constructed so heroes always face right and
   enemies always face left from the art's own facing.
-- **Data**: `HeroData.artSet`, `EnemyData.artSet` + `EnemyData.stageAlternates` (rotation). Generator
-  (`DataAssetGenerator`) wires these at build time - pasted SerializedObject edits do NOT survive a rebuild.
+- **Data**: `HeroData.artSet`, `EnemyData.artSet` + `EnemyData.stageAlternates` (rotation). The generator
+  (`ContentGenerator`, from the `art` field in `Content/Specs/*.json`) wires these at build time - pasted
+  SerializedObject edits do NOT survive a rebuild. `stageAlternates` is still hand-set (S6b).
 - **Verified live**: idle/attack/hurt/death all observed (death frame `Blood Monster_A_Death_3`, hurt
   `Blood Monster_A_Hurt_1`, hero mid-swing `Soldier_Attack02_2`); boss = Orc; alternation Demon/Blood Monster
   by stage parity; stale-animator clearance on placeholder waves; enemies face left. Screenshot
