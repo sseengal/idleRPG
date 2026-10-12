@@ -141,9 +141,9 @@ TextureImporter:
       name: Greatsword Skeleton_Attack03_0
       rect:
         serializedVersion: 2
-        x: 43
+        x: 41
         y: 35
-        width: 46
+        width: 48
         height: 29
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -163,9 +163,9 @@ TextureImporter:
       name: Greatsword Skeleton_Attack03_1
       rect:
         serializedVersion: 2
-        x: 143
+        x: 141
         y: 35
-        width: 46
+        width: 48
         height: 29
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -185,9 +185,9 @@ TextureImporter:
       name: Greatsword Skeleton_Attack03_2
       rect:
         serializedVersion: 2
-        x: 243
+        x: 241
         y: 35
-        width: 46
+        width: 48
         height: 29
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -207,9 +207,9 @@ TextureImporter:
       name: Greatsword Skeleton_Attack03_3
       rect:
         serializedVersion: 2
-        x: 343
+        x: 341
         y: 35
-        width: 46
+        width: 48
         height: 29
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -229,9 +229,9 @@ TextureImporter:
       name: Greatsword Skeleton_Attack03_4
       rect:
         serializedVersion: 2
-        x: 443
+        x: 441
         y: 35
-        width: 46
+        width: 48
         height: 29
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -251,9 +251,9 @@ TextureImporter:
       name: Greatsword Skeleton_Attack03_5
       rect:
         serializedVersion: 2
-        x: 543
+        x: 541
         y: 35
-        width: 46
+        width: 48
         height: 29
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -273,9 +273,9 @@ TextureImporter:
       name: Greatsword Skeleton_Attack03_6
       rect:
         serializedVersion: 2
-        x: 643
+        x: 641
         y: 35
-        width: 46
+        width: 48
         height: 29
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -295,9 +295,9 @@ TextureImporter:
       name: Greatsword Skeleton_Attack03_7
       rect:
         serializedVersion: 2
-        x: 743
+        x: 741
         y: 35
-        width: 46
+        width: 48
         height: 29
       alignment: 0
       pivot: {x: 0.5, y: 0.5}

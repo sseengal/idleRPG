@@ -76,3 +76,4 @@ MonoBehaviour:
   HurtFps: 10
   DeathFps: 10
   ArtFacesLeft: 0
+  StrikeFrame: 6
