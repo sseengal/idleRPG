@@ -117,8 +117,12 @@ namespace IdleRPG.UI
             Vector3 bodyCenter = new Vector3(bodyX, bodyY, targetSlot.position.z);
 
             float dirX = bodyCenter.x >= rect.position.x ? 1f : -1f;
-            float selfHalf = rect.rect.width * 0.5f * Mathf.Abs(rect.lossyScale.x);
-            float targetHalf = targetSlot.rect.width * 0.5f * Mathf.Abs(targetSlot.lossyScale.x);
+
+            // Both halves use the SLOT width (the body's footprint), never the live icon rect: a wide attack
+            // window has already grown that rect, and using it would park the unit short of its target.
+            float selfHalf = BodyWidth(animator, rect) * 0.5f * Mathf.Abs(rect.lossyScale.x);
+            float targetHalf = BodyWidth(targetSlot.GetComponent<CharacterAnimator>(), targetSlot) * 0.5f *
+                               Mathf.Abs(targetSlot.lossyScale.x);
             float gap = selfHalf + targetHalf + contactPaddingPx;
 
             contact = new Vector3(bodyCenter.x - (dirX * gap), bodyCenter.y, bodyCenter.z);
@@ -292,6 +296,20 @@ private void Update()
                 default:
                     return;
             }
+        }
+
+        /// <summary>
+        /// The width the body is drawn at: the unit's announced slot size when it has an animator, else the live
+        /// rect (a plain slot container has no animator and keeps its own width).
+        /// </summary>
+        private static float BodyWidth(CharacterAnimator unit, RectTransform fallback)
+        {
+            if (unit != null && unit.SlotSize.x > 0f)
+            {
+                return unit.SlotSize.x;
+            }
+
+            return fallback != null ? fallback.rect.width : 0f;
         }
 
         /// <summary>Fast launch, gentle landing — the run reads as a dart, not a slide.</summary>

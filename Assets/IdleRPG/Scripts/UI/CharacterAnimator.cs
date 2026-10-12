@@ -32,9 +32,30 @@ namespace IdleRPG.UI
         /// </summary>
         private Vector2 slotSize;
 
-        /// <summary>Pixels-per-sprite-pixel so every action renders its body at the same size (the pack's
-        /// attack/death frames have much wider windows than idle; a fixed rect would shrink those poses).</summary>
+        /// <summary>Pixels-per-sprite-pixel. ONE value for the whole roster (see <see cref="RosterReferencePx"/>),
+        /// so every character's body renders at the same size in every pose AND keeps the size the artist gave it
+        /// relative to the others. The rect follows the frame's own window, so a wide pose is transparent margin.</summary>
         private float pixelScale = 1f;
+
+        /// <summary>
+        /// The roster's biggest idle window, in art pixels - measured from the imported art (Demon_E, 50x29).
+        /// This is the denominator of the shared scale: the biggest character exactly fills its slot, and every
+        /// other character draws smaller by exactly as much as the art draws it smaller.
+        ///
+        /// Why a constant and not the character's own window: using each character's own window blew every one of
+        /// them up to fill its box, so the art's pixel size differed character to character (a 21px wizard and a
+        /// 50px demon drew with the same apparent body). One constant is the whole fix for that.
+        /// </summary>
+        private const float RosterReferencePx = 50f;
+
+        /// <summary>
+        /// Whole-roster size dial. 1.00 = the biggest character exactly fills its slot. Raising it makes every
+        /// unit bigger together, in proportion, and the biggest one then overflows its box by the same amount.
+        /// Tweak this one number to taste.
+        ///
+        /// 2.40 = twice that fill size, which is what a phone needs: at 1.00-1.20 the units read as tiny.
+        /// </summary>
+        private const float IconSizeBump = 2.4f;
 
         /// <summary>Whose look is wanted: true = face left (enemies). Combined with the art's own facing.</summary>
         public bool FacingLeft { get; set; }
@@ -44,6 +65,12 @@ namespace IdleRPG.UI
         public bool HasArt => art != null && art.HasAnimation;
 
         public CharacterArtSet Art => art;
+
+        /// <summary>
+        /// The icon size the slot announced (local units). Callers that need the BODY's footprint - the lunge's
+        /// stop distance - must use this, not the live rect: a wide attack window has already grown that rect.
+        /// </summary>
+        public Vector2 SlotSize => slotSize;
 
         /// <summary>Announces the icon size this slot wants. Idempotent - call again only on a real resize.</summary>
         public void SetSlotSize(Vector2 size)
@@ -82,13 +109,10 @@ namespace IdleRPG.UI
                     slotSize = target.rectTransform.sizeDelta;
                 }
 
-                Sprite[] reference = art.Idle != null && art.Idle.Length > 0 ? art.Idle : art.GetAttack();
-                if (reference != null && reference.Length > 0)
-                {
-                    Rect r = reference[0].rect;
-                    pixelScale = Mathf.Max(slotSize.x, slotSize.y)
-                                 / Mathf.Max(1f, Mathf.Max(r.width, r.height));
-                }
+                // The roster's ONE scale (see RosterReferencePx/IconSizeBump). The character's own window is
+                // deliberately NOT read here: reading it per character is what made everyone draw at a
+                // different pixel size.
+                pixelScale = Mathf.Max(slotSize.x, slotSize.y) * IconSizeBump / RosterReferencePx;
             }
 
             PlayIdle();
@@ -217,9 +241,14 @@ namespace IdleRPG.UI
         }
 
         /// <summary>
-        /// Sizes the icon rect to the current clip's window at a single per-character pixel scale, so every
-        /// pose (idle/attack/hurt/death) renders its body at the same size. Extreme swings are capped at 1.5x
-        /// the wired base so a wide attack never overflows its slot row.
+        /// Sizes the icon rect to the current clip's window at the roster's one shared pixel scale
+        /// (<see cref="RosterReferencePx"/>), so the character's body renders at exactly the same size in every
+        /// pose (idle/attack/hurt/death) and at the size the art gives it relative to every other character.
+        ///
+        /// The rect is PROPORTIONAL to the frame's own window: a wide window (a lunging attack) makes the rect
+        /// wider while the body keeps its size - the extra area is transparent margin. An earlier version capped
+        /// the rect at 1.5x the slot, and that shrank the character itself: Archer's attack window is 2.5 slots
+        /// wide, so he drew at 60% of his idle size mid-swing.
         /// </summary>
         private void ApplyClipSize()
         {
@@ -229,12 +258,7 @@ namespace IdleRPG.UI
             }
 
             Rect r = clip[0].rect;
-            float baseMax = Mathf.Max(1f, Mathf.Max(slotSize.x, slotSize.y));
-            float cap = baseMax * 1.5f;
-            float natural = Mathf.Max(r.width, r.height) * pixelScale;
-            float mul = Mathf.Min(1f, cap / Mathf.Max(1f, natural));
-
-            target.rectTransform.sizeDelta = new Vector2(r.width * pixelScale * mul, r.height * pixelScale * mul);
+            target.rectTransform.sizeDelta = new Vector2(r.width * pixelScale, r.height * pixelScale);
         }
 
         private static float Second(int fps)
