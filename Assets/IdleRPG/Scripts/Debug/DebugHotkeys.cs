@@ -49,6 +49,25 @@ namespace IdleRPG.Debugging
             }
         }
 
+        /// <summary>
+        /// Moves the run by <paramref name="delta"/> stages, clamped at stage 1. Dev builds only.
+        /// Same call as the `S` key and the debug menu, so it tests the real path and adds no new state.
+        /// </summary>
+        public void StepStage(int delta)
+        {
+            if (gameManager == null)
+            {
+                return;
+            }
+
+            int stage = Mathf.Max(1, gameManager.CurrentStage + delta);
+            gameManager.StartRun(stage);
+
+            Log($"Stage {(delta >= 0 ? "+" : "-")}{Mathf.Abs(delta)} -> {stage} " +
+                $"(pool: normal {gameManager.WaveData?.NormalEnemyCount ?? 0}, " +
+                $"boss {gameManager.WaveData?.BossEnemyCount ?? 0}).");
+        }
+
         private void Update()
         {
             Keyboard keyboard = Keyboard.current;
@@ -140,6 +159,18 @@ namespace IdleRPG.Debugging
                 int nextStage = gameManager.CurrentStage + 1;
                 gameManager.StartRun(nextStage);
                 Log($"Skipped to stage {nextStage}.");
+            }
+
+            // Stage stepper: walking the 100-stage ladder by hand is impossible, so these two keys move the run one
+            // stage at a time. `]` forward, `[` back (clamped at stage 1) - the same call `S` and the debug menu use.
+            if (keyboard.rightBracketKey.wasPressedThisFrame)
+            {
+                StepStage(1);
+            }
+
+            if (keyboard.leftBracketKey.wasPressedThisFrame)
+            {
+                StepStage(-1);
             }
 
             if (keyboard.mKey.wasPressedThisFrame)
