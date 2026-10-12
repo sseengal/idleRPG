@@ -19,7 +19,6 @@ namespace IdleRPG.EditorTools
         private const int Tile = 100;
 
         private static readonly string[] Characters = { "Soldier", "Orc", "Demon_A", "Blood Monster_A" };
-        private static readonly string[] Actions = { "Idle", "Walk", "Attack01", "Attack02", "Attack03", "Hurt", "Death" };
 
         [MenuItem("Tools/Idle RPG/Art/Import TinyRPG Characters")]
         public static void ImportAll()
@@ -50,18 +49,46 @@ namespace IdleRPG.EditorTools
             }
 
             // Per-action strips only (the bare <Char>.png combined sheet is point-imported, not sliced).
+            // Names are MAPPED, not matched: the packs use Attack, Attack3, DEATH, Walk01, Flying and more.
+            // Anything unrecognised is reported, never silently skipped.
+            int baseCount = 0, abilityCount = 0, vfxCount = 0;
+            var unknown = new List<string>();
+
             foreach (string strip in Directory.GetFiles(dir, character + "_*.png"))
             {
-                string fileName = Path.GetFileNameWithoutExtension(strip);
-                string action = fileName.Substring(character.Length + 1);
+                string action = Path.GetFileNameWithoutExtension(strip).Substring(character.Length + 1);
+                CharacterAction resolved = CharacterActionResolver.Resolve(action);
 
-                if (!IsAction(action))
+                switch (resolved.Kind)
                 {
-                    continue;
-                }
+                    case CharacterActionKind.Base:
+                        SliceStrip(ToAssetPath(strip));
+                        baseCount++;
+                        break;
 
-                SliceStrip(ToAssetPath(strip));
+                    case CharacterActionKind.Ability:
+                        abilityCount++;
+                        break;
+
+                    case CharacterActionKind.Vfx:
+                        vfxCount++;
+                        break;
+
+                    default:
+                        unknown.Add(action);
+                        break;
+                }
             }
+
+            if (unknown.Count > 0)
+            {
+                Debug.LogWarning("[CharacterArtImporter] " + character + ": unrecognised action(s) - " +
+                                 string.Join(", ", unknown) + ". NOT imported. Teach " +
+                                 nameof(CharacterActionResolver) + " about them if the game should use them.");
+            }
+
+            Debug.Log("[CharacterArtImporter] " + character + ": " + baseCount + " base strip(s) imported; " +
+                      abilityCount + " ability and " + vfxCount + " effect strip(s) recognised, not imported.");
 
             string sheet = dir + Path.DirectorySeparatorChar + character + ".png";
             if (File.Exists(sheet))
@@ -70,19 +97,6 @@ namespace IdleRPG.EditorTools
             }
 
             RebuildArtSet(character);
-        }
-
-        private static bool IsAction(string action)
-        {
-            for (int i = 0; i < Actions.Length; i++)
-            {
-                if (Actions[i] == action)
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private static void SliceStrip(string path)
@@ -267,6 +281,13 @@ namespace IdleRPG.EditorTools
             art.Hurt = LoadFrames(character, "Hurt", dir);
             art.Death = LoadFrames(character, "Death", dir);
 
+            // The four flying creatures (Bat, Blood Monster_B, Ghostfire, Hellbat) have no Idle strip: their
+            // movement animation carries the pose, so Idle falls back to Walk rather than rendering nothing.
+            if ((art.Idle == null || art.Idle.Length == 0) && art.Walk != null && art.Walk.Length > 0)
+            {
+                art.Idle = art.Walk;
+            }
+
             // This pack's art is drawn facing right (verified from the sheets); heroes keep that orientation
             // and enemies get mirrored, so both end up facing the opponent.
             art.ArtFacesLeft = false;
@@ -274,10 +295,19 @@ namespace IdleRPG.EditorTools
             EditorUtility.SetDirty(art);
         }
 
-        private static Sprite[] LoadFrames(string character, string action, string dir)
+        private static Sprite[] LoadFrames(string character, string slot, string dir)
         {
-            string path = ToAssetPath(dir + Path.DirectorySeparatorChar + character + "_" + action + ".png");
-            string prefix = character + "_" + action + "_";
+            // The slot is FOUND, not guessed: the pack may call the same animation Attack, Attack3, Walk01 or Flying.
+            string strip = CharacterActionResolver.FindStrip(dir, character, slot);
+
+            if (strip == null)
+            {
+                return new Sprite[0];
+            }
+
+            string stripName = Path.GetFileNameWithoutExtension(strip).Substring(character.Length + 1);
+            string path = ToAssetPath(strip);
+            string prefix = character + "_" + stripName + "_";
 
             var sprites = new List<Sprite>();
             Object[] all = AssetDatabase.LoadAllAssetsAtPath(path);
