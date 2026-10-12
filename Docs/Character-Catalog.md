@@ -58,12 +58,12 @@ shadow variants were deliberately skipped (they bake a fake drop shadow; the sce
 | Demon_B | NORMAL | Attack01:9 Attack02:6 Death:4 Hurt:4 Idle:6 Walk:8 |
 | Demon_C | NORMAL | Attack01:6 Attack02:6 Death:4 Hurt:4 Idle:6 Walk:6 |
 | Demon_D | NORMAL | Attack01:11 Attack02:18 Attack03:12 Death:4 Hurt:4 Idle:6 Walk:8 |
-| Demon_E | BOSS | Attack01:8 Attack02:13 Attack03:8 Death:4 Hurt:4 Idle:6 Walk:8 |
+| Demon_E | NORMAL | Attack01:8 Attack02:13 Attack03:8 Death:4 Hurt:4 Idle:6 Walk:8 |
 | Demoness_A | BOSS | Attack01:9 Attack02:15 Attack03:16 Death:4 Hurt:4 Idle:6 Walk:8 |
 | Demoness_B | NORMAL | Attack01:8 Attack02:8 Death:4 Hurt:4 Idle:6 Walk:6 |
 | Blood Monster_A | NORMAL | Attack01:8 Attack02:8 Death:4 Hurt:4 Idle:6 Walk:8 |
 | Blood Monster_B | NORMAL | Attack01:8 Attack02:9 **Death:6** **Flying:6** Hurt:4 |
-| Eyeball Monster | BOSS | Attack01:8 Attack02:8 Attack03:6 **Attack03(No beam effects):6** **Beam:3** Death:4 Hurt:4 Idle:6 Walk:6 |
+| Eyeball Monster | NORMAL | Attack01:8 Attack02:8 Attack03:6 **Attack03(No beam effects):6** **Beam:3** Death:4 Hurt:4 Idle:6 Walk:6 |
 | Flame Golem | BOSS | Attack01:9 Attack02:9 Attack03:9 **Death:6** Hurt:4 Idle:6 **Walk:12** |
 | Ghostfire | NORMAL | Attack01:6 Attack02:7 **Attack02(No beam effects):7** **Beam:3** **Death:6** **Flying:6** Hurt:4 |
 | Hellbat | NORMAL | Attack01:6 Attack02:7 Death:4 **Flying:6** Hurt:4 |
