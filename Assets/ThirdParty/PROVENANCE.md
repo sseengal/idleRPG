@@ -41,12 +41,42 @@ attributions (the store packet pass, B10b, owns that).
 
 ---
 
+## Tiny RPG Character Asset Pack 01 v2.0 — Full (22 characters)
+
+| Field | Value |
+|---|---|
+| id | `tinyrpg_pack01_full` |
+| source | `~/Downloads/Tiny RPG Character Asset Pack 01 v2.0 -Full 22 Characters.zip` |
+| drop location | `TinyRPGAssets/` — **project root, outside `Assets/`**, so Unity and the build cannot see it yet |
+| author / licence | **UNRESOLVED.** No licence, readme, `.txt` or `.pdf` exists anywhere in the zip — verified by listing the archive |
+| grid | 100 px cells; a plain set and a `with shadows` set; Aseprite sources included |
+| contents | 22 characters + `Arrow01-03` and `Magic` projectile art |
+| used for | heroes, bosses and normal enemies — see `Docs/Character-Catalog.md` and `Docs/Stage-Ladder.md` |
+| action needed | **find the store receipt or product page** and record the terms here. This gates the entire art plan |
+
+## Tiny RPG Character Asset Pack 02 v1.01
+
+| Field | Value |
+|---|---|
+| id | `tinyrpg_pack02` |
+| source | `~/Downloads/Tiny RPG Character Asset Pack 02 v1.01-Free Demon_A&Blood Monster_A.zip` |
+| drop location | `TinyRPGAssets2/` — **project root, outside `Assets/`** |
+| author / licence | **UNRESOLVED.** No licence file in the zip |
+| grid | 100 px cells; plain + shadowed sets; Aseprite sources |
+| contents | 20 enemy-side characters (demons, hell, undead, Black Knights) |
+| used for | bands 4–10 of the stage ladder |
+
+---
+
 ## Known gaps (must be closed before submission)
 
 | Pack | Gap |
 |---|---|
-| `TinyRPG_01_SoldierOrc` | **No licence file in the pack.** Source + licence must be recorded before it ships, or the art must be replaced. Currently used only by the ArtLab spike. |
-| `PixelLab` (generated goblin) | Generated with the trial account; the account terms and the generation ledger need recording before shipping (see `Docs/Art-Pipeline.md` §16). |
+| `TinyRPG_01_SoldierOrc` | **No licence file in the pack.** This art is **live on the battle page** — all three heroes, the boss, and the goblin slot — so it must be licensed before release, or replaced. |
+| `tinyrpg_pack01_full` | **No licence file.** The store receipt is the only source. |
+| `tinyrpg_pack02` | **No licence file.** The store receipt is the only source. |
+| `PixelLab` (generated goblin) | Generated with the trial account; the account terms and the generation ledger need recording before shipping. **Not used in the game** — lab benchmark only. |
+
 
 ---
 

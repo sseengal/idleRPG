@@ -2,7 +2,7 @@
 
 > **Everything that describes this game lives here.** One folder, one source of truth per topic.
 > Root `README.md` is the quick start (clone → open → play); everything deeper is in this folder.
-> Last restructured: Step 11e (2026-09-21); Art-Pipeline.md added 2026-09-26; Launch-Plan.md added 2026-10-11.
+> Last restructured: Step 11e (2026-09-21); Art-Pipeline.md added 2026-09-26; Launch-Plan.md added 2026-10-11; Character-Catalog.md, Stage-Ladder.md and Ability-Map.md added 2026-10-11.
 
 ---
 
@@ -13,6 +13,9 @@
 | What is left to finish, and where are we right now? | **`Checklist.md`** (master record - start here) |
 | What is planned next, in what order, with what acceptance? | `Roadmap.md` |
 | How do I get this to the stores, and in what order? | **`Launch-Plan.md`** (art, audio, store launch - sequenced for a one-man team) |
+| What characters and animations do we have, exactly? | **`Character-Catalog.md`** (all 42, enumerated from the packs, never hand-typed) |
+| Which enemy appears on which stage, and who is a boss? | **`Stage-Ladder.md`** (100 stages, 10 bands) |
+| What are the abilities, and how are they unlocked? | **`Ability-Map.md`** (named strips -> abilities, plus the unlock rule) |
 | Why is the code shaped this way? Layers, decisions, rules | `Architecture.md` |
 | How does the simulation work (combat, formation, enemies)? | `Sim-Core.md` |
 | Content pipeline: specs, generator, validator, enemies/zones | `Content.md` |
@@ -46,6 +49,9 @@ Docs/
   Checklist.md       <- master progress + status
   Roadmap.md         <- ordered backlog with acceptance tests
   Launch-Plan.md     <- art + audio + store launch, sequenced for a one-man team
+  Character-Catalog.md <- all 42 characters, enumerated (actions + frames + traps)
+  Stage-Ladder.md    <- 100 stages, 10 bands, bosses, introduction order
+  Ability-Map.md     <- named animation strips -> abilities, and the unlock rule
   Architecture.md    <- decisions (A/B/AD log), layers, data catalog
   Sim-Core.md        <- pure simulation design
   Content.md         <- specs + pipeline + enemies/zones/affixes
