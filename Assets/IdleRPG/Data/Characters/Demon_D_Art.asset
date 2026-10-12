@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 546d8378a11c7469ba65bc56b7cf79f0, type: 3}
+  m_Name: Demon_D_Art
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.CharacterArtSet
+  Idle:
+  - {fileID: 8785127103531371532, guid: 74c43f98976e14d4286bef4cc15171c7, type: 3}
+  - {fileID: -8610645300745375028, guid: 74c43f98976e14d4286bef4cc15171c7, type: 3}
+  - {fileID: -8290349719671171821, guid: 74c43f98976e14d4286bef4cc15171c7, type: 3}
+  - {fileID: 1968499726362868777, guid: 74c43f98976e14d4286bef4cc15171c7, type: 3}
+  - {fileID: 3990079480465644019, guid: 74c43f98976e14d4286bef4cc15171c7, type: 3}
+  - {fileID: -4545139563215443222, guid: 74c43f98976e14d4286bef4cc15171c7, type: 3}
+  Walk:
+  - {fileID: 8610733412841011058, guid: 0845f736e72514c6884702d26cbbfe4f, type: 3}
+  - {fileID: 9053086257595424911, guid: 0845f736e72514c6884702d26cbbfe4f, type: 3}
+  - {fileID: -4759869704140724306, guid: 0845f736e72514c6884702d26cbbfe4f, type: 3}
+  - {fileID: -1385685976928852908, guid: 0845f736e72514c6884702d26cbbfe4f, type: 3}
+  - {fileID: 7103143259945792486, guid: 0845f736e72514c6884702d26cbbfe4f, type: 3}
+  - {fileID: -3683021498909426456, guid: 0845f736e72514c6884702d26cbbfe4f, type: 3}
+  - {fileID: 4602256350312489923, guid: 0845f736e72514c6884702d26cbbfe4f, type: 3}
+  - {fileID: 5025282625303553245, guid: 0845f736e72514c6884702d26cbbfe4f, type: 3}
+  Attack01:
+  - {fileID: -1324305044111654732, guid: 5f3f55bec343643e9b8182687abd902f, type: 3}
+  - {fileID: -5102190082036595150, guid: 5f3f55bec343643e9b8182687abd902f, type: 3}
+  - {fileID: 8545417517244957573, guid: 5f3f55bec343643e9b8182687abd902f, type: 3}
+  - {fileID: -7748681898887094246, guid: 5f3f55bec343643e9b8182687abd902f, type: 3}
+  - {fileID: -7843303366315871645, guid: 5f3f55bec343643e9b8182687abd902f, type: 3}
+  - {fileID: 3088012487232008321, guid: 5f3f55bec343643e9b8182687abd902f, type: 3}
+  - {fileID: 1767903272622733057, guid: 5f3f55bec343643e9b8182687abd902f, type: 3}
+  - {fileID: -2697315799327310540, guid: 5f3f55bec343643e9b8182687abd902f, type: 3}
+  - {fileID: 5444028414835302120, guid: 5f3f55bec343643e9b8182687abd902f, type: 3}
+  - {fileID: 7335331468218051706, guid: 5f3f55bec343643e9b8182687abd902f, type: 3}
+  - {fileID: -8195255348586659110, guid: 5f3f55bec343643e9b8182687abd902f, type: 3}
+  Attack02:
+  - {fileID: -7018427477926742108, guid: e8addf24ec5954b848caca1b85cf5505, type: 3}
+  - {fileID: -3640354842263742794, guid: e8addf24ec5954b848caca1b85cf5505, type: 3}
+  - {fileID: 3202412255096723079, guid: e8addf24ec5954b848caca1b85cf5505, type: 3}
+  - {fileID: 7779157271915724075, guid: e8addf24ec5954b848caca1b85cf5505, type: 3}
+  - {fileID: -1290486039024439175, guid: e8addf24ec5954b848caca1b85cf5505, type: 3}
+  - {fileID: -4558440713948631072, guid: e8addf24ec5954b848caca1b85cf5505, type: 3}
+  - {fileID: -6753099288574367091, guid: e8addf24ec5954b848caca1b85cf5505, type: 3}
+  - {fileID: -1126930216866458222, guid: e8addf24ec5954b848caca1b85cf5505, type: 3}
+  - {fileID: -4090212370920784480, guid: e8addf24ec5954b848caca1b85cf5505, type: 3}
+  - {fileID: -3042472564525518443, guid: e8addf24ec5954b848caca1b85cf5505, type: 3}
+  - {fileID: -3800121417735479614, guid: e8addf24ec5954b848caca1b85cf5505, type: 3}
+  - {fileID: 6602028863608243007, guid: e8addf24ec5954b848caca1b85cf5505, type: 3}
+  - {fileID: -8239646802110760977, guid: e8addf24ec5954b848caca1b85cf5505, type: 3}
+  - {fileID: -7288044759292185409, guid: e8addf24ec5954b848caca1b85cf5505, type: 3}
+  - {fileID: 7041303427146635926, guid: e8addf24ec5954b848caca1b85cf5505, type: 3}
+  - {fileID: 3204370619731866749, guid: e8addf24ec5954b848caca1b85cf5505, type: 3}
+  - {fileID: 2872403041528687618, guid: e8addf24ec5954b848caca1b85cf5505, type: 3}
+  - {fileID: 8408158005805794263, guid: e8addf24ec5954b848caca1b85cf5505, type: 3}
+  Attack03:
+  - {fileID: -1645050986624828360, guid: fe4bcc3ff1868471ba7e2ceaf2c62e52, type: 3}
+  - {fileID: -7094707144992588764, guid: fe4bcc3ff1868471ba7e2ceaf2c62e52, type: 3}
+  - {fileID: 3567988529148646577, guid: fe4bcc3ff1868471ba7e2ceaf2c62e52, type: 3}
+  - {fileID: 3766361270655204526, guid: fe4bcc3ff1868471ba7e2ceaf2c62e52, type: 3}
+  - {fileID: -311083105760058157, guid: fe4bcc3ff1868471ba7e2ceaf2c62e52, type: 3}
+  - {fileID: -1773019974649613395, guid: fe4bcc3ff1868471ba7e2ceaf2c62e52, type: 3}
+  - {fileID: 6183480958125297554, guid: fe4bcc3ff1868471ba7e2ceaf2c62e52, type: 3}
+  - {fileID: 6773526565100525163, guid: fe4bcc3ff1868471ba7e2ceaf2c62e52, type: 3}
+  - {fileID: -5715393676166864085, guid: fe4bcc3ff1868471ba7e2ceaf2c62e52, type: 3}
+  - {fileID: 8643100724754840491, guid: fe4bcc3ff1868471ba7e2ceaf2c62e52, type: 3}
+  - {fileID: -7014514728746778872, guid: fe4bcc3ff1868471ba7e2ceaf2c62e52, type: 3}
+  - {fileID: 685524568553281260, guid: fe4bcc3ff1868471ba7e2ceaf2c62e52, type: 3}
+  Hurt:
+  - {fileID: 6269141886750477873, guid: 914776d95b98245278045c3ce8a973bf, type: 3}
+  - {fileID: -9136026521720499555, guid: 914776d95b98245278045c3ce8a973bf, type: 3}
+  - {fileID: 2976554311564078000, guid: 914776d95b98245278045c3ce8a973bf, type: 3}
+  - {fileID: -3408464472401970980, guid: 914776d95b98245278045c3ce8a973bf, type: 3}
+  Death:
+  - {fileID: 6278103490412130166, guid: 4047a1c38312d49df99f1b4003559923, type: 3}
+  - {fileID: 6794223657528699655, guid: 4047a1c38312d49df99f1b4003559923, type: 3}
+  - {fileID: -548660965735818547, guid: 4047a1c38312d49df99f1b4003559923, type: 3}
+  - {fileID: 4258934655782312184, guid: 4047a1c38312d49df99f1b4003559923, type: 3}
+  IdleFps: 6
+  WalkFps: 8
+  AttackFps: 12
+  HurtFps: 10
+  DeathFps: 10
+  ArtFacesLeft: 0

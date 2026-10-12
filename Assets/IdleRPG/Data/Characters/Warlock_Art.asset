@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 546d8378a11c7469ba65bc56b7cf79f0, type: 3}
+  m_Name: Warlock_Art
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.CharacterArtSet
+  Idle:
+  - {fileID: -8660780280198352559, guid: 51bb4ff98a8444b5a953a241422d4f54, type: 3}
+  - {fileID: 5079759823712719169, guid: 51bb4ff98a8444b5a953a241422d4f54, type: 3}
+  - {fileID: -3279092004422089092, guid: 51bb4ff98a8444b5a953a241422d4f54, type: 3}
+  - {fileID: 6929533868095090268, guid: 51bb4ff98a8444b5a953a241422d4f54, type: 3}
+  - {fileID: -7040366239620767148, guid: 51bb4ff98a8444b5a953a241422d4f54, type: 3}
+  - {fileID: 5707981659713625673, guid: 51bb4ff98a8444b5a953a241422d4f54, type: 3}
+  Walk:
+  - {fileID: 5112904577981523908, guid: ebebd3e39c3f04df992ae2e76afd452f, type: 3}
+  - {fileID: 8458322038138487386, guid: ebebd3e39c3f04df992ae2e76afd452f, type: 3}
+  - {fileID: 8817969513539426125, guid: ebebd3e39c3f04df992ae2e76afd452f, type: 3}
+  - {fileID: -5922404784405131101, guid: ebebd3e39c3f04df992ae2e76afd452f, type: 3}
+  - {fileID: 7056796465425308012, guid: ebebd3e39c3f04df992ae2e76afd452f, type: 3}
+  - {fileID: -6632615444580804388, guid: ebebd3e39c3f04df992ae2e76afd452f, type: 3}
+  - {fileID: -8832284686808276363, guid: ebebd3e39c3f04df992ae2e76afd452f, type: 3}
+  - {fileID: 3212875437849335215, guid: ebebd3e39c3f04df992ae2e76afd452f, type: 3}
+  Attack01:
+  - {fileID: -185364929729159213, guid: b319e3cdbe6a340b19ffb8c502657755, type: 3}
+  - {fileID: 1168800578801758758, guid: b319e3cdbe6a340b19ffb8c502657755, type: 3}
+  - {fileID: -3250875498323379048, guid: b319e3cdbe6a340b19ffb8c502657755, type: 3}
+  - {fileID: -4756636249015582237, guid: b319e3cdbe6a340b19ffb8c502657755, type: 3}
+  - {fileID: -1831995016594016600, guid: b319e3cdbe6a340b19ffb8c502657755, type: 3}
+  - {fileID: -5490002851506311659, guid: b319e3cdbe6a340b19ffb8c502657755, type: 3}
+  - {fileID: 7869747120315448715, guid: b319e3cdbe6a340b19ffb8c502657755, type: 3}
+  Attack02:
+  - {fileID: -8000957572291149403, guid: 6639179616ea14e018e30df94928a5e8, type: 3}
+  - {fileID: -1986312976347167186, guid: 6639179616ea14e018e30df94928a5e8, type: 3}
+  - {fileID: 7039075212884562525, guid: 6639179616ea14e018e30df94928a5e8, type: 3}
+  - {fileID: -5453372584827263508, guid: 6639179616ea14e018e30df94928a5e8, type: 3}
+  - {fileID: 7713076164531145569, guid: 6639179616ea14e018e30df94928a5e8, type: 3}
+  - {fileID: -8620245508714109687, guid: 6639179616ea14e018e30df94928a5e8, type: 3}
+  Attack03: []
+  Hurt:
+  - {fileID: -7381819022111219643, guid: 3343993f2a1c54ef88a83eb74a6ba567, type: 3}
+  - {fileID: -1642614570328474363, guid: 3343993f2a1c54ef88a83eb74a6ba567, type: 3}
+  - {fileID: -1853417119917125501, guid: 3343993f2a1c54ef88a83eb74a6ba567, type: 3}
+  - {fileID: -7056899248339546325, guid: 3343993f2a1c54ef88a83eb74a6ba567, type: 3}
+  Death:
+  - {fileID: 1679812923000568342, guid: f7a3be416a1554aa3b57b904a02346ac, type: 3}
+  - {fileID: 3469457335188075453, guid: f7a3be416a1554aa3b57b904a02346ac, type: 3}
+  - {fileID: 8222236963305076607, guid: f7a3be416a1554aa3b57b904a02346ac, type: 3}
+  - {fileID: -3904036743537787672, guid: f7a3be416a1554aa3b57b904a02346ac, type: 3}
+  - {fileID: -3850181823570191166, guid: f7a3be416a1554aa3b57b904a02346ac, type: 3}
+  - {fileID: 8078396789901531809, guid: f7a3be416a1554aa3b57b904a02346ac, type: 3}
+  - {fileID: 492089792290645368, guid: f7a3be416a1554aa3b57b904a02346ac, type: 3}
+  - {fileID: 1264768218648190961, guid: f7a3be416a1554aa3b57b904a02346ac, type: 3}
+  - {fileID: -8129619817719151610, guid: f7a3be416a1554aa3b57b904a02346ac, type: 3}
+  - {fileID: 8469104301034833495, guid: f7a3be416a1554aa3b57b904a02346ac, type: 3}
+  - {fileID: -8672480663834290089, guid: f7a3be416a1554aa3b57b904a02346ac, type: 3}
+  IdleFps: 6
+  WalkFps: 8
+  AttackFps: 12
+  HurtFps: 10
+  DeathFps: 10
+  ArtFacesLeft: 0

@@ -146,6 +146,22 @@ namespace IdleRPG.EditorTools
                     continue;
                 }
 
+                // Only BASE action strips are imported into art sets; the named specials and the effect overlays
+                // are deliberately left alone until the ability system exists (owner decision, S1). Flagging their
+                // preset would be noise about files the pipeline is not supposed to touch.
+                string bare = Path.GetFileNameWithoutExtension(path);
+                int split = bare.LastIndexOf('_');
+
+                if (split > 0)
+                {
+                    CharacterAction resolved = CharacterActionResolver.Resolve(bare.Substring(split + 1));
+
+                    if (resolved.Kind != CharacterActionKind.Base)
+                    {
+                        continue;
+                    }
+                }
+
                 TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
 
                 if (importer == null)
@@ -211,21 +227,49 @@ namespace IdleRPG.EditorTools
                 }
 
                 sets++;
-                Require(art.Idle, "Idle", name, problems);
-                Require(art.Attack01, "Attack01", name, problems);
-                Require(art.Hurt, "Hurt", name, problems);
-                Require(art.Death, "Death", name, problems);
+                string dir = characterDir.Replace(Path.DirectorySeparatorChar, '/');
+
+                // Every frame the strip's width promises must actually exist in the art set. Unity DROPS a sprite
+                // whose slice rect hangs off the texture, and it only warns - so a strip can silently lose all its
+                // frames and the animation simply plays short. This is the check that makes that impossible to miss.
+                CheckSlot("Idle", art.Idle, dir, name, problems);
+                CheckSlot("Walk", art.Walk, dir, name, problems);
+                CheckSlot("Attack01", art.Attack01, dir, name, problems);
+                CheckSlot("Attack02", art.Attack02, dir, name, problems);
+                CheckSlot("Attack03", art.Attack03, dir, name, problems);
+                CheckSlot("Hurt", art.Hurt, dir, name, problems);
+                CheckSlot("Death", art.Death, dir, name, problems);
             }
 
             Debug.Log("[ArtPipelineValidator] art sets: " + sets + " checked");
         }
 
-        private static void Require(Sprite[] frames, string slot, string character, List<string> problems)
+        /// <summary>
+        /// Compares a slot's strip (found by the same resolver the importer uses) with the frames the art set holds.
+        /// A slot with no strip in this pack is not a problem - most characters have no Attack03.
+        /// </summary>
+        private static void CheckSlot(string slot, Sprite[] frames, string dir, string character, List<string> problems)
         {
-            if (frames == null || frames.Length == 0)
+            string strip = CharacterActionResolver.FindStrip(dir, character, slot);
+
+            if (strip == null)
             {
-                problems.Add(character + " art set has no " + slot + " frames");
+                return;
             }
+
+            int expected = CharacterArtImporter.ReadPngWidth(ToAssetPath(strip)) / ExpectedPpu;
+            int actual = frames == null ? 0 : frames.Length;
+
+            if (expected > 0 && actual != expected)
+            {
+                problems.Add(character + " " + slot + ": the strip promises " + expected + " frame(s) but the art " +
+                             "set holds " + actual + " - frames were DROPPED (a slice rect hangs off the texture)");
+            }
+        }
+
+        private static string ToAssetPath(string fullPath)
+        {
+            return fullPath.Replace(Path.DirectorySeparatorChar, '/').Substring(fullPath.IndexOf("Assets/"));
         }
 
         /// <summary>Check 4: every third-party pack is traceable in the provenance record (G15 wants this).</summary>

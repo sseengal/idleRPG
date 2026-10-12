@@ -18,7 +18,8 @@ namespace IdleRPG.EditorTools
         private const string OutputDir = "Assets/IdleRPG/Data/Characters";
         private const int Tile = 100;
 
-        private static readonly string[] Characters = { "Soldier", "Orc", "Demon_A", "Blood Monster_A" };
+        /// <summary>Widest strip in the packs is 1800 px (18 frames), so 2048 covers every one of them.</summary>
+        private const int MaxMobileTextureSize = 2048;
 
         [MenuItem("Tools/Idle RPG/Art/Import TinyRPG Characters")]
         public static void ImportAll()
@@ -28,14 +29,70 @@ namespace IdleRPG.EditorTools
                 AssetDatabase.CreateFolder("Assets/IdleRPG/Data", "Characters");
             }
 
-            foreach (string character in Characters)
+            // The character list is SCANNED, not hardcoded. The old list named four characters, so adding art
+            // silently did nothing - the same class of mistake as the hardcoded action names in S1.
+            List<string> characters = FindCharacters();
+
+            foreach (string character in characters)
             {
                 ImportCharacter(character);
             }
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log("[CharacterArtImporter] imported: " + string.Join(", ", Characters));
+            Debug.Log("[CharacterArtImporter] imported " + characters.Count + " character(s): " +
+                      string.Join(", ", characters));
+        }
+
+        /// <summary>Every character folder under <see cref="Root"/>. "_Source" is the raw pack drop, not a character.</summary>
+        private static List<string> FindCharacters()
+        {
+            var found = new List<string>();
+            string root = Root.Replace('/', Path.DirectorySeparatorChar);
+
+            if (!Directory.Exists(root))
+            {
+                Debug.LogError("[CharacterArtImporter] no character root at " + Root);
+                return found;
+            }
+
+            string[] dirs = Directory.GetDirectories(root);
+            System.Array.Sort(dirs, System.StringComparer.Ordinal);
+
+            for (int i = 0; i < dirs.Length; i++)
+            {
+                string name = Path.GetFileName(dirs[i]);
+
+                if (name.StartsWith("_"))
+                {
+                    continue;
+                }
+
+                found.Add(name);
+            }
+
+            return found;
+        }
+
+        /// <summary>
+        /// Declares a texture's settings for one mobile platform explicitly, instead of leaving the inert
+        /// "inherit the default" stub that Unity writes on its own when a mobile target is active.
+        /// </summary>
+        private static void ApplyMobilePolicy(TextureImporter importer, string platform)
+        {
+            var settings = new TextureImporterPlatformSettings
+            {
+                name = platform,
+                overridden = true,
+                maxTextureSize = MaxMobileTextureSize,
+                format = TextureImporterFormat.RGBA32,
+                textureCompression = TextureImporterCompression.Uncompressed,
+                compressionQuality = 100,
+                crunchedCompression = false,
+                allowsAlphaSplitting = false,
+            };
+
+            importer.SetPlatformTextureSettings(settings);
         }
 
         private static void ImportCharacter(string character)
@@ -149,6 +206,13 @@ namespace IdleRPG.EditorTools
             importer.alphaIsTransparency = true;
             importer.wrapMode = TextureWrapMode.Clamp;
 
+            // The per-platform policy is DECLARED here, not hand-edited into 344 .meta files. Pixel art with 1 px
+            // black outlines turns to mush under block compression (Art-Pipeline 17), so both mobile platforms
+            // start uncompressed. If the device pass says the memory is too high, THIS is the one place to switch
+            // them to ASTC 4x4 - both stores support ASTC, with ETC2 as the Android fallback.
+            ApplyMobilePolicy(importer, "Android");
+            ApplyMobilePolicy(importer, "iPhone");
+
             // Slice rects use the shared crop window; a tiny 2px pad keeps the AA edge alive.
             for (int i = 0; i < metas.Count; i++)
             {
@@ -220,11 +284,16 @@ namespace IdleRPG.EditorTools
 
                 if (x1 >= x0 && y1 >= y0)
                 {
+                    // The body always sits inside its own tile (x0..x1 are tile-local), so the ONLY thing that can
+                    // overflow is the 2 px pad. If the crop pushed past the tile edge, every frame rect built from
+                    // it hangs off the right of the strip and Unity silently DROPS that frame - 289 frames went
+                    // missing that way on the widest poses. Clamping to the tile can only trim the pad, never the
+                    // body, so this is safe for every strip.
                     int pad = 2;
                     int cx = Mathf.Max(0, x0 - pad);
                     int cy = Mathf.Max(0, y0 - pad);
-                    int cw = Mathf.Min(Tile, x1 - x0 + 1 + pad * 2);
-                    int ch = Mathf.Min(Tile, y1 - y0 + 1 + pad * 2);
+                    int cw = Mathf.Min(Tile - cx, x1 - x0 + 1 + pad * 2);
+                    int ch = Mathf.Min(Tile - cy, y1 - y0 + 1 + pad * 2);
                     window = new Rect(cx, cy, cw, ch);
                     cropped = true;
                 }
@@ -352,8 +421,11 @@ namespace IdleRPG.EditorTools
             return int.TryParse(tail, out value) ? value : 0;
         }
 
-        /// <summary>Reads the PNG IHDR width without touching the imported texture.</summary>
-        private static int ReadPngWidth(string assetPath)
+        /// <summary>
+        /// Reads the PNG IHDR width without touching the imported texture.
+        /// Internal so the art validator can compare a strip's promised frame count against the art set's real one.
+        /// </summary>
+        internal static int ReadPngWidth(string assetPath)
         {
             string full = Path.Combine(Directory.GetCurrentDirectory(), assetPath);
             if (!File.Exists(full))
