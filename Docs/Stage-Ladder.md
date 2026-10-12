@@ -129,6 +129,7 @@ villains. The three Black Knights are one family used three times — a three-pa
 | **A boss size field** — so `isBoss` art renders larger | **the only code addition** | builder |
 | A palette-recolour tool plus a curated palette table | small tool; the palettes are an art call | builder + owner |
 | Licence record | already verified: modification allowed, redistribution not | done |
+| **Art wiring in the SPEC** — `heroes.json` has **no art field**, so all three heroes were hand-wired to `Soldier_Art`, and `Enemy_Slime` / `Enemy_Bat` / `Enemy_Goblin` have **no art set at all** | a spec field plus a generator line, per hero and per enemy | builder |
 
 ## How we will know it works
 
@@ -137,6 +138,26 @@ villains. The three Black Knights are one family used three times — a three-pa
    that stage, and the pool size lands inside the range the table above promises.
 3. Every stage's boss wave shows that stage's boss, and the `isBoss` flag is set where expected.
 4. A live walk of three bands, judged at 1:1 on a device — the owner's eye is the gate.
+
+## Verification tooling — the debug stage stepper (F3 overlay)
+
+Walking the ladder by hand means playing 100 stages. The overlay gets three functions so a band can be jumped to and
+inspected in seconds.
+
+| Function | Input | Behaviour |
+|---|---|---|
+| **Stage +1** | `]` key and an overlay row | `GameManager.StartRun(CurrentStage + 1)` |
+| **Stage −1** | `[` key and an overlay row | `GameManager.StartRun(CurrentStage - 1)` |
+| **Stage readout** | overlay row | current stage, wave, how many enemies the pool holds, and their names — so a window can be checked at a glance |
+
+**Rules**
+
+- **Editor and development builds only.** The overlay is already compiled behind `UNITY_EDITOR || DEVELOPMENT_BUILD`
+  and absent from a release build (B1b verifies this); the stepper inherits that and must never leak into release.
+- It calls **`GameManager.StartRun` only** — the same call the debug menu already uses (`DebugHotkeys.cs`), so it adds
+  no new gameplay path and no new state.
+- **The readout is the point.** The stepper exists to answer one question fast: *which enemies does stage N show, and
+  how many of them?* That is how the windows and pool sizes in this document get checked.
 
 ## Open decisions
 
