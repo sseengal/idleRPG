@@ -193,6 +193,8 @@ namespace IdleRPG.EditorTools
             Texture2D tex = AssetDatabase.LoadAssetAtPath<Texture2D>(assetPath);
             Rect window = new Rect(0f, 0f, Tile, Tile);
 
+            bool cropped = false;
+
             if (tex != null && tex.isReadable)
             {
                 Color[] px = tex.GetPixels();
@@ -224,9 +226,21 @@ namespace IdleRPG.EditorTools
                     int cw = Mathf.Min(Tile, x1 - x0 + 1 + pad * 2);
                     int ch = Mathf.Min(Tile, y1 - y0 + 1 + pad * 2);
                     window = new Rect(cx, cy, cw, ch);
+                    cropped = true;
                 }
 
-                UnityEngine.Object.DestroyImmediate(tex);
+                // NOTE: the texture is NOT destroyed here. It belongs to the AssetDatabase, so destroying it is
+                // illegal - Unity threw "Destroying assets is not permitted", and because that happened AFTER the
+                // crop window was computed but BEFORE it was returned, every strip silently fell back to the full
+                // 100 px tile and characters rendered tiny (the bug fixed in Art-Pipeline 18). The readable copy is
+                // released by the isReadable=false + reimport below.
+            }
+
+            if (!cropped)
+            {
+                Debug.LogError("[CharacterArtImporter] no crop window for " + assetPath +
+                               " - this strip will render at FULL TILE SIZE. Check that the texture imported " +
+                               "readable and that its first tile has opaque pixels.");
             }
 
             if (!wasReadable && importer != null)
