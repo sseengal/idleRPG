@@ -124,12 +124,42 @@ villains. The three Black Knights are one family used three times — a three-pa
 
 | Item | Cost | Owner |
 |---|---|---|
-| Stage windows (two numbers per enemy) | the S5 mechanism, unchanged | builder |
-| ~40 boss assets, ~42 elite assets, ~84 window rows | data, generated from the spec | builder |
-| **A boss size field** — so `isBoss` art renders larger | **the only code addition** | builder |
-| A palette-recolour tool plus a curated palette table | small tool; the palettes are an art call | builder + owner |
+| Stage windows (two numbers per enemy) | the S5 mechanism, unchanged | **built** |
+| ~40 boss assets, ~42 elite assets, ~84 window rows | data, generated from the spec | **built** (40 bosses, 14 elites - see below) |
+| **A boss size field** — so `isBoss` art renders larger | **the only code addition** | **built** — `bossSizeScale` on `EnemySpec`/`EnemyData`, default 1.6 |
+| A palette-recolour tool plus a curated palette table | small tool; the palettes are an art call | **still open** — the 14 elites reuse their base art until then |
 | Licence record | already verified: modification allowed, redistribution not | done |
-| **Art wiring in the SPEC** — `heroes.json` has **no art field**, so all three heroes were hand-wired to `Soldier_Art`, and `Enemy_Slime` / `Enemy_Bat` / `Enemy_Goblin` have **no art set at all** | **DONE (S6a, `ce0675a`)** — specs carry an `art` field; the generator resolves it to `Data/Characters/<name>_Art.asset` and Export writes it back, so the wiring survives regeneration. Heroes are now Archer / Knight / Wizard and `Boss_Ogre` is Orc (all three heroes previously pointed at `Soldier_Art`). **Still hand-set: enemy `stageAlternates`** (alternation art is not in the spec yet — S6b) | builder |
+| **Art wiring in the SPEC** — `heroes.json` has **no art field**, so all three heroes were hand-wired to `Soldier_Art`, and `Enemy_Slime` / `Enemy_Bat` / `Enemy_Goblin` have **no art set at all** | **DONE (S6a, `ce0675a`)** — specs carry an `art` field; the generator resolves it to `Data/Characters/<name>_Art.asset` and Export writes it back, so the wiring survives regeneration. Heroes are now Archer / Knight / Wizard and `Boss_Ogre` is Orc (all three heroes previously pointed at `Soldier_Art`). **DONE (S6b)** — `stageAlternates` is in the spec too: the generator writes the alternates onto the asset and Export reads them back, so the Goblin's Demon / Blood Monster skins survive a regeneration | built |
+
+## As built (2026-10-12)
+
+The ladder exists in `Assets/IdleRPG/Content/Specs/enemies.json` (+ `waves.json` for the pools), generated into
+81 enemy assets. `Tools > Idle RPG > Content > Generate Assets From Specs` rebuilds them.
+
+**Where difficulty is tuned — one table.** `enemies.json` opens with `bands`: ten rows of multipliers (health,
+attack, defence add, gold, interval). An enemy row carries *identity* (id, name, art, first/last stage, archetype)
+and its numbers are computed as **band × archetype**. So "bands 8-10 hit 20% harder" is one number plus a
+regeneration, never forty edited rows. A non-zero number on a row still wins, which is how the four original
+enemies keep their hand numbers. Archetypes (brute / skirmisher / caster / beast / undead / humanoid) shape *how* a
+band expresses its strength.
+
+**Verified after generation:** stages 1-100 each have **exactly one** boss; the normal pool runs 7 at stage 1, rises
+to 13-14 in the middle bands and holds 12 at stage 91. A new ladder check inside `Validate Content` (so also inside
+`Run All Checks`) fails the build if a band row is missing, a window runs backwards, a stage has too few enemies or
+no boss, or two bosses cover one stage.
+
+**Two deliberate compromises, both easy to change:**
+
+- **14 elites, not 42.** The doc's two promises — one elite per character (~84 total) and a 12-14 pool per stage —
+  cannot both hold: forty-two elites all reaching stage 100 would put ~50 enemies on one stage. Fourteen windows
+  keep the pool at 12-14. The remaining recolours go in as their own windows once the palette pass happens.
+- **`Boss_Ogre` is a spare.** The boss table above owns every stage, and a spare with a wide window would put two
+  bosses on a stage. The Ogre asset is kept but is not in the boss pool, so it cannot spawn.
+
+**Known warnings (5, none fatal):** the spare Ogre and the summoned-only Skeleton Archer are in no pool; and the
+loop robot reports the climb slowing after stage 26 with a 22-minute worst wall against a 12-minute target. That
+last one is a balance signal, and the band table is where it gets answered.
+
 
 ## How we will know it works
 
