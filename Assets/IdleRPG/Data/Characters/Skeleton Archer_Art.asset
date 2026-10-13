@@ -50,10 +50,19 @@ MonoBehaviour:
   - {fileID: -2261304069325055388, guid: 056f94932cb2f43fbb782b97ceeabd4d, type: 3}
   - {fileID: -5206051105711831062, guid: 056f94932cb2f43fbb782b97ceeabd4d, type: 3}
   - {fileID: -817043152144999645, guid: 056f94932cb2f43fbb782b97ceeabd4d, type: 3}
+  Ability:
+  - {fileID: 2497261057822891915, guid: 18b7123b3d61a4d38a2eb58734bee635, type: 3}
+  - {fileID: 2205392314371797829, guid: 18b7123b3d61a4d38a2eb58734bee635, type: 3}
+  - {fileID: 31424828718478673, guid: 18b7123b3d61a4d38a2eb58734bee635, type: 3}
+  - {fileID: -6088636631044899261, guid: 18b7123b3d61a4d38a2eb58734bee635, type: 3}
+  - {fileID: 3817973500767815344, guid: 18b7123b3d61a4d38a2eb58734bee635, type: 3}
   IdleFps: 6
   WalkFps: 8
   AttackFps: 12
   HurtFps: 10
   DeathFps: 10
+  AbilityFps: 10
   ArtFacesLeft: 0
   StrikeFrame: 6
+  AbilityStrip: Summon
+  AbilityStrikeFrame: 2

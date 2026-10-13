@@ -71,10 +71,14 @@ MonoBehaviour:
   - {fileID: -6083921793743801990, guid: 395c0e45b9e8b4d35871fc201167369e, type: 3}
   - {fileID: -7420146819957259643, guid: 395c0e45b9e8b4d35871fc201167369e, type: 3}
   - {fileID: 1723716763905865988, guid: 395c0e45b9e8b4d35871fc201167369e, type: 3}
+  Ability: []
   IdleFps: 6
   WalkFps: 8
   AttackFps: 12
   HurtFps: 10
   DeathFps: 10
+  AbilityFps: 10
   ArtFacesLeft: 0
   StrikeFrame: 4
+  AbilityStrip: 
+  AbilityStrikeFrame: -1

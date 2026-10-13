@@ -150,6 +150,39 @@ namespace IdleRPG.EditorTools
             return null;
         }
 
+        /// <summary>
+        /// The character's named special strip - the ability material (Block / Heal / Beam / Spike / Summon) - or
+        /// null when it has none. <paramref name="actionName"/> receives the pack's own name for it.
+        ///
+        /// Files are sorted first, so the same folder always yields the same strip. A character with two specials
+        /// gets the first one; the importer reports the other rather than silently choosing.
+        /// </summary>
+        public static string FindAbilityStrip(string directory, string character, out string actionName)
+        {
+            actionName = null;
+
+            if (!Directory.Exists(directory))
+            {
+                return null;
+            }
+
+            string[] files = Directory.GetFiles(directory, character + "_*.png");
+            Array.Sort(files, StringComparer.Ordinal);
+
+            for (int i = 0; i < files.Length; i++)
+            {
+                string action = Path.GetFileNameWithoutExtension(files[i]).Substring(character.Length + 1);
+
+                if (Resolve(action).Kind == CharacterActionKind.Ability)
+                {
+                    actionName = action;
+                    return files[i];
+                }
+            }
+
+            return null;
+        }
+
         private static CharacterAction Base(string slot, string strip)
         {
             return new CharacterAction(CharacterActionKind.Base, slot, strip);

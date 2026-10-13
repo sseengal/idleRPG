@@ -206,6 +206,7 @@ namespace IdleRPG.EditorTools
             }
 
             int sets = 0;
+            int specials = 0;
 
             foreach (string characterDir in Directory.GetDirectories(ImportedRoot))
             {
@@ -239,9 +240,34 @@ namespace IdleRPG.EditorTools
                 CheckSlot("Attack03", art.Attack03, dir, name, problems);
                 CheckSlot("Hurt", art.Hurt, dir, name, problems);
                 CheckSlot("Death", art.Death, dir, name, problems);
+
+                // The named special strip is the ability material. When the pack has one, the art set must hold it
+                // or an ability has nothing to play - this is the guard that stops a plain re-import dropping them
+                // (the same failure mode that lost the shadows).
+                string abilityStrip = CharacterActionResolver.FindAbilityStrip(dir, name, out string abilityAction);
+
+                if (abilityStrip != null)
+                {
+                    specials++;
+
+                    int expected = CharacterArtImporter.ReadPngWidth(ToAssetPath(abilityStrip)) / ExpectedPpu;
+                    int actual = art.Ability == null ? 0 : art.Ability.Length;
+
+                    if (actual == 0)
+                    {
+                        problems.Add("'" + name + "' has a special strip (" + abilityAction + ") but its art set " +
+                                     "holds no Ability frames - run Tools > Idle RPG > Art > Import TinyRPG Characters");
+                    }
+                    else if (expected > 0 && actual != expected)
+                    {
+                        problems.Add(name + " Ability (" + abilityAction + "): the strip promises " + expected +
+                                     " frame(s) but the art set holds " + actual + " - frames were DROPPED");
+                    }
+                }
             }
 
-            Debug.Log("[ArtPipelineValidator] art sets: " + sets + " checked");
+            Debug.Log("[ArtPipelineValidator] art sets: " + sets + " checked, " + specials +
+                      " with a special (ability) strip");
         }
 
         /// <summary>

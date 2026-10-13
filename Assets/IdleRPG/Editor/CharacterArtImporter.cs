@@ -124,6 +124,9 @@ namespace IdleRPG.EditorTools
                         break;
 
                     case CharacterActionKind.Ability:
+                        // The named special strips are the ability material: sliced like any base strip so an
+                        // ability can play its own animation (Ability-Plan S1).
+                        SliceStrip(ToAssetPath(strip));
                         abilityCount++;
                         break;
 
@@ -144,8 +147,9 @@ namespace IdleRPG.EditorTools
                                  nameof(CharacterActionResolver) + " about them if the game should use them.");
             }
 
-            Debug.Log("[CharacterArtImporter] " + character + ": " + baseCount + " base strip(s) imported; " +
-                      abilityCount + " ability and " + vfxCount + " effect strip(s) recognised, not imported.");
+            Debug.Log("[CharacterArtImporter] " + character + ": " + baseCount + " base strip(s) and " +
+                      abilityCount + " special strip(s) imported; " + vfxCount +
+                      " effect strip(s) recognised, not imported.");
 
             string sheet = dir + Path.DirectorySeparatorChar + character + ".png";
             if (File.Exists(sheet))
@@ -364,6 +368,16 @@ namespace IdleRPG.EditorTools
             art.Hurt = LoadFrames(character, "Hurt", dir);
             art.Death = LoadFrames(character, "Death", dir);
 
+            // The named special (Block / Heal / Beam / Spike / Summon) is the ability material: sliced and cropped
+            // exactly like a base strip, with its own fps and its own measured strike frame, so an ability can play
+            // its own animation and land its effect on the frame the pose extends.
+            art.Ability = LoadAbilityFrames(character, dir, out string abilityAction, out string abilityStrip);
+            art.AbilityStrip = abilityAction ?? string.Empty;
+            art.AbilityFps = DefaultAbilityFps;
+            art.AbilityStrikeFrame = abilityStrip == null
+                ? -1
+                : MeasureStrikeFrame(ToAssetPath(abilityStrip), ReadPngWidth(ToAssetPath(abilityStrip)) / Tile);
+
             // The four flying creatures (Bat, Blood Monster_B, Ghostfire, Hellbat) have no Idle strip: their
             // movement animation carries the pose, so Idle falls back to Walk rather than rendering nothing.
             if ((art.Idle == null || art.Idle.Length == 0) && art.Walk != null && art.Walk.Length > 0)
@@ -415,7 +429,17 @@ namespace IdleRPG.EditorTools
             }
 
             string path = ToAssetPath(strip);
-            int cols = ReadPngWidth(path) / Tile;
+            return MeasureStrikeFrame(path, ReadPngWidth(path) / Tile);
+        }
+
+        /// <summary>
+        /// The pixel half of the measurement: which frame of this strip is the most extended pose. Used for the
+        /// attack strip and for the special (ability) strip alike, so both land their effect on the same kind of
+        /// frame - the sword at full reach, the bow released, the spell burst.
+        /// </summary>
+        private static int MeasureStrikeFrame(string assetPath, int cols)
+        {
+            string path = assetPath;
 
             if (cols <= 0)
             {
@@ -494,16 +518,36 @@ namespace IdleRPG.EditorTools
             return strike;
         }
 
+        /// <summary>
+        /// Playback rate the pack authors its special strips at. Stored per character on the art set, so a strip
+        /// that feels wrong can be tuned in the inspector without touching this.
+        /// </summary>
+        private const int DefaultAbilityFps = 10;
+
         private static Sprite[] LoadFrames(string character, string slot, string dir)
         {
             // The slot is FOUND, not guessed: the pack may call the same animation Attack, Attack3, Walk01 or Flying.
             string strip = CharacterActionResolver.FindStrip(dir, character, slot);
 
-            if (strip == null)
-            {
-                return new Sprite[0];
-            }
+            return strip == null ? new Sprite[0] : LoadStripFrames(character, strip);
+        }
 
+        /// <summary>
+        /// The character's special strip frames (the ability material), or an empty array when it has none.
+        /// <paramref name="actionName"/> receives the pack's own name for it ("Block", "Heal", "Summon", ...) and
+        /// <paramref name="stripPath"/> the file itself - the art set records the name, the measurement needs the
+        /// file.
+        /// </summary>
+        private static Sprite[] LoadAbilityFrames(string character, string dir, out string actionName, out string stripPath)
+        {
+            stripPath = CharacterActionResolver.FindAbilityStrip(dir, character, out actionName);
+
+            return stripPath == null ? new Sprite[0] : LoadStripFrames(character, stripPath);
+        }
+
+        /// <summary>Every sprite of one sliced strip, in frame order.</summary>
+        private static Sprite[] LoadStripFrames(string character, string strip)
+        {
             string stripName = Path.GetFileNameWithoutExtension(strip).Substring(character.Length + 1);
             string path = ToAssetPath(strip);
             string prefix = character + "_" + stripName + "_";

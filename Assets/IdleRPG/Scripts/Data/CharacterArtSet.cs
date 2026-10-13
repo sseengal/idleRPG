@@ -20,12 +20,26 @@ namespace IdleRPG.Data
         public Sprite[] Hurt;
         public Sprite[] Death;
 
+        /// <summary>
+        /// The character's named SPECIAL strip - Block / Heal / Beam / Spike / Summon - which backs its ability.
+        ///
+        /// Empty for a character whose ability is a spare attack instead (the Archer and the Lancer use Attack02).
+        /// The ability definition says which slot to play, so the art set never has to guess.
+        /// </summary>
+        public Sprite[] Ability;
+
         [Header("Playback")]
         [Range(1, 30)] public int IdleFps = 6;
         [Range(1, 30)] public int WalkFps = 8;
         [Range(1, 30)] public int AttackFps = 12;
         [Range(1, 30)] public int HurtFps = 10;
         [Range(1, 30)] public int DeathFps = 10;
+
+        /// <summary>
+        /// Playback rate of the special strip. Per clip, not one rate for the whole character: a 4-frame Block and a
+        /// 10-frame Summon cannot share a rate without one of them looking wrong (Ability-Plan, decision 8).
+        /// </summary>
+        [Range(1, 30)] public int AbilityFps = 10;
 
         [Header("Facing")]
         [Tooltip("Which direction the art was drawn facing. The views combine this with the hero/enemy rule:\nheroes face right, enemies face left - so this flag decides whether a sprite needs a mirror flip.")]
@@ -68,6 +82,42 @@ namespace IdleRPG.Data
         /// -1 (or out of range) = fall back to the last frame, which can never land the hit before the swing.
         /// </summary>
         public int StrikeFrame = -1;
+
+        /// <summary>
+        /// Which special strip the <see cref="Ability"/> frames came from - "Block", "Heal", "Beam", "Spike",
+        /// "Summon" - or empty when the character has none. Kept for the log, the validator and debugging.
+        /// </summary>
+        public string AbilityStrip = "";
+
+        /// <summary>
+        /// The ability's strike frame, measured from the pixels exactly like the attack's: the frame the special
+        /// reaches its most extended pose, which is where the effect lands. -1 = fall back to the last frame.
+        /// </summary>
+        public int AbilityStrikeFrame = -1;
+
+        /// <summary>True when this character owns a special strip, so an ability can play its own animation.</summary>
+        public bool HasAbility => Ability != null && Ability.Length > 0;
+
+        /// <summary>
+        /// How long the special strip takes up to and including its strike frame - the cast window an ability uses,
+        /// the same way <see cref="SwingSeconds"/> times an attack.
+        /// </summary>
+        public float AbilitySeconds
+        {
+            get
+            {
+                if (!HasAbility)
+                {
+                    return 0f;
+                }
+
+                int strike = AbilityStrikeFrame >= 0 && AbilityStrikeFrame < Ability.Length
+                    ? AbilityStrikeFrame
+                    : Ability.Length - 1;
+
+                return (strike + 1) / (float)Mathf.Max(1, AbilityFps);
+            }
+        }
 
         /// <summary>
         /// How long this character's swing takes before the blow lands: up to and including its strike frame, at
