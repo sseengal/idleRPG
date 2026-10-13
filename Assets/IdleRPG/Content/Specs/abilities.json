@@ -47,6 +47,21 @@
             "description": "Slams the front hero with a spike of rock."
         },
         {
+            "id": "enemy_volley",
+            "displayName": "Volley",
+            "description": "Looses an arrow at the front hero.",
+            "kind": "damage",
+            "artSlot": "Attack02",
+            "cooldownSec": 12.0,
+            "shieldFactor": 0.5,
+            "shieldSeconds": 4.0,
+            "healFraction": 0.25,
+            "damageMultiplier": 1.4,
+            "target": "fronthero",
+            "unlockStage": 0,
+            "tokenCost": 0.0
+        },
+        {
             "id": "fireball",
             "displayName": "Fireball",
             "kind": "damage",
@@ -77,8 +92,8 @@
             "description": "Raises a guard: the Knight takes half damage for a few seconds."
         },
         {
-            "id": "volley",
-            "displayName": "Volley",
+            "id": "soldier_charge",
+            "displayName": "Charge",
             "kind": "damage",
             "artSlot": "Attack02",
             "cooldownSec": 10.0,
@@ -89,7 +104,7 @@
             "target": "frontenemy",
             "unlockStage": 8,
             "tokenCost": 3.0,
-            "description": "Looses a heavy shot at the front enemy."
+            "description": "Drives a heavy blow into the front enemy."
         }
     ]
 }

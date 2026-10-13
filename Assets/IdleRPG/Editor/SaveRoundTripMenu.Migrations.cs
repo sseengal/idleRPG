@@ -105,7 +105,8 @@ namespace IdleRPG.EditorTools
                 migratedV4.GetLevel("hero_knight.attack") == 25 &&   // floor(ln(1+0.1x80)/ln(1.09))
                 migratedV4.GetLevel("hero_knight.health") == 25 &&
                 migratedV4.GetLevel("hero_knight.defense") == 52 &&  // floor(ln(1+0.15x80)/ln(1.05))
-                migratedV4.GetLevel("hero_archer.defense") == 52 &&
+                migratedV4.GetLevel("hero_soldier.defense") == 52 &&  // the Archer's levels now ride the Soldier (v8)
+                migratedV4.GetLevel("hero_archer.defense") == 0 &&    // ...and the old key is gone, not duplicated
                 migratedV4.GetLevel("hero_mage.attack") == 26 &&     // floor(ln(1+0.1x91)/ln(1.09))
                 migratedV4.GetLevel("Prestige_Health") == 0 &&       // global tracks untouched
                 migratedV4.currentStage == 24 &&

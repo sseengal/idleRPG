@@ -240,10 +240,12 @@ namespace IdleRPG.EditorTools
                 .Apply();
             heroes.Add(knight);
 
-            HeroData archer = CreateOrLoad<HeroData>(HeroFolder + "/Hero_Archer.asset");
-            new Editable(archer)
-                .Set("heroID", "hero_archer")
-                .Set("heroName", "Archer")
+            // The Archer left the party for the enemy roster (v8) and the Soldier took its place. Kept in step with
+            // heroes.json so this legacy generator can never resurrect a hero the game no longer ships.
+            HeroData soldier = CreateOrLoad<HeroData>(HeroFolder + "/Hero_Soldier.asset");
+            new Editable(soldier)
+                .Set("heroID", "hero_soldier")
+                .Set("heroName", "Soldier")
                 .Set("baseHealth", 110f)
                 .Set("baseAttack", 8f)
                 .Set("baseDefense", 4f)
@@ -252,7 +254,7 @@ namespace IdleRPG.EditorTools
                 .SetSpriteRef("heroIcon", LoadFrame(SoldierIdleSheet, "Soldier_Idle_3"))
                 .SetColor("placeholderTint", new Color(0.62f, 0.76f, 1f, 1f))
                 .Apply();
-            heroes.Add(archer);
+            heroes.Add(soldier);
 
             HeroData mage = CreateOrLoad<HeroData>(HeroFolder + "/Hero_Mage.asset");
             new Editable(mage)

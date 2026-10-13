@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 016f0dc48a49d449092feed3a15a4d24
+guid: 7dbeae60266f240aa8145e0ae4e29e70
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 9060643420719219057
-    second: boss_soldier_captain_0
+      213: 4962345167500387995
+    second: enemy_archer_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -141,7 +141,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: boss_soldier_captain_0
+      name: enemy_archer_0
       rect:
         serializedVersion: 2
         x: 0
@@ -156,8 +156,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 17103709f2fddbd70800000000000000
-      internalID: 9060643420719219057
+      spriteID: b96acb163aacdd440800000000000000
+      internalID: 4962345167500387995
       vertices: []
       indices: 
       edges: []

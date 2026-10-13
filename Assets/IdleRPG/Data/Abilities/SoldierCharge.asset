@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 35bf50eb489af4ef4ae94d01e9b01a39, type: 3}
-  m_Name: Volley
+  m_Name: SoldierCharge
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.AbilityDef
-  displayName: Volley
-  abilityID: volley
-  description: Looses a heavy shot at the front enemy.
+  displayName: Charge
+  abilityID: soldier_charge
+  description: Drives a heavy blow into the front enemy.
   kind: 2
   target: 3
   artSlot: Attack02

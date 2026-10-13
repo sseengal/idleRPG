@@ -19,13 +19,15 @@ Three play at a time; the other three are art-ready reserves. **No Necromancer �
 | Hero | Base attack | Special action in the pack | Ability (proposal) |
 |---|---|---|---|
 | **Knight** | Attack01:7 | `Block:4` | Shield Wall — reduces incoming damage |
-| **Archer** | Attack01:9 | Attack02:12, Attack03 — *none* | Volley — a heavier shot |
+| **Soldier** | Attack01:6 | Attack02:6, Attack03:9 | Charge — a heavier blow |
 | **Wizard** | Attack01:6 (+`Attack01_Effect`) | `Attack02_Effect`, `Attack01_Effect` | Fireball — ranged spell with its own VFX strip |
 | **Priest** *(reserve)* | `Attack:9` | **`Heal:6`** (+`Heal_effect`) | **Heal** — restores a party member. Your idea, and the art exists |
 | **Knight Templar** *(reserve)* | Attack01:7 | `Block:4` | Bulwark — party-wide defence |
 | **Lancer** *(reserve)* | Attack01:6 | Attack02:9, Attack03:8 | Impale — a piercing strike |
 
-**Archer is the one gap:** it has two attacks and no special action. Its second attack becomes its ability.
+**The Archer traded places with the Soldier (v8):** the Archer is now an enemy (it wears `enemy_volley` on the enemy
+side) and the Soldier is in the party. Every sheet then has exactly one role, so no hero is a recolour of a wave enemy.
+The two enemies that wore the Soldier sheet became the Archer and its boss, with the same stage windows.
 
 ---
 
@@ -57,7 +59,7 @@ already own levels, costs and the purchase path. A new ability is a row in the t
 
 | Unlock | Rule |
 |---|---|
-| Knight, Archer, Wizard | playable from the start |
+| Knight, Soldier, Wizard | playable from the start |
 | Priest | unlocked at a stage milestone |
 | Knight Templar, Lancer | unlocked at later stage milestones |
 | Each hero's ability | bought as a track row, per hero |

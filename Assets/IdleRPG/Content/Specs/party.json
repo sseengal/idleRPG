@@ -2,7 +2,7 @@
     "version": 1,
     "heroIds": [
         "hero_knight",
-        "hero_archer",
+        "hero_soldier",
         "hero_mage"
     ]
 }

@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 342a2a4185f454a48b8d18d2ece4e6df, type: 3}
-  m_Name: Hero_Archer
+  m_Name: Hero_Soldier
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.HeroData
-  heroID: hero_archer
-  heroName: Archer
-  heroIcon: {fileID: 21300000, guid: e6ade3addd7674bafba2a131098a9250, type: 3}
+  heroID: hero_soldier
+  heroName: Soldier
+  heroIcon: {fileID: 0}
   baseHealth: 110
   baseAttack: 8
   baseDefense: 4
@@ -23,5 +23,5 @@ MonoBehaviour:
   baseCritDamage: 2
   role: 1
   placeholderTint: {r: 0.34901962, g: 0.8509804, b: 0.4509804, a: 1}
-  artSet: {fileID: 11400000, guid: 825fb0e2c51c641e48a3e0ee7318f958, type: 2}
-  ability: {fileID: 11400000, guid: d2bb9ed32f311424baf21a290a46551b, type: 2}
+  artSet: {fileID: 11400000, guid: fb0452c54a0e649af8eb7f52aedd3ea0, type: 2}
+  ability: {fileID: 11400000, guid: dea6f62bcb2eb493098738c87013ff6f, type: 2}

@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ec2cfe7cf2cb64fa9b4fa3c722078478, type: 3}
-  m_Name: Enemy_Soldier
+  m_Name: Enemy_Archer
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.EnemyData
-  enemyName: Soldier
-  enemyID: enemy_soldier
+  enemyName: Archer
+  enemyID: enemy_archer
   enemySprite: {fileID: 0}
   baseHealth: 105
   baseAttack: 12.960001
@@ -26,8 +26,8 @@ MonoBehaviour:
   bossGoldMultiplier: 1
   bossSizeScale: 1.6
   placeholderTint: {r: 0.6039216, g: 0.64705884, b: 0.69411767, a: 1}
-  artSet: {fileID: 11400000, guid: fb0452c54a0e649af8eb7f52aedd3ea0, type: 2}
+  artSet: {fileID: 11400000, guid: 825fb0e2c51c641e48a3e0ee7318f958, type: 2}
   stageAlternates: []
-  ability: {fileID: 0}
+  ability: {fileID: 11400000, guid: 08334e726bc1b41499917c987aa4a70a, type: 2}
   firstStage: 51
   lastStage: 60

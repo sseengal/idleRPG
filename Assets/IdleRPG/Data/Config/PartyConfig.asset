@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.PartyConfig
   heroes:
   - {fileID: 11400000, guid: 4804f729c78d34612ab8bd9fbbf7aa01, type: 2}
-  - {fileID: 11400000, guid: 4665db637017847bdbc80c09a58f5d25, type: 2}
+  - {fileID: 11400000, guid: 41b81ab21c8ec4757b7fc2976023b231, type: 2}
   - {fileID: 11400000, guid: d5e31c666ce9a4c76813ff2d11625afd, type: 2}

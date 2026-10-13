@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35bf50eb489af4ef4ae94d01e9b01a39, type: 3}
+  m_Name: EnemyVolley
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.AbilityDef
+  displayName: Volley
+  abilityID: enemy_volley
+  description: Looses an arrow at the front hero.
+  kind: 2
+  target: 4
+  artSlot: Attack02
+  cooldownSec: 12
+  shieldFactor: 0.5
+  shieldSeconds: 4
+  healFraction: 0.25
+  damageMultiplier: 1.4
+  unlockStage: 0
+  tokenCost: 0

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,8 +10,25 @@ namespace IdleRPG.Save
     /// </summary>
     public static class SaveMigrations
     {
+        /// <summary>
+        /// The key renames the LAST migration performed ("hero_archer.attack" -&gt; "hero_soldier.attack"). Recorded
+        /// so the save check can tell a rename apart from a thrown-away value: a rename rewrites a line, and that
+        /// check's additive-only rule would otherwise read the rewrite as data loss.
+        /// </summary>
+        public static readonly List<KeyValuePair<string, string>> LastRenames = new List<KeyValuePair<string, string>>();
+
+        private static void RecordRename(string from, string to)
+        {
+            if (!string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(to) && from != to)
+            {
+                LastRenames.Add(new KeyValuePair<string, string>(from, to));
+            }
+        }
+
         public static SaveData Migrate(SaveData data)
         {
+            LastRenames.Clear();
+
             if (data == null)
             {
                 return SaveData.CreateDefault();
@@ -156,8 +174,103 @@ namespace IdleRPG.Save
                 Debug.Log("[SaveMigrations] Migrated save v6 -> v7 (abilities; empty = nothing assigned).");
             }
 
+            if (version < 8)
+            {
+                // v7 -> v8: the Archer left the party and the Soldier took its place - the Archer became an enemy
+                // instead, so that a hero and an enemy never share one sprite sheet. A hero id is written into the
+                // keyed stat levels and into the ability assignments, so the progress has to travel with it;
+                // otherwise the party would come back with a level-0 hero while its levels sat under a name the game
+                // no longer ships. The two enemies that wore the Soldier art (enemy_soldier, boss_soldier_captain)
+                // were renamed too, but enemies are pure content, so no save references them.
+                RenameLevelPrefix(data, "hero_archer.", "hero_soldier.");
+                RenameLevelPrefix(data, SaveData.SaveKeys.AbilityUnlock("volley"), SaveData.SaveKeys.AbilityUnlock("soldier_charge"));
+                RenameHeroId(data, "hero_archer", "hero_soldier");
+                RenameAbilityId(data, "volley", "soldier_charge");
+
+                Debug.Log("[SaveMigrations] Migrated save v7 -> v8 (Archer became the Soldier; progress carried across).");
+            }
+
             data.schemaVersion = SaveData.CurrentVersion;
             return data;
+        }
+
+        /// <summary>
+        /// Renames every keyed level under a prefix ("hero_archer." -> "hero_soldier."). The keyed list is how the
+        /// game stores "how far along" anything is, so a renamed hero has to bring its levels with it.
+        /// </summary>
+        private static void RenameLevelPrefix(SaveData data, string oldPrefix, string newPrefix)
+        {
+            if (data.levels == null || string.IsNullOrEmpty(oldPrefix))
+            {
+                return;
+            }
+
+            for (int i = 0; i < data.levels.Count; i++)
+            {
+                LevelRecord record = data.levels[i];
+                if (record == null || string.IsNullOrEmpty(record.key))
+                {
+                    continue;
+                }
+
+                if (record.key.StartsWith(oldPrefix, StringComparison.Ordinal))
+                {
+                    string renamed = newPrefix + record.key.Substring(oldPrefix.Length);
+                    RecordRename(record.key, renamed);
+                    record.key = renamed;
+                }
+            }
+        }
+
+        /// <summary>Renames a hero id wherever a save writes one: the legacy hero list and the ability assignments.</summary>
+        private static void RenameHeroId(SaveData data, string oldId, string newId)
+        {
+            RecordRename(oldId, newId);
+
+            if (data.heroes != null)
+            {
+                for (int i = 0; i < data.heroes.Count; i++)
+                {
+                    if (data.heroes[i] != null && data.heroes[i].heroID == oldId)
+                    {
+                        data.heroes[i].heroID = newId;
+                    }
+                }
+            }
+
+            if (data.abilityAssignments != null)
+            {
+                for (int i = 0; i < data.abilityAssignments.Count; i++)
+                {
+                    if (data.abilityAssignments[i] != null && data.abilityAssignments[i].heroID == oldId)
+                    {
+                        data.abilityAssignments[i].heroID = newId;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Renames an ability id inside the assignments. The unlock keys are keyed levels, so
+        /// <see cref="RenameLevelPrefix"/> handles those.
+        /// </summary>
+        private static void RenameAbilityId(SaveData data, string oldId, string newId)
+        {
+            RecordRename(oldId, newId);
+
+            if (data.abilityAssignments == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < data.abilityAssignments.Count; i++)
+            {
+                AbilityAssignmentRecord record = data.abilityAssignments[i];
+                if (record != null && record.abilityID == oldId)
+                {
+                    record.abilityID = newId;
+                }
+            }
         }
 
         /// <summary>

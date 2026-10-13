@@ -23,11 +23,25 @@ Heroes (3 playable now, 3 art-ready reserves unlocked later):
 | Hero | Ability | Strip | Effect (v1) | Status |
 |---|---|---|---|---|
 | Knight | Shield Wall | `Block:4` | self shield: damage taken x0.5 for N s | **v1** |
-| Archer | Volley | `Attack02:12` (its spare attack) | heavy shot: front enemy takes a bigger hit | **v1** |
+| Soldier | Charge | `Attack02:6` (its spare attack) | heavy blow on the front enemy | **v1** |
 | Wizard | Fireball | `Attack02:9` (VFX overlay deferred) | ranged hit on the front enemy | **v1** |
 | Priest | Heal | `Heal:6` | restore HP to the lowest-health ally | v1 effect, gated by hero unlock |
 | Knight Templar | Bulwark | `Block:4` | party shield (the Shield buff applied to all allies) | v1 effect, gated by hero unlock |
 | Lancer | Impale | `Attack02:9` | piercing hit on the front enemy | v1 effect, gated by hero unlock |
+
+**Roster swap (v8).** The Archer left the party and became an enemy; the Soldier took its place and wears `enemy_volley`
+from the enemy side. The reason is the art: the Soldier's sheet was already on two enemies, and a hero that looks
+exactly like a common wave enemy is unreadable in a battle made of stacked sprites. Swapping the two roles gives every
+sheet exactly ONE job. The hero ids moved with it (`hero_archer` -> `hero_soldier`), so a save's keyed stat levels are
+renamed on load rather than stranded.
+
+**One ability active at a time, per hero.** A hero may own several clips (see below) but only one is switched on. That
+is what keeps the choice meaningful, and it is why the save holds one ability id per hero rather than a set.
+
+**Every clip beyond the base attack is ability material.** The pack gives some characters more than one spare action,
+and the `(With magic effects)` variants are the same wind-up with the spell already drawn, which is the only way to get
+visible magic today (there is no VFX overlay system). Counting those, the Knight owns 3 clips (Attack02, Attack03,
+Block), the Soldier 2, the Wizard 3 (Attack02 plus both composited casts). Landing them is a later step.
 
 Enemies (auto-cast, same vocabulary):
 

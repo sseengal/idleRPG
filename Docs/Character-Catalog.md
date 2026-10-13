@@ -22,7 +22,7 @@ shadow variants were deliberately skipped (they bake a fake drop shadow; the sce
 
 | Character | Role | Actions (name : frames) |
 |---|---|---|
-| Archer | HERO | Attack01:9 Attack02:12 Death:4 Hurt:4 Idle:6 Walk:8 |
+| Archer | NORMAL | Attack01:9 Attack02:12 Death:4 Hurt:4 Idle:6 Walk:8 |
 | Knight | HERO | Attack01:7 Attack02:10 Attack03:11 **Block:4** Death:4 Hurt:4 Idle:6 Walk:8 |
 | Wizard | HERO | Attack01:6 **Attack01_Effect:10** Attack01(With magic effects):15 Attack02:9 **Attack02_Effect:7** Attack02(With magic effects):14 Death:4 Hurt:4 Idle:6 Walk:8 |
 | Priest | HERO | Attack:9 **Attack_effect:5** Attack(With magic effects):9 **Heal:6** **Heal_effect:4** Heal(With magic effects):6 Death:4 Hurt:4 Idle:6 Walk:8 |
@@ -40,7 +40,7 @@ shadow variants were deliberately skipped (they bake a fake drop shadow; the sce
 | Elite Orc | BOSS | Attack01:7 Attack02:11 Attack03:9 Death:4 Hurt:4 Idle:6 Walk:8 |
 | Orc rider | BOSS | Attack01:8 Attack02:9 Attack03:11 **Block:4** Death:4 Hurt:4 Idle:6 Walk:8 |
 | Armored Axeman | NORMAL | Attack01:9 Attack02:9 Attack03:12 Death:4 Hurt:4 Idle:6 Walk:8 |
-| Soldier | NORMAL | Attack01:6 Attack02:6 Attack03:9 Death:4 Hurt:4 Idle:6 Walk:8 |
+| Soldier | HERO | Attack01:6 Attack02:6 Attack03:9 Death:4 Hurt:4 Idle:6 Walk:8 |
 | Swordsman | NORMAL | Attack01:7 Attack02:15 **Attack3:12** Death:4 **Hurt:5** Idle:6 Walk:8 |
 | Necromancer | BOSS | Attack01:9 Attack02:10 **Attack02_Effect:6** Attack02(With magic effects):10 **DEATH:9** Hurt:4 Idle:6 **Summon:10** **Sumon_Effect:7** Summon(With magic effects):13 Walk:6 |
 | Skeleton Archer | SUMMON | **Attack:9** Death:4 Hurt:4 Idle:6 **Summon:5** Walk:8 |

@@ -29,7 +29,7 @@ namespace IdleRPG.Save
     public class SaveData
     {
         /// <summary>Bumped whenever the schema changes; drives migration (see SaveMigrations).</summary>
-        public const int CurrentVersion = 7;
+        public const int CurrentVersion = 8;
 
         public int schemaVersion = CurrentVersion;
 

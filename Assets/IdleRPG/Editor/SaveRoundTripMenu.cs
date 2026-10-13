@@ -179,6 +179,12 @@ namespace IdleRPG.EditorTools
 
             // Upgrade the file the way a load does, then prove the upgraded payload is stable.
             SaveData migrated = SaveMigrations.Migrate(parsed);
+
+            // What that upgrade RENAMED (hero_archer.* -> hero_soldier.*). A rename rewrites a line rather than
+            // dropping it, so the additive-only check has to be told, or it reads the rewrite as lost data.
+            List<KeyValuePair<string, string>> renames =
+                new List<KeyValuePair<string, string>>(SaveMigrations.LastRenames);
+
             string first = JsonUtility.ToJson(migrated, true);
             string second = JsonUtility.ToJson(JsonUtility.FromJson<SaveData>(first), true);
 
@@ -188,19 +194,20 @@ namespace IdleRPG.EditorTools
                 return false;
             }
 
-            // Additive-only: every field that existed on disk must still be there after the upgrade.
-            int lost = CountMissingLines(onDisk, second);
+            // Additive-only: every field that existed on disk must still be there after the upgrade, unless the
+            // upgrade deliberately renamed it - a renamed field must still carry its value under the new name.
+            int lost = CountMissingLines(onDisk, second, renames);
 
             if (lost > 0)
             {
                 Debug.LogError($"[SaveRoundTrip] The upgrade dropped {lost} line(s) that existed on disk:\n" +
-                               $"{DescribeMissingLines(onDisk, second)}");
+                               $"{DescribeMissingLines(onDisk, second, renames)}");
                 return false;
             }
 
             Debug.Log($"[SaveRoundTrip] file {Path.GetFileName(system.SavePath)}: v{fileVersion} -> v{migrated.schemaVersion}, " +
                       $"stable, additive-only ({onDisk.Length} -> {first.Length} chars, " +
-                      $"{migrated.partySlots?.Count ?? 0} slot(s), {lost} line(s) lost).");
+                      $"{migrated.partySlots?.Count ?? 0} slot(s), {lost} line(s) lost, {renames.Count} rename(s) checked).");
             return true;
         }
 
@@ -208,7 +215,7 @@ namespace IdleRPG.EditorTools
         /// Counts non-empty lines of <paramref name="older"/> that do not appear in <paramref name="newer"/>.
         /// The version line is skipped on purpose: bumping the version is the migration *succeeding*.
         /// </summary>
-        private static int CountMissingLines(string older, string newer)
+        private static int CountMissingLines(string older, string newer, List<KeyValuePair<string, string>> renames = null)
         {
             int missing = 0;
 
@@ -217,7 +224,7 @@ namespace IdleRPG.EditorTools
                 string trimmed = line.Trim();
 
                 if (trimmed.Length > 0 && !IsVersionLine(trimmed) && !IsRetiredLine(trimmed) &&
-                    !LinesMatch(trimmed, newer))
+                    !LinesMatch(trimmed, newer, renames))
                 {
                     missing++;
                 }
@@ -231,9 +238,14 @@ namespace IdleRPG.EditorTools
         /// numerically equal value. Double values re-serialise with slightly different digits (217311.77801439282 ->
         /// 217311.7780143928), which is formatting, not data loss - byte comparison would be a false positive.
         /// </summary>
-        private static bool LinesMatch(string oldTrimmed, string newer)
+        private static bool LinesMatch(string oldTrimmed, string newer, List<KeyValuePair<string, string>> renames = null)
         {
             if (newer.Contains(oldTrimmed))
+            {
+                return true;
+            }
+
+            if (renames != null && MatchesUnderNewKey(oldTrimmed, newer, renames))
             {
                 return true;
             }
@@ -249,6 +261,34 @@ namespace IdleRPG.EditorTools
                 if (TryParseNumberedField(trimmed, out string otherKey, out double newValue) &&
                     otherKey == key &&
                     System.Math.Abs(oldValue - newValue) <= 1e-6 * System.Math.Max(1d, System.Math.Abs(oldValue)))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Accepts a line whose KEY the upgrade renamed ("hero_archer.attack" -&gt; "hero_soldier.attack"): the same
+        /// line rewritten with the new key must then be present, carrying the same value. Strict on purpose - if the
+        /// value did not arrive under the new name, the line still counts as lost, so a rename can never quietly
+        /// swallow data.
+        /// </summary>
+        private static bool MatchesUnderNewKey(string oldTrimmed, string newer, List<KeyValuePair<string, string>> renames)
+        {
+            for (int i = 0; i < renames.Count; i++)
+            {
+                string from = renames[i].Key;
+                if (string.IsNullOrEmpty(from) || !oldTrimmed.Contains(from))
+                {
+                    continue;
+                }
+
+                string rewritten = oldTrimmed.Replace(from, renames[i].Value);
+
+                // null renames: run only the verbatim and numeric rules, so a rename cannot match itself forever.
+                if (LinesMatch(rewritten, newer, null))
                 {
                     return true;
                 }
@@ -293,7 +333,7 @@ namespace IdleRPG.EditorTools
             return true;
         }
 
-        private static string DescribeMissingLines(string older, string newer)
+        private static string DescribeMissingLines(string older, string newer, List<KeyValuePair<string, string>> renames = null)
         {
             System.Text.StringBuilder builder = new System.Text.StringBuilder();
 
@@ -302,7 +342,7 @@ namespace IdleRPG.EditorTools
                 string trimmed = line.Trim();
 
                 if (trimmed.Length > 0 && !IsVersionLine(trimmed) && !IsRetiredLine(trimmed) &&
-                    !LinesMatch(trimmed, newer))
+                    !LinesMatch(trimmed, newer, renames))
                 {
                     builder.AppendLine("    lost: " + trimmed);
                 }
