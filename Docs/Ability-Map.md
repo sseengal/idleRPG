@@ -1,5 +1,8 @@
 # Ability Map — the special animations, and what they become
 
+> The build plan (decisions, data, sim, UI, unlock, order) now lives in **`Ability-Plan.md`**. This file stays the
+> strip-to-ability reference.
+
 The packs ship **named special actions**, not just attacks. That means abilities can be **animation-backed from day
 one** instead of reusing attack frames. This document maps each special action to the ability it backs, its owner, and
 how it is unlocked.
