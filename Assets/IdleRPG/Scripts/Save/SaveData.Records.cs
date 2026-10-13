@@ -77,6 +77,26 @@ namespace IdleRPG.Save
             this.level = level;
         }
     }
+    /// <summary>
+    /// Which ability one hero has assigned (schema v7). Held as IDs, not table indices: reordering the ability
+    /// table can then never silently remap a player's choice onto a different ability.
+    /// </summary>
+    [Serializable]
+    public class AbilityAssignmentRecord
+    {
+        public string heroID = "";
+        public string abilityID = "";
+
+        public AbilityAssignmentRecord()
+        {
+        }
+
+        public AbilityAssignmentRecord(string heroID, string abilityID)
+        {
+            this.heroID = heroID;
+            this.abilityID = abilityID;
+        }
+    }
     [Serializable]
     public class AutomationSetting
     {

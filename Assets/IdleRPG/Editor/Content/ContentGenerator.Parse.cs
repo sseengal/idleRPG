@@ -31,6 +31,71 @@ namespace IdleRPG.EditorTools.Content
             }
         }
 
+        /// <summary>"shield" | "heal" | "damage" | anything else = damage.</summary>
+        private static AbilityKind ParseAbilityKind(string value)
+        {
+            switch ((value ?? "").Trim().ToLowerInvariant())
+            {
+                case "shield":
+                    return AbilityKind.Shield;
+                case "heal":
+                    return AbilityKind.Heal;
+                default:
+                    return AbilityKind.Damage;
+            }
+        }
+
+        /// <summary>Spec spelling for a kind, so the exporter writes back what the parser reads.</summary>
+        private static string AbilityKindName(AbilityKind kind)
+        {
+            switch (kind)
+            {
+                case AbilityKind.Shield:
+                    return "shield";
+                case AbilityKind.Heal:
+                    return "heal";
+                default:
+                    return "damage";
+            }
+        }
+
+        /// <summary>"self" | "party" | "lowestally" | "frontenemy" | "fronthero" | anything else = frontenemy.</summary>
+        private static AbilityTarget ParseAbilityTarget(string value)
+        {
+            switch ((value ?? "").Trim().ToLowerInvariant())
+            {
+                case "self":
+                    return AbilityTarget.Self;
+                case "party":
+                    return AbilityTarget.Party;
+                case "lowestally":
+                case "lowesthealthally":
+                    return AbilityTarget.LowestAlly;
+                case "fronthero":
+                    return AbilityTarget.FrontHero;
+                default:
+                    return AbilityTarget.FrontEnemy;
+            }
+        }
+
+        /// <summary>Spec spelling for a target, so the exporter writes back what the parser reads.</summary>
+        private static string AbilityTargetName(AbilityTarget target)
+        {
+            switch (target)
+            {
+                case AbilityTarget.Self:
+                    return "self";
+                case AbilityTarget.Party:
+                    return "party";
+                case AbilityTarget.LowestAlly:
+                    return "lowestally";
+                case AbilityTarget.FrontHero:
+                    return "fronthero";
+                default:
+                    return "frontenemy";
+            }
+        }
+
         private static HeroStatType ParseStatType(string value)
         {
             switch ((value ?? "").Trim().ToLowerInvariant())

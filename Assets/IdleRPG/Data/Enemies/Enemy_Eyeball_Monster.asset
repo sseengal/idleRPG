@@ -28,5 +28,6 @@ MonoBehaviour:
   placeholderTint: {r: 0.47843137, g: 0.37254903, b: 0.7490196, a: 1}
   artSet: {fileID: 11400000, guid: 744027728098d4b168004178c5ff2d33, type: 2}
   stageAlternates: []
+  ability: {fileID: 11400000, guid: 841af794ae9fa4e3b98e8096d4758968, type: 2}
   firstStage: 61
   lastStage: 70

@@ -143,6 +143,19 @@ namespace IdleRPG.Save
                 Debug.Log("[SaveMigrations] Migrated save v5 -> v6 (equipment; empty = no gear).");
             }
 
+            if (version < 7)
+            {
+                // v6 -> v7: hero abilities added. No conversion: the assignment list is additive and JsonUtility
+                // defaults it to empty, so an older save simply has nothing assigned (no ability in battle), and the
+                // unlock state lives in the existing keyed level list, which old saves already carry.
+                if (data.abilityAssignments == null)
+                {
+                    data.abilityAssignments = new List<AbilityAssignmentRecord>();
+                }
+
+                Debug.Log("[SaveMigrations] Migrated save v6 -> v7 (abilities; empty = nothing assigned).");
+            }
+
             data.schemaVersion = SaveData.CurrentVersion;
             return data;
         }

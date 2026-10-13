@@ -17,6 +17,7 @@ namespace IdleRPG.EditorTools.Content
 
         public const string HeroesPath = SpecRoot + "/heroes.json";
         public const string EnemiesPath = SpecRoot + "/enemies.json";
+        public const string AbilitiesPath = SpecRoot + "/abilities.json";
         public const string PartyPath = SpecRoot + "/party.json";
         public const string WavesPath = SpecRoot + "/waves.json";
         public const string TracksPath = SpecRoot + "/tracks.json";
@@ -24,6 +25,7 @@ namespace IdleRPG.EditorTools.Content
         public const string DataRoot = "Assets/IdleRPG/Data";
         public const string HeroFolder = DataRoot + "/Heroes";
         public const string EnemyFolder = DataRoot + "/Enemies";
+        public const string AbilityFolder = DataRoot + "/Abilities";
         public const string ConfigFolder = DataRoot + "/Config";
 
         /// <summary>Loads a spec file, or returns a fresh default when it is missing/unreadable.</summary>

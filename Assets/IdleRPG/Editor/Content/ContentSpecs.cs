@@ -34,6 +34,11 @@ namespace IdleRPG.EditorTools.Content
         public float baseAttack = 10f;
         public float baseDefense = 5f;
         public float attackIntervalSec = 1.5f;
+        /// <summary>
+        /// Ability id from abilities.json ("shield_wall"). Empty = no ability. A hero's ability is only usable once
+        /// the player has unlocked it (token purchase gated behind a stage), so this is what it CAN have.
+        /// </summary>
+        public string ability = "";
         /// <summary>Placeholder tint as "#RRGGBBAA".</summary>
         public string tint = "#FFFFFFFF";
     }
@@ -132,8 +137,67 @@ namespace IdleRPG.EditorTools.Content
         public float bossSizeScale = 1.6f;
 
         public string tint = "#FFFFFFFF";
+        /// <summary>
+        /// Ability id from abilities.json ("enemy_block"). Empty = no ability. Enemies are NOT gated by unlock stage or
+        /// tokens - they simply cast it on its own cooldown (Ability-Plan decision 5).
+        /// </summary>
+        public string ability = "";
         /// <summary>"inherit" | "frontmost" | "lowesthealthpercent" | "random" | "backlinefirst".</summary>
         public string targetRule = "inherit";
+    }
+
+    [Serializable]
+    public class AbilitySpecFile
+    {
+        public int version = 1;
+        public List<AbilitySpec> abilities = new List<AbilitySpec>();
+    }
+
+    /// <summary>
+    /// One ability: what it does, which art slot plays it, how often it may fire, and what it costs to unlock.
+    /// Authored in abilities.json. Heroes and enemies point at an id with their own "ability" field, so the same
+    /// definition (e.g. the enemies' Block) is shared by everyone who uses it.
+    /// </summary>
+    [Serializable]
+    public class AbilitySpec
+    {
+        public string id = "";
+        public string displayName = "";
+
+        /// <summary>"shield" | "heal" | "damage".</summary>
+        public string kind = "damage";
+
+        /// <summary>
+        /// Which art slot plays it: "Ability" (the character's own special strip) or a numbered attack strip such as
+        /// "Attack02". A character that has no such strip simply does not play one.
+        /// </summary>
+        public string artSlot = "Ability";
+
+        /// <summary>Seconds between casts. The cast itself is instant; this is the clock that refills it.</summary>
+        public float cooldownSec = 12f;
+
+        /// <summary>Shield: damage taken is multiplied by this while active (0.5 = half damage).</summary>
+        public float shieldFactor = 0.5f;
+
+        /// <summary>Shield: how long the shield lasts.</summary>
+        public float shieldSeconds = 4f;
+
+        /// <summary>Heal: fraction of the target's maximum health restored.</summary>
+        public float healFraction = 0.25f;
+
+        /// <summary>Damage: multiplier applied to the caster's attack.</summary>
+        public float damageMultiplier = 1.8f;
+
+        /// <summary>Who the effect lands on: "self" | "party" | "lowestally" | "frontenemy" | "fronthero".</summary>
+        public string target = "frontenemy";
+
+        /// <summary>Stage the player must have reached before it can be bought. 0 = no gate.</summary>
+        public int unlockStage = 0;
+
+        /// <summary>Prestige tokens it costs. 0 = free (the starting ability, so the feature is usable at once).</summary>
+        public double tokenCost = 0d;
+
+        public string description = "";
     }
 
     [Serializable]

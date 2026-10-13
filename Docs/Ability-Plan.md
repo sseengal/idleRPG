@@ -71,7 +71,7 @@ Enemies (auto-cast, same vocabulary):
 | Step | What | Acceptance |
 |---|---|---|
 | **S1** | Import the ability strips into the art sets (new slots + per-clip fps + a measured strike frame). | **DONE 2026-10-13** — 15 of the 42 characters carry a special (`Block`/`Heal`/`Beam`/`Spike`/`Summon`) with its own fps and strike frame; the art validator reports "42 sets checked, 15 with a special strip, PASS". Playback arrives with S3. |
-| **S2** | `AbilityDef` + `abilities.json` spec + generator; unlock (token cost + stage gate) riding the keyed level list; the Party-tab assign row. | Assign an unlocked ability to a hero; it survives save/reload. |
+| **S2** | `AbilityDef` + `abilities.json` spec + generator; unlock (token cost + stage gate) riding the keyed level list; the Party-tab assign row. | Assign an unlocked ability to a hero; it survives save/reload. Split in three: **S2a** data spine (done), **S2b** unlock + assignment service, **S2c** Party-tab row. **The assignment needed one additive save field and so moved the schema to v7** (the unlock itself still needs none). |
 | **S3** | The sim effect layer + **Knight's Shield Wall end-to-end**: battle tab, tap-to-cast, cooldown clock, log line, the shield actually reduces damage. | Tap -> Knight plays Block -> incoming damage is halved for N s, all visible and logged. |
 | **S4** | Heal, Volley, Fireball, Impale, Bulwark; enemy Block/Beam/Spike auto-cast. | Every v1 ability has a working effect, its own animation and cooldown, and is logged. |
 | **S5** | The three reserve heroes (Priest, Knight Templar, Lancer) and their abilities behind stage-milestone unlocks. | Unlock a reserve hero mid-run and assign/use its ability. |

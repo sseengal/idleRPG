@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35bf50eb489af4ef4ae94d01e9b01a39, type: 3}
+  m_Name: EnemyBlock
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.AbilityDef
+  displayName: Block
+  abilityID: enemy_block
+  description: 'Braces behind its guard: damage taken is halved for a few seconds.'
+  kind: 0
+  target: 0
+  artSlot: Ability
+  cooldownSec: 15
+  shieldFactor: 0.5
+  shieldSeconds: 3
+  healFraction: 0.25
+  damageMultiplier: 1.8
+  unlockStage: 0
+  tokenCost: 0

@@ -15,7 +15,7 @@ namespace IdleRPG.EditorTools.Content
         // ------------------------------------------------------------------
         // Apply (specs -> assets)
         // ------------------------------------------------------------------
-        private static Dictionary<string, HeroData> ApplyHeroes(HeroSpecFile file)
+        private static Dictionary<string, HeroData> ApplyHeroes(HeroSpecFile file, Dictionary<string, AbilityDef> abilityById)
         {
             Dictionary<string, HeroData> byId = new Dictionary<string, HeroData>();
 
@@ -35,6 +35,7 @@ namespace IdleRPG.EditorTools.Content
                     .SetColor("placeholderTint", ContentSpecIO.FromHex(spec.tint, Color.white))
                     .SetSprite("heroIcon", spec.icon)
                     .SetAsset("artSet", ResolveArtSet(spec.art))
+                    .SetAsset("ability", ResolveAbility(spec.ability, abilityById))
                     .Apply();
 
                 byId[spec.id] = hero;
@@ -43,7 +44,64 @@ namespace IdleRPG.EditorTools.Content
             return byId;
         }
 
-        private static Dictionary<string, EnemyData> ApplyEnemies(EnemySpecFile file)
+        /// <summary>
+        /// Writes the ability assets from the spec. The spec OWNS these numbers (like the enemy band table): edit
+        /// abilities.json, regenerate, and every hero and enemy that names the ability follows.
+        /// </summary>
+        private static Dictionary<string, AbilityDef> ApplyAbilities(AbilitySpecFile file)
+        {
+            Dictionary<string, AbilityDef> byId = new Dictionary<string, AbilityDef>();
+
+            for (int i = 0; i < file.abilities.Count; i++)
+            {
+                AbilitySpec spec = file.abilities[i];
+                string assetName = DeriveAssetName(spec.id);
+                AbilityDef ability = ContentSpecIO.CreateOrLoad<AbilityDef>(ContentSpecIO.AbilityFolder + "/" + assetName + ".asset");
+
+                new Editable(ability)
+                    .Set("abilityID", spec.id)
+                    .Set("displayName", spec.displayName)
+                    .Set("description", spec.description)
+                    .Set("kind", (int)ParseAbilityKind(spec.kind))
+                    .Set("target", (int)ParseAbilityTarget(spec.target))
+                    .Set("artSlot", spec.artSlot)
+                    .Set("cooldownSec", spec.cooldownSec)
+                    .Set("shieldFactor", spec.shieldFactor)
+                    .Set("shieldSeconds", spec.shieldSeconds)
+                    .Set("healFraction", spec.healFraction)
+                    .Set("damageMultiplier", spec.damageMultiplier)
+                    .Set("unlockStage", spec.unlockStage)
+                    .Set("tokenCost", spec.tokenCost)
+                    .Apply();
+
+                byId[spec.id] = ability;
+            }
+
+            return byId;
+        }
+
+        /// <summary>
+        /// Looks up the ability a hero or enemy names. An empty id means "none" (null, not an error); an id that names
+        /// nothing is a spec typo, so it is reported - the asset would otherwise be silently ability-less.
+        /// </summary>
+        private static AbilityDef ResolveAbility(string id, Dictionary<string, AbilityDef> abilityById)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return null;
+            }
+
+            AbilityDef ability;
+            if (abilityById != null && abilityById.TryGetValue(id, out ability))
+            {
+                return ability;
+            }
+
+            Debug.LogWarning($"[ContentGenerator] Ability \"{id}\" is named by a hero/enemy but missing from abilities.json.");
+            return null;
+        }
+
+        private static Dictionary<string, EnemyData> ApplyEnemies(EnemySpecFile file, Dictionary<string, AbilityDef> abilityById)
         {
             Dictionary<string, EnemyData> byId = new Dictionary<string, EnemyData>();
 
@@ -71,6 +129,7 @@ namespace IdleRPG.EditorTools.Content
                     .SetSprite("enemySprite", spec.sprite)
                     .SetAsset("artSet", ResolveArtSet(spec.art))
                     .SetObjectList("stageAlternates", ResolveArtSets(spec.stageAlternates))
+                    .SetAsset("ability", ResolveAbility(spec.ability, abilityById))
                     .Set("firstStage", spec.firstStage)
                     .Set("lastStage", spec.lastStage)
                     .Apply();

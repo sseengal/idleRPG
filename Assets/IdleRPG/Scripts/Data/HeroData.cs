@@ -41,6 +41,9 @@ namespace IdleRPG.Data
         [Tooltip("Animated frames (Idle/Attack/Hurt/Death). When set, the unit is rendered from these frames and the tint above is ignored (real art is coloured).")]
         [SerializeField] private CharacterArtSet artSet;
 
+        [Tooltip("Ability this hero can bring (empty = none). Usable only once the player has unlocked it.")]
+        [SerializeField] private AbilityDef ability;
+
         public string HeroID => string.IsNullOrEmpty(heroID) ? name : heroID;
 
         public string HeroName => string.IsNullOrEmpty(heroName) ? name : heroName;
@@ -65,6 +68,9 @@ namespace IdleRPG.Data
 
         /// <summary>Animated frames when real art is wired; null for placeholders/fallbacks.</summary>
         public CharacterArtSet ArtSet => artSet;
+
+        /// <summary>Ability this hero can bring, or null for none. Unlock state is the player's, not the hero's.</summary>
+        public AbilityDef Ability => ability;
 
         public HeroRole Role => role;
 

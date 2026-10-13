@@ -29,7 +29,7 @@ namespace IdleRPG.Save
     public class SaveData
     {
         /// <summary>Bumped whenever the schema changes; drives migration (see SaveMigrations).</summary>
-        public const int CurrentVersion = 6;
+        public const int CurrentVersion = 7;
 
         public int schemaVersion = CurrentVersion;
 
@@ -85,6 +85,12 @@ namespace IdleRPG.Save
         // list (the equipped records reference them by instance id); the bag = all minus those worn. ---
         public List<ItemSaveRecord> inventory = new List<ItemSaveRecord>();
         public List<EquippedGearRecord> equippedGear = new List<EquippedGearRecord>();
+
+        // --- Abilities (schema v7, additive): which ability sits on which hero. Only the ASSIGNMENT needs its own
+        // field - the unlock state rides the keyed level list below (key "ability_<id>", level 0 = locked), which is
+        // how the game already stores "how far along" anything is. An empty list means "nothing assigned", which is
+        // exactly how a v6 save played. ---
+        public List<AbilityAssignmentRecord> abilityAssignments = new List<AbilityAssignmentRecord>();
 
         // --- Legacy (schema <= v4): kept ONLY as migration input; new saves always write these empty. ---
         public List<HeroProgressRecord> heroes = new List<HeroProgressRecord>();

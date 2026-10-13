@@ -22,6 +22,7 @@ namespace IdleRPG.EditorTools.Content
         {
             ExportHeroes();
             ExportEnemies();
+            ExportAbilities();
             ExportParty();
             ExportWaves();
             ExportUpgrades();
@@ -35,15 +36,23 @@ namespace IdleRPG.EditorTools.Content
         {
             HeroSpecFile heroes = ContentSpecIO.Load<HeroSpecFile>(ContentSpecIO.HeroesPath);
             EnemySpecFile enemies = ContentSpecIO.Load<EnemySpecFile>(ContentSpecIO.EnemiesPath);
+            AbilitySpecFile abilities = ContentSpecIO.Load<AbilitySpecFile>(ContentSpecIO.AbilitiesPath);
             PartySpecFile party = ContentSpecIO.Load<PartySpecFile>(ContentSpecIO.PartyPath);
             WaveSpecFile waves = ContentSpecIO.Load<WaveSpecFile>(ContentSpecIO.WavesPath);
             UpgradeSpecFile upgrades = ContentSpecIO.Load<UpgradeSpecFile>(ContentSpecIO.TracksPath);
 
+            // Create the ability folder BEFORE the batch. Inside an asset-editing batch, AssetDatabase.IsValidFolder
+            // does not report a folder the batch just created, so every ability asset would create the folder again
+            // and Unity would write duplicate companions - "Abilities 1.meta", "Abilities 2.meta"... - which is the
+            // litter the currency folder still carries (Currencies 1..7.meta, committed by the same generator).
+            ContentSpecIO.EnsureFolder(ContentSpecIO.AbilityFolder);
+
             AssetDatabase.StartAssetEditing();
             try
             {
-                Dictionary<string, HeroData> heroById = ApplyHeroes(heroes);
-                Dictionary<string, EnemyData> enemyById = ApplyEnemies(enemies);
+                Dictionary<string, AbilityDef> abilityById = ApplyAbilities(abilities);
+                Dictionary<string, HeroData> heroById = ApplyHeroes(heroes, abilityById);
+                Dictionary<string, EnemyData> enemyById = ApplyEnemies(enemies, abilityById);
                 ApplyParty(party, heroById);
                 ApplyWaves(waves, enemyById);
                 ApplyUpgrades(upgrades);
@@ -59,8 +68,8 @@ namespace IdleRPG.EditorTools.Content
             int drawn = PlaceholderSpriteGenerator.GenerateCardUnits();
 
             Debug.Log($"[ContentGenerator] Applied specs (heroes {heroes.heroes.Count}, enemies {enemies.enemies.Count}, " +
-                      $"stat upgrades {upgrades.statUpgrades.Count}, prestige {upgrades.prestigeUpgrades.Count}, " +
-                      $"new card pictures {drawn}).");
+                      $"abilities {abilities.abilities.Count}, stat upgrades {upgrades.statUpgrades.Count}, " +
+                      $"prestige {upgrades.prestigeUpgrades.Count}, new card pictures {drawn}).");
         }
 
         // ------------------------------------------------------------------
@@ -155,6 +164,37 @@ namespace IdleRPG.EditorTools.Content
         /// alternates onto the asset and Export reads them back, so a regeneration round-trips them instead of
         /// quietly dropping the skins (the Goblin's Demon / Blood Monster sheets).
         /// </summary>
+        private static void ExportAbilities()
+        {
+            AbilitySpecFile file = new AbilitySpecFile();
+            List<AbilityDef> assets = ContentSpecIO.LoadAll<AbilityDef>(ContentSpecIO.AbilityFolder);
+
+            for (int i = 0; i < assets.Count; i++)
+            {
+                AbilityDef ability = assets[i];
+
+                file.abilities.Add(new AbilitySpec
+                {
+                    id = ability.AbilityID,
+                    displayName = ability.DisplayName,
+                    description = ability.Description,
+                    kind = AbilityKindName(ability.Kind),
+                    target = AbilityTargetName(ability.Target),
+                    artSlot = ability.ArtSlot,
+                    cooldownSec = ability.CooldownSec,
+                    shieldFactor = ability.ShieldFactor,
+                    shieldSeconds = ability.ShieldSeconds,
+                    healFraction = ability.HealFraction,
+                    damageMultiplier = ability.DamageMultiplier,
+                    unlockStage = ability.UnlockStage,
+                    tokenCost = ability.TokenCost
+                });
+            }
+
+            file.abilities.Sort((a, b) => string.CompareOrdinal(a.id, b.id));
+            ContentSpecIO.Save(ContentSpecIO.AbilitiesPath, file);
+        }
+
         private static List<string> AlternatesOf(EnemyData enemy)
         {
             var names = new List<string>();
