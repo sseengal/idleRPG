@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using IdleRPG.Abilities;
 using IdleRPG.Combat;
 using IdleRPG.Data;
 using IdleRPG.Economy;
@@ -46,6 +47,9 @@ namespace IdleRPG.Core
             public DailyStreakService DailyStreak;
             public AdCapsService AdCaps;
             public FirstRunTips FirstRunTips;
+
+            /// <summary>Hero abilities: the unlock levels and which hero wears which.</summary>
+            public AbilityService Abilities;
         }
 
         /// <summary>The run and lifetime numbers the save needs that no service owns.</summary>
@@ -99,6 +103,7 @@ namespace IdleRPG.Core
 
             services.Shop?.WriteToSave(data);
             services.Gear?.WriteToSave(data);
+            services.Abilities?.WriteToSave(data);
 
             if (services.Formation != null)
             {
@@ -167,6 +172,7 @@ namespace IdleRPG.Core
             services.DailyStreak?.Restore(data.dailyStreakLastDate, data.dailyStreakCount);
             services.AdCaps?.Restore(data.adRedemptions);
             services.FirstRunTips?.Restore(data.GetLevel(SaveData.SaveKeys.TipMask()));
+            services.Abilities?.LoadFromSave(data);
 
             return run;
         }

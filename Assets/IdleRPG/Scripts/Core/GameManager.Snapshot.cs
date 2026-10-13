@@ -66,7 +66,8 @@ namespace IdleRPG.Core
                 Gear = Gear,
                 DailyStreak = DailyStreak,
                 AdCaps = AdCaps,
-                FirstRunTips = FirstRunTips
+                FirstRunTips = FirstRunTips,
+                Abilities = Abilities
             };
         }
 

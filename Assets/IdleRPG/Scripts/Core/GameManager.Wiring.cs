@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using IdleRPG.Abilities;
 using IdleRPG.Combat;
 using IdleRPG.Data;
 using IdleRPG.DebugTools;
@@ -99,6 +100,9 @@ namespace IdleRPG.Core
             DailyStreak = new Economy.DailyStreakService(balanceConfig, ResolveClockNow);
             AdCaps = new Economy.AdCapsService(balanceConfig, ResolveClockNow);
             FirstRunTips = new Core.FirstRunTips(Economy, Tracks, () => Ascension != null && Ascension.CanAscend(RunBestStage));
+            // Ability-Plan S2: abilities are bought with tokens and wear a stage gate, so the service asks for the
+            // CURRENT stage at unlock time rather than caching one at construction.
+            Abilities = new AbilityService(Economy, () => CurrentStage);
 
             // Step 10a/10b: the board the party stands on. Created **before** the load so a saved layout can be
             // restored into it; with no saved layout the default placement (the MVP's fixed lanes) is used, so a
@@ -214,6 +218,7 @@ namespace IdleRPG.Core
                 DailyStreak = DailyStreak,
                 AdCaps = AdCaps,
                 FirstRunTips = FirstRunTips,
+                Abilities = Abilities,
                 Boost = Boost,
                 Ads = Ads,
                 Iap = Iap,

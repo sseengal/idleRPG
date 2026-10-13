@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using IdleRPG.Abilities;
 using IdleRPG.Combat;
 using IdleRPG.Data;
 using IdleRPG.DebugTools;
@@ -158,6 +159,9 @@ namespace IdleRPG.Core
 
         /// <summary>Three first-run hints, shown once each (B8').</summary>
         public Core.FirstRunTips FirstRunTips { get; private set; }
+
+        /// <summary>Hero abilities (Ability-Plan S2). Reads the stage at unlock time, so the gate is never stale.</summary>
+        public AbilityService Abilities { get; private set; }
 
         /// <summary>
         /// Debug/testing hook: replace the shared game clock's "today" (e.g. yesterday/tomorrow) without touching

@@ -409,6 +409,18 @@ namespace IdleRPG.Save
             {
                 return "tipSeen.mask";
             }
+
+            /// <summary>
+            /// Every ability unlock key starts with this. The ability service scans the keyed list by this prefix
+            /// instead of asking for ids it knows, so an ability this build no longer contains still round-trips.
+            /// </summary>
+            public const string AbilityUnlockPrefix = "ability.";
+
+            /// <summary>"ability.shield_wall" - level 0 = locked, 1 = unlocked.</summary>
+            public static string AbilityUnlock(string abilityId)
+            {
+                return AbilityUnlockPrefix + (abilityId ?? "");
+            }
         }
 
         /// <summary>Debug-friendly summary.</summary>

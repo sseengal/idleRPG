@@ -1,3 +1,4 @@
+using IdleRPG.Abilities;
 using IdleRPG.Combat;
 using IdleRPG.Data;
 using IdleRPG.Economy;
@@ -74,6 +75,9 @@ namespace IdleRPG.Core
 
         /// <summary>Three first-run hints, spoken once each through the toast line (B8').</summary>
         public FirstRunTips FirstRunTips { get; set; }
+
+        /// <summary>Hero abilities: which are unlocked, and which hero wears which (Ability-Plan S2).</summary>
+        public AbilityService Abilities { get; set; }
 
         /// <summary>True once the minimum set of systems is present.</summary>
         public bool IsReady => Balance != null && Waves != null && Party != null && Combat != null && Economy != null;
