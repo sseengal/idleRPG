@@ -2,6 +2,19 @@
     "version": 1,
     "heroes": [
         {
+            "id": "hero_soldier",
+            "asset": "Hero_Soldier",
+            "displayName": "Soldier",
+            "icon": "hero_soldier",
+            "art": "Soldier",
+            "ability": "soldier_charge",
+            "baseHealth": 110.0,
+            "baseAttack": 8.0,
+            "baseDefense": 4.0,
+            "attackIntervalSec": 1.0,
+            "tint": "#59D973FF"
+        },
+        {
             "id": "hero_knight",
             "asset": "Hero_Knight",
             "displayName": "Knight",
@@ -26,19 +39,7 @@
             "baseDefense": 5.0,
             "attackIntervalSec": 2.0,
             "tint": "#BF66F2FF"
-        },
-        {
-            "id": "hero_soldier",
-            "asset": "Hero_Soldier",
-            "displayName": "Soldier",
-            "icon": "hero_soldier",
-            "art": "Soldier",
-            "ability": "soldier_charge",
-            "baseHealth": 110.0,
-            "baseAttack": 8.0,
-            "baseDefense": 4.0,
-            "attackIntervalSec": 1.0,
-            "tint": "#59D973FF"
         }
     ]
 }
+
