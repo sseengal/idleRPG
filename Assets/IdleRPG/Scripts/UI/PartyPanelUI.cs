@@ -210,11 +210,11 @@ namespace IdleRPG.UI
 
             formationLabel = UiRuntime.CreateText(root, "FormationInfo", string.Empty, UiType.Role.Sentence,
                 TextAlignmentOptions.TopLeft, bodyText);
-            UiRuntime.Anchor(formationLabel.rectTransform, new Vector2(0.02f, 0.46f), new Vector2(0.98f, 0.62f), 8f, 0f, 8f, 0f);
+            UiRuntime.Anchor(formationLabel.rectTransform, new Vector2(0.02f, 0.46f), new Vector2(0.98f, 0.62f), UiSpace.Small, UiSpace.None, UiSpace.Small, UiSpace.None);
 
             TextMeshProUGUI hint = UiRuntime.CreateText(root, "FormationHint", "tap a hero, then tap a slot", UiType.Role.Sentence,
                 TextAlignmentOptions.TopLeft, hintColor);
-            UiRuntime.Anchor(hint.rectTransform, new Vector2(0.02f, 0.38f), new Vector2(0.98f, 0.46f), 8f, 0f, 8f, 0f);
+            UiRuntime.Anchor(hint.rectTransform, new Vector2(0.02f, 0.38f), new Vector2(0.98f, 0.46f), UiSpace.Small, UiSpace.None, UiSpace.Small, UiSpace.None);
         }
 
         // ------------------------------------------------------------------
@@ -270,11 +270,11 @@ namespace IdleRPG.UI
         {
             TextMeshProUGUI label = UiRuntime.CreateText(root, caption + "Caption", caption, UiType.Role.Small,
                 TextAlignmentOptions.MidlineLeft, SlotRowTextColor);
-            UiRuntime.Anchor(label.rectTransform, new Vector2(0.48f, yMax), new Vector2(0.72f, yMax + 0.035f), 4f, 0f, 0f, 0f);
+            UiRuntime.Anchor(label.rectTransform, new Vector2(0.48f, yMax), new Vector2(0.72f, yMax + 0.035f), UiSpace.Tight, UiSpace.None, UiSpace.None, UiSpace.None);
 
             TextMeshProUGUI note = UiRuntime.CreateText(root, caption + "Note", "(coming soon)", UiType.Role.Small,
                 TextAlignmentOptions.MidlineRight, SlotRowTextColor);
-            UiRuntime.Anchor(note.rectTransform, new Vector2(0.60f, yMax), new Vector2(0.97f, yMax + 0.035f), 0f, 0f, 4f, 0f);
+            UiRuntime.Anchor(note.rectTransform, new Vector2(0.60f, yMax), new Vector2(0.97f, yMax + 0.035f), UiSpace.None, UiSpace.None, UiSpace.Tight, UiSpace.None);
 
             const float xMin = 0.48f;
             const float xMax = 0.97f;

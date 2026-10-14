@@ -101,7 +101,7 @@ namespace IdleRPG.UI
                 // NoWrap on purpose: the shared button builder allows wrapping, and "RANKS" would break in half.
                 label.textWrappingMode = TextWrappingModes.NoWrap;
                 UiType.ApplyAuto(label, UiType.Role.Micro);
-                UiRuntime.Stretch(label.rectTransform, 2f, 0f, 2f, 0f);
+                UiRuntime.Stretch(label.rectTransform, UiSpace.Hairline, UiSpace.None, UiSpace.Hairline, UiSpace.None);
             }
         }
 

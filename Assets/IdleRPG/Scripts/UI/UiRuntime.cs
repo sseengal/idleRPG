@@ -130,7 +130,7 @@ namespace IdleRPG.UI
 
             TextMeshProUGUI text = CreateText(image.transform, "Label", label, role,
                 TextAlignmentOptions.Center, Color.white);
-            Stretch(text.rectTransform, 8f, 4f, 8f, 4f);
+            Stretch(text.rectTransform, UiSpace.LabelPadX, UiSpace.LabelPadY, UiSpace.LabelPadX, UiSpace.LabelPadY);
             text.textWrappingMode = TextWrappingModes.Normal;
 
             if (onClick != null)

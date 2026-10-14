@@ -126,7 +126,7 @@ namespace IdleRPG.UI
 
             TextMeshProUGUI label = UiRuntime.CreateText(buttonObject.transform, "Label", "BUY", UiType.Role.Section,
                 TextAlignmentOptions.Center, TextColor);
-            UiRuntime.Stretch(label.rectTransform, 4f, 4f, 4f, 4f);
+            UiRuntime.Stretch(label.rectTransform, UiSpace.Tight, UiSpace.Tight, UiSpace.Tight, UiSpace.Tight);
             // The button shows the price, whose length grows ("25 gems" -> "1.2K gems"), so it shrinks to fit.
             UiType.ApplyAuto(label, UiType.Role.Section);
             return button;
