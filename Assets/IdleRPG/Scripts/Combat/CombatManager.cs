@@ -85,7 +85,7 @@ namespace IdleRPG.Combat
 
         public bool IsRunning => director != null && director.IsRunning;
 
-        /// <summary>Wave label for the HUD: one name, or "Goblin +2" when the wave holds several enemies.</summary>
+        /// <summary>Wave label for the HUD: one name, or "Werewolf +2" when the wave holds several enemies.</summary>
         public string CurrentEnemyName
         {
             get

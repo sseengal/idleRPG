@@ -42,8 +42,8 @@ namespace IdleRPG.EditorTools
 
         private static readonly string[] LogLines =
         {
-            "-- Wave 6: Goblin x2, Bat --",
-            "Knight hits Goblin A for 12.4K",
+            "-- Wave 6: Werewolf x2, Bat --",
+            "Knight hits Werewolf A for 12.4K",
             "Archer hits Bat B for 8.1K",
             "Mage crits Goblin A for 21.7K",
             "Goblin A hits Knight for 3.2K"

@@ -9,7 +9,7 @@ namespace IdleRPG.Combat
     /// Builds the enemy side of one wave: how many enemies, which archetypes, which ranks, and how the wave's
     /// HP / attack / gold budget is split between them.
     ///
-    /// ELI5: one enemy per wave is easy - just scale its numbers by the stage. A *wave* is harder: three goblins
+    /// ELI5: one enemy per wave is easy - just scale its numbers by the stage. A *wave* is harder: three werewolves
     /// must not mean three times the health, three times the damage and three times the gold, or the idle rate
     /// falls apart. So this is the shopper: it takes the wave's enemies, keeps their individual flavour, and
     /// ratios the group back to the budget a single-enemy wave would have had (`BalanceConfig.Wave*Multiplier`).
@@ -104,7 +104,7 @@ namespace IdleRPG.Combat
             }
         }
 
-        /// <summary>One readable line for tools and logs ("Goblin#0 60hp 12atk 18g | Bat#1 ...").</summary>
+        /// <summary>One readable line for tools and logs ("Werewolf#0 57hp 10atk 8g | Bat#1 ...").</summary>
         public static string Describe(EnemyCombatant[] team)
         {
             if (team == null || team.Length == 0)
@@ -139,7 +139,7 @@ namespace IdleRPG.Combat
 
         /// <summary>
         /// Ratios the team's totals back to a one-enemy wave's budget, keeping the relative beefiness of each
-        /// archetype (a goblin stays chunkier than a slime). Defence is deliberately left alone: armour is part of
+        /// archetype (a brute stays chunkier than a slime). Defence is deliberately left alone: armour is part of
         /// an archetype's identity, and the HP multiplier is the knob that compensates for it.
         /// </summary>
         private static void ApplyWaveBudget(EnemyCombatant[] team, BalanceConfig balance)

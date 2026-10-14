@@ -176,7 +176,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Mage crits Goblin A for 21.7K
+  m_text: Mage crits Werewolf A for 21.7K
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b2dc5bdbdcb8e46898d0d67522f3bd66, type: 2}
   m_sharedMaterial: {fileID: 7564709693728215020, guid: b2dc5bdbdcb8e46898d0d67522f3bd66, type: 2}
@@ -911,7 +911,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Mage crits Goblin A for 21.7K
+  m_text: Mage crits Werewolf A for 21.7K
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9eb89df384354445f8216e6d52f795af, type: 2}
   m_sharedMaterial: {fileID: 880730043868981411, guid: 9eb89df384354445f8216e6d52f795af, type: 2}
@@ -2685,7 +2685,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Knight hits Goblin A for 12.4K
+  m_text: Knight hits Werewolf A for 12.4K
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 811bf5e03e797429a9b6535494f23e1e, type: 2}
   m_sharedMaterial: {fileID: -7615703366388874344, guid: 811bf5e03e797429a9b6535494f23e1e, type: 2}
@@ -5151,7 +5151,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Goblin A hits Knight for 3.2K
+  m_text: Werewolf A hits Knight for 3.2K
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 811bf5e03e797429a9b6535494f23e1e, type: 2}
   m_sharedMaterial: {fileID: -7615703366388874344, guid: 811bf5e03e797429a9b6535494f23e1e, type: 2}
@@ -6770,7 +6770,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Knight hits Goblin A for 12.4K
+  m_text: Knight hits Werewolf A for 12.4K
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b2dc5bdbdcb8e46898d0d67522f3bd66, type: 2}
   m_sharedMaterial: {fileID: 7564709693728215020, guid: b2dc5bdbdcb8e46898d0d67522f3bd66, type: 2}
@@ -8194,7 +8194,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '-- Wave 6: Goblin x2, Bat --'
+  m_text: '-- Wave 6: Werewolf x2, Bat --'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9eb89df384354445f8216e6d52f795af, type: 2}
   m_sharedMaterial: {fileID: 880730043868981411, guid: 9eb89df384354445f8216e6d52f795af, type: 2}
@@ -8713,7 +8713,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '-- Wave 6: Goblin x2, Bat --'
+  m_text: '-- Wave 6: Werewolf x2, Bat --'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 811bf5e03e797429a9b6535494f23e1e, type: 2}
   m_sharedMaterial: {fileID: -7615703366388874344, guid: 811bf5e03e797429a9b6535494f23e1e, type: 2}
@@ -9210,7 +9210,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Goblin A hits Knight for 3.2K
+  m_text: Werewolf A hits Knight for 3.2K
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b2dc5bdbdcb8e46898d0d67522f3bd66, type: 2}
   m_sharedMaterial: {fileID: 7564709693728215020, guid: b2dc5bdbdcb8e46898d0d67522f3bd66, type: 2}
@@ -12165,7 +12165,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '-- Wave 6: Goblin x2, Bat --'
+  m_text: '-- Wave 6: Werewolf x2, Bat --'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b2dc5bdbdcb8e46898d0d67522f3bd66, type: 2}
   m_sharedMaterial: {fileID: 7564709693728215020, guid: b2dc5bdbdcb8e46898d0d67522f3bd66, type: 2}
@@ -19735,7 +19735,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Mage crits Goblin A for 21.7K
+  m_text: Mage crits Werewolf A for 21.7K
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 811bf5e03e797429a9b6535494f23e1e, type: 2}
   m_sharedMaterial: {fileID: -7615703366388874344, guid: 811bf5e03e797429a9b6535494f23e1e, type: 2}
@@ -20792,7 +20792,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Knight hits Goblin A for 12.4K
+  m_text: Knight hits Werewolf A for 12.4K
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9eb89df384354445f8216e6d52f795af, type: 2}
   m_sharedMaterial: {fileID: 880730043868981411, guid: 9eb89df384354445f8216e6d52f795af, type: 2}
@@ -21066,7 +21066,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Goblin A hits Knight for 3.2K
+  m_text: Werewolf A hits Knight for 3.2K
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9eb89df384354445f8216e6d52f795af, type: 2}
   m_sharedMaterial: {fileID: 880730043868981411, guid: 9eb89df384354445f8216e6d52f795af, type: 2}

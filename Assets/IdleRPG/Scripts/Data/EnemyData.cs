@@ -46,7 +46,7 @@ namespace IdleRPG.Data
         [Tooltip("Animated frames (Idle/Attack/Hurt/Death). When set, the unit is rendered from these frames and the tint above is ignored.")]
         [SerializeField] private CharacterArtSet artSet;
 
-        [Tooltip("Alternate looks rotated by stage (index = stage % length). Used to give one archetype several skins across a run, e.g. Demon/Blood Monster on the goblin wave.")]
+        [Tooltip("Alternate looks rotated by stage (index = stage % length). Used to give one archetype several skins across a run, e.g. Demon/Blood Monster on the band-1 wave.")]
         [SerializeField] private CharacterArtSet[] stageAlternates;
 
         [Tooltip("Abilities this enemy may cast (empty = none). Enemies are not gated by unlock stage or tokens.")]

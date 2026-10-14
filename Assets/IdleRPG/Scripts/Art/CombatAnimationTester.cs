@@ -15,9 +15,13 @@ namespace IdleRPG.Art
     ///
     /// Uses the Input System package (the project's Active Input Handling is "Input System Package (New)" only, so
     /// UnityEngine.Input must not be used). The Context Menu items below mirror the keys for Inspector-driven reviews.
+    ///
+    /// Not character-specific: point it at any Animator. It was called GoblinCombatTester while the ArtLab's
+    /// benchmark character was a goblin; that enemy was removed (band 1 is Slime, Bat, Werewolf - see
+    /// `Stage-Ladder.md`), so the name is now generic.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class GoblinCombatTester : MonoBehaviour
+    public sealed class CombatAnimationTester : MonoBehaviour
     {
         [Tooltip("Animator driven by the combat trigger parameters. Falls back to the one on this object.")]
         [SerializeField] private Animator animator;
@@ -75,7 +79,7 @@ namespace IdleRPG.Art
         {
             if (animator == null)
             {
-                Debug.LogWarning("[GoblinCombatTester] no Animator assigned; nothing to fire.", this);
+                Debug.LogWarning("[CombatAnimationTester] no Animator assigned; nothing to fire.", this);
                 return;
             }
 
@@ -87,7 +91,7 @@ namespace IdleRPG.Art
         {
             if (animator == null)
             {
-                Debug.LogWarning("[GoblinCombatTester] no Animator assigned; can't restart.", this);
+                Debug.LogWarning("[CombatAnimationTester] no Animator assigned; can't restart.", this);
                 return;
             }
 
@@ -102,7 +106,7 @@ namespace IdleRPG.Art
                 return;
             }
 
-            Debug.Log($"[GoblinCombatTester] {what} fired. Keys: A=Attack, H=Hurt, D=Dead, R=Restart to Idle.", this);
+            Debug.Log($"[CombatAnimationTester] {what} fired. Keys: A=Attack, H=Hurt, D=Dead, R=Restart to Idle.", this);
             _hintLogged = true;
         }
     }

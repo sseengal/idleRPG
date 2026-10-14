@@ -178,7 +178,7 @@ namespace IdleRPG.UI
 
         /// <summary>
         /// Name of one enemy. When the wave holds several of the same archetype the slots are suffixed
-        /// A/B/C, so "Goblin" x3 reads as Goblin A, Goblin B, Goblin C in the log.
+        /// A/B/C, so "Werewolf" x3 reads as Werewolf A, Werewolf B, Werewolf C in the log.
         /// </summary>
         private static string EnemyName(int enemyIndex = 0)
         {

@@ -132,7 +132,7 @@ GameObject:
   - component: {fileID: 13315447}
   - component: {fileID: 13315448}
   m_Layer: 0
-  m_Name: Benchmark_Goblin
+  m_Name: Benchmark_Character
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -246,7 +246,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6e006d3e0ed04b89ab302a756805ac3, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Art.GoblinCombatTester
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Art.CombatAnimationTester
   animator: {fileID: 13315447}
 --- !u!1 &226762250
 GameObject:
