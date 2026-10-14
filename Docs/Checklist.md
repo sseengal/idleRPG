@@ -1787,6 +1787,45 @@ no overlap). The management page bands are also named now, so a band change is o
 `UI-Layout.md` §2c and §2d.
 
 
+## 1ah. The Goblin is gone - band 1 is Slime, Bat, Werewolf  ·  **built + verified 2026-10-14**
+
+The Goblin was never a real card: there is no Goblin in the art pack, so it could only borrow a third-party sprite,
+and `Stage-Ladder.md` already recorded its removal ("**Gone in this pass:** the `Goblin` card"). It survived as a
+**stale generated asset** that `WaveConfig` still pointed at, which produced both content errors - "no spec entry"
+and "references `Enemy_Goblin`, which is not in `enemies.json`".
+
+**Root cause, found by checking rather than guessing:** the working-tree `WaveConfig.asset` was a **stale
+pre-`c97bc88` file** - 3 normal enemies (Slime, Bat, **Goblin**) and 1 boss, where HEAD has **33 normal enemies
+(including the Werewolf) and 40 bosses**. Commit `c97bc88` ("the Archer becomes an enemy, the Soldier becomes a
+hero") had already replaced it. So the working tree was running an old config: the Goblin appeared, and **69 enemy
+references were missing** (which is why the climb sim spammed `[WaveConfig] No enemies configured at all`).
+
+**Fix:** restored `WaveConfig.asset` from HEAD. That removes the Goblin and brings back all 69 references in one
+move. Nothing was lost - all four of the stale file's entries exist in HEAD.
+
+| Also changed | Why |
+|---|---|
+| `Enemy_Goblin.asset` (+ meta) deleted | stale; no spec entry |
+| `PlaceholderSpriteGenerator` | no longer draws an `enemy_goblin` placeholder; the generated PNG is gone |
+| `GoblinCombatTester` → `CombatAnimationTester` | it was never goblin-specific (it fires Attack/Hurt/Dead on any Animator). The rename **keeps the GUID**, so the ArtLab reference still resolves |
+| `ArtLab`'s `Benchmark_Goblin` → `Benchmark_Character` | its **sprite** is still the goblin sheet and its **Animator controller is a dangling reference** - both need re-pointing in the editor |
+| comments + the UI lab's mock log text | the "Goblin" examples now read Werewolf |
+
+**Verified:** `73 enemies checked`, **all 10 ladder bands OK** (band 1: pool of 3 at stage 1), `normal 33 / boss 40`,
+and no `Enemy_Goblin` reference. The one remaining content error is **pre-existing and balance**: the loop robot gets
+**stuck on stage 30** (90.4 min, 111 upgrades), and the sim logs `Stage 30 wave N has no enemy to spawn` - band 3 is
+windowed 21-30, so that pool looks like a content question, not a Goblin one.
+
+**Separate, not fixed here - the animation pipeline has no assets.** There are **no `.anim` clips and no
+`.controller` files anywhere in the project**, and the ArtLab's Animator points at a controller GUID that exists only
+in the scene. So *no* character's animations are playing yet - that is why the Werewolf's were not. It is art-pipeline
+work, not a Goblin fault.
+
+**Third-party goblin art is left in place on purpose:** `Assets/ThirdParty/PixelLab/goblin/` (idle/attack/death/hurt
+sheets) and its world-height entries in `ArtPresetApplier`. It looks like a planned asset, so deleting it is a
+separate decision - it is tracked in git if you do want it gone.
+
+
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 
 Base gate: every step below names the loop beat or money path it serves. Anything that cannot is not in the base.
