@@ -274,7 +274,11 @@ namespace IdleRPG.EditorTools
 
         /// <summary>
         /// One hero's column: portrait, name, health, the ability it is wearing, the cast clock and the CAST button.
-        /// Anchored by hand rather than with a layout group, matching the rest of the battle page.
+        ///
+        /// Every band is a FRACTION of the column, not a pixel offset. The panel is the battle log's rectangle
+        /// (1080 x ~523 canvas units on the reference resolution), and the log's own content scrolls - this one must
+        /// not: a fixed offset layout built for a short strip either crammed the rows or pushed the button out of the
+        /// container. Fractions cannot do that, whatever the band height becomes.
         /// </summary>
         private static AbilityPanelUI.Row BuildAbilityColumn(Transform parent, int index, int total)
         {
@@ -282,31 +286,33 @@ namespace IdleRPG.EditorTools
             UiFactory.Anchor(column.GetComponent<RectTransform>(),
                 new Vector2(index / (float)total, 0f), new Vector2((index + 1) / (float)total, 1f), 8f, 8f, 8f, 8f);
 
+            // Square by height (~203 units at the reference size), so the art is not stretched; preserveAspect
+            // keeps the sprite itself correct inside it.
             Image portrait = UiFactory.Icon("Portrait", column.transform, Color.white);
-            UiFactory.Anchor(portrait.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), -36f, -84f, 36f, -12f);
+            UiFactory.Anchor(portrait.rectTransform, new Vector2(0.20f, 0.58f), new Vector2(0.80f, 0.98f));
 
             TextMeshProUGUI name = UiFactory.Text("Name", column.transform, "", UiType.Role.Sentence,
                 TextAlignmentOptions.Center, UiTheme.Text);
-            UiFactory.Anchor(name.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), 4f, -110f, -4f, -88f);
+            UiFactory.Anchor(name.rectTransform, new Vector2(0.02f, 0.485f), new Vector2(0.98f, 0.575f));
 
             HpBarView health = CreateHpBar(column.transform, "HpBar");
-            UiFactory.Anchor(health.GetComponent<RectTransform>(), new Vector2(0.03f, 1f), new Vector2(0.97f, 1f), 0f, -138f, 0f, -114f);
+            UiFactory.Anchor(health.GetComponent<RectTransform>(), new Vector2(0.06f, 0.42f), new Vector2(0.94f, 0.475f));
 
             TextMeshProUGUI ability = UiFactory.Text("Ability", column.transform, "", UiType.Role.Small,
                 TextAlignmentOptions.Center, UiTheme.TextDim);
-            UiFactory.Anchor(ability.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), 4f, -166f, -4f, -142f);
+            UiFactory.Anchor(ability.rectTransform, new Vector2(0.02f, 0.335f), new Vector2(0.98f, 0.41f));
+
+            TextMeshProUGUI clock = UiFactory.Text("Clock", column.transform, "", UiType.Role.Small,
+                TextAlignmentOptions.Center, UiTheme.Text);
+            UiFactory.Anchor(clock.rectTransform, new Vector2(0.02f, 0.255f), new Vector2(0.98f, 0.325f));
 
             Image clockFill = CreateFilledImage("ClockFill", column.transform, new Color(0.30f, 0.68f, 0.42f, 1f));
-            UiFactory.Anchor(clockFill.rectTransform, new Vector2(0.03f, 1f), new Vector2(0.97f, 1f), 0f, -190f, 0f, -170f);
-
-            TextMeshProUGUI clock = UiFactory.Text("Clock", column.transform, "", UiType.Role.Micro,
-                TextAlignmentOptions.Center, UiTheme.Text);
-            UiFactory.Anchor(clock.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), 4f, -214f, -4f, -192f);
+            UiFactory.Anchor(clockFill.rectTransform, new Vector2(0.06f, 0.215f), new Vector2(0.94f, 0.243f));
 
             // The panel replaces this placeholder listener in ConfigureRuntime; the factory always adds one.
             Button cast = UiFactory.Button("Cast", column.transform, "CAST", "ui_button", UiType.Role.Sentence,
                 UiTheme.Text, () => { });
-            UiFactory.Anchor(cast.GetComponent<RectTransform>(), new Vector2(0.12f, 0f), new Vector2(0.88f, 0f), 0f, 8f, 0f, 54f);
+            UiFactory.Anchor(cast.GetComponent<RectTransform>(), new Vector2(0.14f, 0.05f), new Vector2(0.86f, 0.16f));
 
             return new AbilityPanelUI.Row
             {
