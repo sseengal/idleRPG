@@ -1735,6 +1735,56 @@ panel, and a long currency value (like `1.25M`) can slide under the button. That
 not to the type scale.
 
 
+## 1ag. UI layout: containers, the spacing ladder, mobile scaling  ·  **built + verified 2026-10-14**
+
+The UI had three lists for sizes, fingers and look - and none for the space between things. Gaps were hand-picked
+in about 60 places (eight different values: 0, 2, 4, 6, 8, 10, 12, 14) and two panels doing the same job padded
+14/6 and 10/10, so nothing lined up. Two more faults came out of the same audit: the **modal canvas was not
+safe-area fitted** (popups and cards could sit under a notch), and the two bars were **screen fractions** (header
+6%, nav 12%), so they grew on tall phones and could shrink below their own text.
+
+**The fix, in five commits:**
+
+| # | Commit | What changed |
+|---|---|---|
+| 1 | `7eb8985` | `UiSpace.cs`: the ladder (None 0 · Hairline 2 · Tight 4 · Snug 6 · Small 8 · Base 10 · Medium 12 · Gutter 14 · Large 24) + roles (`ScreenMargin` 14, `CardPadding` 12, `RowGap` 8, `LabelPadX/Y`, `ChipPadX/Y`) + `Padding(...)`. A safe box on the modal canvas; the toast moved inside the main one; safe nodes authored **stretched** (they kept Unity's default 100x100 rect and only read correctly in Play Mode). Header and nav became **fixed-height** bars (115 / 230) pinned top and bottom, with the page stretched between them. `matchWidthOrHeight` **0** on all three canvases and the lab |
+| 2 | `a818643` | the management panels (nav buttons, shell, panel area, upgrade / ascend / shop scrolls, hero stat rows) |
+| 3 | `4ca6176` | the shared builders + header + party + shop |
+| 4 | `356a435` | `UiSpacingCheck` guard, registered in `Run All Checks` |
+| 5 | `970f10a` | `Docs/UI-Layout.md` + the index links |
+
+**Why match width:** every fixed size in the UI is calibrated to the 1080-wide reference and every band is
+flexible, so matching width keeps taps and text the same on every phone and lets a taller phone show **more
+content**. Downside, stated plainly: on a short, wide screen (a tablet in portrait) the bands get less height than
+designed, so pages scroll more. Phones are the target.
+
+**Measured (live scene):** header rect 101 (was 101.2), nav 220 (was 214.4 - its odd 6-unit top inset was
+dropped), page 1575 (was 1574.4), so nothing shifted on a 9:16 screen. Two `SafeAreaFitter` nodes now exist (main
++ modal). The **damage layer needs none**: `FloatingDamageTextPool.Spawn()` reparents each number into the battle
+viewport, which is already inside the main safe box.
+
+**Every sweep is pixel-lossless:** `Main.unity` was byte-identical (md5 checked) before and after each sweep,
+because the ladder was designed to contain every value already in use.
+
+**The guard:** `Tools > Idle RPG > UI > Check Spacing` fails on a hand-written gap (a non-zero inset, a hand-built
+`RectOffset`, a numeric scroll / stack spacing). A zero is allowed - "no gap" is not a spacing choice. Seen to
+fire: a probe with `9f` as an inset produced `SPACING: FAIL - 1 hand-written gap(s) found`; the probe was deleted
+and the check returned to PASS (9 numeric-tail calls in 120 files, all zero). Allow-list, each with a reason:
+`UiSpace` itself, the design lab, the F3 dev overlay, and `InventoryTabUI.Grid.cs` (56 and 18 are layout offsets,
+-5 is the selection ring's overhang - not gaps).
+
+**Also found:** the type-scale guard reports **false errors in Play Mode**. It reads the live scene, which then
+contains the runtime-built `DevOverlayCanvas`, so it flags size-13 Liberation Sans labels that do not exist in the
+saved scene. Run it out of Play Mode.
+
+**Left alone on purpose:** `Main.unity` stays uncommitted - its diff is 15,579 lines, of which about 400 are this
+work and the rest is pre-existing scene churn; this work is reproducible from the builder. The three inventory
+numbers (56 / 18 / -5) become named constants only if that tab is un-parked.
+
+**Not fixed here:** the header is still crowded - the RANKS button sits over the token chip and a long value can
+slide under it. That is a header layout pass (`UI-Layout.md` §7), not a spacing fault.
+
+
 ## 1e. Remaining path to MVP  ·  **what is left, in order**
 
 Base gate: every step below names the loop beat or money path it serves. Anything that cannot is not in the base.

@@ -17,7 +17,8 @@ The page was built for a mouse. Every control was smaller than a fingertip:
 | Automation toggle / buy | about 198 x 52 | about 1.4 x 0.4 cm |
 | Ascend buy (BUY) | about 196 x 81 | about 1.4 x 0.6 cm |
 
-The canvas is 1080 x 1920 (`match 0.5`), so one unit is about a third of a device pixel: **1 cm is roughly 114
+The canvas is 1080 x 1920 and scales by **matching the width** (was `match 0.5`; changed 2026-10-14 - see
+`UI-Layout.md` §3), so on a 1080-wide phone one unit is exactly one device pixel: **1 cm is roughly 114
 units**. The smallest comfortable target is about 1 cm, or 48 dp, which is **about 144 units**. The old hero
 buttons were a quarter of that height.
 

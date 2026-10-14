@@ -435,15 +435,20 @@ sizes are **tokens**, not ad-hoc numbers.
 
 ### The canvas-scale trap (found the expensive way)
 
-A pixel font is only crisp when **canvas pixels equal screen pixels**. The MVP canvas uses
-`ScaleWithScreenSize` + match 0.5, which lands on a fractional scale (0.667 in a 1280x720 editor view) and turns
-crisp glyphs into uneven ones. It looked like a font bug and was a scaling bug. Consequences:
+A pixel font is only crisp when **canvas pixels equal screen pixels**. The canvas uses `ScaleWithScreenSize`,
+reference 1080x1920. It used to blend width and height (`match 0.5`), which landed on a fractional scale (0.667 in
+a 1280x720 editor view) and turned crisp glyphs into uneven ones - it looked like a font bug and was a scaling bug.
+**Changed 2026-10-14: the scale now matches the WIDTH** (`matchWidthOrHeight = 0`, see `UI-Layout.md` §3), so on
+any 1080-wide phone the scale is exactly 1:1 even when the phone is taller than 9:16. The old blend went fractional
+as soon as the aspect differed from 9:16. Consequences:
 
 - Verdicts on pixel text must be made at 1:1 - that is why the lab renders its own 1080x1920 snapshot instead of
   screenshotting the editor window.
-- **Open decision before the reskin lands:** either accept fractional scaling on device (chunky, slightly uneven -
-  the honest cheap option), or move the UI to integer scaling / a fixed reference canvas (crisp, costs letterboxing
-  on some phone aspect ratios). Measure on a real device before choosing.
+- **Open decision before the reskin lands (narrowed, not closed):** match-width fixes 1080-wide phones, but a phone
+  whose width is not 1080 (1170 px on a 3x iPhone, 1440 px on many Androids) still lands on a fractional scale. So
+  the choice is now: accept that fraction (chunky, slightly uneven - the honest cheap option), or move the UI to
+  integer scaling / a fixed reference canvas (crisp, costs letterboxing on some aspect ratios). Measure on a real
+  device before choosing.
 
 ### How to look at the lab
 
