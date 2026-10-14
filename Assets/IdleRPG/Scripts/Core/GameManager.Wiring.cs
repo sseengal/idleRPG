@@ -143,6 +143,10 @@ namespace IdleRPG.Core
 
             combatManager.SetStatProvider(Resolver);
 
+            // Ability-Plan: the fight asks the ability service who is wearing what, by party index. Set BEFORE the
+            // party is built below, so resuming a save arms the equipped abilities immediately.
+            combatManager.AbilityProvider = index => Abilities.EquippedFor(partyConfig.GetHero(index));
+
             if (LoadedFromSave)
             {
                 // Resume exactly where the player left off, healing the party like a retry would.

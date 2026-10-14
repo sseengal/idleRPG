@@ -162,6 +162,7 @@ namespace IdleRPG.UI
             GameEvents.EnemyDamaged += OnAllyAttackLanded;
             GameEvents.SwingStarted += OnSwingStarted;
             GameEvents.HeroStatsChanged += OnHeroStatsChanged;
+            GameEvents.AbilityCast += OnAbilityCast;
             GameEvents.WaveCompleted += OnWaveChanged;
             GameEvents.StageChanged += OnStageChangedHandler;
         }
@@ -173,8 +174,39 @@ namespace IdleRPG.UI
             GameEvents.EnemyDamaged -= OnAllyAttackLanded;
             GameEvents.SwingStarted -= OnSwingStarted;
             GameEvents.HeroStatsChanged -= OnHeroStatsChanged;
+            GameEvents.AbilityCast -= OnAbilityCast;
             GameEvents.WaveCompleted -= OnWaveChanged;
             GameEvents.StageChanged -= OnStageChangedHandler;
+        }
+
+        /// <summary>
+        /// Plays this hero's own animation for a cast (Ability-Plan). The ability names the art slot, so the Knight's
+        /// Shield Wall plays its Block strip and the Wizard's Arcane Burst the composited cast - no per-character
+        /// cases. No lunge either: an ability has no target yet (effects land later), so the hero stays in place.
+        /// </summary>
+        private void OnAbilityCast(CombatantSide side, int index, string abilityId, string abilityName, string clipSlot, double cooldownSeconds)
+        {
+            if (side != CombatantSide.Party || index != heroIndex || appliedData == null)
+            {
+                return;
+            }
+
+            CharacterArtSet art = appliedData.ArtSet;
+
+            if (art == null)
+            {
+                return;
+            }
+
+            Sprite[] frames = art.FramesFor(clipSlot);
+            CharacterAnimator clipPlayer = EnsureAnimator();
+
+            if (clipPlayer == null || frames.Length == 0)
+            {
+                return;
+            }
+
+            clipPlayer.PlayClip(frames, art.FpsFor(clipSlot));
         }
 
         /// <summary>This hero committed a swing: run to the target slot; the hit lands after the swing window.</summary>

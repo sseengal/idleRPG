@@ -67,6 +67,25 @@ namespace IdleRPG.Sim
         public double Remaining;
     }
 
+    /// <summary>
+    /// A unit cast its ability. This is only "the cast happened": the clock has already restarted, and whatever the
+    /// ability DOES resolves separately, so the view can play the clip without waiting for an effect.
+    /// </summary>
+    public struct AbilityCastEvent
+    {
+        public CombatantSide Side;
+        public int Index;
+        public string DisplayName;
+        public string AbilityId;
+        public string AbilityName;
+
+        /// <summary>Which art slot plays it ("Ability", "Attack02"), so the view needs no lookup to find the frames.</summary>
+        public string ClipSlot;
+
+        /// <summary>The cooldown that just started, in seconds - the UI needs it for the clock.</summary>
+        public double CooldownSeconds;
+    }
+
     /// <summary>A combatant died.</summary>
     public struct DeathEvent
     {

@@ -37,6 +37,9 @@ namespace IdleRPG.Sim
         // --- Events (indices included; the runtime maps them onto GameEvents) ---
         public event Action<DamageEvent> Damaged;
         public event Action<SwingStartedEvent> SwingStarted;
+
+        /// <summary>A unit cast its ability (Ability-Plan). Fired on the fight's own tick, never mid-frame.</summary>
+        public event Action<AbilityCastEvent> AbilityCast;
         public event Action<DeathEvent> Died;
         public event Action<int, double> EnemyKilled;
         public event Action PartyWiped;
@@ -225,12 +228,57 @@ namespace IdleRPG.Sim
             for (int i = 0; i < party.Length; i++)
             {
                 party[i]?.Tick(deltaTime);
+                DrainAbilityCast(party[i], CombatantSide.Party, i);
             }
 
             for (int i = 0; i < enemies.Length; i++)
             {
                 enemies[i]?.Tick(deltaTime);
+                DrainAbilityCast(enemies[i], CombatantSide.Enemy, i);
             }
+        }
+
+        /// <summary>
+        /// Asks one of the party to cast its ability now. Returns false when that seat is empty, the unit is down, or
+        /// its clock has not run out - the same answer the button needs to decide whether the press could do anything.
+        /// The request only sets a flag; <see cref="DrainAbilityCast"/> fires it on the next tick.
+        /// </summary>
+        public bool RequestAbility(int partyIndex)
+        {
+            if (party == null || partyIndex < 0 || partyIndex >= party.Length)
+            {
+                return false;
+            }
+
+            return party[partyIndex] != null && party[partyIndex].RequestAbility();
+        }
+
+        /// <summary>
+        /// Turns a requested cast into an event. Doing it on the tick (rather than the moment the button is pressed)
+        /// is what makes a cast pause with the game: nothing fires while the fight is not advancing.
+        /// </summary>
+        private void DrainAbilityCast(Combatant unit, CombatantSide side, int index)
+        {
+            if (unit == null)
+            {
+                return;
+            }
+
+            if (!unit.ConsumeAbilityCast(out string abilityId, out string abilityName, out string clipSlot, out double cooldownSeconds))
+            {
+                return;
+            }
+
+            AbilityCast?.Invoke(new AbilityCastEvent
+            {
+                Side = side,
+                Index = index,
+                DisplayName = unit.DisplayName,
+                AbilityId = abilityId,
+                AbilityName = abilityName,
+                ClipSlot = clipSlot,
+                CooldownSeconds = cooldownSeconds
+            });
         }
 
         /// <summary>Advances the single in-flight swing; the one that finishes applies its damage now (impact).</summary>

@@ -142,6 +142,47 @@ namespace IdleRPG.Data
             }
         }
 
+        /// <summary>
+        /// The frames of one named slot ("Attack02", "Ability"), or an empty array. This is how an ability finds the
+        /// clip it plays: the ability definition names a slot, the art set supplies the frames. Never null, so callers
+        /// can check Length instead of guarding twice.
+        /// </summary>
+        public Sprite[] FramesFor(string slot)
+        {
+            switch (slot)
+            {
+                case "Idle": return Idle ?? new Sprite[0];
+                case "Walk": return Walk ?? new Sprite[0];
+                case "Attack01": return Attack01 ?? new Sprite[0];
+                case "Attack02": return Attack02 ?? new Sprite[0];
+                case "Attack03": return Attack03 ?? new Sprite[0];
+                case "Hurt": return Hurt ?? new Sprite[0];
+                case "Death": return Death ?? new Sprite[0];
+                default: return Ability ?? new Sprite[0];
+            }
+        }
+
+        /// <summary>
+        /// Playback rate that belongs to a named slot. The special strip has its own rate and the attacks share one,
+        /// so an ability must ask for the rate of the slot it plays rather than assume the attack rate.
+        /// </summary>
+        public int FpsFor(string slot)
+        {
+            switch (slot)
+            {
+                case "Idle": return IdleFps;
+                case "Walk": return WalkFps;
+                case "Hurt": return HurtFps;
+                case "Death": return DeathFps;
+                case "Attack01":
+                case "Attack02":
+                case "Attack03":
+                    return AttackFps;
+                default:
+                    return AbilityFps;
+            }
+        }
+
         public bool HasAnimation => Idle != null && Idle.Length > 0;
     }
 }

@@ -51,6 +51,38 @@ namespace IdleRPG.Combat
 
         public bool IsBossWave => director != null && director.IsBossWave;
 
+        private Func<int, AbilityDef> abilityProvider;
+
+        /// <summary>
+        /// Who supplies each hero's equipped ability, by party index. Set once by the game wiring. Writing it also
+        /// pushes it to the simulator, which may already exist - and the sim asks it every time it builds the party,
+        /// so an ability swapped in the Party tab is live from the next wave without a restart.
+        /// </summary>
+        public Func<int, AbilityDef> AbilityProvider
+        {
+            get => abilityProvider;
+            set
+            {
+                abilityProvider = value;
+
+                if (simulator != null)
+                {
+                    simulator.AbilityFor = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Asks a hero to cast its equipped ability. False when it owns nothing, is down, or is still cooling, so the
+        /// button can tell "not yet" apart from "nothing happened". The cast itself fires on the fight's next tick.
+        /// </summary>
+        public bool RequestAbility(int heroIndex)
+        {
+            return simulator != null &&
+                   simulator.CurrentEncounter != null &&
+                   simulator.CurrentEncounter.RequestAbility(heroIndex);
+        }
+
         public bool IsRunning => director != null && director.IsRunning;
 
         /// <summary>Wave label for the HUD: one name, or "Goblin +2" when the wave holds several enemies.</summary>
@@ -93,6 +125,8 @@ namespace IdleRPG.Combat
             simulator.SwingStarted += OnSimSwingStarted;
             simulator.EnemyKilled += OnSimEnemyKilled;
             simulator.HeroDamaged += OnSimHeroDamaged;
+            simulator.AbilityCast += OnSimAbilityCast;
+            simulator.AbilityFor = abilityProvider;
             simulator.HeroDied += OnSimHeroDied;
             simulator.PartyWiped += OnSimPartyWiped;
 
@@ -218,6 +252,17 @@ namespace IdleRPG.Combat
 
             LogCombat($"Stage {stage} | Wave {wave}/{WavesPerStage}{(isBoss ? " (BOSS)" : string.Empty)} -> " +
                       $"{EncounterFactory.Describe(simulator.Enemies)}");
+        }
+
+        /// <summary>
+        /// A cast happened, on either side. Logged - the player must be able to read what the enemy just did - and
+        /// raised so the panel can restart that hero's clock and the unit view can play the clip. Nothing else: what
+        /// an ability DOES is resolved separately, so a cast is watchable before it means anything.
+        /// </summary>
+        private void OnSimAbilityCast(AbilityCastEvent cast)
+        {
+            LogCombat($"{cast.DisplayName} casts {cast.AbilityName}");
+            GameEvents.RaiseAbilityCast(cast.Side, cast.Index, cast.AbilityId, cast.AbilityName, cast.ClipSlot, cast.CooldownSeconds);
         }
 
         private void OnSimEnemyDamaged(EnemyDamagedInfo info)

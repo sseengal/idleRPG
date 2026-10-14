@@ -116,13 +116,103 @@ namespace IdleRPG.Sim
         /// <summary>Stable string key for tooling and logs ("party:0", "enemy:2").</summary>
         public string Key => (Side == CombatantSide.Party ? "party:" : "enemy:") + SlotIndex;
 
+        // --- Ability (Ability-Plan) ---
+        // Kept as PLAIN VALUES, never as the ability asset: Scripts/Sim is its own assembly and must not depend on
+        // IdleRPG.Data (the compile error that proved it is why this comment exists). The view and the panel look the
+        // ability up by id; the sim only needs the id, the label, the clip slot and the cooldown.
+        private double abilityCooldown;
+        private bool abilityCastRequested;
+
+        /// <summary>Id of the ability this unit may cast, or empty for none.</summary>
+        public string AbilityId { get; private set; } = "";
+
+        /// <summary>Display name for the log line ("Shield Wall").</summary>
+        public string AbilityName { get; private set; } = "";
+
+        /// <summary>Which art slot plays it ("Ability", "Attack02"). The view resolves frames and rate from this.</summary>
+        public string AbilityClipSlot { get; private set; } = "";
+
+        /// <summary>Seconds between casts. The blast itself is instant; this is the clock that refills it.</summary>
+        public double AbilityCooldownSec { get; private set; }
+
+        public bool HasAbility => !string.IsNullOrEmpty(AbilityId);
+
+        /// <summary>Seconds until the ability is usable again. 0 = ready.</summary>
+        public double AbilityCooldownRemaining => abilityCooldown < 0d ? 0d : abilityCooldown;
+
+        /// <summary>True when there is something to cast, the unit is up, and the clock has run out.</summary>
+        public bool IsAbilityReady => HasAbility && IsAlive && abilityCooldown <= 0d;
+
+        /// <summary>Gives the unit an ability and clears its clock, so a fresh fight starts with it ready.</summary>
+        public void SetAbility(string id, string displayName, string clipSlot, double cooldownSec)
+        {
+            AbilityId = string.IsNullOrEmpty(id) ? "" : id;
+            AbilityName = string.IsNullOrEmpty(displayName) ? AbilityId : displayName;
+            AbilityClipSlot = string.IsNullOrEmpty(clipSlot) ? "Ability" : clipSlot;
+            AbilityCooldownSec = cooldownSec < 0d ? 0d : cooldownSec;
+
+            abilityCooldown = 0d;
+            abilityCastRequested = false;
+        }
+
+        /// <summary>
+        /// Asks to cast right now. False when there is nothing to cast, the unit is down, or it is still cooling -
+        /// so a press can never queue a cast the fight then has to refuse.
+        /// </summary>
+        public bool RequestAbility()
+        {
+            if (!IsAbilityReady)
+            {
+                return false;
+            }
+
+            abilityCastRequested = true;
+            return true;
+        }
+
+        /// <summary>
+        /// The fight drains a request here and raises the cast. True when a cast fired, with the ability's values in
+        /// the out parameters, having started its cooldown. False when nothing was requested or the unit went down.
+        /// </summary>
+        public bool ConsumeAbilityCast(out string abilityId, out string abilityName, out string clipSlot, out double cooldownSec)
+        {
+            abilityId = null;
+            abilityName = null;
+            clipSlot = null;
+            cooldownSec = 0d;
+
+            if (!abilityCastRequested)
+            {
+                return false;
+            }
+
+            abilityCastRequested = false;
+
+            if (!HasAbility || !IsAlive)
+            {
+                return false;
+            }
+
+            abilityCooldown = AbilityCooldownSec;
+            abilityId = AbilityId;
+            abilityName = AbilityName;
+            clipSlot = AbilityClipSlot;
+            cooldownSec = AbilityCooldownSec;
+            return true;
+        }
+
         // --- Behaviour ---
-        /// <summary>Advances the attack cooldown.</summary>
+        /// <summary>Advances the attack cooldown and the ability cooldown.</summary>
         public void Tick(double deltaTime)
         {
             if (!IsAlive || deltaTime <= 0d)
             {
                 return;
+            }
+
+            if (abilityCooldown > 0d)
+            {
+                abilityCooldown -= deltaTime;
             }
 
             attackTimer -= deltaTime;

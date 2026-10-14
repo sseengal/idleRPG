@@ -90,6 +90,12 @@ namespace IdleRPG.Core
             SafeInvoke(HeroDamaged, heroIndex, damage, currentHealth, maxHealth, attackerEnemyIndex, isCritical, nameof(HeroDamaged));
         }
 
+        /// <summary>A unit cast its ability. Raised from the fight's own tick, so a paused game raises nothing.</summary>
+        internal static void RaiseAbilityCast(CombatantSide side, int index, string abilityId, string abilityName, string clipSlot, double cooldownSeconds)
+        {
+            SafeInvoke(AbilityCast, side, index, abilityId, abilityName, clipSlot, cooldownSeconds, nameof(AbilityCast));
+        }
+
         internal static void RaiseHeroDied(int heroIndex)
         {
             SafeInvoke(HeroDied, heroIndex, nameof(HeroDied));

@@ -128,6 +128,11 @@ namespace IdleRPG.Debugging
                 BuyAll(HeroStatType.Defense, 10);
             }
 
+            if (keyboard.f4Key.wasPressedThisFrame)
+            {
+                ToggleAllAbilities();
+            }
+
             if (keyboard.gKey.wasPressedThisFrame)
             {
                 gameManager.Economy.AddGold(goldGrantAmount);
@@ -259,6 +264,42 @@ namespace IdleRPG.Debugging
             double nextCost = gameManager.Upgrade.GetCost(0, statType, levels);
             Log($"{statType.ToDisplayName()} +{levels}: {purchased} hero(es) upgraded | {gameManager.Economy} | " +
                 $"next x{levels} costs {NumberFormatter.Format(nextCost)}");
+        }
+
+        /// <summary>
+        /// DEV: unlocks every hero ability and equips each hero's first one; pressing again locks them all back.
+        ///
+        /// With no Party screen yet this is how an ability gets into a fight at all, and it goes through the same
+        /// service that screen will use. The wave is restarted afterwards, because a fight takes the equipped
+        /// abilities when it is built - without that, the key would look like it did nothing.
+        /// </summary>
+        public void ToggleAllAbilities()
+        {
+            if (gameManager == null || gameManager.Abilities == null)
+            {
+                return;
+            }
+
+            if (gameManager.Abilities.UnlockedCount > 0)
+            {
+                gameManager.Abilities.DebugReset();
+                Log("Abilities: locked again (nothing equipped). Restarting the wave.");
+            }
+            else
+            {
+                var heroes = gameManager.Context != null && gameManager.Context.Party != null
+                    ? gameManager.Context.Party.Heroes
+                    : null;
+
+                int equipped = gameManager.Abilities.DebugUnlockAll(heroes);
+                Log($"Abilities: all unlocked, {equipped} hero(es) equipped. Restarting the wave so the fight picks them up.");
+            }
+
+            var combat = gameManager.Context != null ? gameManager.Context.Combat : null;
+            if (combat != null)
+            {
+                combat.SetStage(gameManager.CurrentStage, healParty: true);
+            }
         }
 
         private void LogStatus()

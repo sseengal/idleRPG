@@ -183,6 +183,23 @@ namespace IdleRPG.UI
             Play(art.Hurt, loop: false, Second(art.HurtFps), idleOnDone: true);
         }
 
+        /// <summary>
+        /// Plays one specific clip once - an ability's own animation. An ability is not the base attack, so it is
+        /// played by the frames the ability names rather than through <see cref="PlayAttack"/>: the Knight's Shield
+        /// Wall is its Block strip, the Wizard's Arcane Burst a composited cast. Returns to Idle when it finishes
+        /// unless the caller wants to decide what comes next.
+        /// </summary>
+        public void PlayClip(Sprite[] frames, int fps, Action onFinished = null)
+        {
+            if (frames == null || frames.Length == 0)
+            {
+                onFinished?.Invoke();
+                return;
+            }
+
+            Play(frames, loop: false, Second(fps), idleOnDone: onFinished == null, done: onFinished);
+        }
+
         public void PlayDeath(Action onFinished = null)
         {
             if (art == null)

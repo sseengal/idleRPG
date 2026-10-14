@@ -36,6 +36,13 @@ namespace IdleRPG.Core
         /// <summary>(message) one-sentence news for the battle log; rendered verbatim by CombatLogUI.</summary>
         public static event Action<LogMessage> CombatMessage;
 
+        /// <summary>
+        /// A unit cast its ability (Ability-Plan): which side, its index on that side, the ability id, its display
+        /// name, and the cooldown that just started. The SIDE travels with it because hero index 0 and enemy index 0
+        /// are both real, so the index alone cannot say who cast.
+        /// </summary>
+        public static event Action<CombatantSide, int, string, string, string, double> AbilityCast;
+
         /// <summary>(day, gems) when the daily-streak calendar pays out (B7 S2).</summary>
         public static event Action<int, double> DailyStreakClaimed;
 

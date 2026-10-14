@@ -70,6 +70,15 @@ namespace IdleRPG.Combat
 
         public event Action PartyWiped;
 
+        /// <summary>A hero or enemy cast its ability (Ability-Plan). Forwarded from the fight's own tick.</summary>
+        public event Action<AbilityCastEvent> AbilityCast;
+
+        /// <summary>
+        /// Supplies the ability a hero has equipped, by PARTY INDEX. Injected by the game wiring, so the sim never has
+        /// to know about unlocks or the save file. Null (tests, tools) means no hero is carrying an ability.
+        /// </summary>
+        public Func<int, AbilityDef> AbilityFor { get; set; }
+
         // --- State ---
         public SimContext Context => context;
 
@@ -192,6 +201,10 @@ namespace IdleRPG.Combat
                 index++;
             }
 
+            // Arm every hero from the provider. Done once here, and again at the start of every wave, so an ability
+            // bought or swapped between waves reaches the fight without restarting the game.
+            ArmPartyAbilities();
+
             formation = assignedFormation;
             StampFormationRules();
             encounter.SetParty(heroes);
@@ -280,6 +293,7 @@ namespace IdleRPG.Combat
             }
 
             enemies = new[] { enemy };
+            ArmPartyAbilities();
             encounter.SpawnEnemies(enemies);
             encounter.PartyTargetRule = TargetRule.FrontMost;
             return true;
@@ -294,6 +308,7 @@ namespace IdleRPG.Combat
             }
 
             enemies = team;
+            ArmPartyAbilities();
             encounter.SpawnEnemies(enemies);
             encounter.PartyTargetRule = TargetRule.FrontMost;
             return true;
@@ -315,6 +330,37 @@ namespace IdleRPG.Combat
         // ------------------------------------------------------------------
         // Internals
         // ------------------------------------------------------------------
+        /// <summary>
+        /// Reads each hero's equipped ability from the injected provider and gives it to the fight (Ability-Plan).
+        /// Called when the party is built and at the start of every wave, so an ability bought or swapped between
+        /// waves is live in the next one - no restart, and no debug-only path. The provider is the game wiring's
+        /// job, so the sim never has to know about unlocks or the save file.
+        /// </summary>
+        private void ArmPartyAbilities()
+        {
+            if (heroes == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < heroes.Length; i++)
+            {
+                HeroCombatant hero = heroes[i];
+                if (hero == null)
+                {
+                    continue;
+                }
+
+                AbilityDef equipped = AbilityFor != null ? AbilityFor(i) : null;
+
+                hero.SetAbility(
+                    equipped != null ? equipped.AbilityID : null,
+                    equipped != null ? equipped.DisplayName : null,
+                    equipped != null ? equipped.ArtSlot : null,
+                    equipped != null ? equipped.CooldownSec : 0d);
+            }
+        }
+
         private void WireEncounterEvents()
         {
             encounter.Damaged += OnEncounterDamaged;
@@ -322,6 +368,7 @@ namespace IdleRPG.Combat
             encounter.Died += OnEncounterDied;
             encounter.EnemyKilled += (index, gold) => EnemyKilled?.Invoke(index, gold);
             encounter.PartyWiped += () => PartyWiped?.Invoke();
+            encounter.AbilityCast += cast => AbilityCast?.Invoke(cast);
         }
 
         private void OnEncounterSwingStarted(SwingStartedEvent swing)

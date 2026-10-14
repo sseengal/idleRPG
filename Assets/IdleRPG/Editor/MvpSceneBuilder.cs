@@ -107,8 +107,10 @@ namespace IdleRPG.EditorTools
             BuildViewport(battlePage.GetComponent<RectTransform>(), damageRoot,
                 out FormationBoardView formationBoard, out EnemyStackView enemyStack,
                 out FloatingDamageTextPool damagePool, out RectTransform enemyAnchor);
-            CombatLogUI combatLog = BuildCombatLog(battlePage.GetComponent<RectTransform>());
-            BuildLogHeaderRow(battlePage.GetComponent<RectTransform>());
+            RectTransform battleRect = battlePage.GetComponent<RectTransform>();
+            CombatLogUI combatLog = BuildCombatLog(battleRect);
+            AbilityPanelUI abilityPanel = BuildAbilityPanel(battleRect, partyConfig.ValidHeroCount);
+            BuildLogHeaderRow(battleRect, combatLog, abilityPanel);
             TabController tabs = BuildManagementPage(managementPage.GetComponent<RectTransform>(), partyConfig, prestigeUpgrades);
             ScreenController screens = BuildNavBar(safeArea, battlePage, managementPage, tabs, damageRoot.gameObject);
             OfflineRewardsPopup offlinePopup = BuildOfflinePopup(modalRoot);
