@@ -244,6 +244,36 @@ namespace IdleRPG.Abilities
             return true;
         }
 
+        /// <summary>
+        /// The ability this hero actually wears: equipped AND unlocked, resolved against its own list. This is the one
+        /// answer the fight needs, and the Party row shows the same thing, so both read from here. Null when the hero
+        /// owns nothing, has bought nothing, or the equipped id is not one it offers.
+        /// </summary>
+        public AbilityDef EquippedFor(HeroData hero)
+        {
+            if (hero == null)
+            {
+                return null;
+            }
+
+            string id = AssignedId(hero.HeroID);
+            if (string.IsNullOrEmpty(id) || !unlocked.Contains(id))
+            {
+                return null;
+            }
+
+            AbilityDef[] offered = hero.Abilities;
+            for (int i = 0; i < offered.Length; i++)
+            {
+                if (offered[i] != null && string.Equals(offered[i].AbilityID, id, StringComparison.Ordinal))
+                {
+                    return offered[i];
+                }
+            }
+
+            return null;
+        }
+
         /// <summary>True when this hero is one of the cards that offers this ability in the content.</summary>
         public static bool Owns(HeroData hero, AbilityDef ability)
         {
