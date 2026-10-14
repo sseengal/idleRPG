@@ -18,6 +18,10 @@ namespace IdleRPG.UI
         [SerializeField] private TextMeshProUGUI gemsText;
         [SerializeField] private TextMeshProUGUI tokensText;
 
+        [Tooltip("The horizontal row the currency chips and the RANKS button share, so the layout group divides " +
+                 "the width and they cannot overlap. Null falls back to the header itself (an older scene).")]
+        [SerializeField] private RectTransform chipRow;
+
         [Header("Progress")]
         [SerializeField] private TextMeshProUGUI stageText;
 
@@ -87,12 +91,31 @@ namespace IdleRPG.UI
             GameEvents.GoldBoostChanged -= OnGoldBoostChanged;
         }
 
-        /// <summary>Runtime trophy button (right edge of the top bar) - opens the global ranks sheet.</summary>
+        /// <summary>Width of the RANKS button, in canvas units. A size, not a gap, so it is not on the UiSpace ladder.</summary>
+        private const float RanksButtonWidth = 110f;
+
+        /// <summary>
+        /// Runtime trophy button (right end of the chip row) - opens the global ranks sheet. As the row's last child
+        /// with a fixed width, it takes its own slice and the chips keep the rest, so the two can never overlap.
+        /// </summary>
         private void BuildLeaderboardButton()
         {
-            Button trophy = UiRuntime.CreateButton(transform, "LeaderboardButton", "RANKS",
+            // The row is the right parent when the scene provides one; the header is the fallback for a scene built
+            // before the row existed.
+            Transform parent = chipRow != null ? chipRow : transform;
+
+            Button trophy = UiRuntime.CreateButton(parent, "LeaderboardButton", "RANKS",
                 new Vector2(0.88f, 0.10f), new Vector2(0.985f, 0.90f), OpenLeaderboard,
                 new Color(0.30f, 0.36f, 0.50f, 1f), null, UiType.Role.Micro);
+
+            if (chipRow != null)
+            {
+                // In the row: a fixed width and no flex, so the three chips share whatever is left.
+                LayoutElement element = trophy.gameObject.AddComponent<LayoutElement>();
+                element.preferredWidth = RanksButtonWidth;
+                element.flexibleWidth = 0f;
+            }
+
             TextMeshProUGUI label = trophy.GetComponentInChildren<TextMeshProUGUI>();
             if (label != null)
             {

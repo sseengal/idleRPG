@@ -29,13 +29,31 @@ namespace IdleRPG.EditorTools
             PinBar(header.rectTransform, top: true, HeaderBandHeight, UiSpace.ScreenMargin, UiSpace.ScreenMargin);
             HudHeaderUI view = header.gameObject.AddComponent<HudHeaderUI>();
 
-            // Currency chips (icon + value), evenly spaced across the top row.
-            TextMeshProUGUI goldText = CreateCurrencyChip(header.transform, "GoldChip", "ui_icon_gold", 0.03f, 0.32f);
-            TextMeshProUGUI gemText = CreateCurrencyChip(header.transform, "GemChip", "ui_icon_gem", 0.35f, 0.62f);
-            TextMeshProUGUI tokenText = CreateCurrencyChip(header.transform, "TokenChip", "ui_icon_token", 0.65f, 0.97f);
+            // The currency chips and the RANKS button share ONE row driven by a layout group, so they divide the
+            // width and can never overlap. They used to be placed by hand - chips at 0.03 / 0.35 / 0.65 and the
+            // runtime RANKS button at 0.88 - and the token chip and the button collided by about 95 units, which is
+            // how a long currency value ended up sliding under the button.
+            GameObject row = UiFactory.Node("ChipRow", header.transform);
+            RectTransform rowRect = row.GetComponent<RectTransform>();
+            UiFactory.Stretch(rowRect, UiSpace.Large, UiSpace.Medium, UiSpace.Large, UiSpace.Medium);
+
+            HorizontalLayoutGroup layout = row.AddComponent<HorizontalLayoutGroup>();
+            layout.spacing = UiSpace.Small;
+            layout.childAlignment = TextAnchor.MiddleLeft;
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+            layout.childForceExpandWidth = false;
+            layout.childForceExpandHeight = true;
+
+            // Currency chips (icon + value). The row divides the width between them; the RANKS button (built at
+            // runtime by HudHeaderUI) takes a fixed slice at the end.
+            TextMeshProUGUI goldText = CreateCurrencyChip(row.transform, "GoldChip", "ui_icon_gold");
+            TextMeshProUGUI gemText = CreateCurrencyChip(row.transform, "GemChip", "ui_icon_gem");
+            TextMeshProUGUI tokenText = CreateCurrencyChip(row.transform, "TokenChip", "ui_icon_token");
 
 
-            // Boost chip: hidden until an ad boost is running.
+            // Boost chip: hidden until an ad boost is running. It stays on the HEADER, not in the row - it is an
+            // overlay badge, not a fourth currency, so the layout group must not size it.
             Image boostChip = KitPanel("BoostChip", header.transform, UiTheme.Accent);
             UiFactory.Anchor(boostChip.rectTransform, new Vector2(0.03f, 0.20f), new Vector2(0.53f, 0.92f));
 
@@ -47,18 +65,25 @@ namespace IdleRPG.EditorTools
             SceneWiringUtility.SetField(view, "goldText", goldText);
             SceneWiringUtility.SetField(view, "gemsText", gemText);
             SceneWiringUtility.SetField(view, "tokensText", tokenText);
+            SceneWiringUtility.SetField(view, "chipRow", rowRect);
             SceneWiringUtility.SetField(view, "boostChip", boostChip.gameObject);
             SceneWiringUtility.SetField(view, "boostText", boostText);
 
             return view;
         }
 
-        /// <summary>Creates one "icon + value" chip inside the header.</summary>
-        private static TextMeshProUGUI CreateCurrencyChip(Transform parent, string name, string iconSprite,
-            float xMin, float xMax)
+        /// <summary>
+        /// Creates one "icon + value" chip inside the header row.
+        ///
+        /// The row's layout group sizes it, so the chip carries a <see cref="LayoutElement"/> instead of a
+        /// hand-picked fraction. Two independently tuned fractions are exactly how the token chip and the RANKS
+        /// button ended up overlapping.
+        /// </summary>
+        private static TextMeshProUGUI CreateCurrencyChip(Transform parent, string name, string iconSprite)
         {
             Image chip = KitPanel(name, parent, UiTheme.PanelLight);
-            UiFactory.Anchor(chip.rectTransform, new Vector2(xMin, 0.20f), new Vector2(xMax, 0.92f));
+            LayoutElement element = chip.gameObject.AddComponent<LayoutElement>();
+            element.flexibleWidth = 1f;
 
             Image icon = UiFactory.Icon("Icon", chip.transform, Color.white);
             icon.sprite = UiFactory.LoadSprite(iconSprite);
