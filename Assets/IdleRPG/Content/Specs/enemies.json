@@ -150,7 +150,9 @@
             "asset": "Enemy_Skeleton",
             "displayName": "Skeleton",
             "art": "Skeleton",
-            "ability": "enemy_block",
+            "abilities": [
+                "enemy_block"
+            ],
             "firstStage": 11,
             "lastStage": 20,
             "archetype": "undead",
@@ -251,7 +253,9 @@
             "asset": "Enemy_Armored_Orc",
             "displayName": "Armored Orc",
             "art": "Armored Orc",
-            "ability": "enemy_block",
+            "abilities": [
+                "enemy_block"
+            ],
             "firstStage": 21,
             "lastStage": 30,
             "archetype": "brute",
@@ -292,7 +296,9 @@
             "asset": "Enemy_Orc_Rider",
             "displayName": "Orc Rider",
             "art": "Orc rider",
-            "ability": "enemy_block",
+            "abilities": [
+                "enemy_block"
+            ],
             "firstStage": 26,
             "lastStage": 30,
             "archetype": "brute",
@@ -373,7 +379,9 @@
             "asset": "Enemy_Lava_Slime",
             "displayName": "Lava Slime",
             "art": "Lava Slime",
-            "ability": "enemy_spike",
+            "abilities": [
+                "enemy_spike"
+            ],
             "firstStage": 41,
             "lastStage": 50,
             "archetype": "beast",
@@ -394,7 +402,9 @@
             "asset": "Enemy_Ghostfire",
             "displayName": "Ghostfire",
             "art": "Ghostfire",
-            "ability": "enemy_beam",
+            "abilities": [
+                "enemy_beam"
+            ],
             "firstStage": 41,
             "lastStage": 50,
             "archetype": "caster",
@@ -449,7 +459,9 @@
             "bossSizeScale": 1.6,
             "tint": "#9AA5B1FF",
             "targetRule": "inherit",
-            "ability": "enemy_volley"
+            "abilities": [
+                "enemy_volley"
+            ]
         },
         {
             "id": "enemy_swordsman",
@@ -516,7 +528,9 @@
             "asset": "Enemy_Eyeball_Monster",
             "displayName": "Eyeball Monster",
             "art": "Eyeball Monster",
-            "ability": "enemy_beam",
+            "abilities": [
+                "enemy_beam"
+            ],
             "firstStage": 61,
             "lastStage": 70,
             "archetype": "caster",
@@ -837,7 +851,9 @@
             "asset": "Boss_Bone_Captain",
             "displayName": "Bone Captain",
             "art": "Skeleton",
-            "ability": "enemy_block",
+            "abilities": [
+                "enemy_block"
+            ],
             "firstStage": 11,
             "lastStage": 13,
             "archetype": "undead",
@@ -958,7 +974,9 @@
             "asset": "Boss_Orc_Raider",
             "displayName": "Orc Raider",
             "art": "Orc rider",
-            "ability": "enemy_block",
+            "abilities": [
+                "enemy_block"
+            ],
             "firstStage": 27,
             "lastStage": 29,
             "archetype": "brute",
@@ -1079,7 +1097,9 @@
             "asset": "Boss_Lava_Behemoth",
             "displayName": "Lava Behemoth",
             "art": "Lava Slime",
-            "ability": "enemy_spike",
+            "abilities": [
+                "enemy_spike"
+            ],
             "firstStage": 41,
             "lastStage": 43,
             "archetype": "brute",
@@ -1100,7 +1120,9 @@
             "asset": "Boss_Ghostfire_Wraith",
             "displayName": "Ghostfire Wraith",
             "art": "Ghostfire",
-            "ability": "enemy_beam",
+            "abilities": [
+                "enemy_beam"
+            ],
             "firstStage": 44,
             "lastStage": 46,
             "archetype": "caster",
@@ -1175,7 +1197,9 @@
             "bossSizeScale": 1.6,
             "tint": "#D94033FF",
             "targetRule": "inherit",
-            "ability": "enemy_volley"
+            "abilities": [
+                "enemy_volley"
+            ]
         },
         {
             "id": "boss_swordsman_champion",
@@ -1262,7 +1286,9 @@
             "asset": "Boss_Eyeball_Watcher",
             "displayName": "Eyeball Watcher",
             "art": "Eyeball Monster",
-            "ability": "enemy_beam",
+            "abilities": [
+                "enemy_beam"
+            ],
             "firstStage": 64,
             "lastStage": 66,
             "archetype": "caster",
@@ -1523,7 +1549,9 @@
             "asset": "Boss_Black_Knight_Champion",
             "displayName": "Black Knight Champion",
             "art": "Black Knight_B",
-            "ability": "enemy_block",
+            "abilities": [
+                "enemy_block"
+            ],
             "firstStage": 97,
             "lastStage": 99,
             "archetype": "brute",
@@ -1544,7 +1572,9 @@
             "asset": "Boss_Black_Knight_Sovereign",
             "displayName": "Black Knight Sovereign",
             "art": "Black Knight_C",
-            "ability": "enemy_beam",
+            "abilities": [
+                "enemy_beam"
+            ],
             "firstStage": 100,
             "lastStage": 100,
             "archetype": "brute",

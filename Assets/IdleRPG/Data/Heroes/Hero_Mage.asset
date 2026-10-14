@@ -24,4 +24,6 @@ MonoBehaviour:
   role: 2
   placeholderTint: {r: 0.7490196, g: 0.4, b: 0.9490196, a: 1}
   artSet: {fileID: 11400000, guid: f9830d3fedb0c430198e7727758aee9b, type: 2}
-  ability: {fileID: 11400000, guid: 998c67988d5af4d24bd3488f43fb3c45, type: 2}
+  abilities:
+  - {fileID: 11400000, guid: 998c67988d5af4d24bd3488f43fb3c45, type: 2}
+  - {fileID: 11400000, guid: ad10ed53eeb8648a39167e2562f59d20, type: 2}

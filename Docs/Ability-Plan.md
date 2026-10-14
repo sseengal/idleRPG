@@ -38,10 +38,31 @@ renamed on load rather than stranded.
 **One ability active at a time, per hero.** A hero may own several clips (see below) but only one is switched on. That
 is what keeps the choice meaningful, and it is why the save holds one ability id per hero rather than a set.
 
-**Every clip beyond the base attack is ability material.** The pack gives some characters more than one spare action,
-and the `(With magic effects)` variants are the same wind-up with the spell already drawn, which is the only way to get
-visible magic today (there is no VFX overlay system). Counting those, the Knight owns 3 clips (Attack02, Attack03,
-Block), the Soldier 2, the Wizard 3 (Attack02 plus both composited casts). Landing them is a later step.
+**Every clip beyond the base attack is ability material.** The pack gives some characters more than one spare action.
+Counting the composited casts, the Knight owns 3 clips (Attack02, Attack03, Block), the Soldier 2, the Wizard 3
+(Attack02 plus both composited casts).
+
+**Two clips per hero, one equipped, no unequip.**
+
+| Hero | Ability 1 | Ability 2 |
+|---|---|---|
+| Knight | Shield Wall (`Block`) | Heavy Strike (`Attack02`) |
+| Soldier | Charge (`Attack02`) | War Cry (`Attack03`, a party shield played from a swing clip - it has no block art) |
+| Wizard | Fireball (`Attack02`) | Arcane Burst (`Attack03`, the composited cast) |
+
+A hero equips ONE of the two and can never clear it: switching to the other is allowed, unequipping is not, because a
+hero with no ability is only ever worse and there is no decision in it. Buying the second ability does NOT switch to
+it - the player chooses. Buying the first equips it, since there is nothing to switch from.
+
+**Composited strips earn a spare attack slot.** A `(With magic effects)` strip is the same wind-up with the spell
+already drawn into the frames. The importer may place one in an attack slot the character has NO plain strip for -
+never Attack01, so the primary swing is never replaced - which is how the Wizard's second ability gets a distinct cast
+instead of repeating its basic attack. Four characters claimed one: the Wizard and Necromancer (Attack03), the Warlock
+(Attack03) and the Priest (Attack02). The rest of their composited and overlay strips stay recognised but unused.
+
+**The battle panel is a tab: `[ BATTLE LOG | ABILITIES ]`.** The second tab shows one column per hero - portrait, name,
+HP bar, equipped ability, a cooldown clock and a CAST button. Casting plays the clip, starts the cooldown and writes a
+log line. What an ability DOES is built after that plumbing, so the casts can be watched first.
 
 Enemies (auto-cast, same vocabulary):
 

@@ -62,7 +62,7 @@ namespace IdleRPG.EditorTools
         /// <summary>Check 1: every strip file in a pack must resolve to something the game understands.</summary>
         private static void CheckStripNames(List<string> problems)
         {
-            int characters = 0, files = 0, baseStrips = 0, abilities = 0, vfx = 0;
+            int characters = 0, files = 0, baseStrips = 0, abilities = 0, vfx = 0, composites = 0;
 
             for (int p = 0; p < Packs.Length; p++)
             {
@@ -111,6 +111,12 @@ namespace IdleRPG.EditorTools
                         {
                             vfx++;
                         }
+                        else if (resolved.Kind == CharacterActionKind.Composite)
+                        {
+                            // A "(With magic effects)" strip: real animation, placed in a spare attack slot by the
+                            // importer when the character has one. Recognised, so it is never reported as a mystery.
+                            composites++;
+                        }
                         else
                         {
                             problems.Add("unrecognised action in " + name + ": '" + bare + "' - teach " +
@@ -121,7 +127,7 @@ namespace IdleRPG.EditorTools
             }
 
             Debug.Log("[ArtPipelineValidator] strip names: " + characters + " character(s), " + files + " file(s) - " +
-                      baseStrips + " base, " + abilities + " ability, " + vfx + " vfx");
+                      baseStrips + " base, " + abilities + " ability, " + vfx + " vfx, " + composites + " composite");
         }
 
         /// <summary>Check 2: imported strips must carry the project's import preset.</summary>

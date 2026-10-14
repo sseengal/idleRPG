@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using IdleRPG.Data;
 using IdleRPG.Economy;
 using IdleRPG.Save;
@@ -88,6 +89,13 @@ namespace IdleRPG.Abilities
                     if (record == null || string.IsNullOrEmpty(record.heroID) || string.IsNullOrEmpty(record.abilityID))
                     {
                         continue;
+                    }
+
+                    if (assignedByHero.ContainsKey(record.heroID))
+                    {
+                        // One ability per hero. A payload carrying two for the same hero keeps the LAST: better one
+                        // equipped than two, but say so rather than collapsing it in silence.
+                        Debug.LogWarning($"[AbilityService] {record.heroID} carries more than one ability; keeping the last ({record.abilityID}).");
                     }
 
                     assignedByHero[record.heroID] = record.abilityID;
@@ -215,13 +223,10 @@ namespace IdleRPG.Abilities
 
             if (ability == null)
             {
-                bool removed = assignedByHero.Remove(heroId);
-                if (removed)
-                {
-                    AssignmentChanged?.Invoke(heroId);
-                }
-
-                return removed;
+                // NO UNEQUIP (Ability-Plan): a bought hero ability is always switched on, so clearing is REFUSED
+                // rather than supported. A hero either owns nothing (never bought) or has exactly one equipped.
+                // Switching to another ability the hero already owns is a change, not an unequip, and is allowed.
+                return false;
             }
 
             if (!IsUnlocked(ability))
@@ -239,10 +244,75 @@ namespace IdleRPG.Abilities
             return true;
         }
 
-        /// <summary>True when this hero is the one who could ever wear this ability (its owner in the content).</summary>
+        /// <summary>True when this hero is one of the cards that offers this ability in the content.</summary>
         public static bool Owns(HeroData hero, AbilityDef ability)
         {
-            return hero != null && ability != null && hero.Ability == ability;
+            if (hero == null || ability == null)
+            {
+                return false;
+            }
+
+            AbilityDef[] offered = hero.Abilities;
+            for (int i = 0; i < offered.Length; i++)
+            {
+                if (offered[i] == ability)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// DEBUG ONLY. Forgets every unlock and every assignment, so the test key can put the game back to the
+        /// "nothing bought" state. The player-facing path can never do this: unequipping is not allowed.
+        /// </summary>
+        public void DebugReset()
+        {
+            unlocked.Clear();
+            assignedByHero.Clear();
+        }
+
+        /// <summary>
+        /// DEBUG ONLY. Unlocks every ability a hero offers and equips the first one, so abilities can be exercised
+        /// without earning the tokens first. The first ability is the one the content lists first.
+        /// </summary>
+        public int DebugUnlockAll(IReadOnlyList<HeroData> heroes)
+        {
+            int equipped = 0;
+
+            if (heroes == null)
+            {
+                return equipped;
+            }
+
+            for (int i = 0; i < heroes.Count; i++)
+            {
+                HeroData hero = heroes[i];
+                if (hero == null)
+                {
+                    continue;
+                }
+
+                AbilityDef[] offered = hero.Abilities;
+                for (int a = 0; a < offered.Length; a++)
+                {
+                    if (offered[a] != null)
+                    {
+                        unlocked.Add(offered[a].AbilityID);
+                    }
+                }
+
+                if (offered.Length > 0 && offered[0] != null)
+                {
+                    assignedByHero[hero.HeroID] = offered[0].AbilityID;
+                    AssignmentChanged?.Invoke(hero.HeroID);
+                    equipped++;
+                }
+            }
+
+            return equipped;
         }
     }
 }

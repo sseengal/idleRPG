@@ -49,8 +49,8 @@ namespace IdleRPG.Data
         [Tooltip("Alternate looks rotated by stage (index = stage % length). Used to give one archetype several skins across a run, e.g. Demon/Blood Monster on the goblin wave.")]
         [SerializeField] private CharacterArtSet[] stageAlternates;
 
-        [Tooltip("Ability this enemy casts on its own cooldown (empty = none). Enemies are not gated by unlock stage or tokens.")]
-        [SerializeField] private AbilityDef ability;
+        [Tooltip("Abilities this enemy may cast (empty = none). Enemies are not gated by unlock stage or tokens.")]
+        [SerializeField] private AbilityDef[] abilities;
 
         [Header("Stage window")]
         [Tooltip("First stage this enemy may appear on. 1 = available from the start.")]
@@ -107,8 +107,8 @@ namespace IdleRPG.Data
         /// <summary>Who this archetype attacks (Step 11). <see cref="EnemyTargetingMode.Inherit"/> = wave default.</summary>
         public EnemyTargetingMode TargetRule => targetRule;
 
-        /// <summary>Ability this enemy casts on its own cooldown, or null for none.</summary>
-        public AbilityDef Ability => ability;
+        /// <summary>Abilities this enemy may cast, never null. Enemies cast on their own cooldown.</summary>
+        public AbilityDef[] Abilities => abilities ?? new AbilityDef[0];
 
         public float AttackIntervalSec => Mathf.Max(MinAttackIntervalSec, attackIntervalSec);
 

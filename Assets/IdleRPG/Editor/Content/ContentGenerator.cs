@@ -95,7 +95,8 @@ namespace IdleRPG.EditorTools.Content
                     baseAttack = SoField.Float(hero, "baseAttack", 10f),
                     baseDefense = SoField.Float(hero, "baseDefense", 5f),
                     attackIntervalSec = SoField.Float(hero, "attackIntervalSec", 1.5f),
-                    tint = ContentSpecIO.ToHex(SoField.Color(hero, "placeholderTint", Color.white))
+                    tint = ContentSpecIO.ToHex(SoField.Color(hero, "placeholderTint", Color.white)),
+                    abilities = AbilityIds(hero.Abilities)
                 });
             }
 
@@ -151,7 +152,8 @@ namespace IdleRPG.EditorTools.Content
                     bossSizeScale = SoField.Float(enemy, "bossSizeScale", 1.35f),
                     tint = ContentSpecIO.ToHex(SoField.Color(enemy, "placeholderTint", Color.white)),
                     targetRule = ((EnemyTargetingMode)SoField.Int(enemy, "targetRule", (int)EnemyTargetingMode.Inherit))
-                        .ToString().ToLowerInvariant()
+                        .ToString().ToLowerInvariant(),
+                    abilities = AbilityIds(enemy.Abilities)
                 });
             }
 
@@ -193,6 +195,31 @@ namespace IdleRPG.EditorTools.Content
 
             file.abilities.Sort((a, b) => string.CompareOrdinal(a.id, b.id));
             ContentSpecIO.Save(ContentSpecIO.AbilitiesPath, file);
+        }
+
+        /// <summary>
+        /// The ability ids an ASSET really carries, in its own order. Read from the asset rather than the spec, so an
+        /// export can never invent one and an ability wired by hand into an asset survives the round trip. Both
+        /// exporters need this: they rebuild each card from scratch, so without it an export silently wiped the list.
+        /// </summary>
+        private static List<string> AbilityIds(AbilityDef[] abilities)
+        {
+            List<string> ids = new List<string>();
+
+            if (abilities == null)
+            {
+                return ids;
+            }
+
+            for (int i = 0; i < abilities.Length; i++)
+            {
+                if (abilities[i] != null && !string.IsNullOrEmpty(abilities[i].AbilityID))
+                {
+                    ids.Add(abilities[i].AbilityID);
+                }
+            }
+
+            return ids;
         }
 
         private static List<string> AlternatesOf(EnemyData enemy)

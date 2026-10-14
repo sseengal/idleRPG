@@ -12,6 +12,13 @@ namespace IdleRPG.EditorTools
         /// <summary>A named special move (Summon, Block, Heal, Beam, Spike) - the ability material.</summary>
         Ability,
 
+        /// <summary>
+        /// A "&lt;Action&gt;(With magic effects)" strip: the same action with its spell already drawn into the frames.
+        /// Not a slot of its own - the importer may place it in a SPARE attack slot so the character gains a distinct
+        /// extra clip (the Wizard's composited cast is what this exists for).
+        /// </summary>
+        Composite,
+
         /// <summary>A magic/beam/spike effect overlay, or a composited "with effects" variant of an action.</summary>
         Vfx,
 
@@ -64,9 +71,17 @@ namespace IdleRPG.EditorTools
 
             string a = action.Trim();
 
-            // Effects first: a composited or overlay variant is never an action slot. This catches "*_Effect",
-            // "*_effect", "(With magic effects)", "(No beam effects)", "(No spike effects)" and the pack's
-            // "Sumon_Effect" typo in one rule.
+            // A composited variant - "<Action>(With magic effects)" - is the SAME action with its spell already drawn
+            // into the frames. It is not a slot by itself, but it is real animation the game can use, so it is
+            // classified as its own kind and the importer may place it in a SPARE attack slot (see ResolveComposites).
+            // Checked before the effect rule below, which would otherwise swallow it as an overlay.
+            if (Has(a, "with magic effects"))
+            {
+                return new CharacterAction(CharacterActionKind.Composite, null, a);
+            }
+
+            // Effects: a composited or overlay variant is never an action slot. This catches "*_Effect",
+            // "*_effect", "(No beam effects)", "(No spike effects)" and the pack's "Sumon_Effect" typo in one rule.
             if (Has(a, "effect") || Has(a, "effects"))
             {
                 return new CharacterAction(CharacterActionKind.Vfx, null, a);
@@ -174,6 +189,39 @@ namespace IdleRPG.EditorTools
                 string action = Path.GetFileNameWithoutExtension(files[i]).Substring(character.Length + 1);
 
                 if (Resolve(action).Kind == CharacterActionKind.Ability)
+                {
+                    actionName = action;
+                    return files[i];
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// The character's first composited strip ("&lt;Action&gt;(With magic effects)"), or null when it has none.
+        /// <paramref name="actionName"/> receives the pack's own name for it.
+        ///
+        /// Used ONLY for a slot the character has no plain strip for, so the primary swing is never replaced by the
+        /// version with the spell baked into it. Files are sorted, so the same folder always yields the same pick.
+        /// </summary>
+        public static string FindCompositeStrip(string directory, string character, out string actionName)
+        {
+            actionName = null;
+
+            if (!Directory.Exists(directory))
+            {
+                return null;
+            }
+
+            string[] files = Directory.GetFiles(directory, character + "_*.png");
+            Array.Sort(files, StringComparer.Ordinal);
+
+            for (int i = 0; i < files.Length; i++)
+            {
+                string action = Path.GetFileNameWithoutExtension(files[i]).Substring(character.Length + 1);
+
+                if (Resolve(action).Kind == CharacterActionKind.Composite)
                 {
                     actionName = action;
                     return files[i];

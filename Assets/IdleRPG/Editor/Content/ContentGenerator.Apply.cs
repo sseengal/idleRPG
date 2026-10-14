@@ -35,7 +35,7 @@ namespace IdleRPG.EditorTools.Content
                     .SetColor("placeholderTint", ContentSpecIO.FromHex(spec.tint, Color.white))
                     .SetSprite("heroIcon", spec.icon)
                     .SetAsset("artSet", ResolveArtSet(spec.art))
-                    .SetAsset("ability", ResolveAbility(spec.ability, abilityById))
+                    .SetObjectList("abilities", ResolveAbilities(spec.abilities, abilityById))
                     .Apply();
 
                 byId[spec.id] = hero;
@@ -81,24 +81,39 @@ namespace IdleRPG.EditorTools.Content
         }
 
         /// <summary>
-        /// Looks up the ability a hero or enemy names. An empty id means "none" (null, not an error); an id that names
-        /// nothing is a spec typo, so it is reported - the asset would otherwise be silently ability-less.
+        /// Looks up the abilities a card names, in the order it names them. An empty list means "none" (not an error);
+        /// an id that names nothing is a spec typo and is reported, because that card would otherwise sit in the fight
+        /// with one ability quietly missing.
         /// </summary>
-        private static AbilityDef ResolveAbility(string id, Dictionary<string, AbilityDef> abilityById)
+        private static List<AbilityDef> ResolveAbilities(List<string> ids, Dictionary<string, AbilityDef> abilityById)
         {
-            if (string.IsNullOrEmpty(id))
+            List<AbilityDef> resolved = new List<AbilityDef>();
+
+            if (ids == null)
             {
-                return null;
+                return resolved;
             }
 
-            AbilityDef ability;
-            if (abilityById != null && abilityById.TryGetValue(id, out ability))
+            for (int i = 0; i < ids.Count; i++)
             {
-                return ability;
+                string id = ids[i];
+                if (string.IsNullOrEmpty(id))
+                {
+                    continue;
+                }
+
+                AbilityDef ability;
+                if (abilityById != null && abilityById.TryGetValue(id, out ability))
+                {
+                    resolved.Add(ability);
+                }
+                else
+                {
+                    Debug.LogWarning($"[ContentGenerator] Ability \"{id}\" is named by a hero/enemy but missing from abilities.json.");
+                }
             }
 
-            Debug.LogWarning($"[ContentGenerator] Ability \"{id}\" is named by a hero/enemy but missing from abilities.json.");
-            return null;
+            return resolved;
         }
 
         private static Dictionary<string, EnemyData> ApplyEnemies(EnemySpecFile file, Dictionary<string, AbilityDef> abilityById)
@@ -129,7 +144,7 @@ namespace IdleRPG.EditorTools.Content
                     .SetSprite("enemySprite", spec.sprite)
                     .SetAsset("artSet", ResolveArtSet(spec.art))
                     .SetObjectList("stageAlternates", ResolveArtSets(spec.stageAlternates))
-                    .SetAsset("ability", ResolveAbility(spec.ability, abilityById))
+                    .SetObjectList("abilities", ResolveAbilities(spec.abilities, abilityById))
                     .Set("firstStage", spec.firstStage)
                     .Set("lastStage", spec.lastStage)
                     .Apply();

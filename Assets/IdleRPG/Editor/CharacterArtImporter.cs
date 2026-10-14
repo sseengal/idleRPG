@@ -108,7 +108,7 @@ namespace IdleRPG.EditorTools
             // Per-action strips only (the bare <Char>.png combined sheet is point-imported, not sliced).
             // Names are MAPPED, not matched: the packs use Attack, Attack3, DEATH, Walk01, Flying and more.
             // Anything unrecognised is reported, never silently skipped.
-            int baseCount = 0, abilityCount = 0, vfxCount = 0;
+            int baseCount = 0, abilityCount = 0, vfxCount = 0, compositeCount = 0;
             var unknown = new List<string>();
 
             foreach (string strip in Directory.GetFiles(dir, character + "_*.png"))
@@ -130,6 +130,13 @@ namespace IdleRPG.EditorTools
                         abilityCount++;
                         break;
 
+                    case CharacterActionKind.Composite:
+                        // Sliced like the rest, but only PLACED when the character has a spare attack slot (see the
+                        // art-set fill below). Its frames exist either way, so a later rule change needs no re-slice.
+                        SliceStrip(ToAssetPath(strip));
+                        compositeCount++;
+                        break;
+
                     case CharacterActionKind.Vfx:
                         vfxCount++;
                         break;
@@ -149,7 +156,8 @@ namespace IdleRPG.EditorTools
 
             Debug.Log("[CharacterArtImporter] " + character + ": " + baseCount + " base strip(s) and " +
                       abilityCount + " special strip(s) imported; " + vfxCount +
-                      " effect strip(s) recognised, not imported.");
+                      " effect strip(s) recognised, not imported; " + compositeCount +
+                      " composited strip(s) sliced for a spare attack slot.");
 
             string sheet = dir + Path.DirectorySeparatorChar + character + ".png";
             if (File.Exists(sheet))
@@ -368,6 +376,32 @@ namespace IdleRPG.EditorTools
             art.Hurt = LoadFrames(character, "Hurt", dir);
             art.Death = LoadFrames(character, "Death", dir);
 
+            // A composited strip ("<Action>(With magic effects)") is the same wind-up with its spell already drawn
+            // into the frames - real animation the game can show. It may fill an attack slot this character has NO
+            // plain strip for, and never Attack01, so the primary swing is never replaced by the version with the
+            // spell baked in. The Wizard's plain attacks stop at Attack02, so its composited cast becomes Attack03
+            // and its second ability has a distinct clip to play instead of repeating its basic attack.
+            bool spare02 = IsEmpty(art.Attack02);
+            if (spare02 || IsEmpty(art.Attack03))
+            {
+                Sprite[] composite = LoadCompositeFrames(character, dir, out string compositeAction);
+
+                if (composite.Length > 0)
+                {
+                    if (spare02)
+                    {
+                        art.Attack02 = composite;
+                    }
+                    else
+                    {
+                        art.Attack03 = composite;
+                    }
+
+                    Debug.Log($"[CharacterArtImporter] {character}: composited strip \"{compositeAction}\" fills the " +
+                              $"spare {(spare02 ? "Attack02" : "Attack03")} slot ({composite.Length} frames).");
+                }
+            }
+
             // The named special (Block / Heal / Beam / Spike / Summon) is the ability material: sliced and cropped
             // exactly like a base strip, with its own fps and its own measured strike frame, so an ability can play
             // its own animation and land its effect on the frame the pose extends.
@@ -528,6 +562,23 @@ namespace IdleRPG.EditorTools
         {
             // The slot is FOUND, not guessed: the pack may call the same animation Attack, Attack3, Walk01 or Flying.
             string strip = CharacterActionResolver.FindStrip(dir, character, slot);
+
+            return strip == null ? new Sprite[0] : LoadStripFrames(character, strip);
+        }
+
+        /// <summary>True when a slot holds no frames at all.</summary>
+        private static bool IsEmpty(Sprite[] frames)
+        {
+            return frames == null || frames.Length == 0;
+        }
+
+        /// <summary>
+        /// The character's first composited strip ("&lt;Action&gt;(With magic effects)") as frames, or an empty array.
+        /// <paramref name="actionName"/> receives the pack's own name for it, for the log.
+        /// </summary>
+        private static Sprite[] LoadCompositeFrames(string character, string dir, out string actionName)
+        {
+            string strip = CharacterActionResolver.FindCompositeStrip(dir, character, out actionName);
 
             return strip == null ? new Sprite[0] : LoadStripFrames(character, strip);
         }

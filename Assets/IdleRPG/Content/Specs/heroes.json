@@ -7,7 +7,10 @@
             "displayName": "Soldier",
             "icon": "hero_soldier",
             "art": "Soldier",
-            "ability": "soldier_charge",
+            "abilities": [
+                "soldier_charge",
+                "war_cry"
+            ],
             "baseHealth": 110.0,
             "baseAttack": 8.0,
             "baseDefense": 4.0,
@@ -20,7 +23,10 @@
             "displayName": "Knight",
             "icon": "hero_knight",
             "art": "Knight",
-            "ability": "shield_wall",
+            "abilities": [
+                "shield_wall",
+                "heavy_strike"
+            ],
             "baseHealth": 240.0,
             "baseAttack": 12.0,
             "baseDefense": 12.0,
@@ -33,7 +39,10 @@
             "displayName": "Mage",
             "icon": "hero_mage",
             "art": "Wizard",
-            "ability": "fireball",
+            "abilities": [
+                "fireball",
+                "arcane_burst"
+            ],
             "baseHealth": 130.0,
             "baseAttack": 16.0,
             "baseDefense": 5.0,
@@ -42,4 +51,3 @@
         }
     ]
 }
-

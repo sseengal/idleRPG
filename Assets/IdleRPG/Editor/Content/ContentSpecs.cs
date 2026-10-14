@@ -35,10 +35,11 @@ namespace IdleRPG.EditorTools.Content
         public float baseDefense = 5f;
         public float attackIntervalSec = 1.5f;
         /// <summary>
-        /// Ability id from abilities.json ("shield_wall"). Empty = no ability. A hero's ability is only usable once
-        /// the player has unlocked it (token purchase gated behind a stage), so this is what it CAN have.
+        /// Ability ids from abilities.json that this hero may OWN ("shield_wall", "heavy_strike"). Empty = none.
+        /// Each one sits behind its own unlock (token cost + stage gate). The player equips exactly ONE of them and
+        /// can never unequip - a bought hero ability is always switched on (Ability-Plan).
         /// </summary>
-        public string ability = "";
+        public List<string> abilities = new List<string>();
         /// <summary>Placeholder tint as "#RRGGBBAA".</summary>
         public string tint = "#FFFFFFFF";
     }
@@ -138,10 +139,10 @@ namespace IdleRPG.EditorTools.Content
 
         public string tint = "#FFFFFFFF";
         /// <summary>
-        /// Ability id from abilities.json ("enemy_block"). Empty = no ability. Enemies are NOT gated by unlock stage or
-        /// tokens - they simply cast it on its own cooldown (Ability-Plan decision 5).
+        /// Ability ids from abilities.json that this enemy may cast ("enemy_block"). Empty = none. Enemies are NOT
+        /// gated by unlock stage or tokens, and they cast on their own cooldown (Ability-Plan decision 5).
         /// </summary>
-        public string ability = "";
+        public List<string> abilities = new List<string>();
         /// <summary>"inherit" | "frontmost" | "lowesthealthpercent" | "random" | "backlinefirst".</summary>
         public string targetRule = "inherit";
     }

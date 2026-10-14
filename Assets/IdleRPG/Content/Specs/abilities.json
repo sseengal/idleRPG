@@ -2,6 +2,21 @@
     "version": 1,
     "abilities": [
         {
+            "id": "arcane_burst",
+            "displayName": "Arcane Burst",
+            "description": "The Wizard looses the full spell - a longer, heavier cast.",
+            "kind": "damage",
+            "artSlot": "Attack03",
+            "cooldownSec": 18.0,
+            "shieldFactor": 0.5,
+            "shieldSeconds": 4.0,
+            "healFraction": 0.25,
+            "damageMultiplier": 2.4,
+            "target": "frontenemy",
+            "unlockStage": 20,
+            "tokenCost": 6.0
+        },
+        {
             "id": "enemy_beam",
             "displayName": "Beam",
             "kind": "damage",
@@ -77,6 +92,21 @@
             "description": "Hurls a fireball at the front enemy for heavy damage."
         },
         {
+            "id": "heavy_strike",
+            "displayName": "Heavy Strike",
+            "description": "The Knight follows through with a wide, heavier swing.",
+            "kind": "damage",
+            "artSlot": "Attack02",
+            "cooldownSec": 10.0,
+            "shieldFactor": 0.5,
+            "shieldSeconds": 4.0,
+            "healFraction": 0.25,
+            "damageMultiplier": 1.7,
+            "target": "frontenemy",
+            "unlockStage": 8,
+            "tokenCost": 3.0
+        },
+        {
             "id": "shield_wall",
             "displayName": "Shield Wall",
             "kind": "shield",
@@ -105,6 +135,21 @@
             "unlockStage": 8,
             "tokenCost": 3.0,
             "description": "Drives a heavy blow into the front enemy."
+        },
+        {
+            "id": "war_cry",
+            "displayName": "War Cry",
+            "description": "The Soldier braces the whole party: damage taken is cut for a few seconds.",
+            "kind": "shield",
+            "artSlot": "Attack03",
+            "cooldownSec": 20.0,
+            "shieldFactor": 0.75,
+            "shieldSeconds": 4.0,
+            "healFraction": 0.25,
+            "damageMultiplier": 1.8,
+            "target": "party",
+            "unlockStage": 14,
+            "tokenCost": 5.0
         }
     ]
 }

@@ -45,7 +45,22 @@ MonoBehaviour:
   - {fileID: 3626111044525762897, guid: b515b644bd4a34fa9a0d210be70109cc, type: 3}
   - {fileID: 1257542386834920961, guid: b515b644bd4a34fa9a0d210be70109cc, type: 3}
   - {fileID: 7362704776350770244, guid: b515b644bd4a34fa9a0d210be70109cc, type: 3}
-  Attack03: []
+  Attack03:
+  - {fileID: 9203052997628377331, guid: fab4ba2bed0fe4a17b79d1e1dfe76224, type: 3}
+  - {fileID: -530799108775956634, guid: fab4ba2bed0fe4a17b79d1e1dfe76224, type: 3}
+  - {fileID: 6213386146940309023, guid: fab4ba2bed0fe4a17b79d1e1dfe76224, type: 3}
+  - {fileID: 5422196481918989558, guid: fab4ba2bed0fe4a17b79d1e1dfe76224, type: 3}
+  - {fileID: -7238306544568976644, guid: fab4ba2bed0fe4a17b79d1e1dfe76224, type: 3}
+  - {fileID: -1282987432884806065, guid: fab4ba2bed0fe4a17b79d1e1dfe76224, type: 3}
+  - {fileID: 8598593867185801517, guid: fab4ba2bed0fe4a17b79d1e1dfe76224, type: 3}
+  - {fileID: -4641742215885521171, guid: fab4ba2bed0fe4a17b79d1e1dfe76224, type: 3}
+  - {fileID: 7578987712460975780, guid: fab4ba2bed0fe4a17b79d1e1dfe76224, type: 3}
+  - {fileID: -2534004996235081345, guid: fab4ba2bed0fe4a17b79d1e1dfe76224, type: 3}
+  - {fileID: -2250028454629025669, guid: fab4ba2bed0fe4a17b79d1e1dfe76224, type: 3}
+  - {fileID: 8033787614141715911, guid: fab4ba2bed0fe4a17b79d1e1dfe76224, type: 3}
+  - {fileID: 8772314239080089889, guid: fab4ba2bed0fe4a17b79d1e1dfe76224, type: 3}
+  - {fileID: 7706984827796750154, guid: fab4ba2bed0fe4a17b79d1e1dfe76224, type: 3}
+  - {fileID: 7396143408516357480, guid: fab4ba2bed0fe4a17b79d1e1dfe76224, type: 3}
   Hurt:
   - {fileID: -4370345954088884294, guid: 71f1948671b43437c8971d80692b99ad, type: 3}
   - {fileID: 3443203245855315443, guid: 71f1948671b43437c8971d80692b99ad, type: 3}
