@@ -2,7 +2,7 @@
 
 > **Everything that describes this game lives here.** One folder, one source of truth per topic.
 > Root `README.md` is the quick start (clone → open → play); everything deeper is in this folder.
-> Last restructured: Step 11e (2026-09-21); Art-Pipeline.md added 2026-09-26; Launch-Plan.md added 2026-10-11; Character-Catalog.md, Stage-Ladder.md and Ability-Map.md added 2026-10-11.
+> Last restructured: Step 11e (2026-09-21); Art-Pipeline.md added 2026-09-26; Launch-Plan.md added 2026-10-11; Character-Catalog.md, Stage-Ladder.md and Ability-Map.md added 2026-10-11; UI-Layout.md added 2026-10-14.
 
 ---
 
@@ -23,6 +23,7 @@
 | Monetisation plan: sources, sinks, IAP mock, guards | `Monetisation.md` |
 | Levelling, prestige, tracks, roster | `Progression.md` |
 | Screens, navigation, log contract, accessibility | `UI-UX.md` |
+| Containers, the spacing ladder, mobile scaling | **`UI-Layout.md`** |
 | Art pipeline: HD-2D look, asset volume, tooling, perf budgets (G11/G12) | `Art-Pipeline.md` |
 
 ## Status legend (used in every doc)
@@ -61,6 +62,7 @@ Docs/
   Manual-Tests.md    <- the one manual-testing runbook (proof lap, phone list, device passes, store tests) - do these
   B10-owner-inputs.md<- your step-by-step list to complete BEFORE B10 can start
   UI-UX.md           <- screens, navigation, battle log contract
+  UI-Layout.md       <- containers, the spacing ladder, mobile scaling
   Art-Pipeline.md    <- HD-2D art pipeline, asset volume, perf budgets (G11/G12)
   REVIEW.md          <- deletion candidates / resolved removals
 ```

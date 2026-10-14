@@ -91,6 +91,24 @@ the game came out in Unity's smooth default font (Liberation Sans) at roughly ha
 two screens matched. Measured before: 136 labels in Liberation Sans. After: 0, and only 26/30/32/36/40/48/56 in use.
 Full record: `Checklist.md` §1af.
 
+### 1c. Containers and gaps - one ruler, no hand-written numbers (2026-10-14)
+
+The same idea as the type scale, applied to the space between things. Every gap picks a **role** from
+`Scripts/UI/UiSpace.cs` (the ladder: None 0, Hairline 2, Tight 4, Snug 6, Small 8, Base 10, Medium 12,
+Gutter 14, Large 24; plus roles such as `ScreenMargin` 14, `CardPadding` 12, `RowGap` 8).
+
+The structure underneath: three layers (main, damage, modal), every overlay on a **safe box**, two
+**fixed-height** chrome bars (header 115, nav 230) with the page stretched between them, and
+`matchWidthOrHeight = 0` (match width) on every canvas, so taps and text stay the same on every phone and a
+taller phone shows more content.
+
+**The guard:** `Tools > Idle RPG > UI > Check Spacing` fails on a hand-written gap (a non-zero inset, a
+hand-built `RectOffset`, a numeric scroll / stack spacing). It runs inside `Run All Checks (regression)` too.
+
+**The full picture - containers, the ladder, the mobile decisions, the measured numbers and the known
+exceptions - is in `UI-Layout.md`.** That file owns spacing; this one owns screens and text.
+
+
 ## 2. Navigation model
 
 MVP shell today: header + Battle/Management pages + nav (BATTLE / UPGRADES / ASCEND / SHOP).
