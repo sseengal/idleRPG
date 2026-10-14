@@ -19,8 +19,11 @@ namespace IdleRPG.UI
         /// <summary>One upgrade row: name + effect + level + cost, with its buy buttons on the right.</summary>
         public const float RowHeight = 180f;
 
-        /// <summary>Gap between rows in a stacked list.</summary>
-        public const float RowGap = 8f;
+        /// <summary>
+        /// Gap between rows in a stacked list. Points at <see cref="UiSpace.RowGap"/> so the spacing ladder owns
+        /// the number; the name stays because the touch rules (and their docs) use it.
+        /// </summary>
+        public const float RowGap = UiSpace.RowGap;
 
         /// <summary>How tall a list of <paramref name="rows"/> rows is, including the gaps between them.</summary>
         public static float ListHeight(int rows)

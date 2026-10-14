@@ -27,11 +27,11 @@ namespace IdleRPG.EditorTools
             List<PrestigeUpgradeData> prestigeUpgrades)
         {
             Image shell = UiFactory.Panel("ManagementShell", pageRoot, "ui_panel", new Color(1f, 1f, 1f, 0.98f));
-            UiFactory.Stretch(shell.rectTransform, 14f, 6f, 14f, 6f);
+            UiFactory.Stretch(shell.rectTransform, UiSpace.ScreenMargin, UiSpace.Snug, UiSpace.ScreenMargin, UiSpace.Snug);
             TabController tabs = shell.gameObject.AddComponent<TabController>();
 
             GameObject panelsRoot = UiFactory.Node("Panels", shell.transform);
-            UiFactory.Anchor(panelsRoot.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, 10f, 10f, 10f, 10f);
+            UiFactory.Anchor(panelsRoot.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, UiSpace.Base, UiSpace.Base, UiSpace.Base, UiSpace.Base);
 
             GameObject partyPanel = BuildPartyPanel(panelsRoot.transform);
             GameObject upgradePanel = BuildUpgradePanel(panelsRoot.transform, partyConfig);
@@ -83,7 +83,7 @@ namespace IdleRPG.EditorTools
                 float xMin = i * width;
 
                 Image buttonImage = KitPanel("Nav" + labels[i], bar.transform, UiTheme.PanelLight, raycast: true);
-                UiFactory.Anchor(buttonImage.rectTransform, new Vector2(xMin, 0.08f), new Vector2(xMin + width, 0.92f), 6f, 0f, 6f, 0f);
+                UiFactory.Anchor(buttonImage.rectTransform, new Vector2(xMin, 0.08f), new Vector2(xMin + width, 0.92f), UiSpace.Snug, UiSpace.None, UiSpace.Snug, UiSpace.None);
 
                 Button button = buttonImage.gameObject.AddComponent<Button>();
                 button.targetGraphic = buttonImage;
@@ -93,7 +93,7 @@ namespace IdleRPG.EditorTools
                 // Auto-sized: "UPGRADES" is the longest tab word and a tab is only ~198 units wide, so a longer
                 // label shrinks towards UiType.Micro instead of spilling over its neighbour.
                 UiType.ApplyAuto(label, UiType.Role.Small);
-                UiFactory.Stretch(label.rectTransform, 8f, 4f, 8f, 4f);
+                UiFactory.Stretch(label.rectTransform, UiSpace.Small, UiSpace.Tight, UiSpace.Small, UiSpace.Tight);
 
                 buttons[i] = button;
                 backgrounds[i] = button.targetGraphic as Image;
@@ -146,8 +146,8 @@ namespace IdleRPG.EditorTools
                 TextAlignmentOptions.MidlineLeft, DimTextColor);
             UiFactory.Anchor(title.rectTransform, new Vector2(0.02f, 0.945f), new Vector2(0.98f, 1f));
 
-            ScrollRect scroll = UiFactory.CreateScrollView(panel.transform, "UpgradeScroll", 10f, new RectOffset(4, 4, 4, 4), out RectTransform list);
-            UiFactory.Anchor(scroll.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, 0.93f), 2f, 2f, 2f, 2f);
+            ScrollRect scroll = UiFactory.CreateScrollView(panel.transform, "UpgradeScroll", UiSpace.Base, UiSpace.Padding(UiSpace.Tight), out RectTransform list);
+            UiFactory.Anchor(scroll.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, 0.93f), UiSpace.Hairline, UiSpace.Hairline, UiSpace.Hairline, UiSpace.Hairline);
 
             HeroUpgradeRowUI[] rows = new HeroUpgradeRowUI[Mathf.Max(1, partyConfig != null ? partyConfig.ValidHeroCount : 1)];
 
@@ -194,7 +194,7 @@ namespace IdleRPG.EditorTools
             // layout left buttons about 9 dp tall.
             GameObject list = UiFactory.Node("Stats", row.transform);
             UiFactory.Anchor(list.GetComponent<RectTransform>(), new Vector2(0.02f, listBottom), new Vector2(0.98f, listTop));
-            UiFactory.VerticalStack(list, UiTouch.RowGap, new RectOffset(0, 0, 0, 0));
+            UiFactory.VerticalStack(list, UiSpace.RowGap, UiSpace.Padding(UiSpace.None));
 
             HeroUpgradeRowUI.StatRow[] statRows =
             {
@@ -287,8 +287,8 @@ namespace IdleRPG.EditorTools
             UiFactory.Anchor(ascendButton.GetComponent<RectTransform>(), new Vector2(0.24f, 0.60f), new Vector2(0.76f, 0.77f));
             TextMeshProUGUI ascendButtonLabel = ascendButton.GetComponentInChildren<TextMeshProUGUI>();
 
-            ScrollRect scroll = UiFactory.CreateScrollView(panel.transform, "PrestigeScroll", 8f, new RectOffset(4, 4, 4, 4), out RectTransform list);
-            UiFactory.Anchor(scroll.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, 0.57f), 2f, 2f, 2f, 0f);
+            ScrollRect scroll = UiFactory.CreateScrollView(panel.transform, "PrestigeScroll", UiSpace.Small, UiSpace.Padding(UiSpace.Tight), out RectTransform list);
+            UiFactory.Anchor(scroll.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, 0.57f), UiSpace.Hairline, UiSpace.Hairline, UiSpace.Hairline, UiSpace.None);
 
             PrestigeUpgradeRowUI[] rows = new PrestigeUpgradeRowUI[TokenRowCount(prestigeUpgrades)];
 
@@ -398,8 +398,8 @@ namespace IdleRPG.EditorTools
             TextMeshProUGUI watchAdLabel = watchAdButton.GetComponentInChildren<TextMeshProUGUI>();
 
             // The offer shelf, styled like the prestige tree (same scroll band, same card rows).
-            ScrollRect scroll = UiFactory.CreateScrollView(panel.transform, "Offers", 8f, new RectOffset(4, 4, 4, 4), out RectTransform offerRoot);
-            UiFactory.Anchor(scroll.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, 0.57f), 2f, 2f, 2f, 0f);
+            ScrollRect scroll = UiFactory.CreateScrollView(panel.transform, "Offers", UiSpace.Small, UiSpace.Padding(UiSpace.Tight), out RectTransform offerRoot);
+            UiFactory.Anchor(scroll.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, 0.57f), UiSpace.Hairline, UiSpace.Hairline, UiSpace.Hairline, UiSpace.None);
 
             SceneWiringUtility.SetField(ui, "gemsLabel", gemsLabel);
             SceneWiringUtility.SetField(ui, "watchAdButton", watchAdButton);

@@ -46,7 +46,7 @@ namespace IdleRPG.UI
         /// <summary>The gap between two big sections on a page.</summary>
         public const float SectionGap = Small;
 
-        /// <summary>The gap between two rows in a list. The same value as <see cref="UiTouch.RowGap"/> on purpose.</summary>
+        /// <summary>The gap between two rows in a list. <see cref="UiTouch.RowGap"/> points here, so this is the one number.</summary>
         public const float RowGap = Small;
 
         /// <summary>The inset from a card or dialog edge to its content.</summary>
