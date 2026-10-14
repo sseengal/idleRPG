@@ -1781,8 +1781,10 @@ saved scene. Run it out of Play Mode.
 work and the rest is pre-existing scene churn; this work is reproducible from the builder. The three inventory
 numbers (56 / 18 / -5) become named constants only if that tab is un-parked.
 
-**Not fixed here:** the header is still crowded - the RANKS button sits over the token chip and a long value can
-slide under it. That is a header layout pass (`UI-Layout.md` §7), not a spacing fault.
+**Fixed right after:** the header crowding. The chips and RANKS now share one layout-group row, so they divide the
+width and cannot overlap (measured: Gold 38-328, Gems 336-626, Tokens 634-924, RANKS 932-1042 - 8 units apart,
+no overlap). The management page bands are also named now, so a band change is one edit. Both are recorded in
+`UI-Layout.md` §2c and §2d.
 
 
 ## 1e. Remaining path to MVP  ·  **what is left, in order**

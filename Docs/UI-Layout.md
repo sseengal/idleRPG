@@ -61,6 +61,45 @@ builds both, so neither can change size with the screen.
 Fractions of the page (so they follow whatever height the page gets): stage/wave row **0.93–0.99**, viewport
 **0.39–0.93**, log/abilities tab strip **0.34–0.39**, log or abilities panel **0–0.34**.
 
+### 2c. The header is a row, not hand-placed chips (2026-10-14)
+
+The currency chips and the RANKS button live in one `ChipRow` under the header, driven by a
+`HorizontalLayoutGroup`. The three chips carry `LayoutElement.flexibleWidth = 1` and divide the width; the RANKS
+button takes a fixed 110-unit slice at the end.
+
+Why: they used to be placed by hand — the chips at 0.03 / 0.35 / 0.65 of the header, and the runtime RANKS button
+at 0.88 — and the token chip and the button **overlapped by about 95 units**. That is how a long currency value
+ended up sliding under the button. Two numbers, tuned separately, never compared.
+
+Measured in Play (row width 1004): Gold 38–328, Gems 336–626, Tokens 634–924, RANKS 932–1042 — all 8 units
+apart, 77 tall, no overlap.
+
+The boost chip stays on the **header**, not in the row: it is an overlay badge, not a fourth currency, so the
+layout group must not size it.
+
+### 2d. Page bands have names (2026-10-14)
+
+The management panels used to place their bands with bare fractions. They are now named once, at the top of
+`MvpSceneBuilder.Panels.cs`:
+
+| Constant | Value | Used by |
+|---|---|---|
+| `BandTop` | 1.0 | all |
+| `BandTitleBottom` | 0.88 | ASCEND + SHOP |
+| `BandSubLineBottom` | 0.79 | ASCEND + SHOP |
+| `BandActionTop` / `BandActionBottom` | 0.77 / 0.60 | ASCEND + SHOP |
+| `BandListTop` | 0.57 | ASCEND + SHOP |
+| `BandUpgradesTitleBottom` / `BandUpgradesListTop` | 0.945 / 0.93 | UPGRADES (it has no action band) |
+
+A band change is one edit, and the two mirrored screens cannot drift apart. It was a **pure rename** — no pixel
+moved.
+
+**Bands stay fractions on purpose.** A band is a proportion of a flexible page, not a gap in canvas units, so it
+is not on the `UiSpace` ladder. On phones this is safe: match-width scaling means the page is **never shorter
+than its 1575-unit design height** (every phone is at least 16:9 tall), so a fraction band is never smaller than
+designed. It would bite on a short, wide screen — a tablet — see §3. If the v1.1 font-scale or localization pass
+ever overflows a band, convert *that band* to content-sizing. Do not build a container system for it.
+
 ## 3. Scaling: match WIDTH
 
 All three canvases (and the UI lab) use `ScaleWithScreenSize`, reference **1080 × 1920**,
@@ -143,7 +182,8 @@ Sans) that do not exist in the saved scene.
 |---|---|
 | `InventoryTabUI.Grid.cs` | allow-listed: 56 and 18 are layout offsets, −5 is the selection ring's overhang. Not gaps |
 | `UiLabSceneBuilder.cs`, `DevOverlay.cs` | allow-listed: the lab compares looks; the overlay is developer UI |
-| Header crowding | the RANKS button sits over the token chip, and a long value (`1.25M`) can slide under it. A **header layout pass**, not a spacing fault |
+| Header row | **fixed 2026-10-14** — the chips and RANKS share one layout-group row (§2c), so they divide the width and cannot overlap |
+| Page bands | named (§2d): ASCEND + SHOP share one set; UPGRADES has its own. Change one constant, not four screens |
 | Tablets | bands compress on a short, wide screen (see §3). Fix = cap the canvas width, if tablets matter |
 | Inventory 56 / 18 / −5 | should become named constants (or new roles) if the inventory tab is un-parked |
 | Toast | sits inside the main safe box at 0.32–0.40 of the safe rect (it used to be on the raw canvas) |
@@ -167,4 +207,6 @@ Sans) that do not exist in the saved scene.
 | 4 | the battle page, the management panels, the shared builders, the header, party and shop onto roles — each sweep verified **pixel-lossless** (`Main.unity` byte-identical) |
 | 5 | `UiSpacingCheck`, registered in `Run All Checks` |
 | 6 | this document |
+| 7 | the header row (`ChipRow`) — fixes the chip / RANKS overlap (§2c) |
+| 8 | named management page bands — a pure rename (§2d) |
 
