@@ -69,7 +69,7 @@ namespace IdleRPG.EditorTools
             GameObject managementPage, TabController tabs, GameObject damageCanvas)
         {
             Image bar = KitPanel("NavBar", safeArea, UiTheme.Panel);
-            UiFactory.Anchor(bar.rectTransform, Vector2.zero, new Vector2(1f, NavBarTop), 14f, 10f, 14f, 6f);
+            PinBar(bar.rectTransform, top: false, NavBandHeight, UiSpace.ScreenMargin, UiSpace.Base);
             ScreenController controller = bar.gameObject.AddComponent<ScreenController>();
 
             string[] labels = { "BATTLE", "PARTY", "UPGRADES", "ASCEND", "SHOP" };

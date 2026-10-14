@@ -183,7 +183,7 @@ namespace IdleRPG.EditorTools
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(ReferenceWidth, ReferenceHeight);
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-            scaler.matchWidthOrHeight = 0.5f;
+            scaler.matchWidthOrHeight = 0f;   // match width: the lab must scale like the shipping canvas
 
             return canvasObject.GetComponent<RectTransform>();
         }

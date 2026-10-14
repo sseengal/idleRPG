@@ -26,7 +26,7 @@ namespace IdleRPG.EditorTools
         private static HudHeaderUI BuildHeader(RectTransform safeArea)
         {
             Image header = KitPanel("Header", safeArea, UiTheme.Panel);
-            UiFactory.Anchor(header.rectTransform, new Vector2(0f, HeaderBottom), Vector2.one, 14f, 0f, 14f, 14f);
+            PinBar(header.rectTransform, top: true, HeaderBandHeight, UiSpace.ScreenMargin, UiSpace.ScreenMargin);
             HudHeaderUI view = header.gameObject.AddComponent<HudHeaderUI>();
 
             // Currency chips (icon + value), evenly spaced across the top row.
@@ -41,7 +41,7 @@ namespace IdleRPG.EditorTools
 
             TextMeshProUGUI boostText = UiFactory.Text("BoostLabel", boostChip.transform, "x2", UiType.Role.Section,
                 TextAlignmentOptions.Center, UiTheme.InkOnAccent);
-            UiFactory.Stretch(boostText.rectTransform, 12f, 4f, 12f, 4f);
+            UiFactory.Stretch(boostText.rectTransform, UiSpace.Medium, UiSpace.Tight, UiSpace.Medium, UiSpace.Tight);
             boostChip.gameObject.SetActive(false);
 
             SceneWiringUtility.SetField(view, "goldText", goldText);
@@ -121,7 +121,7 @@ namespace IdleRPG.EditorTools
             out RectTransform enemyAnchor)
         {
             GameObject viewport = UiFactory.Node("Viewport", pageRoot);
-            UiFactory.Anchor(viewport.GetComponent<RectTransform>(), new Vector2(0f, BattleViewportBottom), new Vector2(1f, StageRowMinY), 14f, 6f, 14f, 6f);
+            UiFactory.Anchor(viewport.GetComponent<RectTransform>(), new Vector2(0f, BattleViewportBottom), new Vector2(1f, StageRowMinY), UiSpace.ScreenMargin, UiSpace.Snug, UiSpace.ScreenMargin, UiSpace.Snug);
 
             // Clips the cover-fitted backdrop so its overflow never draws over the header or combat log.
             viewport.AddComponent<RectMask2D>();
@@ -198,7 +198,7 @@ namespace IdleRPG.EditorTools
 
             TextMeshProUGUI label = UiFactory.Text("StageLabel", row.transform, "Stage 1", UiType.Role.Section,
                 TextAlignmentOptions.Center, UiTheme.Text);
-            UiFactory.Stretch(label.rectTransform, 24f, 0f, 24f, 0f);
+            UiFactory.Stretch(label.rectTransform, UiSpace.Large, UiSpace.None, UiSpace.Large, UiSpace.None);
 
             // Same field HudHeaderUI already drives on StageChanged - just relocated out of the header.
             SceneWiringUtility.SetField(header, "stageText", label);
@@ -211,7 +211,7 @@ namespace IdleRPG.EditorTools
         private static void BuildLogHeaderRow(RectTransform pageRoot, CombatLogUI log, AbilityPanelUI abilities)
         {
             Image row = KitPanel("BattleLogHeader", pageRoot, UiTheme.Panel);
-            UiFactory.Anchor(row.rectTransform, new Vector2(0f, LogTop), new Vector2(1f, BattleViewportBottom), 14f, 0f, 14f, 0f);
+            UiFactory.Anchor(row.rectTransform, new Vector2(0f, LogTop), new Vector2(1f, BattleViewportBottom), UiSpace.ScreenMargin, UiSpace.None, UiSpace.ScreenMargin, UiSpace.None);
 
             TabController tabs = row.gameObject.AddComponent<TabController>();
 
@@ -245,7 +245,7 @@ namespace IdleRPG.EditorTools
         private static Button BuildTabButton(Transform parent, string name, string label, Vector2 min, Vector2 max)
         {
             Button button = UiFactory.Button(name, parent, label, "ui_tab_off", UiType.Role.Section, UiTheme.Text, () => { });
-            UiFactory.Anchor(button.GetComponent<RectTransform>(), min, max, 6f, 2f, 6f, 2f);
+            UiFactory.Anchor(button.GetComponent<RectTransform>(), min, max, UiSpace.Snug, UiSpace.Hairline, UiSpace.Snug, UiSpace.Hairline);
             return button;
         }
 
@@ -256,7 +256,7 @@ namespace IdleRPG.EditorTools
         private static AbilityPanelUI BuildAbilityPanel(RectTransform pageRoot, int heroCount)
         {
             Image strip = KitPanel("AbilityPanel", pageRoot, UiTheme.Panel, raycast: true);
-            UiFactory.Anchor(strip.rectTransform, Vector2.zero, new Vector2(1f, LogTop), 14f, 6f, 14f, 6f);
+            UiFactory.Anchor(strip.rectTransform, Vector2.zero, new Vector2(1f, LogTop), UiSpace.ScreenMargin, UiSpace.Snug, UiSpace.ScreenMargin, UiSpace.Snug);
 
             AbilityPanelUI panel = strip.gameObject.AddComponent<AbilityPanelUI>();
             int columns = heroCount < 1 ? 1 : heroCount;
@@ -284,7 +284,7 @@ namespace IdleRPG.EditorTools
         {
             GameObject column = UiFactory.Node("Hero" + index, parent);
             UiFactory.Anchor(column.GetComponent<RectTransform>(),
-                new Vector2(index / (float)total, 0f), new Vector2((index + 1) / (float)total, 1f), 8f, 8f, 8f, 8f);
+                new Vector2(index / (float)total, 0f), new Vector2((index + 1) / (float)total, 1f), UiSpace.Small, UiSpace.Small, UiSpace.Small, UiSpace.Small);
 
             // Square by height (~203 units at the reference size), so the art is not stretched; preserveAspect
             // keeps the sprite itself correct inside it.
@@ -418,10 +418,10 @@ namespace IdleRPG.EditorTools
         private static CombatLogUI BuildCombatLog(RectTransform pageRoot)
         {
             Image strip = KitPanel("CombatLog", pageRoot, UiTheme.Panel, raycast: true);
-            UiFactory.Anchor(strip.rectTransform, Vector2.zero, new Vector2(1f, LogTop), 14f, 6f, 14f, 6f);
+            UiFactory.Anchor(strip.rectTransform, Vector2.zero, new Vector2(1f, LogTop), UiSpace.ScreenMargin, UiSpace.Snug, UiSpace.ScreenMargin, UiSpace.Snug);
             CombatLogUI ui = strip.gameObject.AddComponent<CombatLogUI>();
 
-            ScrollRect scroll = UiFactory.CreateScrollView(strip.transform, "Scroll", 2f, new RectOffset(10, 10, 6, 6), out RectTransform content, autoSizeContent: false);
+            ScrollRect scroll = UiFactory.CreateScrollView(strip.transform, "Scroll", UiSpace.Hairline, UiSpace.Padding(UiSpace.Base, UiSpace.Snug), out RectTransform content, autoSizeContent: false);
 
         // The feed drives its own scroll position, so the ScrollRect must never spring the content back:
         // Clamped, no inertia.
