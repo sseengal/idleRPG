@@ -31,10 +31,14 @@ namespace IdleRPG.EditorTools
         private const float ReferenceWidth = 1080f;
         private const float ReferenceHeight = 1920f;
 
-        // Layout bands, as fractions of screen height.
-        private const float HeaderBottom = 0.94f;   // header: HeaderBottom .. 1 (slim: just the currencies + boost)
-        private const float PagesBottom = 0.12f;    // page area: PagesBottom .. HeaderBottom
-        private const float NavBarTop = 0.12f;      // nav bar: 0 .. NavBarTop
+        // The two chrome bands are FIXED heights, not screen fractions.
+        //
+        // Why: a fraction makes the bars change size with the screen. On a tall phone the extra height was split
+        // between the bars and the page, and on a short screen the top bar could fall below the 56-unit currency
+        // numbers. One rule now: extra height belongs to the page, the bars never move.
+        // The values reproduce the 1080x1920 design (header 6% and nav 12% of 1920), so nothing shifts on 9:16.
+        private const float HeaderBandHeight = 115f;   // top bar: the currency chips + boost, pinned to the top
+        private const float NavBandHeight = 230f;      // bottom bar: the five nav buttons, pinned to the bottom
 
         // Bands inside the battle page (page coords): log 0..LogTop, log-header 0.34..0.39,
         // viewport 0.39..StageRowMinY, stage/wave row 0.93..0.99.
@@ -59,8 +63,10 @@ namespace IdleRPG.EditorTools
                 return;
             }
 
+            // The builder READS balance data, it never writes it. This line used to regenerate every data asset,
+            // so each rebuild silently reset live numbers: enemy stats went back to generator values (Slime 57 -> 60)
+            // and the stage ladder lost its wave entries. Generate data on purpose, never as a side effect of a scene.
             PlaceholderSpriteGenerator.GenerateAll();
-            DataAssetGenerator.GenerateAll();
 
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
             PrepareCamera();
@@ -95,8 +101,13 @@ namespace IdleRPG.EditorTools
 
             RectTransform canvasRoot = CreateCanvas(hudRoot);
             RectTransform damageRoot = CreateDamageCanvas(hudRoot);
-            RectTransform modalRoot = CreateModalCanvas(hudRoot);
+            RectTransform modalCanvas = CreateModalCanvas(hudRoot);
             RectTransform safeArea = CreateSafeArea(canvasRoot);
+
+            // The modal canvas gets its own safe box. A card near a screen edge (the ranks sheet, the offline claim)
+            // must clear a notch or a gesture bar just like the HUD bars do, so every card hangs off this node and
+            // never off the raw canvas.
+            RectTransform modalRoot = CreateSafeArea(modalCanvas);
 
             HudHeaderUI header = BuildHeader(safeArea);
 
@@ -115,7 +126,7 @@ namespace IdleRPG.EditorTools
             ScreenController screens = BuildNavBar(safeArea, battlePage, managementPage, tabs, damageRoot.gameObject);
             OfflineRewardsPopup offlinePopup = BuildOfflinePopup(modalRoot);
             DefeatModalUI defeatModal = BuildDefeatModal(modalRoot);
-            ToastUI toast = BuildToast(canvasRoot);
+            ToastUI toast = BuildToast(safeArea);
             EnsureEventSystem();
 
             SceneWiringUtility.SetField(hud, "gameManager", gameManager);
@@ -178,7 +189,15 @@ namespace IdleRPG.EditorTools
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(ReferenceWidth, ReferenceHeight);
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-            scaler.matchWidthOrHeight = 0.5f;
+
+            // Match WIDTH (0), not a width/height blend.
+            //
+            // Every fixed size in the UI (a 144-unit button, a 56-unit number, a 14-unit margin) is calibrated to the
+            // 1080-wide reference, and every band is flexible. Matching width therefore keeps taps and text the same
+            // on every phone, and a taller phone shows MORE content instead of bigger bars.
+            // Downside, stated plainly: on a short, wide screen (a tablet in portrait) the bands get less height than
+            // designed, so pages scroll more. Phones are the target; tablets are a separate job if they ever matter.
+            scaler.matchWidthOrHeight = 0f;
 
             canvasObject.AddComponent<GraphicRaycaster>();
             return canvasObject.GetComponent<RectTransform>();
@@ -199,7 +218,7 @@ namespace IdleRPG.EditorTools
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(ReferenceWidth, ReferenceHeight);
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-            scaler.matchWidthOrHeight = 0.5f;
+            scaler.matchWidthOrHeight = 0f;   // match width, same reason as the main canvas
 
             // No GraphicRaycaster: damage numbers must never eat input.
             return canvasObject.GetComponent<RectTransform>();
@@ -221,25 +240,52 @@ namespace IdleRPG.EditorTools
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(ReferenceWidth, ReferenceHeight);
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-            scaler.matchWidthOrHeight = 0.5f;
+            scaler.matchWidthOrHeight = 0f;   // match width, same reason as the main canvas
 
             canvasObject.AddComponent<GraphicRaycaster>();
             return canvasObject.GetComponent<RectTransform>();
         }
 
-        /// <summary>A full-page container that overlays the shared header/nav bands.</summary>
+        /// <summary>
+        /// A full-page container that sits BETWEEN the two fixed chrome bands: from the top of the nav bar to the
+        /// bottom of the header. Every extra unit of screen height lands here, which is the point of the fixed bars.
+        /// </summary>
         private static GameObject CreatePage(string name, RectTransform safeArea)
         {
             GameObject page = UiFactory.Node(name, safeArea);
-            UiFactory.Anchor(page.GetComponent<RectTransform>(), new Vector2(0f, PagesBottom), new Vector2(1f, HeaderBottom));
+            UiFactory.Anchor(page.GetComponent<RectTransform>(), Vector2.zero, Vector2.one,
+                0f, NavBandHeight, 0f, HeaderBandHeight);
             return page;
         }
 
+        /// <summary>
+        /// Pins a full-width bar of a FIXED height to the top or the bottom of its parent, with the shared side
+        /// margin and edge gap. The header and the nav bar use this so neither can change size with the screen.
+        /// </summary>
+        private static void PinBar(RectTransform rect, bool top, float height, float sideMargin, float edgeGap)
+        {
+            rect.anchorMin = new Vector2(0f, top ? 1f : 0f);
+            rect.anchorMax = new Vector2(1f, top ? 1f : 0f);
+            rect.pivot = new Vector2(0.5f, top ? 1f : 0f);
+            rect.anchoredPosition = new Vector2(0f, top ? -edgeGap : edgeGap);
+            rect.sizeDelta = new Vector2(-2f * sideMargin, height - edgeGap);
+        }
+
+        /// <summary>
+        /// A stretched safe box under <paramref name="canvasRoot"/>: the HUD bars and every card hang off one of
+        /// these, so a notch, a Dynamic Island or a gesture bar can never clip them.
+        ///
+        /// The rect is authored STRETCHED (full parent) on purpose. Before, it kept Unity's default 100x100 rect
+        /// and only became correct once <see cref="SafeAreaFitter"/> ran in Play Mode, so the HUD was unreadable in
+        /// Edit Mode. Now the authored rect is the no-notch case, and the fitter only tightens it on a real device.
+        /// </summary>
         private static RectTransform CreateSafeArea(RectTransform canvasRoot)
         {
             GameObject safeArea = UiFactory.Node("SafeArea", canvasRoot);
+            RectTransform rect = safeArea.GetComponent<RectTransform>();
+            UiFactory.Stretch(rect);
             safeArea.AddComponent<SafeAreaFitter>();
-            return safeArea.GetComponent<RectTransform>();
+            return rect;
         }
 
         private static void EnsureEventSystem()

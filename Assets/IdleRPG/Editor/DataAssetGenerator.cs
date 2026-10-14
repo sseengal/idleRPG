@@ -32,7 +32,9 @@ namespace IdleRPG.EditorTools
         private const string OrcIdleSheet = "Assets/ThirdParty/TinyRPG_01_SoldierOrc/Characters(100x100 split)/Orc/Orc/Orc_Idle.png";
         private const string GoblinIdleSheet = "Assets/ThirdParty/PixelLab/goblin/Goblin_Idle_anim.png";
 
-        [MenuItem("Tools/Idle RPG/Generate Data Assets")]
+        // No menu entry on purpose. This overwrites every live data asset with generator values - it reset enemy
+        // stats and wiped the stage ladder when it was reachable from Tools and from the scene builder. It survives
+        // only as the bootstrap used by the debug scene builder when the data is missing entirely.
         public static void GenerateAll()
         {
             AssetDatabase.StartAssetEditing();

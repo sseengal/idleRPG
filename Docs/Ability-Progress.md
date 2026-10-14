@@ -39,6 +39,11 @@ An earlier note claimed the daily/offline rewards overlay held the fight. That w
 - **ABILITIES tab layout.** Columns were placed with pixel offsets sized for a ~200 unit strip. The real container
   is 1052 x 523. Every band is now a **fraction** of the column, so the layout cannot overflow whatever the
   container height turns out to be. No scroll view was added and none is wanted.
+- **Live balance data can no longer be overwritten by accident.** Root cause found: `MvpSceneBuilder.BuildMvpScene`
+  called `DataAssetGenerator.GenerateAll()`, so *every scene rebuild* rewrote the data assets - enemy stats went
+  back to generator values (Slime 57 -> 60) and `WaveConfig` lost its wave entries (about 56 of them). The builder
+  no longer generates data, and the generator lost its `Tools > Generate Data Assets` menu entry. It survives only
+  as the bootstrap the debug scene builder calls when the data is missing entirely.
 
 ## Open - UI (hand this to the front-end framework team)
 
@@ -59,13 +64,27 @@ An earlier note claimed the daily/offline rewards overlay held the fight. That w
    (the v7 assignment list already exists, so this is mostly wiring plus a migration if the shape changes).
 4. **Abilities from data.** The editor catalogue still drives which ability a hero gets; the ability definitions
    and the card data should be the single source.
-5. **Enemy/boss and balance housekeeping.** Delete the legacy `Tools > Generate Data Assets` menu that overwrites
-   live numbers (it already resurrected a deleted Goblin once), remove character/boss placeholders, rework the art
-   validator to "art, or else a placeholder", and re-baseline the golden numbers.
+5. **Enemy/boss and balance housekeeping.** Restore the files the generator damaged (see the dirty-tree section),
+   remove character/boss placeholders, rework the art validator to "art, or else a placeholder", and re-baseline the
+   golden numbers. The generator footgun itself is closed.
 
 ## Dirty working tree - needs a decision, do not commit blind
 
 `Main.unity` (~30k lines), `BalanceConfig.asset`, `WaveConfig.asset`, hero/enemy data assets, the TMP font assets,
 placeholder `.meta` files, an untracked `Enemy_Goblin.asset`, and the untracked `TinyRPGAssets/` +
-`TinyRPGAssets2/` art packs. Data assets and the Goblin are the known landmine: committing them would overwrite
-live numbers. The scene carries the new panel layout and is intentionally left uncommitted while that is sorted.
+`TinyRPGAssets2/` art packs.
+
+Split by what each one actually is:
+
+- **Damage from the generator (restore from git):** `WaveConfig.asset` lost ~56 wave entries - the stage ladder is
+  broken in the working tree right now. The enemy/hero data assets have generator numbers back (`Enemy_Slime`
+  health 57 -> 60, attack 9.9 -> 6, interval 1.7 -> 2). `Enemy_Goblin.asset` is a stray the generator recreated
+  with `firstStage: 1`; nothing references it (not the scene, not the wave config), so it can be deleted.
+- **Additive, safe to keep:** `BalanceConfig.asset` gained gear fields (inventoryCap, gear rarity weights, prices).
+- **Mechanical importer churn:** placeholder `.meta` files gained empty Android/iOS override blocks; the two TMP
+  font assets were rewritten by the font importer.
+- **Not mine:** `Assets/IdleRPG/Scripts/UI/UiSpace.cs` is the front-end team's spacing ladder (untracked). Left alone.
+- **Art source packs:** `TinyRPGAssets/` + `TinyRPGAssets2/` (6.6 MB) are downloads, not project content; they live
+  outside `Assets/`, so git should ignore them rather than track them.
+
+The scene carries the new panel layout and is intentionally left uncommitted until the above is settled.
