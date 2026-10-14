@@ -63,6 +63,10 @@ namespace IdleRPG.EditorTools
             //    text size by hand. Without this, the 15-sizes-in-90-places problem can come back one label at a time.
             ok &= UiTypeScaleCheck.RunCheckWithResult();
 
+            // 5) UI spacing: every gap in the UI code must come from UiSpace. Without this, the
+            //    eight-numbers-in-60-places problem can come back one call site at a time.
+            ok &= UiSpacingCheck.RunCheckWithResult();
+
             Debug.Log(ok
                 ? "[Regression] REGRESSION: PASS - save drift, content validation (incl. loop health) and the golden numbers are in line."
                 : "[Regression] REGRESSION: FAIL - see the errors above.");

@@ -108,7 +108,7 @@ namespace IdleRPG.EditorTools
 
             TextMeshProUGUI text = Text("Label", background.transform, label, role,
                 TextAlignmentOptions.Center, textColor);
-            Stretch(text.rectTransform, 8f, 4f, 8f, 4f);
+            Stretch(text.rectTransform, UiSpace.LabelPadX, UiSpace.LabelPadY, UiSpace.LabelPadX, UiSpace.LabelPadY);
 
             if (onClick != null)
             {
