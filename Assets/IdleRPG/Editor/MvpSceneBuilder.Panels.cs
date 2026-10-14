@@ -21,6 +21,29 @@ namespace IdleRPG.EditorTools
     public static partial class MvpSceneBuilder
     {
         // ------------------------------------------------------------------
+        // Page bands - named once, used by the panels below
+        //
+        // A band is a fraction of the PAGE rect (the area between the two chrome bars). Naming them means a band
+        // change is one edit, and the ASCEND and SHOP pages - which share one shape (title, sub-line, one action,
+        // then a list) - cannot drift apart.
+        //
+        // They are NOT on the UiSpace ladder on purpose: the ladder is gaps in canvas units, these are proportions
+        // of a flexible page. The trade-off is recorded in Docs/UI-Layout.md.
+        // ------------------------------------------------------------------
+        private const float BandTop = 1f;
+
+        /// <summary>ASCEND + SHOP: title band, sub-line band, the action button, then the list below it.</summary>
+        private const float BandTitleBottom = 0.88f;
+        private const float BandSubLineBottom = 0.79f;
+        private const float BandActionTop = 0.77f;
+        private const float BandActionBottom = 0.60f;
+        private const float BandListTop = 0.57f;
+
+        /// <summary>UPGRADES: one title line and a long list, so its bands sit higher.</summary>
+        private const float BandUpgradesTitleBottom = 0.945f;
+        private const float BandUpgradesListTop = 0.93f;
+
+        // ------------------------------------------------------------------
         // Control dock
         // ------------------------------------------------------------------
         private static TabController BuildManagementPage(RectTransform pageRoot, PartyConfig partyConfig,
@@ -144,10 +167,10 @@ namespace IdleRPG.EditorTools
             TextMeshProUGUI title = UiFactory.Text("Title", panel.transform,
                 "Spend gold to raise each hero's stats (scroll for more)", UiType.Role.Sentence,
                 TextAlignmentOptions.MidlineLeft, DimTextColor);
-            UiFactory.Anchor(title.rectTransform, new Vector2(0.02f, 0.945f), new Vector2(0.98f, 1f));
+            UiFactory.Anchor(title.rectTransform, new Vector2(0.02f, BandUpgradesTitleBottom), new Vector2(0.98f, BandTop));
 
             ScrollRect scroll = UiFactory.CreateScrollView(panel.transform, "UpgradeScroll", UiSpace.Base, UiSpace.Padding(UiSpace.Tight), out RectTransform list);
-            UiFactory.Anchor(scroll.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, 0.93f), UiSpace.Hairline, UiSpace.Hairline, UiSpace.Hairline, UiSpace.Hairline);
+            UiFactory.Anchor(scroll.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, BandUpgradesListTop), UiSpace.Hairline, UiSpace.Hairline, UiSpace.Hairline, UiSpace.Hairline);
 
             HeroUpgradeRowUI[] rows = new HeroUpgradeRowUI[Mathf.Max(1, partyConfig != null ? partyConfig.ValidHeroCount : 1)];
 
@@ -277,18 +300,18 @@ namespace IdleRPG.EditorTools
 
             TextMeshProUGUI yieldLabel = UiFactory.Text("Yield", panel.transform, "Ascend for 0 tokens", UiType.Role.Section,
                 TextAlignmentOptions.Center, TextColor);
-            UiFactory.Anchor(yieldLabel.rectTransform, new Vector2(0.03f, 0.88f), new Vector2(0.97f, 1f));
+            UiFactory.Anchor(yieldLabel.rectTransform, new Vector2(0.03f, BandTitleBottom), new Vector2(0.97f, BandTop));
 
             TextMeshProUGUI requirementLabel = UiFactory.Text("Requirement", panel.transform, "Best stage 1", UiType.Role.Sentence,
                 TextAlignmentOptions.Center, DimTextColor);
-            UiFactory.Anchor(requirementLabel.rectTransform, new Vector2(0.03f, 0.79f), new Vector2(0.97f, 0.88f));
+            UiFactory.Anchor(requirementLabel.rectTransform, new Vector2(0.03f, BandSubLineBottom), new Vector2(0.97f, BandTitleBottom));
 
             Button ascendButton = UiFactory.Button("AscendButton", panel.transform, "ASCEND", "ui_button_gold", UiType.Role.Section, TextColor, null);
-            UiFactory.Anchor(ascendButton.GetComponent<RectTransform>(), new Vector2(0.24f, 0.60f), new Vector2(0.76f, 0.77f));
+            UiFactory.Anchor(ascendButton.GetComponent<RectTransform>(), new Vector2(0.24f, BandActionBottom), new Vector2(0.76f, BandActionTop));
             TextMeshProUGUI ascendButtonLabel = ascendButton.GetComponentInChildren<TextMeshProUGUI>();
 
             ScrollRect scroll = UiFactory.CreateScrollView(panel.transform, "PrestigeScroll", UiSpace.Small, UiSpace.Padding(UiSpace.Tight), out RectTransform list);
-            UiFactory.Anchor(scroll.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, 0.57f), UiSpace.Hairline, UiSpace.Hairline, UiSpace.Hairline, UiSpace.None);
+            UiFactory.Anchor(scroll.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, BandListTop), UiSpace.Hairline, UiSpace.Hairline, UiSpace.Hairline, UiSpace.None);
 
             PrestigeUpgradeRowUI[] rows = new PrestigeUpgradeRowUI[TokenRowCount(prestigeUpgrades)];
 
@@ -386,20 +409,20 @@ namespace IdleRPG.EditorTools
             // Header band, mirroring the ASCEND page: title, sub-line, one big gold action button.
             TextMeshProUGUI title = UiFactory.Text("Title", panel.transform, "Shop", UiType.Role.Section,
                 TextAlignmentOptions.Center, TextColor);
-            UiFactory.Anchor(title.rectTransform, new Vector2(0.03f, 0.88f), new Vector2(0.97f, 1f));
+            UiFactory.Anchor(title.rectTransform, new Vector2(0.03f, BandTitleBottom), new Vector2(0.97f, BandTop));
 
             TextMeshProUGUI gemsLabel = UiFactory.Text("Gems", panel.transform, "0 gems", UiType.Role.Sentence,
                 TextAlignmentOptions.Center, DimTextColor);
-            UiFactory.Anchor(gemsLabel.rectTransform, new Vector2(0.03f, 0.79f), new Vector2(0.97f, 0.88f));
+            UiFactory.Anchor(gemsLabel.rectTransform, new Vector2(0.03f, BandSubLineBottom), new Vector2(0.97f, BandTitleBottom));
 
             // The headline action (same slot as the ASCEND button): watch an ad for a gold boost.
             Button watchAdButton = UiFactory.Button("WatchAdButton", panel.transform, "WATCH AD", "ui_button_gold", UiType.Role.Section, TextColor, null);
-            UiFactory.Anchor(watchAdButton.GetComponent<RectTransform>(), new Vector2(0.24f, 0.60f), new Vector2(0.76f, 0.77f));
+            UiFactory.Anchor(watchAdButton.GetComponent<RectTransform>(), new Vector2(0.24f, BandActionBottom), new Vector2(0.76f, BandActionTop));
             TextMeshProUGUI watchAdLabel = watchAdButton.GetComponentInChildren<TextMeshProUGUI>();
 
             // The offer shelf, styled like the prestige tree (same scroll band, same card rows).
             ScrollRect scroll = UiFactory.CreateScrollView(panel.transform, "Offers", UiSpace.Small, UiSpace.Padding(UiSpace.Tight), out RectTransform offerRoot);
-            UiFactory.Anchor(scroll.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, 0.57f), UiSpace.Hairline, UiSpace.Hairline, UiSpace.Hairline, UiSpace.None);
+            UiFactory.Anchor(scroll.GetComponent<RectTransform>(), new Vector2(0f, 0f), new Vector2(1f, BandListTop), UiSpace.Hairline, UiSpace.Hairline, UiSpace.Hairline, UiSpace.None);
 
             SceneWiringUtility.SetField(ui, "gemsLabel", gemsLabel);
             SceneWiringUtility.SetField(ui, "watchAdButton", watchAdButton);
