@@ -20,11 +20,14 @@
 | Next after this | You: one play check of the ability lane (press a cast, watch it queue, play, land). Then the B8' proof lap, the B9' shipping checklist, B10 live store wiring (AdMob + Unity Ads), B10b store packet, B1a/B1b device passes. **Art/UI runs alongside (§1s / `Art-Pipeline.md` §17): open `Scenes/UiLab.unity` or `Screenshots/ui-lab/uilab.png` and pick look A, B or C.** |
 | MVP decisions (owner, 2026-09-27) | gate = **store-submittable**; **3 playable heroes** (a 4th needs the v1.1 roster UI); both stores at once; **art + audio = the final pass before submission**; no analytics SDK; full record + cuts in §1p |
 | Save schema | **v8** (`SaveData.cs:32`). v4 `runBestStage`; v5 one keyed `levels` list; v6 gear inventory; v7 ability assignment; v8 Archer -> Soldier roster swap. Additive migrations, no data loss (§1h / B35-B36, `Architecture.md` §4) |
+| Golden numbers | **VOID as a gate** until the full rebalance after feature complete (`Content.md` §10). `Run All Checks` fails those four lines by design; the baseline is not re-recorded now |
 | Shipped build | `Builds/IdleRPG-mac.app` verified (boot, save, offline, combat) |
 | Docs | all live in `Docs/` - index `Docs/README.md`; status here; backlog `Roadmap.md`; removals `Docs/REVIEW.md`; cleanup gate `Docs/Cleanup-Checks.md`. Sections 1a-1ah below are the build journal, not current status |
 
-**Standing regression surfaces** (run these on every combat-affecting change): golden numbers, content validator,
-save drift, **battle log**. The log is a *contract with the player*, not decoration: any feature that produces or
+**Standing regression surfaces** (run these on every combat-affecting change): content validator, save drift,
+**battle log** — plus the golden numbers as a printed reading only. **The golden baseline is VOID until the full
+rebalance after feature complete** (`Content.md` §10): `Run All Checks` ends FAIL on those four lines by design.
+The log is a *contract with the player*, not decoration: any feature that produces or
 renames combat text (statuses, abilities, **enemy item drops**, **item usage in battle**, affixes, pets) must be
 re-checked for correct attribution, one line per wave, no mid-line renaming and no "... N more hits" flooding.
 

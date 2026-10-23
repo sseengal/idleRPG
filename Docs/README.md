@@ -56,10 +56,11 @@ the code wins and the page is fixed the same day.
 ## Standing rules (apply to every change)
 
 1. **One sub-step at a time** - implement, recompile, verify, tick the box, hand off for a manual test.
-2. **Run the regression surfaces** on every combat-affecting change: golden numbers, content validator, save drift,
-   **battle log** (attribution, one line per wave, no mid-line renaming, no flooding). The golden numbers are
-   **frozen until the MVP baseline pass** (`Content.md` §10): a FAIL is expected while content is still moving, and
-   the baseline file is not edited until then.
+2. **Run the regression surfaces** on every combat-affecting change: content validator, save drift, **battle log**
+   (attribution, one line per wave, no mid-line renaming, no flooding) and the golden numbers as a **printed
+   reading, not a gate**. The golden baseline is **VOID until the full rebalance after feature complete**
+   (`Content.md` §10): `Run All Checks` ends FAIL on those four lines by design, and the baseline file is not edited
+   until then.
 3. **Parity lever** - force the wave recipe to `1x 100%` and the golden numbers must match the single-enemy
    baseline byte for byte; that proves a change is additive.
 4. **Nothing is stored that can be derived** - wave size comes from `hash(stage, wave)` + the recipe, so saves stay

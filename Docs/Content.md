@@ -211,41 +211,35 @@ slots, and the check warns if it does.
 
 Rules: single invocation, no background loops, no auto-tuning, results pasted into the step log.
 
-Since B4 (2026-09-25): `Golden Numbers` are **asserted, not eyeballed** - `Run All Checks` compares them against
-`BalanceBaseline` (±2%) and fails the build on drift; the robot climb (loop health) runs inside the content validator.
+Since B4 (2026-09-25) `Golden Numbers` were asserted against `BalanceBaseline` (±2%). **That assertion is retired
+until the rebalance below** — the check still prints the numbers, and `Run All Checks` still reports the drift, but
+the drift is not a failure condition while the game is pre-rebalance. The robot climb (loop health) still runs
+inside the content validator and remains a real signal.
 
-### When the baseline is re-recorded — decision, 24 Oct 2026
+### The baseline is VOID until the rebalance — owner decision, 24 Oct 2026
 
-**The golden numbers are frozen until the MVP is finished.** They are re-recorded **once**, in a single pass,
-and only after both of these are true:
+> **The golden numbers do not gate the build any more.** They were recorded on **2026-09-25**, before gear,
+> abilities, the Archer -> Soldier swap and enemy casts existed. They are kept as history only.
+> **A full rebalance is a separate pass AFTER the feature set is complete**, and it re-records them once.
 
-1. **Story sequencing is finished** — every story beat and its fight are in order, with no placeholder beats left.
-2. **MVP content is closed** — no more heroes, enemies, abilities, effect kinds or timing changes are planned for
-   the MVP.
+What this means in practice:
 
-Until that day:
+- **Do not re-baseline now.** Do not edit `Editor/BalanceBaseline.cs`, do not widen the ±2% tolerance, and do not
+  treat the four golden lines as a blocker.
+- **`Run All Checks` will end `REGRESSION: FAIL` on the four golden lines. That is expected** and it is not a bug.
+  Read every other line: save drift, content validation, the type scale and the spacing ladder are still real checks.
+- **Last measured (24 Oct 2026, history only):** 201.7 s @x1.0, 183.4 s @x1.6, 128 gold, 0.698 gold/s @x1.6.
+- **A cleanup must still not change them.** If a tidy-up moves a number, the tidy-up changed behaviour
+  (`Cleanup-Checks.md`). But the absence of PASS is no longer evidence of a problem.
 
-- **Leave `Editor/BalanceBaseline.cs` alone.** The `Recorded` line stays at `2026-09-25` and the four numbers stay
-  as they are.
-- **A real change will make the check FAIL, and that is expected.** A new pool member or a retuned stat moves
-  stage 1. Record the new numbers in the step log (or the checklist entry) and carry on. Do not edit the baseline
-  to silence it, and never widen the ±2% tolerance.
-- **The other checks must still pass.** Save drift, content validation, the type scale and the spacing ladder are
-  not frozen. A golden-number FAIL is not permission for the rest to fail.
-- **Cleanup must not move a number at all.** If a tidy-up moves one, the tidy-up changed behaviour
-  (see `Cleanup-Checks.md`).
+**Feature complete** means, for this decision: story sequencing done, boss moves done, reserve heroes and hero
+auto-cast decided, art + audio pass done, no more heroes / enemies / abilities / effect kinds / timing changes
+planned for the MVP.
 
-Why: a re-baseline done before the content is final is a number we would record again next week. One dated entry at
-the end is easier to trust than a trail of entries that each say "interim".
-
-The cost, said plainly: while the baseline is frozen, the golden-number line **stops catching accidental drift**,
-because a legitimate change and an accident look the same — both FAIL. Cover that gap by reading the printed
-numbers against the last recorded run, and keep `Sweep Stages` in the loop for wall detection. That is a weaker net
-than an asserted baseline, and it is worth the trade for not re-recording the same four numbers every week.
-
-At the MVP baseline pass: run `Golden Numbers`, confirm stage 1 is inside its 90-180 s band and the robot climb
-still reaches its target, then update the four numbers and the `Recorded` line with the date and the reason, and
-re-run until PASS. One entry, one date.
+**The rebalance pass, when it starts:** tune the numbers, run `Golden Numbers`, confirm stage 1 sits inside its
+90-180 s band and the robot climb reaches its target, then update the four numbers **and** the `Recorded` line with
+one date and one reason, and run until PASS. One entry, one date. Until that day, `Sweep Stages` and the robot climb
+are the only pacing signals worth reading.
 
 ## 11. Numeric + difficulty budget guards
 

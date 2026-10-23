@@ -14,33 +14,30 @@ Run all four in the same order, before the edit and after it.
 | # | Check | Where | Pass condition |
 |---|---|---|---|
 | 1 | Scripts compile | Unity Console | zero compile errors |
-| 2 | Full regression net | `Tools > Idle RPG > Run All Checks (regression)` | log ends with `[Regression] REGRESSION: PASS` |
+| 2 | Full regression net | `Tools > Idle RPG > Run All Checks (regression)` | every line `ok` **except the four golden lines**, which are expected to FAIL (`Content.md` §10) |
 | 3 | EditMode tests (12 tests) | `Window > General > Test Runner > EditMode > Run All` | 12 passed, 0 failed |
 | 4 | Player loop smoke | `Docs/Manual-Tests.md` §1 plus §2 of this page | every item matches the "before" notes |
 
-Check 2 already covers save drift, content validation, golden numbers, the UI type scale and the UI spacing ladder.
+Check 2 already covers save drift, content validation, the UI type scale and the UI spacing ladder.
 Check 3 covers drop routing, the formulas and the save round trip.
 
-**The golden numbers are frozen until the MVP baseline pass** (`Content.md` §10). A cleanup must leave them exactly
-where they are — same seconds, kills, gold, rate. If a tidy-up moves one, the tidy-up changed behaviour, so revert it
-instead of re-recording the baseline. A golden-number FAIL during *feature* work is a different case: record the new
-numbers and carry on, without editing `BalanceBaseline.cs`.
+**The golden numbers are VOID as a gate (owner decision, 24 Oct 2026).** They were recorded 2026-09-25, before
+gear, abilities, the roster swap and enemy casts. A full rebalance is a separate pass **after the feature set is
+complete** (`Content.md` §10). So: `Run All Checks` ends `REGRESSION: FAIL`, and that is expected — do not
+re-baseline, do not edit `BalanceBaseline.cs`, and read the other lines instead. A cleanup must still leave the
+printed numbers alone, but their PASS is not required.
 
-### Known drift at 24 Oct 2026 — not caused by a cleanup
+### Last measured numbers (history only, 24 Oct 2026)
 
-`Run All Checks (regression)` currently ends **FAIL** on four golden numbers:
-
-| Check | Today | Baseline (2026-09-25) |
+| Check | Measured | Old baseline (2026-09-25) |
 |---|---|---|
 | stage 1 seconds @x1.0 | 201.7 | 80 |
 | stage 1 seconds @x1.6 | 183.4 | 126 |
 | stage 1 gold | 128 | 272 |
 | stage 1 gold/s @x1.6 | 0.698 | 2.16 |
 
-The same numbers were logged on **23 Oct 2026, before the cleanup pass**, and they match the content validator's own
-stage-1 line (`183s, 22 kills, 128 gold, 0.70 gold/s`). Cause: the ability and enemy-cast work changed fight length
-after the 2026-09-25 baseline. **Do not re-baseline for a cleanup.** Compare a new run against the numbers above;
-they are the real "before" until the MVP baseline pass.
+Recorded so a future run has a comparison point. These are **not** targets and **not** a gate. The real numbers
+come from the rebalance pass after feature complete.
 
 Record the result of each check in the commit message. Example:
 `Docs: one page per topic (checks: PASS, 12/12 EditMode, smoke same)`.
