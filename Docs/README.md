@@ -73,29 +73,43 @@ the code wins and the page is fixed the same day.
 
 ```
 Docs/
-  README.md          <- this index
-  Game-Vision.md     <- CANON: story-led campaign, automatic combat, restart on death
-  Combat-Sequencing.md <- CURRENT: fight order, strip choice, timings, audit and Play checks
-  Combat-Presentation.md <- old record: 23 Oct research + 24 Oct build log
-  Ability-Progress.md <- CURRENT: what works in the ability feature, what is open
-  Ability-Plan.md     <- the locked ability decisions (built behaviour is in Combat-Sequencing.md)
-  Cleanup-Checks.md  <- the before/after gate for consolidation work (no behaviour change)
-  Checklist.md       <- master progress + status
-  Roadmap.md         <- ordered backlog with acceptance tests
-  Launch-Plan.md     <- art + audio + store launch, sequenced for a one-man team
-  Character-Catalog.md <- all 42 characters, enumerated (actions + frames + traps)
-  Stage-Ladder.md    <- 100 stages, 10 bands, bosses, introduction order
-  Ability-Map.md     <- named animation strips -> abilities, and the unlock rule
-  Architecture.md    <- decisions (A/B/AD log), layers, data catalog
-  Sim-Core.md        <- pure simulation design
-  Content.md         <- specs + pipeline + enemies/zones/affixes
-  Progression.md     <- currencies, tracks, prestige, roster
-  Idle-Economy.md    <- rates, offline, time payouts
-  Monetisation.md    <- sources, sinks, IAP mock, guards (B7 done; live-store wiring = B10, see its §6b)
-  Manual-Tests.md    <- the one manual-testing runbook (proof lap, phone list, device passes, store tests) - do these
-  B10-owner-inputs.md<- your step-by-step list to complete BEFORE B10 can start
-  UI-UX.md           <- screens, navigation, battle log contract
-  UI-Layout.md       <- containers, the spacing ladder, mobile scaling
-  Art-Pipeline.md    <- HD-2D art pipeline, asset volume, perf budgets (G11/G12)
-  REVIEW.md          <- deletion candidates / resolved removals
+  README.md            <- this index
+  -- current --
+  Game-Vision.md       <- CANON: story-led campaign, automatic combat, restart on death
+  Checklist.md         <- master status: what is done, what is left
+  Cleanup-Checks.md    <- the before/after gate for consolidation (no behaviour change)
+  Combat-Sequencing.md <- how a blow reaches the screen: lane, timings, enemy casts
+  Ability-Progress.md  <- ability status: what works, what is open
+  Ability-Plan.md      <- the locked ability decisions
+  Ability-Map.md       <- hero / enemy -> ability id
+  Character-Catalog.md <- all 42 characters, enumerated
+  Stage-Ladder.md      <- 100 stages, 10 bands, bosses
+  Architecture.md      <- layers, decisions (B/AD log), save contract
+  Sim-Core.md          <- pure simulation design
+  Content.md           <- specs, generator, validator, enemies/zones
+  Progression.md       <- currencies, tracks, prestige, roster
+  Idle-Economy.md      <- rates, offline payouts
+  Monetisation.md      <- sources, sinks, IAP mock, guards
+  UI-UX.md             <- screens, navigation, battle-log contract
+  UI-Layout.md         <- containers, the spacing ladder, mobile scaling
+  Art-Pipeline.md      <- HD-2D look, asset volume, perf budgets
+  Manual-Tests.md      <- the one manual runbook
+  Launch-Plan.md       <- art + audio + store launch, sequenced
+  B10-owner-inputs.md  <- what you must do before B10 starts
+  Roadmap.md           <- ordered backlog with acceptance
+  REVIEW.md            <- deletion candidates and resolved removals
+  -- record (kept for the reasoning; each opens with a pointer to the current page) --
+  Combat-Presentation.md   -> Combat-Sequencing.md
+  Refactor-Plan.md         -> Architecture.md
+  Mobile-Readiness.md      -> Launch-Plan.md, Manual-Tests.md
+  Party-Page.md            -> UI-UX.md, UI-Layout.md
+  Upgrades-Page.md         -> UI-UX.md, Progression.md
+  Equipment-MVP-Plan.md    -> Inventory-AS-BUILT.md
+  Inventory-Tab-Plan.md    -> Inventory-AS-BUILT.md
+  Inventory-AS-BUILT.md    -> as-built: gear + bag, save v6
+  Leaderboard-MVP.md       -> as-built: mock field, no backend
+  Run-Identity.md          -> as-built: defeat modal + run stats
 ```
+
+A page in the record group must open with a **RECORD, not current** line and name the page that replaced it.
+A new doc that describes behaviour goes in the current group, or it is not finished.

@@ -1,5 +1,7 @@
 # Upgrades Page - design + mobile layout pass (Phase 1)
 
+> **RECORD, not current.** Phase 1 shipped. Current screens: `UI-UX.md`; upgrade maths: `Progression.md`.
+
 *Started 2026-10-10. This is the design record for the UPGRADES page, the same way `Party-Page.md` is the record
 for PARTY.*
 

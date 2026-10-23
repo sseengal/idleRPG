@@ -1,5 +1,8 @@
 # Mobile Readiness + Polish / Test / Playtest Plan
 
+> **RECORD, not current.** The hardening it describes is done. Current launch sequence: `Launch-Plan.md`;
+> manual passes: `Manual-Tests.md`; store wiring: `B10-owner-inputs.md`.
+
 Status: MVP code is feature-complete. This is the hardening track BEFORE assets and monetization
 are added - the goal is "the app is ready" on real devices, with a repeatable test loop.
 

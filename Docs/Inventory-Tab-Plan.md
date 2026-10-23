@@ -1,5 +1,7 @@
 # Inventory tab — design + build record
 
+> **RECORD, not current.** Superseded by `Inventory-AS-BUILT.md` (what the code does today).
+
 > (2026-10-04). Follow-up to `Docs/Equipment-MVP-Plan.md`. The first equipment UI shoved the bag into a tiny
 > pager drawer on the Roster (13px rows, 11px trash, overlapping the abilities row). This design moves ALL of
 > inventory selection/discarding onto its own Party page tab with mobile-first touch sizes.

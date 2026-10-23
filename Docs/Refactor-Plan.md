@@ -1,5 +1,7 @@
 # Refactor Plan (run mid-cycle, Apr 2026)
 
+> **RECORD, not current.** The refactor it describes ran in 2026. Current structure and rules: `Architecture.md`.
+
 Goal: modularize the Idle RPG codebase for maintainability - de-duplicate transient-UI
 machinery, split the big files, consolidate item-visual vocabulary. **Zero behavior change.**
 Every step: compile clean -> smoke (boot, battle ticks, 3 tabs, dropdown/sheet, leaderboard,

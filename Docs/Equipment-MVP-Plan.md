@@ -1,5 +1,7 @@
 # Equipment MVP — the plan
 
+> **RECORD, not current.** Gear shipped 4 Oct 2026 (save v6). What the code does: `Inventory-AS-BUILT.md`.
+
 > Design record + build order (2026-10-04). "Items" (consumables/materials/crafting) are a LATER system; this
 > doc covers **equipment only**: gear that drops from boss kills, is class-locked, is manually equipped into
 > three typed slots, and has two token-priced quality-of-life upgrades.

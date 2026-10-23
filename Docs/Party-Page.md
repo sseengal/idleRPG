@@ -1,5 +1,8 @@
 # The Party page - vision, information architecture, and the path there
 
+> **RECORD, not current.** The page shipped its shell and three tabs. Current screens: `UI-UX.md`;
+> containers and spacing: `UI-Layout.md`.
+
 > Design record (2026-09-30). Classic RPG/JRPG framing, adapted to an **idle** game. The MVP ships the
 > shell plus two tabs (Roster, Formation); everything else is recorded here so the layout never has to be
 > redesigned when it lands.
