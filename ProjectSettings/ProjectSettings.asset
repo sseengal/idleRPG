@@ -172,7 +172,7 @@ PlayerSettings:
   androidMinAspectRatio: 1
   applicationIdentifier:
     Android: com.sseengal.idlerpg
-    Standalone: com.Unity-Technologies.com.unity.template.urp-blank
+    Standalone: com.sseengal.idlerpg
     iPhone: com.sseengal.idlerpg
   buildNumber:
     Standalone: 0
