@@ -126,6 +126,9 @@ Assets/Screenshots/
 # Art source packs (downloads, not project content - nothing under Assets/ references them)
 /TinyRPGAssets/
 /TinyRPGAssets2/
+# Third-party source packs moved out of Assets/ (Unity no longer imports them; licences stay in
+# Assets/ThirdParty/*.txt and PROVENANCE.md)
+/ThirdPartyAssets/
 
 # macOS Finder metadata
 .DS_Store
