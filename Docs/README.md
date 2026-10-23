@@ -38,7 +38,7 @@ the code wins and the page is fixed the same day.
 | What characters and animations do we have, exactly? | **`Character-Catalog.md`** (all 42, enumerated from the packs, never hand-typed) |
 | Which enemy appears on which stage, and who is a boss? | **`Stage-Ladder.md`** (100 stages, 10 bands) |
 | What are the abilities, and how are they unlocked? | **`Ability-Map.md`** (named strips -> abilities, plus the unlock rule) |
-| How do I clean up the project without changing the game? | **`Cleanup-Checks.md`** (before/after gate: regression net, 12 EditMode tests, 5-minute smoke) |
+| How do I clean up the project without changing the game? | **`Cleanup-Checks.md`** (before/after gate: regression net, 14 EditMode tests, 5-minute smoke) |
 | Why is the code shaped this way? Layers, decisions, rules | `Architecture.md` |
 | How does the simulation work (combat, formation, enemies)? | `Sim-Core.md` |
 | Content pipeline: specs, generator, validator, enemies/zones | `Content.md` (also: **when the golden numbers are re-recorded**) |
@@ -94,6 +94,7 @@ Docs/
   UI-UX.md             <- screens, navigation, battle-log contract
   UI-Layout.md         <- containers, the spacing ladder, mobile scaling
   Art-Pipeline.md      <- HD-2D look, asset volume, perf budgets
+  Audio-Plan.md        <- cues, music, licences, the audio build order
   Manual-Tests.md      <- the one manual runbook
   Launch-Plan.md       <- art + audio + store launch, sequenced
   B10-owner-inputs.md  <- what you must do before B10 starts

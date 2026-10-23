@@ -88,7 +88,7 @@ events to cues, with 9 cues: **hit, crit, kill, boss, level-up, claim, purchase,
 
 | # | Step | Lane | Notes |
 |---|---|---|---|
-| 2.1 | Write `Docs/Audio-Plan.md`: the cue table, music, the mute row, and the fields to fill (source, licence, volume) | builder | one page; needs no decisions to write |
+| 2.1 | ~~Write `Docs/Audio-Plan.md`~~ **DONE 24 Oct 2026** - cue table, music plan, licence fields and the build order (A1-A6) are written | builder | next: pick authored vs licensed |
 | 2.2 | Choose sources and licences (CC0 or paid) and **record the licence** | owner | same discipline already used for art |
 | 2.3 | Import and swap the clips behind `AudioDirector` | builder | **zero gameplay code changes** — the seam was built for this |
 | 2.4 | Add the **mute** row | builder | it lands inside B10's settings sheet, so the two ship together |
@@ -179,7 +179,7 @@ That is the reason art and audio must be **in** before submission, not after.
 
 | Order | Task | Needs from you first |
 |---|---|---|
-| 1 | Write `Docs/Audio-Plan.md` (cue table + the fields to fill) | nothing |
+| 1 | ~~Write `Docs/Audio-Plan.md` (cue table + the fields to fill)~~ **DONE 24 Oct 2026** | nothing |
 | 2 | Design tokens: Shop / Upgrades / Ascend onto `UiTheme` / `UiSkin` | nothing |
 | 3 | B10 wiring: ads + IAP + Restore behind the existing seams | the ad ids (0.5) + the Google plugin file |
 | 4 | The settings sheet: Restore + privacy link + mute | the privacy URL (0.7) + B10 started |
@@ -196,7 +196,7 @@ Items 1 and 2 need no decisions from you and can start immediately.
 | 1 | Play account type (personal vs organisation) | the whole schedule (⏱ the 14-day gate) | `Checklist.md` §1p |
 | 2 | Company name, app display name, bundle/package id | Phase 0.4, both stores, every phone build | `B10-owner-inputs.md` §6 |
 | 3 | The look: one of the 3 UI Lab options + the style anchor | Phase 3.3-3.5 and the screenshots | `Art-Pipeline.md` §17 |
-| 4 | Audio sources and licences | Phase 2.2 | `Docs/Audio-Plan.md` (to be written) |
+| 4 | Audio sources and licences | Phase 2.2 | `Docs/Audio-Plan.md` §4 and §6 |
 | 5 | `Art-Pipeline.md` §9: mark the HD-2D questions **superseded**, or keep that program | nothing today — but it must not stay ambiguous | `Art-Pipeline.md` §9 |
 
 ---

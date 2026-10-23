@@ -2,8 +2,11 @@
 
 > Owns: every way the game pays the player for time, and every way it asks for money.
 > Parent: `Architecture.md` (AD6, AD7, B4-B7, B13, A9).
-> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** Step 11e (2026-09-21).
+> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** 24 Oct 2026 (re-read against the code).
 > Specs Steps 9, 17, 19. Acceptance tests live in `Roadmap.md`.
+>
+> **Built today:** the measured ledger rate, the dual-capped offline payout, the ad boost, gem sinks and the daily
+> streak. Expeditions, bounties and ability-scroll bundles below are **design targets**, not code.
 
 ---
 

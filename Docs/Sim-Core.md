@@ -2,9 +2,13 @@
 
 > Owns: the Unity-free combat + reward simulation (`Assets/IdleRPG/Scripts/Sim/`).
 > Parent: `Architecture.md` (§2 layers, §3 data catalog, §4 save, E1-E14 rules).
-> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** Step 11e (2026-09-21).
+> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** 24 Oct 2026 (re-read against the code).
 > Specs the Steps 7-13 changes; acceptance tests live in `Roadmap.md`.
 > **Rule: this folder never references `UnityEngine`** (no `Mathf`, no `Vector2`, no `Debug`).
+>
+> **Built form:** abilities are `Sim/SimAbility.cs` plus the lane in `Encounter.cs`. The `AbilityRuntime`, status and
+> effect-pipeline sections below are the **original design**; statuses are not in the code. Current behaviour:
+> `Combat-Sequencing.md`.
 
 ---
 

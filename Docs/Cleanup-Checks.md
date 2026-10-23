@@ -14,8 +14,8 @@ Run all four in the same order, before the edit and after it.
 | # | Check | Where | Pass condition |
 |---|---|---|---|
 | 1 | Scripts compile | Unity Console | zero compile errors |
-| 2 | Full regression net | `Tools > Idle RPG > Run All Checks (regression)` | every line `ok` **except the four golden lines**, which are expected to FAIL (`Content.md` §10) |
-| 3 | EditMode tests (12 tests) | `Window > General > Test Runner > EditMode > Run All` | 12 passed, 0 failed |
+| 2 | Full regression net | `Tools > Idle RPG > Run All Checks (regression)` | ends `[Regression] REGRESSION: PASS`; golden drift appears as **warnings**, not failures |
+| 3 | EditMode tests (14 tests) | `Window > General > Test Runner > EditMode > Run All` | 14 passed, 0 failed |
 | 4 | Player loop smoke | `Docs/Manual-Tests.md` §1 plus §2 of this page | every item matches the "before" notes |
 
 Check 2 already covers save drift, content validation, the UI type scale and the UI spacing ladder.
@@ -23,9 +23,9 @@ Check 3 covers drop routing, the formulas and the save round trip.
 
 **The golden numbers are VOID as a gate (owner decision, 24 Oct 2026).** They were recorded 2026-09-25, before
 gear, abilities, the roster swap and enemy casts. A full rebalance is a separate pass **after the feature set is
-complete** (`Content.md` §10). So: `Run All Checks` ends `REGRESSION: FAIL`, and that is expected — do not
-re-baseline, do not edit `BalanceBaseline.cs`, and read the other lines instead. A cleanup must still leave the
-printed numbers alone, but their PASS is not required.
+complete** (`Content.md` §10). So the golden lines and the stage-1 time band now report as **warnings**:
+`Run All Checks` ends **PASS** while they drift. Do not re-baseline and do not edit `BalanceBaseline.cs`. A cleanup
+must still leave the printed numbers alone.
 
 ### Last measured numbers (history only, 24 Oct 2026)
 
@@ -40,7 +40,7 @@ Recorded so a future run has a comparison point. These are **not** targets and *
 come from the rebalance pass after feature complete.
 
 Record the result of each check in the commit message. Example:
-`Docs: one page per topic (checks: PASS, 12/12 EditMode, smoke same)`.
+`Docs: one page per topic (checks: PASS, 14/14 EditMode, smoke same)`.
 
 ---
 

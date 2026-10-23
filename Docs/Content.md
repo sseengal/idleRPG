@@ -12,7 +12,7 @@
 | Type | SO | Volume now | Volume target |
 |---|---|---|---|
 | Heroes | `HeroData` | 3 | 12-20 |
-| Abilities | `AbilityData` | 0 | 3-5 per hero + 8-12 enemy abilities |
+| Abilities | `AbilityDef` | 11 (3 hero + 8 enemy) | 2 per hero + a move per boss |
 | Enemies | `EnemyData` | 4 (3 + 1 boss) | 6 archetypes x 3-4 variants + 1 boss per zone |
 | Encounters | `EncounterData` | implicit (1 enemy) | 8-12 per zone |
 | Zones | `ZoneData` | implicit (endless stage counter) | 1 every 25-30 stages |
@@ -76,8 +76,8 @@ is unaffected and the stage-1 golden numbers still read 126s / 272 gold / 2.16 g
 | `Elite` | 1, buffed variant of another archetype | extra ability, +rewards | target priority |
 | `Boss` | 1 (+ escorts) | scripted ability cycle, enrage below 30% HP | burst phase, defensive cooldowns |
 
-Each archetype carries 0-2 `AbilityData` refs. Enemy abilities are the main source of "the fight has a shape"
-before heroes have many abilities - ship them at Step 12 with the pipeline.
+Each archetype carries 0-2 ability refs. Enemy abilities are **live**: 8 enemies carry one and casts start at stage 1
+(the Slime). The open gap is **boss moves** - 32 of 40 bosses have none (`Combat-Sequencing.md` §16).
 
 ## 5. Encounter budget (keeps idle rate stable - K1)
 
@@ -119,7 +119,8 @@ in `SimContext.Rules`.
 
 ## 7. Ability design rules
 
-1. Every ability must be **auto-cast**. No ability requires input; the player tunes *priority + unlock*.
+1. ~~Every ability must be **auto-cast**; the player tunes priority + unlock.~~ **Revised 24 Oct 2026:** a hero cast
+   is an action the player triggers in the lane; enemies auto-cast on a random roll (`Combat-Sequencing.md` §3, §9).
 2. Every ability has: a trigger, a target rule, 1-3 effects, a scaling stat, tags, and a visible cue (log line + VFX key).
 3. Cooldown + energy: `cooldownSec` primary; `charges` for "stored" abilities; energy only if a hero's kit needs it.
 4. Role kit template:

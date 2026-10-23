@@ -480,12 +480,12 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
 | 9 | Economy audit: currencies, funnel, IdleTimeService | DONE | 9a + 9b-1..4 (ledger, sinks, audio hooks, full reset) |
 | 10 | Formation | DONE | 10a-10e (save v3, separate boards, even-spread targeting) |
 | 11 | Multi-enemy encounters | DONE | 11a-11e (1-3 waves, size recipe, battle-log fix) |
-| 12 | Effect pipeline + statuses | PARKED (v1.1) | blocked by 7, 11 |
-| 13 | Ability system | PARKED (v1.1) | blocked by 12 |
+| 12 | Effect pipeline + statuses | SPLIT | effect kinds shipped 24 Oct 2026 (shield / heal / damage, `Combat-Sequencing.md` §7); **statuses** (stacking, dots, tags) still v1.1 |
+| 13 | Ability system | DONE (2026-10-24) | 11 abilities, one per hero, cast is a lane action, enemy auto-cast; save v7/v8. Open: assignments in save, hero auto-cast (S6) |
 | 14 | Generic progression tracks | DONE | promoted to base B5 (schema v5) |
 | 15 | Zones, difficulty, walls, affixes, guidance | SPLIT | base slice landed (milestone gems + bounce detection); zone/wall/affix depth = v1.1 |
 | 16 | Automation & QoL | DONE | promoted to base B6 (cards, AUTO panel, speed, robot rebirth loop) |
-| 17 | Roster, stars, expeditions, return hub | PARKED (v1.1) | blocked by 13, 14, 15 |
+| 17 | Roster, stars, expeditions, return hub | PARKED (v1.1) | the Archer -> Soldier swap shipped (save v8), but roster collection, stars and expeditions stay parked |
 | 18 | Transcendence, relics, codex | PARKED (v1.1) | blocked by 15, 17 |
 | 19 | Monetisation: ads, gems, shop, season skeleton | SPLIT | base slice = B7 (`DONE 2026-09-27`); **live-store wiring = B10** (real SDKs, Restore, consent, manifests); season + extra SKUs v1.1 |
 | 20 | Visual/audio/UX polish + l10n + a11y + perf | SPLIT | MVP slice = **art + audio final pass before submission** + 3-row settings + device verify (B10/B10b/B1b); rest v1.1 |
@@ -511,6 +511,21 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
 | **Settings screen** (audio/notifications/a11y/battery/language) - G4 | must be explicit in Step 20 |
 | **Device perf budgets + real art pipeline** - G11/G12 | Step 20 |
 | **Daily reset boundary decision** (UTC vs local) - G13 | Step 16 |
+
+## 7b. Code shape — parked until feature complete
+
+Measured 24 Oct 2026, deliberately **not** done during the cleanup. Each item is behaviour-preserving on paper but
+needs a play check, so each ships alone, after the art/audio pass.
+
+| # | Item | Why it matters | Why not now | Size |
+|---|---|---|---|---|
+| S1 | **Two UI construction paths.** `MvpSceneBuilder*` + `UiLabSceneBuilder` + `CombatDebugSceneBuilder` = 2,143 editor lines; `PartyRosterView.Build`, `ShopPanelUI.Build`, `HudHeaderUI` build at runtime | Two places decide layout, so a panel can look different depending on which path made it | moving layout is the fastest way to break a page, and the art pass will change panels anyway | L |
+| S2 | **`HeroUnitView` (474) and `EnemyUnitView` (458) are mirror copies** | one bug gets fixed twice, or once | it is the most timing-sensitive code in the game; needs a device pass | M |
+| S3 | **`Combat/` holds bridge + data adapters** (`HeroCombatant`, `EncounterFactory`, `WaveComposition`, `Formation`, `CombatRewardCalculator`, `CombatScaling`). Only `CombatScaling` is engine-free | docs say "Sim is pure"; correct, but the folder reads as one layer | the adapters bind `Data` ScriptableObjects, and `IdleRPG.Sim` cannot reference them, so a move needs an adapter split, not a file move | M |
+| S4 | **No settings screen** | volume/mute exist in code with no UI (`Audio-Plan.md` A5) | belongs with the audio pass | S |
+
+Test net now exists for the risky part: `EncounterLaneTests` proves one action at a time and that a cast lands only
+after its window. S2 still needs a human eye.
 
 ## 8. Definition of done (every step)
 
