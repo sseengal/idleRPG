@@ -132,3 +132,6 @@ Assets/Screenshots/
 
 # macOS Finder metadata
 .DS_Store
+
+# Raw art pack kept on disk only (contains & and spaces)
+/Tiny RPG Character Asset Pack 01 v2.0 -Free Soldier&Orc/

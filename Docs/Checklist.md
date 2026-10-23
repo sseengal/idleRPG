@@ -780,7 +780,7 @@ double-offline ad instead of two, gems may buy automation as an accelerant, anal
   page is hidden never triggered the scroll layout (all seven stacked on one spot), so `ShopPanelUI.OnEnable`
   now forces a `LayoutRebuilder` pass. Verified live: seven 116px cards stacked 1056->196 with correct
   name/value/effect/button labels, CTA live, no overlap; `Run All Checks` = **PASS**.
-  Screenshot: `Assets/Screenshots/shop_ascend_style.png`.
+  Screenshot: `Screenshots/shop_ascend_style.png`.
 
 ## 1l. B7 S2 — the every-morning gift (daily streak)  ·  **built + verified 2026-09-27**
 
@@ -807,7 +807,7 @@ claim also on background-resume, persist-then-pay, injected clock, neutral `Boos
   day 1 (+5); rollback -> refused, gems unchanged; day-7 probe -> +25 + boost active (extends the running boost);
   clean reset -> `441 gems · Day-1 streak (next +8)` in the shop header; save drift `v5 -> v5 additive-only`
   (2238 chars, incl. the 2 new fields); `Run All Checks` = **PASS** (goldens + battle log untouched).
-  Screenshot: `Assets/Screenshots/shop_streak.png`.
+  Screenshot: `Screenshots/shop_streak.png`.
 
 ## 1m. B7 S3 — ad placements + per-day caps  ·  **built + verified 2026-09-27**
 
@@ -1153,7 +1153,7 @@ Built and verified in the editor:
   but the game's scaled canvas smeared them - documented in `Art-Pipeline.md` §17.)
 - `Scenes/UiLab.unity` (**not in build settings**) holds three full-screen looks (only A is active in the scene);
   `Tools > Idle RPG > Capture UI Lab Snapshot` writes one 1:1 1080x1920 PNG per look to
-  `Assets/Screenshots/ui-lab/uilab-{A,B,C}.png`. Each look = a font + a distinct palette (slate+gold, parchment+amber,
+  `Screenshots/ui-lab/uilab-{A,B,C}.png`. Each look = a font + a distinct palette (slate+gold, parchment+amber,
   indigo+cyan); unit slabs mirror the real battle layout. The pick is the whole look.
 - Licence record: `Assets/ThirdParty/PROVENANCE.md` - also names the two known gaps (Tiny RPG pack has **no licence
   file**; PixelLab generated art needs its account terms recorded).
@@ -1234,7 +1234,7 @@ enemy names + HP now below sprites like players, boss frame panel removed, direc
 Same-day polish (battle page, 2026-09-30): proper static stand-in art for units (Soldier/Orc/Goblin frames;
 slime/bat wait on the PixelLab token), stage/wave row centered below the header (overlap gone), "Ascend: X"
 header duplicate removed (Ascend page already owns the yield), new "BATTLE LOG" row above the log, bigger hero
-slots (160x176) + enemy icon cap 200. Screenshot `Assets/Screenshots/battle-page-v5.png`.
+slots (160x176) + enemy icon cap 200. Screenshot `Screenshots/battle-page-v5.png`.
 
 Next, in order: (1) **owner pick** = done 2026-09-30 (font A for display, font B for sentences at 34px, palette A);
 (2) **design tokens** - `Scripts/UI/UiTheme.cs` created and the battle page converted; the rest of the ~109

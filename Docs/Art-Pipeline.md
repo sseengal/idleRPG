@@ -369,7 +369,7 @@ jobs bill on completion). Credits `$0.00`, subscription `trial`.
 
 States reached and sprites confirmed: Idle → `Goblin_Idle_anim_0`; Attack (clipTime 0.41) → `Goblin_Attack_anim_3`
 (mid-lunge); Hurt (0.48) → `Goblin_Hurt_anim_3` (recoil); Death (0.92) → `Goblin_Death_anim_6` (fallen, held).
-`P10_goblin_{idle_cam,attack,hurt,death}.png` + `P10_contact.png` in `Assets/Screenshots/art-lab/` (gitignored).
+`P10_goblin_{idle_cam,attack,hurt,death}.png` + `P10_contact.png` in `Screenshots/art-lab/` (gitignored).
 Same-pipeline camera captures differ between every pair (2.7-3.7% of the goblin crop, mean delta 48-62) with the
 background pixel-identical — the pose change is on screen, not just in the asset.
 
@@ -409,7 +409,7 @@ exists and works (`MvpSceneBuilder`), so this is a **reskin, not a rebuild**.
 | Import policy tool | `Tools > Idle RPG > Art > Apply UI-Art Presets` (`UiArtPresetApplier`) | Point filter, no mips, **uncompressed**, PPU 100, centre pivot, FullRect, 12px 9-slice border |
 | Font asset tool | `Tools > Idle RPG > Art > Generate Pixel Fonts` (`PixelFontAssetGenerator`) | SDF render mode, sampled at 64px - see the font policy below for why raster was rejected |
 | Comparison scene | `Tools > Idle RPG > Build UI Lab Scene` → `Scenes/UiLab.unity` | Three complete looks stacked in one portrait screen. **Not in build settings** |
-| Pixel-exact snapshot | `Tools > Idle RPG > Capture UI Lab Snapshot` | Renders 1080x1920 at 1:1 and writes `Assets/Screenshots/ui-lab/uilab-{A,B,C}.png` - one full-screen PNG per look |
+| Pixel-exact snapshot | `Tools > Idle RPG > Capture UI Lab Snapshot` | Renders 1080x1920 at 1:1 and writes `Screenshots/ui-lab/uilab-{A,B,C}.png` - one full-screen PNG per look |
 | Licence record | `Assets/ThirdParty/PROVENANCE.md` | Source + licence + date per pack, plus the two known licence gaps |
 
 ### Measured, not guessed (the import numbers)
@@ -460,7 +460,7 @@ as soon as the aspect differed from 9:16. Consequences:
 ### How to look at the lab
 
 Open `Assets/IdleRPG/Scenes/UiLab.unity` and press Play (look A shows), then run the snapshot menu item. The
-decision images are the three 1:1 1080x1920 PNGs in `Assets/Screenshots/ui-lab/uilab-{A,B,C}.png` - **judge from
+decision images are the three 1:1 1080x1920 PNGs in `Screenshots/ui-lab/uilab-{A,B,C}.png` - **judge from
 the PNGs, not the editor window** (the Game view scales the canvas by a fraction and smears a pixel font).
 
 One look per screen, not three stacked: each is the full battle screen - top bar with currency chips, the dimmed
@@ -515,7 +515,7 @@ The pick hit the real scene, not another lab:
   "-- session resumed --" divider (restart/offline loads start visibly fresh). FUTURE MECHANICS RULE: systems
   that want to say something in the feed (item drops etc.) call GameEvents.RaiseCombatMessage - zero UI wiring.
   Verified live: wave headers, "Stage X wave Y cleared", kills/crits flow; SaveLoaded clears + divider appears.
-  Screenshot `Assets/Screenshots/battle-page-v8-log.png`.
+  Screenshot `Screenshots/battle-page-v8-log.png`.
 
 - **Fifth pass - battle-page bugfixes (2026-09-30):** damage numbers smaller (32px, crit 1.3x, shorter travel),
   and spawns now adopt the unit anchor's anchors/pivot + clamp inside the battle view (numbers can no longer
@@ -523,13 +523,13 @@ derive below the sim); empty hero seats are fully invisible (resting colour alph
 re-painting the old white ghost); enemy health bars are sprite-less solid colour fills with the players' exact
 styling and the same relative placement/size; the BOSS gets a bigger name (1.3x) while its
 health bar stays the standard size (reverted same day - owner call). Verified live: enemy name y 0.14-0.32 + bar anchors (0.10,0.02)-(0.90,0.12) + fill sprite=none,
-empty seats alpha 0, damage template 32px. Screenshot `Assets/Screenshots/battle-page-v7.png`.
+empty seats alpha 0, damage template 32px. Screenshot `Screenshots/battle-page-v7.png`.
 - **Fourth pass - battle-page cleanup part 2 (2026-09-30):** currency header slimmed (12% -> ~7% of screen,
   chips fill it tightly, boost into the same band); formation slot tiles set to transparent (no white layers /
   row indicators on the battle view - the Party page keeps its board); enemy names moved **below** the sprite
   (same as players), HP bar at the bottom; the full-slot boss frame panel **removed** (boss = red BOSS name tag
   + larger sprite only); floating damage numbers now pop from the enemy's top-LEFT and the hero's top-RIGHT.
-  Verified live (anchors/colors/null checks) + screenshot `Assets/Screenshots/battle-page-v6.png`.
+  Verified live (anchors/colors/null checks) + screenshot `Screenshots/battle-page-v6.png`.
 - **Third pass - battle-page cleanup (2026-09-30, owner-directed):** proper static stand-in art so the
   layout can be judged: heroes = three Soldier frames (`Soldier_Idle_0/3`, `Soldier_Attack01_2`) tinted
   white/steel-blue/violet; enemies Goblin = goblin art, Ogre = Orc art. **Slime + Bat keep the procedural
@@ -538,7 +538,7 @@ empty seats alpha 0, damage template 32px. Screenshot `Assets/Screenshots/battle
   Stage/wave now lives in its own **centered row between the header and the battle sim** (was overlapping the
   tokens chip); the header's duplicate "Ascend: X" is **deleted** (the Ascend page already shows the yield);
   a **"BATTLE LOG" row** now separates the sim from the log (future tab anchor). Verified live: actor + data
-  checks + screenshot `Assets/Screenshots/battle-page-v5.png`.
+  checks + screenshot `Screenshots/battle-page-v5.png`.
 
 Not in this pass (still open below): other pages (Shop/Upgrades/Ascend still use their old colours - `UiTheme`
 exists, wiring them in is mechanical), currency icons, and unit art.
@@ -588,7 +588,7 @@ stage-1 = Demon). Slime/Bat/Goblin placeholders are untouched.
 - **Verified live**: idle/attack/hurt/death all observed (death frame `Blood Monster_A_Death_3`, hurt
   `Blood Monster_A_Hurt_1`, hero mid-swing `Soldier_Attack02_2`); boss = Orc; alternation Demon/Blood Monster
   by stage parity; stale-animator clearance on placeholder waves; enemies face left. Screenshot
-  `Assets/Screenshots/battle-page-v9-tinyrpg.png`.
+  `Screenshots/battle-page-v9-tinyrpg.png`.
 - **Licence**: TESTING ONLY until the pack's terms are confirmed (no licence text shipped) - see PROVENANCE.
 - **Immediate issue (same hour): characters rendered extremely tiny.** The 100x100 pack tiles only carry ~20% body pixels, so full-tile sprites in the fixed slot rects drew as small dark blobs. Fixed by cropping every strip to the union of its opaque bounds (shared window per action -> animation stays stable) inside the importer, so the character fills its tile; hero board icons raised from 0.62x to 0.8x of the slot. Result live: heroes ~128px, enemies ~170-200px (boss). Both the facing and the attack-size observed: the pack art faces RIGHT natively, so the ArtFacesLeft flag was corrected to false - heroes now keep the native right facing, enemies get mirrored (scaleX verified -1.00 live), the requested directions. Attack/hurt/death frames have much wider windows than idle (Soldier Attack02 29x29 vs Idle 17x22); a fixed rect would shrink those poses, so CharacterAnimator now sizes the icon rect per action at a single per-character pixel scale (idle 103x128, attack 162x162 live) - every pose renders its body at the same size, and extreme swings are capped at 1.5x the slot base. Screenshot battle-page-v10-tinyrpg.png.
 - **Battle-page cleanup pass 3 (2026-09-30): no death fade (sprite/name/hp never alpha-tween - death clip then instant hide for enemies, heroes stay opaque on the death pose), enemy HP bars are now hero-identical style at ~128px (was stretching across the 557px enemy column), columns staggered: heroes front-slash (front column raised 28px), enemies backslash (lower slots drift right 24px). Screenshot battle-page-v11.png.

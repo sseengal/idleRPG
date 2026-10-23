@@ -32,12 +32,14 @@ How this was measured (so the numbers can be re-run):
 
 | id | Candidate | Files | Size | External refs | Verdict |
 |---|---|---|---|---|---|
-| R2 | Nine empty folder husks | 9 folders | ~0 | 0 | remove |
-| R3 | `Art/Characters/TinyRPG/_Source` | 41 | 528 K | 0 of 41 | remove |
+| R2 | Nine empty folder husks | 9 folders | ~0 | 0 | **DONE 24 Oct 2026** |
+| R3 | `Art/Characters/TinyRPG/_Source` | 41 | 528 K | 0 of 41 | **DONE 24 Oct 2026** - moved to `ThirdPartyAssets/TinyRPG_source/` (gitignored) |
 | R4 | `Assets/ThirdParty` unused tail | 96 of 102 | ~1.5 M | 8 kept | **DONE 24 Oct 2026** |
-| R5 | Orphan data assets | 11 | small | 0 | remove (one caution) |
-| R6 | `Assets/Screenshots` | 42 | 10 M | untracked | move outside `Assets` |
+| R5 | Orphan data assets | 10 | small | 0 | **DONE 24 Oct 2026** |
+| R6 | `Assets/Screenshots` | 42 | 10 M | untracked | **DONE 24 Oct 2026** - now `Screenshots/` at the project root |
 | R7 | `SaveSamples` | 2 | small | 0 | keep (PARKED) |
+| R8 | `Scripts/Art/SpriteLitMaterialSwapper.cs` | 1 | small | 0 (not in any scene) | **DONE 24 Oct 2026** |
+| R9 | `Tiny RPG Character Asset Pack 01…` (project root) | 41 | 264 K | 0 | **DONE 24 Oct 2026** - untracked (kept on disk, gitignored) |
 
 ### R2 — nine empty folder husks
 
@@ -115,7 +117,7 @@ The packs themselves are ignored by Git, so a fresh clone has the game art but n
 
 ### R6 — `Assets/Screenshots` (move, do not delete)
 
-42 PNGs, 10 MB, and Git already ignores the folder (`Assets/Screenshots/` in `.gitignore`). They sit inside
+42 PNGs, 10 MB, and Git already ignores the folder (`Screenshots/` in `.gitignore`). They sit inside
 `Assets/`, so Unity imports every one of them on a fresh clone and whenever they change.
 
 - **Recommendation:** move the folder to the project root (outside `Assets/`) and keep it as the visual history.
@@ -131,12 +133,14 @@ save-migration work, not runtime content. Keeping them costs two small files. **
 
 | Doc | Checked | Verdict |
 |---|---|---|
-| `Architecture.md` | 2026-09-21 (Step 11e) | current - decision log extended (B28-B33) |
-| `Checklist.md` | 2026-09-21 (Step 11e) | current - master record, includes the standing regression surfaces |
-| `Roadmap.md` | 2026-09-21 (Step 11e) | current - 11a/11b/11c/11e done, Step 12 next |
-| `Sim-Core.md` | 2026-09-21 (Step 11e) | current - ranks removed, wave size derivation documented |
-| `Content.md` | 2026-09-21 (Step 11c) | current - budget split + recipe described |
-| `UI-UX.md` | 2026-09-21 (Step 11e) | current - battle-log contract added |
-| `Idle-Economy.md` | 2026-09-21 (Step 11c refresh) | current - offline payout uses the wave-size mean |
-| `Progression.md` | 2026-09-20 | current - untouched by Steps 10/11 (no progression changes) |
-| `README.md` (root) | 2026-09-21 | current - quick start, now points into `Docs/` |
+| `README.md` (index) | 2026-10-24 | current - every page listed, current vs record groups |
+| `Checklist.md` | 2026-10-24 | current - status table rewritten; save v8 |
+| `Architecture.md` | 2026-10-24 | current - save contract v8, B39-B42 added |
+| `Roadmap.md` | 2026-09-27 (B6) | **needs a re-check** - does not mention abilities, gear or the lane |
+| `Combat-Sequencing.md` | 2026-10-24 | current |
+| `Ability-Progress.md` | 2026-10-24 | current |
+| `Ability-Plan.md` / `Ability-Map.md` | 2026-10-24 | current - false claims removed |
+| `Sim-Core.md`, `Content.md`, `Idle-Economy.md`, `Progression.md` | 2026-09-21 (Step 11e) | **needs a re-check** - predates gear, abilities, roster v8 |
+| `UI-UX.md`, `UI-Layout.md`, `Art-Pipeline.md` | 2026-10-11 / 10-14 | current |
+| `Launch-Plan.md`, `Manual-Tests.md`, `Monetisation.md` | 2026-10 | current; `Manual-Tests.md` gained the ability lane check |
+| `Refactor-Plan`, `Mobile-Readiness`, `Party-Page`, `Upgrades-Page`, `Inventory-Tab-Plan`, `Equipment-MVP-Plan` | 2026-10-24 | **RECORD** - each opens with a pointer |
