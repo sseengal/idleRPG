@@ -2,7 +2,7 @@
 
 > **Everything that describes this game lives here.** One folder, one source of truth per topic.
 > Root `README.md` is the quick start (clone → open → play); everything deeper is in this folder.
-> Last restructured: Step 11e (2026-09-21); Art-Pipeline.md added 2026-09-26; Launch-Plan.md added 2026-10-11; Character-Catalog.md, Stage-Ladder.md and Ability-Map.md added 2026-10-11; UI-Layout.md added 2026-10-14.
+> Last restructured: Step 11e (2026-09-21); Art-Pipeline.md added 2026-09-26; Launch-Plan.md added 2026-10-11; Character-Catalog.md, Stage-Ladder.md and Ability-Map.md added 2026-10-11; UI-Layout.md added 2026-10-14; Combat-Sequencing.md added 2026-10-24.
 
 ---
 
@@ -10,6 +10,9 @@
 
 | Question | Document |
 |---|---|
+| What is this game now — endless, or a story? | **`Game-Vision.md`** (canon: story-led mini campaign, automatic combat, restart on death) |
+| How does a fight reach the screen, and how do abilities work? | **`Combat-Presentation.md`** (the built contract: one lane, one event per picture) |
+| What is the fight order, which strip plays, and what are the timings? | **`Combat-Sequencing.md`** (one page: lane, art-to-time, enemy timing, audit, checks) |
 | What is left to finish, and where are we right now? | **`Checklist.md`** (master record - start here) |
 | What is planned next, in what order, with what acceptance? | `Roadmap.md` |
 | How do I get this to the stores, and in what order? | **`Launch-Plan.md`** (art, audio, store launch - sequenced for a one-man team) |
@@ -47,6 +50,9 @@
 ```
 Docs/
   README.md          <- this index
+  Game-Vision.md     <- CANON: story-led campaign, automatic combat, restart on death
+  Combat-Presentation.md <- the fight's contract (one lane, art-measured windows, ability parity)
+  Combat-Sequencing.md <- the fight order, strip choice, timings, audit and Play checks (one page)
   Checklist.md       <- master progress + status
   Roadmap.md         <- ordered backlog with acceptance tests
   Launch-Plan.md     <- art + audio + store launch, sequenced for a one-man team

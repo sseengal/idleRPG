@@ -22,6 +22,6 @@ MonoBehaviour:
   shieldFactor: 0.5
   shieldSeconds: 4
   healFraction: 0.25
-  damageMultiplier: 1.4
+  damageMultiplier: 1.9
   unlockStage: 0
   tokenCost: 0

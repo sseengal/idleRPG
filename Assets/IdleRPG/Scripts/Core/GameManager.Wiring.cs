@@ -131,6 +131,16 @@ namespace IdleRPG.Core
                 }
             }
 
+            // MVP stop-gap (24 Oct 2026): the moves are open from the first wave, because nothing in the game hands
+            // them over yet. Runs after the save load (so a save's own unlocks are kept) and before the party is
+            // built below (the fight takes equipped abilities when it is built).
+            // TODO: ability unlock story moment - delete this call and unlock each ability at its story beat.
+            if (unlockAllAbilitiesForMvp && Abilities != null && partyConfig != null)
+            {
+                int equipped = Abilities.OpenAllForMvp(partyConfig.Heroes);
+                Debug.Log($"[GameManager] MVP ability unlock: {equipped} hero(es) equipped.");
+            }
+
             // One owner for the money door: the rewarded-ad guard and the IAP cash register. Everything it needs
             // (ads, ad caps, iap, boost, shop, till, save) exists by now.
             monetization = new MonetizationService(Ads, AdCaps, Iap, Boost, Shop, Rewards, Save, LogFlow);

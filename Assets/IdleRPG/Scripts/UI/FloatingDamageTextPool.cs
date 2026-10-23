@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using IdleRPG.Core;
+using IdleRPG.Sim;
 
 namespace IdleRPG.UI
 {
@@ -24,6 +25,12 @@ namespace IdleRPG.UI
 
         private readonly List<FloatingDamageTextView> pool = new List<FloatingDamageTextView>();
         private readonly List<FloatingDamageTextView> active = new List<FloatingDamageTextView>();
+
+        [Header("Enemy ability")]
+        [Tooltip("How long after an enemy announces its ability its damage still counts as ability damage.")]
+        [SerializeField] private float abilityHitWindowSec = 2.5f;
+
+        private readonly List<float> enemyCastUntil = new List<float>();
         private float driftSeed;
 
         /// <summary>
@@ -54,12 +61,51 @@ namespace IdleRPG.UI
         {
             GameEvents.EnemyDamaged += OnEnemyDamaged;
             GameEvents.HeroDamaged += OnHeroDamaged;
+            GameEvents.Healed += OnHealed;
+            GameEvents.ShieldApplied += OnShieldApplied;
+            GameEvents.AbilityCast += OnAbilityCast;
         }
 
         private void OnDisable()
         {
             GameEvents.EnemyDamaged -= OnEnemyDamaged;
             GameEvents.HeroDamaged -= OnHeroDamaged;
+            GameEvents.Healed -= OnHealed;
+            GameEvents.ShieldApplied -= OnShieldApplied;
+            GameEvents.AbilityCast -= OnAbilityCast;
+        }
+
+        /// <summary>
+        /// Marks the enemy that announced an ability. Its hit lands a moment later, so the damage event that
+        /// follows carries no "ability" flag; this window is what turns that plain hit into a heavy one.
+        /// </summary>
+        private void OnAbilityCast(CombatantSide side, int index, string abilityId, string abilityName, string clipSlot, double cooldownSeconds)
+        {
+            if (side != CombatantSide.Enemy || index < 0)
+            {
+                return;
+            }
+
+            while (enemyCastUntil.Count <= index)
+            {
+                enemyCastUntil.Add(0f);
+            }
+
+            enemyCastUntil[index] = Time.time + Mathf.Max(0.1f, abilityHitWindowSec);
+
+            // Call-out over the caster: the player sees where the move came from, not just that one happened.
+            if (!string.IsNullOrEmpty(abilityName))
+            {
+                Spawn(0d, AnchorFor(CombatantSide.Enemy, index), FloatingTextStyle.AbilityHit, abilityName);
+            }
+        }
+
+        /// <summary>True while the damage from that enemy slot still belongs to an ability it just called out.</summary>
+        private bool IsAbilityHit(int enemyIndex)
+        {
+            return enemyIndex >= 0
+                && enemyIndex < enemyCastUntil.Count
+                && Time.time <= enemyCastUntil[enemyIndex];
         }
 
         /// <summary>Replaces the per-enemy damage anchors so numbers come out of the enemy that was hit.</summary>
@@ -109,10 +155,42 @@ namespace IdleRPG.UI
                 return;
             }
 
-            Spawn(damage, heroAnchors[heroIndex], FloatingTextStyle.Incoming);
+            FloatingTextStyle style = IsAbilityHit(attackerEnemyIndex)
+                ? FloatingTextStyle.AbilityHit
+                : FloatingTextStyle.Incoming;
+
+            Spawn(damage, heroAnchors[heroIndex], style);
         }
 
-        private void Spawn(double value, RectTransform anchor, FloatingTextStyle style)
+        /// <summary>Health restored by an ability: a green number over the unit that was healed.</summary>
+        private void OnHealed(HealEvent heal)
+        {
+            if (heal.Amount <= 0d)
+            {
+                return;
+            }
+
+            Spawn(heal.Amount, AnchorFor(heal.Side, heal.Index), FloatingTextStyle.Heal);
+        }
+
+        /// <summary>A guard raised by an ability: a blue "GUARD" over the unit (no number, because no health moved).</summary>
+        private void OnShieldApplied(ShieldEvent shield)
+        {
+            Spawn(0d, AnchorFor(shield.Side, shield.Index), FloatingTextStyle.Guard, "GUARD");
+        }
+
+        /// <summary>The anchor that belongs to one unit on either side.</summary>
+        private RectTransform AnchorFor(CombatantSide side, int index)
+        {
+            if (side == CombatantSide.Enemy)
+            {
+                return EnemyAnchor(index);
+            }
+
+            return heroAnchors != null && index >= 0 && index < heroAnchors.Length ? heroAnchors[index] : null;
+        }
+
+        private void Spawn(double value, RectTransform anchor, FloatingTextStyle style, string text = null)
         {
             if (anchor == null || active.Count >= Mathf.Max(1, maxActive))
             {
@@ -129,7 +207,7 @@ namespace IdleRPG.UI
             // heroes pops from the hero's top-RIGHT. The rect adopts the anchor's anchor/pivot so the
             // offset lands in the SAME coordinate space (otherwise numbers drifted below the sim), then
             // it is clamped to stay inside the battle view.
-            float side = style == FloatingTextStyle.Incoming ? 1f : -1f;
+            float side = style == FloatingTextStyle.Incoming || style == FloatingTextStyle.AbilityHit || style == FloatingTextStyle.Heal ? 1f : -1f;
 
             RectTransform rt = view.transform as RectTransform;
             rt.SetParent(anchor.parent, false);
@@ -149,7 +227,16 @@ namespace IdleRPG.UI
             }
 
             driftSeed += 1.37f;
-            view.Play(value, position, style, driftSeed);
+
+            if (string.IsNullOrEmpty(text))
+            {
+                view.Play(value, position, style, driftSeed);
+            }
+            else
+            {
+                view.Play(text, position, style, driftSeed);
+            }
+
             active.Add(view);
         }
 

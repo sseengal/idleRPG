@@ -88,6 +88,9 @@
             "asset": "Enemy_Slime",
             "displayName": "Slime",
             "art": "Slime",
+            "abilities": [
+                "enemy_spike_slime"
+            ],
             "firstStage": 1,
             "lastStage": 10,
             "archetype": "beast",

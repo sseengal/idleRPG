@@ -9,25 +9,25 @@ using IdleRPG.Sim;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// The ABILITIES tab of the battle page (Ability-Plan).
+    /// The battle page's ability strip, one button per hero (Ability-Plan).
     ///
-    /// ELI5: one column per hero - its picture, its name, its health, the ability it is wearing, a clock that says
-    /// when it can be cast again, and the button that casts it.
+    /// ELI5: three buttons under the fight. Each one shows a hero's face, the special move that hero is wearing,
+    /// whether it is ready or still resting, and pressing it makes that hero use that move.
     ///
-    /// An ability does NOTHING yet on purpose: pressing the button plays that hero's own animation and writes a line
-    /// in the battle log, so the plumbing can be watched before it is made meaningful. Everything a column shows comes
-    /// from the fight itself (whose clock pauses with the game), so the panel cannot drift from the sim.
+    /// A press queues that hero's cast. The cast is announced when the action lane is free - one actor, one target,
+    /// one travel window - and the button says so: "QUEUED" (amber) while it waits, then the cooldown clock. Everything
+    /// a button shows comes from the fight itself (whose clock pauses with the game), so the strip cannot drift from
+    /// the sim.
     /// </summary>
     public sealed class AbilityPanelUI : MonoBehaviour
     {
-        /// <summary>One hero's column. Built by the scene builder and wired once.</summary>
+        /// <summary>One hero's button. Built by the scene builder and wired once. The whole cell is the button.</summary>
         [System.Serializable]
         public sealed class Row
         {
             public int heroIndex;
             public Image portrait;
             public TextMeshProUGUI nameLabel;
-            public HpBarView health;
             public TextMeshProUGUI abilityLabel;
             public TextMeshProUGUI clockLabel;
             public Image clockFill;
@@ -38,12 +38,42 @@ namespace IdleRPG.UI
         [SerializeField] private Color readyTint = new Color(0.30f, 0.68f, 0.42f, 1f);
         [SerializeField] private Color coolingTint = new Color(0.30f, 0.33f, 0.40f, 1f);
 
+        /// <summary>Amber wash while a press waits for the action lane. The wait is real, so it is shown.</summary>
+        [SerializeField] private Color queuedTint = new Color(0.72f, 0.62f, 0.28f, 1f);
+
+        /// <summary>Grey wash for a hero with nothing to cast. Nothing is hidden, so the row keeps its width.</summary>
+        [SerializeField] private Color lockedTint = new Color(0.22f, 0.24f, 0.29f, 1f);
+
         private GameManager manager;
+
+        /// <summary>True once the pictures have a sprite. The party data is not readable on the first enable.</summary>
+        private bool portraitsBound;
+
+        /// <summary>True once each button has its press listener. Those listeners do not survive the editor.</summary>
+        private bool wired;
 
         /// <summary>Wires the panel from the scene builder, the same way the unit views are wired.</summary>
         public void ConfigureRuntime(Row[] rowViews)
         {
             rows = rowViews ?? new Row[0];
+            wired = false;
+            WireButtons();
+        }
+
+        /// <summary>
+        /// Attaches each button's press to its hero.
+        ///
+        /// This must happen at RUNTIME. A listener added by the scene builder at edit time is not serialized, so the
+        /// buttons arrive in play mode with an empty onClick and a press does nothing at all.
+        /// </summary>
+        private void WireButtons()
+        {
+            if (wired)
+            {
+                return;
+            }
+
+            wired = true;
 
             for (int i = 0; i < rows.Length; i++)
             {
@@ -60,18 +90,26 @@ namespace IdleRPG.UI
         }
 
         /// <summary>
-        /// The panel sits on a tab that starts hidden, so binding happens when it is first shown: the HUD may not have
-        /// a manager at scene start.
+        /// The strip lives on the battle page, which is active at scene start, but the HUD's manager may not be
+        /// assigned yet, so binding is deferred to first enable and re-checked every frame.
         /// </summary>
         private void OnEnable()
         {
             Bind();
-            RefreshPortraits();
+            WireButtons();
+            portraitsBound = RefreshPortraits();
         }
 
         private void Update()
         {
             Bind();
+
+            // A frame or two after scene start the HUD finally hands over the manager. Until then there is no card
+            // data to read, so the pictures stay empty - keep asking instead of giving up on the first enable.
+            if (!portraitsBound)
+            {
+                portraitsBound = RefreshPortraits();
+            }
 
             Encounter encounter = ActiveEncounter();
             if (encounter == null || rows == null)
@@ -97,21 +135,11 @@ namespace IdleRPG.UI
             bool alive = hero != null && hero.IsAlive;
             bool hasAbility = hero != null && hero.HasAbility;
             bool cooling = hasAbility && alive && hero.AbilityCooldownRemaining > 0d;
+            bool queued = hasAbility && alive && hero.HasCastRequest;
 
             if (row.nameLabel != null && card != null)
             {
                 row.nameLabel.SetText(card.HeroName);
-            }
-
-            if (row.health != null)
-            {
-                row.health.SetVisible(hero != null);
-
-                if (hero != null)
-                {
-                    row.health.SetFill((float)hero.HealthPercent);
-                    row.health.SetValueLabel(hero.CurrentHealth, hero.MaxHealth);
-                }
             }
 
             if (row.abilityLabel != null)
@@ -122,8 +150,11 @@ namespace IdleRPG.UI
             if (row.clockLabel != null)
             {
                 row.clockLabel.SetText(!hasAbility
-                    ? "-"
-                    : cooling ? Mathf.CeilToInt((float)hero.AbilityCooldownRemaining) + "s" : "READY");
+                    ? "LOCKED"
+                    : queued
+                        ? "QUEUED"
+                        : cooling ? Mathf.CeilToInt((float)hero.AbilityCooldownRemaining) + "s" : "READY");
+                row.clockLabel.color = queued ? queuedTint : hasAbility && !cooling && alive ? readyTint : coolingTint;
             }
 
             if (row.clockFill != null)
@@ -139,17 +170,26 @@ namespace IdleRPG.UI
 
             if (row.castButton != null)
             {
-                row.castButton.gameObject.SetActive(hasAbility);
-                row.castButton.interactable = hasAbility && alive && !cooling;
+                row.castButton.interactable = hasAbility && alive && !cooling && !queued;
+
+                // The cell never disappears: a missing button would make the strip jump and leave a dead gap.
+                Image face = row.castButton.targetGraphic as Image;
+                if (face != null)
+                {
+                    face.color = hasAbility ? (queued ? queuedTint : Color.white) : lockedTint;
+                }
             }
         }
 
-        /// <summary>Points each column's picture at the art it shows, once, when the tab is first opened.</summary>
-        private void RefreshPortraits()
+        /// <summary>
+        /// Points each button's picture at the art it shows. Returns false when the party data is not readable yet,
+        /// so the caller can try again on the next frame.
+        /// </summary>
+        private bool RefreshPortraits()
         {
-            if (rows == null)
+            if (rows == null || HeroCard(0) == null)
             {
-                return;
+                return false;
             }
 
             for (int i = 0; i < rows.Length; i++)
@@ -170,6 +210,8 @@ namespace IdleRPG.UI
                     ? card.ArtSet.Poster
                     : card.HeroIcon;
             }
+
+            return true;
         }
 
         /// <summary>Asks the fight to cast. The fight refuses when it cannot, so a press can never force one.</summary>

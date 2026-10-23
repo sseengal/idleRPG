@@ -16,6 +16,10 @@ namespace IdleRPG.Combat
     /// </summary>
     public sealed class CombatSimulator
     {
+        // A wave's first enemy cast roll waits this long (random inside the range), so a fight does not open with a move.
+        private const double EnemyFirstCastMinSec = 2d;
+        private const double EnemyFirstCastMaxSec = 6d;
+
         private ICombatStatProvider statProvider;
         private readonly EnemyTargetingMode targetingMode;
         private Formation formation;
@@ -53,8 +57,8 @@ namespace IdleRPG.Combat
         // --- Events (mirrors the old API so UI/log keep working) ---
         public event Action<EnemyDamagedInfo> EnemyDamaged;
 
-        /// <summary>An attack was announced (attacker committed; damage lands after the swing window).</summary>
-        public event Action<int, CombatantSide, int, CombatantSide> SwingStarted;
+        /// <summary>An attack or ability was announced (attacker committed; effects land after the travel window).</summary>
+        public event Action<int, CombatantSide, int, CombatantSide, string> SwingStarted;
 
         /// <summary>(enemyIndex, goldReward) - one call per enemy, so the UI can attribute a 1-3 enemy wave.</summary>
         public event Action<int, double> EnemyKilled;
@@ -72,6 +76,12 @@ namespace IdleRPG.Combat
 
         /// <summary>A hero or enemy cast its ability (Ability-Plan). Forwarded from the fight's own tick.</summary>
         public event Action<AbilityCastEvent> AbilityCast;
+
+        /// <summary>An ability healed a unit (forwarded at impact).</summary>
+        public event Action<HealEvent> Healed;
+
+        /// <summary>An ability raised a guard on a unit (forwarded at impact).</summary>
+        public event Action<ShieldEvent> ShieldApplied;
 
         /// <summary>
         /// Supplies the ability a hero has equipped, by PARTY INDEX. Injected by the game wiring, so the sim never has
@@ -294,6 +304,7 @@ namespace IdleRPG.Combat
 
             enemies = new[] { enemy };
             ArmPartyAbilities();
+            ArmEnemyAbilities();
             encounter.SpawnEnemies(enemies);
             encounter.PartyTargetRule = TargetRule.FrontMost;
             return true;
@@ -309,6 +320,7 @@ namespace IdleRPG.Combat
 
             enemies = team;
             ArmPartyAbilities();
+            ArmEnemyAbilities();
             encounter.SpawnEnemies(enemies);
             encounter.PartyTargetRule = TargetRule.FrontMost;
             return true;
@@ -353,11 +365,97 @@ namespace IdleRPG.Combat
 
                 AbilityDef equipped = AbilityFor != null ? AbilityFor(i) : null;
 
-                hero.SetAbility(
-                    equipped != null ? equipped.AbilityID : null,
-                    equipped != null ? equipped.DisplayName : null,
-                    equipped != null ? equipped.ArtSlot : null,
-                    equipped != null ? equipped.CooldownSec : 0d);
+                // One mapping point: everything the fight needs about an ability is copied here, art window included.
+                hero.SetAbility(ToSimAbility(equipped, hero.Data != null ? hero.Data.ArtSet : null));
+            }
+        }
+
+        /// <summary>
+        /// Gives every enemy its ability (data-driven from the enemy asset, never from an unlock or the save file).
+        /// Enemies are armed at the start of each wave, which is also why their clock begins ready: a wave opens with
+        /// the enemy able to use its move, exactly like a hero at full clock.
+        /// </summary>
+        private void ArmEnemyAbilities()
+        {
+            if (enemies == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < enemies.Length; i++)
+            {
+                EnemyCombatant enemy = enemies[i];
+                if (enemy == null || enemy.Data == null)
+                {
+                    continue;
+                }
+
+                AbilityDef[] owned = enemy.Data.Abilities;
+                AbilityDef ability = owned != null && owned.Length > 0 ? owned[0] : null;
+
+                enemy.SetAbility(ToSimAbility(ability, enemy.Data.ResolveArt(enemy.Stage)));
+
+                // A wave must not open with an enemy move on its very first beat: the first roll waits 2-6 s, then the
+                // normal chance decides. Seeded from the fight's own generator, so a replay stays in step.
+                if (enemy.HasAbility)
+                {
+                    double wait = EnemyFirstCastMinSec +
+                                  (context.Rng != null ? context.Rng.NextDouble() * (EnemyFirstCastMaxSec - EnemyFirstCastMinSec) : 0d);
+                    enemy.HoldAbility(wait);
+                }
+            }
+        }
+
+        /// <summary>
+        /// The single place a data ability becomes a fight ability. A new ability needs a spec row and an asset - no view
+        /// code, no switch in the UI, no event of its own.
+        /// </summary>
+        private static SimAbility ToSimAbility(AbilityDef definition, CharacterArtSet art)
+        {
+            if (definition == null)
+            {
+                return SimAbility.None;
+            }
+
+            string slot = definition.ArtSlot;
+
+            return new SimAbility
+            {
+                Id = definition.AbilityID,
+                DisplayName = definition.DisplayName,
+                ClipSlot = slot,
+                CooldownSec = definition.CooldownSec,
+                Kind = MapKind(definition.Kind),
+                Target = MapTarget(definition.Target),
+                ShieldFactor = definition.ShieldFactor,
+                ShieldSeconds = definition.ShieldSeconds,
+                HealFraction = definition.HealFraction,
+                DamageMultiplier = definition.DamageMultiplier,
+
+                // The art owns the travel window: the effect lands on the frame that strip reaches full reach.
+                WindowSeconds = art != null ? art.SecondsFor(slot) : 0f
+            };
+        }
+
+        private static SimAbilityKind MapKind(AbilityKind kind)
+        {
+            switch (kind)
+            {
+                case AbilityKind.Heal: return SimAbilityKind.Heal;
+                case AbilityKind.Shield: return SimAbilityKind.Shield;
+                default: return SimAbilityKind.Damage;
+            }
+        }
+
+        private static SimAbilityTarget MapTarget(AbilityTarget target)
+        {
+            switch (target)
+            {
+                case AbilityTarget.Self: return SimAbilityTarget.Self;
+                case AbilityTarget.Party: return SimAbilityTarget.Party;
+                case AbilityTarget.LowestAlly: return SimAbilityTarget.LowestAlly;
+                case AbilityTarget.FrontHero: return SimAbilityTarget.FrontHero;
+                default: return SimAbilityTarget.FrontEnemy;
             }
         }
 
@@ -369,11 +467,13 @@ namespace IdleRPG.Combat
             encounter.EnemyKilled += (index, gold) => EnemyKilled?.Invoke(index, gold);
             encounter.PartyWiped += () => PartyWiped?.Invoke();
             encounter.AbilityCast += cast => AbilityCast?.Invoke(cast);
+            encounter.Healed += heal => Healed?.Invoke(heal);
+            encounter.ShieldApplied += shield => ShieldApplied?.Invoke(shield);
         }
 
         private void OnEncounterSwingStarted(SwingStartedEvent swing)
         {
-            SwingStarted?.Invoke(swing.AttackerIndex, swing.AttackerSide, swing.TargetIndex, swing.TargetSide);
+            SwingStarted?.Invoke(swing.AttackerIndex, swing.AttackerSide, swing.TargetIndex, swing.TargetSide, swing.ClipSlot);
         }
 
         private void OnEncounterDamaged(DamageEvent damage)

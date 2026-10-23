@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using IdleRPG.Core;
 using IdleRPG.Data;
+using IdleRPG.Sim;
 using IdleRPG.Utils;
 
 namespace IdleRPG.UI
@@ -46,6 +47,44 @@ namespace IdleRPG.UI
         private void OnEnemyKilled(string enemyName, double goldReward, int enemyIndex)
         {
             Append(string.Format("{0} defeated  +{1} gold", enemyName, NumberFormatter.Format(goldReward)), goldColor);
+        }
+
+        /// <summary>
+        /// A unit cast its ability: the "cause" line. It is written when the cast is announced, so it always appears
+        /// before the impact line that follows - the same order a basic attack reads in.
+        /// </summary>
+        private void OnAbilityCast(CombatantSide side, int index, string abilityId, string abilityName, string clipSlot, double cooldownSeconds)
+        {
+            if (side == CombatantSide.Enemy)
+            {
+                // The enemy move is the thing the player must notice: loud verb, its own colour.
+                Append(string.Format("{0} unleashes {1}!", EnemyName(index), abilityName), enemyAbilityColor);
+                return;
+            }
+
+            string caster = HeroName(index);
+            Append(string.Format("{0} casts {1}", caster, abilityName), eventColor);
+        }
+
+        private void OnHealed(HealEvent heal)
+        {
+            string target = heal.Side == CombatantSide.Enemy ? EnemyName(heal.Index) : HeroName(heal.Index);
+
+            Append(string.Format("{0} healed for {1} by {2}  ({3}/{4})", target,
+                NumberFormatter.Format(heal.Amount),
+                heal.AbilityName,
+                NumberFormatter.Format(heal.TargetHealth),
+                NumberFormatter.Format(heal.TargetMaxHealth)), healColor);
+        }
+
+        private void OnShieldApplied(ShieldEvent shield)
+        {
+            string target = shield.Side == CombatantSide.Enemy ? EnemyName(shield.Index) : HeroName(shield.Index);
+
+            Append(string.Format("{0} guards with {1}  ({2}% damage for {3}s)", target,
+                shield.AbilityName,
+                NumberFormatter.Format(shield.Factor * 100d),
+                NumberFormatter.Format(shield.Seconds)), guardColor);
         }
 
         private void OnHeroDied(int heroIndex)

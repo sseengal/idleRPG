@@ -123,5 +123,9 @@ Assets/_Recovery/
 Screenshots/
 Assets/Screenshots/
 
+# Art source packs (downloads, not project content - nothing under Assets/ references them)
+/TinyRPGAssets/
+/TinyRPGAssets2/
+
 # macOS Finder metadata
 .DS_Store

@@ -143,6 +143,47 @@ namespace IdleRPG.Data
         }
 
         /// <summary>
+        /// The measured strike frame for a named slot, or -1 when that slot has none.
+        ///
+        /// Only the primary attack strip and the special (ability) strip are measured from the pixels. A secondary
+        /// strip such as "Attack02" has no measured frame yet, so its hit lands on its last frame - correct, never
+        /// early. Measuring those is art-importer work (see Docs/Combat-Presentation.md).
+        /// </summary>
+        public int StrikeFrameFor(string slot)
+        {
+            switch (slot)
+            {
+                case "Attack01": return StrikeFrame;
+                case "Ability": return AbilityStrikeFrame;
+                default: return -1;
+            }
+        }
+
+        /// <summary>
+        /// How long one named slot takes up to and including its strike frame, at that slot's own frame rate.
+        /// This is the travel window an ability uses, exactly the way <see cref="SwingSeconds"/> times an attack:
+        /// the effect lands on the frame the art reaches its most extended pose.
+        /// </summary>
+        public float SecondsFor(string slot)
+        {
+            Sprite[] frames = FramesFor(slot);
+            int count = frames != null ? frames.Length : 0;
+
+            if (count == 0)
+            {
+                return 0f;
+            }
+
+            int strike = StrikeFrameFor(slot);
+            if (strike < 0 || strike >= count)
+            {
+                strike = count - 1;
+            }
+
+            return (strike + 1) / (float)Mathf.Max(1, FpsFor(slot));
+        }
+
+        /// <summary>
         /// The frames of one named slot ("Attack02", "Ability"), or an empty array. This is how an ability finds the
         /// clip it plays: the ability definition names a slot, the art set supplies the frames. Never null, so callers
         /// can check Length instead of guarding twice.

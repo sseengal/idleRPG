@@ -80,10 +80,11 @@ namespace IdleRPG.Core
         public static event Action<EnemyDamagedInfo> EnemyDamaged;
 
         /// <summary>
-        /// (attackerIndex, attackerSide, targetIndex, targetSide) — an attack was announced. The damage itself
-        /// lands later via <see cref="EnemyDamaged"/>/<see cref="HeroDamaged"/>; this is the visual "commit" beat.
+        /// (attackerIndex, attackerSide, targetIndex, targetSide, clipSlot) - an action was announced. The effect
+        /// itself lands later via <see cref="EnemyDamaged"/>/<see cref="HeroDamaged"/>; this is the visual "commit"
+        /// beat. A non-empty clip slot means "play this strip instead of the ordinary attack".
         /// </summary>
-        public static event Action<int, CombatantSide, int, CombatantSide> SwingStarted;
+        public static event Action<int, CombatantSide, int, CombatantSide, string> SwingStarted;
 
         /// <summary>(enemyName, goldReward, enemyIndex). One call per enemy.</summary>
         public static event Action<string, double, int> EnemyKilled;
@@ -96,6 +97,12 @@ namespace IdleRPG.Core
 
         /// <summary>(heroIndex).</summary>
         public static event Action<int> HeroDied;
+
+        /// <summary>An ability healed a unit (impact): who, by how much, and its health after the heal.</summary>
+        public static event Action<HealEvent> Healed;
+
+        /// <summary>An ability raised a guard on a unit (impact): who, the damage factor, and how long it lasts.</summary>
+        public static event Action<ShieldEvent> ShieldApplied;
 
         // ------------------------------------------------------------------
         // Progression
@@ -156,6 +163,9 @@ namespace IdleRPG.Core
             EnemyKilled = null;
             HeroDamaged = null;
             HeroDied = null;
+            Healed = null;
+            ShieldApplied = null;
+            AbilityCast = null;
             HeroStatsChanged = null;
             HeroLevelChanged = null;
             UpgradePurchased = null;

@@ -7,7 +7,7 @@ decisions, data, sim, UI, unlock, order. Everything here is agreed as of 2026-10
 
 | # | Decision | Choice |
 |---|---|---|
-| 1 | Cast model | **Instant, off-turn.** Tap -> the hero plays the special strip immediately -> the effect lands ~0.5 s later -> the normal swing rhythm continues. Reuses the announce -> play -> impact rhythm attacks already use. |
+| 1 | Cast model | **Revised 24 Oct 2026: a cast is an ACTION IN THE LANE**, not an instant off-turn burst. Any cast --> the request waits (button shows QUEUED) --> it is announced like a swing --> the effect lands on its own art-measured window. `Combat-Presentation.md` §12 is the built contract; this row is kept so the change is visible. |
 | 2 | Combat cost | **Cooldown only.** No mana/energy. Unlock is the "limited" part; casts cost time. |
 | 3 | Targeting | **Automatic.** One tap, no aiming: Shield self, Heal lowest-health ally, damage the front enemy. |
 | 4 | Enemy cadence | **Auto-cast on a per-ability cooldown** from wave start. No random chance. |

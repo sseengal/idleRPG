@@ -45,6 +45,9 @@ namespace IdleRPG.UI
         [SerializeField] private float hitPunchScale = 0.94f;
         [SerializeField] private float critPunchScale = 0.88f;
         [SerializeField] private float punchDurationSec = 0.12f;
+        [Tooltip("Flash colour when an ability raises a guard on this enemy (no health moved, so the bar is untouched).")]
+        [SerializeField] private Color shieldFlashColor = new Color(0.55f, 0.8f, 1f, 1f);
+        [SerializeField] private float shieldFlashDurationSec = 0.2f;
 
         private int enemyIndex;
         private float popTimer;
@@ -86,6 +89,8 @@ namespace IdleRPG.UI
             GameEvents.EnemyKilled += OnEnemyKilled;
             GameEvents.HeroDamaged += OnEnemyAttackLanded;
             GameEvents.SwingStarted += OnSwingStarted;
+            GameEvents.Healed += OnHealed;
+            GameEvents.ShieldApplied += OnShieldApplied;
         }
 
         private void OnDisable()
@@ -95,6 +100,8 @@ namespace IdleRPG.UI
             GameEvents.EnemyKilled -= OnEnemyKilled;
             GameEvents.HeroDamaged -= OnEnemyAttackLanded;
             GameEvents.SwingStarted -= OnSwingStarted;
+            GameEvents.Healed -= OnHealed;
+            GameEvents.ShieldApplied -= OnShieldApplied;
         }
 
         private void OnEnemySpawned(string enemyName, double maxHealth, bool isBoss, int index)
@@ -242,18 +249,25 @@ namespace IdleRPG.UI
             }
         }
 
-        /// <summary>This enemy committed a swing: start the swing clip and run to the hero it is about to hit.</summary>
-        private void OnSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide)
+        /// <summary>
+        /// This enemy committed an action: start the clip and run at the hero it is about to hit. The clip slot lets an
+        /// enemy cast play its own strip through the same entry point a swing uses.
+        /// </summary>
+        private void OnSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot)
         {
             if (attackerSide != CombatantSide.Enemy || attackerIndex != enemyIndex)
             {
                 return;
             }
 
-            // Same rule as the heroes: the swing starts on the ANNOUNCE, so the strike lands on the hit ~0.35 s later
-            // instead of the hit starting the animation. Plays even with no target slot (attack in place).
             EnsureLunge();
-            StartSwing();
+            StartSwing(clipSlot);
+
+            // A self/party guard stays planted; only a hostile target pulls the enemy forward.
+            if (targetSide != CombatantSide.Party)
+            {
+                return;
+            }
 
             HudController hud = HudController.Instance;
             FormationBoardView board = hud != null ? hud.FormationBoard : null;
@@ -265,8 +279,11 @@ namespace IdleRPG.UI
             }
         }
 
-        /// <summary>Plays the attack strip once; the lunge blinks home when the clip finishes.</summary>
-        private void StartSwing()
+        /// <summary>
+        /// Plays one action clip, then lets the lunge blink home. Empty slot = the ordinary attack; a named slot = the
+        /// ability strip the cast asked for.
+        /// </summary>
+        private void StartSwing(string clipSlot)
         {
             CharacterAnimator swing = EnsureAnimator();
 
@@ -275,13 +292,48 @@ namespace IdleRPG.UI
                 return;
             }
 
-            swing.PlayAttack(() =>
+            EnemyData data = ResolveEnemyData();
+            CharacterArtSet art = data != null ? data.ResolveArt(CurrentStage()) : null;
+            Sprite[] frames = art != null && !string.IsNullOrEmpty(clipSlot) ? art.FramesFor(clipSlot) : null;
+
+            if (frames != null && frames.Length > 0)
             {
-                if (lunge != null)
-                {
-                    lunge.CompleteSwing();
-                }
-            });
+                swing.PlayClip(frames, art.FpsFor(clipSlot), OnSwingClipFinished);
+                return;
+            }
+
+            swing.PlayAttack(OnSwingClipFinished);
+        }
+
+        private void OnSwingClipFinished()
+        {
+            if (lunge != null)
+            {
+                lunge.CompleteSwing();
+            }
+        }
+
+        /// <summary>An ability healed this enemy: refresh the bar so the number matches the fight.</summary>
+        private void OnHealed(HealEvent heal)
+        {
+            if (heal.Side != CombatantSide.Enemy || heal.Index != enemyIndex || hpBar == null)
+            {
+                return;
+            }
+
+            hpBar.SetFill(heal.TargetMaxHealth <= 0d ? 0f : (float)(heal.TargetHealth / heal.TargetMaxHealth));
+            hpBar.SetValueLabel(heal.TargetHealth, heal.TargetMaxHealth);
+        }
+
+        /// <summary>An ability raised a guard on this enemy: a short blue flash, because no health moved.</summary>
+        private void OnShieldApplied(ShieldEvent shield)
+        {
+            if (shield.Side != CombatantSide.Enemy || shield.Index != enemyIndex)
+            {
+                return;
+            }
+
+            hitJuice.Flash(shieldFlashColor, baseColor, shieldFlashDurationSec);
         }
 
         private void OnEnemyKilled(string enemyName, double goldReward, int index)

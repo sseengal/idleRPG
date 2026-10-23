@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.IO;
 using TMPro;
 using UnityEditor;
@@ -230,125 +229,82 @@ namespace IdleRPG.EditorTools
         }
 
         /// <summary>
-        /// The log / abilities tab strip. This row used to be a plain "BATTLE LOG" label; it is now the tab bar,
-        /// because the two panels share one rectangle and only the strip decides which of them is visible.
+        /// The three hero ability buttons, one per party slot, in the band between the viewport and the log
+        /// (Ability-Plan). They are always on screen: an ability you can only reach by opening a tab is an ability
+        /// the player forgets mid-fight.
+        ///
+        /// ELI5: three buttons under the fight. Press one and that hero does its special move.
         /// </summary>
-        private static void BuildLogHeaderRow(RectTransform pageRoot, CombatLogUI log, AbilityPanelUI abilities)
+        private static AbilityPanelUI BuildAbilityStrip(RectTransform pageRoot, int heroCount)
         {
-            Image row = KitPanel("BattleLogHeader", pageRoot, UiTheme.Panel);
-            UiFactory.Anchor(row.rectTransform, new Vector2(0f, LogTop), new Vector2(1f, BattleViewportBottom), UiSpace.ScreenMargin, UiSpace.None, UiSpace.ScreenMargin, UiSpace.None);
-
-            TabController tabs = row.gameObject.AddComponent<TabController>();
-
-            Button logTab = BuildTabButton(row.transform, "LogTab", "BATTLE LOG", new Vector2(0f, 0f), new Vector2(0.5f, 1f));
-            Button abilityTab = BuildTabButton(row.transform, "AbilityTab", "ABILITIES", new Vector2(0.5f, 0f), new Vector2(1f, 1f));
-
-            List<TabController.TabDefinition> definitions = new List<TabController.TabDefinition>
-            {
-                CreateBattleTab("BattleLog", logTab, log != null ? log.gameObject : null),
-                CreateBattleTab("Abilities", abilityTab, abilities != null ? abilities.gameObject : null)
-            };
-
-            SceneWiringUtility.SetField(tabs, "tabs", definitions);
-            SceneWiringUtility.SetField(tabs, "activeTabSprite", UiFactory.LoadSprite("ui_tab_on"), required: false);
-            SceneWiringUtility.SetField(tabs, "inactiveTabSprite", UiFactory.LoadSprite("ui_tab_off"), required: false);
-        }
-
-        private static TabController.TabDefinition CreateBattleTab(string name, Button button, GameObject panel)
-        {
-            return new TabController.TabDefinition
-            {
-                tabName = name,
-                button = button,
-                buttonBackground = button != null ? button.targetGraphic as Image : null,
-                buttonLabel = button != null ? button.GetComponentInChildren<TextMeshProUGUI>() : null,
-                panel = panel
-            };
-        }
-
-        /// <summary>One clickable tab. This strip owns its buttons, unlike the management tabs (nav-bar driven).</summary>
-        private static Button BuildTabButton(Transform parent, string name, string label, Vector2 min, Vector2 max)
-        {
-            Button button = UiFactory.Button(name, parent, label, "ui_tab_off", UiType.Role.Section, UiTheme.Text, () => { });
-            UiFactory.Anchor(button.GetComponent<RectTransform>(), min, max, UiSpace.Snug, UiSpace.Hairline, UiSpace.Snug, UiSpace.Hairline);
-            return button;
-        }
-
-        /// <summary>
-        /// The ABILITIES tab: one column per hero, sharing the log's rectangle so the strip simply swaps which panel
-        /// is visible. Built hidden, because the battle log stays the default tab.
-        /// </summary>
-        private static AbilityPanelUI BuildAbilityPanel(RectTransform pageRoot, int heroCount)
-        {
-            Image strip = KitPanel("AbilityPanel", pageRoot, UiTheme.Panel, raycast: true);
-            UiFactory.Anchor(strip.rectTransform, Vector2.zero, new Vector2(1f, LogTop), UiSpace.ScreenMargin, UiSpace.Snug, UiSpace.ScreenMargin, UiSpace.Snug);
+            Image strip = KitPanel("AbilityStrip", pageRoot, UiTheme.Panel, raycast: true);
+            UiFactory.Anchor(strip.rectTransform, new Vector2(0f, LogTop), new Vector2(1f, BattleViewportBottom),
+                UiSpace.ScreenMargin, UiSpace.Snug, UiSpace.ScreenMargin, UiSpace.Snug);
 
             AbilityPanelUI panel = strip.gameObject.AddComponent<AbilityPanelUI>();
-            int columns = heroCount < 1 ? 1 : heroCount;
-            AbilityPanelUI.Row[] rows = new AbilityPanelUI.Row[columns];
+            int buttons = heroCount < 1 ? 1 : heroCount;
+            AbilityPanelUI.Row[] rows = new AbilityPanelUI.Row[buttons];
 
-            for (int i = 0; i < columns; i++)
+            for (int i = 0; i < buttons; i++)
             {
-                rows[i] = BuildAbilityColumn(strip.transform, i, columns);
+                rows[i] = BuildAbilityButton(strip.transform, i, buttons);
             }
 
             panel.ConfigureRuntime(rows);
-            strip.gameObject.SetActive(false);
             return panel;
         }
 
         /// <summary>
-        /// One hero's column: portrait, name, health, the ability it is wearing, the cast clock and the CAST button.
+        /// One hero's button: its picture on the left, its name and the ability it wears on the right, the cast
+        /// clock under them and a cooldown bar along the bottom. The whole cell is the button, so the tap target is
+        /// the full width instead of a small CAPTION-sized box.
         ///
-        /// Every band is a FRACTION of the column, not a pixel offset. The panel is the battle log's rectangle
-        /// (1080 x ~523 canvas units on the reference resolution), and the log's own content scrolls - this one must
-        /// not: a fixed offset layout built for a short strip either crammed the rows or pushed the button out of the
-        /// container. Fractions cannot do that, whatever the band height becomes.
+        /// Every band is a FRACTION of the cell, the same rule the old column used: the strip's height comes from a
+        /// constant, and fractions cannot overflow it whatever that constant becomes.
         /// </summary>
-        private static AbilityPanelUI.Row BuildAbilityColumn(Transform parent, int index, int total)
+        private static AbilityPanelUI.Row BuildAbilityButton(Transform parent, int index, int total)
         {
-            GameObject column = UiFactory.Node("Hero" + index, parent);
-            UiFactory.Anchor(column.GetComponent<RectTransform>(),
-                new Vector2(index / (float)total, 0f), new Vector2((index + 1) / (float)total, 1f), UiSpace.Small, UiSpace.Small, UiSpace.Small, UiSpace.Small);
-
-            // Square by height (~203 units at the reference size), so the art is not stretched; preserveAspect
-            // keeps the sprite itself correct inside it.
-            Image portrait = UiFactory.Icon("Portrait", column.transform, Color.white);
-            UiFactory.Anchor(portrait.rectTransform, new Vector2(0.20f, 0.58f), new Vector2(0.80f, 0.98f));
-
-            TextMeshProUGUI name = UiFactory.Text("Name", column.transform, "", UiType.Role.Sentence,
-                TextAlignmentOptions.Center, UiTheme.Text);
-            UiFactory.Anchor(name.rectTransform, new Vector2(0.02f, 0.485f), new Vector2(0.98f, 0.575f));
-
-            HpBarView health = CreateHpBar(column.transform, "HpBar");
-            UiFactory.Anchor(health.GetComponent<RectTransform>(), new Vector2(0.06f, 0.42f), new Vector2(0.94f, 0.475f));
-
-            TextMeshProUGUI ability = UiFactory.Text("Ability", column.transform, "", UiType.Role.Small,
-                TextAlignmentOptions.Center, UiTheme.TextDim);
-            UiFactory.Anchor(ability.rectTransform, new Vector2(0.02f, 0.335f), new Vector2(0.98f, 0.41f));
-
-            TextMeshProUGUI clock = UiFactory.Text("Clock", column.transform, "", UiType.Role.Small,
-                TextAlignmentOptions.Center, UiTheme.Text);
-            UiFactory.Anchor(clock.rectTransform, new Vector2(0.02f, 0.255f), new Vector2(0.98f, 0.325f));
-
-            Image clockFill = CreateFilledImage("ClockFill", column.transform, new Color(0.30f, 0.68f, 0.42f, 1f));
-            UiFactory.Anchor(clockFill.rectTransform, new Vector2(0.06f, 0.215f), new Vector2(0.94f, 0.243f));
-
-            // The panel replaces this placeholder listener in ConfigureRuntime; the factory always adds one.
-            Button cast = UiFactory.Button("Cast", column.transform, "CAST", "ui_button", UiType.Role.Sentence,
+            // The factory's own label stays unused - the cell carries three of its own.
+            Button cell = UiFactory.Button("Hero" + index, parent, string.Empty, "ui_button", UiType.Role.Small,
                 UiTheme.Text, () => { });
-            UiFactory.Anchor(cast.GetComponent<RectTransform>(), new Vector2(0.14f, 0.05f), new Vector2(0.86f, 0.16f));
+            UiFactory.Anchor(cell.GetComponent<RectTransform>(),
+                new Vector2(index / (float)total, 0f), new Vector2((index + 1) / (float)total, 1f),
+                UiSpace.Small, UiSpace.Tight, UiSpace.Small, UiSpace.Tight);
+
+            Transform placeholder = cell.transform.Find("Label");
+            if (placeholder != null)
+            {
+                placeholder.gameObject.SetActive(false);
+            }
+
+            // Left sliver: the hero itself. preserveAspect keeps the sprite correct inside a non-square cell.
+            Image portrait = UiFactory.Icon("Portrait", cell.transform, Color.white);
+            UiFactory.Anchor(portrait.rectTransform, new Vector2(0.02f, 0.14f), new Vector2(0.28f, 0.95f));
+
+            TextMeshProUGUI name = UiFactory.Text("Name", cell.transform, string.Empty, UiType.Role.Micro,
+                TextAlignmentOptions.MidlineLeft, UiTheme.TextDim);
+            UiFactory.Anchor(name.rectTransform, new Vector2(0.30f, 0.70f), new Vector2(0.98f, 0.94f));
+
+            TextMeshProUGUI ability = UiFactory.Text("Ability", cell.transform, string.Empty, UiType.Role.Small,
+                TextAlignmentOptions.MidlineLeft, UiTheme.Text);
+            UiFactory.Anchor(ability.rectTransform, new Vector2(0.30f, 0.40f), new Vector2(0.98f, 0.70f));
+
+            TextMeshProUGUI clock = UiFactory.Text("Clock", cell.transform, string.Empty, UiType.Role.Small,
+                TextAlignmentOptions.MidlineLeft, UiTheme.Text);
+            UiFactory.Anchor(clock.rectTransform, new Vector2(0.30f, 0.12f), new Vector2(0.98f, 0.40f));
+
+            Image clockFill = CreateFilledImage("ClockFill", cell.transform, new Color(0.30f, 0.68f, 0.42f, 1f));
+            UiFactory.Anchor(clockFill.rectTransform, new Vector2(0.02f, 0f), new Vector2(0.98f, 0.08f));
 
             return new AbilityPanelUI.Row
             {
                 heroIndex = index,
                 portrait = portrait,
                 nameLabel = name,
-                health = health,
                 abilityLabel = ability,
                 clockLabel = clock,
                 clockFill = clockFill,
-                castButton = cast
+                castButton = cell
             };
         }
 

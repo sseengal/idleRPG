@@ -48,6 +48,12 @@ namespace IdleRPG.UI
         [SerializeField] private Color killColor = new Color(0.55f, 0.95f, 0.6f, 1f);
         [SerializeField] private Color eventColor = new Color(0.70f, 0.80f, 1f, 1f);
         [SerializeField] private Color goldColor = new Color(1f, 0.85f, 0.45f, 1f);
+        [Tooltip("Colour of a heal line.")]
+        [SerializeField] private Color healColor = new Color(0.5f, 0.95f, 0.6f, 1f);
+        [Tooltip("Colour of a guard (shield) line.")]
+        [SerializeField] private Color guardColor = new Color(0.6f, 0.82f, 1f, 1f);
+        [Tooltip("Colour of an enemy ability line. Loud on purpose: the player must spot it in the scroll.")]
+        [SerializeField] private Color enemyAbilityColor = new Color(1f, 0.55f, 0.15f, 1f);
 
         private readonly List<TextMeshProUGUI> liveLines = new List<TextMeshProUGUI>();
         private readonly Queue<TextMeshProUGUI> pool = new Queue<TextMeshProUGUI>();
@@ -80,6 +86,9 @@ namespace IdleRPG.UI
             GameEvents.EnemyKilled += OnEnemyKilled;
             GameEvents.HeroDamaged += OnHeroDamaged;
             GameEvents.HeroDied += OnHeroDied;
+            GameEvents.Healed += OnHealed;
+            GameEvents.ShieldApplied += OnShieldApplied;
+            GameEvents.AbilityCast += OnAbilityCast;
             GameEvents.AscensionCompleted += OnAscensionCompleted;
             GameEvents.UpgradePurchased += OnUpgradePurchased;
             GameEvents.OfflineRewardsClaimed += OnOfflineRewardsClaimed;
@@ -93,6 +102,9 @@ namespace IdleRPG.UI
             GameEvents.EnemyKilled -= OnEnemyKilled;
             GameEvents.HeroDamaged -= OnHeroDamaged;
             GameEvents.HeroDied -= OnHeroDied;
+            GameEvents.Healed -= OnHealed;
+            GameEvents.ShieldApplied -= OnShieldApplied;
+            GameEvents.AbilityCast -= OnAbilityCast;
             GameEvents.AscensionCompleted -= OnAscensionCompleted;
             GameEvents.UpgradePurchased -= OnUpgradePurchased;
             GameEvents.OfflineRewardsClaimed -= OnOfflineRewardsClaimed;

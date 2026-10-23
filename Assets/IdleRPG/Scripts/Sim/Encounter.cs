@@ -27,6 +27,13 @@ namespace IdleRPG.Sim
         /// <summary>Which side committed last - the soft alternation preference ("other side goes next").</summary>
         private CombatantSide? lastActorSide;
 
+        // Enemy cast intent (Ability-Plan). An enemy's clock is its will, but a clock that has run out must not mean
+        // "cast on the next beat" - that is what made every fight sound like a metronome. While ready, the unit rolls
+        // once every 1-3 s and only a pass becomes a cast, so a move lands from time to time and can catch a player out.
+        private const double EnemyCastChance = 0.35d;
+        private const double EnemyCastRetryMinSec = 1d;
+        private const double EnemyCastRetryMaxSec = 3d;
+
         public Encounter(SimContext context)
         {
             this.context = context ?? SimContext.CreateDefault();
@@ -40,6 +47,13 @@ namespace IdleRPG.Sim
 
         /// <summary>A unit cast its ability (Ability-Plan). Fired on the fight's own tick, never mid-frame.</summary>
         public event Action<AbilityCastEvent> AbilityCast;
+
+        /// <summary>An ability healed a unit (impact). One call per unit healed.</summary>
+        public event Action<HealEvent> Healed;
+
+        /// <summary>An ability raised a guard on a unit (impact). One call per unit guarded.</summary>
+        public event Action<ShieldEvent> ShieldApplied;
+
         public event Action<DeathEvent> Died;
         public event Action<int, double> EnemyKilled;
         public event Action PartyWiped;
@@ -175,6 +189,17 @@ namespace IdleRPG.Sim
             activeSwing = default;
             recoveryRemaining = 0d;
             lastActorSide = null;
+
+            // A queued press belongs to the fight that was running: a wave change or a reset must not fire it later.
+            for (int i = 0; i < party.Length; i++)
+            {
+                party[i]?.CancelAbilityRequest();
+            }
+
+            for (int i = 0; i < enemies.Length; i++)
+            {
+                enemies[i]?.CancelAbilityRequest();
+            }
         }
 
         /// <summary>
@@ -228,20 +253,34 @@ namespace IdleRPG.Sim
             for (int i = 0; i < party.Length; i++)
             {
                 party[i]?.Tick(deltaTime);
-                DrainAbilityCast(party[i], CombatantSide.Party, i);
             }
 
             for (int i = 0; i < enemies.Length; i++)
             {
-                enemies[i]?.Tick(deltaTime);
-                DrainAbilityCast(enemies[i], CombatantSide.Enemy, i);
+                Combatant enemy = enemies[i];
+                if (enemy == null)
+                {
+                    continue;
+                }
+
+                enemy.Tick(deltaTime);
+
+                // Enemies have no buttons: their clock IS their intent. When it runs out they get a chance to ask for a
+                // cast, and the lane announces it exactly like a hero's press (one action at a time, same events, same
+                // pictures). A miss is not a wasted turn - the enemy keeps swinging and rolls again shortly.
+                if (enemy.IsAbilityReady &&
+                    enemy.TickAbilityIntent(deltaTime, context.Rng, EnemyCastChance, EnemyCastRetryMinSec, EnemyCastRetryMaxSec))
+                {
+                    enemy.RequestAbility();
+                }
             }
         }
 
         /// <summary>
-        /// Asks one of the party to cast its ability now. Returns false when that seat is empty, the unit is down, or
-        /// its clock has not run out - the same answer the button needs to decide whether the press could do anything.
-        /// The request only sets a flag; <see cref="DrainAbilityCast"/> fires it on the next tick.
+        /// Asks one of the party to cast its ability. Returns false when that seat is empty, the unit is down, its clock
+        /// has not run out, or it is already queued - the same answer the button needs to decide whether the press
+        /// could do anything. The request is a flag; <see cref="AnnounceNext"/> turns it into an action when the lane
+        /// is free, so the cast can never start while somebody else is mid-swing.
         /// </summary>
         public bool RequestAbility(int partyIndex)
         {
@@ -251,34 +290,6 @@ namespace IdleRPG.Sim
             }
 
             return party[partyIndex] != null && party[partyIndex].RequestAbility();
-        }
-
-        /// <summary>
-        /// Turns a requested cast into an event. Doing it on the tick (rather than the moment the button is pressed)
-        /// is what makes a cast pause with the game: nothing fires while the fight is not advancing.
-        /// </summary>
-        private void DrainAbilityCast(Combatant unit, CombatantSide side, int index)
-        {
-            if (unit == null)
-            {
-                return;
-            }
-
-            if (!unit.ConsumeAbilityCast(out string abilityId, out string abilityName, out string clipSlot, out double cooldownSeconds))
-            {
-                return;
-            }
-
-            AbilityCast?.Invoke(new AbilityCastEvent
-            {
-                Side = side,
-                Index = index,
-                DisplayName = unit.DisplayName,
-                AbilityId = abilityId,
-                AbilityName = abilityName,
-                ClipSlot = clipSlot,
-                CooldownSeconds = cooldownSeconds
-            });
         }
 
         /// <summary>Advances the single in-flight swing; the one that finishes applies its damage now (impact).</summary>
@@ -306,46 +317,154 @@ namespace IdleRPG.Sim
             recoveryRemaining = recoverySec > 0d ? recoverySec : 0d;
         }
 
-        /// <summary>Applies one landed swing: damage, threat, the impact event, and any death that follows.</summary>
+        /// <summary>
+        /// Applies one landed action: a swing's damage, or an ability's effect on everyone it was aimed at. Deaths (and the
+        /// party wipe that follows) resolve in one place, so an ability kill is announced exactly like a swing kill.
+        /// </summary>
         private void ApplySwing(PendingSwing swing)
         {
             Combatant attacker = swing.Attacker;
+
+            // No free hits from the grave: a flight that ended after the attacker fell does nothing.
+            if (attacker == null || !attacker.IsAlive)
+            {
+                return;
+            }
+
+            if (swing.IsAbility)
+            {
+                ApplyAbilityImpact(swing);
+                attacker.EndSwing();
+                return;
+            }
+
             Combatant target = swing.Target;
 
-            // No free hits from the grave or on corpses: a flight that ended after either side vanished does nothing
-            // (a surviving attacker whose blow was wasted still re-arms, so it is not stuck "ready" forever).
-            if (attacker == null || target == null || !attacker.IsAlive || !target.IsAlive)
+            // No free hits on corpses: a flight that ended after the victim fell does nothing (the attacker still
+            // re-arms, so it is not stuck "ready" forever).
+            if (target == null || !target.IsAlive)
             {
-                if (attacker != null && attacker.IsAlive)
-                {
-                    attacker.EndSwing();
-                }
-
+                attacker.EndSwing();
                 return;
             }
 
             double applied = target.TakeDamage(swing.Damage);
             attacker.Threat += applied;
 
+            RaiseDamage(attacker, target, swing.AttackerSide, applied, swing.IsCritical);
+
+            // The swing is over: the attacker's cooldown starts counting a full interval from this impact.
+            attacker.EndSwing();
+
+            ResolveDeath(target);
+        }
+
+        /// <summary>One ability impact. Damage goes through the swing's own path, so numbers / HP / kills are free.</summary>
+        private void ApplyAbilityImpact(PendingSwing swing)
+        {
+            Combatant caster = swing.Attacker;
+            SimAbility ability = swing.Ability;
+            Combatant[] targets = swing.Targets;
+
+            if (targets == null || targets.Length == 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < targets.Length; i++)
+            {
+                Combatant target = targets[i];
+                if (target == null || !target.IsAlive)
+                {
+                    continue;
+                }
+
+                if (ability.Kind == SimAbilityKind.Damage)
+                {
+                    double applied = target.TakeDamage(swing.Damage);
+                    caster.Threat += applied;
+                    RaiseDamage(caster, target, swing.AttackerSide, applied, swing.IsCritical);
+                    ResolveDeath(target);
+                    continue;
+                }
+
+                if (ability.Kind == SimAbilityKind.Heal)
+                {
+                    double healed = target.Heal(target.MaxHealth * ability.HealFraction);
+                    if (healed <= 0d)
+                    {
+                        continue;
+                    }
+
+                    Healed?.Invoke(new HealEvent
+                    {
+                        Side = target.Side,
+                        Index = target.SlotIndex,
+                        SourceSide = swing.AttackerSide,
+                        SourceIndex = caster.SlotIndex,
+                        AbilityName = ability.DisplayName,
+                        Amount = healed,
+                        TargetHealth = target.CurrentHealth,
+                        TargetMaxHealth = target.MaxHealth
+                    });
+
+                    continue;
+                }
+
+                // Shield: a real damage-taken modifier for a few seconds, not a cosmetic glow.
+                double factor = ability.ShieldFactor;
+                double seconds = ability.ShieldSeconds;
+
+                if (seconds <= 0d)
+                {
+                    continue;
+                }
+
+                target.ApplyGuard(factor, seconds);
+
+                ShieldApplied?.Invoke(new ShieldEvent
+                {
+                    Side = target.Side,
+                    Index = target.SlotIndex,
+                    SourceSide = swing.AttackerSide,
+                    SourceIndex = caster.SlotIndex,
+                    AbilityName = ability.DisplayName,
+                    Factor = target.DamageTakenMultiplier,
+                    Seconds = seconds
+                });
+            }
+        }
+
+        /// <summary>Raises the impact event for a hit that really removed something (a 0-damage hit shows no number).</summary>
+        private void RaiseDamage(Combatant attacker, Combatant target, CombatantSide attackerSide, double applied, bool isCritical)
+        {
+            if (applied <= 0d)
+            {
+                return;
+            }
+
             Damaged?.Invoke(new DamageEvent
             {
                 AttackerIndex = attacker.SlotIndex,
-                AttackerSide = swing.AttackerSide,
+                AttackerSide = attackerSide,
                 TargetIndex = target.SlotIndex,
                 TargetSide = target.Side,
                 Damage = applied,
                 TargetHealth = target.CurrentHealth,
                 TargetMaxHealth = target.MaxHealth,
-                IsCritical = swing.IsCritical
+                IsCritical = isCritical
             });
+        }
 
-            // The swing is over: the attacker's cooldown starts counting a full interval from this impact.
-            attacker.EndSwing();
-
-            if (target.IsAlive)
+        /// <summary>Every consequence of a unit reaching 0 health: its death, the kill reward, and a party wipe.</summary>
+        private void ResolveDeath(Combatant target)
+        {
+            if (target == null || target.IsAlive)
             {
                 return;
             }
+
+            target.CancelAbilityRequest();
 
             Died?.Invoke(new DeathEvent
             {
@@ -394,6 +513,13 @@ namespace IdleRPG.Sim
         /// <summary>Starts the next ready attacker's swing: picks who, rolls the hit (crit + damage) and announces it.</summary>
         private void AnnounceNext()
         {
+            // A queued press has priority: the player asked for it, so it is announced like any other action - one
+            // actor, one target, one travel window - before the ordinary attack pick runs.
+            if (AnnounceAbility())
+            {
+                return;
+            }
+
             int maxAttempts = party.Length + enemies.Length + 1;
             int attempts = 0;
 
@@ -455,6 +581,252 @@ namespace IdleRPG.Sim
                 });
                 return;
             }
+        }
+
+        /// <summary>
+        /// Turns a queued press into the next action, or returns false when nobody asked to cast.
+        ///
+        /// A cast is announced exactly like a swing: the ability's own target rule picks who it lands on, the travel
+        /// window is measured from that ability's art strip, and the effect resolves at impact. The button's press is
+        /// therefore visible on the same beat a basic attack would be - the only difference is which clip plays and
+        /// what happens when it connects.
+        /// </summary>
+        private bool AnnounceAbility()
+        {
+            Combatant caster = PickPendingCaster(out CombatantSide side);
+            if (caster == null)
+            {
+                return false;
+            }
+
+            SimAbility ability = caster.Ability;
+            Combatant[] defenders = side == CombatantSide.Party ? enemies : party;
+            Combatant[] friends = side == CombatantSide.Party ? party : enemies;
+
+            Combatant[] targets = ResolveAbilityTargets(ability.Target, caster, defenders, friends);
+            if (targets.Length == 0)
+            {
+                // Nothing to aim at: the press is dropped instead of sticking until a target appears.
+                caster.EndSwing();
+                return false;
+            }
+
+            Combatant anchor = targets[0];
+            double damage = 0d;
+            bool isCritical = false;
+
+            if (ability.Kind == SimAbilityKind.Damage)
+            {
+                // Same crit and defence path as a swing, so an ability crit reads and resolves exactly like a swing crit.
+                double critChance = caster.CritChance > 0d ? caster.CritChance : context.Rules.CriticalChance;
+                double critDamage = caster.CritDamageMultiplier > 1d
+                    ? caster.CritDamageMultiplier
+                    : context.Rules.CriticalDamageMultiplier;
+
+                isCritical = critChance > 0d && context.Rng.NextDouble() < critChance;
+
+                double multiplier = ability.DamageMultiplier * (isCritical ? critDamage : 1d);
+                damage = FormulaUtility.Damage(caster.Attack, anchor.Defense, context.Rules.MinDamageRatio, multiplier);
+            }
+
+            activeSwing = new PendingSwing
+            {
+                Attacker = caster,
+                Target = anchor,
+                AttackerSide = side,
+                Damage = damage,
+                IsCritical = isCritical,
+                Remaining = AbilityWindow(caster),
+                IsAbility = true,
+                Ability = ability,
+                Targets = targets
+            };
+
+            hasActiveSwing = true;
+            lastActorSide = side;
+
+            // The clock starts at the ANNOUNCE: the time spent queued for the lane is not charged to the player.
+            caster.StartAbilityCooldown();
+
+            AbilityCast?.Invoke(new AbilityCastEvent
+            {
+                Side = side,
+                Index = caster.SlotIndex,
+                DisplayName = caster.DisplayName,
+                AbilityId = ability.Id,
+                AbilityName = ability.DisplayName,
+                ClipSlot = ability.ClipSlot,
+                CooldownSeconds = ability.CooldownSec,
+                Kind = ability.Kind,
+                Target = ability.Target,
+                TargetSide = anchor.Side,
+                TargetIndex = anchor.SlotIndex
+            });
+
+            // The view entry point is the SAME event a basic attack uses. An explicit clip slot is the only extra:
+            // nothing in the UI has to know that this is an ability.
+            SwingStarted?.Invoke(new SwingStartedEvent
+            {
+                AttackerSide = side,
+                AttackerIndex = caster.SlotIndex,
+                TargetSide = anchor.Side,
+                TargetIndex = anchor.SlotIndex,
+                ClipSlot = ability.ClipSlot,
+                IsAbility = true
+            });
+
+            return true;
+        }
+
+        /// <summary>The first unit (party first, then enemies) with a valid queued cast. Taking it clears the request.</summary>
+        private Combatant PickPendingCaster(out CombatantSide side)
+        {
+            Combatant pick = FindPendingCaster(party);
+            if (pick != null)
+            {
+                side = CombatantSide.Party;
+                return pick;
+            }
+
+            pick = FindPendingCaster(enemies);
+            side = CombatantSide.Enemy;
+            return pick;
+        }
+
+        private static Combatant FindPendingCaster(Combatant[] row)
+        {
+            if (row == null)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < row.Length; i++)
+            {
+                Combatant candidate = row[i];
+                if (candidate == null || !candidate.IsAlive || !candidate.HasCastRequest)
+                {
+                    continue;
+                }
+
+                // A request that can no longer start is thrown away, not left to fire later.
+                if (candidate.TryTakeAbilityRequest())
+                {
+                    return candidate;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Who the ability lands on. The caster's own side is never guessed: "FrontEnemy"/"FrontHero" always mean the
+        /// side opposite the caster, so a hero ability can never heal an enemy by mistake.
+        /// </summary>
+        private Combatant[] ResolveAbilityTargets(SimAbilityTarget target, Combatant caster, Combatant[] defenders, Combatant[] friends)
+        {
+            switch (target)
+            {
+                case SimAbilityTarget.Self:
+                    return new[] { caster };
+
+                case SimAbilityTarget.Party:
+                    return LivingMembers(friends);
+
+                case SimAbilityTarget.LowestAlly:
+                    return SingleTarget(LowestHealth(friends));
+
+                case SimAbilityTarget.FrontEnemy:
+                case SimAbilityTarget.FrontHero:
+                    return SingleTarget(SelectTarget(defenders, caster.Side == CombatantSide.Party ? PartyTargetRule : EnemyTargetRule));
+
+                default:
+                    return SingleTarget(SelectTarget(defenders, caster.Side == CombatantSide.Party ? PartyTargetRule : EnemyTargetRule));
+            }
+        }
+
+        private static Combatant[] SingleTarget(Combatant target)
+        {
+            return target == null ? Array.Empty<Combatant>() : new[] { target };
+        }
+
+        private static Combatant LowestHealth(Combatant[] row)
+        {
+            if (row == null)
+            {
+                return null;
+            }
+
+            Combatant best = null;
+
+            for (int i = 0; i < row.Length; i++)
+            {
+                Combatant candidate = row[i];
+                if (candidate == null || !candidate.IsAlive)
+                {
+                    continue;
+                }
+
+                if (best == null || candidate.HealthPercent < best.HealthPercent)
+                {
+                    best = candidate;
+                }
+            }
+
+            return best;
+        }
+
+        private static Combatant[] LivingMembers(Combatant[] row)
+        {
+            if (row == null)
+            {
+                return Array.Empty<Combatant>();
+            }
+
+            int alive = 0;
+            for (int i = 0; i < row.Length; i++)
+            {
+                if (row[i] != null && row[i].IsAlive)
+                {
+                    alive++;
+                }
+            }
+
+            if (alive == 0)
+            {
+                return Array.Empty<Combatant>();
+            }
+
+            Combatant[] members = new Combatant[alive];
+            int index = 0;
+
+            for (int i = 0; i < row.Length; i++)
+            {
+                if (row[i] != null && row[i].IsAlive)
+                {
+                    members[index++] = row[i];
+                }
+            }
+
+            return members;
+        }
+
+        /// <summary>
+        /// How long a cast travels before its effect lands: measured from the ability's own art strip up to its strike
+        /// frame, clamped to the same 0.1-2 s range as a swing so one broken clip can never stall the fight.
+        /// No measured strip = the caster's ordinary swing window.
+        /// </summary>
+        private double AbilityWindow(Combatant caster)
+        {
+            double window = caster != null && caster.Ability.WindowSeconds > 0d
+                ? caster.Ability.WindowSeconds
+                : SwingWindow(caster);
+
+            if (window < 0.1d)
+            {
+                return 0.1d;
+            }
+
+            return window > 2d ? 2d : window;
         }
 
         /// <summary>

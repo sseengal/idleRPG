@@ -23,8 +23,15 @@ namespace IdleRPG.UI
         [SerializeField] private Color normalColor = Color.white;
         [SerializeField] private Color criticalColor = new Color(1f, 0.85f, 0.25f, 1f);
         [SerializeField] private Color incomingColor = new Color(1f, 0.35f, 0.35f, 1f);
+        [Tooltip("Colour of health restored by an ability.")]
+        [SerializeField] private Color healColor = new Color(0.4f, 0.95f, 0.5f, 1f);
+        [Tooltip("Colour of a guard raised by an ability (no number, just the word).")]
+        [SerializeField] private Color guardColor = new Color(0.55f, 0.8f, 1f, 1f);
+        [Tooltip("Colour of damage from an enemy ability: heavier than a plain hit.")]
+        [SerializeField] private Color abilityColor = new Color(1f, 0.55f, 0.15f, 1f);
         [SerializeField] private float baseFontSize = UiType.Damage;
         [SerializeField] private float criticalScale = UiType.CritScale;
+        [SerializeField] private float abilityScale = 1.5f;
 
         private float elapsed;
         private Vector2 startPosition;
@@ -48,6 +55,15 @@ namespace IdleRPG.UI
         /// <summary>Starts a number at a local anchored position.</summary>
         public void Play(double value, Vector2 anchoredPosition, FloatingTextStyle style, float driftSeed)
         {
+            Play(NumberFormatter.Format(value), anchoredPosition, style, driftSeed);
+        }
+
+        /// <summary>
+        /// Starts a number or a short word (a guard has no number) at a local anchored position. The style decides the
+        /// colour and the size; the caller decides the text.
+        /// </summary>
+        public void Play(string text, Vector2 anchoredPosition, FloatingTextStyle style, float driftSeed)
+        {
             if (label == null || rectTransform == null)
             {
                 IsPlaying = false;
@@ -59,15 +75,42 @@ namespace IdleRPG.UI
             elapsed = 0f;
             driftDirection = driftSeed % 2f < 1f ? -1f : 1f;
 
-            label.SetText(NumberFormatter.Format(value));
-            label.color = style == FloatingTextStyle.Critical
-                ? criticalColor
-                : (style == FloatingTextStyle.Incoming ? incomingColor : normalColor);
+            label.SetText(text);
 
-            // Crit damage is the "chunky" showcase: same font, bigger, gold. Reset for everything else.
-            label.fontSize = style == FloatingTextStyle.Critical
-                ? baseFontSize * criticalScale
-                : baseFontSize;
+            Color colour = normalColor;
+            switch (style)
+            {
+                case FloatingTextStyle.Critical:
+                    colour = criticalColor;
+                    break;
+                case FloatingTextStyle.Incoming:
+                    colour = incomingColor;
+                    break;
+                case FloatingTextStyle.Heal:
+                    colour = healColor;
+                    break;
+                case FloatingTextStyle.Guard:
+                    colour = guardColor;
+                    break;
+                case FloatingTextStyle.AbilityHit:
+                    colour = abilityColor;
+                    break;
+            }
+
+            label.color = colour;
+
+            // Crit and enemy-ability damage are the "chunky" showcase: same font, bigger. Reset for everything else.
+            float scale = 1f;
+            if (style == FloatingTextStyle.Critical)
+            {
+                scale = criticalScale;
+            }
+            else if (style == FloatingTextStyle.AbilityHit)
+            {
+                scale = abilityScale;
+            }
+
+            label.fontSize = baseFontSize * scale;
 
             gameObject.SetActive(true);
             IsPlaying = true;
@@ -120,6 +163,15 @@ namespace IdleRPG.UI
     {
         Normal = 0,
         Critical = 1,
-        Incoming = 2
+        Incoming = 2,
+
+        /// <summary>Health restored by an ability: green.</summary>
+        Heal = 3,
+
+        /// <summary>A guard raised by an ability: blue.</summary>
+        Guard = 4,
+
+        /// <summary>Damage from an enemy ability: orange and bigger than a plain hit.</summary>
+        AbilityHit = 5
     }
 }

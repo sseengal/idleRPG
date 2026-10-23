@@ -40,9 +40,13 @@ namespace IdleRPG.EditorTools
         private const float HeaderBandHeight = 115f;   // top bar: the currency chips + boost, pinned to the top
         private const float NavBandHeight = 230f;      // bottom bar: the five nav buttons, pinned to the bottom
 
-        // Bands inside the battle page (page coords): log 0..LogTop, log-header 0.34..0.39,
+        // Bands inside the battle page (page coords): log 0..LogTop, ability strip 0.28..0.39,
         // viewport 0.39..StageRowMinY, stage/wave row 0.93..0.99.
-        private const float LogTop = 0.34f;
+        //
+        // LogTop used to be 0.34, with a 79-unit tab bar above the log. The bar is gone and one hero button
+        // lives in its place, so the band had to grow: 0.11 of the page is ~174 units, enough for a portrait and
+        // three short labels without them touching. The log gives up ~90 units it did not need - it scrolls.
+        private const float LogTop = 0.28f;
         private const float BattleViewportBottom = 0.39f;
         private const float StageRowMinY = 0.93f;
         private const float StageRowMaxY = 0.99f;
@@ -120,8 +124,10 @@ namespace IdleRPG.EditorTools
                 out FloatingDamageTextPool damagePool, out RectTransform enemyAnchor);
             RectTransform battleRect = battlePage.GetComponent<RectTransform>();
             CombatLogUI combatLog = BuildCombatLog(battleRect);
-            AbilityPanelUI abilityPanel = BuildAbilityPanel(battleRect, partyConfig.ValidHeroCount);
-            BuildLogHeaderRow(battleRect, combatLog, abilityPanel);
+
+            // The ability strip sits in the band between the viewport and the log. It used to be a second tab
+            // beside the log, which meant the buttons were invisible during a fight - the one moment they matter.
+            BuildAbilityStrip(battleRect, partyConfig.ValidHeroCount);
             TabController tabs = BuildManagementPage(managementPage.GetComponent<RectTransform>(), partyConfig, prestigeUpgrades);
             ScreenController screens = BuildNavBar(safeArea, battlePage, managementPage, tabs, damageRoot.gameObject);
             OfflineRewardsPopup offlinePopup = BuildOfflinePopup(modalRoot);

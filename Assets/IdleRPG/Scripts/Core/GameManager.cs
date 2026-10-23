@@ -60,6 +60,10 @@ namespace IdleRPG.Core
         [Tooltip("Print stage/state changes to the console.")]
         [SerializeField] private bool logFlowToConsole = true;
 
+        [Tooltip("MVP stop-gap: every hero owns and wears its first ability from the very first wave. " +
+                 "Turn this off when the story hands abilities over instead.")]
+        [SerializeField] private bool unlockAllAbilitiesForMvp = true;
+
         private bool isWired;
         private RunController runner;
         private OfflineCoordinator offline;

@@ -1,7 +1,8 @@
 # Abilities - progress and open items
 
 Living status page. The contract (what the feature must do) stays in `Ability-Plan.md`; this page says what
-actually works today, what was measured, and what is still open.
+actually works today, what was measured, and what is still open. **Fight order, strip choice, timings and the
+animation audit now live on one page: `Combat-Sequencing.md`.**
 
 ## Where the feature stands
 
@@ -12,7 +13,12 @@ actually works today, what was measured, and what is still open.
 | Buy / unlock (stage gate) / assign | done |
 | Roster swap Archer to Soldier, save v8 | done |
 | Cast: request, event, log line, cooldown, ABILITIES tab, F4 debug | done, verified |
-| Effect (shield / heal / damage) | **not started** |
+| **Cast sequencing in the action lane** (queued press, target, travel window, impact) | **done 24 Oct 2026** - see `Combat-Presentation.md` §12 |
+| Effect (shield / heal / damage) | **done 24 Oct 2026** - same section |
+| Enemy casts (auto on their own cooldown) | **done 24 Oct 2026** |
+| **Enemy cast timing is random, not a metronome** ("Wild Cards") | **done 24 Oct 2026** - first roll waits 2-6 s, then 35% chance per 1-3 s roll |
+| **Enemy moves hit harder** ("Heavier Hands") | **done 24 Oct 2026** - damage moves x1.8-1.9 of a plain hit (was x1.3-1.4) |
+| **Enemy move is announced loudly** ("Herald") | **done 24 Oct 2026** - orange "`<enemy> unleashes <move>!`" log line, orange name over the caster, 1.5x damage number |
 
 ## Measured, not assumed
 
@@ -22,6 +28,17 @@ actually works today, what was measured, and what is still open.
   spans y -262..262 and x -526..526. Nothing spills out, and the panel has no scroll view.
 - **Labels read correctly:** Knight 240/240 Shield Wall 14s, Soldier 110/110 Charge READY, Mage 130/130 Fireball READY.
 - 21 abilities / 76 cards, 0 broken clips, art pipeline PASS, save drift test PASS at v8.
+- **Enemy moves appear from stage 1.** Before this pass the first ability-carrying enemy was the Skeleton at stage
+  11, so a new player could fight for an hour and never see one. Slime now uses Spike, so the move shows up in the
+  opening waves. Cost: a Slime can take 1.8x a normal hit instead of 1x - it reads as a hit, not a wall.
+- **Slime casts with its second attack strip.** The Slime has no `Ability` art, so its Spike was silently falling
+  back to the plain attack (Attack01, 6 frames) while its 12-frame Attack02 sat unused. Slime now points at its own
+  ability row `enemy_spike_slime`, which names `Attack02`; the Lava Slime and Lava Behemoth keep `enemy_spike`
+  (their own Spike strip). Verified in Play: `cast Enemy idx=0 id=enemy_spike_slime slot=Attack02`, then the view
+  plays that strip. Side effect: the blow lands on the last frame of a 12-frame / 12 fps strip, so the hero takes
+  the damage about 1.0 s after the call-out (still inside the 2.5 s orange window).
+- **Heavy number measured:** the same floating text plays a plain hit at 32 px red (`FF5959FF`) and an ability hit at
+  48 px orange (`FF8C26FF`).
 
 ## Correction: the fight never stopped because of the offline popup
 
@@ -55,20 +72,29 @@ An earlier note claimed the daily/offline rewards overlay held the fight. That w
 
 ## Open - backend (no UI)
 
-1. **Effect layer.** `AbilityKind` is carried but nothing happens on a cast. Order: shield (Knight Shield Wall) ->
-   heal -> damage. Sim side: a shield pool that absorbs damage before health, a heal that raises health, a damage
-   burst that goes through the normal damage path, each raising an event the view can show.
-2. **Enemy auto-cast.** Enemy abilities (`enemy_block`, `enemy_beam`, `enemy_spike`, `enemy_volley`) exist and
-   never fire.
-3. **Assignments in the save.** Which hero wears which ability is currently session state; it should be persisted
-   (the v7 assignment list already exists, so this is mostly wiring plus a migration if the shape changes).
-4. **Abilities from data.** The editor catalogue still drives which ability a hero gets; the ability definitions
-   and the card data should be the single source.
-5. **Enemy/boss and balance housekeeping.** Restore the files the generator damaged (see the dirty-tree section),
-   remove character/boss placeholders, rework the art validator to "art, or else a placeholder", and re-baseline the
-   golden numbers. The generator footgun itself is closed.
+0. **Ability unlock story moment (MVP stop-gap lives now).** Every hero owns and wears its first ability from the
+   first wave, because no screen or story beat hands one over yet. One switch does it: `GameManager.unlockAllAbilitiesForMvp`
+   (true today), calling `AbilityService.OpenAllForMvp`. When the story beat is ready, set the switch off and unlock
+   each ability at its beat; nothing else has to change, because the fight already reads whichever ability is worn.
+   The `TODO: ability unlock story moment` markers in `AbilityService.cs` and `GameManager.Wiring.cs` point at the two
+   places to edit.
 
-## Dirty working tree - needs a decision, do not commit blind
+1. ~~Effect layer~~ and ~~enemy auto-cast~~ — **done 24 Oct 2026**; see `Combat-Sequencing.md` §7 and §9.
+2. **Assignments in the save.** Which hero wears which ability is currently session state; it should be persisted
+   (the v7 assignment list already exists, so this is mostly wiring plus a migration if the shape changes).
+3. **Abilities from data.** The editor catalogue still drives which ability a hero gets; the ability definitions
+   and the card data should be the single source.
+4. **Enemy/boss and balance housekeeping.** Restore the files the generator damaged (see the dirty-tree section),
+   remove character/boss placeholders, rework the art validator to "art, or else a placeholder", and re-baseline the
+   golden numbers. The generator footgun itself is closed. Boss moves (32 of 40 have none) and the nine unused
+   Summon / Heal / Block strips are listed in `Combat-Sequencing.md` §11 and §16.
+
+## Dirty working tree - resolved 24 Oct 2026
+
+> **Resolved.** The tree was committed on 24 Oct 2026 (see `git log`). The scene carries the new panel
+> layout, the enemy/hero data assets and the ability assets are in. `TinyRPGAssets/` and
+> `TinyRPGAssets2/` are downloads outside `Assets/`; they are now listed in `.gitignore` instead of being
+> tracked. The notes below are kept as the record of what each group actually was.
 
 `Main.unity` (~30k lines), `BalanceConfig.asset`, `WaveConfig.asset`, hero/enemy data assets, the TMP font assets,
 placeholder `.meta` files, an untracked `Enemy_Goblin.asset`, and the untracked `TinyRPGAssets/` +

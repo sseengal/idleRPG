@@ -76,4 +76,16 @@ MonoBehaviour:
   adGoldBoostMultiplier: 2
   adGoldBoostDurationSec: 1800
   bossGearDropChance: 0
+  inventoryCap: 20
+  gearStatBaseFraction: 0.015
+  gearStatPerStage: 0.0012
+  gearStatMaxFraction: 0.25
+  gearRarityWeights:
+  - 55
+  - 28
+  - 12
+  - 5
+  gearPriceBase: 2
+  gearPricePerStage: 0.9
+  gearSalvageFraction: 0.4
   autosaveIntervalSec: 15

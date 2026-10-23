@@ -69,8 +69,34 @@ namespace IdleRPG.Sim
 
         public double CurrentHealth { get; private set; }
 
-        /// <summary>Absorbs damage before health (the pipeline fills this from Step 12 on).</summary>
+        /// <summary>
+        /// Absorbs damage before health (the pipeline fills this from Step 12 on).
+        /// </summary>
         public double Shield { get; set; }
+
+        private double guardFactor = 1d;
+        private double guardSecondsRemaining;
+
+        /// <summary>
+        /// Damage taken is multiplied by this while a guard is up (1 = no guard). An ability's Shield kind sets it for
+        /// a few seconds, so "half damage for 4 s" really halves every hit that lands inside that window.
+        /// </summary>
+        public double DamageTakenMultiplier => guardSecondsRemaining > 0d ? guardFactor : 1d;
+
+        /// <summary>
+        /// Raises (or refreshes) a guard: incoming damage is multiplied by <paramref name="factor"/> for
+        /// <paramref name="seconds"/>. A factor is kept inside 0.05..1, because a guard can never make damage worse.
+        /// </summary>
+        public void ApplyGuard(double factor, double seconds)
+        {
+            if (!IsAlive || seconds <= 0d)
+            {
+                return;
+            }
+
+            guardFactor = factor < 0.05d ? 0.05d : (factor > 1d ? 1d : factor);
+            guardSecondsRemaining = seconds;
+        }
 
         /// <summary>
         /// This unit's critical-hit chance (0..1) and damage multiplier. 0 chance = "use the rules' global crit"
@@ -123,19 +149,27 @@ namespace IdleRPG.Sim
         private double abilityCooldown;
         private bool abilityCastRequested;
 
+        // Enemy intent only: seconds left before the next "shall I cast now?" roll. A ready clock on its own used to
+        // mean "cast on the very next beat", which made enemy moves feel like a metronome. Now the unit waits, rolls
+        // once, and only a pass turns into a cast.
+        private double abilityPatience;
+
+        /// <summary>What this unit may cast, or <see cref="SimAbility.None"/> when it has nothing.</summary>
+        public SimAbility Ability { get; private set; } = SimAbility.None;
+
         /// <summary>Id of the ability this unit may cast, or empty for none.</summary>
-        public string AbilityId { get; private set; } = "";
+        public string AbilityId => Ability.Id;
 
         /// <summary>Display name for the log line ("Shield Wall").</summary>
-        public string AbilityName { get; private set; } = "";
+        public string AbilityName => Ability.DisplayName;
 
         /// <summary>Which art slot plays it ("Ability", "Attack02"). The view resolves frames and rate from this.</summary>
-        public string AbilityClipSlot { get; private set; } = "";
+        public string AbilityClipSlot => Ability.ClipSlot;
 
-        /// <summary>Seconds between casts. The blast itself is instant; this is the clock that refills it.</summary>
-        public double AbilityCooldownSec { get; private set; }
+        /// <summary>Seconds between casts, counted from the announce - the wait in the lane is not charged.</summary>
+        public double AbilityCooldownSec => Ability.CooldownSec;
 
-        public bool HasAbility => !string.IsNullOrEmpty(AbilityId);
+        public bool HasAbility => Ability.IsValid;
 
         /// <summary>Seconds until the ability is usable again. 0 = ready.</summary>
         public double AbilityCooldownRemaining => abilityCooldown < 0d ? 0d : abilityCooldown;
@@ -143,16 +177,19 @@ namespace IdleRPG.Sim
         /// <summary>True when there is something to cast, the unit is up, and the clock has run out.</summary>
         public bool IsAbilityReady => HasAbility && IsAlive && abilityCooldown <= 0d;
 
-        /// <summary>Gives the unit an ability and clears its clock, so a fresh fight starts with it ready.</summary>
-        public void SetAbility(string id, string displayName, string clipSlot, double cooldownSec)
-        {
-            AbilityId = string.IsNullOrEmpty(id) ? "" : id;
-            AbilityName = string.IsNullOrEmpty(displayName) ? AbilityId : displayName;
-            AbilityClipSlot = string.IsNullOrEmpty(clipSlot) ? "Ability" : clipSlot;
-            AbilityCooldownSec = cooldownSec < 0d ? 0d : cooldownSec;
+        /// <summary>
+        /// True when a cast has been asked for but the lane has not announced it yet. The ability button shows this as
+        /// "queued": the wait is real, so it must be visible instead of looking like a dead press.
+        /// </summary>
+        public bool HasCastRequest => abilityCastRequested;
 
+        /// <summary>Gives the unit an ability and clears its clock, so a fresh fight starts with it ready.</summary>
+        public void SetAbility(SimAbility ability)
+        {
+            Ability = ability;
             abilityCooldown = 0d;
             abilityCastRequested = false;
+            abilityPatience = 0d;
         }
 
         /// <summary>
@@ -171,34 +208,80 @@ namespace IdleRPG.Sim
         }
 
         /// <summary>
-        /// The fight drains a request here and raises the cast. True when a cast fired, with the ability's values in
-        /// the out parameters, having started its cooldown. False when nothing was requested or the unit went down.
+        /// The fight takes the pending request when the lane is free. True only when the cast may really start now,
+        /// so a request made while the unit stood ready cannot fire after it fell.
         /// </summary>
-        public bool ConsumeAbilityCast(out string abilityId, out string abilityName, out string clipSlot, out double cooldownSec)
+        public bool TryTakeAbilityRequest()
         {
-            abilityId = null;
-            abilityName = null;
-            clipSlot = null;
-            cooldownSec = 0d;
-
             if (!abilityCastRequested)
             {
                 return false;
             }
 
             abilityCastRequested = false;
+            return IsAbilityReady;
+        }
 
-            if (!HasAbility || !IsAlive)
+        /// <summary>Throws a pending request away (the unit died, the wave ended, the run reset).</summary>
+        public void CancelAbilityRequest()
+        {
+            abilityCastRequested = false;
+        }
+
+        /// <summary>
+        /// The cast was announced: its clock starts now. Starting it at the announce (not at the press) is
+        /// deliberate - a queued press waits for the lane, and the player is not charged for that wait.
+        /// </summary>
+        public void StartAbilityCooldown()
+        {
+            abilityCooldown = HasAbility ? Ability.CooldownSec : 0d;
+        }
+
+        /// <summary>
+        /// Makes the unit wait this long before its first cast roll. Used at wave start, so a fight does not open with
+        /// an enemy move on its very first beat.
+        /// </summary>
+        public void HoldAbility(double seconds)
+        {
+            abilityPatience = seconds > 0d ? seconds : 0d;
+        }
+
+        /// <summary>
+        /// Enemy intent, one beat at a time. While the clock is out the unit waits; when the wait ends it rolls ONCE
+        /// against <paramref name="chance"/>. A pass means "cast now"; a miss means it swings instead and waits again
+        /// for a random spell of <paramref name="retryMinSec"/> to <paramref name="retryMaxSec"/>.
+        ///
+        /// One roll per wait, never one per frame: a per-frame roll would fire almost at once no matter how small the
+        /// chance, and the number would stop meaning what it says. The dice come from the fight's own generator, so a
+        /// replay and an offline run land on the same casts.
+        /// </summary>
+        public bool TickAbilityIntent(double deltaTime, IRng rng, double chance, double retryMinSec, double retryMaxSec)
+        {
+            if (!IsAbilityReady)
             {
+                abilityPatience = 0d;
                 return false;
             }
 
-            abilityCooldown = AbilityCooldownSec;
-            abilityId = AbilityId;
-            abilityName = AbilityName;
-            clipSlot = AbilityClipSlot;
-            cooldownSec = AbilityCooldownSec;
-            return true;
+            if (abilityPatience > 0d)
+            {
+                abilityPatience -= deltaTime;
+                if (abilityPatience > 0d)
+                {
+                    return false;
+                }
+            }
+
+            if (rng == null || rng.NextDouble() < chance)
+            {
+                abilityPatience = 0d;
+                return true;
+            }
+
+            double min = retryMinSec > 0d ? retryMinSec : 0d;
+            double max = retryMaxSec > min ? retryMaxSec : min;
+            abilityPatience = min + (rng != null && max > min ? rng.NextDouble() * (max - min) : 0d);
+            return false;
         }
 
         // --- Behaviour ---
@@ -215,6 +298,16 @@ namespace IdleRPG.Sim
                 abilityCooldown -= deltaTime;
             }
 
+            if (guardSecondsRemaining > 0d)
+            {
+                guardSecondsRemaining -= deltaTime;
+                if (guardSecondsRemaining <= 0d)
+                {
+                    guardSecondsRemaining = 0d;
+                    guardFactor = 1d;
+                }
+            }
+
             attackTimer -= deltaTime;
             if (attackTimer <= 0d)
             {
@@ -222,7 +315,7 @@ namespace IdleRPG.Sim
             }
         }
 
-        /// <summary>Applies damage (shield first, then health). Returns the amount actually removed.</summary>
+        /// <summary>Applies damage (guard, then shield, then health). Returns the amount actually removed.</summary>
         public double TakeDamage(double damage)
         {
             if (damage <= 0d || !IsAlive)
@@ -230,16 +323,18 @@ namespace IdleRPG.Sim
                 return 0d;
             }
 
+            // A guard multiplies the WHOLE hit (health and shield alike), which is what "takes half damage" means.
+            double incoming = damage * DamageTakenMultiplier;
             double applied = 0d;
 
             if (Shield > 0d)
             {
-                double absorbed = damage > Shield ? Shield : damage;
+                double absorbed = incoming > Shield ? Shield : incoming;
                 Shield -= absorbed;
                 applied += absorbed;
             }
 
-            double toHealth = damage - applied;
+            double toHealth = incoming - applied;
             if (toHealth > 0d)
             {
                 double healthHit = toHealth > CurrentHealth ? CurrentHealth : toHealth;
@@ -279,6 +374,8 @@ namespace IdleRPG.Sim
         {
             CurrentHealth = Stats.MaxHealth;
             Shield = 0d;
+            guardSecondsRemaining = 0d;
+            guardFactor = 1d;
             RestartTimer();
         }
 

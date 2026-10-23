@@ -74,7 +74,8 @@ namespace IdleRPG.Combat
 
         /// <summary>
         /// Asks a hero to cast its equipped ability. False when it owns nothing, is down, or is still cooling, so the
-        /// button can tell "not yet" apart from "nothing happened". The cast itself fires on the fight's next tick.
+        /// button can tell "not yet" apart from "nothing happened". The cast is announced as soon as the action lane is
+        /// free (one actor, one target, one travel window), and its cooldown starts at that announce.
         /// </summary>
         public bool RequestAbility(int heroIndex)
         {
@@ -126,6 +127,8 @@ namespace IdleRPG.Combat
             simulator.EnemyKilled += OnSimEnemyKilled;
             simulator.HeroDamaged += OnSimHeroDamaged;
             simulator.AbilityCast += OnSimAbilityCast;
+            simulator.Healed += OnSimHealed;
+            simulator.ShieldApplied += OnSimShieldApplied;
             simulator.AbilityFor = abilityProvider;
             simulator.HeroDied += OnSimHeroDied;
             simulator.PartyWiped += OnSimPartyWiped;
@@ -220,6 +223,9 @@ namespace IdleRPG.Combat
             simulator.SwingStarted -= OnSimSwingStarted;
             simulator.EnemyKilled -= OnSimEnemyKilled;
             simulator.HeroDamaged -= OnSimHeroDamaged;
+            simulator.AbilityCast -= OnSimAbilityCast;
+            simulator.Healed -= OnSimHealed;
+            simulator.ShieldApplied -= OnSimShieldApplied;
             simulator.HeroDied -= OnSimHeroDied;
             simulator.PartyWiped -= OnSimPartyWiped;
         }
@@ -255,14 +261,41 @@ namespace IdleRPG.Combat
         }
 
         /// <summary>
-        /// A cast happened, on either side. Logged - the player must be able to read what the enemy just did - and
-        /// raised so the panel can restart that hero's clock and the unit view can play the clip. Nothing else: what
-        /// an ability DOES is resolved separately, so a cast is watchable before it means anything.
+        /// A cast was announced: it has a target and a travel window now. Logged so the player can read what happened,
+        /// then raised so the panel restarts the correct clock. The picture and the effect need nothing else from here -
+        /// the clip rides on <see cref="OnSimSwingStarted"/> and the damage / heal / guard arrives at impact.
         /// </summary>
         private void OnSimAbilityCast(AbilityCastEvent cast)
         {
-            LogCombat($"{cast.DisplayName} casts {cast.AbilityName}");
+            LogCombat($"{cast.DisplayName} casts {cast.AbilityName} at {TargetLabel(cast.TargetSide, cast.TargetIndex)}");
             GameEvents.RaiseAbilityCast(cast.Side, cast.Index, cast.AbilityId, cast.AbilityName, cast.ClipSlot, cast.CooldownSeconds);
+        }
+
+        private void OnSimHealed(HealEvent heal)
+        {
+            GameEvents.RaiseHealed(heal);
+            LogCombat($"{TargetLabel(heal.Side, heal.Index)} healed for {heal.Amount:0.#} by {heal.AbilityName}");
+        }
+
+        private void OnSimShieldApplied(ShieldEvent shield)
+        {
+            GameEvents.RaiseShieldApplied(shield);
+            LogCombat($"{TargetLabel(shield.Side, shield.Index)} guarded by {shield.AbilityName} " +
+                      $"(x{shield.Factor:0.##} for {shield.Seconds:0.#}s)");
+        }
+
+        /// <summary>Name of one unit on either side, for a log line.</summary>
+        private string TargetLabel(CombatantSide side, int index)
+        {
+            if (side == CombatantSide.Enemy)
+            {
+                return EnemyLabel(index);
+            }
+
+            return simulator != null && simulator.Heroes != null && index >= 0 && index < simulator.Heroes.Length &&
+                   simulator.Heroes[index] != null
+                ? simulator.Heroes[index].DisplayName
+                : $"Hero {index}";
         }
 
         private void OnSimEnemyDamaged(EnemyDamagedInfo info)
@@ -276,9 +309,9 @@ namespace IdleRPG.Combat
             }
         }
 
-        private void OnSimSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide)
+        private void OnSimSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot)
         {
-            GameEvents.RaiseSwingStarted(attackerIndex, attackerSide, targetIndex, targetSide);
+            GameEvents.RaiseSwingStarted(attackerIndex, attackerSide, targetIndex, targetSide, clipSlot);
         }
 
         private void OnSimEnemyKilled(int enemyIndex, double goldReward)

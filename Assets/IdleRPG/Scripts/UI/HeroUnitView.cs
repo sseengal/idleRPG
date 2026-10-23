@@ -26,6 +26,9 @@ namespace IdleRPG.UI
         [Tooltip("Squash-to value on a hit (1.0 = no punch). Subtle: whole seat dips, icon and bar together.")]
         [SerializeField] private float hitPunchScale = 0.94f;
         [SerializeField] private float hitPunchDurationSec = 0.12f;
+        [Tooltip("Flash colour when an ability raises a guard on this hero (no health moved, so the bar is untouched).")]
+        [SerializeField] private Color shieldFlashColor = new Color(0.55f, 0.8f, 1f, 1f);
+        [SerializeField] private float shieldFlashDurationSec = 0.2f;
 
         private Color baseColor = Color.white;
         private readonly UnitHitJuice hitJuice = new UnitHitJuice();
@@ -161,8 +164,9 @@ namespace IdleRPG.UI
             GameEvents.HeroDied += OnHeroDied;
             GameEvents.EnemyDamaged += OnAllyAttackLanded;
             GameEvents.SwingStarted += OnSwingStarted;
+            GameEvents.Healed += OnHealed;
+            GameEvents.ShieldApplied += OnShieldApplied;
             GameEvents.HeroStatsChanged += OnHeroStatsChanged;
-            GameEvents.AbilityCast += OnAbilityCast;
             GameEvents.WaveCompleted += OnWaveChanged;
             GameEvents.StageChanged += OnStageChangedHandler;
         }
@@ -173,56 +177,33 @@ namespace IdleRPG.UI
             GameEvents.HeroDied -= OnHeroDied;
             GameEvents.EnemyDamaged -= OnAllyAttackLanded;
             GameEvents.SwingStarted -= OnSwingStarted;
+            GameEvents.Healed -= OnHealed;
+            GameEvents.ShieldApplied -= OnShieldApplied;
             GameEvents.HeroStatsChanged -= OnHeroStatsChanged;
-            GameEvents.AbilityCast -= OnAbilityCast;
             GameEvents.WaveCompleted -= OnWaveChanged;
             GameEvents.StageChanged -= OnStageChangedHandler;
         }
 
         /// <summary>
-        /// Plays this hero's own animation for a cast (Ability-Plan). The ability names the art slot, so the Knight's
-        /// Shield Wall plays its Block strip and the Wizard's Arcane Burst the composited cast - no per-character
-        /// cases. No lunge either: an ability has no target yet (effects land later), so the hero stays in place.
+        /// This hero committed an action: run to the target slot (hostile targets only) and play the clip. The clip
+        /// slot rides on the event, so an ability needs no handler of its own - the ability path and the attack path are
+        /// the same path, which is what stops one of them drifting.
         /// </summary>
-        private void OnAbilityCast(CombatantSide side, int index, string abilityId, string abilityName, string clipSlot, double cooldownSeconds)
-        {
-            if (side != CombatantSide.Party || index != heroIndex || appliedData == null)
-            {
-                return;
-            }
-
-            CharacterArtSet art = appliedData.ArtSet;
-
-            if (art == null)
-            {
-                return;
-            }
-
-            Sprite[] frames = art.FramesFor(clipSlot);
-            CharacterAnimator clipPlayer = EnsureAnimator();
-
-            if (clipPlayer == null || frames.Length == 0)
-            {
-                return;
-            }
-
-            clipPlayer.PlayClip(frames, art.FpsFor(clipSlot));
-        }
-
-        /// <summary>This hero committed a swing: run to the target slot; the hit lands after the swing window.</summary>
-        private void OnSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide)
+        private void OnSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot)
         {
             if (attackerSide != CombatantSide.Party || attackerIndex != heroIndex)
             {
                 return;
             }
 
-            // The swing starts on the ANNOUNCE, not on the hit: the sim waits out this unit's attack strip up to its
-            // own strike frame before the damage lands, so the blow connects on the frame the sword is at full reach
-            // (measured from the art, not guessed) with no gap after it. It plays even when the target slot is
-            // missing (attack in place), so a swing is never silently dropped.
             EnsureLunge();
-            StartSwing();
+            StartSwing(clipSlot);
+
+            // A self/party guard stays planted: a guard that charges at nothing is a lie.
+            if (targetSide != CombatantSide.Enemy)
+            {
+                return;
+            }
 
             HudController hud = HudController.Instance;
             EnemyStackView stack = hud != null ? hud.EnemyStack : null;
@@ -234,8 +215,12 @@ namespace IdleRPG.UI
             }
         }
 
-        /// <summary>Plays the attack strip once; the lunge blinks home when the clip finishes.</summary>
-        private void StartSwing()
+        /// <summary>
+        /// Plays one action clip, then lets the lunge blink home. An empty slot is the ordinary attack strip; a named
+        /// slot is an ability strip. Both finish through the same callback, so the lunge can never be left waiting for a
+        /// clip that another play call replaced.
+        /// </summary>
+        private void StartSwing(string clipSlot)
         {
             CharacterAnimator swing = EnsureAnimator();
 
@@ -244,13 +229,51 @@ namespace IdleRPG.UI
                 return;
             }
 
-            swing.PlayAttack(() =>
+            CharacterArtSet art = appliedData != null ? appliedData.ArtSet : null;
+            Sprite[] frames = art != null && !string.IsNullOrEmpty(clipSlot) ? art.FramesFor(clipSlot) : null;
+
+            if (frames != null && frames.Length > 0)
             {
-                if (lunge != null)
-                {
-                    lunge.CompleteSwing();
-                }
-            });
+                swing.PlayClip(frames, art.FpsFor(clipSlot), OnSwingClipFinished);
+                return;
+            }
+
+            swing.PlayAttack(OnSwingClipFinished);
+        }
+
+        private void OnSwingClipFinished()
+        {
+            if (lunge != null)
+            {
+                lunge.CompleteSwing();
+            }
+        }
+
+        /// <summary>An ability healed this hero: refresh the bar so the number matches the fight.</summary>
+        private void OnHealed(HealEvent heal)
+        {
+            if (heal.Side != CombatantSide.Party || heal.Index != heroIndex)
+            {
+                return;
+            }
+
+            if (hpBar != null)
+            {
+                hpBar.SetVisible(true);
+                hpBar.SetFill(heal.TargetMaxHealth <= 0d ? 0f : (float)(heal.TargetHealth / heal.TargetMaxHealth));
+                hpBar.SetValueLabel(heal.TargetHealth, heal.TargetMaxHealth);
+            }
+        }
+
+        /// <summary>An ability raised a guard on this hero: a short blue flash, because no health moved.</summary>
+        private void OnShieldApplied(ShieldEvent shield)
+        {
+            if (shield.Side != CombatantSide.Party || shield.Index != heroIndex)
+            {
+                return;
+            }
+
+            hitJuice.Flash(baseColor, shieldFlashColor, shieldFlashDurationSec);
         }
 
         private void OnHeroDamaged(int index, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical)

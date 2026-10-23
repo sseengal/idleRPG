@@ -75,9 +75,9 @@ namespace IdleRPG.Core
             SafeInvoke(EnemyDamaged, info, nameof(EnemyDamaged));
         }
 
-        internal static void RaiseSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide)
+        internal static void RaiseSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot)
         {
-            SafeInvoke(SwingStarted, attackerIndex, attackerSide, targetIndex, targetSide, nameof(SwingStarted));
+            SafeInvoke(SwingStarted, attackerIndex, attackerSide, targetIndex, targetSide, clipSlot, nameof(SwingStarted));
         }
 
         internal static void RaiseEnemyKilled(string enemyName, double goldReward, int enemyIndex)
@@ -94,6 +94,18 @@ namespace IdleRPG.Core
         internal static void RaiseAbilityCast(CombatantSide side, int index, string abilityId, string abilityName, string clipSlot, double cooldownSeconds)
         {
             SafeInvoke(AbilityCast, side, index, abilityId, abilityName, clipSlot, cooldownSeconds, nameof(AbilityCast));
+        }
+
+        /// <summary>An ability's heal landed on a unit.</summary>
+        internal static void RaiseHealed(HealEvent heal)
+        {
+            SafeInvoke(Healed, heal, nameof(Healed));
+        }
+
+        /// <summary>An ability's guard landed on a unit.</summary>
+        internal static void RaiseShieldApplied(ShieldEvent shield)
+        {
+            SafeInvoke(ShieldApplied, shield, nameof(ShieldApplied));
         }
 
         internal static void RaiseHeroDied(int heroIndex)

@@ -305,10 +305,31 @@ namespace IdleRPG.Abilities
         }
 
         /// <summary>
-        /// DEBUG ONLY. Unlocks every ability a hero offers and equips the first one, so abilities can be exercised
-        /// without earning the tokens first. The first ability is the one the content lists first.
+        /// MVP ONLY. Gives every hero the abilities its card offers and wears the first one, so a fresh game opens
+        /// with working move buttons instead of three grey placeholders. It writes the same state the buy path writes,
+        /// so the save carries it like any other unlock.
+        ///
+        /// TODO: ability unlock story moment - replace the boot-time call with the story beat that hands the first
+        /// move over. Nothing else has to change: the fight already reads whichever ability is worn.
+        /// </summary>
+        public int OpenAllForMvp(IReadOnlyList<HeroData> heroes)
+        {
+            return UnlockEveryOfferedAbility(heroes);
+        }
+
+        /// <summary>
+        /// DEBUG ONLY. Same state as <see cref="OpenAllForMvp"/>, kept for the F4 test key.
         /// </summary>
         public int DebugUnlockAll(IReadOnlyList<HeroData> heroes)
+        {
+            return UnlockEveryOfferedAbility(heroes);
+        }
+
+        /// <summary>
+        /// Unlocks every ability a hero offers and wears the first one. The first ability is the one the content
+        /// lists first. Returns how many heroes were given a move.
+        /// </summary>
+        private int UnlockEveryOfferedAbility(IReadOnlyList<HeroData> heroes)
         {
             int equipped = 0;
 
