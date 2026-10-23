@@ -163,8 +163,8 @@ debug menus, the console log and the Unity MCP bridge. A manual pass takes ~5 mi
 ## Building
 
 1. `Tools > Idle RPG > Mobile > Verify Settings` → expect `RESULT: all good.`
-2. `File > Build Settings`: `Assets/IdleRPG/Scenes/Main.unity` is the shipping scene. `CombatDebug.unity` is a dev
-   scene, and `Assets/Scenes/SampleScene.unity` is Unity template residue that should be removed from the list.
+2. `File > Build Settings`: `Assets/IdleRPG/Scenes/Main.unity` is the only enabled scene. `CombatDebug.unity` stays
+   disabled as a dev scene; the Unity template `SampleScene` and its Readme assets were removed.
 3. Android: IL2CPP + ARM64, min API 26. iOS: IL2CPP, iPhone + iPad, min iOS 15.
 4. Bundle identifiers are `com.sseengal.idlerpg` on Android and iOS (the Standalone slot still carries the Unity
    template id; set it before a desktop store build). Change both if you fork.
