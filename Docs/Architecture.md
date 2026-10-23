@@ -1,8 +1,8 @@
 # Idle RPG — Architecture & Scale-Up
 
 > 2D mobile idle RPG. Unity 6000.6.0f1, URP 2D, portrait, iOS + Android.
-> Status: MVP shipped (Steps 0-6). This is the **design north star** for everything after the MVP.
-> The MVP build journal now lives in `archive/Plan.md` (**obsolete**, kept for its verification logs).
+> **Status 24 Oct 2026:** MVP shipped and playable. Combat runs in one action lane with art-measured
+> windows (`Combat-Sequencing.md`); abilities, gear and the roster swap are built (save v8).
 > This file is *how the game is built and how it scales*. Folder index: `README.md`.
 
 ---
@@ -216,7 +216,21 @@ Definitions only - no logic. Every definition has a stable string `id` (the only
 
 ---
 
-## 4. Save contract (schema v3)
+## 4. Save contract (schema v8)
+
+**Shipped today: v8** (`SaveData.CurrentVersion`). Migrations are additive, so an old save loads with no data loss:
+
+| Version | Adds |
+|---|---|
+| v3 | `partySlots` (formation) |
+| v4 | `runBestStage` |
+| v5 | one keyed `levels` list replaces the hero columns + prestige list (B35) |
+| v6 | gear: `inventory` (worn + bag instances) and `equippedGear` ids |
+| v7 | one ability id per hero |
+| v8 | Archer -> Soldier roster swap; `hero_archer` keys renamed on load, never stranded |
+
+The block below is the **original v3 blueprint**, kept as the design target. Where it and the code differ,
+the code wins.
 
 ### 4.1 Shape
 
@@ -306,7 +320,7 @@ ui             { lastScreenIndex, settings{...} }
 | AD2 | One gameplay driver: `RunController.Tick(dt)`; no coroutines in gameplay flow | Locked - **implemented in 7c** |
 | AD3 | `GameContext` built once and injected; no runtime `Find*`/`GetComponent` | Locked - **implemented in 7c** (panel `EnsureBound()` fallbacks retire in Step 8) |
 | AD4 | `SimContext` snapshot (rules + rng + `SimMode`) is the sim's only input besides specs | Locked |
-| AD5 | Save stores **ids + string keys only**; lists not dictionaries; schema v3 generic records | Locked |
+| AD5 | Save stores **ids + string keys only**; lists not dictionaries; generic records since v3, now **v8** (§4) | Locked |
 | AD6 | Offline always uses the measured `SimLedger` rate first; no second offline formula | Locked |
 | AD7 | Every payout path goes through the reward funnel + ledger | Locked |
 | AD8 | UI: dumb views + presenters, rows built from lists/prefab templates | Locked |
@@ -367,7 +381,11 @@ ui             { lastScreenIndex, settings{...} }
 | B35 | Save schema **v5**: all progression levels are ONE keyed list `levels[{key,level}]` (`"hero_knight.attack"` for hero stats, the track id for globals). The v4 hero columns + prestige list are migration input only and always write empty. **Keys are a permanent contract** - a renamed key silently throws away progress, so migrations must never rewrite keys | B5 | Locked |
 | B36 | B5 **defers** `currency[]` / `ledger{}` reshaping (Architecture §4 plan) until a step that actually needs it (B7). Reshaping three working scalars buys nothing today and doubles the risk on the live save | B5 | Locked |
 | B37 | **Tracks are authored in `tracks.json`**, the one card per row. `SceneWiringUtility` wires scene lists from the spec, so **a new track = card + generate + scene rebuild, no C#**. The scene is the last mile for references (GUIDs), so `Build MVP Scene` is part of the content workflow, not a code change | B5 | Locked |
-| B14 | Codex/bestiary doubles as the difficulty-hint system | 18 | Locked |
+| B38 | **Codex/bestiary doubles as the difficulty-hint system** | 18 | Locked |
+| B39 | **A cast is an action in the lane**, not an off-turn burst: the press queues, the lane announces it, the effect lands on the strip's measured strike frame | 24 Oct 2026 | Locked |
+| B40 | **Gear adds a fraction of the hero's base stat** (capped). Combat never knows items exist; it reads the final numbers only (save v6) | 4 Oct 2026 | Locked |
+| B41 | **No picture measures time or reads fight state.** Every window comes from `CharacterArtSet.SecondsFor` / `StrikeFrameFor`; the sim owns the clock | 24 Oct 2026 | Locked |
+| B42 | **One sheet, one role.** The Archer became an enemy and the Soldier a hero, so no hero looks like a wave enemy; `hero_archer` save keys are renamed on load (save v8) | 24 Oct 2026 | Locked |
 
 ### 6.4 Removals / avoid
 
@@ -376,7 +394,7 @@ ui             { lastScreenIndex, settings{...} }
 | C1 | `PartyConfig.DesiredPartySize` hardcode + warning | Remove in Step 10 |
 | C2 | `HeroStatType` enum as a save key | Remove in Step 14 (schema v3) |
 | C3 | Fixed `heroViews[]` / single `enemyView` arrays | Remove in Steps 10-11 |
-| C4 | Gear with randomized stats **before** the stat registry + effect pipeline exist | Avoid (Step 18 at the earliest) |
+| C4 | Gear with randomized stats **before** the stat registry + effect pipeline exist | **Superseded 4 Oct 2026** - gear shipped as fixed-fraction stats (save v6, `Inventory-AS-BUILT.md`) |
 | C5 | PvP / guilds / leaderboards (needs a server) | Out of scope |
 | C6 | Forced/interstitial ads, timed boss failure, punishing-absence timers | Avoid permanently |
 | C7 | Player-visible "power score" early | Avoid; show DPS / eHP / gold-per-min / stage ETA |
@@ -450,9 +468,10 @@ Verification per step: clean recompile → `Run All Checks (regression)` PASS �
 
 | Item | State |
 |---|---|
-| Docs | **complete** - `Architecture.md`, `Sim-Core.md`, `Progression.md`, `Content.md`, `Idle-Economy.md`, `UI-UX.md`, `Roadmap.md` |
-| Code changes | none - documentation only |
-| Ready to implement | **yes** - start at `Roadmap.md` Step 7 (sim core refactor, behaviour-identical) |
+| Docs | 33 pages. Index `README.md`; status `Checklist.md`; backlog `Roadmap.md`; cleanup gate `Cleanup-Checks.md` |
+| Code | 245 C# files, 4 assemblies (`Sim` has zero Unity references) |
+| Last change | Ability feature + one-lane combat, 24 Oct 2026 (save v8) |
+| Next | Owner play check of the ability lane, then B9' shipping checklist and B10 live SDKs |
 | Per-step contract | owner doc section -> one change -> recompile -> acceptance test -> docs+status -> manual test handoff |
 
 Handoff rules for the next steps: write the doc part for a system, then implement **one** small code change,

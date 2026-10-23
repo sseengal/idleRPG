@@ -12,16 +12,16 @@
 
 | Field | Value |
 |---|---|
-| Current step | **B8' proof lap NEXT** (all kit + polish built + verified 2026-09-27, §1q; only the owner's battle-log + shop-beat play session remains, + the juice-pass visual review §1u / `Manual-Tests.md` §2b). **MVP = store-submittable** (§1p): then B9' shipping checklist -> **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
+| Current step | **Abilities + one-lane combat built 24 Oct 2026** (`Combat-Sequencing.md`, `Ability-Progress.md`). Open in that feature: ability assignments in the save, boss moves. Then B9' shipping checklist -> **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
-| v1.0 gate | **the loop + money**, and **MVP = store-submittable** (§1p). No statuses/abilities/zones/affixes/gear/roster/relics before the base is done |
+| v1.0 gate | **the loop + money**, and **MVP = store-submittable** (§1p). The gate stands for NEW systems: abilities, gear and the roster swap shipped after it, so read it as "no zones / affixes / relics before the base is done" |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
-| Last completed | B7 S5 - the monetisation guard + shop readout on F3 (planted cheats refused by the build; see §1o), 2026-09-27 |
-| Next after this | the B8' proof lap (you: battle-log + shop-beat play check, F3 in hand); then the B9' shipping checklist, B10 live store wiring (AdMob + Unity Ads), B10b store packet, B1a/B1b device passes. **Art/UI runs alongside (§1s / `Art-Pipeline.md` §17): open `Scenes/UiLab.unity` or `Assets/Screenshots/ui-lab/uilab.png` and pick look A, B or C.** |
+| Last completed | The ability feature - one action lane, real shield/heal/damage effects, random enemy cast timing, enemy casts from stage 1, Archer -> Soldier roster swap (save v8), 2026-10-24 |
+| Next after this | You: one play check of the ability lane (press a cast, watch it queue, play, land). Then the B8' proof lap, the B9' shipping checklist, B10 live store wiring (AdMob + Unity Ads), B10b store packet, B1a/B1b device passes. **Art/UI runs alongside (§1s / `Art-Pipeline.md` §17): open `Scenes/UiLab.unity` or `Screenshots/ui-lab/uilab.png` and pick look A, B or C.** |
 | MVP decisions (owner, 2026-09-27) | gate = **store-submittable**; **3 playable heroes** (a 4th needs the v1.1 roster UI); both stores at once; **art + audio = the final pass before submission**; no analytics SDK; full record + cuts in §1p |
-| Save schema | v5 (v3 -> v4 adds `runBestStage`; v4 -> v5 = one keyed `levels` list; additive migrations, no data loss - see §1h / B35-B36) |
+| Save schema | **v8** (`SaveData.cs:32`). v4 `runBestStage`; v5 one keyed `levels` list; v6 gear inventory; v7 ability assignment; v8 Archer -> Soldier roster swap. Additive migrations, no data loss (§1h / B35-B36, `Architecture.md` §4) |
 | Shipped build | `Builds/IdleRPG-mac.app` verified (boot, save, offline, combat) |
-| Docs | all live in `Docs/` - index `Docs/README.md`; status here; backlog `Roadmap.md`; removals `Docs/REVIEW.md` (R1: obsolete MVP journal deleted) |
+| Docs | all live in `Docs/` - index `Docs/README.md`; status here; backlog `Roadmap.md`; removals `Docs/REVIEW.md`; cleanup gate `Docs/Cleanup-Checks.md`. Sections 1a-1ah below are the build journal, not current status |
 
 **Standing regression surfaces** (run these on every combat-affecting change): golden numbers, content validator,
 save drift, **battle log**. The log is a *contract with the player*, not decoration: any feature that produces or
@@ -1897,7 +1897,12 @@ the battle-log contract is checked, and the touched screen has had a device smok
 - [ ] **battle log re-checked** with the new texts (status ticks, per-type damage, crit changes) - see section 0
 - [ ] acceptance: TTK matches hand-calc; trigger depth cap proven
 
-### 13 — Ability system  `[ ]`
+### 13 — Ability system  `[x] shipped 2026-10-24`  (record, not open work)
+> Built: `AbilityDef` + `abilities.json` (11 abilities), cooldown-only casts in the action lane,
+> shield/heal/damage effects, enemy auto-cast with random timing, ABILITIES tab, save v7/v8.
+> Open only: hero auto-cast (deferred, `Ability-Plan.md` decision 6) and ability assignments in the save.
+> Current behaviour: `Combat-Sequencing.md`. Status: `Ability-Progress.md`. The list below is the original
+> plan, kept so the wording is not lost.
 - [ ] `AbilityData` + `EffectSpec` rows; `AbilityRuntime` (cooldown/charges/trigger)
 - [ ] auto-cast + player-ordered priority
 - [ ] 1 ability per existing hero + 3-4 enemy abilities
