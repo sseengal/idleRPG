@@ -26,6 +26,22 @@ where they are — same seconds, kills, gold, rate. If a tidy-up moves one, the 
 instead of re-recording the baseline. A golden-number FAIL during *feature* work is a different case: record the new
 numbers and carry on, without editing `BalanceBaseline.cs`.
 
+### Known drift at 24 Oct 2026 — not caused by a cleanup
+
+`Run All Checks (regression)` currently ends **FAIL** on four golden numbers:
+
+| Check | Today | Baseline (2026-09-25) |
+|---|---|---|
+| stage 1 seconds @x1.0 | 201.7 | 80 |
+| stage 1 seconds @x1.6 | 183.4 | 126 |
+| stage 1 gold | 128 | 272 |
+| stage 1 gold/s @x1.6 | 0.698 | 2.16 |
+
+The same numbers were logged on **23 Oct 2026, before the cleanup pass**, and they match the content validator's own
+stage-1 line (`183s, 22 kills, 128 gold, 0.70 gold/s`). Cause: the ability and enemy-cast work changed fight length
+after the 2026-09-25 baseline. **Do not re-baseline for a cleanup.** Compare a new run against the numbers above;
+they are the real "before" until the MVP baseline pass.
+
 Record the result of each check in the commit message. Example:
 `Docs: one page per topic (checks: PASS, 12/12 EditMode, smoke same)`.
 

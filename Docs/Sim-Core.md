@@ -112,7 +112,7 @@ Starter stat set (data rows, no code):
 | `dmgTaken` | new | negative = mitigation (buff/debuff carrier) |
 | `dmgDealt` | new | generic damage % |
 
-`StatId` is a static class of string constants; **ids are the save keys** (schema v3 `statLevels`).
+`StatId` is a static class of string constants; **ids are the save keys** (the v5 keyed `levels` list; the save is v8).
 
 ## 5. Combatant model (hero and enemy are the same thing)
 

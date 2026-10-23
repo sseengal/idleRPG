@@ -1,5 +1,8 @@
 # Inventory — as-built implementation record
 
+> **As built at save v6.** v7 added one ability id per hero and v8 the Archer -> Soldier roster swap; neither
+> changes the gear shape described here.
+
 > **PARKED for MVP (2026-10-10).** The INVENTORY tab is not built (`PartyPanelUI.InventoryEnabled = false`) and
 > boss drops are off (`BalanceConfig.bossGearDropChance = 0`). The code below is intact and correct - it is simply
 > not reachable. Rationale, restoration steps and what still runs: `Docs/Party-Page.md` §7.1.
