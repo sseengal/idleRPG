@@ -391,7 +391,9 @@ frozen.
 | Ability assignments are session state, not saved | Needs persistence wiring | Small |
 | Hero abilities open for everyone (MVP switch) | Deliberate stop-gap until story beats exist | Small |
 
-Balance is a separate pass: the ordering and the effects are correct, the numbers are not tuned.
+Balance is a separate pass: the ordering and the effects are correct, the numbers are not tuned. **The golden
+numbers stay frozen until story sequencing and the MVP are finished** — one dated re-record at the end, not one per
+step (`Content.md` §10, "When the baseline is re-recorded").
 
 ---
 
@@ -421,9 +423,9 @@ Balance is a separate pass: the ordering and the effects are correct, the number
 ## 18. Related docs
 
 - `Docs/Game-Vision.md` — the story-led campaign this serves.
-- `Docs/Combat-Presentation.md` — the original research and the built contract (§12 changelog).
-- `Docs/Ability-Progress.md` — status list and measurements.
-- `Docs/Ability-Plan.md` — intended ability design that is not built.
+- `Docs/Combat-Presentation.md` — the 23 Oct research and the 24 Oct build log (record page).
+- `Docs/Ability-Progress.md` — ability status, measurements and open items.
+- `Docs/Ability-Plan.md` — the locked ability decisions; built behaviour is this page.
 - `Docs/Ability-Map.md` — which hero and enemy owns which ability id.
 - `Docs/Character-Catalog.md` — every character's strips and frame counts.
 - `Docs/Sim-Core.md`, `Docs/Architecture.md` — layer rules this page builds on.

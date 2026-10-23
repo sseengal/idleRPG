@@ -287,6 +287,11 @@ means revoke-and-rotate, not panic.
 (strips -> clips + controller) -> `HD2D/SpriteLit` in `ArtLab.unity`. The factory's output only has to arrive in
 `Assets/ThirdParty/`.
 
+> **Layout change, 24 Oct 2026.** `Assets/ThirdParty/` now holds only the files the game or its tools still read
+> (8 art/font files) plus the licence records. The rest of each pack — 94 files — moved to `ThirdPartyAssets/` at the
+> project root, outside `Assets/`, and is ignored by Git. A factory run can drop new art into `Assets/ThirdParty/`
+> exactly as before. See `REVIEW.md` R4 for the exact keep list and why each file stays.
+
 ---
 
 ## 15. HD-2D re-scoped for this title (owner question, 2026-09-26)
@@ -355,7 +360,9 @@ jobs bill on completion). Credits `$0.00`, subscription `trial`.
   (`StateKey` maps Attack→Attack01 etc.). Built 4 clips + `Goblin.controller` at 10 fps: Idle 0.8 s loop;
   Attack01/Hurt/Death 0.8/0.8/0.9 s hold-last-frame. Parameters: `Moving`, `Attack`, `AttackVariant`, `Hurt`, `Dead`.
   Transitions: Idle→Attack01 (Attack trigger + AttackVariant=0), Idle→Hurt (Hurt), exit-time returns to Idle,
-  AnyState→Death (Dead). Strips live at `Assets/ThirdParty/PixelLab/goblin/Goblin_<Clip>_anim.png`.
+  AnyState→Death (Dead). Strips lived at `Assets/ThirdParty/PixelLab/goblin/Goblin_<Clip>_anim.png`. **24 Oct 2026:**
+  only `Goblin_Idle_anim.png` is still under `Assets/` (it is in `ArtLab.unity`); the Attack / Hurt / Death strips
+  moved to `ThirdPartyAssets/PixelLab/goblin/`, so the builder now finds the Idle strip alone if it is re-run.
 - **Scene wiring:** `Benchmark_Goblin` got the `Goblin` Animator + sprite `Goblin_Idle_anim_0` (1.15 m bounds kept).
 
 ### Verified combat loop (play mode, freeze-frame stepping via `Animator.Update`)
@@ -397,7 +404,7 @@ exists and works (`MvpSceneBuilder`), so this is a **reskin, not a rebuild**.
 
 | Thing | Where | Notes |
 |---|---|---|
-| UI art pack | `Assets/ThirdParty/Kenney_PixelUI/` | Kenney Pixel UI Pack, **CC0**, 35 PNGs: 9-slice panels/buttons in 3 families + a 16x16 tile sheet |
+| UI art pack | `Assets/ThirdParty/Kenney_PixelUI/` | Kenney Pixel UI Pack, **CC0**. **24 Oct 2026:** only the live 9-slice `grey.png` (used by `UiSkin` and both scenes) and `License.txt` stay under `Assets/`; the other 34 PNGs moved to `ThirdPartyAssets/Kenney_PixelUI/` |
 | Pixel fonts | `Assets/ThirdParty/PixelFonts/` + `Assets/IdleRPG/Resources/Fonts/*.asset` | Silkscreen, VT323, Jersey 10 - all OFL 1.1. Fonts live in a **Resources** folder so runtime-created text (log lines, hero HP bars, damage numbers) can load them too |
 | Import policy tool | `Tools > Idle RPG > Art > Apply UI-Art Presets` (`UiArtPresetApplier`) | Point filter, no mips, **uncompressed**, PPU 100, centre pivot, FullRect, 12px 9-slice border |
 | Font asset tool | `Tools > Idle RPG > Art > Generate Pixel Fonts` (`PixelFontAssetGenerator`) | SDF render mode, sampled at 64px - see the font policy below for why raster was rejected |

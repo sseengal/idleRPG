@@ -187,6 +187,8 @@ debug menus, the console log and the Unity MCP bridge. A manual pass takes ~5 mi
 | `Docs/Checklist.md` | **master progress record** - what is done, what is left, current step |
 | `Docs/Roadmap.md` | ordered backlog with acceptance tests + status board |
 | `Docs/Architecture.md` | layers, boundaries, data catalog, save schema, engineering rules, decision log |
+| `Docs/Combat-Sequencing.md` | **current**: fight order, which strip plays, timings, enemy cast timing, audit |
+| `Docs/Ability-Progress.md` | **current**: what works in the ability feature and what is open |
 | `Docs/Sim-Core.md` | pure simulation design (encounters, formation, waves, effect pipeline, abilities, ledger) |
 | `Docs/Progression.md` | currencies + sinks, tracks, roster/stars, relics, prestige layers, automation |
 | `Docs/Content.md` | zones, difficulty curves, walls, affixes, enemy archetypes, content pipeline + validator |

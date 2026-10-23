@@ -160,8 +160,9 @@ in `SimContext.Rules`.
 ## 8a. How to add a monster (the recipe)  ·  added 2026-09-27 with the monster-making kit (see `Checklist.md` §1q)
 
 Six steps, no code. The golden rule that keeps it honest: **adding a monster to a fight pool re-shuffles which
-monster appears at every stage** (the rotation wraps around the pool size), so new monsters are a *balance event*,
-and the measuring numbers must be re-recorded on purpose - step 6 is that ritual.
+monster appears at every stage** (the rotation wraps around the pool size), so new monsters are a *balance event*.
+Step 6 records the new measuring numbers, but it does **not** edit the baseline: the golden numbers are frozen until
+story sequencing and the MVP are finished (§10, "When the baseline is re-recorded").
 
 1. **Copy a card** in `Content/Specs/enemies.json`. Give it a unique id carrying a **family word** so the drawing
    tool picks a silhouette automatically:
@@ -179,11 +180,11 @@ and the measuring numbers must be re-recorded on purpose - step 6 is that ritual
    how many picks shifted. This is the surprise, removed *before* you commit.
 5. **Press `Tools > Idle RPG > Content > Validate Content`** - the checks shout at any mistake (missing picture, no
    family word, no pool, bad interval or stats).
-6. **Re-record the golden numbers on purpose.** Run `Tools > Idle RPG > Run All Checks (regression)`. It will FAIL -
-   that is expected and correct, not a bug. Read the new stage-1 seconds/kills/gold/rate, confirm the stage-1 clear
-   time is still inside its 90-180s band and the robot climb still reaches its target with no stall, then update
-   `Editor/BalanceBaseline.cs` (the four numbers and the `Recorded` line with the date + reason) and re-run until
-   PASS. Never widen the ±2% tolerance. Growing a pool gets a dated entry exactly like the B3d/B4 re-baselines.
+6. **Do not re-record the golden numbers yet.** Run `Tools > Idle RPG > Run All Checks (regression)`. The
+   golden-number line will FAIL when the new monster shifts stage 1 — before the MVP baseline pass that is expected,
+   not a bug (see §10 "When the baseline is re-recorded"). Write the new stage-1 seconds/kills/gold/rate in the step
+   log, confirm the clear time is still inside its 90-180s band and the robot climb still reaches its target with no
+   stall, and leave `Editor/BalanceBaseline.cs` unchanged. Never widen the ±2% tolerance.
 
 Heroes use the same recipe with `heroes.json` + `party.json`; at MVP the party must not exceed the 3 formation
 slots, and the check warns if it does.
@@ -212,6 +213,39 @@ Rules: single invocation, no background loops, no auto-tuning, results pasted in
 
 Since B4 (2026-09-25): `Golden Numbers` are **asserted, not eyeballed** - `Run All Checks` compares them against
 `BalanceBaseline` (±2%) and fails the build on drift; the robot climb (loop health) runs inside the content validator.
+
+### When the baseline is re-recorded — decision, 24 Oct 2026
+
+**The golden numbers are frozen until the MVP is finished.** They are re-recorded **once**, in a single pass,
+and only after both of these are true:
+
+1. **Story sequencing is finished** — every story beat and its fight are in order, with no placeholder beats left.
+2. **MVP content is closed** — no more heroes, enemies, abilities, effect kinds or timing changes are planned for
+   the MVP.
+
+Until that day:
+
+- **Leave `Editor/BalanceBaseline.cs` alone.** The `Recorded` line stays at `2026-09-25` and the four numbers stay
+  as they are.
+- **A real change will make the check FAIL, and that is expected.** A new pool member or a retuned stat moves
+  stage 1. Record the new numbers in the step log (or the checklist entry) and carry on. Do not edit the baseline
+  to silence it, and never widen the ±2% tolerance.
+- **The other checks must still pass.** Save drift, content validation, the type scale and the spacing ladder are
+  not frozen. A golden-number FAIL is not permission for the rest to fail.
+- **Cleanup must not move a number at all.** If a tidy-up moves one, the tidy-up changed behaviour
+  (see `Cleanup-Checks.md`).
+
+Why: a re-baseline done before the content is final is a number we would record again next week. One dated entry at
+the end is easier to trust than a trail of entries that each say "interim".
+
+The cost, said plainly: while the baseline is frozen, the golden-number line **stops catching accidental drift**,
+because a legitimate change and an accident look the same — both FAIL. Cover that gap by reading the printed
+numbers against the last recorded run, and keep `Sweep Stages` in the loop for wall detection. That is a weaker net
+than an asserted baseline, and it is worth the trade for not re-recording the same four numbers every week.
+
+At the MVP baseline pass: run `Golden Numbers`, confirm stage 1 is inside its 90-180 s band and the robot climb
+still reaches its target, then update the four numbers and the `Recorded` line with the date and the reason, and
+re-run until PASS. One entry, one date.
 
 ## 11. Numeric + difficulty budget guards
 

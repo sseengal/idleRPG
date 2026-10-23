@@ -4,6 +4,9 @@ Living status page. The contract (what the feature must do) stays in `Ability-Pl
 actually works today, what was measured, and what is still open. **Fight order, strip choice, timings and the
 animation audit now live on one page: `Combat-Sequencing.md`.**
 
+**Last checked against the code: 24 Oct 2026.** That check removed three stale "open" items: the `TabController`
+panel bug, the `UiSpace.cs` tracking question and the Goblin asset. Details are under "Resolved in the 24 Oct check".
+
 ## Where the feature stands
 
 | Layer | State |
@@ -13,8 +16,8 @@ animation audit now live on one page: `Combat-Sequencing.md`.**
 | Buy / unlock (stage gate) / assign | done |
 | Roster swap Archer to Soldier, save v8 | done |
 | Cast: request, event, log line, cooldown, ABILITIES tab, F4 debug | done, verified |
-| **Cast sequencing in the action lane** (queued press, target, travel window, impact) | **done 24 Oct 2026** - see `Combat-Presentation.md` §12 |
-| Effect (shield / heal / damage) | **done 24 Oct 2026** - same section |
+| **Cast sequencing in the action lane** (queued press, target, travel window, impact) | **done 24 Oct 2026** - see `Combat-Sequencing.md` §3 and §7 |
+| Effect (shield / heal / damage) | **done 24 Oct 2026** - see `Combat-Sequencing.md` §7 |
 | Enemy casts (auto on their own cooldown) | **done 24 Oct 2026** |
 | **Enemy cast timing is random, not a metronome** ("Wild Cards") | **done 24 Oct 2026** - first roll waits 2-6 s, then 35% chance per 1-3 s roll |
 | **Enemy moves hit harder** ("Heavier Hands") | **done 24 Oct 2026** - damage moves x1.8-1.9 of a plain hit (was x1.3-1.4) |
@@ -64,11 +67,7 @@ An earlier note claimed the daily/offline rewards overlay held the fight. That w
 
 ## Open - UI (hand this to the front-end framework team)
 
-- `TabController.Show(index)` sets the index but does not activate the page when called from code: the ability
-  panel stayed `activeSelf = false` while the battle log stayed active. The on-screen tab buttons work. One small
-  item, in the file that team now owns.
 - Placeholder pictures for characters and bosses still exist; hero icons should point at the first idle frame.
-- A `UiSpace.cs` file is untracked in `Assets/IdleRPG/Scripts/UI/` - confirm whether that is the front-end team's.
 
 ## Open - backend (no UI)
 
@@ -84,33 +83,44 @@ An earlier note claimed the daily/offline rewards overlay held the fight. That w
    (the v7 assignment list already exists, so this is mostly wiring plus a migration if the shape changes).
 3. **Abilities from data.** The editor catalogue still drives which ability a hero gets; the ability definitions
    and the card data should be the single source.
-4. **Enemy/boss and balance housekeeping.** Restore the files the generator damaged (see the dirty-tree section),
-   remove character/boss placeholders, rework the art validator to "art, or else a placeholder", and re-baseline the
-   golden numbers. The generator footgun itself is closed. Boss moves (32 of 40 have none) and the nine unused
-   Summon / Heal / Block strips are listed in `Combat-Sequencing.md` §11 and §16.
+4. **Enemy/boss and balance housekeeping.** Remove character/boss placeholders and rework the art validator to "art,
+   or else a placeholder". Boss moves (32 of 40 have none) and the nine unused Summon / Heal / Block strips are
+   listed in `Combat-Sequencing.md` §11 and §16. **The golden numbers are not re-recorded yet** — they stay frozen
+   until story sequencing and the MVP are finished (`Content.md` §10, "When the baseline is re-recorded").
 
-## Dirty working tree - resolved 24 Oct 2026
+## Resolved in the 24 Oct check
 
-> **Resolved.** The tree was committed on 24 Oct 2026 (see `git log`). The scene carries the new panel
-> layout, the enemy/hero data assets and the ability assets are in. `TinyRPGAssets/` and
-> `TinyRPGAssets2/` are downloads outside `Assets/`; they are now listed in `.gitignore` instead of being
-> tracked. The notes below are kept as the record of what each group actually was.
+Three items were listed as open and were already done. They are recorded here so nobody re-opens them.
+
+- **`TabController.Show(index)` does activate its page.** Verified in `UI/TabController.cs`: `Show` sets
+  `ActiveIndex`, then calls `tab.panel.SetActive(isActive)` for every tab, so the chosen panel is on and the others
+  are off. The earlier note measured a moment before that fix landed.
+- **`UiSpace.cs` is tracked and owned.** It lives at `Assets/IdleRPG/Scripts/UI/UiSpace.cs` and is in Git
+  (`a818643 UI spacing: the management panels use UiSpace roles`). It is part of this project, not a file from
+  another team.
+- **The Goblin asset is gone.** `Data/Enemies/Enemy_Goblin.asset` no longer exists; the card was removed with the
+  band 1 change (`72cdc37`).
+
+## Dirty working tree - historical record (resolved 24 Oct 2026)
+
+> **Archived. Not current status.** This section records what the working tree looked like before the 24 Oct
+> commit. The tree is clean now, and every item below was settled. Read it only to understand why a rule exists.
 
 `Main.unity` (~30k lines), `BalanceConfig.asset`, `WaveConfig.asset`, hero/enemy data assets, the TMP font assets,
-placeholder `.meta` files, an untracked `Enemy_Goblin.asset`, and the untracked `TinyRPGAssets/` +
-`TinyRPGAssets2/` art packs.
+placeholder `.meta` files, a stray `Enemy_Goblin.asset`, and the untracked `TinyRPGAssets/` + `TinyRPGAssets2/`
+art packs were all in the tree before the commit.
 
-Split by what each one actually is:
+Split by what each one was:
 
-- **Damage from the generator (restore from git):** `WaveConfig.asset` lost ~56 wave entries - the stage ladder is
-  broken in the working tree right now. The enemy/hero data assets have generator numbers back (`Enemy_Slime`
-  health 57 -> 60, attack 9.9 -> 6, interval 1.7 -> 2). `Enemy_Goblin.asset` is a stray the generator recreated
-  with `firstStage: 1`; nothing references it (not the scene, not the wave config), so it can be deleted.
-- **Additive, safe to keep:** `BalanceConfig.asset` gained gear fields (inventoryCap, gear rarity weights, prices).
+- **Damage from the generator (restored from git):** `WaveConfig.asset` had lost ~56 wave entries, which broke the
+  stage ladder in the working tree. The enemy/hero data assets had generator numbers back (`Enemy_Slime`
+  health 57 -> 60, attack 9.9 -> 6, interval 1.7 -> 2). `Enemy_Goblin.asset` was a stray the generator recreated
+  with `firstStage: 1`; nothing referenced it, and it was deleted.
+- **Additive, kept:** `BalanceConfig.asset` gained gear fields (inventoryCap, gear rarity weights, prices).
 - **Mechanical importer churn:** placeholder `.meta` files gained empty Android/iOS override blocks; the two TMP
   font assets were rewritten by the font importer.
-- **Not mine:** `Assets/IdleRPG/Scripts/UI/UiSpace.cs` is the front-end team's spacing ladder (untracked). Left alone.
-- **Art source packs:** `TinyRPGAssets/` + `TinyRPGAssets2/` (6.6 MB) are downloads, not project content; they live
-  outside `Assets/`, so git should ignore them rather than track them.
+- **Owned by this project:** `Assets/IdleRPG/Scripts/UI/UiSpace.cs` is the spacing ladder. It is tracked now.
+- **Art source packs:** `TinyRPGAssets/` + `TinyRPGAssets2/` (6.6 MB) were downloads, not project content; they
+  live outside `Assets/` and are ignored by Git.
 
-The scene carries the new panel layout and is intentionally left uncommitted until the above is settled.
+The scene carries the panel layout from that pass and is committed.

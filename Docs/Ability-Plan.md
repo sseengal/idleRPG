@@ -3,11 +3,15 @@
 Companion to `Ability-Map.md` (which maps the pack's named strips to abilities). This file is the *build* plan:
 decisions, data, sim, UI, unlock, order. Everything here is agreed as of 2026-10-12; change it here, not in the code.
 
+> **Status: DECISIONS PAGE.** The decisions below still hold, but most of this plan is now built.
+> For what the game does today — cast in the lane, which strip plays, impact timing, enemy timing — read
+> **`Combat-Sequencing.md`**. For "what works / what is open" read **`Ability-Progress.md`**.
+
 ## 1. The locked decisions
 
 | # | Decision | Choice |
 |---|---|---|
-| 1 | Cast model | **Revised 24 Oct 2026: a cast is an ACTION IN THE LANE**, not an instant off-turn burst. Any cast --> the request waits (button shows QUEUED) --> it is announced like a swing --> the effect lands on its own art-measured window. `Combat-Presentation.md` §12 is the built contract; this row is kept so the change is visible. |
+| 1 | Cast model | **Revised 24 Oct 2026: a cast is an ACTION IN THE LANE**, not an instant off-turn burst. Any cast --> the request waits (button shows QUEUED) --> it is announced like a swing --> the effect lands on its own art-measured window. **`Combat-Sequencing.md` is the built behaviour**; this row is kept so the change is visible. |
 | 2 | Combat cost | **Cooldown only.** No mana/energy. Unlock is the "limited" part; casts cost time. |
 | 3 | Targeting | **Automatic.** One tap, no aiming: Shield self, Heal lowest-health ally, damage the front enemy. |
 | 4 | Enemy cadence | **Auto-cast on a per-ability cooldown** from wave start. No random chance. |

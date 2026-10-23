@@ -285,7 +285,7 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
 
 > **Post-launch content drop (owner decision 2026-09-27).** Real monsters arrive **after release** as an update, using
 > the kit built in B8': one card each, the picture drawn automatically, the who-appears-where map read before
-> committing, then a deliberate re-record of the golden numbers - because the fight rotation wraps around the pool
+> committing, and the new measuring numbers written down - because the fight rotation wraps around the pool
 > size, so adding one monster re-shuffles which monster appears at every stage. Launch roster stays **3 heroes /
 > 4 monsters**. Details: `Checklist.md` §1p (decisions) and §1q (the kit).
 

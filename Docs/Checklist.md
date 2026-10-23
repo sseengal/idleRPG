@@ -1089,8 +1089,8 @@ parity net agrees).
 
 ### The recipe card (added 2026-09-27)
 `Docs/Content.md` §8a: how to add a monster in 6 steps - the family words and the safe stat envelope, the pool step,
-generate + validate, read the rotation map first, then the **golden-number re-record ritual** (the check FAILING is
-expected; re-baseline with a dated reason exactly like B3d/B4).
+generate + validate, read the rotation map first, then step 6: **write the new numbers down, do not re-baseline**
+(the check FAILING is expected; the baseline stays frozen until the MVP pass - `Content.md` §10).
 
 ### What is left of B8'
 Only the **proof lap** - a play session you run. Full step-by-step in **`Docs/Manual-Tests.md` §2** (battle-log
@@ -1821,9 +1821,10 @@ windowed 21-30, so that pool looks like a content question, not a Goblin one.
 in the scene. So *no* character's animations are playing yet - that is why the Werewolf's were not. It is art-pipeline
 work, not a Goblin fault.
 
-**Third-party goblin art is left in place on purpose:** `Assets/ThirdParty/PixelLab/goblin/` (idle/attack/death/hurt
-sheets) and its world-height entries in `ArtPresetApplier`. It looks like a planned asset, so deleting it is a
-separate decision - it is tracked in git if you do want it gone.
+**Third-party goblin art:** `Assets/ThirdParty/PixelLab/goblin/` used to hold the idle/attack/death/hurt sheets and
+`ArtPresetApplier` still carries world-height entries for it. **24 Oct 2026:** the unused sheets moved to
+`ThirdPartyAssets/PixelLab/goblin/` (outside `Assets/`, ignored by Git); only `Goblin_Idle_anim.png` stays because
+`ArtLab.unity` shows it. See `REVIEW.md` R4.
 
 
 ## 1e. Remaining path to MVP  ·  **what is left, in order**

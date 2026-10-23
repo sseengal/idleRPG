@@ -28,7 +28,9 @@ includes them (enforced at build time from B10).
 ## 1. Before every build (a few eyeball reads — the heavy lifting is automated)
 
 - [ ] `Tools > Idle RPG > Run All Checks (regression)` → ends **PASS** (drift + validation + golden numbers + the
-      type scale).
+      type scale). If the only failure is the golden-number line, and the change was meant to move the numbers, that
+      is the frozen baseline talking, not a bug: write the new numbers down and check the other lines passed
+      (`Content.md` §10). Cleanup work gets no such allowance.
 - [ ] `Tools > Idle RPG > UI > Check Type Scale` → **PASS** (every label on the scale, in a theme font, and no code
       setting a size by hand). It also runs inside the check above; this is the version with the size/font histogram.
 - [ ] `Tools > Idle RPG > Mobile > Verify Settings` → nothing red.

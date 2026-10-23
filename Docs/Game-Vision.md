@@ -25,7 +25,7 @@ story beat  ->  fight (automatic)  ->  reward  ->  choice (party / gear / abilit
 ```
 
 1. **Story beat.** A short scene pushes the plot: a place, a problem, a person.
-2. **Fight.** Combat runs itself, one actor at a time (see `Combat-Presentation.md`). The player
+2. **Fight.** Combat runs itself, one actor at a time (see `Combat-Sequencing.md`). The player
    watches, presses ability buttons, and can speed the fight up.
 3. **Reward.** Gold, gear, an ability, a new party member, or a key item that opens the next beat.
 4. **Choice.** Spend what was earned. Small, clear choices — not a spreadsheet.
@@ -54,7 +54,7 @@ chapters** until the content proves too long. Decide before building the save sc
 | System | Keep | Change |
 |---|---|---|
 | Combat sim (`Encounter`) | Everything. One lane, art-measured windows, event-driven pictures | Nothing now. Balance comes later |
-| Abilities | The data pipeline from `AbilityDef` to the fight | Now a real action (see `Combat-Presentation.md`) |
+| Abilities | The data pipeline from `AbilityDef` to the fight | Now a real action (see `Combat-Sequencing.md`) |
 | Stages / waves | The machinery | Becomes **story beats**: one beat = one encounter (or a short chain) |
 | Endless scaling | Do not grow it | Replace with authored difficulty per beat |
 | Prestige / tokens | The permanent-upgrade layer | Reframed as "kept on death" |
@@ -119,7 +119,7 @@ every ability clip. Both must start before the systems are "finished", or the sh
 
 ## Related docs
 
-- `Docs/Combat-Presentation.md` — how a fight reaches the screen (built contract).
+- `Docs/Combat-Sequencing.md` — how a fight reaches the screen today (current page).
 - `Docs/Roadmap.md` — ordered backlog (needs re-ordering to this vision).
 - `Docs/Progression.md` — levels and prestige (the "keep on death" layer).
 - `Docs/Stage-Ladder.md` — the old 100-stage ladder (source material for beats, not the plan).

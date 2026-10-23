@@ -2,6 +2,10 @@
 
 Researched from code on 23 Oct 2026. **No code was changed for this document.**
 
+> **Status: RECORD PAGE, not the current page.** This file is the original research plus the build log.
+> For how a fight reaches the screen **today** — fight order, which strip plays, every timing, enemy cast
+> timing — read **`Combat-Sequencing.md`**. Keep this page for the reasoning and the 24 Oct change log.
+
 > **Update (24 Oct 2026): S1–S5 are BUILT.** The ability path now runs in the same lane as a basic
 > attack, with damage, heal and guard effects, floating numbers, log lines and enemy parity. See §12.
 > The game's goal also changed: it is now a **story-led mini campaign with automatic combat**
@@ -116,7 +120,8 @@ cleanly. Abilities are outside it.
    whether a cast hits or guards.
 6. **Cooldown starts at the drain tick**, and the panel reads it; there is no visible "queued" state.
 7. **Docs drifted.** `Docs/Ability-Progress.md` says sequencing is done; it is not. `Ability-Plan.md`
-   describes the intended design, not the built one.
+   describes the intended design, not the built one. **(Resolved 24 Oct 2026: sequencing was built; the
+   docs now point at `Combat-Sequencing.md` and are checked against the code.)**
 
 ---
 
@@ -279,6 +284,9 @@ shared. `AbilityWindow` is clamped like swings (0.1–2 s) so one bad clip canno
 
 ## 12. Change log — what was built (24 Oct 2026)
 
+> This is the **build log** for the 24 Oct pass. Current behaviour and every timing are in
+> `Combat-Sequencing.md`; line anchors below were true on 24 Oct 2026 and may have moved since.
+
 ### Sim
 
 - **New `Sim/SimAbility.cs`** — plain-value card (`SimAbilityKind`, `SimAbilityTarget`, `SimAbility`):
@@ -346,7 +354,8 @@ Use §10 as written, plus:
 
 - `Docs/Game-Vision.md` — the story-led MVP this work now serves.
 
-- `Docs/Ability-Plan.md` — intended ability design (not built).
-- `Docs/Ability-Progress.md` — status list (stale on sequencing).
+- `Docs/Combat-Sequencing.md` — **current page**: fight order, strip choice, all timings, enemy timing, audit.
+- `Docs/Ability-Plan.md` — the locked ability decisions; built behaviour is in `Combat-Sequencing.md`.
+- `Docs/Ability-Progress.md` — ability status and open items.
 - `Docs/Ability-Map.md` — which hero/enemy owns which ability id.
 - `Docs/Architecture.md`, `Docs/Sim-Core.md` — layer rules this document builds on.
