@@ -48,9 +48,10 @@ The two enemies that wore the Soldier sheet became the Archer and its boss, with
 
 Heroes and abilities are **unlocked**, so the plan needs three things: a rule, a place to store it, and a cost.
 
-**Storage — the cheap version.** The save already carries a **keyed level list** (schema v5/v6). An unlock can ride it:
-**level 0 = locked, level 1+ = unlocked.** That means **no schema change** and no migration risk. A separate
-"unlocked heroes" flag would force a schema bump — avoid it unless a level genuinely cannot express the state.
+**Storage — the cheap version.** The save already carries a **keyed level list** (v5; the save is now v8) and a
+per-hero ability id (v7). An unlock can ride the level list: **level 0 = locked, level 1+ = unlocked.** That means
+**no schema change** and no migration risk. A separate "unlocked heroes" flag would force a schema bump — avoid it
+unless a level genuinely cannot express the state.
 
 **Cost — the cheap version.** Ability upgrades can ride the existing **progression tracks** (`TrackService`), which
 already own levels, costs and the purchase path. A new ability is a row in the track spec, not a new system.
@@ -64,8 +65,8 @@ already own levels, costs and the purchase path. A new ability is a row in the t
 | Knight Templar, Lancer | unlocked at later stage milestones |
 | Each hero's ability | bought as a track row, per hero |
 
-**What does not exist yet:** the **combat effect** — what an ability actually does. That is `Roadmap.md` Step 13,
-parked for v1.1. So the honest split is: **art and data now, the effect later.**
+**The combat effect is built** (24 Oct 2026): shield, heal and damage resolve in the action lane, on the strip's
+measured strike frame. See `Combat-Sequencing.md` §7 for built behaviour and `Ability-Progress.md` for status.
 
 ---
 
@@ -80,8 +81,8 @@ parked for v1.1. So the honest split is: **art and data now, the effect later.**
 | VFX | the `*_Effect` strip, or the `(With magic effects)` composited variant |
 | Hurt / Death | `Hurt`, `Death` |
 
-**Frame-rate caveat:** attacks run from 6 to 18 frames and the art set holds **one fps per character**. Ability timing
-will feel uneven until fps is stored per clip, or the variance is accepted.
+**Frame-rate note (resolved):** attacks run from 6 to 18 frames, so the art set stores **fps per clip** and a measured
+strike frame per strip (built 2026-10-13, `Ability-Plan.md` S1). Timing no longer assumes one fps per character.
 
 ---
 

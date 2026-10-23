@@ -30,7 +30,8 @@ panel bug, the `UiSpace.cs` tracking question and the Goblin asset. Details are 
 - **The ABILITIES panel fits its container.** Column content spans y -228..244 and x -511..511; the container
   spans y -262..262 and x -526..526. Nothing spills out, and the panel has no scroll view.
 - **Labels read correctly:** Knight 240/240 Shield Wall 14s, Soldier 110/110 Charge READY, Mage 130/130 Fireball READY.
-- 21 abilities / 76 cards, 0 broken clips, art pipeline PASS, save drift test PASS at v8.
+- **11 ability definitions** (`Content/Specs/abilities.json`, 11 assets in `Data/Abilities`), 15 of 42 characters
+  carry a special strip, 0 broken clips, art pipeline PASS, save drift test PASS at v8.
 - **Enemy moves appear from stage 1.** Before this pass the first ability-carrying enemy was the Skeleton at stage
   11, so a new player could fight for an hour and never see one. Slime now uses Spike, so the move shows up in the
   opening waves. Cost: a Slime can take 1.8x a normal hit instead of 1x - it reads as a hit, not a wall.

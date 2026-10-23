@@ -14,7 +14,7 @@ decisions, data, sim, UI, unlock, order. Everything here is agreed as of 2026-10
 | 1 | Cast model | **Revised 24 Oct 2026: a cast is an ACTION IN THE LANE**, not an instant off-turn burst. Any cast --> the request waits (button shows QUEUED) --> it is announced like a swing --> the effect lands on its own art-measured window. **`Combat-Sequencing.md` is the built behaviour**; this row is kept so the change is visible. |
 | 2 | Combat cost | **Cooldown only.** No mana/energy. Unlock is the "limited" part; casts cost time. |
 | 3 | Targeting | **Automatic.** One tap, no aiming: Shield self, Heal lowest-health ally, damage the front enemy. |
-| 4 | Enemy cadence | **Auto-cast on a per-ability cooldown** from wave start. No random chance. |
+| 4 | Enemy cadence | **Superseded 24 Oct 2026.** Auto-cast stays, but the roll is random: first cast waits 2-6 s, then 35% per 1-3 s roll (`Combat-Sequencing.md` §9). A metronome read as unfair. |
 | 5 | Summon | **Deferred.** It needs mid-fight combatants, which the sim does not do today. Built last, as a temporary ally. |
 | 6 | Auto-trigger | **Deferred to an ascension unlock**, per hero (not a global toggle). |
 | 7 | Enemy v1 set | **Block / Beam / Spike.** Enemy Summon waits for the villain band. |
@@ -123,12 +123,14 @@ ability recolours, and the auto-cast polish once ascension is felt.
 
 - **Per-clip fps**: a 6-frame Block vs an 18-frame Summon cannot share one fps. Stored per clip (decision 8).
 - **Summon**: real sim work (mid-fight combatants). Parked, so it cannot stall S1–S4.
-- **Off-turn resolution**: the sim must let an ability resolve while a swing is in flight. Small, but it is the
-  one structural change to `Encounter`; S3 proves it with one ability before anything else builds on it.
+- **Off-turn resolution** — resolved by making a cast an action in the lane (decision 1, `Architecture.md` B39). The
+  sim needed no change to its action model; the window comes from the strip.
 - **Balance**: cooldowns and effect strengths are guesses until played. Each ability carries its numbers in the
   spec, so they are one edit each, like the ladder's band table.
 
-## 7. Ready to execute
+## 7. State (24 Oct 2026)
 
-S1 (import the strips) is safe, art-only and immediately verifiable — it is the recommended first step.
+S1-S4 are built: per-clip fps + strike frames, `AbilityDef` + `abilities.json`, unlock/assign (save v7), cast in the
+lane with real effects, enemy auto-cast with random timing. **S5** (reserve heroes) and **S6** (hero auto-cast) remain.
+Built behaviour: `Combat-Sequencing.md`. Status: `Ability-Progress.md`.
 
