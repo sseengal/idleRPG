@@ -84,6 +84,13 @@ namespace IdleRPG.EditorTools
         /// <summary>Checks one object and everything under it.</summary>
         private static void CheckObject(Transform root, string area)
         {
+            // The F3 dev overlay is developer UI, not player UI - the same exemption the code-side scan already
+            // makes for DevOverlay.cs. Its labels stay small and use the default font on purpose.
+            if (root.name == "DevOverlayCanvas")
+            {
+                return;
+            }
+
             foreach (TextMeshProUGUI label in root.GetComponentsInChildren<TextMeshProUGUI>(true))
             {
                 CheckLabel(label, area);

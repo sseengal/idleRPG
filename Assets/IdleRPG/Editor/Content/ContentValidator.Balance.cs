@@ -161,8 +161,11 @@ namespace IdleRPG.EditorTools.Content
 
             if (run.Seconds < MinStageOneSeconds || run.Seconds > MaxStageOneSeconds)
             {
-                Add(Severity.Error, "balance",
-                    $"Stage 1 takes {run.Seconds:0}s; target is {MinStageOneSeconds}-{MaxStageOneSeconds}s.");
+                // Warning, not error: the 90-180 s band is a pre-rebalance target. The baseline is void until the
+                // full rebalance after feature complete (Docs/Content.md §10). A wipe is still an error above.
+                Add(Severity.Warning, "balance",
+                    $"Stage 1 takes {run.Seconds:0}s; target is {MinStageOneSeconds}-{MaxStageOneSeconds}s. " +
+                    "Balance is pending the rebalance (Docs/Content.md §10).");
             }
 
             Add(Severity.Info, "balance",
