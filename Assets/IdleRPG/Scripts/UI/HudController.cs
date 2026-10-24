@@ -38,7 +38,7 @@ namespace IdleRPG.UI
 
         public EnemyStackView EnemyStack => enemyStack;
 
-        /// <summary>The battle board (display only; the Party tab owns editing).</summary>
+        /// <summary>The battle board: one view per hero (which can move between pads) and six pads to move to.</summary>
         public FormationBoardView FormationBoard => formationBoard;
 
         private void Awake()

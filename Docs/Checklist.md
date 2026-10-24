@@ -484,6 +484,25 @@ validator       ok [balance] Stage 1: 124s, 11 kills, 272 gold, 2.20 gold/s (ban
       the changed RNG stream - the per-enemy TTK is identical, which is the number that proves the *combat* model did
       not move. Enemy damage was deliberately **not** retuned; difficulty impact is measured in the sweep above
 
+### 10f — Moving a hero is a battle tactic  `[x]`
+- [x] **One view per hero, not per pad.** `FormationBoardView` builds six pads plus a view per party hero in the board
+      layer; a move is the hero's own node sliding to another pad, so a hero can cross columns without being destroyed
+      and rebuilt (the old seat-owned view is why every "where is he" question returned an empty seat)
+- [x] **Tap a hero -> free pads brighten -> tap a free pad -> he slides (0.22 s).** Any other tap (another hero, an
+      occupied pad, the board background) drops the hold and moves nobody. Taps are ignored while a hero is sliding
+- [x] **`Formation.TryMove` stays the only data path**: `Changed` -> `GameManager.OnFormationChanged` -> save dirty +
+      `CombatSimulator.ApplyFormation()`, so the next enemy swing and every row-gated move already obey the new seat
+- [x] **The PARTY tab lost its FORMATION tab** (`BuildFormation`, `RefreshFormationText`, `PartyBoardUI`,
+      `FormationSlotView` deleted). With the bag parked the panel has one tab, so the tab bar is dropped and the
+      roster fills the page
+- [x] **Numbers are born at impact, not at the seat.** `UnitAnchors` holds each unit's `BodyRect` (the icon, the only
+      thing that moves); `ShowNumber` / `ShowWord` read it once. The pool's `heroAnchors` / `SetHeroAnchors` are gone
+- [x] `CharacterLunge.RefreshHome()` parks the icon at its recorded resting offset **before** reading home, so a seat
+      move during a dash cannot store the contact point as home
+- [ ] **verify live**: knight covers an ally -> number and `GUARD` beside the ally; tap Knight, free pads brighten,
+      tap a back pad -> he slides and enemies target the new rank; tap elsewhere cancels; name/hp bar follows him
+
+
 ### 11a — Encounter factory + composition + enemy ranks  `[x]`  (still 1 enemy per wave)
 - [x] **simplified the plan on purpose:** no `EncounterData` SO and no `encounters.json` yet. Composition is the
       wave's existing enemy plus its rotation neighbours (`WaveConfig.GetEnemiesFor`), so it stays deterministic

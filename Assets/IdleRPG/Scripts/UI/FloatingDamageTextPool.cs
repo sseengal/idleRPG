@@ -17,7 +17,6 @@ namespace IdleRPG.UI
         [SerializeField] private RectTransform enemyAnchor;
         [Tooltip("One anchor per enemy slot (1-3); takes priority over enemyAnchor when set by the stack.")]
         [SerializeField] private RectTransform[] enemyAnchors;
-        [SerializeField] private RectTransform[] heroAnchors;
 
         [Header("Pool")]
         [SerializeField] private int prewarmCount = 8;
@@ -73,15 +72,6 @@ namespace IdleRPG.UI
             public float clock;
             public int frame;
             public bool active;
-        }
-
-        /// <summary>
-        /// Replaces the per-hero damage anchors. The formation strip calls this whenever the board changes, so a
-        /// swapped hero keeps its numbers coming out of the right slot.
-        /// </summary>
-        public void SetHeroAnchors(RectTransform[] anchors)
-        {
-            heroAnchors = anchors;
         }
 
         /// <summary>The live pool, so a unit view can post a word at its own position.</summary>
@@ -248,7 +238,10 @@ namespace IdleRPG.UI
             Spawn(0d, AnchorFor(shield.Side, shield.Index), FloatingTextStyle.Guard, "GUARD UP", new Vector2(0f, 96f));
         }
 
-        /// <summary>The anchor that belongs to one unit on either side.</summary>
+        /// <summary>
+        /// The unit's live body rect (registered by its view), falling back to the enemy slot anchors for a spawn that
+        /// has no view yet. Heroes own their numbers and words, so there is no party fallback to go stale.
+        /// </summary>
         private RectTransform AnchorFor(CombatantSide side, int index)
         {
             // Live position first: a unit that dashes (the Knight guarding an ally) must take its numbers with it.
@@ -259,12 +252,7 @@ namespace IdleRPG.UI
                 return live;
             }
 
-            if (side == CombatantSide.Enemy)
-            {
-                return EnemyAnchor(index);
-            }
-
-            return heroAnchors != null && index >= 0 && index < heroAnchors.Length ? heroAnchors[index] : null;
+            return side == CombatantSide.Enemy ? EnemyAnchor(index) : null;
         }
 
         /// <summary>

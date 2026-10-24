@@ -145,8 +145,10 @@ close is always top-left, primary button reachable one-handed (1080x1920 referen
 
 - Damage numbers: pooled + aggregated per target (3 heroes x 3 enemies would be 9 streams), capped per second.
 - Statuses: up to 3 icons per unit with stack count; tap a unit for a bottom-sheet inspect (combat keeps running).
-- Formation swap happens on the **PARTY** tab only: tap hero, then tap any slot (occupied = swap, empty = move, the
-  old slot is vacated). No drag, no auto-arrange, no presets - position is the player's call (Step 10d).
+- Formation swap is a **battle tactic**: tap a hero on the battle board (he is held), free pads brighten, tap a free
+  pad and he slides there. Any other tap drops the hold and nothing moves. The move re-stamps the live fight at once,
+  so the next enemy swing and every row-gated move already obey it. No drag, no auto-arrange, no presets - position is
+  the player's call (Step 10e).
 - Swing timing: the sim announces a swing and lands the damage `SwingDurationSec` later (0.35 s). The unit starts its
   **attack clip on the announcement** and runs in at the same time, so the strike frame lands on the hit instead of
   the hit starting the animation. The clip finishes during the pose, then the unit blinks home.

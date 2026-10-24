@@ -43,6 +43,10 @@ The collection and the hero sheet.
 ### 2.2 Formation  *(MVP)*
 The board - the only place heroes are moved (`PartyBoardUI`), plus the *why*.
 
+> **Superseded (2026-10-24):** moving a hero is now a **battle tactic** (`FormationBoardView`): tap a hero, free pads
+> brighten, tap a free pad and he slides there. The FORMATION tab and `PartyBoardUI` are gone; the rank mechanic is
+> unchanged. This page stays as the record of the original design.
+
 - Front/back ranks already carry real weight (`FormationData.BackRowTargetWeight`): the page should say so in
   plain words ("the back rank is targeted 0.8x as often").
 - Later: **presets** (push / farm / boss), **auto-arrange** by role, per-zone recommended layouts, row-gated
@@ -114,7 +118,7 @@ Rules that keep it scalable:
   buttons).
 - **Roster**: 3 animated portrait cards; big animated selected hero; stats panel with live derived stats
   (gear boosts included); reserved stars line; gear row (3 typed slots, live equipment) and ability row (3 locked).
-- **Formation**: the existing board + rank readout + hint. No presets/auto-arrange.
+- Formation: **superseded** - moving heroes is now a battle tactic (tap hero, tap a free pad). No presets/auto-arrange.
 - 3 heroes, no add/remove/bench.
 - Known cosmetic: all three portraits share the Soldier art until distinct hero art exists.
 

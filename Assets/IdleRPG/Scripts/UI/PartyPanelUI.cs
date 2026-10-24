@@ -1,27 +1,22 @@
-using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using IdleRPG.Combat;
 using IdleRPG.Core;
 
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// The PARTY page: a three-tab workspace.
+    /// The PARTY page: a one-tab workspace (the ROSTER), with the INVENTORY tab built only when the bag is enabled.
     ///
-    /// ROSTER     - PartyRosterView (hero cards, big portrait + stats, equipped gear preview - read only).
-    /// FORMATION  - the board; the only place a hero is moved (PartyBoardUI), plus what the ranks do.
-    /// INVENTORY  - InventoryTabUI (square tile bag, filters + sort, E markers, docked sheet).
+    /// ELI5: this page is the changing room. Moving heroes used to happen here too; it now happens on the battle
+    /// board itself (tap a hero, tap a free pad), so the page keeps only the roster and what the hero wears.
     ///
-    /// The page shell owns only the tabs and the wiring between the three views. Inventory selection /
-    /// discarding lives ONLY on the INVENTORY tab; the Roster just shows what is worn.
+    /// The shell owns the tabs and the wiring. Inventory selection / discarding lives ONLY on the INVENTORY tab.
     /// </summary>
     public sealed class PartyPanelUI : MonoBehaviour
     {
         [Header("Layout")]
         [SerializeField] private RectTransform boardRoot;
-        [SerializeField] private Vector2 boardOffset = new Vector2(14f, -24f);
 
         /// <summary>
         /// The INVENTORY sub-tab (the "bag": dropped loot, equip / salvage) is PARKED for MVP, so the tab is not
@@ -32,20 +27,14 @@ namespace IdleRPG.UI
 
         private readonly Color activeTabColor = new Color(0.24f, 0.34f, 0.55f, 1f);
         private readonly Color inactiveTabColor = new Color(0.11f, 0.13f, 0.19f, 1f);
-        private readonly Color bodyText = new Color(1f, 1f, 1f, 0.92f);
-        private readonly Color dimText = new Color(1f, 1f, 1f, 0.55f);
-        private readonly Color hintColor = new Color(1f, 0.92f, 0.7f);
 
         private GameManager manager;
-        private PartyBoardUI board;
         private InventoryTabUI inventoryTab;
         private PartyRosterView rosterView;
 
         private Image[] tabBackgrounds;
         private GameObject[] tabPanels;
         private int activeTab;
-
-        private TextMeshProUGUI formationLabel;
 
         private bool built;
 
@@ -58,24 +47,16 @@ namespace IdleRPG.UI
             }
             else
             {
-                // Levels and formation can change while the tab is closed, so re-read on open.
+                // Levels and gear can change while the tab is closed, so re-read on open.
                 RefreshAll();
             }
         }
 
         private void OnDestroy()
         {
-            if (manager != null)
+            if (manager != null && manager.Gear != null)
             {
-                if (manager.Formation != null)
-                {
-                    manager.Formation.Changed -= RefreshAll;
-                }
-
-                if (manager.Gear != null)
-                {
-                    manager.Gear.Changed -= RefreshAll;
-                }
+                manager.Gear.Changed -= RefreshAll;
             }
         }
 
@@ -89,7 +70,7 @@ namespace IdleRPG.UI
             HudController hud = HudController.Instance;
             manager = hud != null ? hud.GameManager : null;
 
-            if (manager == null || manager.Formation == null || manager.Party == null)
+            if (manager == null || manager.Party == null)
             {
                 Debug.LogWarning("[PartyPanelUI] GameManager not ready yet; will bind on next open.");
                 return;
@@ -100,16 +81,14 @@ namespace IdleRPG.UI
             BuildTabs(root);
             rosterView = tabPanels[0].AddComponent<PartyRosterView>();
             rosterView.Build(manager);
-            BuildFormation((RectTransform)tabPanels[1].transform);
 
             if (InventoryEnabled)
             {
-                BuildInventory((RectTransform)tabPanels[2].transform);
+                BuildInventory((RectTransform)tabPanels[1].transform);
             }
 
             ShowTab(0);
 
-            manager.Formation.Changed += RefreshAll;
             if (manager.Gear != null)
             {
                 manager.Gear.Changed += RefreshAll;
@@ -127,10 +106,15 @@ namespace IdleRPG.UI
             // Tab set is data, not a fixed array: parking the bag removes one tab and the layout re-spreads
             // itself evenly (no re-authoring, no left-heavy bar).
             string[] names = InventoryEnabled
-                ? new[] { "ROSTER", "FORMATION", "INVENTORY" }
-                : new[] { "ROSTER", "FORMATION" };
+                ? new[] { "ROSTER", "INVENTORY" }
+                : new[] { "ROSTER" };
 
-            tabBackgrounds = new Image[names.Length];
+            // With the bag parked there is one tab, so the bar is dropped and the roster gets the full panel
+            // instead of a lonely button over empty space.
+            bool showBar = names.Length > 1;
+            float panelTop = showBar ? 0.895f : 1f;
+
+            tabBackgrounds = showBar ? new Image[names.Length] : null;
             tabPanels = new GameObject[names.Length];
 
             const float barLeft = 0.03f;
@@ -140,16 +124,19 @@ namespace IdleRPG.UI
 
             for (int i = 0; i < names.Length; i++)
             {
-                float xMin = barLeft + i * (width + barGap);
-                float xMax = xMin + width;
-                int captured = i;
+                if (showBar)
+                {
+                    float xMin = barLeft + i * (width + barGap);
+                    float xMax = xMin + width;
+                    int captured = i;
 
-                Button tab = UiRuntime.CreateButton(root, "Tab" + names[i], names[i],
-                    new Vector2(xMin, 0.905f), new Vector2(xMax, 0.995f), () => ShowTab(captured), inactiveTabColor);
-                tabBackgrounds[i] = tab != null ? tab.GetComponent<Image>() : null;
+                    Button tab = UiRuntime.CreateButton(root, "Tab" + names[i], names[i],
+                        new Vector2(xMin, 0.905f), new Vector2(xMax, 0.995f), () => ShowTab(captured), inactiveTabColor);
+                    tabBackgrounds[i] = tab != null ? tab.GetComponent<Image>() : null;
+                }
 
                 GameObject panel = UiRuntime.CreateNode(names[i] + "Panel", root);
-                UiRuntime.Anchor(panel.GetComponent<RectTransform>(), Vector2.zero, new Vector2(1f, 0.895f));
+                UiRuntime.Anchor(panel.GetComponent<RectTransform>(), Vector2.zero, new Vector2(1f, panelTop));
                 tabPanels[i] = panel;
             }
         }
@@ -194,30 +181,6 @@ namespace IdleRPG.UI
         }
 
         // ------------------------------------------------------------------
-        // Formation (the board owns itself)
-        // ------------------------------------------------------------------
-        private void BuildFormation(RectTransform root)
-        {
-            GameObject boardObject = UiRuntime.CreateNode("PartyBoard", root);
-            RectTransform rect = boardObject.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0f, 1f);
-            rect.anchorMax = new Vector2(0f, 1f);
-            rect.pivot = new Vector2(0f, 1f);
-            rect.anchoredPosition = boardOffset;
-
-            board = boardObject.AddComponent<PartyBoardUI>();
-            board.Build(manager);
-
-            formationLabel = UiRuntime.CreateText(root, "FormationInfo", string.Empty, UiType.Role.Sentence,
-                TextAlignmentOptions.TopLeft, bodyText);
-            UiRuntime.Anchor(formationLabel.rectTransform, new Vector2(0.02f, 0.46f), new Vector2(0.98f, 0.62f), UiSpace.Small, UiSpace.None, UiSpace.Small, UiSpace.None);
-
-            TextMeshProUGUI hint = UiRuntime.CreateText(root, "FormationHint", "tap a hero, then tap a slot", UiType.Role.Sentence,
-                TextAlignmentOptions.TopLeft, hintColor);
-            UiRuntime.Anchor(hint.rectTransform, new Vector2(0.02f, 0.38f), new Vector2(0.98f, 0.46f), UiSpace.Small, UiSpace.None, UiSpace.Small, UiSpace.None);
-        }
-
-        // ------------------------------------------------------------------
         // Inventory (the bag lives on its own component)
         // ------------------------------------------------------------------
         private void BuildInventory(RectTransform root)
@@ -231,7 +194,7 @@ namespace IdleRPG.UI
         // ------------------------------------------------------------------
         private void RefreshAll()
         {
-            if (manager == null || manager.Formation == null || manager.Party == null || tabPanels == null)
+            if (manager == null || manager.Party == null || tabPanels == null)
             {
                 return;
             }
@@ -241,26 +204,10 @@ namespace IdleRPG.UI
             {
                 rosterView.RefreshAll();
             }
-
-            RefreshFormationText();
-        }
-
-        private void RefreshFormationText()
-        {
-            if (formationLabel == null)
-            {
-                return;
-            }
-
-            Formation formation = manager.Formation;
-            StringBuilder builder = new StringBuilder(140);
-            builder.AppendLine("front " + formation.FrontCount + "   back " + formation.BackCount);
-            builder.Append("the back rank is targeted " + formation.Data.BackRowTargetWeight.ToString("0.##") + "x as often as the front");
-            formationLabel.SetText(builder.ToString());
         }
 
         // ------------------------------------------------------------------
-        // Shared row builder (the Roster and the Formation use the same locked-slot look)
+        // Shared row builder (the Roster uses the locked-slot look)
         // ------------------------------------------------------------------
         internal static readonly Color SlotRowTextColor = new Color(1f, 1f, 1f, 0.55f);
         internal static readonly Color SlotRowCellColor = new Color(0.14f, 0.16f, 0.23f, 0.95f);

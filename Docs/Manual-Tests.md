@@ -166,22 +166,14 @@ includes them (enforced at build time from B10).
 
 ---
 
-## 2f. Party page — formation + bag lock (added 2026-10-10)
+## 2f. Party page — formation + bag lock (added 2026-10-10, updated 2026-10-24)
 
-> The formation tab should look like a changing room, not a battle screen, and the bag is parked. Open PARTY and
-> let a fight run behind the menu while you check the first item.
-
-### Formation tab (the bug that was fixed)
-- [ ] **Nothing moves.** With combat running, stand on FORMATION for ~20 s: no slot runs, blinks, flashes, or plays
-      an attack/hurt pose. Heroes stand in idle only.
-- [ ] **No battle chrome**: no health bars, no damage flashes on the formation board.
-- [ ] **Still works**: tap a hero (it highlights), tap a slot, the two swap; the rank readout and hint still read.
-- [ ] Empty slots say `empty`; a hero who moves leaves no ghost behind in the old slot.
+> Moving a hero is now a **battle tactic**. This section keeps the bag-lock checks; the formation checks moved to
+> the battle board (2g below).
 
 ### Party sub-nav + bag lock
-- [ ] PARTY shows **two** tabs: `ROSTER` and `FORMATION` — no INVENTORY button, and the two tabs are evenly spread
-      (not bunched on the left).
-- [ ] No `Inventory` panel or dead button is left behind; the page opens on ROSTER as before.
+- [ ] PARTY shows **one** tab (`ROSTER`) — the tab bar is dropped so the roster fills the page; no INVENTORY button.
+- [ ] No `Formation` panel or dead button is left behind; the page opens on ROSTER as before.
 
 ### Roster gear row
 - [ ] The gear hint reads **"gear: coming soon"** (it used to say "tap a slot to manage", which was never true).
@@ -196,6 +188,32 @@ includes them (enforced at build time from B10).
       still marks crits, and the lunge/turn-beat behaviour on the BATTLE page is untouched.
 
 ---
+
+## 2h. Moving a hero in battle + where the numbers land (added 2026-10-24)
+
+> Moving a hero is now a **battle tactic**: tap a hero, free pads brighten, tap a free pad. Numbers and words are born
+> at the point of impact, not at the pad the hero usually stands on.
+
+### Move a hero
+- [ ] Tap the Knight's card (the hero himself, not the pad edge): nothing moves yet, and **three free pads brighten**
+      (two in the back column, one more in the front column).
+- [ ] Tap a brightened back pad: he **slides** there in about a fifth of a second, name and health bar with him.
+- [ ] Tap him, then tap **anywhere else** (another hero, an occupied pad, empty board): the brightening disappears and
+      nobody moves.
+- [ ] After a move the console has no errors, and the next enemy swings follow the new row (heroes in the back rank
+      are hit less often - watch the log for `back` targets).
+- [ ] Move him back to the front pad: same two taps, same slide.
+- [ ] Relaunch Play: the layout you left is still there.
+
+### Numbers land on the hero, not on his pad
+- [ ] With Guard up, let the Knight cover a hit on another hero: the number **and** the word `GUARD` appear next to
+      the hero he covered, where he is standing at that moment - not over his empty pad.
+- [ ] The number does **not** chase him when he dashes back home; it stays where it appeared and fades out.
+- [ ] Every hero (top, middle, bottom) shows his own numbers when hit.
+- [ ] An enemy that runs at the party shows its number where it was hit.
+
+---
+
 
 ## 2g. Upgrades page — mobile layout pass, Phase 1 (added 2026-10-10)
 

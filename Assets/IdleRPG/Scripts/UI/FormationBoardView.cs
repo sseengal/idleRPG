@@ -8,11 +8,16 @@ using IdleRPG.Data;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// The party board as a **display**: front and back rank as two vertical columns, one view per slot.
+    /// The party board: six pads (two columns = front and back rank) plus **one view per hero**.
     ///
-    /// ELI5: the scoreboard version of the formation - it shows where everyone stands and nothing more. No
-    /// buttons, no swapping: moving heroes only happens on the Party screen, so a stray tap during a fight can
-    /// never reshuffle your team. Built in code from FormationData, so the board shape is data, not scene surgery.
+    /// ELI5: pads are parking spaces; heroes are cars. A car can drive to another space without becoming a different
+    /// car. That is why the view belongs to the hero and only its position belongs to a pad - the earlier version put
+    /// a hero's view inside a pad, so a hero who moved had to vanish here and reappear there, and every effect that
+    /// asked "where is he" got the empty space instead of the hero.
+    ///
+    /// Moving is a two-tap tactic on this board (tap a hero, tap a free pad). Free pads brighten while a hero is
+    /// held; any other tap drops the selection. The data change goes through <see cref="Formation.TryMove"/>, whose
+    /// Changed event re-stamps the live fight, marks the save dirty and repaints this board.
     /// </summary>
     public sealed class FormationBoardView : MonoBehaviour
     {
@@ -24,21 +29,25 @@ namespace IdleRPG.UI
         [Header("Art (optional)")]
         [SerializeField] private Sprite slotSprite;
         [SerializeField] private Color slotColor = new Color(1f, 1f, 1f, 0.16f);
+        [Tooltip("A free pad while a hero is held: this is the cue that says \"tap a free pad\".")]
+        [SerializeField] private Color emptyPadColor = new Color(1f, 0.93f, 0.72f, 0.42f);
 
         private GameManager manager;
-        private FloatingDamageTextPool damagePool;
         private Formation formation;
 
-        private Image[] slotBackgrounds;
-        private HeroUnitView[] slotViews;
-        private RectTransform[] slotRects;
-        private RectTransform[] heroSlotRects;
+        private Image[] padImages;
+        private RectTransform[] padRects;
+        private HeroUnitView[] heroViews;
+        private RectTransform[] heroRects;
+        private int[] heroPad = new int[0];
+        private int heroCount;
+
+        private int selectedHero = -1;
 
         /// <summary>Builds the board and keeps it in sync with the formation and the fight.</summary>
         public void Build(GameManager gameManager, FloatingDamageTextPool pool)
         {
             manager = gameManager;
-            damagePool = pool;
             formation = manager != null ? manager.Formation : null;
 
             if (formation == null)
@@ -47,8 +56,9 @@ namespace IdleRPG.UI
                 return;
             }
 
-            BuildSlots();
-            Refresh();
+            BuildPads();
+            RebuildHeroes();
+            Refresh(instant: true);
 
             formation.Changed -= OnFormationChanged;
             formation.Changed += OnFormationChanged;
@@ -64,59 +74,115 @@ namespace IdleRPG.UI
 
         private void OnFormationChanged()
         {
-            Refresh();
+            Refresh(instant: false);
         }
 
-        private void BuildSlots()
+        // ------------------------------------------------------------------
+        // Build
+        // ------------------------------------------------------------------
+        private void BuildPads()
         {
             FormationData data = formation.Data;
             int slots = formation.SlotCount;
 
-            slotBackgrounds = new Image[slots];
-            slotViews = new HeroUnitView[slots];
-            slotRects = new RectTransform[slots];
+            ((RectTransform)transform).sizeDelta = FormationBoardLayout.SizeOf(data, slotSize, columnGap, rowGap);
+
+            // A catcher behind the pads: a tap that is not a hero and not a pad only drops the selection.
+            GameObject catcher = UiRuntime.CreateNode("BoardBackground", transform);
+            Image catcherImage = UiRuntime.CreatePanel(catcher.transform, null, new Color(0f, 0f, 0f, 0f), true);
+            UiRuntime.Stretch(catcherImage.rectTransform);
+            Button catcherButton = catcher.AddComponent<Button>();
+            catcherButton.targetGraphic = catcherImage;
+            catcherButton.transition = Selectable.Transition.None;
+            catcherButton.onClick.AddListener(OnBackgroundTapped);
+
+            padImages = new Image[slots];
+            padRects = new RectTransform[slots];
 
             for (int slot = 0; slot < slots; slot++)
             {
-                BuildSlot(data, slot);
-            }
+                GameObject pad = UiRuntime.CreateNode("Pad" + slot, transform);
+                RectTransform rect = pad.GetComponent<RectTransform>();
+                rect.anchorMin = new Vector2(0f, 1f);
+                rect.anchorMax = new Vector2(0f, 1f);
+                rect.pivot = new Vector2(0f, 1f);
+                rect.sizeDelta = slotSize;
+                rect.anchoredPosition = FormationBoardLayout.PositionOfSlot(data, slot, slotSize, columnGap, rowGap);
 
-            ((RectTransform)transform).sizeDelta = FormationBoardLayout.SizeOf(data, slotSize, columnGap, rowGap);
+                Image background = UiRuntime.CreatePanel(pad.transform, slotSprite, slotColor, true);
+                UiRuntime.Stretch(background.rectTransform);
+
+                int captured = slot;
+                Button button = pad.AddComponent<Button>();
+                button.targetGraphic = background;
+                button.transition = Selectable.Transition.None;
+                button.onClick.AddListener(() => OnPadTapped(captured));
+
+                padImages[slot] = background;
+                padRects[slot] = rect;
+            }
         }
 
-        private void BuildSlot(FormationData data, int slotIndex)
+        /// <summary>Builds one view per party hero. Views are reused across refreshes - a hero never loses his view.</summary>
+        private void RebuildHeroes()
         {
-            GameObject slot = UiRuntime.CreateNode("Slot" + slotIndex, transform);
-            RectTransform rect = slot.GetComponent<RectTransform>();
+            int count = manager != null && manager.Party != null ? manager.Party.Heroes.Count : 0;
+
+            heroViews = new HeroUnitView[Mathf.Max(1, count)];
+            heroRects = new RectTransform[Mathf.Max(1, count)];
+            heroPad = new int[Mathf.Max(1, count)];
+
+            for (int i = 0; i < heroPad.Length; i++)
+            {
+                heroPad[i] = -1;
+            }
+
+            heroCount = count;
+        }
+
+        private HeroUnitView EnsureHeroView(int heroIndex)
+        {
+            if (heroViews[heroIndex] != null)
+            {
+                return heroViews[heroIndex];
+            }
+
+            GameObject node = UiRuntime.CreateNode("Hero" + heroIndex, transform);
+            RectTransform rect = node.GetComponent<RectTransform>();
             rect.anchorMin = new Vector2(0f, 1f);
             rect.anchorMax = new Vector2(0f, 1f);
             rect.pivot = new Vector2(0f, 1f);
             rect.sizeDelta = slotSize;
-            rect.anchoredPosition = FormationBoardLayout.PositionOfSlot(data, slotIndex, slotSize, columnGap, rowGap);
 
-            Image background = UiRuntime.CreatePanel(slot.transform, slotSprite, slotColor);
-            UiRuntime.Stretch(background.rectTransform);
+            // Invisible hit area: tapping a hero holds him, tapping anything else drops the hold.
+            Image hitArea = UiRuntime.CreatePanel(node.transform, null, new Color(0f, 0f, 0f, 0f), true);
+            UiRuntime.Stretch(hitArea.rectTransform);
 
-            Image icon = UiRuntime.CreateIcon("Icon", slot.transform);
+            int captured = heroIndex;
+            Button button = node.AddComponent<Button>();
+            button.targetGraphic = hitArea;
+            button.transition = Selectable.Transition.None;
+            button.onClick.AddListener(() => OnHeroTapped(captured));
+
+            Image icon = UiRuntime.CreateIcon("Icon", node.transform);
             // TinyRPG pass: the pack tiles are ~20% body so keep icons big (0.8x slot) or the characters read tiny.
             UiRuntime.CenterOn(icon.rectTransform, new Vector2(0.5f, 0.60f), new Vector2(slotSize.x * 0.80f, slotSize.x * 0.80f));
 
-            TextMeshProUGUI nameLabel = UiRuntime.CreateText(slot.transform, "Name", string.Empty, UiType.Role.Small,
+            TextMeshProUGUI nameLabel = UiRuntime.CreateText(node.transform, "Name", string.Empty, UiType.Role.Small,
                 TextAlignmentOptions.Center, UiTheme.Text);
-            // Hero names vary in length and the slot is a fixed width, so the name shrinks to fit instead of spilling.
+            // Hero names vary in length and the pad is a fixed width, so the name shrinks to fit instead of spilling.
             UiType.ApplyAuto(nameLabel, UiType.Role.Small);
             UiRuntime.Anchor(nameLabel.rectTransform, new Vector2(0f, 0.14f), new Vector2(1f, 0.32f));
 
-            HpBarView hpBar = BuildHpBar(slot.transform);
+            HpBarView hpBar = BuildHpBar(node.transform);
+            CanvasGroup group = node.AddComponent<CanvasGroup>();
 
-            CanvasGroup group = slot.AddComponent<CanvasGroup>();
-            HeroUnitView view = slot.AddComponent<HeroUnitView>();
-            view.ConfigureRuntime(-1, icon, hpBar, nameLabel, group);
-            view.ClearVisual();
+            HeroUnitView view = node.AddComponent<HeroUnitView>();
+            view.ConfigureRuntime(heroIndex, icon, hpBar, nameLabel, group);
 
-            slotBackgrounds[slotIndex] = background;
-            slotViews[slotIndex] = view;
-            slotRects[slotIndex] = rect;
+            heroViews[heroIndex] = view;
+            heroRects[heroIndex] = rect;
+            return view;
         }
 
         private HpBarView BuildHpBar(Transform parent)
@@ -139,64 +205,168 @@ namespace IdleRPG.UI
             return view;
         }
 
-        /// <summary>Slot rect of one hero (formation slot the hero currently stands in), for run-to-target effects.</summary>
-        public RectTransform GetHeroSlotRect(int heroIndex)
-        {
-            if (heroSlotRects == null || heroIndex < 0 || heroIndex >= heroSlotRects.Length)
-            {
-                return null;
-            }
-
-            return heroSlotRects[heroIndex];
-        }
-
+        // ------------------------------------------------------------------
+        // Repaint
+        // ------------------------------------------------------------------
         /// <summary>
-        /// Repaints every slot from the board. Empty slots are explicitly **blanked** (icon + name cleared), which
-        /// is the bug that made a hero appear in two slots after a move.
+        /// Places every hero on his pad and refreshes his data. <paramref name="instant"/> is true for the first
+        /// layout; after that a hero the player moved eases across, so the eye can follow who went where.
         /// </summary>
-        private void Refresh()
+        private void Refresh(bool instant)
         {
-            if (formation == null || slotViews == null)
+            if (formation == null || heroViews == null)
             {
                 return;
             }
 
             PartyConfig party = manager != null ? manager.Party : null;
-            int heroCount = party != null ? party.Heroes.Count : 0;
-            RectTransform[] anchors = new RectTransform[Mathf.Max(1, heroCount)];
+            int count = party != null ? party.Heroes.Count : 0;
 
-            // hero index -> the slot rect he stands in (for run-to-target effects, e.g. an enemy lunging a hero).
-            heroSlotRects = new RectTransform[Mathf.Max(1, heroCount)];
-
-            for (int slot = 0; slot < slotViews.Length; slot++)
+            if (count > heroViews.Length)
             {
-                HeroUnitView view = slotViews[slot];
+                RebuildHeroes();
+            }
+
+            heroCount = count;
+
+            for (int hero = 0; hero < heroCount; hero++)
+            {
+                HeroData data = party.GetHero(hero);
+                HeroUnitView view = EnsureHeroView(hero);
 
                 if (view == null)
                 {
                     continue;
                 }
 
-                int heroIndex = formation.HeroAt(slot);
-                HeroData hero = heroIndex >= 0 && party != null ? party.GetHero(heroIndex) : null;
-
-                if (hero == null)
+                if (data == null)
                 {
                     view.ClearVisual();
                     continue;
                 }
 
                 view.enabled = true;
-                view.Configure(heroIndex);
-                view.Apply(hero);
-                view.SetHealthVisible(true);   // a filled seat shows its health bar (it is hidden while empty)
-                view.RefreshStats();           // and it shows the LIVE hp immediately - no zero flash after a move
-                anchors[Mathf.Clamp(heroIndex, 0, anchors.Length - 1)] = slotRects[slot];
-                heroSlotRects[Mathf.Clamp(heroIndex, 0, heroSlotRects.Length - 1)] = slotRects[slot];
+                view.Configure(hero);
+
+                // Place the hero FIRST: creating his dash (inside Apply) captures its home from where he stands now,
+                // so a view that is still at the board origin would send him back to the corner after every swing.
+                int slot = formation.SlotOfHero(hero);
+
+                if (slot >= 0 && slot < padRects.Length)
+                {
+                    bool firstPlacement = heroPad[hero] < 0 || heroPad[hero] == slot;
+                    view.SlideTo(padRects[slot], instant || firstPlacement);
+                    heroPad[hero] = slot;
+                }
+
+                view.Apply(data);
+                view.SetHealthVisible(true);   // a living hero shows his bar
+                view.RefreshStats();           // and the LIVE hp immediately - no zero flash after a move
             }
 
-            // Damage numbers follow the hero, so the pool gets fresh anchors after every board change.
-            damagePool?.SetHeroAnchors(anchors);
+            UpdatePadVisuals();
+        }
+
+        /// <summary>Free pads brighten only while a hero is held. That is the whole instruction for the tactic.</summary>
+        private void UpdatePadVisuals()
+        {
+            if (padImages == null || formation == null)
+            {
+                return;
+            }
+
+            for (int slot = 0; slot < padImages.Length; slot++)
+            {
+                if (padImages[slot] == null)
+                {
+                    continue;
+                }
+
+                bool isFreeDestination = selectedHero >= 0 && formation.HeroAt(slot) < 0;
+                padImages[slot].color = isFreeDestination ? emptyPadColor : slotColor;
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Taps: tap a hero, tap a free pad. Anything else drops the hold.
+        // ------------------------------------------------------------------
+        private void OnHeroTapped(int heroIndex)
+        {
+            if (AnyHeroSliding())
+            {
+                return;
+            }
+
+            if (selectedHero >= 0)
+            {
+                ClearSelection();
+                return;
+            }
+
+            selectedHero = heroIndex;
+            UpdatePadVisuals();
+        }
+
+        private void OnPadTapped(int slotIndex)
+        {
+            if (AnyHeroSliding() || selectedHero < 0)
+            {
+                ClearSelection();
+                return;
+            }
+
+            // A free pad is the only destination: moving onto an occupied pad is not offered.
+            if (formation.HeroAt(slotIndex) >= 0)
+            {
+                ClearSelection();
+                return;
+            }
+
+            int hero = selectedHero;
+            ClearSelection();
+
+            // TryMove fires Formation.Changed, which re-stamps the fight, saves the layout and calls Refresh().
+            formation.TryMove(hero, slotIndex);
+        }
+
+        private void OnBackgroundTapped()
+        {
+            ClearSelection();
+        }
+
+        private void ClearSelection()
+        {
+            selectedHero = -1;
+            UpdatePadVisuals();
+        }
+
+        private bool AnyHeroSliding()
+        {
+            if (heroViews == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < heroViews.Length; i++)
+            {
+                if (heroViews[i] != null && heroViews[i].IsSliding)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>The view of one hero - what a dash should aim at (an enemy lunging at the back rank).</summary>
+        public RectTransform GetHeroSlotRect(int heroIndex)
+        {
+            if (heroRects == null || heroIndex < 0 || heroIndex >= heroRects.Length)
+            {
+                return null;
+            }
+
+            return heroRects[heroIndex];
         }
     }
 }

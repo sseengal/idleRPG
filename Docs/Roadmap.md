@@ -137,6 +137,9 @@ interesting"), it does not enter the base - and it is not parked either unless t
   - **10d `DONE`** - formation rework: rows change targeting *frequency* (not damage), the front-rank-empty stall
     bug and the duplicated-hero bug are fixed, the board is a vertical two-column layout, battle is display-only,
     editing is Party-only, all slots usable, presets deleted. Party tab structured for stats/gear rows.
+  - **10e `DONE`** - position editing moved INTO the battle board, and the board now holds one view per hero instead
+    of one per pad. Tap a hero, free pads brighten, tap a free pad, he slides there; any other tap cancels. The PARTY
+    tab lost its FORMATION tab. Damage numbers are born at the body's position at impact and never follow it.
 - **Blocked by:** Steps 7, 8. **Risk:** schema v3 migration - test against the existing v2 save.
 
 ### Step 10e — Even spread inside a rank  `DONE`

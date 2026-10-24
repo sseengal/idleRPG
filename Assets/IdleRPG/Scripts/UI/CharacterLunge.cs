@@ -62,6 +62,12 @@ namespace IdleRPG.UI
         private Vector3 from;
         private float clock;
 
+        /// <summary>The icon's resting local offset, captured once: home is derived from it, never from where the
+        /// unit happens to be. Without this, re-capturing home mid-dash stored the CONTACT point as home and the unit
+        /// walked back to the enemy instead of to its seat.</summary>
+        private Vector2 restAnchored;
+        private bool restCaptured;
+
         /// <summary>Set when the attack clip finishes during the pose; Holding waits for this before blinking.</summary>
         private bool blinkQueued;
 
@@ -73,19 +79,32 @@ namespace IdleRPG.UI
 
             if (rect != null)
             {
+                restAnchored = rect.anchoredPosition;
+                restCaptured = true;
                 home = rect.position;
             }
         }
 
         public bool IsBusy => state != State.Idle;
 
-        /// <summary>Re-captures the home anchor. Call after a slot is (re)laid out so the unit returns to the right spot.</summary>
+        /// <summary>
+        /// Re-captures the home anchor after the seat under this icon moved. Parks the icon at its resting offset
+        /// FIRST, then reads the world point - so calling this while the icon is out on a dash cannot mistake the
+        /// contact point for home.
+        /// </summary>
         public void RefreshHome()
         {
-            if (rect != null)
+            if (rect == null)
             {
-                home = rect.position;
+                return;
             }
+
+            if (restCaptured)
+            {
+                rect.anchoredPosition = restAnchored;
+            }
+
+            home = rect.position;
         }
 
         /// <summary>

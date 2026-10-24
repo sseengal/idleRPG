@@ -194,6 +194,12 @@ Effect sheets live in `Assets/IdleRPG/Resources/Vfx/` and are cut by `Tools > Id
 stands. Shatter uses it (a thrown spell), and so does every party-targeted move (Guard), which never runs at nothing.
 The flag rides `SwingStartedEvent.StayPlanted` from the sim to the unit view, so the sim and the picture agree.
 
+**Where a number is born.** A number or word is placed ONCE, at the body's position at the instant the event fires
+(`UnitAnchors` holds each unit's live body rect), and it never follows anything afterwards. This matters for a unit
+that dashes: the Knight guarding an ally is standing beside that ally when the hit lands, so the number and `GUARD`
+appear there, not on his empty pad. The text is parented to the unit's own board node, which does not move during a
+fight - only a player-ordered seat move moves it, and that is deliberate.
+
 **Which strip is the ordinary attack.** `CharacterArtSet.BasicAttackSlot` names it - `Attack01` by default, the Mage
 uses `Attack02` (the Shatter cast pose, plain sheet, no frost burst). `SwingSeconds` is measured from that same strip,
 so the blow still lands on the strip's own contact frame.

@@ -389,6 +389,7 @@ ui             { lastScreenIndex, settings{...} }
 | B40 | **Gear adds a fraction of the hero's base stat** (capped). Combat never knows items exist; it reads the final numbers only (save v6) | 4 Oct 2026 | Locked |
 | B41 | **No picture measures time or reads fight state.** Every window comes from `CharacterArtSet.SecondsFor` / `StrikeFrameFor`; the sim owns the clock | 24 Oct 2026 | Locked |
 | B42 | **One sheet, one role.** The Archer became an enemy and the Soldier a hero, so no hero looks like a wave enemy; `hero_archer` save keys are renamed on load (save v8) | 24 Oct 2026 | Locked |
+| B43 | **A unit has a body; a pad has an owner.** A hero's view belongs to the hero and moves to a pad, never the other way round. Everything that must appear *on* a unit reads `BodyRect` once, at impact; nothing follows a dashing unit afterwards | 24 Oct 2026 | Locked |
 
 ### 6.4 Removals / avoid
 

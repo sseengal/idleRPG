@@ -62,11 +62,17 @@ namespace IdleRPG.UI
         /// <summary>Which enemy of the wave this view shows (0-based).</summary>
         public int EnemyIndex => enemyIndex;
 
+        /// <summary>
+        /// Where this enemy is DRAWN right now - the sprite, which is what the lunge moves. Numbers and bursts are
+        /// born at this point and never follow it afterwards.
+        /// </summary>
+        private RectTransform BodyRect => spriteImage != null ? spriteImage.rectTransform : transform as RectTransform;
+
         /// <summary>Points this view at slot <paramref name="index"/> of the wave.</summary>
         public void Configure(int index)
         {
             enemyIndex = index;
-            UnitAnchors.Register(CombatantSide.Enemy, index, transform as RectTransform);
+            UnitAnchors.Register(CombatantSide.Enemy, index, BodyRect);
         }
 
         /// <summary>Runtime wiring (used by the code-built battle page).</summary>
@@ -85,7 +91,7 @@ namespace IdleRPG.UI
 
         private void OnEnable()
         {
-            UnitAnchors.Register(CombatantSide.Enemy, enemyIndex, transform as RectTransform);
+            UnitAnchors.Register(CombatantSide.Enemy, enemyIndex, BodyRect);
             GameEvents.EnemySpawned += OnEnemySpawned;
             GameEvents.EnemyDamaged += OnEnemyDamaged;
             GameEvents.EnemyKilled += OnEnemyKilled;
@@ -97,7 +103,7 @@ namespace IdleRPG.UI
 
         private void OnDisable()
         {
-            UnitAnchors.Unregister(CombatantSide.Enemy, enemyIndex, transform as RectTransform);
+            UnitAnchors.Unregister(CombatantSide.Enemy, enemyIndex, BodyRect);
             GameEvents.EnemySpawned -= OnEnemySpawned;
             GameEvents.EnemyDamaged -= OnEnemyDamaged;
             GameEvents.EnemyKilled -= OnEnemyKilled;

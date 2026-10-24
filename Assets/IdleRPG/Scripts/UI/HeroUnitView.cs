@@ -8,8 +8,11 @@ using IdleRPG.Sim;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// View for one party lane: icon, name label, HP bar, hit flash and death dim.
+    /// View for one HERO (not one seat): icon, name label, HP bar, hit flash, death dim, dash and board move.
     /// Subscribes to <see cref="GameEvents"/>; needs no Update() polling.
+    ///
+    /// ELI5: a hero is a thing that stands somewhere, not a hole in the ground. The board moves this whole view to a
+    /// pad; the icon inside it dashes at enemies. Anything that needs "where is he" asks <see cref="BodyRect"/>.
     /// </summary>
     public sealed class HeroUnitView : MonoBehaviour
     {
@@ -30,6 +33,14 @@ namespace IdleRPG.UI
         [SerializeField] private Color shieldFlashColor = new Color(0.55f, 0.8f, 1f, 1f);
         [SerializeField] private float shieldFlashDurationSec = 0.2f;
 
+        [Header("Board move")]
+        [Tooltip("Seconds a hero takes to slide to a new pad when the player moves him. 0 = snap.")]
+        [SerializeField] private float slideSeconds = 0.22f;
+
+        private Vector2 slideFrom;
+        private Vector2 slideTo;
+        private float slideT = -1f;
+
         private Color baseColor = Color.white;
         private readonly UnitHitJuice hitJuice = new UnitHitJuice();
 
@@ -39,24 +50,64 @@ namespace IdleRPG.UI
 
         public int HeroIndex => heroIndex;
 
+        /// <summary>
+        /// Where this hero is DRAWN right now - the icon, which is the only thing that moves. Numbers, words and any
+        /// future effect read this, and read it once: a number is born at the impact point and never follows.
+        /// </summary>
+        public RectTransform BodyRect => iconImage != null ? iconImage.rectTransform : transform as RectTransform;
+
+        /// <summary>True while the view is sliding to a new pad (taps are ignored until it lands).</summary>
+        public bool IsSliding => slideT >= 0f;
+
+        /// <summary>
+        /// Moves the whole view to a board pad. Instant on the first layout; a short ease when the player moves him,
+        /// so the eye can follow which hero went where. The lunge re-captures its home when the slide lands.
+        /// </summary>
+        public void SlideTo(RectTransform pad, bool instant)
+        {
+            RectTransform self = transform as RectTransform;
+
+            if (self == null || pad == null)
+            {
+                return;
+            }
+
+            if (instant || slideSeconds <= 0f)
+            {
+                self.anchoredPosition = pad.anchoredPosition;
+                slideT = -1f;
+
+                if (lunge != null)
+                {
+                    lunge.RefreshHome();
+                }
+
+                return;
+            }
+
+            slideFrom = self.anchoredPosition;
+            slideTo = pad.anchoredPosition;
+            slideT = 0f;
+        }
+
         public void Configure(int index)
         {
             heroIndex = index;
-            UnitAnchors.Register(CombatantSide.Party, index, transform as RectTransform);
+            UnitAnchors.Register(CombatantSide.Party, index, BodyRect);
         }
 
         /// <summary>
-        /// Wires a view that was created in code (the formation strip builds a view per slot at runtime, so it
+        /// Wires a view that was created in code (the battle board builds one view per hero at runtime, so it
         /// cannot use the inspector). Kept separate from <see cref="Configure(int)"/> so the scene path is unchanged.
         /// </summary>
         public void ConfigureRuntime(int index, Image icon, HpBarView hp, TextMeshProUGUI label, CanvasGroup group)
         {
             heroIndex = index;
-            UnitAnchors.Register(CombatantSide.Party, index, transform as RectTransform);
             iconImage = icon;
             hpBar = hp;
             nameLabel = label;
             canvasGroup = group;
+            UnitAnchors.Register(CombatantSide.Party, index, BodyRect);
         }
 
         /// <summary>Shows or hides the health bar (the Party board has no health to show).</summary>
@@ -78,6 +129,7 @@ namespace IdleRPG.UI
             appliedData = null;
             hitJuice.Clear();
             transform.localScale = Vector3.one;
+            slideT = -1f;
             baseColor = new Color(1f, 1f, 1f, 0f);   // empty seats rest invisible (Update() honours this)
 
             if (lunge != null)
@@ -162,7 +214,14 @@ namespace IdleRPG.UI
 
         private void OnEnable()
         {
-            UnitAnchors.Register(CombatantSide.Party, heroIndex, transform as RectTransform);
+            // Only register once the icon is wired: a code-built view is enabled by AddComponent BEFORE
+            // ConfigureRuntime hands it its icon, and registering then would point this hero's numbers at the
+            // view's own box instead of the character.
+            if (iconImage != null)
+            {
+                UnitAnchors.Register(CombatantSide.Party, heroIndex, BodyRect);
+            }
+
             GameEvents.HeroDamaged += OnHeroDamaged;
             GameEvents.HeroDied += OnHeroDied;
             GameEvents.EnemyDamaged += OnAllyAttackLanded;
@@ -177,7 +236,7 @@ namespace IdleRPG.UI
 
         private void OnDisable()
         {
-            UnitAnchors.Unregister(CombatantSide.Party, heroIndex, transform as RectTransform);
+            UnitAnchors.Unregister(CombatantSide.Party, heroIndex, BodyRect);
             GameEvents.HeroDamaged -= OnHeroDamaged;
             GameEvents.HeroDied -= OnHeroDied;
             GameEvents.EnemyDamaged -= OnAllyAttackLanded;
@@ -365,13 +424,13 @@ namespace IdleRPG.UI
                     ? FloatingTextStyle.Critical
                     : pool.IsAbilityHit(attackerEnemyIndex) ? FloatingTextStyle.AbilityHit : FloatingTextStyle.Incoming;
 
-                pool.ShowNumber(transform as RectTransform, damage, style);
+                pool.ShowNumber(BodyRect, damage, style);
             }
 
-            // A guarded hit: say GUARD at this unit's own transform, which is where the knight actually stands right now.
+            // A guarded hit: say GUARD at this unit's body, which is where the knight actually stands right now.
             if (isGuarded)
             {
-                FloatingDamageTextPool.Instance?.ShowWord(transform as RectTransform, "GUARD", FloatingTextStyle.Guard);
+                FloatingDamageTextPool.Instance?.ShowWord(BodyRect, "GUARD", FloatingTextStyle.Guard);
             }
 
             // A covered hit: land the dash on the damage beat, then blink home.
@@ -539,6 +598,8 @@ namespace IdleRPG.UI
 
         private void Update()
         {
+            TickSlide();
+
             if (iconImage == null)
             {
                 return;
@@ -557,6 +618,40 @@ namespace IdleRPG.UI
             }
 
             hitJuice.TickPunch(Time.deltaTime, transform);
+        }
+
+        /// <summary>Eases the view toward the pad it was sent to; the lunge re-captures home on landing.</summary>
+        private void TickSlide()
+        {
+            if (slideT < 0f)
+            {
+                return;
+            }
+
+            RectTransform self = transform as RectTransform;
+
+            if (self == null)
+            {
+                slideT = -1f;
+                return;
+            }
+
+            slideT += Time.deltaTime / Mathf.Max(0.01f, slideSeconds);
+            float t = Mathf.Clamp01(slideT);
+            float eased = t * t * (3f - 2f * t);
+            self.anchoredPosition = Vector2.Lerp(slideFrom, slideTo, eased);
+
+            if (t < 1f)
+            {
+                return;
+            }
+
+            slideT = -1f;
+
+            if (lunge != null)
+            {
+                lunge.RefreshHome();
+            }
         }
     }
 }
