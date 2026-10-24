@@ -478,23 +478,33 @@ namespace IdleRPG.UI
             rt.anchorMax = anchor.anchorMax;
             rt.pivot = anchor.pivot;
 
-            // Position from the anchor's WORLD position, converted into the parent's local space. Reading
-            // anchoredPosition would ignore a unit that has been moved by a dash: the lunge changes the transform's
-            // position, not its stored anchoredPosition, so the text stayed at the old seat.
-            Vector2 anchorLocal = anchor.parent is RectTransform space
-                ? (Vector2)space.InverseTransformPoint(anchor.position)
+            // Position from the anchor's WORLD position, converted into the parent's local space, then into the
+            // anchoredPosition the text rect needs. Reading anchor.anchoredPosition ignored a unit moved by a dash
+            // (the lunge changes position, not the stored anchoredPosition); converting world -> local alone was not
+            // enough either, because the text inherits the anchor's own anchors and pivot.
+            Rect spaceRect = anchor.parent is RectTransform space ? space.rect : new Rect(0f, 0f, 0f, 0f);
+            Vector2 local = anchor.parent is RectTransform localSpace
+                ? (Vector2)localSpace.InverseTransformPoint(anchor.position)
                 : anchor.anchoredPosition;
 
-            Vector2 position = anchorLocal + new Vector2(
+            Vector2 offset = new Vector2(
                 side * (40f + Random.Range(0f, Mathf.Abs(anchorJitter) * 0.5f)),
                 Random.Range(18f, 42f));
 
-            if (anchor.parent is RectTransform parentRect)
+            local += offset;
+
+            if (spaceRect.width > 0f && spaceRect.height > 0f)
             {
-                Rect bounds = parentRect.rect;
-                position.x = Mathf.Clamp(position.x, -(bounds.width * 0.5f) + 18f, (bounds.width * 0.5f) - 18f);
-                position.y = Mathf.Clamp(position.y, -(bounds.height * 0.5f) + 14f, (bounds.height * 0.5f) - 10f);
+                local.x = Mathf.Clamp(local.x, spaceRect.xMin + 18f, spaceRect.xMax - 18f);
+                local.y = Mathf.Clamp(local.y, spaceRect.yMin + 14f, spaceRect.yMax - 10f);
             }
+
+            // uGUI: localPosition = anchorReference + anchoredPosition + (pivot - 0.5) * size.
+            Vector2 anchorReference = new Vector2(
+                spaceRect.xMin + spaceRect.width * rt.anchorMin.x,
+                spaceRect.yMin + spaceRect.height * rt.anchorMin.y);
+            Vector2 pivotOffset = Vector2.Scale(rt.sizeDelta, rt.pivot - new Vector2(0.5f, 0.5f));
+            Vector2 position = local - anchorReference - pivotOffset;
 
             driftSeed += 1.37f;
 
