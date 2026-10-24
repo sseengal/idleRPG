@@ -227,6 +227,26 @@ namespace IdleRPG.Debugging
                 LogStatus();
             }
 
+            // N: play the throwaway test cutscene (bars, one enemy walks in, a title). Proves the projector works.
+            if (keyboard.nKey.wasPressedThisFrame)
+            {
+                IdleRPG.UI.CutsceneRunner runner = IdleRPG.UI.CutsceneRunner.Instance;
+
+                if (runner == null)
+                {
+                    Log("No cutscene runner on the HUD; the test shot cannot play (N).");
+                }
+                else if (runner.IsPlaying)
+                {
+                    Log("A cutscene is already playing (N).");
+                }
+                else
+                {
+                    runner.Play(IdleRPG.UI.CutsceneDef.CreateSample());
+                    Log("Cutscene: sample boss intro (N). SPACE or click skips.");
+                }
+            }
+
             if (keyboard.f5Key.wasPressedThisFrame)
             {
                 bool saved = gameManager.SaveNow();

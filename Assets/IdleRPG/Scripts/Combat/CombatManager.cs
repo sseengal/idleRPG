@@ -208,9 +208,20 @@ namespace IdleRPG.Combat
             director?.Stop();
         }
 
+        /// <summary>
+        /// True while a cutscene owns the screen. Combat does not advance, so no numbers move behind the picture.
+        /// Set by <see cref="IdleRPG.UI.CutsceneRunner"/> only; a cutscene can never change anything else.
+        /// </summary>
+        public bool Paused { get; set; }
+
         /// <summary>Driven by <see cref="RunController"/> - the only place combat advances.</summary>
         public void Tick(double deltaTime)
         {
+            if (Paused)
+            {
+                return;
+            }
+
             director?.Tick(deltaTime);
         }
 

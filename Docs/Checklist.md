@@ -2052,6 +2052,28 @@ Found while reviewing progress against the design docs. Each needs a home in `Ro
 
 ---
 
+### 10g — One planner per beat, plus cutscene ground work  `[x]`
+- [x] **`BeatDirector` is the only subscriber to a swing announce.** Views no longer compute positions: each exposes
+      `PlaySwing(clipSlot)` and `RunTo(worldSpot, cover)`. `BattleSpots` owns the gap and side maths
+- [x] **The plan order is the fix:** cover first (the guard's spot *becomes* the impact spot), then the attacker
+      (reserved spot -> `stayPlanted` -> its own near flank). One pass, no timing knobs
+- [x] **Two bugs the probe caught:** the sim reports `TargetIndex` = the **guard** and `CoveredAllyIndex` = the ally
+      being saved (they were swapped), and the approach side must be measured **attacker-relative**, not
+      target-relative - otherwise the enemy stops on the far flank. Verified: ally 338.5 -> knight 513.2 (hold 0.65)
+      -> enemy 756.9, so `ally < knight < enemy` with no stacked icons
+- [x] **`CharacterLunge` takes a destination** (`BeginRunTo` / `BeginCoverTo`); `ComputeContact`, the impact re-aim and
+      the target-hunting fields are gone, so nothing can disagree about where a beat ends
+- [x] **`BeatDirector.Interject(side, index, spot)`** reserves a spot for the next beat - the hook for taunts,
+      knockbacks and forced swaps, with no special case anywhere else
+- [x] **Cutscene ground work:** `CutsceneDef` (steps, `pauseBattle`, `skippable`, `hardCapSeconds`),
+      `CutsceneRunner` (bars, title, step walk in real time, skip on SPACE / click, hard cap, restore) and
+      `CombatManager.Paused`. Dev key `N` plays a 3 s sample. A cutscene can only move views and set text - it can
+      never damage, grant loot or touch the formation. See [Cutscene-Plan.md](Cutscene-Plan.md)
+- [x] **The dev key path is the shape:** `N` -> `CutsceneRunner.Instance.Play(sample)`; the runner is created by
+      `HudController.Start` next to the `BeatDirector`, so no scene wiring is needed
+
+---
+
 ## 7. Automated regression (EditMode, headless)
 
 - [ ] run the pure-logic suites before any commit that touches `Save/`, `Equipment/`, `Economy/`,

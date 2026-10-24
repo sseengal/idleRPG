@@ -98,6 +98,16 @@ namespace IdleRPG.UI
             {
                 gameObject.AddComponent<BeatDirector>();
             }
+
+            // The cutscene projector: bars, a title line, and the pause it needs. Created here for the same reason.
+            CutsceneRunner runner = GetComponent<CutsceneRunner>();
+
+            if (runner == null)
+            {
+                runner = gameObject.AddComponent<CutsceneRunner>();
+            }
+
+            runner.Initialize(modalRoot != null ? modalRoot : (RectTransform)transform);
         }
 
         private void OnDestroy()
