@@ -107,6 +107,7 @@ namespace IdleRPG.UI
             GameEvents.ShieldApplied += OnShieldApplied;
             GameEvents.AbilityCast += OnAbilityCast;
             GameEvents.ImpactVfx += OnImpactVfx;
+            GameEvents.CoverIntercepted += OnCoverIntercepted;
         }
 
         private void OnDisable()
@@ -117,6 +118,7 @@ namespace IdleRPG.UI
             GameEvents.ShieldApplied -= OnShieldApplied;
             GameEvents.AbilityCast -= OnAbilityCast;
             GameEvents.ImpactVfx -= OnImpactVfx;
+            GameEvents.CoverIntercepted -= OnCoverIntercepted;
         }
 
         /// <summary>
@@ -242,7 +244,13 @@ namespace IdleRPG.UI
         /// <summary>A guard raised by an ability: a blue "GUARD" over the unit (no number, because no health moved).</summary>
         private void OnShieldApplied(ShieldEvent shield)
         {
-            Spawn(0d, AnchorFor(shield.Side, shield.Index), FloatingTextStyle.Guard, "GUARD");
+            Spawn(0d, AnchorFor(shield.Side, shield.Index), FloatingTextStyle.Guard, "GUARD UP");
+        }
+
+        /// <summary>A guard just took a hit meant for an ally: say so over the guard.</summary>
+        private void OnCoverIntercepted(int guardIndex, int allyIndex)
+        {
+            Spawn(0d, AnchorFor(CombatantSide.Party, guardIndex), FloatingTextStyle.Guard, "GUARD");
         }
 
         /// <summary>The anchor that belongs to one unit on either side.</summary>

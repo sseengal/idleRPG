@@ -253,7 +253,7 @@ namespace IdleRPG.UI
         /// This enemy committed an action: start the clip and run at the hero it is about to hit. The clip slot lets an
         /// enemy cast play its own strip through the same entry point a swing uses.
         /// </summary>
-        private void OnSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot)
+        private void OnSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot, int coveredAllyIndex)
         {
             if (attackerSide != CombatantSide.Enemy || attackerIndex != enemyIndex)
             {
@@ -271,7 +271,11 @@ namespace IdleRPG.UI
 
             HudController hud = HudController.Instance;
             FormationBoardView board = hud != null ? hud.FormationBoard : null;
-            RectTransform targetSlot = board != null ? board.GetHeroSlotRect(targetIndex) : null;
+
+            // A guard intercepts the hit: the knight has already stepped in front of the ally, so the enemy runs at
+            // THAT slot. Using the knight's own index would send it into an empty slot he just left.
+            int visualTargetIndex = coveredAllyIndex >= 0 ? coveredAllyIndex : targetIndex;
+            RectTransform targetSlot = board != null ? board.GetHeroSlotRect(visualTargetIndex) : null;
 
             if (lunge != null && !lunge.IsBusy && targetSlot != null)
             {

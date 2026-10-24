@@ -233,7 +233,7 @@ namespace IdleRPG.UI
         /// slot rides on the event, so an ability needs no handler of its own - the ability path and the attack path are
         /// the same path, which is what stops one of them drifting.
         /// </summary>
-        private void OnSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot)
+        private void OnSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot, int coveredAllyIndex)
         {
             if (attackerSide != CombatantSide.Party || attackerIndex != heroIndex)
             {

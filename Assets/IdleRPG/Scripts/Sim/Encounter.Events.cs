@@ -68,6 +68,9 @@ namespace IdleRPG.Sim
 
         /// <summary>True when this action is an ability, not a basic attack (the log and the view may care).</summary>
         public bool IsAbility;
+
+        /// <summary>When a guard intercepts this hit, the ally it was aimed at (-1 = a normal hit).</summary>
+        public int CoveredAllyIndex;
     }
 
     /// <summary>A blow or an ability travelling from announcement to impact.</summary>

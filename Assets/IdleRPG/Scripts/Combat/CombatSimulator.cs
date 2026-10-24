@@ -58,7 +58,7 @@ namespace IdleRPG.Combat
         public event Action<EnemyDamagedInfo> EnemyDamaged;
 
         /// <summary>An attack or ability was announced (attacker committed; effects land after the travel window).</summary>
-        public event Action<int, CombatantSide, int, CombatantSide, string> SwingStarted;
+        public event Action<int, CombatantSide, int, CombatantSide, string, int> SwingStarted;
 
         /// <summary>(enemyIndex, goldReward) - one call per enemy, so the UI can attribute a 1-3 enemy wave.</summary>
         public event Action<int, double> EnemyKilled;
@@ -485,7 +485,7 @@ namespace IdleRPG.Combat
 
         private void OnEncounterSwingStarted(SwingStartedEvent swing)
         {
-            SwingStarted?.Invoke(swing.AttackerIndex, swing.AttackerSide, swing.TargetIndex, swing.TargetSide, swing.ClipSlot);
+            SwingStarted?.Invoke(swing.AttackerIndex, swing.AttackerSide, swing.TargetIndex, swing.TargetSide, swing.ClipSlot, swing.CoveredAllyIndex);
         }
 
         private void OnEncounterDamaged(DamageEvent damage)

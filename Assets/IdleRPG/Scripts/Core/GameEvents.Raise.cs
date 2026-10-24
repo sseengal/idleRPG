@@ -75,9 +75,9 @@ namespace IdleRPG.Core
             SafeInvoke(EnemyDamaged, info, nameof(EnemyDamaged));
         }
 
-        internal static void RaiseSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot)
+        internal static void RaiseSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot, int coveredAllyIndex)
         {
-            SafeInvoke(SwingStarted, attackerIndex, attackerSide, targetIndex, targetSide, clipSlot, nameof(SwingStarted));
+            SafeInvoke(SwingStarted, attackerIndex, attackerSide, targetIndex, targetSide, clipSlot, coveredAllyIndex, nameof(SwingStarted));
         }
 
         internal static void RaiseEnemyKilled(string enemyName, double goldReward, int enemyIndex)

@@ -90,7 +90,7 @@ namespace IdleRPG.Core
         /// itself lands later via <see cref="EnemyDamaged"/>/<see cref="HeroDamaged"/>; this is the visual "commit"
         /// beat. A non-empty clip slot means "play this strip instead of the ordinary attack".
         /// </summary>
-        public static event Action<int, CombatantSide, int, CombatantSide, string> SwingStarted;
+        public static event Action<int, CombatantSide, int, CombatantSide, string, int> SwingStarted;
 
         /// <summary>(enemyName, goldReward, enemyIndex). One call per enemy.</summary>
         public static event Action<string, double, int> EnemyKilled;

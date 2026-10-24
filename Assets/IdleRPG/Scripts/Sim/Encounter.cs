@@ -626,7 +626,8 @@ namespace IdleRPG.Sim
                     AttackerSide = side,
                     AttackerIndex = attacker.SlotIndex,
                     TargetSide = target.Side,
-                    TargetIndex = target.SlotIndex
+                    TargetIndex = target.SlotIndex,
+                    CoveredAllyIndex = coveredAlly != null ? coveredAlly.SlotIndex : -1
                 });
 
                 if (coveredAlly != null)

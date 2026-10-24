@@ -323,9 +323,9 @@ namespace IdleRPG.Combat
             }
         }
 
-        private void OnSimSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot)
+        private void OnSimSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot, int coveredAllyIndex)
         {
-            GameEvents.RaiseSwingStarted(attackerIndex, attackerSide, targetIndex, targetSide, clipSlot);
+            GameEvents.RaiseSwingStarted(attackerIndex, attackerSide, targetIndex, targetSide, clipSlot, coveredAllyIndex);
         }
 
         private void OnSimEnemyKilled(int enemyIndex, double goldReward)
