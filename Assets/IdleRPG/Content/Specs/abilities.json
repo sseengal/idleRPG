@@ -44,7 +44,8 @@
             "target": "self",
             "unlockStage": 0,
             "tokenCost": 0.0,
-            "description": "Braces behind its guard: damage taken is halved for a few seconds."
+            "description": "Braces behind its guard: damage taken is halved for a few seconds.",
+            "castInPlace": true
         },
         {
             "id": "enemy_spike",
@@ -139,7 +140,8 @@
             "unlockStage": 1,
             "tokenCost": 0.0,
             "description": "Stands guard: intercepts the next 2 hits aimed at any ally, taking half damage.",
-            "guardHits": 2
+            "guardHits": 2,
+            "castInPlace": true
         },
         {
             "id": "holy_slash",
@@ -172,7 +174,8 @@
             "damageMultiplier": 1.8,
             "target": "party",
             "unlockStage": 14,
-            "tokenCost": 5.0
+            "tokenCost": 5.0,
+            "castInPlace": true
         }
     ]
 }

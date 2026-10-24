@@ -197,7 +197,9 @@ must obey both:
    uses it.
 2. **Target on the caster's own side** (rule, no flag needed): Guard (self), War Cry (party), enemy Block (self) have no
    distance to close, so the beat planner stages the clip and nothing else. This rule is what stops a "GUARD UP"
-   moment from dragging the knight sideways - the flag alone was not enough, because Guard is a self-targeted shield.
+   moment from dragging the knight sideways - the flag alone was not enough, because a support ability can forget it.
+   All three now also carry `castInPlace: true` in `abilities.json`, so data and rule say the same thing twice on
+   purpose.
 
 **Where a number is born.** A number or word is placed ONCE, at the body's position at the instant the event fires
 (`UnitAnchors` holds each unit's live body rect), and it never follows anything afterwards. This matters for a unit

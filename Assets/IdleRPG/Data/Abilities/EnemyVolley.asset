@@ -18,9 +18,14 @@ MonoBehaviour:
   kind: 2
   target: 4
   artSlot: Attack02
+  impactVfx: 
+  impactDelaySec: 0
+  impactVfxScale: 1
+  castInPlace: 0
   cooldownSec: 12
   shieldFactor: 0.5
   shieldSeconds: 4
+  guardHits: 0
   healFraction: 0.25
   damageMultiplier: 1.9
   unlockStage: 0

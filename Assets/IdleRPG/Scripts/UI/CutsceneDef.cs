@@ -1,50 +1,39 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using IdleRPG.Sim;
 
 namespace IdleRPG.UI
 {
-    /// <summary>What one step of a cutscene does.</summary>
+    /// <summary>
+    /// What one step of a fixed play does. Only two verbs exist, because a play is a picture: it can put a unit
+    /// somewhere, or play that unit's clip. Nothing here can damage, heal, grant loot or move the player's formation.
+    /// </summary>
     public enum CutsceneVerb
     {
-        /// <summary>Nothing happens; holds the beat (a pause between lines).</summary>
-        Wait = 0,
-
-        /// <summary>The black bars slide in.</summary>
-        BarsIn = 1,
-
-        /// <summary>The black bars slide out (the shot is over).</summary>
-        BarsOut = 2,
-
-        /// <summary>Sets the title line.</summary>
-        Text = 3,
-
         /// <summary>Sends a unit to a point on screen (0..1, x and y).</summary>
-        MoveUnit = 4,
+        MoveUnit = 0,
 
         /// <summary>Plays a unit's action clip.</summary>
-        PlayClip = 5
+        PlayClip = 1
     }
 
     /// <summary>
-    /// One beat of a fixed play: a time, a verb and its arguments. There is no logic here - the runner walks them in
-    /// order, which is what makes a cutscene reproducible.
+    /// One beat of a fixed play: a time, a verb and its arguments. No logic lives here - the runner walks the beats in
+    /// time order, which is what makes a play reproducible from run to run.
     /// </summary>
     [Serializable]
     public struct CutsceneStep
     {
-        [Tooltip("Seconds from the start of the cutscene.")]
+        [Tooltip("Seconds from the start of the play.")]
         public float time;
 
         public CutsceneVerb verb;
 
-        [Tooltip("Text for the Text verb.")]
-        public string text;
-
-        [Tooltip("Which side the unit is on (MoveUnit / PlayClip).")]
+        [Tooltip("Which side the unit is on.")]
         public CombatantSide side;
 
-        [Tooltip("Party or enemy index (MoveUnit / PlayClip).")]
+        [Tooltip("Party or enemy index.")]
         public int index;
 
         [Tooltip("Where to stand, in screen fractions (0..1). MoveUnit only.")]
@@ -52,9 +41,8 @@ namespace IdleRPG.UI
     }
 
     /// <summary>
-    /// A fixed, animation-locked play: bars, a line of text, a unit moving, a clip playing. Nothing here can damage,
-    /// heal, grant loot or change the party - a cutscene is a picture, and it is deliberately unable to be anything
-    /// else. Fill the steps in an asset later; the test one is built in code.
+    /// A fixed, animation-locked play. It holds no game state and has no way to change the fight: a cutscene is a
+    /// picture. Author one with <see cref="CutsceneBuilder"/> or fill the steps in an asset.
     /// </summary>
     [CreateAssetMenu(fileName = "CutsceneDef", menuName = "Idle RPG/Cutscene", order = 20)]
     public sealed class CutsceneDef : ScriptableObject
@@ -67,28 +55,80 @@ namespace IdleRPG.UI
         [Tooltip("A tap (or SPACE) ends it early.")]
         public bool skippable = true;
 
-        [Tooltip("Hard stop: even a broken step can never trap the player longer than this.")]
+        [Tooltip("Hard stop: even a broken beat can never trap the player longer than this.")]
         public float hardCapSeconds = 8f;
 
         public CutsceneStep[] steps = Array.Empty<CutsceneStep>();
+    }
 
-        /// <summary>
-        /// Test play: bars, a title, one enemy walking to the middle. Long enough to judge the feel, short enough to
-        /// press again. Not content - a probe with a title on it.
-        /// </summary>
-        public static CutsceneDef CreateSample()
+    /// <summary>
+    /// Writes a play in one place: one line per beat. This is the structure content is authored with - it cannot
+    /// express anything except where a unit stands and which clip it plays, so a scene can never quietly grow game
+    /// rules and the whole shot reads as a list.
+    /// </summary>
+    public sealed class CutsceneBuilder
+    {
+        private readonly CutsceneDef def;
+        private readonly List<CutsceneStep> steps = new List<CutsceneStep>();
+
+        public CutsceneBuilder(string id)
         {
-            CutsceneDef def = CreateInstance<CutsceneDef>();
-            def.id = "sample_boss_intro";
-            def.hardCapSeconds = 5f;
-            def.steps = new[]
+            def = ScriptableObject.CreateInstance<CutsceneDef>();
+            def.id = id;
+        }
+
+        public CutsceneBuilder PauseBattle(bool paused)
+        {
+            def.pauseBattle = paused;
+            return this;
+        }
+
+        public CutsceneBuilder Skippable(bool skippable)
+        {
+            def.skippable = skippable;
+            return this;
+        }
+
+        public CutsceneBuilder HardCap(float seconds)
+        {
+            def.hardCapSeconds = seconds;
+            return this;
+        }
+
+        /// <summary>`2.10 s: the enemy walks to the middle of the screen.`</summary>
+        public CutsceneBuilder Move(float time, CombatantSide side, int index, Vector2 spot)
+        {
+            steps.Add(new CutsceneStep
             {
-                new CutsceneStep { time = 0f, verb = CutsceneVerb.BarsIn },
-                new CutsceneStep { time = 0.30f, verb = CutsceneVerb.MoveUnit, side = CombatantSide.Enemy, index = 0, spot = new Vector2(0.62f, 0.55f) },
-                new CutsceneStep { time = 0.90f, verb = CutsceneVerb.PlayClip, side = CombatantSide.Enemy, index = 0 },
-                new CutsceneStep { time = 1.10f, verb = CutsceneVerb.Text, text = "THE ORC CHIEFTAIN" },
-                new CutsceneStep { time = 3.20f, verb = CutsceneVerb.BarsOut }
-            };
+                time = time,
+                verb = CutsceneVerb.MoveUnit,
+                side = side,
+                index = index,
+                spot = spot
+            });
+
+            return this;
+        }
+
+        /// <summary>`0.90 s: the enemy plays its attack strip.`</summary>
+        public CutsceneBuilder PlayClip(float time, CombatantSide side, int index)
+        {
+            steps.Add(new CutsceneStep
+            {
+                time = time,
+                verb = CutsceneVerb.PlayClip,
+                side = side,
+                index = index
+            });
+
+            return this;
+        }
+
+        public CutsceneDef Build()
+        {
+            steps.Sort((a, b) => a.time.CompareTo(b.time));
+            def.steps = steps.ToArray();
+
             return def;
         }
     }

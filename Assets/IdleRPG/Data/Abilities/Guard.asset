@@ -21,6 +21,7 @@ MonoBehaviour:
   impactVfx: 
   impactDelaySec: 0
   impactVfxScale: 1
+  castInPlace: 1
   cooldownSec: 14
   shieldFactor: 0.5
   shieldSeconds: 4

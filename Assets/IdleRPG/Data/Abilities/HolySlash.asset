@@ -14,16 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.AbilityDef
   displayName: Holy Slash
   abilityID: holy_slash
-  description: Leaps and brings the blade down on the front enemy.
+  description: Leaps and brings a blessed blade down on the front enemy.
   kind: 2
   target: 3
   artSlot: Attack02
   impactVfx: heavy_smash
   impactDelaySec: 0.1
   impactVfxScale: 1.25
+  castInPlace: 0
   cooldownSec: 10
   shieldFactor: 0.5
   shieldSeconds: 4
+  guardHits: 0
   healFraction: 0.25
   damageMultiplier: 1.6
   unlockStage: 8

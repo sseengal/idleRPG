@@ -48,9 +48,6 @@ namespace IdleRPG.Sim
         /// <summary>A unit cast its ability (Ability-Plan). Fired on the fight's own tick, never mid-frame.</summary>
         public event Action<AbilityCastEvent> AbilityCast;
 
-        /// <summary>Raised at the announce when a guard intercepts a hit aimed at an ally (guard index, ally index).</summary>
-        public event Action<int, int> CoverIntercepted;
-
         /// <summary>Raised at the announce when a cast carries an on-target impact effect (see <see cref="ImpactVfxEvent"/>).</summary>
         public event Action<ImpactVfxEvent> ImpactVfx;
         /// <summary>An ability healed a unit (impact). One call per unit healed.</summary>
@@ -642,11 +639,6 @@ namespace IdleRPG.Sim
                     CoveredAllyIndex = coveredAlly != null ? coveredAlly.SlotIndex : -1
                 });
 
-                if (coveredAlly != null)
-                {
-                    CoverIntercepted?.Invoke(target.SlotIndex, coveredAlly.SlotIndex);
-                }
-
                 return;
             }
         }
@@ -787,11 +779,6 @@ namespace IdleRPG.Sim
                 CoveredAllyIndex = coveredAlly != null ? coveredAlly.SlotIndex : -1,
                 StayPlanted = ability.StayPlanted
             });
-
-            if (coveredAlly != null)
-            {
-                CoverIntercepted?.Invoke(anchor.SlotIndex, coveredAlly.SlotIndex);
-            }
 
             return true;
         }

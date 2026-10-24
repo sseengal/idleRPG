@@ -1,18 +1,16 @@
-# Cutscenes - the plan and the ground work
+# Cutscenes - the structure, and what it may never do
 
-> Status: **structure only (2026-10-24)**. `CutsceneDef` (steps: time + verb + arguments) and a step-walking
-> `CutsceneRunner` exist. The **visual** half - black bars, a title line, a skip key, a dev key on `N` - was a throwaway
-> test effect and is being removed (`Checklist.md` §10g note). No content uses any of it yet.
->
-> **Next:** trim the runner to `Wait` / `MoveUnit` / `PlayClip` and drop the `N` key, then author a real sequence when
-> one is specified. This page is the design record, not a description of shipped effects.
+> Status: **structure ready, no effects (2026-10-24)**. `CutsceneDef` holds a list of beats; `CutsceneBuilder` writes
+> one in a single readable place; `CutsceneRunner` walks the list, pauses the fight and puts it back. It draws nothing -
+> there are no bars, no title, no text and no key. The old test effect (bars + title on `N`) was removed by owner
+> decision: structure first, effects when a real shot asks for them.
 
 ---
 
 ## 1. What a cutscene is (and is not)
 
-A cutscene is a **fixed play**: bars, a line of text, a unit walking in, a clip playing. Its length comes from its own
-animations, not from the fight, and nothing in it can change the game - no damage, no loot, no formation.
+A cutscene is a **fixed play**: a list of beats, each with its own time. Its length comes from its own animations, not
+from the fight, and nothing in it can change the game - no damage, no loot, no formation move.
 
 Two clocks, and they never mix:
 
@@ -23,41 +21,52 @@ Two clocks, and they never mix:
 
 ## 2. The vocabulary
 
-- **Step** - one thing at one time: `0.30 s: move the boss to the middle`.
-- **Verb** - what a step does. The **structure keeps** `Wait`, `MoveUnit`, `PlayClip`. The visual verbs `BarsIn`,
-  `BarsOut`, `Text` belong to the effect layer that is being removed; they come back only when a real shot needs them.
-- **Sequence** - the ordered list of steps (`CutsceneDef.steps`).
+- **Step** - one thing at one time: `2.10 s: move enemy 0 to the middle of the screen`.
+- **Verb** - what a step does. Only two exist, because a play is a picture:
+  - `MoveUnit` - send a unit to a screen fraction (0..1, so a shot survives any resolution)
+  - `PlayClip` - play that unit's action strip
+- **Sequence** - the ordered list of steps (`CutsceneDef.steps`, sorted by time at build).
 
-That is the whole model. A fight beat is a short sequence the `BeatDirector` builds from a sim event; a cutscene is a
-long sequence read from an asset. Same verbs, different clock.
+A fight beat is a short sequence the `BeatDirector` builds from a sim event; a cutscene is a longer sequence read from
+data. Same idea, different clock.
 
 ## 3. Rules that keep it safe
 
-1. **One at a time.** `Play` is ignored while another cutscene runs.
-2. **Pause is explicit.** `CutsceneDef.pauseBattle` stops `CombatManager` (a flag on `Tick`); nothing else is frozen.
+1. **One at a time.** `Play` is ignored while another play runs.
+2. **Pause is explicit.** `CutsceneDef.pauseBattle` stops `CombatManager` through its `Paused` flag; nothing else freezes.
 3. **Skippable or not** - `skippable` ends the play on SPACE / a click.
-4. **Hard cap.** `hardCapSeconds` finishes the play even if a step never arrives. A broken step cannot trap a player.
-5. **No game state.** The runner can only move views and set text. If a cutscene ever needs to grant something, that
-   is a game rule and belongs in the sim, fired before or after the play.
-6. **Real time.** The runner uses `Time.unscaledDeltaTime`; if a frame is long (or the app was backgrounded), the
-   play jumps to the correct step instead of stretching.
+4. **Hard cap.** `hardCapSeconds` finishes the play even if a beat never arrives. A broken step cannot trap a player.
+5. **No game state.** The runner can only move views and play clips. If a cutscene ever needs to grant something, that
+   is a game rule and belongs in the sim, before or after the play.
+6. **Real time.** The runner uses `Time.unscaledDeltaTime`; a long frame (or a backgrounded app) jumps to the beat it
+   should already be on instead of stretching the shot.
 
-## 4. How to add a cutscene
+## 4. How to author one
 
-1. Right click in the Project window -> `Create > Idle RPG > Cutscene`.
-2. Fill `steps`: a time, a verb, and its arguments. `MoveUnit.spot` is a **screen fraction** (0..1), so the shot
-   survives any resolution.
-3. Play it from code: `CutsceneRunner.Instance.Play(myDef)`.
+**In code - one line per beat:**
 
-The test shot lives in code (`CutsceneDef.CreateSample`, dev key `N`) because it is a probe, not content.
+```csharp
+CutsceneDef shot = new CutsceneBuilder("boss_intro")
+    .PauseBattle(true)
+    .HardCap(8f)
+    .Move(0.30f, CombatantSide.Enemy, 0, new Vector2(0.62f, 0.55f))
+    .PlayClip(0.90f, CombatantSide.Enemy, 0)
+    .Build();
 
-## 5. What is deliberately not built yet
+CutsceneRunner.Instance.Play(shot);
+```
 
-- **Data authoring comfort** - an inspector preview or a timeline editor. Worth it only when someone other than a
-  programmer writes shots.
-- **Camera, audio, shake, fades** - new verbs, added when the first real shot needs them.
-- **Unity Timeline** - it is built for this, but our units are runtime-built UI images driven by a frame swapper, so it
-  would need a custom track anyway. The step/verb shape here maps cleanly onto it if we ever switch.
+**In an asset:** `Create > Idle RPG > Cutscene`, fill the steps, then `CutsceneRunner.Instance.Play(def)`.
+
+Positions are screen fractions of the damage canvas (1080 x 1920 reference), so `(0.5, 0.5)` is the middle on any phone.
+
+## 5. What is deliberately not built
+
+- **Text, bars, fades, camera, shake, audio** - new verbs, added when the first real shot needs them. They are effects,
+  not structure, and the owner asked for structure first.
+- **An inspector preview / timeline editor** - worth it only when someone other than a programmer writes shots.
+- **Unity Timeline** - built for this, but our units are runtime-built UI images driven by a frame swapper, so it would
+  need a custom track anyway. This step/verb shape maps onto it cleanly if we switch.
 
 ## 6. QA list for any cutscene
 
@@ -65,5 +74,5 @@ The test shot lives in code (`CutsceneDef.CreateSample`, dev key `N`) because it
 - SPACE / click skips; a second press does nothing.
 - The hard cap ends it even if the last step is wrong.
 - Backgrounding the app and returning does not replay or strand it.
-- No numbers, bars or bobbleheads keep moving behind the bars (combat is paused).
-- On a 4:3 and a 19.5:9 screen the bars still cover the HUD edges.
+- Combat is paused for the whole play (no numbers, no bars moving behind it).
+- A move written as `(0.5, 0.5)` lands in the middle of the screen on a 4:3 and a 19.5:9 device.

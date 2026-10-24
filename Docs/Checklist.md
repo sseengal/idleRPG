@@ -2077,10 +2077,12 @@ Found while reviewing progress against the design docs. Each needs a home in `Ro
       never damage, grant loot or touch the formation. See [Cutscene-Plan.md](Cutscene-Plan.md)
 - [x] **The dev key path is the shape:** `N` -> `CutsceneRunner.Instance.Play(sample)`; the runner is created by
       `HudController.Start` next to the `BeatDirector`, so no scene wiring is needed
-- [ ] **Corrected 2026-10-24 (owner):** the visual half (bars, title, skip, `N`) was a throwaway effect, not what was
-      asked for. Decision: keep the **structure only** (`CutsceneDef` steps + a step-walking runner for
-      `Wait` / `MoveUnit` / `PlayClip`), strip the bars/title, and drop the `N` key until a real sequence is specified.
-      See [Cutscene-Plan.md](Cutscene-Plan.md). Not done yet - queued behind the guard work
+- [x] **Corrected 2026-10-24 (owner):** the visual half (bars, title, skip, `N`) was a throwaway effect, not what was
+      asked for. **Done:** the runner is now a pure step walker (`MoveUnit`, `PlayClip` - `Wait` was dropped too, since a
+      pause is just the gap between two times), the bars/title/`N` key and its catalog line are deleted, and
+      `CutsceneBuilder` writes a shot as one line per beat. Verified: a move written `(0.30, 0.50)` lands at exactly
+      (324, 960) on the 1080x1920 damage canvas; `Play` pauses combat and the hard cap finishes and resumes it.
+      See [Cutscene-Plan.md](Cutscene-Plan.md)
 
 ---
 
@@ -2103,10 +2105,11 @@ Found while reviewing progress against the design docs. Each needs a home in `Ro
 - [x] **Kept on purpose:** `coverHoldSeconds` (0.65 s) - the longer hold is what makes "I took that for you" read;
       `RunTo(spot, cover)` shape; the sim rule (redirect + charges + half damage) untouched, so `GuardCoverTests` pass
       without edits
-- [ ] **Pending (approved, not done):** delete the now-dead `CoverIntercepted` chain (`Encounter` x2,
-      `CombatSimulator`, `CombatManager`, `GameEvents`), `FormationBoardView.EnemySideSign`, and set
-      `castInPlace: true` on `guard` / `war_cry` / `enemy_block` in `abilities.json` so data states the intent the rule
-      already enforces
+- [x] **Cleanup done 2026-10-24:** `CoverIntercepted` deleted end to end (sim event + 2 raises, `CombatSimulator`,
+      `CombatManager`, `GameEvents` + raise, reset), `FormationBoardView.EnemySideSign` deleted, and `castInPlace: true`
+      added to `guard` / `war_cry` / `enemy_block` in `abilities.json` (assets regenerated: `castInPlace: 1` on all
+      three). The director still reads `CoveredAllyIndex` from the announce - that is the plan's input, not a picture
+      event. Behaviour re-probed after the deletion: cast idle / 0.0 px, cover knight 484.5, enemy 630.5, travel 183
 
 ---
 

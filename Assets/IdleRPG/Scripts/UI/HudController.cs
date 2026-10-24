@@ -99,7 +99,9 @@ namespace IdleRPG.UI
                 gameObject.AddComponent<BeatDirector>();
             }
 
-            // The cutscene projector: bars, a title line, and the pause it needs. Created here for the same reason.
+            // The cutscene projector: a step walker with no visuals of its own. Created here with the planner, so a
+            // future shot needs no scene wiring - just a CutsceneDef and one Play call. It gets the screen rect because
+            // a shot is written in screen fractions (0..1), which is what makes it independent of the device size.
             CutsceneRunner runner = GetComponent<CutsceneRunner>();
 
             if (runner == null)
@@ -107,7 +109,11 @@ namespace IdleRPG.UI
                 runner = gameObject.AddComponent<CutsceneRunner>();
             }
 
-            runner.Initialize(modalRoot != null ? modalRoot : (RectTransform)transform);
+            RectTransform space = damageTextPool != null && damageTextPool.transform.parent is RectTransform root
+                ? root
+                : modalRoot;
+
+            runner.SetSpace(space);
         }
 
         private void OnDestroy()
