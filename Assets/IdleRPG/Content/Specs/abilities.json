@@ -140,7 +140,7 @@
             "description": "Raises a guard: the Knight takes half damage for a few seconds."
         },
         {
-            "id": "soldier_charge",
+            "id": "holy_slash",
             "displayName": "Holy Slash",
             "kind": "damage",
             "artSlot": "Attack02",
@@ -155,7 +155,7 @@
             "description": "Leaps and brings a blessed blade down on the front enemy.",
             "impactVfx": "heavy_smash",
             "impactDelaySec": 0.1,
-            "impactVfxScale": 1.15
+            "impactVfxScale": 1.25
         },
         {
             "id": "war_cry",

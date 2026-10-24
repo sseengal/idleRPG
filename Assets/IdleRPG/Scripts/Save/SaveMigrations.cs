@@ -201,6 +201,16 @@ namespace IdleRPG.Save
                 Debug.Log("[SaveMigrations] Migrated save v8 -> v9 (Fireball is now Shatter).");
             }
 
+            if (version < 10)
+            {
+                // v9 -> v10: the Soldier's move was renamed from its first name (Charge) to Holy Slash. Same rule as
+                // v9: the id is written into the unlock keyed list and the assignments, so both travel with it.
+                RenameLevelPrefix(data, SaveData.SaveKeys.AbilityUnlock("soldier_charge"), SaveData.SaveKeys.AbilityUnlock("holy_slash"));
+                RenameAbilityId(data, "soldier_charge", "holy_slash");
+
+                Debug.Log("[SaveMigrations] Migrated save v9 -> v10 (Charge is now Holy Slash).");
+            }
+
             data.schemaVersion = SaveData.CurrentVersion;
             return data;
         }

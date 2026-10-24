@@ -8,7 +8,7 @@
             "icon": "hero_soldier",
             "art": "Soldier",
             "abilities": [
-                "soldier_charge",
+                "holy_slash",
                 "war_cry"
             ],
             "baseHealth": 110.0,
