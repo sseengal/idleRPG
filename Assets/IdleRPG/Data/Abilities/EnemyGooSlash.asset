@@ -10,17 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 35bf50eb489af4ef4ae94d01e9b01a39, type: 3}
-  m_Name: EnemySpikeSlime
+  m_Name: EnemyGooSlash
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.AbilityDef
-  displayName: Spike
-  abilityID: enemy_spike_slime
-  description: 'Same move as Spike, but the Slime has no Spike art: it plays its second attack strip instead.'
+  displayName: Goo Slash
+  abilityID: enemy_goo_slash
+  description: Pulls a blade out of its blob and swings it down at the front hero.
   kind: 2
   target: 4
   artSlot: Attack02
+  impactVfx: 
+  impactDelaySec: 0
+  impactVfxScale: 1
   cooldownSec: 10
   shieldFactor: 0.5
   shieldSeconds: 4
+  guardHits: 0
   healFraction: 0.25
   damageMultiplier: 1.8
   unlockStage: 0

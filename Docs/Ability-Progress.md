@@ -36,12 +36,12 @@ effects). Boss moves and the unused Summon/Heal/Block strips come after. Art is 
 - **11 ability definitions** (`Content/Specs/abilities.json`, 11 assets in `Data/Abilities`), 15 of 42 characters
   carry a special strip, 0 broken clips, art pipeline PASS, save drift test PASS at v8.
 - **Enemy moves appear from stage 1.** Before this pass the first ability-carrying enemy was the Skeleton at stage
-  11, so a new player could fight for an hour and never see one. Slime now uses Spike, so the move shows up in the
+  11, so a new player could fight for an hour and never see one. Slime now uses Goo Slash, so the move shows up in the
   opening waves. Cost: a Slime can take 1.8x a normal hit instead of 1x - it reads as a hit, not a wall.
 - **Slime casts with its second attack strip.** The Slime has no `Ability` art, so its Spike was silently falling
   back to the plain attack (Attack01, 6 frames) while its 12-frame Attack02 sat unused. Slime now points at its own
-  ability row `enemy_spike_slime`, which names `Attack02`; the Lava Slime and Lava Behemoth keep `enemy_spike`
-  (their own Spike strip). Verified in Play: `cast Enemy idx=0 id=enemy_spike_slime slot=Attack02`, then the view
+  ability row `enemy_goo_slash`, which names `Attack02`; the Lava Slime and Lava Behemoth keep `enemy_spike`
+  (their own Spike strip). Verified in Play: `cast Enemy idx=0 id=enemy_goo_slash slot=Attack02`, then the view
   plays that strip. Side effect: the blow lands on the last frame of a 12-frame / 12 fps strip, so the hero takes
   the damage about 1.0 s after the call-out (still inside the 2.5 s orange window).
 - **Heavy number measured:** the same floating text plays a plain hit at 32 px red (`FF5959FF`) and an ability hit at

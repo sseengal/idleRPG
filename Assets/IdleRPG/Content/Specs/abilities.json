@@ -62,8 +62,8 @@
             "description": "Slams the front hero with a spike of rock."
         },
         {
-            "id": "enemy_spike_slime",
-            "displayName": "Spike",
+            "id": "enemy_goo_slash",
+            "displayName": "Goo Slash",
             "kind": "damage",
             "artSlot": "Attack02",
             "cooldownSec": 10.0,
@@ -74,7 +74,7 @@
             "target": "fronthero",
             "unlockStage": 0,
             "tokenCost": 0.0,
-            "description": "Same move as Spike, but the Slime has no Spike art: it plays its second attack strip instead."
+            "description": "Pulls a blade out of its blob and swings it down at the front hero."
         },
         {
             "id": "enemy_volley",

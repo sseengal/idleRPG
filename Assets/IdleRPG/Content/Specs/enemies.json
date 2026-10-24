@@ -89,7 +89,7 @@
             "displayName": "Slime",
             "art": "Slime",
             "abilities": [
-                "enemy_spike_slime"
+                "enemy_goo_slash"
             ],
             "firstStage": 1,
             "lastStage": 10,

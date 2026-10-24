@@ -277,16 +277,16 @@ view fell back to `Attack01`. The 12-frame `Attack02` sat unused.
 
 **Fix (data only, no code).**
 
-1. Added one row, `enemy_spike_slime`, to `Content/Specs/abilities.json`: `artSlot: Attack02`,
+1. Added one row, `enemy_goo_slash`, to `Content/Specs/abilities.json`: `artSlot: Attack02`,
    `kind: Damage`, `damageMultiplier: 1.8`, `cooldownSec: 10`, `target: FrontHero`.
-2. Pointed `Enemy_Slime` at that row (`enemies.json` → `abilities: ["enemy_spike_slime"]`).
-3. Regenerated: `Data/Abilities/EnemySpikeSlime.asset` and `Data/Enemies/Enemy_Slime.asset`.
+2. Pointed `Enemy_Slime` at that row (`enemies.json` → `abilities: ["enemy_goo_slash"]`).
+3. Regenerated: `Data/Abilities/EnemyGooSlash.asset` and `Data/Enemies/Enemy_Slime.asset`. (The row was later renamed from 'Spike' to **Goo Slash**, id `enemy_goo_slash`, and its contact frame set to 8 of 12 -> the hit lands at 0.75 s.)
 4. **Left Lava Slime and Lava Behemoth on `enemy_spike`** — they own a real `Ability` strip.
 
 **Verified in Play, by reading the events** (test-only listeners; they vanish when Play stops):
 
 ```
-PROBE cast Enemy idx=0 id=enemy_spike_slime slot=Attack02
+PROBE cast Enemy idx=0 id=enemy_goo_slash slot=Attack02
 PROBE enemy swing idx=0 slot='Attack02'
 ```
 
@@ -309,7 +309,7 @@ Enumerated from the art sets and the specs, not typed by hand.
 
 | Enemy | Move | Strip used |
 |---|---|---|
-| Slime | Spike | `Attack02` |
+| Slime | Goo Slash | `Attack02` |
 | Skeleton, Armored Orc, Orc Rider, Bone Captain, Orc Raider, Black Knight Champion | Block | `Ability` |
 | Lava Slime, Lava Behemoth | Spike | `Ability` |
 | Ghostfire, Eyeball Monster, Ghostfire Wraith, Eyeball Watcher, Black Knight Sovereign | Beam | `Ability` |
@@ -380,7 +380,7 @@ frozen.
 8. Guard move (Knight Guard, Black Knight Block) → blue flash, `GUARD` word, and the next hit is
    visibly smaller.
 9. Heal move (Priest) → green number, and the lowest hero's bar rises.
-10. Enemy move (Slime Spike, Archer Volley) → its own strip plays, the enemy lunges at a hero, the orange
+10. Enemy move (Slime Goo Slash, Archer Volley) → its own strip plays, the enemy lunges at a hero, the orange
     name shows over it, and a bigger orange number appears on that hero.
 11. Fight one wave of each enemy that owns a move, and confirm the picture matches the move name.
 
