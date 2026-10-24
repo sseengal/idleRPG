@@ -47,6 +47,9 @@ namespace IdleRPG.Sim
 
         /// <summary>Display name of the ability that caused this damage; empty for a plain swing.</summary>
         public string AbilityName;
+
+        /// <summary>True when the hit was reduced by a guard/shield (so the HUD can say GUARD).</summary>
+        public bool IsGuarded;
     }
 
     /// <summary>

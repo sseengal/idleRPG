@@ -324,7 +324,7 @@ namespace IdleRPG.UI
             hitJuice.Flash(baseColor, shieldFlashColor, shieldFlashDurationSec);
         }
 
-        private void OnHeroDamaged(int index, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical)
+        private void OnHeroDamaged(int index, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical, bool isGuarded)
         {
             if (index != heroIndex)
             {

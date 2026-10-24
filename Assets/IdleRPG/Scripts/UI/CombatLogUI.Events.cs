@@ -26,7 +26,7 @@ namespace IdleRPG.UI
                 info.IsCritical ? criticalColor : heroHitColor);
         }
 
-        private void OnHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical)
+        private void OnHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical, bool isGuarded)
         {
             string attacker = EnemyName(attackerEnemyIndex);
             string target = HeroName(heroIndex);

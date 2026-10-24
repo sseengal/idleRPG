@@ -239,7 +239,7 @@ namespace IdleRPG.UI
         /// The blow landed (the sim's impact). The swing clip is already playing - it started on the announce - so
         /// this only plants the enemy on the target and restarts the pose clock at the hit.
         /// </summary>
-        private void OnEnemyAttackLanded(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical)
+        private void OnEnemyAttackLanded(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical, bool isGuarded)
         {
             if (attackerEnemyIndex != enemyIndex)
             {

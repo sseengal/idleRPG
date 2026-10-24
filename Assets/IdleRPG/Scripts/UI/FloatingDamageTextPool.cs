@@ -34,9 +34,6 @@ namespace IdleRPG.UI
         private readonly List<float> enemyCastUntil = new List<float>();
         private float driftSeed;
 
-        /// <summary>Guard index -> time until which the next damage on it counts as an intercepted hit.</summary>
-        private readonly Dictionary<int, float> coverUntil = new Dictionary<int, float>();
-
         [Header("Impact effect")]
         [Tooltip("Frames per second for an on-target impact sheet (Resources/Vfx/<id>).")]
         [SerializeField] private float impactVfxFps = 12f;
@@ -110,7 +107,6 @@ namespace IdleRPG.UI
             GameEvents.ShieldApplied += OnShieldApplied;
             GameEvents.AbilityCast += OnAbilityCast;
             GameEvents.ImpactVfx += OnImpactVfx;
-            GameEvents.CoverIntercepted += OnCoverIntercepted;
         }
 
         private void OnDisable()
@@ -121,7 +117,6 @@ namespace IdleRPG.UI
             GameEvents.ShieldApplied -= OnShieldApplied;
             GameEvents.AbilityCast -= OnAbilityCast;
             GameEvents.ImpactVfx -= OnImpactVfx;
-            GameEvents.CoverIntercepted -= OnCoverIntercepted;
         }
 
         /// <summary>
@@ -142,10 +137,10 @@ namespace IdleRPG.UI
 
             enemyCastUntil[index] = Time.time + Mathf.Max(0.1f, abilityHitWindowSec);
 
-            // Call-out over the caster: the player sees where the move came from, not just that one happened.
+            // Call-out over the caster, centred above the sprite.
             if (!string.IsNullOrEmpty(abilityName))
             {
-                Spawn(0d, AnchorFor(CombatantSide.Enemy, index), FloatingTextStyle.AbilityHit, abilityName);
+                Spawn(0d, AnchorFor(CombatantSide.Enemy, index), FloatingTextStyle.AbilityHit, abilityName, new Vector2(0f, 96f));
             }
         }
 
@@ -198,10 +193,10 @@ namespace IdleRPG.UI
 
             Spawn(info.Damage, EnemyAnchor(info.EnemyIndex), info.IsCritical ? FloatingTextStyle.Critical : FloatingTextStyle.Normal);
 
-            // Name the move at the beat it lands (Holy Slash, Shatter), the same way enemy moves announce themselves.
+            // Name the move at the beat it lands, centred above the enemy: read as a title, not a stray number.
             if (!string.IsNullOrEmpty(info.AbilityName))
             {
-                Spawn(0d, EnemyAnchor(info.EnemyIndex), FloatingTextStyle.AbilityHit, info.AbilityName);
+                Spawn(0d, EnemyAnchor(info.EnemyIndex), FloatingTextStyle.AbilityHit, info.AbilityName, new Vector2(0f, 96f));
             }
 
             // A scheduled burst (ability) already played a moment ago; do not start a second one on its damage.
@@ -225,7 +220,7 @@ namespace IdleRPG.UI
             return enemyAnchors[Mathf.Clamp(enemyIndex, 0, enemyAnchors.Length - 1)];
         }
 
-        private void OnHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical)
+        private void OnHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical, bool isGuarded)
         {
             if (damage <= 0d || heroIndex < 0)
             {
@@ -243,11 +238,10 @@ namespace IdleRPG.UI
                 ? FloatingTextStyle.AbilityHit
                 : FloatingTextStyle.Incoming;
 
-            // Intercepted hit: the guard's word appears here, at impact, over wherever the knight is standing now.
-            if (coverUntil.TryGetValue(heroIndex, out float until) && Time.time <= until)
+            // Intercepted or halved by the guard: say so, at impact, over wherever the knight is standing now.
+            if (isGuarded)
             {
-                coverUntil.Remove(heroIndex);
-                Spawn(0d, anchor, FloatingTextStyle.Guard, "GUARD");
+                Spawn(0d, anchor, FloatingTextStyle.Guard, "GUARD", new Vector2(0f, 78f));
             }
 
             Spawn(damage, anchor, style);
@@ -267,15 +261,7 @@ namespace IdleRPG.UI
         /// <summary>A guard raised by an ability: a blue "GUARD" over the unit (no number, because no health moved).</summary>
         private void OnShieldApplied(ShieldEvent shield)
         {
-            Spawn(0d, AnchorFor(shield.Side, shield.Index), FloatingTextStyle.Guard, "GUARD UP");
-        }
-
-        /// <summary>A guard just took a hit meant for an ally: say so over the guard.</summary>
-        private void OnCoverIntercepted(int guardIndex, int allyIndex)
-        {
-            // The word must land WITH the hit, not at the announce: remember the guard is about to be struck, and let
-            // the damage event (which arrives at impact, with the knight already in front of the ally) draw it.
-            coverUntil[guardIndex] = Time.time + 1.2f;
+            Spawn(0d, AnchorFor(shield.Side, shield.Index), FloatingTextStyle.Guard, "GUARD UP", new Vector2(0f, 96f));
         }
 
         /// <summary>The anchor that belongs to one unit on either side.</summary>
@@ -453,7 +439,7 @@ namespace IdleRPG.UI
             return frames;
         }
 
-        private void Spawn(double value, RectTransform anchor, FloatingTextStyle style, string text = null)
+        private void Spawn(double value, RectTransform anchor, FloatingTextStyle style, string text = null, Vector2? offsetOverride = null)
         {
             if (anchor == null || active.Count >= Mathf.Max(1, maxActive))
             {
@@ -487,7 +473,7 @@ namespace IdleRPG.UI
                 ? (Vector2)localSpace.InverseTransformPoint(anchor.position)
                 : anchor.anchoredPosition;
 
-            Vector2 offset = new Vector2(
+            Vector2 offset = offsetOverride ?? new Vector2(
                 side * (40f + Random.Range(0f, Mathf.Abs(anchorJitter) * 0.5f)),
                 Random.Range(18f, 42f));
 

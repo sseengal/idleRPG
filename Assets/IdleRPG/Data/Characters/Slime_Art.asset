@@ -66,5 +66,7 @@ MonoBehaviour:
   AbilityFps: 10
   ArtFacesLeft: 0
   StrikeFrame: 3
+  Attack02StrikeFrame: 6
+  Attack03StrikeFrame: -1
   AbilityStrip: 
   AbilityStrikeFrame: -1

@@ -354,6 +354,7 @@ namespace IdleRPG.Sim
                 return;
             }
 
+            bool wasGuarded = target.DamageTakenMultiplier < 0.999d;
             double applied = target.TakeDamage(swing.Damage);
 
             // A covered hit spends one charge of the guard that took it.
@@ -364,7 +365,7 @@ namespace IdleRPG.Sim
 
             attacker.Threat += applied;
 
-            RaiseDamage(attacker, target, swing.AttackerSide, applied, swing.IsCritical);
+            RaiseDamage(attacker, target, swing.AttackerSide, applied, swing.IsCritical, string.Empty, string.Empty, wasGuarded);
 
             // The swing is over: the attacker's cooldown starts counting a full interval from this impact.
             attacker.EndSwing();
@@ -394,6 +395,7 @@ namespace IdleRPG.Sim
 
                 if (ability.Kind == SimAbilityKind.Damage)
                 {
+                    bool wasGuarded = target.DamageTakenMultiplier < 0.999d;
                     double applied = target.TakeDamage(swing.Damage);
                     caster.Threat += applied;
 
@@ -403,7 +405,7 @@ namespace IdleRPG.Sim
                         target.ConsumeCoverHit();
                     }
 
-                    RaiseDamage(caster, target, swing.AttackerSide, applied, swing.IsCritical, ability.VfxId, ability.DisplayName);
+                    RaiseDamage(caster, target, swing.AttackerSide, applied, swing.IsCritical, ability.VfxId, ability.DisplayName, wasGuarded);
                     ResolveDeath(target);
                     continue;
                 }
@@ -475,7 +477,7 @@ namespace IdleRPG.Sim
         }
 
         /// <summary>Raises the impact event for a hit that really removed something (a 0-damage hit shows no number).</summary>
-        private void RaiseDamage(Combatant attacker, Combatant target, CombatantSide attackerSide, double applied, bool isCritical, string vfxId = "", string abilityName = "")
+        private void RaiseDamage(Combatant attacker, Combatant target, CombatantSide attackerSide, double applied, bool isCritical, string vfxId = "", string abilityName = "", bool isGuarded = false)
         {
             if (applied <= 0d)
             {
@@ -493,7 +495,8 @@ namespace IdleRPG.Sim
                 TargetMaxHealth = target.MaxHealth,
                 IsCritical = isCritical,
                 VfxId = vfxId,
-                AbilityName = abilityName
+                AbilityName = abilityName,
+                IsGuarded = isGuarded
             });
         }
 

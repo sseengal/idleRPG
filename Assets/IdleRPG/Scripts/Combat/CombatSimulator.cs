@@ -68,7 +68,7 @@ namespace IdleRPG.Combat
         /// The attacker index is what lets the battle log and the models say *which* enemy swung - with 1-3
         /// enemies a line like "Werewolf A hits Knight" must never be guesswork.
         /// </summary>
-        public event Action<int, double, double, double, int, bool> HeroDamaged;
+        public event Action<int, double, double, double, int, bool, bool> HeroDamaged;
 
         public event Action<int> HeroDied;
 
@@ -498,7 +498,7 @@ namespace IdleRPG.Combat
                 return;
             }
 
-            HeroDamaged?.Invoke(damage.TargetIndex, damage.Damage, damage.TargetHealth, damage.TargetMaxHealth, damage.AttackerIndex, damage.IsCritical);
+            HeroDamaged?.Invoke(damage.TargetIndex, damage.Damage, damage.TargetHealth, damage.TargetMaxHealth, damage.AttackerIndex, damage.IsCritical, damage.IsGuarded);
         }
 
         private void OnEncounterDied(DeathEvent death)

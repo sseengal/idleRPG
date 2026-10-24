@@ -351,9 +351,9 @@ namespace IdleRPG.Combat
             return enemy == null ? "Enemy" : enemy.DisplayName;
         }
 
-        private void OnSimHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical)
+        private void OnSimHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical, bool isGuarded)
         {
-            GameEvents.RaiseHeroDamaged(heroIndex, damage, currentHealth, maxHealth, attackerEnemyIndex, isCritical);
+            GameEvents.RaiseHeroDamaged(heroIndex, damage, currentHealth, maxHealth, attackerEnemyIndex, isCritical, isGuarded);
 
             if (!logCombatEvents)
             {

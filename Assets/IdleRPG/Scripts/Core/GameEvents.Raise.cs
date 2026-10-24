@@ -85,9 +85,9 @@ namespace IdleRPG.Core
             SafeInvoke(EnemyKilled, enemyName, goldReward, enemyIndex, nameof(EnemyKilled));
         }
 
-        internal static void RaiseHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical)
+        internal static void RaiseHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical, bool isGuarded)
         {
-            SafeInvoke(HeroDamaged, heroIndex, damage, currentHealth, maxHealth, attackerEnemyIndex, isCritical, nameof(HeroDamaged));
+            SafeInvoke(HeroDamaged, heroIndex, damage, currentHealth, maxHealth, attackerEnemyIndex, isCritical, isGuarded, nameof(HeroDamaged));
         }
 
         /// <summary>A unit cast its ability. Raised from the fight's own tick, so a paused game raises nothing.</summary>
@@ -295,6 +295,23 @@ namespace IdleRPG.Core
             try
             {
                 handler(arg1, arg2, arg3, arg4, arg5, arg6);
+            }
+            catch (Exception exception)
+            {
+                LogSubscriberException(eventName, exception);
+            }
+        }
+
+        private static void SafeInvoke<T1, T2, T3, T4, T5, T6, T7>(Action<T1, T2, T3, T4, T5, T6, T7> handler, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, string eventName)
+        {
+            if (handler == null)
+            {
+                return;
+            }
+
+            try
+            {
+                handler(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
             }
             catch (Exception exception)
             {

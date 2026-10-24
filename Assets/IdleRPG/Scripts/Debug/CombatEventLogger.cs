@@ -108,7 +108,7 @@ namespace IdleRPG.Debugging
             }
         }
 
-        private void OnHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical)
+        private void OnHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical, bool isGuarded)
         {
             if (logHeroDamage)
             {
