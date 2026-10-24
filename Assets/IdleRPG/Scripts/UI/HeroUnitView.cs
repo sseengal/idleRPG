@@ -72,16 +72,19 @@ namespace IdleRPG.UI
                 return;
             }
 
+            // A seat move under a running dash would leave the dash aiming at the old layout: park him first.
+            // (Home is derived from the seat, so nothing has to be re-captured afterwards.)
+            bool movingToAnotherPad = (self.anchoredPosition - pad.anchoredPosition).sqrMagnitude > 0.01f;
+
+            if (movingToAnotherPad && lunge != null)
+            {
+                lunge.ResetToHome();
+            }
+
             if (instant || slideSeconds <= 0f)
             {
                 self.anchoredPosition = pad.anchoredPosition;
                 slideT = -1f;
-
-                if (lunge != null)
-                {
-                    lunge.RefreshHome();
-                }
-
                 return;
             }
 
@@ -197,11 +200,10 @@ namespace IdleRPG.UI
                     iconImage.color = baseColor;
                 }
 
-                // A hero landing in this (possibly re-laid-out) seat re-captures its home anchor for the lunge.
+                // A hero landing in this (possibly re-laid-out) seat parks at the seat before any swing measures from it.
                 CharacterLunge lunge = EnsureLunge();
                 if (lunge != null)
                 {
-                    lunge.RefreshHome();
                     lunge.ResetToHome();
                 }
             }
@@ -534,7 +536,6 @@ namespace IdleRPG.UI
             // Alive again (revived seat, fresh wave): park the hero at home in case a lunge left them mid-run.
             if (hero.IsAlive && lunge != null)
             {
-                lunge.RefreshHome();
                 lunge.ResetToHome();
             }
 
@@ -589,8 +590,6 @@ namespace IdleRPG.UI
                 {
                     lunge = iconImage.gameObject.AddComponent<CharacterLunge>();
                 }
-
-                lunge.RefreshHome();
             }
 
             return lunge;
@@ -647,11 +646,6 @@ namespace IdleRPG.UI
             }
 
             slideT = -1f;
-
-            if (lunge != null)
-            {
-                lunge.RefreshHome();
-            }
         }
     }
 }

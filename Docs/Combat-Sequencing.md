@@ -200,6 +200,11 @@ that dashes: the Knight guarding an ally is standing beside that ally when the h
 appear there, not on his empty pad. The text is parented to the unit's own board node, which does not move during a
 fight - only a player-ordered seat move moves it, and that is deliberate.
 
+**Home is derived, never remembered.** A unit's resting place is `parent.TransformPoint(restLocal)` - the node it
+lives in decides where home is, and the node is exactly what a reposition moves. A stored world point survives a
+reposition, which made a guarding Knight blink back to the seat he had left. For the same reason a seat change parks
+any running dash first, and `Impact()` only snaps a unit that is actually mid-run.
+
 **One size for words, a ladder for numbers.** Every floating word - an ability name, `GUARD`, `GUARD UP` - uses
 `FloatingDamageTextView.wordFontSize` = `UiType.Sentence` (36), exactly one step above the damage size (32). Numbers keep
 their hierarchy: plain 32, crit x1.3, enemy-ability damage x1.5. The label has auto-sizing **off**, so a two-word ability

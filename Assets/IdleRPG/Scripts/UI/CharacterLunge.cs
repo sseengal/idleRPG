@@ -57,16 +57,16 @@ namespace IdleRPG.UI
         private Image image;
 
         private State state;
-        private Vector3 home;
         private Vector3 contact;
         private Vector3 from;
         private float clock;
 
-        /// <summary>The icon's resting local offset, captured once: home is derived from it, never from where the
-        /// unit happens to be. Without this, re-capturing home mid-dash stored the CONTACT point as home and the unit
-        /// walked back to the enemy instead of to its seat.</summary>
-        private Vector2 restAnchored;
-        private bool restCaptured;
+        /// <summary>
+        /// The icon's resting offset inside its unit node. Re-captured at the start of every run (the unit is at rest
+        /// by definition then), so home is always DERIVED from the current layout. A remembered WORLD point is what
+        /// used to survive a reposition and send a unit back to the seat it had left.
+        /// </summary>
+        private Vector3 restLocal;
 
         /// <summary>Set when the attack clip finishes during the pose; Holding waits for this before blinking.</summary>
         private bool blinkQueued;
@@ -79,32 +79,24 @@ namespace IdleRPG.UI
 
             if (rect != null)
             {
-                restAnchored = rect.anchoredPosition;
-                restCaptured = true;
-                home = rect.position;
+                restLocal = rect.localPosition;
             }
         }
 
         public bool IsBusy => state != State.Idle;
 
         /// <summary>
-        /// Re-captures the home anchor after the seat under this icon moved. Parks the icon at its resting offset
-        /// FIRST, then reads the world point - so calling this while the icon is out on a dash cannot mistake the
-        /// contact point for home.
+        /// Where this unit belongs RIGHT NOW: its resting offset converted through the node it lives in. Ask this
+        /// instead of storing a point - the node is what the player moves, so it is always the truth.
         /// </summary>
-        public void RefreshHome()
+        private Vector3 HomeNow()
         {
             if (rect == null)
             {
-                return;
+                return Vector3.zero;
             }
 
-            if (restCaptured)
-            {
-                rect.anchoredPosition = restAnchored;
-            }
-
-            home = rect.position;
+            return rect.parent != null ? rect.parent.TransformPoint(restLocal) : restLocal;
         }
 
         /// <summary>
@@ -122,7 +114,9 @@ namespace IdleRPG.UI
             }
 
             blinkQueued = false;
-            home = rect.position;
+
+            // He is standing at rest, so this is exactly where home is in the CURRENT layout.
+            restLocal = rect.localPosition;
 
             // Stop on the near-side flank of the target, aligned to the target's BODY height. The slot builders place
             // every icon with CenterOn(0.5, 0.60) inside its slot, while the slot rect's pivot sits at the TOP
@@ -161,7 +155,7 @@ namespace IdleRPG.UI
         /// </summary>
         public void Impact()
         {
-            if (rect == null || (state != State.Advancing && state != State.Holding))
+            if (rect == null || state != State.Advancing)
             {
                 return;
             }
@@ -201,7 +195,7 @@ namespace IdleRPG.UI
 
             if (rect != null)
             {
-                rect.position = home;
+                rect.position = HomeNow();
             }
 
             if (image != null)
@@ -273,7 +267,7 @@ private void Update()
 
                     if (clock >= blinkOutSeconds)
                     {
-                        rect.position = home;
+                        rect.position = HomeNow();
 
                         // Cut the swing clip at the teleport (the unit is invisible now): fade in the idle pose,
                         // never the attack's tail frames.

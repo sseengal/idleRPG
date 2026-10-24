@@ -211,12 +211,11 @@ namespace IdleRPG.UI
 
             popTimer = spawnPopDurationSec;
 
-            // The stack re-laid out this slot: re-capture home and park the unit there (mid-lunge units snap back).
+            // The stack re-laid out this slot: park the unit there (mid-lunge units snap back).
             EnsureAnimator();
             CharacterLunge runner = EnsureLunge();
             if (runner != null)
             {
-                runner.RefreshHome();
                 runner.ResetToHome();
             }
         }
@@ -443,8 +442,6 @@ namespace IdleRPG.UI
                 {
                     lunge = spriteImage.gameObject.AddComponent<CharacterLunge>();
                 }
-
-                lunge.RefreshHome();
             }
 
             return lunge;

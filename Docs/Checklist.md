@@ -499,6 +499,10 @@ validator       ok [balance] Stage 1: 124s, 11 kills, 272 gold, 2.20 gold/s (ban
       thing that moves); `ShowNumber` / `ShowWord` read it once. The pool's `heroAnchors` / `SetHeroAnchors` are gone
 - [x] `CharacterLunge.RefreshHome()` parks the icon at its recorded resting offset **before** reading home, so a seat
       move during a dash cannot store the contact point as home
+- [x] **A dash can no longer remember a place.** Home is `parent.TransformPoint(restLocal)`, re-captured at the start
+      of each run; a seat change parks the running dash; `Impact()` only snaps a unit that is mid-run. This is the fix
+      for "Guard breaks after I move a hero": the blink target used to be a stored world point and sent him back to
+      the pad he had left. Verified live: dashing, moving the node, then blinking home lands on the NEW pad (exact).
 - [ ] **verify live**: knight covers an ally -> number and `GUARD` beside the ally; tap Knight, free pads brighten,
       tap a back pad -> he slides and enemies target the new rank; tap elsewhere cancels; name/hp bar follows him
 
