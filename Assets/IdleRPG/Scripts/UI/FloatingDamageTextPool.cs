@@ -38,8 +38,15 @@ namespace IdleRPG.UI
         [Tooltip("Frames per second for an on-target impact sheet (Resources/Vfx/<id>).")]
         [SerializeField] private float impactVfxFps = 12f;
 
-        [Tooltip("Impact sprite size as a multiple of the target anchor's height.")]
-        [SerializeField] private float impactVfxScale = 1.4f;
+        /// <summary>
+        /// Effect size as a multiple of one enemy slot. 2.5 was picked in play: at 1.4 the burst read as a spark,
+        /// at 2.0 it still sat inside the sprite's transparent margin. The sheets have padding, so the number is
+        /// deliberately larger than the unit it covers.
+        /// </summary>
+        private const float ImpactVfxSlotScale = 2.5f;
+
+        /// <summary>Height of one enemy slot, pushed by the stack on every layout. 176 is the shipped slot box.</summary>
+        private float enemySlotHeight = 176f;
 
         private readonly List<ImpactPlay> impacts = new List<ImpactPlay>();
         private readonly Dictionary<string, Sprite[]> impactCache = new Dictionary<string, Sprite[]>();
@@ -133,6 +140,18 @@ namespace IdleRPG.UI
         public void SetEnemyAnchors(RectTransform[] anchors)
         {
             enemyAnchors = anchors;
+        }
+
+        /// <summary>
+        /// Height of one enemy slot, pushed by <see cref="EnemyStackView"/> whenever it lays the wave out.
+        /// Impact effects size themselves from this, because the damage anchors are 1x1 markers.
+        /// </summary>
+        public void SetEnemySlotHeight(float height)
+        {
+            if (height > 1f)
+            {
+                enemySlotHeight = height;
+            }
         }
 
         /// <summary>
@@ -248,8 +267,8 @@ namespace IdleRPG.UI
             rt.pivot = anchor.pivot;
             rt.anchoredPosition = anchor.anchoredPosition;
 
-            float baseSize = anchor.rect.height > 1f ? anchor.rect.height : 120f;
-            float size = Mathf.Max(64f, baseSize * Mathf.Max(0.1f, impactVfxScale));
+            float baseSize = enemySlotHeight > 1f ? enemySlotHeight : 176f;
+            float size = Mathf.Max(96f, baseSize * ImpactVfxSlotScale);
             rt.sizeDelta = new Vector2(size, size);
 
             // Just above its own unit, so the burst covers the enemy but stays under the numbers.

@@ -172,8 +172,13 @@ Death is one path (`ResolveDeath`) for a swing, an ability, or a party wipe, so 
 "party wiped" flow cannot diverge.
 
 **On-target impact effect.** A damage ability may name an `impactVfx`. `DamageEvent.VfxId` carries it to the HUD, and
-`FloatingDamageTextPool` plays the sliced sheet at the hit enemy, sized to 1.4x the target anchor, above the unit and
-under the numbers. Empty id = nothing plays. Missing sheet = nothing plays (never an error).
+`FloatingDamageTextPool` plays the sliced sheet at the hit enemy, above the unit and under the numbers. Empty id =
+nothing plays. Missing sheet = nothing plays (never an error).
+
+**Size rule:** the sprite is **2.5 × the enemy slot height** (176 px slot -> 440 px burst), for every effect, so two
+moves can never look like different weights by accident. The damage anchors the pool uses for numbers are 1x1 markers,
+which is why an earlier version sized the burst to ~168 px and it read as a spark. The multiplier is a constant in
+`FloatingDamageTextPool` (`ImpactVfxSlotScale`); change it there, not per ability.
 
 | Move | Effect id | Sheet |
 |---|---|---|

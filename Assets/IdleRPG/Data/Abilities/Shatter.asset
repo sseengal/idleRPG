@@ -18,6 +18,7 @@ MonoBehaviour:
   kind: 2
   target: 3
   artSlot: Attack02
+  impactVfx: ice_shatter
   cooldownSec: 12
   shieldFactor: 0.5
   shieldSeconds: 4

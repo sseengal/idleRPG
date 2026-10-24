@@ -43,6 +43,7 @@ namespace IdleRPG.UI
         [SerializeField] private float clearPopDurationSec = 0.2f;
 
         private GameManager manager;
+        private FloatingDamageTextPool damagePool;
 
         private Vector2 restPosition;
         private bool restPositionCaptured;
@@ -55,6 +56,7 @@ namespace IdleRPG.UI
         public void Build(GameManager gameManager, FloatingDamageTextPool damagePool)
         {
             manager = gameManager;
+            this.damagePool = damagePool;
             damagePool?.SetEnemyAnchors(anchors);
         }
 
@@ -178,6 +180,9 @@ namespace IdleRPG.UI
 
             // Fixed hero-like box per enemy; shrink only enough to fit the wave in the column.
             float slotHeight = count > 0 ? Mathf.Min(SlotHeight, (height - (count - 1) * SlotGap) / count) : SlotHeight;
+
+            // Impact effects size themselves from a real unit box, not from the 1x1 damage anchors.
+            damagePool?.SetEnemySlotHeight(slotHeight);
 
             // Vertically centre the packed group in the column so it lines up with the hero block instead
             // of hugging the column's top edge.
