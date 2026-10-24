@@ -84,6 +84,14 @@ namespace IdleRPG.UI
             heroAnchors = anchors;
         }
 
+        /// <summary>The live pool, so a unit view can post a word at its own position.</summary>
+        public static FloatingDamageTextPool Instance { get; private set; }
+
+        private void Awake()
+        {
+            Instance = this;
+        }
+
         private void Start()
         {
             if (prefab == null)
@@ -111,6 +119,11 @@ namespace IdleRPG.UI
 
         private void OnDisable()
         {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+
             GameEvents.EnemyDamaged -= OnEnemyDamaged;
             GameEvents.HeroDamaged -= OnHeroDamaged;
             GameEvents.Healed -= OnHealed;
@@ -238,12 +251,7 @@ namespace IdleRPG.UI
                 ? FloatingTextStyle.AbilityHit
                 : FloatingTextStyle.Incoming;
 
-            // Intercepted or halved by the guard: say so, at impact, over wherever the knight is standing now.
-            if (isGuarded)
-            {
-                Spawn(0d, anchor, FloatingTextStyle.Guard, "GUARD", new Vector2(0f, 78f));
-            }
-
+            // Intercepted or halved by the guard: the word is posted by HeroUnitView, which knows its own position.
             Spawn(damage, anchor, style);
         }
 
@@ -319,9 +327,15 @@ namespace IdleRPG.UI
         }
 
         /// <summary>
-        /// Plays an on-target impact sheet at one enemy slot. Missing art is a quiet no-op: an ability must never
-        /// break because a picture is absent.
+        /// Shows a short word over one unit. Used by unit views that know exactly where they are right now (a guard
+        /// that stepped in front of an ally), so the word cannot lag behind a move.
         /// </summary>
+        public void ShowWord(RectTransform anchor, string text, FloatingTextStyle style, float height = 78f)
+        {
+            Spawn(0d, anchor, style, text, new Vector2(0f, height));
+        }
+
+        /// <summary>Plays an on-target impact sheet at one enemy slot. Missing art is a quiet no-op.</summary>
         private void PlayImpact(int enemyIndex, string vfxId, float scale = 1f)
         {
             if (string.IsNullOrEmpty(vfxId))

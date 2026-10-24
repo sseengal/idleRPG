@@ -196,16 +196,29 @@ namespace IdleRPG.UI
         /// </summary>
         private void OnCoverIntercepted(int guardIndex, int allyIndex)
         {
-            if (guardIndex != heroIndex || allyIndex < 0 || lunge == null || lunge.IsBusy)
+            if (guardIndex != heroIndex || allyIndex < 0)
             {
                 return;
+            }
+
+            // Create the mover on demand: the knight may not have attacked yet, and the dash used to be skipped
+            // silently when no lunge existed (that is why the text stayed over his old slot).
+            CharacterLunge dash = EnsureLunge();
+            if (dash == null)
+            {
+                return;
+            }
+
+            if (dash.IsBusy)
+            {
+                dash.ResetToHome();
             }
 
             RectTransform allySlot = FindAllySlot(allyIndex);
 
             if (allySlot != null)
             {
-                lunge.BeginRun(allySlot);
+                dash.BeginRun(allySlot);
             }
         }
 
@@ -340,6 +353,12 @@ namespace IdleRPG.UI
 
             hitJuice.Flash(baseColor, hitFlashColor, hitFlashDurationSec);
             hitJuice.Punch(hitPunchScale, hitPunchDurationSec);
+
+            // A guarded hit: say GUARD at this unit's own transform, which is where the knight actually stands right now.
+            if (isGuarded)
+            {
+                FloatingDamageTextPool.Instance?.ShowWord(transform as RectTransform, "GUARD", FloatingTextStyle.Guard);
+            }
 
             // A covered hit: land the dash on the damage beat, then blink home.
             if (lunge != null && lunge.IsBusy)
