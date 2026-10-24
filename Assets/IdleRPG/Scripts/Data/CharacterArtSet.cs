@@ -56,8 +56,18 @@ namespace IdleRPG.Data
         /// late, so the primary strip is what the game uses. Whatever this returns is also what the sim's swing
         /// window is measured from (<see cref="SwingSeconds"/>), so the clip and the blow always agree.
         /// </summary>
+        /// <summary>Which strip is the ordinary attack: "Attack01" by default (the Mage uses "Attack02").</summary>
+        public string BasicAttackSlot = "Attack01";
+
         public Sprite[] GetAttack()
         {
+            Sprite[] primary = FramesFor(string.IsNullOrEmpty(BasicAttackSlot) ? "Attack01" : BasicAttackSlot);
+
+            if (primary != null && primary.Length > 0)
+            {
+                return primary;
+            }
+
             if (Attack01 != null && Attack01.Length > 0)
             {
                 return Attack01;
@@ -143,7 +153,13 @@ namespace IdleRPG.Data
                     return 0f;
                 }
 
-                int strike = StrikeFrame >= 0 && StrikeFrame < frames ? StrikeFrame : frames - 1;
+                int strike = StrikeFrameFor(string.IsNullOrEmpty(BasicAttackSlot) ? "Attack01" : BasicAttackSlot);
+
+                if (strike < 0 || strike >= frames)
+                {
+                    strike = frames - 1;
+                }
+
                 return (strike + 1) / (float)Mathf.Max(1, AttackFps);
             }
         }

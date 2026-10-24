@@ -256,7 +256,7 @@ namespace IdleRPG.UI
         /// This enemy committed an action: start the clip and run at the hero it is about to hit. The clip slot lets an
         /// enemy cast play its own strip through the same entry point a swing uses.
         /// </summary>
-        private void OnSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot, int coveredAllyIndex)
+        private void OnSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot, int coveredAllyIndex, bool stayPlanted)
         {
             if (attackerSide != CombatantSide.Enemy || attackerIndex != enemyIndex)
             {

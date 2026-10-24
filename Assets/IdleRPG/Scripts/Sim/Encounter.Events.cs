@@ -77,6 +77,9 @@ namespace IdleRPG.Sim
 
         /// <summary>When a guard intercepts this hit, the ally it was aimed at (-1 = a normal hit).</summary>
         public int CoveredAllyIndex;
+
+        /// <summary>True when the caster stays planted instead of running at the target (a ranged spell).</summary>
+        public bool StayPlanted;
     }
 
     /// <summary>A blow or an ability travelling from announcement to impact.</summary>

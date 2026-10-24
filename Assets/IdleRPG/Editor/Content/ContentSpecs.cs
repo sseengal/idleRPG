@@ -183,6 +183,9 @@ namespace IdleRPG.EditorTools.Content
         /// <summary>Effect size relative to the shared base. 1 = standard, 1.15 = a bit bigger.</summary>
         public float impactVfxScale = 1f;
 
+        /// <summary>Cast without stepping at the target: a ranged spell stays planted.</summary>
+        public bool castInPlace = false;
+
         /// <summary>Shield only: how many hits aimed at an ally the caster intercepts (0 = normal timed shield).</summary>
         public int guardHits = 0;
 

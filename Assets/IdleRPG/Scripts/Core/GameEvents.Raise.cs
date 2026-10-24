@@ -75,9 +75,9 @@ namespace IdleRPG.Core
             SafeInvoke(EnemyDamaged, info, nameof(EnemyDamaged));
         }
 
-        internal static void RaiseSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot, int coveredAllyIndex)
+        internal static void RaiseSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot, int coveredAllyIndex, bool stayPlanted)
         {
-            SafeInvoke(SwingStarted, attackerIndex, attackerSide, targetIndex, targetSide, clipSlot, coveredAllyIndex, nameof(SwingStarted));
+            SafeInvoke(SwingStarted, attackerIndex, attackerSide, targetIndex, targetSide, clipSlot, coveredAllyIndex, stayPlanted, nameof(SwingStarted));
         }
 
         internal static void RaiseEnemyKilled(string enemyName, double goldReward, int enemyIndex)
@@ -312,6 +312,23 @@ namespace IdleRPG.Core
             try
             {
                 handler(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+            }
+            catch (Exception exception)
+            {
+                LogSubscriberException(eventName, exception);
+            }
+        }
+
+        private static void SafeInvoke<T1, T2, T3, T4, T5, T6, T7, T8>(Action<T1, T2, T3, T4, T5, T6, T7, T8> handler, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, string eventName)
+        {
+            if (handler == null)
+            {
+                return;
+            }
+
+            try
+            {
+                handler(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
             }
             catch (Exception exception)
             {

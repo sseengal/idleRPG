@@ -107,7 +107,8 @@
             "description": "Casts a shard of ice that bursts on the front enemy.",
             "impactVfx": "ice_shatter",
             "impactDelaySec": 0.35,
-            "impactVfxScale": 1.0
+            "impactVfxScale": 1.0,
+            "castInPlace": true
         },
         {
             "id": "heavy_strike",

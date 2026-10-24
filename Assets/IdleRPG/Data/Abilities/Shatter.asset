@@ -21,9 +21,11 @@ MonoBehaviour:
   impactVfx: ice_shatter
   impactDelaySec: 0.35
   impactVfxScale: 1
+  castInPlace: 1
   cooldownSec: 12
   shieldFactor: 0.5
   shieldSeconds: 4
+  guardHits: 0
   healFraction: 0.25
   damageMultiplier: 2
   unlockStage: 12

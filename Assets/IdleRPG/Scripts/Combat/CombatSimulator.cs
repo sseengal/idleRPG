@@ -58,7 +58,7 @@ namespace IdleRPG.Combat
         public event Action<EnemyDamagedInfo> EnemyDamaged;
 
         /// <summary>An attack or ability was announced (attacker committed; effects land after the travel window).</summary>
-        public event Action<int, CombatantSide, int, CombatantSide, string, int> SwingStarted;
+        public event Action<int, CombatantSide, int, CombatantSide, string, int, bool> SwingStarted;
 
         /// <summary>(enemyIndex, goldReward) - one call per enemy, so the UI can attribute a 1-3 enemy wave.</summary>
         public event Action<int, double> EnemyKilled;
@@ -441,6 +441,7 @@ namespace IdleRPG.Combat
                 ImpactDelaySeconds = definition.ImpactDelaySec,
                 VfxScale = definition.ImpactVfxScale,
                 GuardHits = definition.GuardHits,
+                StayPlanted = definition.CastInPlace,
 
                 // The art owns the travel window: the effect lands on the frame that strip reaches full reach.
                 WindowSeconds = art != null ? art.SecondsFor(slot) : 0f
@@ -485,7 +486,7 @@ namespace IdleRPG.Combat
 
         private void OnEncounterSwingStarted(SwingStartedEvent swing)
         {
-            SwingStarted?.Invoke(swing.AttackerIndex, swing.AttackerSide, swing.TargetIndex, swing.TargetSide, swing.ClipSlot, swing.CoveredAllyIndex);
+            SwingStarted?.Invoke(swing.AttackerIndex, swing.AttackerSide, swing.TargetIndex, swing.TargetSide, swing.ClipSlot, swing.CoveredAllyIndex, swing.StayPlanted);
         }
 
         private void OnEncounterDamaged(DamageEvent damage)

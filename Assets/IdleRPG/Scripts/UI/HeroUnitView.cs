@@ -250,7 +250,7 @@ namespace IdleRPG.UI
         /// slot rides on the event, so an ability needs no handler of its own - the ability path and the attack path are
         /// the same path, which is what stops one of them drifting.
         /// </summary>
-        private void OnSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot, int coveredAllyIndex)
+        private void OnSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot, int coveredAllyIndex, bool stayPlanted)
         {
             if (attackerSide != CombatantSide.Party || attackerIndex != heroIndex)
             {
@@ -261,7 +261,8 @@ namespace IdleRPG.UI
             StartSwing(clipSlot);
 
             // A self/party guard stays planted: a guard that charges at nothing is a lie.
-            if (targetSide != CombatantSide.Enemy)
+            // A ranged spell sets stayPlanted too: the caster throws from where it stands.
+            if (stayPlanted || targetSide != CombatantSide.Enemy)
             {
                 return;
             }
@@ -353,6 +354,19 @@ namespace IdleRPG.UI
 
             hitJuice.Flash(baseColor, hitFlashColor, hitFlashDurationSec);
             hitJuice.Punch(hitPunchScale, hitPunchDurationSec);
+
+            // This unit posts its own numbers: the text is placed from its live transform, so a slot on the edge of
+            // the board (the bottom hero) is not shifted inward by the pool's centre-of-screen bookkeeping.
+            FloatingDamageTextPool pool = FloatingDamageTextPool.Instance;
+
+            if (pool != null)
+            {
+                FloatingTextStyle style = isCritical
+                    ? FloatingTextStyle.Critical
+                    : pool.IsAbilityHit(attackerEnemyIndex) ? FloatingTextStyle.AbilityHit : FloatingTextStyle.Incoming;
+
+                pool.ShowNumber(transform as RectTransform, damage, style);
+            }
 
             // A guarded hit: say GUARD at this unit's own transform, which is where the knight actually stands right now.
             if (isGuarded)

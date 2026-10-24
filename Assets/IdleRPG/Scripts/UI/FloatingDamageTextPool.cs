@@ -110,7 +110,6 @@ namespace IdleRPG.UI
         private void OnEnable()
         {
             GameEvents.EnemyDamaged += OnEnemyDamaged;
-            GameEvents.HeroDamaged += OnHeroDamaged;
             GameEvents.Healed += OnHealed;
             GameEvents.ShieldApplied += OnShieldApplied;
             GameEvents.AbilityCast += OnAbilityCast;
@@ -125,7 +124,6 @@ namespace IdleRPG.UI
             }
 
             GameEvents.EnemyDamaged -= OnEnemyDamaged;
-            GameEvents.HeroDamaged -= OnHeroDamaged;
             GameEvents.Healed -= OnHealed;
             GameEvents.ShieldApplied -= OnShieldApplied;
             GameEvents.AbilityCast -= OnAbilityCast;
@@ -158,7 +156,7 @@ namespace IdleRPG.UI
         }
 
         /// <summary>True while the damage from that enemy slot still belongs to an ability it just called out.</summary>
-        private bool IsAbilityHit(int enemyIndex)
+        public bool IsAbilityHit(int enemyIndex)
         {
             return enemyIndex >= 0
                 && enemyIndex < enemyCastUntil.Count
@@ -233,28 +231,6 @@ namespace IdleRPG.UI
             return enemyAnchors[Mathf.Clamp(enemyIndex, 0, enemyAnchors.Length - 1)];
         }
 
-        private void OnHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical, bool isGuarded)
-        {
-            if (damage <= 0d || heroIndex < 0)
-            {
-                return;
-            }
-
-            RectTransform anchor = AnchorFor(CombatantSide.Party, heroIndex);
-
-            if (anchor == null)
-            {
-                return;
-            }
-
-            FloatingTextStyle style = IsAbilityHit(attackerEnemyIndex)
-                ? FloatingTextStyle.AbilityHit
-                : FloatingTextStyle.Incoming;
-
-            // Intercepted or halved by the guard: the word is posted by HeroUnitView, which knows its own position.
-            Spawn(damage, anchor, style);
-        }
-
         /// <summary>Health restored by an ability: a green number over the unit that was healed.</summary>
         private void OnHealed(HealEvent heal)
         {
@@ -324,6 +300,20 @@ namespace IdleRPG.UI
                 pendingImpacts.RemoveAt(i);
                 PlayImpact(pending.index, pending.vfxId, pending.scale);
             }
+        }
+
+        /// <summary>
+        /// Shows a number over one unit, anchored to that unit's own transform. Hero views call this so a slot at the
+        /// edge of the board (the bottom hero) gets its number where the hero actually stands.
+        /// </summary>
+        public void ShowNumber(RectTransform anchor, double value, FloatingTextStyle style)
+        {
+            if (value <= 0d)
+            {
+                return;
+            }
+
+            Spawn(value, anchor, style);
         }
 
         /// <summary>

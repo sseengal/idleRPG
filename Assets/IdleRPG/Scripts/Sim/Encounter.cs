@@ -784,7 +784,8 @@ namespace IdleRPG.Sim
                 TargetIndex = anchor.SlotIndex,
                 ClipSlot = ability.ClipSlot,
                 IsAbility = true,
-                CoveredAllyIndex = coveredAlly != null ? coveredAlly.SlotIndex : -1
+                CoveredAllyIndex = coveredAlly != null ? coveredAlly.SlotIndex : -1,
+                StayPlanted = ability.StayPlanted
             });
 
             if (coveredAlly != null)

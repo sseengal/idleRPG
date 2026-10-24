@@ -41,6 +41,9 @@ namespace IdleRPG.Data
         [Tooltip("Size of the impact effect, as a multiple of the shared base size. 1 = the standard burst.")]
         [SerializeField] private float impactVfxScale = 1f;
 
+        [Tooltip("Cast without stepping toward the target: a ranged spell stays planted.")]
+        [SerializeField] private bool castInPlace = false;
+
         [Tooltip("Seconds between casts. The cast itself is instant; this is the clock that refills it.")]
         [SerializeField] private float cooldownSec = 12f;
 
@@ -91,6 +94,9 @@ namespace IdleRPG.Data
 
         /// <summary>Shield only: hits aimed at an ally that the caster intercepts. 0 = a normal timed shield.</summary>
         public int GuardHits => Mathf.Max(0, guardHits);
+
+        /// <summary>True when the caster should not step toward the target (a ranged spell).</summary>
+        public bool CastInPlace => castInPlace;
 
         public float CooldownSec => Mathf.Max(MinCooldownSec, cooldownSec);
 

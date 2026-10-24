@@ -190,6 +190,14 @@ which is why an earlier version sized the burst to ~168 px and it read as a spar
 Effect sheets live in `Assets/IdleRPG/Resources/Vfx/` and are cut by `Tools > Idle RPG > Art > Slice VFX Sheets`
 (a 100 px grid; the tool reads the PNG header so Unity's power-of-two rescale cannot move the cuts).
 
+**Cast in place.** An ability with `castInPlace` true does not run at the target: the swing plays where the caster
+stands. Shatter uses it (a thrown spell), and so does every party-targeted move (Guard), which never runs at nothing.
+The flag rides `SwingStartedEvent.StayPlanted` from the sim to the unit view, so the sim and the picture agree.
+
+**Which strip is the ordinary attack.** `CharacterArtSet.BasicAttackSlot` names it - `Attack01` by default, the Mage
+uses `Attack02` (the Shatter cast pose, plain sheet, no frost burst). `SwingSeconds` is measured from that same strip,
+so the blow still lands on the strip's own contact frame.
+
 ---
 
 ## 8. Step 5 — the pictures

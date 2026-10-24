@@ -74,6 +74,9 @@ namespace IdleRPG.Sim
         /// <summary>Shield kind: when &gt; 0 this is a party cover stance for that many intercepted hits, not a timer.</summary>
         public int GuardHits;
 
+        /// <summary>True when the caster stays planted (a ranged spell) instead of running at the target.</summary>
+        public bool StayPlanted;
+
         /// <summary>Multiplier applied to the caster's attack for a Damage ability.</summary>
         public double DamageMultiplier;
 

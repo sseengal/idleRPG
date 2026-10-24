@@ -79,6 +79,7 @@ MonoBehaviour:
   DeathFps: 10
   AbilityFps: 10
   ArtFacesLeft: 0
+  BasicAttackSlot: Attack02
   StrikeFrame: 3
   Attack02StrikeFrame: 5
   Attack03StrikeFrame: -1
