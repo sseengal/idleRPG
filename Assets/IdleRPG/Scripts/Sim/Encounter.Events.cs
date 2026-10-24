@@ -92,6 +92,9 @@ namespace IdleRPG.Sim
         /// <summary>The ally the swing was originally aimed at (null unless <see cref="IsCoveredHit"/>).</summary>
         public Combatant CoveredAlly;
 
+        /// <summary>How many targets of an ability were redirected to a guard (0 for a plain swing).</summary>
+        public int CoveredTargetCount;
+
         /// <summary>The ability being cast (valid only when <see cref="IsAbility"/> is true).</summary>
         public SimAbility Ability;
 

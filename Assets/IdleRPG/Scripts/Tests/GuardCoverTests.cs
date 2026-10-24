@@ -124,6 +124,52 @@ namespace IdleRPG.Tests
         }
 
         [Test]
+        public void Guard_InterceptsAnEnemyAbility()
+        {
+            Combatant ally = Member("ally");
+            Combatant knight = Member("knight");
+            Encounter encounter = Build(new[] { ally, knight }, out Combatant enemy);
+
+            enemy.SetAbility(new SimAbility
+            {
+                Id = "test_spike",
+                DisplayName = "Spike",
+                ClipSlot = "Ability",
+                CooldownSec = 0.5d,
+                Kind = SimAbilityKind.Damage,
+                Target = SimAbilityTarget.FrontHero,
+                DamageMultiplier = 2d,
+                WindowSeconds = 0.1d
+            });
+
+            knight.BeginCoverGuard(2, 0.5d);
+
+            int hitIndex = -1;
+            double hitDamage = 0d;
+
+            encounter.Damaged += damage =>
+            {
+                if (damage.TargetSide == CombatantSide.Party && hitIndex < 0)
+                {
+                    hitIndex = damage.TargetIndex;
+                    hitDamage = damage.Damage;
+                }
+            };
+
+            // Enemy casts are gated by a random patience roll, so give the fight plenty of sim time.
+            for (int step = 0; step < 4000 && hitIndex < 0; step++)
+            {
+                encounter.Step(0.02d);
+            }
+
+            Assert.AreEqual(1, hitIndex, "an enemy ability aimed at the ally must land on the guarding knight");
+            Assert.AreEqual(1000d, ally.CurrentHealth, 0.001d, "the covered ally must take nothing from the ability");
+            Assert.Less(knight.CurrentHealth, 1000d, "the knight takes the ability hit");
+            Assert.Less(hitDamage, 100d, "the intercepted ability hit is halved");
+            Assert.AreEqual(1, knight.CoverGuardHitsRemaining, "an intercepted ability spends one charge");
+        }
+
+        [Test]
         public void TimedShield_StillHurts_AndDoesNotIntercept()
         {
             Combatant ally = Member("ally");

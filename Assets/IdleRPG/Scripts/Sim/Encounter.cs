@@ -396,6 +396,13 @@ namespace IdleRPG.Sim
                 {
                     double applied = target.TakeDamage(swing.Damage);
                     caster.Threat += applied;
+
+                    // An intercepted ability hit spends a guard charge, exactly like an intercepted swing.
+                    if (swing.IsCoveredHit && target.Side == CombatantSide.Party)
+                    {
+                        target.ConsumeCoverHit();
+                    }
+
                     RaiseDamage(caster, target, swing.AttackerSide, applied, swing.IsCritical, ability.VfxId);
                     ResolveDeath(target);
                     continue;
@@ -667,6 +674,33 @@ namespace IdleRPG.Sim
                 return false;
             }
 
+            // Cover guard: an enemy move aimed at an ally is taken by the guarding knight, exactly like a swing. This is
+            // the path that used to skip the guard (the Slime's Spike), because only plain swings were redirected.
+            Combatant coveredAlly = null;
+            int coveredCount = 0;
+
+            if (side == CombatantSide.Enemy)
+            {
+                for (int i = 0; i < targets.Length; i++)
+                {
+                    Combatant intended = targets[i];
+                    if (intended == null || intended.Side != CombatantSide.Party)
+                    {
+                        continue;
+                    }
+
+                    Combatant guard = FindCoverGuard(intended);
+                    if (guard == null)
+                    {
+                        continue;
+                    }
+
+                    coveredAlly ??= intended;
+                    targets[i] = guard;
+                    coveredCount++;
+                }
+            }
+
             Combatant anchor = targets[0];
             double damage = 0d;
             bool isCritical = false;
@@ -695,7 +729,10 @@ namespace IdleRPG.Sim
                 Remaining = AbilityWindow(caster) + ability.ImpactDelaySeconds,
                 IsAbility = true,
                 Ability = ability,
-                Targets = targets
+                Targets = targets,
+                IsCoveredHit = coveredCount > 0,
+                CoveredAlly = coveredAlly,
+                CoveredTargetCount = coveredCount
             };
 
             hasActiveSwing = true;
@@ -741,8 +778,14 @@ namespace IdleRPG.Sim
                 TargetSide = anchor.Side,
                 TargetIndex = anchor.SlotIndex,
                 ClipSlot = ability.ClipSlot,
-                IsAbility = true
+                IsAbility = true,
+                CoveredAllyIndex = coveredAlly != null ? coveredAlly.SlotIndex : -1
             });
+
+            if (coveredAlly != null)
+            {
+                CoverIntercepted?.Invoke(anchor.SlotIndex, coveredAlly.SlotIndex);
+            }
 
             return true;
         }

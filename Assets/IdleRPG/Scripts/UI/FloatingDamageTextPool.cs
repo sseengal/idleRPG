@@ -34,6 +34,9 @@ namespace IdleRPG.UI
         private readonly List<float> enemyCastUntil = new List<float>();
         private float driftSeed;
 
+        /// <summary>Guard index -> time until which the next damage on it counts as an intercepted hit.</summary>
+        private readonly Dictionary<int, float> coverUntil = new Dictionary<int, float>();
+
         [Header("Impact effect")]
         [Tooltip("Frames per second for an on-target impact sheet (Resources/Vfx/<id>).")]
         [SerializeField] private float impactVfxFps = 12f;
@@ -234,6 +237,13 @@ namespace IdleRPG.UI
                 ? FloatingTextStyle.AbilityHit
                 : FloatingTextStyle.Incoming;
 
+            // Intercepted hit: the guard's word appears here, at impact, over wherever the knight is standing now.
+            if (coverUntil.TryGetValue(heroIndex, out float until) && Time.time <= until)
+            {
+                coverUntil.Remove(heroIndex);
+                Spawn(0d, anchor, FloatingTextStyle.Guard, "GUARD");
+            }
+
             Spawn(damage, anchor, style);
         }
 
@@ -257,7 +267,9 @@ namespace IdleRPG.UI
         /// <summary>A guard just took a hit meant for an ally: say so over the guard.</summary>
         private void OnCoverIntercepted(int guardIndex, int allyIndex)
         {
-            Spawn(0d, AnchorFor(CombatantSide.Party, guardIndex), FloatingTextStyle.Guard, "GUARD");
+            // The word must land WITH the hit, not at the announce: remember the guard is about to be struck, and let
+            // the damage event (which arrives at impact, with the knight already in front of the ally) draw it.
+            coverUntil[guardIndex] = Time.time + 1.2f;
         }
 
         /// <summary>The anchor that belongs to one unit on either side.</summary>
