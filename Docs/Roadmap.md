@@ -527,6 +527,10 @@ needs a play check, so each ships alone, after the art/audio pass.
 Test net now exists for the risky part: `EncounterLaneTests` proves one action at a time and that a cast lands only
 after its window. S2 still needs a human eye.
 
+**S3 first step shipped 24 Oct 2026** (branch `refactor/ui-kit`): the eight Data-bound translators moved into
+`Scripts/Combat/Adapters/`, so `Combat/` is the bridge only. File moves, GUIDs kept, gate PASS. The adapter split
+itself is still open. Verification protocol: `Refactor-Notes.md`.
+
 ## 8. Definition of done (every step)
 
 - [ ] Scope matches the owner doc; no unrelated refactor smuggled in

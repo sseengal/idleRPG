@@ -95,6 +95,7 @@ Docs/
   UI-Layout.md         <- containers, the spacing ladder, mobile scaling
   Art-Pipeline.md      <- HD-2D look, asset volume, perf budgets
   Audio-Plan.md        <- cues, music, licences, the audio build order
+  Refactor-Notes.md    <- how the code-shape pass is proved safe (fingerprint + gate)
   Manual-Tests.md      <- the one manual runbook
   Launch-Plan.md       <- art + audio + store launch, sequenced
   B10-owner-inputs.md  <- what you must do before B10 starts
