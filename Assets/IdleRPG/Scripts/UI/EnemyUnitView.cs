@@ -66,6 +66,7 @@ namespace IdleRPG.UI
         public void Configure(int index)
         {
             enemyIndex = index;
+            UnitAnchors.Register(CombatantSide.Enemy, index, transform as RectTransform);
         }
 
         /// <summary>Runtime wiring (used by the code-built battle page).</summary>
@@ -84,6 +85,7 @@ namespace IdleRPG.UI
 
         private void OnEnable()
         {
+            UnitAnchors.Register(CombatantSide.Enemy, enemyIndex, transform as RectTransform);
             GameEvents.EnemySpawned += OnEnemySpawned;
             GameEvents.EnemyDamaged += OnEnemyDamaged;
             GameEvents.EnemyKilled += OnEnemyKilled;
@@ -95,6 +97,7 @@ namespace IdleRPG.UI
 
         private void OnDisable()
         {
+            UnitAnchors.Unregister(CombatantSide.Enemy, enemyIndex, transform as RectTransform);
             GameEvents.EnemySpawned -= OnEnemySpawned;
             GameEvents.EnemyDamaged -= OnEnemyDamaged;
             GameEvents.EnemyKilled -= OnEnemyKilled;

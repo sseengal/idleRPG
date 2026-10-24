@@ -42,6 +42,7 @@ namespace IdleRPG.UI
         public void Configure(int index)
         {
             heroIndex = index;
+            UnitAnchors.Register(CombatantSide.Party, index, transform as RectTransform);
         }
 
         /// <summary>
@@ -51,6 +52,7 @@ namespace IdleRPG.UI
         public void ConfigureRuntime(int index, Image icon, HpBarView hp, TextMeshProUGUI label, CanvasGroup group)
         {
             heroIndex = index;
+            UnitAnchors.Register(CombatantSide.Party, index, transform as RectTransform);
             iconImage = icon;
             hpBar = hp;
             nameLabel = label;
@@ -160,6 +162,7 @@ namespace IdleRPG.UI
 
         private void OnEnable()
         {
+            UnitAnchors.Register(CombatantSide.Party, heroIndex, transform as RectTransform);
             GameEvents.HeroDamaged += OnHeroDamaged;
             GameEvents.HeroDied += OnHeroDied;
             GameEvents.EnemyDamaged += OnAllyAttackLanded;
@@ -174,6 +177,7 @@ namespace IdleRPG.UI
 
         private void OnDisable()
         {
+            UnitAnchors.Unregister(CombatantSide.Party, heroIndex, transform as RectTransform);
             GameEvents.HeroDamaged -= OnHeroDamaged;
             GameEvents.HeroDied -= OnHeroDied;
             GameEvents.EnemyDamaged -= OnAllyAttackLanded;

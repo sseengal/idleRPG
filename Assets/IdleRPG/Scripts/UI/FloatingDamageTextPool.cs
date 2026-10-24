@@ -218,7 +218,14 @@ namespace IdleRPG.UI
 
         private void OnHeroDamaged(int heroIndex, double damage, double currentHealth, double maxHealth, int attackerEnemyIndex, bool isCritical)
         {
-            if (damage <= 0d || heroAnchors == null || heroIndex < 0 || heroIndex >= heroAnchors.Length)
+            if (damage <= 0d || heroIndex < 0)
+            {
+                return;
+            }
+
+            RectTransform anchor = AnchorFor(CombatantSide.Party, heroIndex);
+
+            if (anchor == null)
             {
                 return;
             }
@@ -227,7 +234,7 @@ namespace IdleRPG.UI
                 ? FloatingTextStyle.AbilityHit
                 : FloatingTextStyle.Incoming;
 
-            Spawn(damage, heroAnchors[heroIndex], style);
+            Spawn(damage, anchor, style);
         }
 
         /// <summary>Health restored by an ability: a green number over the unit that was healed.</summary>
@@ -256,6 +263,14 @@ namespace IdleRPG.UI
         /// <summary>The anchor that belongs to one unit on either side.</summary>
         private RectTransform AnchorFor(CombatantSide side, int index)
         {
+            // Live position first: a unit that dashes (the Knight guarding an ally) must take its numbers with it.
+            RectTransform live = UnitAnchors.Get(side, index);
+
+            if (live != null)
+            {
+                return live;
+            }
+
             if (side == CombatantSide.Enemy)
             {
                 return EnemyAnchor(index);
