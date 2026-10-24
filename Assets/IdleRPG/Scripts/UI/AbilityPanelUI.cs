@@ -151,9 +151,11 @@ namespace IdleRPG.UI
             {
                 row.clockLabel.SetText(!hasAbility
                     ? "LOCKED"
-                    : queued
-                        ? "QUEUED"
-                        : cooling ? Mathf.CeilToInt((float)hero.AbilityCooldownRemaining) + "s" : "READY");
+                    : hero.IsCoverGuardActive
+                        ? "GUARD " + hero.CoverGuardHitsRemaining
+                        : queued
+                            ? "QUEUED"
+                            : cooling ? Mathf.CeilToInt((float)hero.AbilityCooldownRemaining) + "s" : "READY");
                 row.clockLabel.color = queued ? queuedTint : hasAbility && !cooling && alive ? readyTint : coolingTint;
             }
 

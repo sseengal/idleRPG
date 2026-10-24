@@ -80,6 +80,9 @@ namespace IdleRPG.Combat
         /// <summary>Raised when a cast carries an on-target impact effect, with the lead time to its start.</summary>
         public event Action<ImpactVfxEvent> ImpactVfx;
 
+        /// <summary>(guard hero index, covered ally index): a guard intercepted a hit aimed at that ally.</summary>
+        public event Action<int, int> CoverIntercepted;
+
         /// <summary>An ability healed a unit (forwarded at impact).</summary>
         public event Action<HealEvent> Healed;
 
@@ -475,6 +478,7 @@ namespace IdleRPG.Combat
             encounter.PartyWiped += () => PartyWiped?.Invoke();
             encounter.AbilityCast += cast => AbilityCast?.Invoke(cast);
             encounter.ImpactVfx += vfx => ImpactVfx?.Invoke(vfx);
+            encounter.CoverIntercepted += (guard, ally) => CoverIntercepted?.Invoke(guard, ally);
             encounter.Healed += heal => Healed?.Invoke(heal);
             encounter.ShieldApplied += shield => ShieldApplied?.Invoke(shield);
         }

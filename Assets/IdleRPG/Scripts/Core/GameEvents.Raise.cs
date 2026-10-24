@@ -102,6 +102,12 @@ namespace IdleRPG.Core
             SafeInvoke(ImpactVfx, vfx.Side, vfx.Index, vfx.VfxId, (float)vfx.LeadSeconds, vfx.Scale, nameof(ImpactVfx));
         }
 
+        /// <summary>A guard intercepted a hit aimed at an ally: the view steps the knight in front of that hero.</summary>
+        internal static void RaiseCoverIntercepted(int guardIndex, int allyIndex)
+        {
+            SafeInvoke(CoverIntercepted, guardIndex, allyIndex, nameof(CoverIntercepted));
+        }
+
         /// <summary>An ability's heal landed on a unit.</summary>
         internal static void RaiseHealed(HealEvent heal)
         {

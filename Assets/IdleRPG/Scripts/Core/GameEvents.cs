@@ -46,6 +46,9 @@ namespace IdleRPG.Core
         /// <summary>(target side, target index, effect id, seconds until it starts, size scale)</summary>
         public static event Action<CombatantSide, int, string, float, float> ImpactVfx;
 
+        /// <summary>(guard hero index, covered ally index): the knight steps in front of that ally.</summary>
+        public static event Action<int, int> CoverIntercepted;
+
         /// <summary>(day, gems) when the daily-streak calendar pays out (B7 S2).</summary>
         public static event Action<int, double> DailyStreakClaimed;
 
@@ -170,6 +173,7 @@ namespace IdleRPG.Core
             ShieldApplied = null;
             AbilityCast = null;
             ImpactVfx = null;
+            CoverIntercepted = null;
             HeroStatsChanged = null;
             HeroLevelChanged = null;
             UpgradePurchased = null;

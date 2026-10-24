@@ -128,6 +128,7 @@ namespace IdleRPG.Combat
             simulator.HeroDamaged += OnSimHeroDamaged;
             simulator.AbilityCast += OnSimAbilityCast;
             simulator.ImpactVfx += OnSimImpactVfx;
+            simulator.CoverIntercepted += OnSimCoverIntercepted;
             simulator.Healed += OnSimHealed;
             simulator.ShieldApplied += OnSimShieldApplied;
             simulator.AbilityFor = abilityProvider;
@@ -226,6 +227,7 @@ namespace IdleRPG.Combat
             simulator.HeroDamaged -= OnSimHeroDamaged;
             simulator.AbilityCast -= OnSimAbilityCast;
             simulator.ImpactVfx -= OnSimImpactVfx;
+            simulator.CoverIntercepted -= OnSimCoverIntercepted;
             simulator.Healed -= OnSimHealed;
             simulator.ShieldApplied -= OnSimShieldApplied;
             simulator.HeroDied -= OnSimHeroDied;
@@ -270,6 +272,11 @@ namespace IdleRPG.Combat
         private void OnSimImpactVfx(ImpactVfxEvent vfx)
         {
             GameEvents.RaiseImpactVfx(vfx);
+        }
+
+        private void OnSimCoverIntercepted(int guardIndex, int allyIndex)
+        {
+            GameEvents.RaiseCoverIntercepted(guardIndex, allyIndex);
         }
 
         private void OnSimAbilityCast(AbilityCastEvent cast)

@@ -169,6 +169,7 @@ namespace IdleRPG.UI
             GameEvents.HeroStatsChanged += OnHeroStatsChanged;
             GameEvents.WaveCompleted += OnWaveChanged;
             GameEvents.StageChanged += OnStageChangedHandler;
+            GameEvents.CoverIntercepted += OnCoverIntercepted;
         }
 
         private void OnDisable()
@@ -182,6 +183,49 @@ namespace IdleRPG.UI
             GameEvents.HeroStatsChanged -= OnHeroStatsChanged;
             GameEvents.WaveCompleted -= OnWaveChanged;
             GameEvents.StageChanged -= OnStageChangedHandler;
+            GameEvents.CoverIntercepted -= OnCoverIntercepted;
+        }
+
+        /// <summary>
+        /// A guard intercepted a hit meant for <paramref name="allyIndex"/>. The guarding hero dashes in front of that
+        /// ally (the same run-in the lunge already does), so the player sees who was saved.
+        /// </summary>
+        private void OnCoverIntercepted(int guardIndex, int allyIndex)
+        {
+            if (guardIndex != heroIndex || allyIndex < 0 || lunge == null || lunge.IsBusy)
+            {
+                return;
+            }
+
+            RectTransform allySlot = FindAllySlot(allyIndex);
+
+            if (allySlot != null)
+            {
+                lunge.BeginRun(allySlot);
+            }
+        }
+
+        /// <summary>The slot rect of one sibling hero, or null when the board is not built yet.</summary>
+        private RectTransform FindAllySlot(int allyIndex)
+        {
+            Transform parent = transform.parent;
+
+            if (parent == null)
+            {
+                return null;
+            }
+
+            HeroUnitView[] views = parent.GetComponentsInChildren<HeroUnitView>(true);
+
+            for (int i = 0; i < views.Length; i++)
+            {
+                if (views[i] != null && views[i].HeroIndex == allyIndex)
+                {
+                    return views[i].transform as RectTransform;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -292,6 +336,13 @@ namespace IdleRPG.UI
 
             hitJuice.Flash(baseColor, hitFlashColor, hitFlashDurationSec);
             hitJuice.Punch(hitPunchScale, hitPunchDurationSec);
+
+            // A covered hit: land the dash on the damage beat, then blink home.
+            if (lunge != null && lunge.IsBusy)
+            {
+                lunge.Impact();
+                lunge.CompleteSwing();
+            }
 
             if (animator != null && animator.HasArt)
             {
