@@ -51,6 +51,20 @@ namespace IdleRPG.UI
         private readonly List<ImpactPlay> impacts = new List<ImpactPlay>();
         private readonly Dictionary<string, Sprite[]> impactCache = new Dictionary<string, Sprite[]>();
 
+        /// <summary>Effects waiting for their lead time (an ability's burst starts before its damage).</summary>
+        private readonly List<PendingImpact> pendingImpacts = new List<PendingImpact>();
+
+        /// <summary>Last time an effect started for each enemy slot, so the damage that follows does not spawn a second one.</summary>
+        private readonly Dictionary<int, float> lastImpactAt = new Dictionary<int, float>();
+
+        private sealed class PendingImpact
+        {
+            public int index;
+            public string vfxId;
+            public float scale;
+            public float atTime;
+        }
+
         private sealed class ImpactPlay
         {
             public Image image;
@@ -92,6 +106,7 @@ namespace IdleRPG.UI
             GameEvents.Healed += OnHealed;
             GameEvents.ShieldApplied += OnShieldApplied;
             GameEvents.AbilityCast += OnAbilityCast;
+            GameEvents.ImpactVfx += OnImpactVfx;
         }
 
         private void OnDisable()
@@ -101,6 +116,7 @@ namespace IdleRPG.UI
             GameEvents.Healed -= OnHealed;
             GameEvents.ShieldApplied -= OnShieldApplied;
             GameEvents.AbilityCast -= OnAbilityCast;
+            GameEvents.ImpactVfx -= OnImpactVfx;
         }
 
         /// <summary>
@@ -176,7 +192,16 @@ namespace IdleRPG.UI
             }
 
             Spawn(info.Damage, EnemyAnchor(info.EnemyIndex), info.IsCritical ? FloatingTextStyle.Critical : FloatingTextStyle.Normal);
-            PlayImpact(info.EnemyIndex, info.VfxId);
+
+            // A scheduled burst (ability) already played a moment ago; do not start a second one on its damage.
+            bool alreadyBurst = !string.IsNullOrEmpty(info.VfxId)
+                && lastImpactAt.TryGetValue(info.EnemyIndex, out float lastAt)
+                && Time.time - lastAt < 0.75f;
+
+            if (!alreadyBurst)
+            {
+                PlayImpact(info.EnemyIndex, info.VfxId);
+            }
         }
 
         private RectTransform EnemyAnchor(int enemyIndex)
@@ -232,10 +257,45 @@ namespace IdleRPG.UI
         }
 
         /// <summary>
+        /// A cast announced its on-target effect. The burst starts after the lead time, which is deliberately BEFORE
+        /// the damage lands: the player should see the shatter, then the number.
+        /// </summary>
+        private void OnImpactVfx(CombatantSide side, int index, string vfxId, float leadSeconds, float scale)
+        {
+            if (side != CombatantSide.Enemy || string.IsNullOrEmpty(vfxId))
+            {
+                return;
+            }
+
+            pendingImpacts.Add(new PendingImpact
+            {
+                index = index,
+                vfxId = vfxId,
+                scale = scale <= 0f ? 1f : scale,
+                atTime = Time.time + Mathf.Max(0f, leadSeconds)
+            });
+        }
+
+        private void TickPendingImpacts()
+        {
+            for (int i = pendingImpacts.Count - 1; i >= 0; i--)
+            {
+                PendingImpact pending = pendingImpacts[i];
+                if (Time.time < pending.atTime)
+                {
+                    continue;
+                }
+
+                pendingImpacts.RemoveAt(i);
+                PlayImpact(pending.index, pending.vfxId, pending.scale);
+            }
+        }
+
+        /// <summary>
         /// Plays an on-target impact sheet at one enemy slot. Missing art is a quiet no-op: an ability must never
         /// break because a picture is absent.
         /// </summary>
-        private void PlayImpact(int enemyIndex, string vfxId)
+        private void PlayImpact(int enemyIndex, string vfxId, float scale = 1f)
         {
             if (string.IsNullOrEmpty(vfxId))
             {
@@ -268,8 +328,9 @@ namespace IdleRPG.UI
             rt.anchoredPosition = anchor.anchoredPosition;
 
             float baseSize = enemySlotHeight > 1f ? enemySlotHeight : 176f;
-            float size = Mathf.Max(96f, baseSize * ImpactVfxSlotScale);
+            float size = Mathf.Max(96f, baseSize * ImpactVfxSlotScale * Mathf.Max(0.1f, scale));
             rt.sizeDelta = new Vector2(size, size);
+            lastImpactAt[enemyIndex] = Time.time;
 
             // Just above its own unit, so the burst covers the enemy but stays under the numbers.
             int sibling = Mathf.Clamp(anchor.GetSiblingIndex() + 1, 0, anchor.parent.childCount - 1);
@@ -426,6 +487,7 @@ namespace IdleRPG.UI
 
         private void Update()
         {
+            TickPendingImpacts();
             TickImpacts(Time.deltaTime);
 
             for (int i = active.Count - 1; i >= 0; i--)

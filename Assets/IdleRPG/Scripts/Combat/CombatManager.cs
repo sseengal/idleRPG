@@ -127,6 +127,7 @@ namespace IdleRPG.Combat
             simulator.EnemyKilled += OnSimEnemyKilled;
             simulator.HeroDamaged += OnSimHeroDamaged;
             simulator.AbilityCast += OnSimAbilityCast;
+            simulator.ImpactVfx += OnSimImpactVfx;
             simulator.Healed += OnSimHealed;
             simulator.ShieldApplied += OnSimShieldApplied;
             simulator.AbilityFor = abilityProvider;
@@ -224,6 +225,7 @@ namespace IdleRPG.Combat
             simulator.EnemyKilled -= OnSimEnemyKilled;
             simulator.HeroDamaged -= OnSimHeroDamaged;
             simulator.AbilityCast -= OnSimAbilityCast;
+            simulator.ImpactVfx -= OnSimImpactVfx;
             simulator.Healed -= OnSimHealed;
             simulator.ShieldApplied -= OnSimShieldApplied;
             simulator.HeroDied -= OnSimHeroDied;
@@ -265,6 +267,11 @@ namespace IdleRPG.Combat
         /// then raised so the panel restarts the correct clock. The picture and the effect need nothing else from here -
         /// the clip rides on <see cref="OnSimSwingStarted"/> and the damage / heal / guard arrives at impact.
         /// </summary>
+        private void OnSimImpactVfx(ImpactVfxEvent vfx)
+        {
+            GameEvents.RaiseImpactVfx(vfx);
+        }
+
         private void OnSimAbilityCast(AbilityCastEvent cast)
         {
             LogCombat($"{cast.DisplayName} casts {cast.AbilityName} at {TargetLabel(cast.TargetSide, cast.TargetIndex)}");

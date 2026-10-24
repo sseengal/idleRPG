@@ -105,7 +105,9 @@
             "unlockStage": 12,
             "tokenCost": 4.0,
             "description": "Casts a shard of ice that bursts on the front enemy.",
-            "impactVfx": "ice_shatter"
+            "impactVfx": "ice_shatter",
+            "impactDelaySec": 0.35,
+            "impactVfxScale": 1.0
         },
         {
             "id": "heavy_strike",
@@ -139,7 +141,7 @@
         },
         {
             "id": "soldier_charge",
-            "displayName": "Overhead Slash",
+            "displayName": "Holy Slash",
             "kind": "damage",
             "artSlot": "Attack02",
             "cooldownSec": 10.0,
@@ -150,8 +152,10 @@
             "target": "frontenemy",
             "unlockStage": 8,
             "tokenCost": 3.0,
-            "description": "Leaps and brings the blade down on the front enemy.",
-            "impactVfx": "heavy_smash"
+            "description": "Leaps and brings a blessed blade down on the front enemy.",
+            "impactVfx": "heavy_smash",
+            "impactDelaySec": 0.1,
+            "impactVfxScale": 1.15
         },
         {
             "id": "war_cry",

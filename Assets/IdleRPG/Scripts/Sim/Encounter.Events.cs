@@ -91,6 +91,23 @@ namespace IdleRPG.Sim
     }
 
     /// <summary>
+    /// An ability's impact effect is about to happen on a target. Raised at the announce, with the lead time until the
+    /// art reaches the target, so the HUD can start the burst BEFORE the damage number lands.
+    /// </summary>
+    public struct ImpactVfxEvent
+    {
+        public CombatantSide Side;
+        public int Index;
+        public string VfxId;
+
+        /// <summary>Seconds from now until the effect should start (the caster's contact time).</summary>
+        public double LeadSeconds;
+
+        /// <summary>Size relative to the shared base (1 = standard).</summary>
+        public float Scale;
+    }
+
+    /// <summary>
     /// A unit cast its ability. This is only "the cast happened": the clock has already restarted, and whatever the
     /// ability DOES resolves separately, so the view can play the clip without waiting for an effect.
     /// </summary>

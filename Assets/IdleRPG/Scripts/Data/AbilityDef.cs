@@ -35,6 +35,12 @@ namespace IdleRPG.Data
         [Tooltip("Sprite sheet id under Resources/Vfx (e.g. \"ice_shatter\"). Played on the target when the move lands. Empty = none.")]
         [SerializeField] private string impactVfx = "";
 
+        [Tooltip("Seconds the effect starts BEFORE the damage lands, so the burst is seen before the number. 0 = at impact.")]
+        [SerializeField] private float impactDelaySec = 0f;
+
+        [Tooltip("Size of the impact effect, as a multiple of the shared base size. 1 = the standard burst.")]
+        [SerializeField] private float impactVfxScale = 1f;
+
         [Tooltip("Seconds between casts. The cast itself is instant; this is the clock that refills it.")]
         [SerializeField] private float cooldownSec = 12f;
 
@@ -73,6 +79,12 @@ namespace IdleRPG.Data
 
         /// <summary>Impact effect id under Resources/Vfx, or empty when the move has no on-target effect.</summary>
         public string ImpactVfx => impactVfx ?? string.Empty;
+
+        /// <summary>How long before the damage the effect starts. 0 = exactly at impact.</summary>
+        public float ImpactDelaySec => Mathf.Max(0f, impactDelaySec);
+
+        /// <summary>Size of the effect relative to the shared base. 1 = standard.</summary>
+        public float ImpactVfxScale => impactVfxScale <= 0f ? 1f : impactVfxScale;
 
         public float CooldownSec => Mathf.Max(MinCooldownSec, cooldownSec);
 

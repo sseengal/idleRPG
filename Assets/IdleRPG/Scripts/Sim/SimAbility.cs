@@ -65,6 +65,12 @@ namespace IdleRPG.Sim
         /// <summary>Sprite sheet id under Resources/Vfx (e.g. "ice_shatter"); empty = no impact effect.</summary>
         public string VfxId;
 
+        /// <summary>How long before the damage the effect should start (0 = at impact).</summary>
+        public double ImpactDelaySeconds;
+
+        /// <summary>Size of the effect relative to the shared base (1 = standard).</summary>
+        public float VfxScale;
+
         /// <summary>Multiplier applied to the caster's attack for a Damage ability.</summary>
         public double DamageMultiplier;
 

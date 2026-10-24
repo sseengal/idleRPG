@@ -27,7 +27,7 @@ Heroes (3 playable now, 3 art-ready reserves unlocked later):
 | Hero | Ability | Strip | Effect (v1) | Status |
 |---|---|---|---|---|
 | Knight | Shield Wall | `Block:4` | self shield: damage taken x0.5 for N s | **v1** |
-| Soldier | Charge | `Attack02:6` (its spare attack) | heavy blow on the front enemy | **v1** |
+| Soldier | Holy Slash | `Attack02:6` (its spare attack) | heavy blow on the front enemy | **v1** |
 | Wizard | Shatter | `Attack02:9` (VFX overlay deferred) | ranged hit on the front enemy | **v1** |
 | Priest | Heal | `Heal:6` | restore HP to the lowest-health ally | v1 effect, gated by hero unlock |
 | Knight Templar | Bulwark | `Block:4` | party shield (the Shield buff applied to all allies) | v1 effect, gated by hero unlock |
@@ -51,7 +51,7 @@ Counting the composited casts, the Knight owns 3 clips (Attack02, Attack03, Bloc
 | Hero | Ability 1 | Ability 2 |
 |---|---|---|
 | Knight | Shield Wall (`Block`) | Heavy Strike (`Attack02`) |
-| Soldier | Charge (`Attack02`) | War Cry (`Attack03`, a party shield played from a swing clip - it has no block art) |
+| Soldier | Holy Slash (`Attack02`) | War Cry (`Attack03`, a party shield played from a swing clip - it has no block art) |
 | Wizard | Shatter (`Attack02`) | Arcane Burst (`Attack03`, the composited cast) |
 
 A hero equips ONE of the two and can never clear it: switching to the other is allowed, unequipping is not, because a

@@ -66,6 +66,8 @@ namespace IdleRPG.EditorTools.Content
                     .Set("target", (int)ParseAbilityTarget(spec.target))
                     .Set("artSlot", spec.artSlot)
                     .Set("impactVfx", spec.impactVfx)
+                    .Set("impactDelaySec", spec.impactDelaySec)
+                    .Set("impactVfxScale", spec.impactVfxScale)
                     .Set("cooldownSec", spec.cooldownSec)
                     .Set("shieldFactor", spec.shieldFactor)
                     .Set("shieldSeconds", spec.shieldSeconds)

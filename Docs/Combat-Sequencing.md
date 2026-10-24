@@ -98,6 +98,8 @@ A move is one row in `Content/Specs/abilities.json`:
 | `healFraction` | Heal as a fraction of the target's maximum health |
 | `shieldFactor` / `shieldSeconds` | Damage taken multiplier while the guard holds, and for how long |
 | `impactVfx` | Optional id under `Resources/Vfx/` (a sliced sheet) played **on the target** at impact — `ice_shatter`, `heavy_smash` |
+| `impactDelaySec` | How long the burst runs **before** the damage lands. 0 = same instant |
+| `impactVfxScale` | Size multiplier on the shared base (1 = standard, 1.15 = a bit bigger) |
 | `unlockStage` | Stage gate (heroes only; enemies ignore it) |
 
 The row becomes an asset (`Data/Abilities/*.asset`), and the hero or enemy points at that asset.
@@ -132,9 +134,9 @@ Consequences worth knowing:
 
 1. **A missing slot does not fall back to another strip.** It plays the plain attack (`Attack01`) because
    the view is handed an empty frame list. This looks like "the ability works but animates wrong".
-2. **An unmeasured strip lands on its last frame.** `Attack02` / `Attack03` have no measured strike frame,
-   so an ability that names them lands on the final frame. A 12-frame strip at 12 fps therefore lands
-   about **1.0 s** after the call-out.
+2. **An unmeasured strip lands on its last frame.** `Attack02` is measured for the two heroes that use it (Soldier contact
+   frame 3, Mage 5). `Attack03` is still unmeasured, so a move that names it lands on the final frame. Check
+   `CharacterArtSet.Attack02StrikeFrame` / `Attack03StrikeFrame` before blaming the view.
 3. **Measure a strip once, and every move that names it is fixed.** Measuring is art-importer work with a
    long lead time; it is not view code.
 
@@ -182,7 +184,7 @@ which is why an earlier version sized the burst to ~168 px and it read as a spar
 
 | Move | Effect id | Sheet |
 |---|---|---|
-| Overhead Slash | `heavy_smash` | `Priest_Attack_effect.png` (5 frames) |
+| Holy Slash | `heavy_smash` | `Priest_Attack_effect.png` (5 frames), 1.15x size |
 | Shatter | `ice_shatter` | `Wizard_Attack01_Effect.png` (10 frames) |
 
 Effect sheets live in `Assets/IdleRPG/Resources/Vfx/` and are cut by `Tools > Idle RPG > Art > Slice VFX Sheets`
@@ -403,7 +405,7 @@ frozen.
 | Item | Why it is not done | Size |
 |---|---|---|
 | Guard lands ~0.1 s after the call-out (Knight `AbilityStrikeFrame = 0`), before the Block strip reads as a shield | Timing, not balance: pick the contact frame | Small |
-| Measure `Attack02` / `Attack03` strike frames | The whole 6-9 frame strip plays, so Overhead Slash and Shatter land on the last frame (0.5 s / 0.75 s) | Medium |
+| Measure `Attack03` strike frames | `Attack02` is measured now (Soldier contact 3, Mage 5), so Holy Slash and Shatter land on the cut. `Attack03` is still -1 | Small |
 | Attach the nine free Summon / Heal / Block strips in §11 | Content decision, not code — each is one spec row plus one asset | Small |
 | Boss moves (32 of 40 bosses have none) | Biggest visible gap; needs strips that exist plus spec rows | Medium |
 | Measure `Attack02` / `Attack03` strike frames | Art-importer work, long lead time; until then those strips land on the last frame | Medium |

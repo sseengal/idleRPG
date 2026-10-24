@@ -77,6 +77,9 @@ namespace IdleRPG.Combat
         /// <summary>A hero or enemy cast its ability (Ability-Plan). Forwarded from the fight's own tick.</summary>
         public event Action<AbilityCastEvent> AbilityCast;
 
+        /// <summary>Raised when a cast carries an on-target impact effect, with the lead time to its start.</summary>
+        public event Action<ImpactVfxEvent> ImpactVfx;
+
         /// <summary>An ability healed a unit (forwarded at impact).</summary>
         public event Action<HealEvent> Healed;
 
@@ -432,6 +435,8 @@ namespace IdleRPG.Combat
                 HealFraction = definition.HealFraction,
                 DamageMultiplier = definition.DamageMultiplier,
                 VfxId = definition.ImpactVfx,
+                ImpactDelaySeconds = definition.ImpactDelaySec,
+                VfxScale = definition.ImpactVfxScale,
 
                 // The art owns the travel window: the effect lands on the frame that strip reaches full reach.
                 WindowSeconds = art != null ? art.SecondsFor(slot) : 0f
@@ -468,6 +473,7 @@ namespace IdleRPG.Combat
             encounter.EnemyKilled += (index, gold) => EnemyKilled?.Invoke(index, gold);
             encounter.PartyWiped += () => PartyWiped?.Invoke();
             encounter.AbilityCast += cast => AbilityCast?.Invoke(cast);
+            encounter.ImpactVfx += vfx => ImpactVfx?.Invoke(vfx);
             encounter.Healed += heal => Healed?.Invoke(heal);
             encounter.ShieldApplied += shield => ShieldApplied?.Invoke(shield);
         }

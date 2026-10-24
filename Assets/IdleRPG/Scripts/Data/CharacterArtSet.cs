@@ -83,6 +83,12 @@ namespace IdleRPG.Data
         /// </summary>
         public int StrikeFrame = -1;
 
+        /// <summary>Contact frame of Attack02 (0-based). -1 = not measured, so a move on that strip lands on the last frame.</summary>
+        public int Attack02StrikeFrame = -1;
+
+        /// <summary>Contact frame of Attack03 (0-based). -1 = not measured.</summary>
+        public int Attack03StrikeFrame = -1;
+
         /// <summary>
         /// Which special strip the <see cref="Ability"/> frames came from - "Block", "Heal", "Beam", "Spike",
         /// "Summon" - or empty when the character has none. Kept for the log, the validator and debugging.
@@ -154,6 +160,8 @@ namespace IdleRPG.Data
             switch (slot)
             {
                 case "Attack01": return StrikeFrame;
+                case "Attack02": return Attack02StrikeFrame;
+                case "Attack03": return Attack03StrikeFrame;
                 case "Ability": return AbilityStrikeFrame;
                 default: return -1;
             }

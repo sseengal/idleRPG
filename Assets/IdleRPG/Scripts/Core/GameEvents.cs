@@ -43,6 +43,9 @@ namespace IdleRPG.Core
         /// </summary>
         public static event Action<CombatantSide, int, string, string, string, double> AbilityCast;
 
+        /// <summary>(target side, target index, effect id, seconds until it starts, size scale)</summary>
+        public static event Action<CombatantSide, int, string, float, float> ImpactVfx;
+
         /// <summary>(day, gems) when the daily-streak calendar pays out (B7 S2).</summary>
         public static event Action<int, double> DailyStreakClaimed;
 
@@ -166,6 +169,7 @@ namespace IdleRPG.Core
             Healed = null;
             ShieldApplied = null;
             AbilityCast = null;
+            ImpactVfx = null;
             HeroStatsChanged = null;
             HeroLevelChanged = null;
             UpgradePurchased = null;

@@ -9,7 +9,7 @@ panel bug, the `UiSpace.cs` tracking question and the Goblin asset. Details are 
 
 ## Where the feature stands
 
-**Next work: hero ability polish** (guard timing, Charge -> Overhead Slash, Shatter -> Shatter, on-target impact
+**Next work: hero ability polish** (guard timing, Holy Slash, Shatter, on-target impact
 effects). Boss moves and the unused Summon/Heal/Block strips come after. Art is **not** next.
 
 | Layer | State |
@@ -32,7 +32,7 @@ effects). Boss moves and the unused Summon/Heal/Block strips come after. Art is 
   of 14. The clock pauses when the game pauses, because it belongs to the sim.
 - **The ABILITIES panel fits its container.** Column content spans y -228..244 and x -511..511; the container
   spans y -262..262 and x -526..526. Nothing spills out, and the panel has no scroll view.
-- **Labels read correctly:** Knight 240/240 Shield Wall 14s, Soldier 110/110 Charge READY, Mage 130/130 Shatter READY.
+- **Labels read correctly:** Knight 240/240 Shield Wall 14s, Soldier 110/110 Holy Slash READY, Mage 130/130 Shatter READY.
 - **11 ability definitions** (`Content/Specs/abilities.json`, 11 assets in `Data/Abilities`), 15 of 42 characters
   carry a special strip, 0 broken clips, art pipeline PASS, save drift test PASS at v8.
 - **Enemy moves appear from stage 1.** Before this pass the first ability-carrying enemy was the Skeleton at stage

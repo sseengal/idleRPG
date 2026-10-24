@@ -96,6 +96,12 @@ namespace IdleRPG.Core
             SafeInvoke(AbilityCast, side, index, abilityId, abilityName, clipSlot, cooldownSeconds, nameof(AbilityCast));
         }
 
+        /// <summary>A cast's on-target effect is due: the HUD starts it after the lead time, before the damage.</summary>
+        internal static void RaiseImpactVfx(ImpactVfxEvent vfx)
+        {
+            SafeInvoke(ImpactVfx, vfx.Side, vfx.Index, vfx.VfxId, (float)vfx.LeadSeconds, vfx.Scale, nameof(ImpactVfx));
+        }
+
         /// <summary>An ability's heal landed on a unit.</summary>
         internal static void RaiseHealed(HealEvent heal)
         {

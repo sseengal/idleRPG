@@ -19,7 +19,7 @@ Three play at a time; the other three are art-ready reserves. **No Necromancer �
 | Hero | Base attack | Special action in the pack | Ability (proposal) |
 |---|---|---|---|
 | **Knight** | Attack01:7 | `Block:4` | Shield Wall — reduces incoming damage |
-| **Soldier** | Attack01:6 | Attack02:6, Attack03:9 | Charge — a heavier blow |
+| **Soldier** | Attack01:6 | Attack02:6, Attack03:9 | Holy Slash — an overhand, downward blow |
 | **Wizard** | Attack01:6 (+`Attack01_Effect`) | `Attack02_Effect`, `Attack01_Effect` | Shatter — ranged spell with its own VFX strip |
 | **Priest** *(reserve)* | `Attack:9` | **`Heal:6`** (+`Heal_effect`) | **Heal** — restores a party member. Your idea, and the art exists |
 | **Knight Templar** *(reserve)* | Attack01:7 | `Block:4` | Bulwark — party-wide defence |

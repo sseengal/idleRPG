@@ -177,6 +177,12 @@ namespace IdleRPG.EditorTools.Content
         /// <summary>Impact effect id under Resources/Vfx (a sliced sheet such as "ice_shatter"). Empty = none.</summary>
         public string impactVfx = "";
 
+        /// <summary>Seconds the effect starts before the damage lands (the burst leads the number).</summary>
+        public float impactDelaySec = 0f;
+
+        /// <summary>Effect size relative to the shared base. 1 = standard, 1.15 = a bit bigger.</summary>
+        public float impactVfxScale = 1f;
+
         /// <summary>Seconds between casts. The cast itself is instant; this is the clock that refills it.</summary>
         public float cooldownSec = 12f;
 

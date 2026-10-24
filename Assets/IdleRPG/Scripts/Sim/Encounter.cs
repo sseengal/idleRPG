@@ -48,6 +48,8 @@ namespace IdleRPG.Sim
         /// <summary>A unit cast its ability (Ability-Plan). Fired on the fight's own tick, never mid-frame.</summary>
         public event Action<AbilityCastEvent> AbilityCast;
 
+        /// <summary>Raised at the announce when a cast carries an on-target impact effect (see <see cref="ImpactVfxEvent"/>).</summary>
+        public event Action<ImpactVfxEvent> ImpactVfx;
         /// <summary>An ability healed a unit (impact). One call per unit healed.</summary>
         public event Action<HealEvent> Healed;
 
@@ -637,7 +639,7 @@ namespace IdleRPG.Sim
                 AttackerSide = side,
                 Damage = damage,
                 IsCritical = isCritical,
-                Remaining = AbilityWindow(caster),
+                Remaining = AbilityWindow(caster) + ability.ImpactDelaySeconds,
                 IsAbility = true,
                 Ability = ability,
                 Targets = targets
@@ -648,6 +650,19 @@ namespace IdleRPG.Sim
 
             // The clock starts at the ANNOUNCE: the time spent queued for the lane is not charged to the player.
             caster.StartAbilityCooldown();
+
+            // Tell the HUD when the burst should start, so its art leads the damage number by ImpactDelaySeconds.
+            if (!string.IsNullOrEmpty(ability.VfxId) && targets != null && targets.Length > 0 && targets[0] != null)
+            {
+                ImpactVfx?.Invoke(new ImpactVfxEvent
+                {
+                    Side = targets[0].Side,
+                    Index = targets[0].SlotIndex,
+                    VfxId = ability.VfxId,
+                    LeadSeconds = AbilityWindow(caster),
+                    Scale = ability.VfxScale <= 0f ? 1f : ability.VfxScale
+                });
+            }
 
             AbilityCast?.Invoke(new AbilityCastEvent
             {
