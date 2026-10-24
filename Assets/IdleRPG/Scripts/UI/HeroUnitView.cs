@@ -275,15 +275,20 @@ namespace IdleRPG.UI
                 dash.ResetToHome();
             }
 
-            RectTransform allySlot = FindAllySlot(allyIndex);
+            RectTransform allyBody = UnitAnchors.Get(CombatantSide.Party, allyIndex);
 
-            if (allySlot != null)
+            if (allyBody == null)
             {
-                // Stand on the ENEMY side of the ally: a back-rank guard must step in front of a front-rank ally,
-                // never park in the back column behind him.
+                allyBody = FindAllySlot(allyIndex);
+            }
+
+            if (allyBody != null)
+            {
+                // Stand on the ENEMY side of the ally, and hold there long enough to read: a back-rank guard steps in
+                // front of a front-rank ally, takes the hit, and only then blinks home.
                 HudController hud = HudController.Instance;
                 float enemySide = hud != null && hud.FormationBoard != null ? hud.FormationBoard.EnemySideSign : 1f;
-                dash.BeginRun(allySlot, enemySide);
+                dash.BeginCover(allyBody, enemySide);
             }
         }
 

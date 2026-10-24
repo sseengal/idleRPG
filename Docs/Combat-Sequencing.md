@@ -202,6 +202,14 @@ dash or be moved, and a small parent box made the old code clamp a number back o
 screen-sized canvas the clamp only keeps text on screen. The dash is also landed (`Impact`) *before* the number is
 asked for, so the body is already at the impact point when it is read.
 
+**A lunge lands on the target's LIVE BODY, at the moment of impact.** `BeginRun` records what it aims at; `Impact()`
+re-computes the contact point from that rect's *current* position. A target rect can be a pad (an enemy seat) or a live
+body (a hero's icon, `targetIsBody: true`), which is how an enemy reaches the guard who stepped in front of an ally
+instead of running into the seat he left. Result on screen: `ally <- knight <- enemy`, no stacked icons.
+
+**Cover holds longer.** `CharacterLunge.BeginCover` uses `coverHoldSeconds` (0.65 s) as the minimum pose after the hit,
+against 0.3 s for an ordinary swing - long enough to read "I took that for you", short enough to stay snappy.
+
 **Home is derived, never remembered.** A unit's resting place is `parent.TransformPoint(restLocal)` - the node it
 lives in decides where home is, and the node is exactly what a reposition moves. A stored world point survives a
 reposition, which made a guarding Knight blink back to the seat he had left. For the same reason a seat change parks

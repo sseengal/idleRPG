@@ -511,6 +511,11 @@ validator       ok [balance] Stage 1: 124s, 11 kills, 272 gold, 2.20 gold/s (ban
       `FormationBoardView.EnemySideSign` says which column faces the enemies (from the pad rects, so a mirrored board
       flips by itself). A back-rank guard now steps in FRONT of a front-rank ally instead of parking behind him.
       Verified: approach `side = 0` lands 84 px left of the ally, cover `side = +1` lands 84 px right of him
+- [x] **A lunge lands on the live body at impact, and a cover lingers.** `BeginRun` keeps its target, `Impact()`
+      re-computes the contact from the target's current position (`targetIsBody` for an icon, pad maths otherwise), so
+      an enemy reaches the guard standing in front of the ally instead of the seat he left. `BeginCover` holds
+      `coverHoldSeconds` = 0.65 s against 0.3 s for a swing. Verified: ally 0 -> knight +142 (hold 0.65); enemy
+      announced 284, landed 324 after the knight moved 40 (re-aimed); order ally < knight < enemy
 - [ ] **verify live**: knight covers an ally -> number and `GUARD` beside the ally; tap Knight, free pads brighten,
       tap a back pad -> he slides and enemies target the new rank; tap elsewhere cancels; name/hp bar follows him
 

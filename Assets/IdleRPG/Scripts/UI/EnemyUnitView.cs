@@ -280,14 +280,19 @@ namespace IdleRPG.UI
             HudController hud = HudController.Instance;
             FormationBoardView board = hud != null ? hud.FormationBoard : null;
 
-            // A guard intercepts the hit: the knight has already stepped in front of the ally, so the enemy runs at
-            // THAT slot. Using the knight's own index would send it into an empty slot he just left.
-            int visualTargetIndex = coveredAllyIndex >= 0 ? coveredAllyIndex : targetIndex;
-            RectTransform targetSlot = board != null ? board.GetHeroSlotRect(visualTargetIndex) : null;
+            // Run at the hero's LIVE BODY, not at his pad. A guard has stepped in front of the ally he covers, so his
+            // body is the thing to reach - aiming at his seat is what made the two icons overlap in front of the ally.
+            RectTransform heroBody = UnitAnchors.Get(CombatantSide.Party, targetIndex);
+            RectTransform target = heroBody;
 
-            if (lunge != null && !lunge.IsBusy && targetSlot != null)
+            if (target == null && board != null)
             {
-                lunge.BeginRun(targetSlot);
+                target = board.GetHeroSlotRect(targetIndex);
+            }
+
+            if (lunge != null && !lunge.IsBusy && target != null)
+            {
+                lunge.BeginRun(target, 0f, heroBody != null);
             }
         }
 
