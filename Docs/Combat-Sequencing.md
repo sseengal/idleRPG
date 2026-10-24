@@ -168,7 +168,7 @@ press can fire into the new wave.
 |---|---|
 | Damage | `TakeDamage` → `Damaged` event → number, HP bar, log, threat, then `ResolveDeath` |
 | Heal | `Heal(maxHealth × healFraction)` → `Healed` event → green number, log |
-| Guard | **Cover stance** (Guard): the caster intercepts the next N hits aimed at any other hero, takes **half** of them, and is halved on direct hits too. **A charge is spent by any enemy hit that lands while the stance is up** (direct or intercepted), so the stance lasts N enemy actions; it also ends if the caster dies or the wave changes. A guard with `guardHits = 0` is the old timed shield (enemy Block, War Cry) |
+| Guard | **Cover stance** (Guard): the caster intercepts the next N hits aimed at any other hero, takes **half** of them, and is halved on direct hits too. **A charge is spent by any enemy hit that lands while the stance is up** (direct or intercepted), so the stance lasts N enemy actions; it also ends if the caster dies or the wave changes. A guard with `guardHits = 0` is the old timed shield (enemy Block, War Cry). The dash is a **picture**: he steps onto the ENEMY side of the ally (never behind him, never a row change) and returns to his own pad |
 
 Death is one path (`ResolveDeath`) for a swing, an ability, or a party wipe, so gold, kill credit and the
 "party wiped" flow cannot diverge.

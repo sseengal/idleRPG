@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using IdleRPG.Combat;
 using IdleRPG.Core;
 using IdleRPG.Data;
+using IdleRPG.Sim;
 
 namespace IdleRPG.UI
 {
@@ -356,6 +357,33 @@ namespace IdleRPG.UI
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// The side of the board the enemies are on: +1 when the front rank's column sits right of the back rank's
+        /// (today's layout), -1 if the board is ever mirrored. A cover dash stands on this side of the ally, so the
+        /// guard reads as being between the ally and the danger - never behind him.
+        /// </summary>
+        public float EnemySideSign
+        {
+            get
+            {
+                if (formation == null || padRects == null || padRects.Length == 0)
+                {
+                    return 1f;
+                }
+
+                FormationData data = formation.Data;
+                RectTransform back = padRects[data.SlotIndexOf(CombatRow.Back, 0)];
+                RectTransform front = padRects[data.SlotIndexOf(CombatRow.Front, 0)];
+
+                if (back == null || front == null)
+                {
+                    return 1f;
+                }
+
+                return front.anchoredPosition.x < back.anchoredPosition.x ? -1f : 1f;
+            }
         }
 
         /// <summary>The view of one hero - what a dash should aim at (an enemy lunging at the back rank).</summary>

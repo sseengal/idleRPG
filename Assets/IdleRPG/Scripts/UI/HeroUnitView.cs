@@ -279,7 +279,11 @@ namespace IdleRPG.UI
 
             if (allySlot != null)
             {
-                dash.BeginRun(allySlot);
+                // Stand on the ENEMY side of the ally: a back-rank guard must step in front of a front-rank ally,
+                // never park in the back column behind him.
+                HudController hud = HudController.Instance;
+                float enemySide = hud != null && hud.FormationBoard != null ? hud.FormationBoard.EnemySideSign : 1f;
+                dash.BeginRun(allySlot, enemySide);
             }
         }
 

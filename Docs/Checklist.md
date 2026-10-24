@@ -503,6 +503,10 @@ validator       ok [balance] Stage 1: 124s, 11 kills, 272 gold, 2.20 gold/s (ban
       of each run; a seat change parks the running dash; `Impact()` only snaps a unit that is mid-run. This is the fix
       for "Guard breaks after I move a hero": the blink target used to be a stored world point and sent him back to
       the pad he had left. Verified live: dashing, moving the node, then blinking home lands on the NEW pad (exact).
+- [x] **Cover stands on the enemy side, not the approach side.** `BeginRun(target, side)` takes an optional side;
+      `FormationBoardView.EnemySideSign` says which column faces the enemies (from the pad rects, so a mirrored board
+      flips by itself). A back-rank guard now steps in FRONT of a front-rank ally instead of parking behind him.
+      Verified: approach `side = 0` lands 84 px left of the ally, cover `side = +1` lands 84 px right of him
 - [ ] **verify live**: knight covers an ally -> number and `GUARD` beside the ally; tap Knight, free pads brighten,
       tap a back pad -> he slides and enemies target the new rank; tap elsewhere cancels; name/hp bar follows him
 

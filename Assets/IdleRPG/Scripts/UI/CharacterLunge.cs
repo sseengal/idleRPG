@@ -102,11 +102,12 @@ namespace IdleRPG.UI
         /// <summary>
         /// Starts the run-in toward a target slot. No-op while the unit is already busy.
         ///
-        /// The caller plays the attack strip at the same moment (the sim's swing window is the wind-up), so this does
-        /// NOT play Walk - the swing's own first frames cover the run-in, and a Walk that was overridden one line
-        /// later only ever flickered.
+        /// <paramref name="side"/> = 0 (default): approach the target from the unit's own side, which is what an
+        /// attack should do. Non-zero: stand on THAT side of the target, ignoring where the unit came from - a cover
+        /// passes the enemy side, so a back-rank guard steps in FRONT of a front-rank ally instead of parking behind
+        /// him.
         /// </summary>
-        public void BeginRun(RectTransform targetSlot)
+        public void BeginRun(RectTransform targetSlot, float side = 0f)
         {
             if (state != State.Idle || rect == null || targetSlot == null)
             {
@@ -138,7 +139,10 @@ namespace IdleRPG.UI
                                Mathf.Abs(targetSlot.lossyScale.x);
             float gap = selfHalf + targetHalf + contactPaddingPx;
 
-            contact = new Vector3(bodyCenter.x - (dirX * gap), bodyCenter.y, bodyCenter.z);
+            // An attack stands on the side it came from; a cover stands where it was told to (the enemy side), so the
+            // reader sees the guard between the ally and the danger.
+            float along = Mathf.Abs(side) > 0.001f ? Mathf.Sign(side) : -dirX;
+            contact = new Vector3(bodyCenter.x + (along * gap), bodyCenter.y, bodyCenter.z);
 
             from = rect.position;
             clock = 0f;
