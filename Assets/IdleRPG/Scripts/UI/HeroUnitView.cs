@@ -227,13 +227,11 @@ namespace IdleRPG.UI
             GameEvents.HeroDamaged += OnHeroDamaged;
             GameEvents.HeroDied += OnHeroDied;
             GameEvents.EnemyDamaged += OnAllyAttackLanded;
-            GameEvents.SwingStarted += OnSwingStarted;
             GameEvents.Healed += OnHealed;
             GameEvents.ShieldApplied += OnShieldApplied;
             GameEvents.HeroStatsChanged += OnHeroStatsChanged;
             GameEvents.WaveCompleted += OnWaveChanged;
             GameEvents.StageChanged += OnStageChangedHandler;
-            GameEvents.CoverIntercepted += OnCoverIntercepted;
         }
 
         private void OnDisable()
@@ -242,108 +240,44 @@ namespace IdleRPG.UI
             GameEvents.HeroDamaged -= OnHeroDamaged;
             GameEvents.HeroDied -= OnHeroDied;
             GameEvents.EnemyDamaged -= OnAllyAttackLanded;
-            GameEvents.SwingStarted -= OnSwingStarted;
             GameEvents.Healed -= OnHealed;
             GameEvents.ShieldApplied -= OnShieldApplied;
             GameEvents.HeroStatsChanged -= OnHeroStatsChanged;
             GameEvents.WaveCompleted -= OnWaveChanged;
             GameEvents.StageChanged -= OnStageChangedHandler;
-            GameEvents.CoverIntercepted -= OnCoverIntercepted;
         }
 
         /// <summary>
-        /// A guard intercepted a hit meant for <paramref name="allyIndex"/>. The guarding hero dashes in front of that
-        /// ally (the same run-in the lunge already does), so the player sees who was saved.
-        /// </summary>
-        private void OnCoverIntercepted(int guardIndex, int allyIndex)
-        {
-            if (guardIndex != heroIndex || allyIndex < 0)
-            {
-                return;
-            }
-
-            // Create the mover on demand: the knight may not have attacked yet, and the dash used to be skipped
-            // silently when no lunge existed (that is why the text stayed over his old slot).
-            CharacterLunge dash = EnsureLunge();
-            if (dash == null)
-            {
-                return;
-            }
-
-            if (dash.IsBusy)
-            {
-                dash.ResetToHome();
-            }
-
-            RectTransform allyBody = UnitAnchors.Get(CombatantSide.Party, allyIndex);
-
-            if (allyBody == null)
-            {
-                allyBody = FindAllySlot(allyIndex);
-            }
-
-            if (allyBody != null)
-            {
-                // Stand on the ENEMY side of the ally, and hold there long enough to read: a back-rank guard steps in
-                // front of a front-rank ally, takes the hit, and only then blinks home.
-                HudController hud = HudController.Instance;
-                float enemySide = hud != null && hud.FormationBoard != null ? hud.FormationBoard.EnemySideSign : 1f;
-                dash.BeginCover(allyBody, enemySide);
-            }
-        }
-
-        /// <summary>The slot rect of one sibling hero, or null when the board is not built yet.</summary>
-        private RectTransform FindAllySlot(int allyIndex)
-        {
-            Transform parent = transform.parent;
-
-            if (parent == null)
-            {
-                return null;
-            }
-
-            HeroUnitView[] views = parent.GetComponentsInChildren<HeroUnitView>(true);
-
-            for (int i = 0; i < views.Length; i++)
-            {
-                if (views[i] != null && views[i].HeroIndex == allyIndex)
-                {
-                    return views[i].transform as RectTransform;
-                }
-            }
-
-            return null;
-        }
-
         /// <summary>
-        /// This hero committed an action: run to the target slot (hostile targets only) and play the clip. The clip
-        /// slot rides on the event, so an ability needs no handler of its own - the ability path and the attack path are
-        /// the same path, which is what stops one of them drifting.
+        /// Plays this hero's action clip. Called by the <see cref="BeatDirector"/> on the announce, so the strike frame
+        /// still lands on the hit.
         /// </summary>
-        private void OnSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot, int coveredAllyIndex, bool stayPlanted)
+        public void PlaySwing(string clipSlot)
         {
-            if (attackerSide != CombatantSide.Party || attackerIndex != heroIndex)
-            {
-                return;
-            }
-
             EnsureLunge();
             StartSwing(clipSlot);
+        }
 
-            // A self/party guard stays planted: a guard that charges at nothing is a lie.
-            // A ranged spell sets stayPlanted too: the caster throws from where it stands.
-            if (stayPlanted || targetSide != CombatantSide.Enemy)
+        /// <summary>
+        /// Sends this hero to a world spot decided by the <see cref="BeatDirector"/>. A cover lingers longer than an
+        /// ordinary swing. Movement is refused while the hero is already out, exactly as before.
+        /// </summary>
+        public void RunTo(Vector3 worldSpot, bool cover)
+        {
+            CharacterLunge mover = EnsureLunge();
+
+            if (mover == null || mover.IsBusy)
             {
                 return;
             }
 
-            HudController hud = HudController.Instance;
-            EnemyStackView stack = hud != null ? hud.EnemyStack : null;
-            RectTransform targetSlot = stack != null ? stack.GetEnemySlotRect(targetIndex) : null;
-
-            if (lunge != null && !lunge.IsBusy && targetSlot != null)
+            if (cover)
             {
-                lunge.BeginRun(targetSlot);
+                mover.BeginCoverTo(worldSpot);
+            }
+            else
+            {
+                mover.BeginRunTo(worldSpot);
             }
         }
 

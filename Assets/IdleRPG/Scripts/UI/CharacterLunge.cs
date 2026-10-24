@@ -31,9 +31,7 @@ namespace IdleRPG.UI
         [Tooltip("How long (s) the run-in takes. Keep it well under the sim swing window.")]
         [SerializeField] private float advanceSeconds = 0.2f;
 
-        [Tooltip("Extra breathing room between the attacker's icon edge and the target's icon edge, world units.")]
-        [SerializeField] private float contactPaddingPx = 18f;
-
+        [Header("Holds")]
         [Header("Swing + blink")]
         [Tooltip("Minimum pose time (s) after a hit, counted from impact.")]
         [SerializeField] private float holdSeconds = 0.3f;
@@ -65,9 +63,6 @@ namespace IdleRPG.UI
         private float clock;
 
         /// <summary>What the current run aims at, kept so the contact point can be re-computed at impact.</summary>
-        private RectTransform runTarget;
-        private float runSide;
-        private bool runTargetIsBody;
         private float runHold;
 
         /// <summary>
@@ -109,34 +104,27 @@ namespace IdleRPG.UI
         }
 
         /// <summary>
-        /// Starts the run-in toward a target. No-op while the unit is already busy.
-        ///
-        /// <paramref name="side"/> = 0 (default): approach the target from the unit's own side, which is what an
-        /// attack should do. Non-zero: stand on THAT side of the target, ignoring where the unit came from.
-        /// <paramref name="targetIsBody"/>: the target rect IS the character (an icon), not a pad - its centre is the
-        /// body centre, so a unit can chase another unit that is moving.
+        /// Runs to a world point and stops there. The point is decided by the caller (the BeatDirector), not computed
+        /// here: one planner, one answer.
         /// </summary>
-        public void BeginRun(RectTransform target, float side = 0f, bool targetIsBody = false)
+        public void BeginRunTo(Vector3 worldSpot)
         {
-            StartRun(target, side, targetIsBody, 0f);
+            StartRun(worldSpot, 0f);
         }
 
         /// <summary>Runs to stand in front of an ally (a cover) and holds there longer than an attack would.</summary>
-        public void BeginCover(RectTransform target, float side)
+        public void BeginCoverTo(Vector3 worldSpot)
         {
-            StartRun(target, side, true, coverHoldSeconds);
+            StartRun(worldSpot, coverHoldSeconds);
         }
 
-        private void StartRun(RectTransform target, float side, bool targetIsBody, float lingerSeconds)
+        private void StartRun(Vector3 worldSpot, float lingerSeconds)
         {
-            if (state != State.Idle || rect == null || target == null)
+            if (state != State.Idle || rect == null)
             {
                 return;
             }
 
-            runTarget = target;
-            runSide = side;
-            runTargetIsBody = targetIsBody;
             runHold = Mathf.Max(0f, lingerSeconds);
 
             blinkQueued = false;
@@ -144,55 +132,10 @@ namespace IdleRPG.UI
             // He is standing at rest, so this is exactly where home is in the CURRENT layout.
             restLocal = rect.localPosition;
 
-            contact = ComputeContact();
+            contact = worldSpot;
             from = rect.position;
             clock = 0f;
             state = State.Advancing;
-        }
-
-        /// <summary>
-        /// Where the run should stop: the near flank of the target's BODY, gapped by both icons' half-widths plus
-        /// breathing room (world units; lossyScale converts local rect sizes).
-        ///
-        /// A pad keeps its own convention: the slot builders place every icon with CenterOn(0.5, 0.60) inside a rect
-        /// whose pivot sits at a corner, so `slot.position` alone is the slot's top edge, not the body. A live body
-        /// needs none of that - its own centre IS the body centre.
-        /// </summary>
-        private Vector3 ComputeContact()
-        {
-            if (rect == null || runTarget == null)
-            {
-                return rect != null ? rect.position : Vector3.zero;
-            }
-
-            Vector3 bodyCenter;
-
-            if (runTargetIsBody)
-            {
-                bodyCenter = runTarget.position;
-            }
-            else
-            {
-                float worldW = runTarget.rect.width * Mathf.Abs(runTarget.lossyScale.x);
-                float worldH = runTarget.rect.height * Mathf.Abs(runTarget.lossyScale.y);
-                float bodyX = runTarget.position.x + (0.5f - runTarget.pivot.x) * worldW;
-                float bodyY = runTarget.position.y - (0.40f - (1f - runTarget.pivot.y)) * worldH;
-                bodyCenter = new Vector3(bodyX, bodyY, runTarget.position.z);
-            }
-
-            float dirX = bodyCenter.x >= rect.position.x ? 1f : -1f;
-
-            // Both halves use the SLOT width (the body's footprint), never the live icon rect: a wide attack
-            // window has already grown that rect, and using it would park the unit short of its target.
-            float selfHalf = BodyWidth(animator, rect) * 0.5f * Mathf.Abs(rect.lossyScale.x);
-            float targetHalf = BodyWidth(runTarget.GetComponent<CharacterAnimator>(), runTarget) * 0.5f *
-                               Mathf.Abs(runTarget.lossyScale.x);
-            float gap = selfHalf + targetHalf + contactPaddingPx;
-
-            // An attack stands on the side it came from; a cover stands where it was told to (the enemy side), so the
-            // reader sees the guard between the ally and the danger.
-            float along = Mathf.Abs(runSide) > 0.001f ? Mathf.Sign(runSide) : -dirX;
-            return new Vector3(bodyCenter.x + (along * gap), bodyCenter.y, bodyCenter.z);
         }
 
         /// <summary>
@@ -210,14 +153,7 @@ namespace IdleRPG.UI
                 return;
             }
 
-            // Re-aim: the target may have MOVED since the announce (a guard steps in front of an ally, an enemy runs
-            // at the party). Landing on where it is now is what keeps the attacker in front of the guard instead of
-            // passing through him.
-            if (runTarget != null)
-            {
-                contact = ComputeContact();
-            }
-
+            // The destination was decided at the announce and cannot change: planting is the only job left.
             rect.position = contact;
             clock = 0f;
             blinkQueued = false;
@@ -250,8 +186,7 @@ namespace IdleRPG.UI
         {
             state = State.Idle;
             blinkQueued = false;
-            runTarget = null;
-            runHold = 0f;
+                runHold = 0f;
 
             if (rect != null)
             {
@@ -371,20 +306,6 @@ private void Update()
                 default:
                     return;
             }
-        }
-
-        /// <summary>
-        /// The width the body is drawn at: the unit's announced slot size when it has an animator, else the live
-        /// rect (a plain slot container has no animator and keeps its own width).
-        /// </summary>
-        private static float BodyWidth(CharacterAnimator unit, RectTransform fallback)
-        {
-            if (unit != null && unit.SlotSize.x > 0f)
-            {
-                return unit.SlotSize.x;
-            }
-
-            return fallback != null ? fallback.rect.width : 0f;
         }
 
         /// <summary>Fast launch, gentle landing — the run reads as a dart, not a slide.</summary>

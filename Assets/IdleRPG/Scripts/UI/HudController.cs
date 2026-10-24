@@ -91,6 +91,13 @@ namespace IdleRPG.UI
                 GoldFlyVfx vfx = host.AddComponent<GoldFlyVfx>();
                 vfx.Initialize(damageTextPool);
             }
+
+            // The one planner of the fight's moving picture: it decides who stands where for every beat. Without it
+            // nobody stages a swing at all, so it is created here, on the object that owns the views.
+            if (GetComponent<BeatDirector>() == null)
+            {
+                gameObject.AddComponent<BeatDirector>();
+            }
         }
 
         private void OnDestroy()

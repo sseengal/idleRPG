@@ -202,10 +202,12 @@ dash or be moved, and a small parent box made the old code clamp a number back o
 screen-sized canvas the clamp only keeps text on screen. The dash is also landed (`Impact`) *before* the number is
 asked for, so the body is already at the impact point when it is read.
 
-**A lunge lands on the target's LIVE BODY, at the moment of impact.** `BeginRun` records what it aims at; `Impact()`
-re-computes the contact point from that rect's *current* position. A target rect can be a pad (an enemy seat) or a live
-body (a hero's icon, `targetIsBody: true`), which is how an enemy reaches the guard who stepped in front of an ally
-instead of running into the seat he left. Result on screen: `ally <- knight <- enemy`, no stacked icons.
+**One planner decides the picture.** `BeatDirector` is the only subscriber to a swing announcement. It plans the whole
+beat in one pass, in this order: cover first (the guard's spot **becomes** the spot the blow lands on), then the
+attacker (a reserved spot wins, then `stayPlanted`, then its own near flank). Views no longer compute positions - they
+expose two verbs, `PlaySwing(clipSlot)` and `RunTo(worldSpot, cover)`. `BattleSpots` owns the gap and side maths; the
+lunge only receives a destination, so it has nothing to re-aim and nothing to remember. `BeatDirector.Interject(...)`
+reserves a spot for the next beat, which is where a taunt, knockback or forced swap will hook in.
 
 **Cover holds longer.** `CharacterLunge.BeginCover` uses `coverHoldSeconds` (0.65 s) as the minimum pose after the hit,
 against 0.3 s for an ordinary swing - long enough to read "I took that for you", short enough to stay snappy.

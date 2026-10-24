@@ -96,7 +96,6 @@ namespace IdleRPG.UI
             GameEvents.EnemyDamaged += OnEnemyDamaged;
             GameEvents.EnemyKilled += OnEnemyKilled;
             GameEvents.HeroDamaged += OnEnemyAttackLanded;
-            GameEvents.SwingStarted += OnSwingStarted;
             GameEvents.Healed += OnHealed;
             GameEvents.ShieldApplied += OnShieldApplied;
         }
@@ -108,7 +107,6 @@ namespace IdleRPG.UI
             GameEvents.EnemyDamaged -= OnEnemyDamaged;
             GameEvents.EnemyKilled -= OnEnemyKilled;
             GameEvents.HeroDamaged -= OnEnemyAttackLanded;
-            GameEvents.SwingStarted -= OnSwingStarted;
             GameEvents.Healed -= OnHealed;
             GameEvents.ShieldApplied -= OnShieldApplied;
         }
@@ -258,41 +256,23 @@ namespace IdleRPG.UI
         }
 
         /// <summary>
-        /// This enemy committed an action: start the clip and run at the hero it is about to hit. The clip slot lets an
-        /// enemy cast play its own strip through the same entry point a swing uses.
+        /// This enemy committed an action: play its clip. Called by the <see cref="BeatDirector"/>, which also decides
+        /// where the enemy stands - the view never works out a position for itself.
         /// </summary>
-        private void OnSwingStarted(int attackerIndex, CombatantSide attackerSide, int targetIndex, CombatantSide targetSide, string clipSlot, int coveredAllyIndex, bool stayPlanted)
+        public void PlaySwing(string clipSlot)
         {
-            if (attackerSide != CombatantSide.Enemy || attackerIndex != enemyIndex)
-            {
-                return;
-            }
-
             EnsureLunge();
             StartSwing(clipSlot);
+        }
 
-            // A self/party guard stays planted; only a hostile target pulls the enemy forward.
-            if (targetSide != CombatantSide.Party)
+        /// <summary>Sends this enemy to a world spot decided by the <see cref="BeatDirector"/>.</summary>
+        public void RunTo(Vector3 worldSpot)
+        {
+            CharacterLunge mover = EnsureLunge();
+
+            if (mover != null && !mover.IsBusy)
             {
-                return;
-            }
-
-            HudController hud = HudController.Instance;
-            FormationBoardView board = hud != null ? hud.FormationBoard : null;
-
-            // Run at the hero's LIVE BODY, not at his pad. A guard has stepped in front of the ally he covers, so his
-            // body is the thing to reach - aiming at his seat is what made the two icons overlap in front of the ally.
-            RectTransform heroBody = UnitAnchors.Get(CombatantSide.Party, targetIndex);
-            RectTransform target = heroBody;
-
-            if (target == null && board != null)
-            {
-                target = board.GetHeroSlotRect(targetIndex);
-            }
-
-            if (lunge != null && !lunge.IsBusy && target != null)
-            {
-                lunge.BeginRun(target, 0f, heroBody != null);
+                mover.BeginRunTo(worldSpot);
             }
         }
 

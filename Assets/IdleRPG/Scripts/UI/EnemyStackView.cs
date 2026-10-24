@@ -60,6 +60,17 @@ namespace IdleRPG.UI
             damagePool?.SetEnemyAnchors(anchors);
         }
 
+        /// <summary>The view of one enemy (used by the beat planner). Null when out of range.</summary>
+        public EnemyUnitView GetEnemyView(int enemyIndex)
+        {
+            if (slots == null || enemyIndex < 0 || enemyIndex >= slots.Length)
+            {
+                return null;
+            }
+
+            return slots[enemyIndex];
+        }
+
         /// <summary>Slot rect of one enemy (for run-to-target effects, e.g. a hero lunging this enemy).</summary>
         public RectTransform GetEnemySlotRect(int enemyIndex)
         {

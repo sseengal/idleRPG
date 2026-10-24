@@ -386,6 +386,17 @@ namespace IdleRPG.UI
             }
         }
 
+        /// <summary>The view of one hero (used by the beat planner). Null when out of range.</summary>
+        public HeroUnitView GetHeroView(int heroIndex)
+        {
+            if (heroViews == null || heroIndex < 0 || heroIndex >= heroViews.Length)
+            {
+                return null;
+            }
+
+            return heroViews[heroIndex];
+        }
+
         /// <summary>The view of one hero - what a dash should aim at (an enemy lunging at the back rank).</summary>
         public RectTransform GetHeroSlotRect(int heroIndex)
         {
