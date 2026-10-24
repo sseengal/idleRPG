@@ -20,7 +20,7 @@ effects). Boss moves and the unused Summon/Heal/Block strips come after. Art is 
 | Roster swap Archer to Soldier, save v8 | done |
 | Cast: request, event, log line, cooldown, ABILITIES tab, F4 debug | done, verified |
 | **Cast sequencing in the action lane** (queued press, target, travel window, impact) | **done 24 Oct 2026** - see `Combat-Sequencing.md` §3 and §7 |
-| Effect (shield / heal / damage) | **done 24 Oct 2026** - see `Combat-Sequencing.md` §7 |
+| Effect (shield / heal / damage) | **done 24 Oct 2026** - shield is a party cover stance: 2 intercepted hits, half damage; see `Combat-Sequencing.md` §7 |
 | Enemy casts (auto on their own cooldown) | **done 24 Oct 2026** |
 | **Enemy cast timing is random, not a metronome** ("Wild Cards") | **done 24 Oct 2026** - first roll waits 2-6 s, then 35% chance per 1-3 s roll |
 | **Enemy moves hit harder** ("Heavier Hands") | **done 24 Oct 2026** - damage moves x1.8-1.9 of a plain hit (was x1.3-1.4) |
