@@ -71,6 +71,9 @@ namespace IdleRPG.Sim
         /// <summary>Size of the effect relative to the shared base (1 = standard).</summary>
         public float VfxScale;
 
+        /// <summary>Shield kind: when &gt; 0 this is a party cover stance for that many intercepted hits, not a timer.</summary>
+        public int GuardHits;
+
         /// <summary>Multiplier applied to the caster's attack for a Damage ability.</summary>
         public double DamageMultiplier;
 

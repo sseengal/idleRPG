@@ -437,6 +437,7 @@ namespace IdleRPG.Combat
                 VfxId = definition.ImpactVfx,
                 ImpactDelaySeconds = definition.ImpactDelaySec,
                 VfxScale = definition.ImpactVfxScale,
+                GuardHits = definition.GuardHits,
 
                 // The art owns the travel window: the effect lands on the frame that strip reaches full reach.
                 WindowSeconds = art != null ? art.SecondsFor(slot) : 0f

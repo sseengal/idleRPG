@@ -196,6 +196,7 @@ namespace IdleRPG.Sim
             for (int i = 0; i < party.Length; i++)
             {
                 party[i]?.CancelAbilityRequest();
+                party[i]?.ClearCoverGuard();
             }
 
             for (int i = 0; i < enemies.Length; i++)
@@ -351,6 +352,13 @@ namespace IdleRPG.Sim
             }
 
             double applied = target.TakeDamage(swing.Damage);
+
+            // A covered hit spends one charge of the guard that took it.
+            if (swing.IsCoveredHit)
+            {
+                swing.Target?.ConsumeCoverHit();
+            }
+
             attacker.Threat += applied;
 
             RaiseDamage(attacker, target, swing.AttackerSide, applied, swing.IsCritical);
@@ -387,6 +395,25 @@ namespace IdleRPG.Sim
                     caster.Threat += applied;
                     RaiseDamage(caster, target, swing.AttackerSide, applied, swing.IsCritical, ability.VfxId);
                     ResolveDeath(target);
+                    continue;
+                }
+
+                if (ability.Kind == SimAbilityKind.Shield && ability.GuardHits > 0)
+                {
+                    // Party cover stance: the caster stands ready for N hits aimed at ANY ally (Shield Wall).
+                    caster.BeginCoverGuard(ability.GuardHits, ability.ShieldFactor);
+
+                    ShieldApplied?.Invoke(new ShieldEvent
+                    {
+                        Side = caster.Side,
+                        Index = caster.SlotIndex,
+                        SourceSide = swing.AttackerSide,
+                        SourceIndex = caster.SlotIndex,
+                        AbilityName = ability.DisplayName,
+                        Factor = caster.DamageTakenMultiplier,
+                        Seconds = ability.GuardHits
+                    });
+
                     continue;
                 }
 
@@ -544,6 +571,20 @@ namespace IdleRPG.Sim
                     continue;
                 }
 
+                // Cover guard: an enemy hit aimed at an ally is taken by the guarding knight instead. The ally is
+                // remembered so the view can show the knight stepping in front of THAT hero.
+                Combatant coveredAlly = null;
+
+                if (side == CombatantSide.Enemy && target.Side == CombatantSide.Party)
+                {
+                    Combatant guard = FindCoverGuard(target);
+                    if (guard != null)
+                    {
+                        coveredAlly = target;
+                        target = guard;
+                    }
+                }
+
                 // Crit comes from the ATTACKER when it has its own values (heroes); enemies fall back to the
                 // rules' global crit, so no enemy asset needs touching.
                 double critChance = attacker.CritChance > 0d ? attacker.CritChance : context.Rules.CriticalChance;
@@ -570,7 +611,9 @@ namespace IdleRPG.Sim
                     AttackerSide = side,
                     Damage = damage,
                     IsCritical = isCritical,
-                    Remaining = SwingWindow(attacker)
+                    Remaining = SwingWindow(attacker),
+                    IsCoveredHit = coveredAlly != null,
+                    CoveredAlly = coveredAlly
                 };
                 hasActiveSwing = true;
                 lastActorSide = side;

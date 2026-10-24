@@ -81,7 +81,56 @@ namespace IdleRPG.Sim
         /// Damage taken is multiplied by this while a guard is up (1 = no guard). An ability's Shield kind sets it for
         /// a few seconds, so "half damage for 4 s" really halves every hit that lands inside that window.
         /// </summary>
-        public double DamageTakenMultiplier => guardSecondsRemaining > 0d ? guardFactor : 1d;
+        public double DamageTakenMultiplier => IsCoverGuardActive
+            ? coverGuardFactor
+            : (guardSecondsRemaining > 0d ? guardFactor : 1d);
+
+        // --- cover guard: Shield Wall as a party stance ------------------------------------------------
+        // The knight stands ready for N hits aimed at ANY ally. Hits that would land on an ally are redirected
+        // to him and halved; hits aimed at him directly are halved too, but do not consume a charge.
+
+        private int coverGuardHits;
+        private double coverGuardFactor = 1d;
+
+        /// <summary>Hits the guard can still intercept (0 = no stance).</summary>
+        public int CoverGuardHitsRemaining => IsAlive ? coverGuardHits : 0;
+
+        public bool IsCoverGuardActive => IsAlive && coverGuardHits > 0;
+
+        /// <summary>Starts (or refreshes) the cover stance for <paramref name="hits"/> intercepted hits.</summary>
+        public void BeginCoverGuard(int hits, double factor)
+        {
+            if (!IsAlive || hits <= 0)
+            {
+                return;
+            }
+
+            coverGuardHits = hits;
+            coverGuardFactor = factor < 0.05d ? 0.05d : (factor > 1d ? 1d : factor);
+        }
+
+        /// <summary>Spends one intercepted hit. The stance ends when the last one is used.</summary>
+        public void ConsumeCoverHit()
+        {
+            if (coverGuardHits <= 0)
+            {
+                return;
+            }
+
+            coverGuardHits--;
+
+            if (coverGuardHits <= 0)
+            {
+                coverGuardHits = 0;
+                coverGuardFactor = 1d;
+            }
+        }
+
+        public void ClearCoverGuard()
+        {
+            coverGuardHits = 0;
+            coverGuardFactor = 1d;
+        }
 
         /// <summary>
         /// Raises (or refreshes) a guard: incoming damage is multiplied by <paramref name="factor"/> for

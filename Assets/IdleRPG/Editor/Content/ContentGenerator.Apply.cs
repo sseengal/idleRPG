@@ -68,6 +68,7 @@ namespace IdleRPG.EditorTools.Content
                     .Set("impactVfx", spec.impactVfx)
                     .Set("impactDelaySec", spec.impactDelaySec)
                     .Set("impactVfxScale", spec.impactVfxScale)
+                    .Set("guardHits", spec.guardHits)
                     .Set("cooldownSec", spec.cooldownSec)
                     .Set("shieldFactor", spec.shieldFactor)
                     .Set("shieldSeconds", spec.shieldSeconds)

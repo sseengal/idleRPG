@@ -83,6 +83,12 @@ namespace IdleRPG.Sim
         /// <summary>True when this action is an ability (its effect, not a swing).</summary>
         public bool IsAbility;
 
+        /// <summary>True when this swing was aimed at an ally but intercepted by a cover guard.</summary>
+        public bool IsCoveredHit;
+
+        /// <summary>The ally the swing was originally aimed at (null unless <see cref="IsCoveredHit"/>).</summary>
+        public Combatant CoveredAlly;
+
         /// <summary>The ability being cast (valid only when <see cref="IsAbility"/> is true).</summary>
         public SimAbility Ability;
 

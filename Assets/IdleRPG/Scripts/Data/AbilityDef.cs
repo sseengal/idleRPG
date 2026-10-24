@@ -49,6 +49,9 @@ namespace IdleRPG.Data
         [SerializeField] private float shieldFactor = 0.5f;
         [SerializeField] private float shieldSeconds = 4f;
 
+        [Tooltip("Shield only: how many hits aimed at an ally the caster intercepts. > 0 turns the shield into a party cover stance (Shield Wall).")]
+        [SerializeField] private int guardHits = 0;
+
         [Header("Heal")]
         [Tooltip("Fraction of the target's MAXIMUM health restored.")]
         [SerializeField] private float healFraction = 0.25f;
@@ -85,6 +88,9 @@ namespace IdleRPG.Data
 
         /// <summary>Size of the effect relative to the shared base. 1 = standard.</summary>
         public float ImpactVfxScale => impactVfxScale <= 0f ? 1f : impactVfxScale;
+
+        /// <summary>Shield only: hits aimed at an ally that the caster intercepts. 0 = a normal timed shield.</summary>
+        public int GuardHits => Mathf.Max(0, guardHits);
 
         public float CooldownSec => Mathf.Max(MinCooldownSec, cooldownSec);
 

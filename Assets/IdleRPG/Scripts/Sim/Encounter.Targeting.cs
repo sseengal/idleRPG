@@ -77,6 +77,29 @@ namespace IdleRPG.Sim
         }
 
         /// <summary>Picks a target for a swing (deterministic; uses the sim RNG for the Random rule).</summary>
+        /// <summary>
+        /// The party member standing guard for <paramref name="intendedTarget"/>, or null. A guard never covers himself:
+        /// a hit aimed at him directly is just a hit on the guard (still halved by his stance).
+        /// </summary>
+        private Combatant FindCoverGuard(Combatant intendedTarget)
+        {
+            for (int i = 0; i < party.Length; i++)
+            {
+                Combatant member = party[i];
+                if (member == null || member == intendedTarget)
+                {
+                    continue;
+                }
+
+                if (member.IsCoverGuardActive)
+                {
+                    return member;
+                }
+            }
+
+            return null;
+        }
+
         private Combatant SelectTarget(Combatant[] candidates, TargetRule rule)
         {
             if (candidates == null || candidates.Length == 0)

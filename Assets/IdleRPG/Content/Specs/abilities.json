@@ -137,7 +137,8 @@
             "target": "self",
             "unlockStage": 1,
             "tokenCost": 0.0,
-            "description": "Raises a guard: the Knight takes half damage for a few seconds."
+            "description": "Stands guard: intercepts the next 2 hits aimed at any ally, taking half damage.",
+            "guardHits": 2
         },
         {
             "id": "holy_slash",
