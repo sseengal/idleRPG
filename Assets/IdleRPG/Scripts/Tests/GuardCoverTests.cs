@@ -61,7 +61,7 @@ namespace IdleRPG.Tests
         }
 
         [Test]
-        public void Guard_DirectHitIsHalved_ButDoesNotSpendACharge()
+        public void Guard_DirectHitIsHalved_AndSpendsACharge()
         {
             Combatant knight = Member("knight");
             Combatant ally = Member("ally");
@@ -75,7 +75,7 @@ namespace IdleRPG.Tests
             }
 
             Assert.AreEqual(950d, knight.CurrentHealth, 1d, "a hit aimed at the knight is halved while guarding");
-            Assert.AreEqual(2, knight.CoverGuardHitsRemaining, "a direct hit must not spend an interception");
+            Assert.AreEqual(1, knight.CoverGuardHitsRemaining, "any hit that lands while guarding spends a charge");
         }
 
         [Test]

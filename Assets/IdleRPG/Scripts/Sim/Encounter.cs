@@ -357,10 +357,11 @@ namespace IdleRPG.Sim
             bool wasGuarded = target.DamageTakenMultiplier < 0.999d;
             double applied = target.TakeDamage(swing.Damage);
 
-            // A covered hit spends one charge of the guard that took it.
-            if (swing.IsCoveredHit)
+            // Any enemy hit that lands on the guard spends a charge: a direct hit and an intercepted one are the same
+            // "enemy turn" to the player, so the stance cannot last forever just because he is the front hero.
+            if (target.IsCoverGuardActive)
             {
-                swing.Target?.ConsumeCoverHit();
+                target.ConsumeCoverHit();
             }
 
             attacker.Threat += applied;
@@ -399,8 +400,8 @@ namespace IdleRPG.Sim
                     double applied = target.TakeDamage(swing.Damage);
                     caster.Threat += applied;
 
-                    // An intercepted ability hit spends a guard charge, exactly like an intercepted swing.
-                    if (swing.IsCoveredHit && target.Side == CombatantSide.Party)
+                    // An enemy ability that lands on the guard spends a charge, like any other hit.
+                    if (target.Side == CombatantSide.Party && target.IsCoverGuardActive)
                     {
                         target.ConsumeCoverHit();
                     }
