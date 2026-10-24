@@ -32,6 +32,7 @@ namespace IdleRPG.UI
 
         private readonly List<float> enemyCastUntil = new List<float>();
         private float driftSeed;
+        private RectTransform textSpace;
 
         [Header("Impact effect")]
         [Tooltip("Frames per second for an on-target impact sheet (Resources/Vfx/<id>).")]
@@ -72,6 +73,24 @@ namespace IdleRPG.UI
             public float clock;
             public int frame;
             public bool active;
+        }
+
+        /// <summary>
+        /// The rect every number is parented to. Stable by construction: the root canvas, which never moves. Resolved
+        /// once, so no unit view has to hand anything over and no future movement can drag a number along.
+        /// </summary>
+        public RectTransform TextSpace
+        {
+            get
+            {
+                if (textSpace == null)
+                {
+                    Canvas canvas = GetComponentInParent<Canvas>();
+                    textSpace = canvas != null ? canvas.rootCanvas.transform as RectTransform : null;
+                }
+
+                return textSpace;
+            }
         }
 
         /// <summary>The live pool, so a unit view can post a word at its own position.</summary>
@@ -454,19 +473,29 @@ namespace IdleRPG.UI
                 : -1f;
 
             RectTransform rt = view.transform as RectTransform;
-            rt.SetParent(anchor.parent, false);
+
+            // Numbers live on a STABLE layer, never on the node that carries them. A unit's own node can dash or be
+            // moved, and the old code both parented the text to it and clamped the text inside its 132x150 box - so a
+            // number born beside an ally was dragged back onto the unit's own pad. The canvas space is screen-sized,
+            // so the clamp only keeps text on screen and never relocates it.
+            RectTransform host = TextSpace ?? anchor.parent as RectTransform;
+
+            if (host == null)
+            {
+                return;
+            }
+
+            rt.SetParent(host, false);
             rt.anchorMin = anchor.anchorMin;
             rt.anchorMax = anchor.anchorMax;
             rt.pivot = anchor.pivot;
 
-            // Position from the anchor's WORLD position, converted into the parent's local space, then into the
+            // Position from the anchor's WORLD position, converted into the host's local space, then into the
             // anchoredPosition the text rect needs. Reading anchor.anchoredPosition ignored a unit moved by a dash
             // (the lunge changes position, not the stored anchoredPosition); converting world -> local alone was not
             // enough either, because the text inherits the anchor's own anchors and pivot.
-            Rect spaceRect = anchor.parent is RectTransform space ? space.rect : new Rect(0f, 0f, 0f, 0f);
-            Vector2 local = anchor.parent is RectTransform localSpace
-                ? (Vector2)localSpace.InverseTransformPoint(anchor.position)
-                : anchor.anchoredPosition;
+            Rect spaceRect = host.rect;
+            Vector2 local = host.InverseTransformPoint(anchor.position);
 
             Vector2 offset = offsetOverride ?? new Vector2(
                 side * (40f + Random.Range(0f, Mathf.Abs(anchorJitter) * 0.5f)),

@@ -420,7 +420,15 @@ namespace IdleRPG.UI
             hitJuice.Flash(baseColor, hitFlashColor, hitFlashDurationSec);
             hitJuice.Punch(hitPunchScale, hitPunchDurationSec);
 
-            // This unit posts its own numbers: the text is placed from its live transform, so a slot on the edge of
+            // Land the dash FIRST: the number and the word are placed from the body's position, so the body must
+            // already be at the impact point when they are read. (Ordering, not magic - this used to be last.)
+            if (lunge != null && lunge.IsBusy)
+            {
+                lunge.Impact();
+                lunge.CompleteSwing();
+            }
+
+            // This unit posts its own numbers: the text is placed from its live body position, so a slot on the edge of
             // the board (the bottom hero) is not shifted inward by the pool's centre-of-screen bookkeeping.
             FloatingDamageTextPool pool = FloatingDamageTextPool.Instance;
 
@@ -437,13 +445,6 @@ namespace IdleRPG.UI
             if (isGuarded)
             {
                 FloatingDamageTextPool.Instance?.ShowWord(BodyRect, "GUARD", FloatingTextStyle.Guard);
-            }
-
-            // A covered hit: land the dash on the damage beat, then blink home.
-            if (lunge != null && lunge.IsBusy)
-            {
-                lunge.Impact();
-                lunge.CompleteSwing();
             }
 
             if (animator != null && animator.HasArt)

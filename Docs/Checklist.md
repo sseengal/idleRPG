@@ -497,6 +497,10 @@ validator       ok [balance] Stage 1: 124s, 11 kills, 272 gold, 2.20 gold/s (ban
       roster fills the page
 - [x] **Numbers are born at impact, not at the seat.** `UnitAnchors` holds each unit's `BodyRect` (the icon, the only
       thing that moves); `ShowNumber` / `ShowWord` read it once. The pool's `heroAnchors` / `SetHeroAnchors` are gone
+- [x] **Numbers live on the root damage canvas, and the dash lands before they are placed.** Text used to be parented
+      to the unit node and clamped inside its 132x150 box, so a number born beside an ally was dragged back onto the
+      knight's pad. `FloatingDamageTextPool.TextSpace` (root canvas, screen-sized) makes the clamp a screen guard only.
+      Verified: anchor at (700,1080) -> text at (700,1158), dx = 0 and dy = the word height, parent `DamageCanvas`
 - [x] `CharacterLunge.RefreshHome()` parks the icon at its recorded resting offset **before** reading home, so a seat
       move during a dash cannot store the contact point as home
 - [x] **A dash can no longer remember a place.** Home is `parent.TransformPoint(restLocal)`, re-captured at the start

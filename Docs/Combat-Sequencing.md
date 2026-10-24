@@ -197,8 +197,10 @@ The flag rides `SwingStartedEvent.StayPlanted` from the sim to the unit view, so
 **Where a number is born.** A number or word is placed ONCE, at the body's position at the instant the event fires
 (`UnitAnchors` holds each unit's live body rect), and it never follows anything afterwards. This matters for a unit
 that dashes: the Knight guarding an ally is standing beside that ally when the hit lands, so the number and `GUARD`
-appear there, not on his empty pad. The text is parented to the unit's own board node, which does not move during a
-fight - only a player-ordered seat move moves it, and that is deliberate.
+appear there, not on his empty pad. Text is parented to the **root damage canvas**, not to the unit: a unit node can
+dash or be moved, and a small parent box made the old code clamp a number back onto the unit's own pad. On a
+screen-sized canvas the clamp only keeps text on screen. The dash is also landed (`Impact`) *before* the number is
+asked for, so the body is already at the impact point when it is read.
 
 **Home is derived, never remembered.** A unit's resting place is `parent.TransformPoint(restLocal)` - the node it
 lives in decides where home is, and the node is exactly what a reposition moves. A stored world point survives a
