@@ -12,13 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35bf50eb489af4ef4ae94d01e9b01a39, type: 3}
   m_Name: SoldierCharge
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.AbilityDef
-  displayName: Overhead Slash
+  displayName: Holy Slash
   abilityID: soldier_charge
   description: Leaps and brings the blade down on the front enemy.
   kind: 2
   target: 3
   artSlot: Attack02
   impactVfx: heavy_smash
+  impactDelaySec: 0.1
+  impactVfxScale: 1.15
   cooldownSec: 10
   shieldFactor: 0.5
   shieldSeconds: 4
