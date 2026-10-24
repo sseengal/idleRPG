@@ -215,6 +215,36 @@ includes them (enforced at build time from B10).
 ---
 
 
+## 2m. Guard — the stance and the picture (added 2026-10-24)
+
+> Guard is one sim rule (intercept N hits aimed at other heroes, take half) and ONE picture: the knight steps between
+> the ally and the enemy that is coming. A plan may only contain a spot a unit will really occupy.
+
+- [ ] Cast Guard: `GUARD UP` appears over the Knight and **he does not move at all** (not even a small sideways hop).
+- [ ] With the stance up, let an enemy hit another hero: the Knight slides **in front of that ally**, on the side the
+      enemy came from, and the enemy stops **facing him** - you can see it close a real distance.
+- [ ] The Knight holds there about two thirds of a second, then blinks home; the number and `GUARD` appear where he
+      actually stood.
+- [ ] The ally takes nothing for the first two covered hits; the **third** hit lands on the ally (charges: `GUARD 2` ->
+      `1` -> `0` on the ability button).
+- [ ] Put the Knight in the **back** row and repeat: he still steps in front of the targeted ally.
+- [ ] Watch one of his own attacks land while an enemy hits an ally in the same instant: he is **not** dragged mid-run;
+      the blow lands on him where he is. (Deliberate: a unit already out is never moved.)
+- [ ] Move a hero to another pad with Guard up: the cover still lands beside the ally, and the enemy still stops facing
+      the Knight (nothing aims at a pad any more).
+- [ ] Console: no errors during all of the above.
+
+---
+
+## 2n. Enemies close the distance (added 2026-10-24)
+
+- [ ] Any enemy attacking the party runs **towards** its target, not just up/down its own row: the travel is clearly
+      visible (roughly 180 px), and it stops roughly one body-width short, never overlapping.
+- [ ] A hero attacking an enemy stops on the **near** side of that enemy (it does not cross to the far side).
+- [ ] Two enemies on different rows both stop facing their own target; their bodies never stack on one another.
+
+---
+
 ## 2g. Upgrades page — mobile layout pass, Phase 1 (added 2026-10-10)
 
 > Every control was smaller than a fingertip. Now one upgrade is one finger-sized row with `+1` and `x10` buttons.

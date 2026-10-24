@@ -1,7 +1,11 @@
 # Cutscenes - the plan and the ground work
 
-> Status: **ground work shipped (2026-10-24)**. `CutsceneRunner` + `CutsceneDef` + one test shot on the `N` dev key.
-> No content uses it yet. This page is the design record.
+> Status: **structure only (2026-10-24)**. `CutsceneDef` (steps: time + verb + arguments) and a step-walking
+> `CutsceneRunner` exist. The **visual** half - black bars, a title line, a skip key, a dev key on `N` - was a throwaway
+> test effect and is being removed (`Checklist.md` §10g note). No content uses any of it yet.
+>
+> **Next:** trim the runner to `Wait` / `MoveUnit` / `PlayClip` and drop the `N` key, then author a real sequence when
+> one is specified. This page is the design record, not a description of shipped effects.
 
 ---
 
@@ -20,7 +24,8 @@ Two clocks, and they never mix:
 ## 2. The vocabulary
 
 - **Step** - one thing at one time: `0.30 s: move the boss to the middle`.
-- **Verb** - what a step does: `Wait`, `BarsIn`, `BarsOut`, `Text`, `MoveUnit`, `PlayClip`.
+- **Verb** - what a step does. The **structure keeps** `Wait`, `MoveUnit`, `PlayClip`. The visual verbs `BarsIn`,
+  `BarsOut`, `Text` belong to the effect layer that is being removed; they come back only when a real shot needs them.
 - **Sequence** - the ordered list of steps (`CutsceneDef.steps`).
 
 That is the whole model. A fight beat is a short sequence the `BeatDirector` builds from a sim event; a cutscene is a

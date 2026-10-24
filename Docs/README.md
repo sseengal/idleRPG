@@ -79,7 +79,8 @@ Docs/
   Game-Vision.md       <- CANON: story-led campaign, automatic combat, restart on death
   Checklist.md         <- master status: what is done, what is left
   Cleanup-Checks.md    <- the before/after gate for consolidation (no behaviour change)
-  Combat-Sequencing.md <- how a blow reaches the screen: lane, timings, enemy casts
+  Combat-Sequencing.md <- how a blow reaches the screen: lane, timings, enemy casts, the one beat planner
+  Cutscene-Plan.md     <- fixed plays (structure only today): steps, rules, QA
   Ability-Progress.md  <- ability status: what works, what is open
   Ability-Plan.md      <- the locked ability decisions
   Ability-Map.md       <- hero / enemy -> ability id

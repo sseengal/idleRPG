@@ -168,7 +168,7 @@ press can fire into the new wave.
 |---|---|
 | Damage | `TakeDamage` → `Damaged` event → number, HP bar, log, threat, then `ResolveDeath` |
 | Heal | `Heal(maxHealth × healFraction)` → `Healed` event → green number, log |
-| Guard | **Cover stance** (Guard): the caster intercepts the next N hits aimed at any other hero, takes **half** of them, and is halved on direct hits too. **A charge is spent by any enemy hit that lands while the stance is up** (direct or intercepted), so the stance lasts N enemy actions; it also ends if the caster dies or the wave changes. A guard with `guardHits = 0` is the old timed shield (enemy Block, War Cry). The dash is a **picture**: he steps onto the ENEMY side of the ally (never behind him, never a row change) and returns to his own pad |
+| Guard | **Cover stance** (Guard): the caster intercepts the next N hits aimed at any other hero, takes **half** of them, and is halved on direct hits too. **A charge is spent by any enemy hit that lands while the stance is up** (direct or intercepted), so the stance lasts N enemy actions; it also ends if the caster dies or the wave changes. A guard with `guardHits = 0` is the old timed shield (enemy Block, War Cry). The dash is a **picture**, and it never invents a position: if he is free he steps **between the ally and the enemy that is coming** (derived from those two bodies, never from a board flag); if he is already out on his own attack he is **not dragged**, and the blow lands on him where he stands |
 
 Death is one path (`ResolveDeath`) for a swing, an ability, or a party wipe, so gold, kill credit and the
 "party wiped" flow cannot diverge.
@@ -190,9 +190,14 @@ which is why an earlier version sized the burst to ~168 px and it read as a spar
 Effect sheets live in `Assets/IdleRPG/Resources/Vfx/` and are cut by `Tools > Idle RPG > Art > Slice VFX Sheets`
 (a 100 px grid; the tool reads the PNG header so Unity's power-of-two rescale cannot move the cuts).
 
-**Cast in place.** An ability with `castInPlace` true does not run at the target: the swing plays where the caster
-stands. Shatter uses it (a thrown spell), and so does every party-targeted move (Guard), which never runs at nothing.
-The flag rides `SwingStartedEvent.StayPlanted` from the sim to the unit view, so the sim and the picture agree.
+**Cast in place - and a support cast never moves at all.** Two separate reasons for a unit to stay home, and the picture
+must obey both:
+
+1. **`castInPlace`** (data, rides `SwingStartedEvent.StayPlanted`): a thrown spell plays where the caster stands. Shatter
+   uses it.
+2. **Target on the caster's own side** (rule, no flag needed): Guard (self), War Cry (party), enemy Block (self) have no
+   distance to close, so the beat planner stages the clip and nothing else. This rule is what stops a "GUARD UP"
+   moment from dragging the knight sideways - the flag alone was not enough, because Guard is a self-targeted shield.
 
 **Where a number is born.** A number or word is placed ONCE, at the body's position at the instant the event fires
 (`UnitAnchors` holds each unit's live body rect), and it never follows anything afterwards. This matters for a unit
@@ -203,14 +208,28 @@ screen-sized canvas the clamp only keeps text on screen. The dash is also landed
 asked for, so the body is already at the impact point when it is read.
 
 **One planner decides the picture.** `BeatDirector` is the only subscriber to a swing announcement. It plans the whole
-beat in one pass, in this order: cover first (the guard's spot **becomes** the spot the blow lands on), then the
-attacker (a reserved spot wins, then `stayPlanted`, then its own near flank). Views no longer compute positions - they
-expose two verbs, `PlaySwing(clipSlot)` and `RunTo(worldSpot, cover)`. `BattleSpots` owns the gap and side maths; the
-lunge only receives a destination, so it has nothing to re-aim and nothing to remember. `BeatDirector.Interject(...)`
-reserves a spot for the next beat, which is where a taunt, knockback or forced swap will hook in.
+beat in one pass, and it obeys one rule:
 
-**Cover holds longer.** `CharacterLunge.BeginCover` uses `coverHoldSeconds` (0.65 s) as the minimum pose after the hit,
-against 0.3 s for an ordinary swing - long enough to read "I took that for you", short enough to stay snappy.
+> **A plan may only contain a position that a unit is actually going to occupy.**
+
+In order:
+
+1. **Landing point.** No cover: the target's own body. Cover: the event's TARGET is the guard, `CoveredAllyIndex` is
+   the ally he saved, so the spot is beside that ally on the attacker's side - or, when the guard is already out on his
+   own attack, his live body (he is not dragged).
+2. **Move or stay.** A support cast (`targetSide == attackerSide`) and a planted attack (`stayPlanted`) stay put.
+3. **Attacker spot.** A reserved spot wins, else its own near flank beside the landing point.
+
+Views no longer compute positions: they expose `PlaySwing(clipSlot)` and `RunTo(worldSpot, cover)`.
+`BattleSpots` owns the gap and side maths, and measures bodies by their **announced slot width** (`view.BodyWidth`),
+never by the live icon rect - `CharacterAnimator` stretches that rect for an attack window, and a stretched body parks
+two units half a screen apart (that was the "enemies only bob up/down their row" bug). The lunge only receives a
+destination, so it has nothing to re-aim and nothing to remember. `BeatDirector.Interject(...)` reserves a spot for the
+next beat, which is where a taunt, knockback or forced swap will hook in.
+
+**Cover holds longer.** When the guard is free, `HeroUnitView.RunTo(spot, cover: true)` reaches
+`CharacterLunge.BeginCoverTo`, which uses `coverHoldSeconds` (0.65 s) as the minimum pose after the hit, against 0.3 s
+for an ordinary swing - long enough to read "I took that for you", short enough to stay snappy.
 
 **Home is derived, never remembered.** A unit's resting place is `parent.TransformPoint(restLocal)` - the node it
 lives in decides where home is, and the node is exactly what a reposition moves. A stored world point survives a

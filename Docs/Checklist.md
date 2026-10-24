@@ -518,6 +518,12 @@ validator       ok [balance] Stage 1: 124s, 11 kills, 272 gold, 2.20 gold/s (ban
       announced 284, landed 324 after the knight moved 40 (re-aimed); order ally < knight < enemy
 - [ ] **verify live**: knight covers an ally -> number and `GUARD` beside the ally; tap Knight, free pads brighten,
       tap a back pad -> he slides and enemies target the new rank; tap elsewhere cancels; name/hp bar follows him
+- [x] **Superseded 2026-10-24 by §10h** (mechanism only, not behaviour): `BeginRun(target, side)` is now
+      `BeginRunTo(worldSpot)` / `BeginCoverTo(worldSpot)`, the impact re-aim is gone (the destination is decided once at
+      the announce), and `EnemySideSign` is no longer used - the cover side is derived from the attacker
+      (`BattleSpots.AttackerSide`). Verified live by the owner: guard covers correctly, nothing aims at a pad
+- [x] **player-verified 2026-10-24**: moving a hero, the cover landing in front of the ally, and the numbers appearing
+      where the guard actually stood
 
 
 ### 11a — Encounter factory + composition + enemy ranks  `[x]`  (still 1 enemy per wave)
@@ -2071,6 +2077,36 @@ Found while reviewing progress against the design docs. Each needs a home in `Ro
       never damage, grant loot or touch the formation. See [Cutscene-Plan.md](Cutscene-Plan.md)
 - [x] **The dev key path is the shape:** `N` -> `CutsceneRunner.Instance.Play(sample)`; the runner is created by
       `HudController.Start` next to the `BeatDirector`, so no scene wiring is needed
+- [ ] **Corrected 2026-10-24 (owner):** the visual half (bars, title, skip, `N`) was a throwaway effect, not what was
+      asked for. Decision: keep the **structure only** (`CutsceneDef` steps + a step-walking runner for
+      `Wait` / `MoveUnit` / `PlayClip`), strip the bars/title, and drop the `N` key until a real sequence is specified.
+      See [Cutscene-Plan.md](Cutscene-Plan.md). Not done yet - queued behind the guard work
+
+---
+
+### 10h — Guard is a rule, not a picture  `[x]`
+- [x] **A support cast never moves.** The beat planner now stages a clip and nothing else when the target is on the
+      caster's own side. `GUARD UP` no longer drags the knight sideways (that hop was a regression from the
+      `BeatDirector` rewrite: `stayPlanted` was the only "don't move" reason, and Guard is a *self* shield with no
+      `castInPlace`). Same rule covers War Cry (party) and enemy Block (self)
+- [x] **Bodies are measured by slot width, not by the live rect.** `BattleSpots` / `view.BodyWidth` read
+      `CharacterAnimator.SlotSize`. The live icon rect is stretched by every attack window, so both "widths" ballooned
+      and the gap ate the whole distance - the enemy only bobbed up/down its row. Restores the rule the old
+      `ComputeContact` used
+- [x] **The cover spot is derived from the attacker**, not from a board flag: the guard stands between the ally and the
+      enemy that is coming (`AttackerSide(attacker, ally)`), so a mirrored layout cannot invert it
+- [x] **No ghost spots. A plan may only contain a spot a unit will really occupy:** the guard is sent to the cover spot
+      when he is free, or the blow lands on his live body when he is already out on his own attack. The enemy can no
+      longer be sent to a place nobody is going to stand
+- [x] **Probe (measured):** Guard cast -> mover state `Idle`, icon moved **0.0 px**; covered hit -> widths 128/128,
+      gap 146, knight at 484.5, enemy travels **183 px** (was 56), order `ally 338.5 < knight < enemy 630.5`
+- [x] **Kept on purpose:** `coverHoldSeconds` (0.65 s) - the longer hold is what makes "I took that for you" read;
+      `RunTo(spot, cover)` shape; the sim rule (redirect + charges + half damage) untouched, so `GuardCoverTests` pass
+      without edits
+- [ ] **Pending (approved, not done):** delete the now-dead `CoverIntercepted` chain (`Encounter` x2,
+      `CombatSimulator`, `CombatManager`, `GameEvents`), `FormationBoardView.EnemySideSign`, and set
+      `castInPlace: true` on `guard` / `war_cry` / `enemy_block` in `abilities.json` so data states the intent the rule
+      already enforces
 
 ---
 

@@ -140,6 +140,11 @@ interesting"), it does not enter the base - and it is not parked either unless t
   - **10e `DONE`** - position editing moved INTO the battle board, and the board now holds one view per hero instead
     of one per pad. Tap a hero, free pads brighten, tap a free pad, he slides there; any other tap cancels. The PARTY
     tab lost its FORMATION tab. Damage numbers are born at the body's position at impact and never follow it.
+  - **10f-10h `DONE` (2026-10-24)** - the picture got one owner. `BeatDirector` plans every fight beat in a single pass
+    (landing point, then attacker), so no two views can disagree about where a unit stands; `BattleSpots` owns the gap
+    and side maths and measures bodies by announced slot width. Guard became a rule plus one honest picture: a support
+    cast never moves anyone, and a covered hit lands on the knight's real body (cover spot when he is free, his live
+    body when he is already out). A cutscene structure (`CutsceneDef` steps) exists but has no effects and no content.
 - **Blocked by:** Steps 7, 8. **Risk:** schema v3 migration - test against the existing v2 save.
 
 ### Step 10e — Even spread inside a rank  `DONE`
@@ -481,7 +486,7 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
 | 7 | Sim core refactor + Balance Lab v1 | DONE | splits 7a/7b/7c |
 | 8 | Content pipeline tools + dev overlay | DONE | 8a/8b; 8c's run-all-checks folded into 1f/1g |
 | 9 | Economy audit: currencies, funnel, IdleTimeService | DONE | 9a + 9b-1..4 (ledger, sinks, audio hooks, full reset) |
-| 10 | Formation | DONE | 10a-10e (save v3, separate boards, even-spread targeting) |
+| 10 | Formation | DONE | 10a-10h (save v3, one view per hero, moves as a battle tactic, one beat planner + guard picture) |
 | 11 | Multi-enemy encounters | DONE | 11a-11e (1-3 waves, size recipe, battle-log fix) |
 | 12 | Effect pipeline + statuses | SPLIT | effect kinds shipped 24 Oct 2026 (shield / heal / damage, `Combat-Sequencing.md` §7); **statuses** (stacking, dots, tags) still v1.1 |
 | 13 | Ability system | DONE (2026-10-24) | 11 abilities, one per hero, cast is a lane action, enemy auto-cast; save v7/v8. Open: assignments in save, hero auto-cast (S6) |

@@ -390,6 +390,7 @@ ui             { lastScreenIndex, settings{...} }
 | B41 | **No picture measures time or reads fight state.** Every window comes from `CharacterArtSet.SecondsFor` / `StrikeFrameFor`; the sim owns the clock | 24 Oct 2026 | Locked |
 | B42 | **One sheet, one role.** The Archer became an enemy and the Soldier a hero, so no hero looks like a wave enemy; `hero_archer` save keys are renamed on load (save v8) | 24 Oct 2026 | Locked |
 | B43 | **A unit has a body; a pad has an owner.** A hero's view belongs to the hero and moves to a pad, never the other way round. Everything that must appear *on* a unit reads `BodyRect` once, at impact; nothing follows a dashing unit afterwards | 24 Oct 2026 | Locked |
+| B44 | **A plan may only contain a spot a unit will really occupy, and a support cast never moves.** `BeatDirector` is the single planner of a fight beat; it stages a landing point (target body, or the guard's cover spot / live body), then moves the attacker only when the target is hostile and the attack is not planted. Bodies are measured by announced slot width (`view.BodyWidth`), never the live icon rect, which a swing stretches | 24 Oct 2026 | Locked |
 
 ### 6.4 Removals / avoid
 

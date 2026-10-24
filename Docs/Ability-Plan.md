@@ -26,7 +26,7 @@ Heroes (3 playable now, 3 art-ready reserves unlocked later):
 
 | Hero | Ability | Strip | Effect (v1) | Status |
 |---|---|---|---|---|
-| Knight | Guard | `Block:4` | self shield: damage taken x0.5 for N s | **v1** |
+| Knight | Guard | `Block:4` | **cover stance:** intercepts the next N hits aimed at any OTHER hero and takes half of them (halved on direct hits too); a charge is spent by any enemy hit that lands while it is up | **v1** |
 | Soldier | Holy Slash | `Attack02:6` (its spare attack) | heavy blow on the front enemy | **v1** |
 | Wizard | Shatter | `Attack02:9` (VFX overlay deferred) | ranged hit on the front enemy | **v1** |
 | Priest | Heal | `Heal:6` | restore HP to the lowest-health ally | v1 effect, gated by hero unlock |
