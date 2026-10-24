@@ -24,7 +24,7 @@
             "icon": "hero_knight",
             "art": "Knight",
             "abilities": [
-                "shield_wall",
+                "guard",
                 "heavy_strike"
             ],
             "baseHealth": 240.0,

@@ -44,6 +44,9 @@ namespace IdleRPG.Sim
 
         /// <summary>Impact effect id from the ability that caused this damage; empty for a plain swing.</summary>
         public string VfxId;
+
+        /// <summary>Display name of the ability that caused this damage; empty for a plain swing.</summary>
+        public string AbilityName;
     }
 
     /// <summary>

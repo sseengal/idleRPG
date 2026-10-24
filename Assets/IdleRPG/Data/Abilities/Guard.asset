@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 35bf50eb489af4ef4ae94d01e9b01a39, type: 3}
-  m_Name: ShieldWall
+  m_Name: Guard
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.AbilityDef
-  displayName: Shield Wall
-  abilityID: shield_wall
+  displayName: Guard
+  abilityID: guard
   description: 'Stands guard: intercepts the next 2 hits aimed at any ally, taking half damage.'
   kind: 0
   target: 0

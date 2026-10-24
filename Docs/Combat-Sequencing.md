@@ -168,7 +168,7 @@ press can fire into the new wave.
 |---|---|
 | Damage | `TakeDamage` → `Damaged` event → number, HP bar, log, threat, then `ResolveDeath` |
 | Heal | `Heal(maxHealth × healFraction)` → `Healed` event → green number, log |
-| Guard | **Cover stance** (Shield Wall): the caster intercepts the next N hits aimed at any other hero, takes **half** of them, and is halved on direct hits too. Charges are spent only on an intercepted hit; the stance ends when they run out, the caster dies, or the wave changes. A guard with `guardHits = 0` is the old timed shield (enemy Block, War Cry) |
+| Guard | **Cover stance** (Guard): the caster intercepts the next N hits aimed at any other hero, takes **half** of them, and is halved on direct hits too. Charges are spent only on an intercepted hit; the stance ends when they run out, the caster dies, or the wave changes. A guard with `guardHits = 0` is the old timed shield (enemy Block, War Cry) |
 
 Death is one path (`ResolveDeath`) for a swing, an ability, or a party wipe, so gold, kill credit and the
 "party wiped" flow cannot diverge.
@@ -377,7 +377,7 @@ frozen.
 5. Log order: cast line, then hit line.
 6. The ABILITIES row keeps the right name and clock through the queued wait.
 7. Swap waves mid-cast → nobody is left away from home.
-8. Guard move (Knight Shield Wall, Black Knight Block) → blue flash, `GUARD` word, and the next hit is
+8. Guard move (Knight Guard, Black Knight Block) → blue flash, `GUARD` word, and the next hit is
    visibly smaller.
 9. Heal move (Priest) → green number, and the lowest hero's bar rises.
 10. Enemy move (Slime Spike, Archer Volley) → its own strip plays, the enemy lunges at a hero, the orange

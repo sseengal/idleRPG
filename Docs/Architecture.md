@@ -230,6 +230,7 @@ Definitions only - no logic. Every definition has a stable string `id` (the only
 | v8 | Archer -> Soldier roster swap; `hero_archer` keys renamed on load, never stranded |
 | v9 | Mage's move renamed `fireball` -> `shatter`; unlock key and assignment renamed on load |
 | v10 | Soldier's move renamed `soldier_charge` -> `holy_slash`; unlock key and assignment renamed on load |
+| v11 | Knight's move renamed `shield_wall` -> `guard` (Shield Wall -> Guard); same rename rule |
 
 The block below is the **original v3 blueprint**, kept as the design target. Where it and the code differ,
 the code wins.

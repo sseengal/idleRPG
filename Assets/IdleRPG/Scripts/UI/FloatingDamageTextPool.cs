@@ -198,6 +198,12 @@ namespace IdleRPG.UI
 
             Spawn(info.Damage, EnemyAnchor(info.EnemyIndex), info.IsCritical ? FloatingTextStyle.Critical : FloatingTextStyle.Normal);
 
+            // Name the move at the beat it lands (Holy Slash, Shatter), the same way enemy moves announce themselves.
+            if (!string.IsNullOrEmpty(info.AbilityName))
+            {
+                Spawn(0d, EnemyAnchor(info.EnemyIndex), FloatingTextStyle.AbilityHit, info.AbilityName);
+            }
+
             // A scheduled burst (ability) already played a moment ago; do not start a second one on its damage.
             bool alreadyBurst = !string.IsNullOrEmpty(info.VfxId)
                 && lastImpactAt.TryGetValue(info.EnemyIndex, out float lastAt)
@@ -472,7 +478,14 @@ namespace IdleRPG.UI
             rt.anchorMax = anchor.anchorMax;
             rt.pivot = anchor.pivot;
 
-            Vector2 position = anchor.anchoredPosition + new Vector2(
+            // Position from the anchor's WORLD position, converted into the parent's local space. Reading
+            // anchoredPosition would ignore a unit that has been moved by a dash: the lunge changes the transform's
+            // position, not its stored anchoredPosition, so the text stayed at the old seat.
+            Vector2 anchorLocal = anchor.parent is RectTransform space
+                ? (Vector2)space.InverseTransformPoint(anchor.position)
+                : anchor.anchoredPosition;
+
+            Vector2 position = anchorLocal + new Vector2(
                 side * (40f + Random.Range(0f, Mathf.Abs(anchorJitter) * 0.5f)),
                 Random.Range(18f, 42f));
 

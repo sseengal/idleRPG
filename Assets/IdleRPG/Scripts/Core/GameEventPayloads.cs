@@ -22,7 +22,10 @@ namespace IdleRPG.Core
         /// <summary>Impact effect id from the ability that caused this damage; empty for a plain swing.</summary>
         public string VfxId;
 
-        public EnemyDamagedInfo(double damage, double currentHealth, double maxHealth, bool isCritical = false, int attackerIndex = -1, int enemyIndex = 0, string vfxId = "")
+        /// <summary>Display name of the ability that caused this damage; empty for a plain swing.</summary>
+        public string AbilityName;
+
+        public EnemyDamagedInfo(double damage, double currentHealth, double maxHealth, bool isCritical = false, int attackerIndex = -1, int enemyIndex = 0, string vfxId = "", string abilityName = "")
         {
             Damage = damage;
             CurrentHealth = currentHealth;
@@ -31,6 +34,7 @@ namespace IdleRPG.Core
             AttackerIndex = attackerIndex;
             EnemyIndex = enemyIndex;
             VfxId = vfxId;
+            AbilityName = abilityName;
         }
 
         /// <summary>Remaining health as 0..1.</summary>

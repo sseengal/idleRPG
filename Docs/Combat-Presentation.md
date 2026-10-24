@@ -344,7 +344,7 @@ shared. `AbilityWindow` is clamped like swings (0.1–2 s) so one bad clip canno
 
 Use §10 as written, plus:
 
-8. A shield ability (Knight Shield Wall) → blue flash, `GUARD` word, and the next hit is visibly
+8. A shield ability (Knight Guard) → blue flash, `GUARD` word, and the next hit is visibly
    smaller.
 9. A heal ability (Priest) → green number and the lowest hero's bar rises.
 10. An enemy with a Beam ability → it plays its strip, lunges at the hero, and a number appears on that

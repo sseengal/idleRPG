@@ -494,7 +494,7 @@ namespace IdleRPG.Combat
             {
                 EnemyDamaged?.Invoke(new EnemyDamagedInfo(
                     damage.Damage, damage.TargetHealth, damage.TargetMaxHealth, damage.IsCritical,
-                    damage.AttackerIndex, damage.TargetIndex, damage.VfxId));
+                    damage.AttackerIndex, damage.TargetIndex, damage.VfxId, damage.AbilityName));
                 return;
             }
 

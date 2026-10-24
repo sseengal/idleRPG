@@ -211,6 +211,16 @@ namespace IdleRPG.Save
                 Debug.Log("[SaveMigrations] Migrated save v9 -> v10 (Charge is now Holy Slash).");
             }
 
+            if (version < 11)
+            {
+                // v10 -> v11: "Shield Wall" was renamed "Guard" once it became a party cover stance. The id travels
+                // with the unlock key and the assignment, as with every ability rename before it.
+                RenameLevelPrefix(data, SaveData.SaveKeys.AbilityUnlock("shield_wall"), SaveData.SaveKeys.AbilityUnlock("guard"));
+                RenameAbilityId(data, "shield_wall", "guard");
+
+                Debug.Log("[SaveMigrations] Migrated save v10 -> v11 (Shield Wall is now Guard).");
+            }
+
             data.schemaVersion = SaveData.CurrentVersion;
             return data;
         }

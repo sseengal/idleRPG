@@ -125,8 +125,8 @@
             "tokenCost": 3.0
         },
         {
-            "id": "shield_wall",
-            "displayName": "Shield Wall",
+            "id": "guard",
+            "displayName": "Guard",
             "kind": "shield",
             "artSlot": "Ability",
             "cooldownSec": 14.0,
