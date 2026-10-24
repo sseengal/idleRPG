@@ -33,6 +33,10 @@ namespace IdleRPG.UI
         [SerializeField] private float criticalScale = UiType.CritScale;
         [SerializeField] private float abilityScale = 1.5f;
 
+        [Tooltip("Size of every floating WORD (ability name, GUARD, GUARD UP). One step above the damage size, so a " +
+                 "caption never competes with the number - and never changes size with the length of the word.")]
+        [SerializeField] private float wordFontSize = UiType.Sentence;
+
         private float elapsed;
         private Vector2 startPosition;
         private float driftDirection;
@@ -50,6 +54,11 @@ namespace IdleRPG.UI
 
             baseScale = rectTransform != null ? rectTransform.localScale.x : 1f;
             baseFontSize = label != null ? label.fontSize : baseFontSize;
+
+            if (wordFontSize <= 0f)
+            {
+                wordFontSize = UiType.Sentence;
+            }
         }
 
         /// <summary>Starts a number at a local anchored position.</summary>
@@ -95,11 +104,17 @@ namespace IdleRPG.UI
                 case FloatingTextStyle.AbilityHit:
                     colour = abilityColor;
                     break;
+                case FloatingTextStyle.AbilityTitle:
+                    colour = abilityColor;
+                    break;
             }
 
             label.color = colour;
 
-            // Crit and enemy-ability damage are the "chunky" showcase: same font, bigger. Reset for everything else.
+            // One size for every word: an ability name is a caption, not a headline, and a two-word name must not
+            // render smaller than a one-word name. Numbers keep their hierarchy (plain, crit, ability hit).
+            bool isWord = style == FloatingTextStyle.Guard || style == FloatingTextStyle.AbilityTitle;
+
             float scale = 1f;
             if (style == FloatingTextStyle.Critical)
             {
@@ -110,7 +125,7 @@ namespace IdleRPG.UI
                 scale = abilityScale;
             }
 
-            label.fontSize = baseFontSize * scale;
+            label.fontSize = isWord ? wordFontSize : baseFontSize * scale;
 
             gameObject.SetActive(true);
             IsPlaying = true;
@@ -172,6 +187,12 @@ namespace IdleRPG.UI
         Guard = 4,
 
         /// <summary>Damage from an enemy ability: orange and bigger than a plain hit.</summary>
-        AbilityHit = 5
+        AbilityHit = 5,
+
+        /// <summary>
+        /// The NAME of an ability, floating over its target: orange, and the same size as every other word
+        /// (GUARD, GUARD UP) so captions never differ from each other.
+        /// </summary>
+        AbilityTitle = 6
     }
 }

@@ -141,7 +141,7 @@ namespace IdleRPG.UI
             // Call-out over the caster, centred above the sprite.
             if (!string.IsNullOrEmpty(abilityName))
             {
-                Spawn(0d, AnchorFor(CombatantSide.Enemy, index), FloatingTextStyle.AbilityHit, abilityName, new Vector2(0f, 96f));
+                Spawn(0d, AnchorFor(CombatantSide.Enemy, index), FloatingTextStyle.AbilityTitle, abilityName, new Vector2(0f, 96f));
             }
         }
 
@@ -197,7 +197,7 @@ namespace IdleRPG.UI
             // Name the move at the beat it lands, centred above the enemy: read as a title, not a stray number.
             if (!string.IsNullOrEmpty(info.AbilityName))
             {
-                Spawn(0d, EnemyAnchor(info.EnemyIndex), FloatingTextStyle.AbilityHit, info.AbilityName, new Vector2(0f, 96f));
+                Spawn(0d, EnemyAnchor(info.EnemyIndex), FloatingTextStyle.AbilityTitle, info.AbilityName, new Vector2(0f, 96f));
             }
 
             // A scheduled burst (ability) already played a moment ago; do not start a second one on its damage.
@@ -448,7 +448,10 @@ namespace IdleRPG.UI
             // heroes pops from the hero's top-RIGHT. The rect adopts the anchor's anchor/pivot so the
             // offset lands in the SAME coordinate space (otherwise numbers drifted below the sim), then
             // it is clamped to stay inside the battle view.
-            float side = style == FloatingTextStyle.Incoming || style == FloatingTextStyle.AbilityHit || style == FloatingTextStyle.Heal ? 1f : -1f;
+            float side = style == FloatingTextStyle.Incoming || style == FloatingTextStyle.AbilityHit
+                         || style == FloatingTextStyle.AbilityTitle || style == FloatingTextStyle.Heal
+                ? 1f
+                : -1f;
 
             RectTransform rt = view.transform as RectTransform;
             rt.SetParent(anchor.parent, false);

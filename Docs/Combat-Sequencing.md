@@ -200,6 +200,11 @@ that dashes: the Knight guarding an ally is standing beside that ally when the h
 appear there, not on his empty pad. The text is parented to the unit's own board node, which does not move during a
 fight - only a player-ordered seat move moves it, and that is deliberate.
 
+**One size for words, a ladder for numbers.** Every floating word - an ability name, `GUARD`, `GUARD UP` - uses
+`FloatingDamageTextView.wordFontSize` = `UiType.Sentence` (36), exactly one step above the damage size (32). Numbers keep
+their hierarchy: plain 32, crit x1.3, enemy-ability damage x1.5. The label has auto-sizing **off**, so a two-word ability
+name can never render smaller than a one-word name.
+
 **Which strip is the ordinary attack.** `CharacterArtSet.BasicAttackSlot` names it - `Attack01` by default, the Mage
 uses `Attack02` (the Shatter cast pose, plain sheet, no frost burst). `SwingSeconds` is measured from that same strip,
 so the blow still lands on the strip's own contact frame.
