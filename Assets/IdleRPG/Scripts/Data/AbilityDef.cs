@@ -31,6 +31,10 @@ namespace IdleRPG.Data
         [Tooltip("Which art slot plays it: \"Ability\" (the character's own special strip) or a numbered attack strip such as \"Attack02\". A character without that strip simply does not play one.")]
         [SerializeField] private string artSlot = "Ability";
 
+        [Header("Impact effect")]
+        [Tooltip("Sprite sheet id under Resources/Vfx (e.g. \"ice_shatter\"). Played on the target when the move lands. Empty = none.")]
+        [SerializeField] private string impactVfx = "";
+
         [Tooltip("Seconds between casts. The cast itself is instant; this is the clock that refills it.")]
         [SerializeField] private float cooldownSec = 12f;
 
@@ -66,6 +70,9 @@ namespace IdleRPG.Data
 
         /// <summary>Name of the art slot that plays the cast ("Ability" or an attack strip name).</summary>
         public string ArtSlot => string.IsNullOrEmpty(artSlot) ? "Ability" : artSlot;
+
+        /// <summary>Impact effect id under Resources/Vfx, or empty when the move has no on-target effect.</summary>
+        public string ImpactVfx => impactVfx ?? string.Empty;
 
         public float CooldownSec => Mathf.Max(MinCooldownSec, cooldownSec);
 

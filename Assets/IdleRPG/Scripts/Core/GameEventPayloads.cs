@@ -19,7 +19,10 @@ namespace IdleRPG.Core
         /// <summary>Party lane of the hero that dealt the damage (-1 when unknown).</summary>
         public int AttackerIndex;
 
-        public EnemyDamagedInfo(double damage, double currentHealth, double maxHealth, bool isCritical = false, int attackerIndex = -1, int enemyIndex = 0)
+        /// <summary>Impact effect id from the ability that caused this damage; empty for a plain swing.</summary>
+        public string VfxId;
+
+        public EnemyDamagedInfo(double damage, double currentHealth, double maxHealth, bool isCritical = false, int attackerIndex = -1, int enemyIndex = 0, string vfxId = "")
         {
             Damage = damage;
             CurrentHealth = currentHealth;
@@ -27,6 +30,7 @@ namespace IdleRPG.Core
             IsCritical = isCritical;
             AttackerIndex = attackerIndex;
             EnemyIndex = enemyIndex;
+            VfxId = vfxId;
         }
 
         /// <summary>Remaining health as 0..1.</summary>

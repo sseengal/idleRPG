@@ -190,6 +190,17 @@ namespace IdleRPG.Save
                 Debug.Log("[SaveMigrations] Migrated save v7 -> v8 (Archer became the Soldier; progress carried across).");
             }
 
+            if (version < 9)
+            {
+                // v8 -> v9: the Mage's move was renamed from "fireball" to "shatter" once its art became the ice
+                // shatter burst. The id is written into the unlock keyed list and into the ability assignments, so
+                // both have to travel with it or the Mage would come back without its move.
+                RenameLevelPrefix(data, SaveData.SaveKeys.AbilityUnlock("fireball"), SaveData.SaveKeys.AbilityUnlock("shatter"));
+                RenameAbilityId(data, "fireball", "shatter");
+
+                Debug.Log("[SaveMigrations] Migrated save v8 -> v9 (Fireball is now Shatter).");
+            }
+
             data.schemaVersion = SaveData.CurrentVersion;
             return data;
         }

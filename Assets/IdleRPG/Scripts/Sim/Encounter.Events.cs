@@ -41,6 +41,9 @@ namespace IdleRPG.Sim
         public double TargetHealth;
         public double TargetMaxHealth;
         public bool IsCritical;
+
+        /// <summary>Impact effect id from the ability that caused this damage; empty for a plain swing.</summary>
+        public string VfxId;
     }
 
     /// <summary>

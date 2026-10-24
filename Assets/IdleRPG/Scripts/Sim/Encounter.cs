@@ -383,7 +383,7 @@ namespace IdleRPG.Sim
                 {
                     double applied = target.TakeDamage(swing.Damage);
                     caster.Threat += applied;
-                    RaiseDamage(caster, target, swing.AttackerSide, applied, swing.IsCritical);
+                    RaiseDamage(caster, target, swing.AttackerSide, applied, swing.IsCritical, ability.VfxId);
                     ResolveDeath(target);
                     continue;
                 }
@@ -436,7 +436,7 @@ namespace IdleRPG.Sim
         }
 
         /// <summary>Raises the impact event for a hit that really removed something (a 0-damage hit shows no number).</summary>
-        private void RaiseDamage(Combatant attacker, Combatant target, CombatantSide attackerSide, double applied, bool isCritical)
+        private void RaiseDamage(Combatant attacker, Combatant target, CombatantSide attackerSide, double applied, bool isCritical, string vfxId = "")
         {
             if (applied <= 0d)
             {
@@ -452,7 +452,8 @@ namespace IdleRPG.Sim
                 Damage = applied,
                 TargetHealth = target.CurrentHealth,
                 TargetMaxHealth = target.MaxHealth,
-                IsCritical = isCritical
+                IsCritical = isCritical,
+                VfxId = vfxId
             });
         }
 

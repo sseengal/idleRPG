@@ -55,6 +55,53 @@ namespace IdleRPG.Tests
         }
 
         [Test]
+        public void Ability_CarriesItsImpactEffectToTheDamageEvent()
+        {
+            Encounter encounter = Build(out Combatant hero, out _);
+
+            hero.SetAbility(new SimAbility
+            {
+                Id = "test_strike",
+                DisplayName = "Test Strike",
+                ClipSlot = "Ability",
+                CooldownSec = 10d,
+                Kind = SimAbilityKind.Damage,
+                Target = SimAbilityTarget.FrontEnemy,
+                DamageMultiplier = 2d,
+                WindowSeconds = 0.2d,
+                VfxId = "test_fx"
+            });
+
+            string seen = null;
+            encounter.Damaged += damage => seen = damage.VfxId;
+
+            Assert.IsTrue(encounter.RequestAbility(0), "the ready hero must accept the cast request");
+
+            for (int step = 0; step < 200 && seen == null; step++)
+            {
+                encounter.Step(0.02d);
+            }
+
+            Assert.AreEqual("test_fx", seen, "the damage event must carry the ability's impact effect id");
+        }
+
+        [Test]
+        public void PlainSwing_CarriesNoImpactEffect()
+        {
+            Encounter encounter = Build(out _, out _);
+
+            string seen = "sentinel";
+            encounter.Damaged += damage => seen = damage.VfxId;
+
+            for (int step = 0; step < 200 && seen == "sentinel"; step++)
+            {
+                encounter.Step(0.02d);
+            }
+
+            Assert.AreEqual(string.Empty, seen ?? string.Empty, "a plain swing must not ask for an impact effect");
+        }
+
+        [Test]
         public void Ability_LandsOnlyAfterItsCastWindow()
         {
             Encounter encounter = Build(out Combatant hero, out _);

@@ -174,6 +174,9 @@ namespace IdleRPG.EditorTools.Content
         /// </summary>
         public string artSlot = "Ability";
 
+        /// <summary>Impact effect id under Resources/Vfx (a sliced sheet such as "ice_shatter"). Empty = none.</summary>
+        public string impactVfx = "";
+
         /// <summary>Seconds between casts. The cast itself is instant; this is the clock that refills it.</summary>
         public float cooldownSec = 12f;
 

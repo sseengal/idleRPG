@@ -97,6 +97,7 @@ A move is one row in `Content/Specs/abilities.json`:
 | `damageMultiplier` | Damage as a multiple of a plain hit |
 | `healFraction` | Heal as a fraction of the target's maximum health |
 | `shieldFactor` / `shieldSeconds` | Damage taken multiplier while the guard holds, and for how long |
+| `impactVfx` | Optional id under `Resources/Vfx/` (a sliced sheet) played **on the target** at impact — `ice_shatter`, `heavy_smash` |
 | `unlockStage` | Stage gate (heroes only; enemies ignore it) |
 
 The row becomes an asset (`Data/Abilities/*.asset`), and the hero or enemy points at that asset.
@@ -169,6 +170,18 @@ press can fire into the new wave.
 
 Death is one path (`ResolveDeath`) for a swing, an ability, or a party wipe, so gold, kill credit and the
 "party wiped" flow cannot diverge.
+
+**On-target impact effect.** A damage ability may name an `impactVfx`. `DamageEvent.VfxId` carries it to the HUD, and
+`FloatingDamageTextPool` plays the sliced sheet at the hit enemy, sized to 1.4x the target anchor, above the unit and
+under the numbers. Empty id = nothing plays. Missing sheet = nothing plays (never an error).
+
+| Move | Effect id | Sheet |
+|---|---|---|
+| Overhead Slash | `heavy_smash` | `Priest_Attack_effect.png` (5 frames) |
+| Shatter | `ice_shatter` | `Wizard_Attack01_Effect.png` (10 frames) |
+
+Effect sheets live in `Assets/IdleRPG/Resources/Vfx/` and are cut by `Tools > Idle RPG > Art > Slice VFX Sheets`
+(a 100 px grid; the tool reads the PNG header so Unity's power-of-two rescale cannot move the cuts).
 
 ---
 
@@ -384,6 +397,8 @@ frozen.
 
 | Item | Why it is not done | Size |
 |---|---|---|
+| Guard lands ~0.1 s after the call-out (Knight `AbilityStrikeFrame = 0`), before the Block strip reads as a shield | Timing, not balance: pick the contact frame | Small |
+| Measure `Attack02` / `Attack03` strike frames | The whole 6-9 frame strip plays, so Overhead Slash and Shatter land on the last frame (0.5 s / 0.75 s) | Medium |
 | Attach the nine free Summon / Heal / Block strips in §11 | Content decision, not code — each is one spec row plus one asset | Small |
 | Boss moves (32 of 40 bosses have none) | Biggest visible gap; needs strips that exist plus spec rows | Medium |
 | Measure `Attack02` / `Attack03` strike frames | Art-importer work, long lead time; until then those strips land on the last frame | Medium |

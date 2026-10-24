@@ -62,6 +62,9 @@ namespace IdleRPG.Sim
         /// <summary>Fraction of the target's MAXIMUM health restored.</summary>
         public double HealFraction;
 
+        /// <summary>Sprite sheet id under Resources/Vfx (e.g. "ice_shatter"); empty = no impact effect.</summary>
+        public string VfxId;
+
         /// <summary>Multiplier applied to the caster's attack for a Damage ability.</summary>
         public double DamageMultiplier;
 

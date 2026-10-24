@@ -311,7 +311,7 @@ screen when hardware is available. Batch-mode: `-executeMethod IdleRPG.EditorToo
 - **Goal:** ask #2 proper: `AbilityData` + `EffectSpec` rows, `AbilityRuntime` (cooldown/charges/triggers/targets),
   auto-cast with player-ordered priority, 1 ability per existing hero + 3-4 enemy abilities, ability UI.
 - **Deliverables:** ability runtime; abilities screen (list/levels/equip/priority); hero kits; enemy kits; cast log
-  lines ("Mage casts Fireball -> 3 targets").
+  lines ("Mage casts Shatter -> 3 targets").
 - **Acceptance:** a cooldown fires deterministically at the expected cadence, DPS/log visibly change, the offline
   rate stays consistent with the new DPS, and levelling an ability improves its numbers.
 - **Blocked by:** Step 12.

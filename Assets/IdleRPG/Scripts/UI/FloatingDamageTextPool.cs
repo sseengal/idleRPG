@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using IdleRPG.Core;
 using IdleRPG.Sim;
 
@@ -32,6 +33,26 @@ namespace IdleRPG.UI
 
         private readonly List<float> enemyCastUntil = new List<float>();
         private float driftSeed;
+
+        [Header("Impact effect")]
+        [Tooltip("Frames per second for an on-target impact sheet (Resources/Vfx/<id>).")]
+        [SerializeField] private float impactVfxFps = 12f;
+
+        [Tooltip("Impact sprite size as a multiple of the target anchor's height.")]
+        [SerializeField] private float impactVfxScale = 1.4f;
+
+        private readonly List<ImpactPlay> impacts = new List<ImpactPlay>();
+        private readonly Dictionary<string, Sprite[]> impactCache = new Dictionary<string, Sprite[]>();
+
+        private sealed class ImpactPlay
+        {
+            public Image image;
+            public RectTransform rect;
+            public Sprite[] frames;
+            public float clock;
+            public int frame;
+            public bool active;
+        }
 
         /// <summary>
         /// Replaces the per-hero damage anchors. The formation strip calls this whenever the board changes, so a
@@ -136,6 +157,7 @@ namespace IdleRPG.UI
             }
 
             Spawn(info.Damage, EnemyAnchor(info.EnemyIndex), info.IsCritical ? FloatingTextStyle.Critical : FloatingTextStyle.Normal);
+            PlayImpact(info.EnemyIndex, info.VfxId);
         }
 
         private RectTransform EnemyAnchor(int enemyIndex)
@@ -188,6 +210,126 @@ namespace IdleRPG.UI
             }
 
             return heroAnchors != null && index >= 0 && index < heroAnchors.Length ? heroAnchors[index] : null;
+        }
+
+        /// <summary>
+        /// Plays an on-target impact sheet at one enemy slot. Missing art is a quiet no-op: an ability must never
+        /// break because a picture is absent.
+        /// </summary>
+        private void PlayImpact(int enemyIndex, string vfxId)
+        {
+            if (string.IsNullOrEmpty(vfxId))
+            {
+                return;
+            }
+
+            RectTransform anchor = EnemyAnchor(enemyIndex);
+            if (anchor == null)
+            {
+                return;
+            }
+
+            Sprite[] frames = ImpactFrames(vfxId);
+            if (frames == null || frames.Length == 0)
+            {
+                return;
+            }
+
+            ImpactPlay play = RentImpact();
+            play.frames = frames;
+            play.frame = 0;
+            play.clock = 0f;
+            play.active = true;
+
+            RectTransform rt = play.rect;
+            rt.SetParent(anchor.parent, false);
+            rt.anchorMin = anchor.anchorMin;
+            rt.anchorMax = anchor.anchorMax;
+            rt.pivot = anchor.pivot;
+            rt.anchoredPosition = anchor.anchoredPosition;
+
+            float baseSize = anchor.rect.height > 1f ? anchor.rect.height : 120f;
+            float size = Mathf.Max(64f, baseSize * Mathf.Max(0.1f, impactVfxScale));
+            rt.sizeDelta = new Vector2(size, size);
+
+            // Just above its own unit, so the burst covers the enemy but stays under the numbers.
+            int sibling = Mathf.Clamp(anchor.GetSiblingIndex() + 1, 0, anchor.parent.childCount - 1);
+            rt.SetSiblingIndex(sibling);
+
+            play.image.sprite = frames[0];
+            play.image.enabled = true;
+            play.image.raycastTarget = false;
+        }
+
+        private void TickImpacts(float deltaTime)
+        {
+            for (int i = 0; i < impacts.Count; i++)
+            {
+                ImpactPlay play = impacts[i];
+                if (!play.active)
+                {
+                    continue;
+                }
+
+                play.clock += deltaTime;
+                int frame = Mathf.FloorToInt(play.clock * Mathf.Max(1f, impactVfxFps));
+
+                if (frame >= play.frames.Length)
+                {
+                    play.active = false;
+                    play.image.enabled = false;
+                    continue;
+                }
+
+                play.image.sprite = play.frames[frame];
+            }
+        }
+
+        private ImpactPlay RentImpact()
+        {
+            for (int i = 0; i < impacts.Count; i++)
+            {
+                if (!impacts[i].active)
+                {
+                    return impacts[i];
+                }
+            }
+
+            var host = new GameObject("ImpactVfx", typeof(RectTransform), typeof(Image));
+            var rect = host.GetComponent<RectTransform>();
+            var image = host.GetComponent<Image>();
+            image.preserveAspect = true;
+            image.raycastTarget = false;
+
+            var play = new ImpactPlay { image = image, rect = rect };
+            impacts.Add(play);
+            return play;
+        }
+
+        /// <summary>Frames for one effect id, loaded once from Resources/Vfx/&lt;id&gt; and sorted 0,1,2,... .</summary>
+        private Sprite[] ImpactFrames(string vfxId)
+        {
+            if (impactCache.TryGetValue(vfxId, out Sprite[] cached))
+            {
+                return cached;
+            }
+
+            Sprite[] frames = Resources.LoadAll<Sprite>("Vfx/" + vfxId);
+            if (frames != null && frames.Length > 1)
+            {
+                System.Array.Sort(frames, (a, b) =>
+                {
+                    if (a.name.Length != b.name.Length)
+                    {
+                        return a.name.Length - b.name.Length;
+                    }
+
+                    return string.CompareOrdinal(a.name, b.name);
+                });
+            }
+
+            impactCache[vfxId] = frames;
+            return frames;
         }
 
         private void Spawn(double value, RectTransform anchor, FloatingTextStyle style, string text = null)
@@ -265,6 +407,8 @@ namespace IdleRPG.UI
 
         private void Update()
         {
+            TickImpacts(Time.deltaTime);
+
             for (int i = active.Count - 1; i >= 0; i--)
             {
                 FloatingDamageTextView view = active[i];

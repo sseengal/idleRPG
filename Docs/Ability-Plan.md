@@ -28,7 +28,7 @@ Heroes (3 playable now, 3 art-ready reserves unlocked later):
 |---|---|---|---|---|
 | Knight | Shield Wall | `Block:4` | self shield: damage taken x0.5 for N s | **v1** |
 | Soldier | Charge | `Attack02:6` (its spare attack) | heavy blow on the front enemy | **v1** |
-| Wizard | Fireball | `Attack02:9` (VFX overlay deferred) | ranged hit on the front enemy | **v1** |
+| Wizard | Shatter | `Attack02:9` (VFX overlay deferred) | ranged hit on the front enemy | **v1** |
 | Priest | Heal | `Heal:6` | restore HP to the lowest-health ally | v1 effect, gated by hero unlock |
 | Knight Templar | Bulwark | `Block:4` | party shield (the Shield buff applied to all allies) | v1 effect, gated by hero unlock |
 | Lancer | Impale | `Attack02:9` | piercing hit on the front enemy | v1 effect, gated by hero unlock |
@@ -52,7 +52,7 @@ Counting the composited casts, the Knight owns 3 clips (Attack02, Attack03, Bloc
 |---|---|---|
 | Knight | Shield Wall (`Block`) | Heavy Strike (`Attack02`) |
 | Soldier | Charge (`Attack02`) | War Cry (`Attack03`, a party shield played from a swing clip - it has no block art) |
-| Wizard | Fireball (`Attack02`) | Arcane Burst (`Attack03`, the composited cast) |
+| Wizard | Shatter (`Attack02`) | Arcane Burst (`Attack03`, the composited cast) |
 
 A hero equips ONE of the two and can never clear it: switching to the other is allowed, unequipping is not, because a
 hero with no ability is only ever worse and there is no decision in it. Buying the second ability does NOT switch to
@@ -112,7 +112,7 @@ Enemies (auto-cast, same vocabulary):
 | **S1** | Import the ability strips into the art sets (new slots + per-clip fps + a measured strike frame). | **DONE 2026-10-13** — 15 of the 42 characters carry a special (`Block`/`Heal`/`Beam`/`Spike`/`Summon`) with its own fps and strike frame; the art validator reports "42 sets checked, 15 with a special strip, PASS". Playback arrives with S3. |
 | **S2** | `AbilityDef` + `abilities.json` spec + generator; unlock (token cost + stage gate) riding the keyed level list; the Party-tab assign row. | Assign an unlocked ability to a hero; it survives save/reload. Split in three: **S2a** data spine (done), **S2b** unlock + assignment service, **S2c** Party-tab row. **The assignment needed one additive save field and so moved the schema to v7** (the unlock itself still needs none). |
 | **S3** | The sim effect layer + **Knight's Shield Wall end-to-end**: battle tab, tap-to-cast, cooldown clock, log line, the shield actually reduces damage. | Tap -> Knight plays Block -> incoming damage is halved for N s, all visible and logged. |
-| **S4** | Heal, Volley, Fireball, Impale, Bulwark; enemy Block/Beam/Spike auto-cast. | Every v1 ability has a working effect, its own animation and cooldown, and is logged. |
+| **S4** | Heal, Volley, Shatter, Impale, Bulwark; enemy Block/Beam/Spike auto-cast. | Every v1 ability has a working effect, its own animation and cooldown, and is logged. |
 | **S5** | The three reserve heroes (Priest, Knight Templar, Lancer) and their abilities behind stage-milestone unlocks. | Unlock a reserve hero mid-run and assign/use its ability. |
 | **S6** | Auto-cast ascension unlock (per hero). | With the ascension upgrade, the hero casts on cooldown with no tap. |
 

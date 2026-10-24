@@ -431,6 +431,7 @@ namespace IdleRPG.Combat
                 ShieldSeconds = definition.ShieldSeconds,
                 HealFraction = definition.HealFraction,
                 DamageMultiplier = definition.DamageMultiplier,
+                VfxId = definition.ImpactVfx,
 
                 // The art owns the travel window: the effect lands on the frame that strip reaches full reach.
                 WindowSeconds = art != null ? art.SecondsFor(slot) : 0f
@@ -482,7 +483,7 @@ namespace IdleRPG.Combat
             {
                 EnemyDamaged?.Invoke(new EnemyDamagedInfo(
                     damage.Damage, damage.TargetHealth, damage.TargetMaxHealth, damage.IsCritical,
-                    damage.AttackerIndex, damage.TargetIndex));
+                    damage.AttackerIndex, damage.TargetIndex, damage.VfxId));
                 return;
             }
 

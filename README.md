@@ -102,7 +102,7 @@ Balance numbers print from `Tools > Idle RPG > Debug > Log Balance Summary`, inc
 | Files | `savegame.json` + `savegame.json.bak` in `Application.persistentDataPath` |
 | Writes | atomic (`.tmp` → replace), previous file kept as `.bak`, unreadable file quarantined as `savegame.corrupt-<timestamp>.json` |
 | Cadence | every 15s, plus debounced saves (≥5s apart) after kills, stage clears, upgrades and ascensions, plus pause, focus loss and quit |
-| Schema | **v8** (`SaveData.CurrentVersion`): v3 partySlots, v4 runBestStage, v5 keyed `levels`, v6 gear, v7 ability id, v8 roster swap. `SaveMigrations` upgrades every older file additively |
+| Schema | **v9** (`SaveData.CurrentVersion`): v3 partySlots, v4 runBestStage, v5 keyed `levels`, v6 gear, v7 ability id, v8 roster swap, v9 Fireball -> Shatter. `SaveMigrations` upgrades every older file additively |
 | Lifetime stats | `totalKills`, `totalGoldEarned`, `playTimeSeconds`, `ascensionCount`, `saveCount`, `lastPageIndex` |
 | Timestamps | `lastSaveTimestampBinary`, `lastLogoutTimestampBinary`, mirrored to PlayerPrefs `IdleRPG.lastLogout` |
 

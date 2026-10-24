@@ -40,7 +40,7 @@
             "icon": "hero_mage",
             "art": "Wizard",
             "abilities": [
-                "fireball",
+                "shatter",
                 "arcane_burst"
             ],
             "baseHealth": 130.0,
