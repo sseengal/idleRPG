@@ -56,43 +56,6 @@ namespace IdleRPG.UI
                 return;
             }
 
-            RectTransform targetBody = UnitAnchors.Get(targetSide, targetIndex);
-
-            if (targetBody == null)
-            {
-                // No view on screen (dead, not spawned): the sim still lands its damage. Nothing to stage.
-                reservations.Clear();
-                return;
-            }
-
-            Vector3 targetSpot = targetBody.position;
-            float targetHalf = BattleSpots.HalfWidth(targetBody);
-
-            // 1. A cover is planned FIRST: the guard's spot becomes the spot the blow lands on.
-            //    In the sim's event the TARGET is the guard (the hit was redirected to him) and CoveredAllyIndex is
-            //    the ally who was saved. Getting those two the right way round is the whole point of this block.
-            if (coveredAllyIndex >= 0)
-            {
-                RectTransform allyBody = UnitAnchors.Get(CombatantSide.Party, coveredAllyIndex);
-                HeroUnitView guard = hud.FormationBoard != null ? hud.FormationBoard.GetHeroView(targetIndex) : null;
-
-                if (allyBody != null && guard != null)
-                {
-                    // Stand on the enemy side of the ally, so the guard is between the ally and the danger.
-                    float side = hud.FormationBoard.EnemySideSign;
-                    Vector3 guardSpot = BattleSpots.Beside(
-                        allyBody.position,
-                        BattleSpots.HalfWidth(guard.BodyRect),
-                        BattleSpots.HalfWidth(allyBody),
-                        side);
-
-                    guard.RunTo(guardSpot, cover: true);
-
-                    targetSpot = guardSpot;
-                    targetHalf = BattleSpots.HalfWidth(guard.BodyRect);
-                }
-            }
-
             RectTransform attackerBody = UnitAnchors.Get(attackerSide, attackerIndex);
 
             if (attackerBody == null)
@@ -101,28 +64,103 @@ namespace IdleRPG.UI
                 return;
             }
 
-            // 2. Play the attacker's clip on the announce, exactly as before.
+            // Play the clip on the announce, exactly as before: the strike frame still lands on the hit.
             PlayClip(attackerSide, attackerIndex, clipSlot);
 
-            // 3. Then place the attacker: a reserved spot wins, then "stay planted", then the near flank.
+            // A support act never travels. Guard (self), War Cry (party), enemy Block (self): the target is on the
+            // caster's own side, so there is no distance to close. A ranged attack says so through stayPlanted.
+            // (The old view had this check; losing it is why the knight hopped when GUARD UP appeared.)
+            if (stayPlanted || targetSide == attackerSide)
+            {
+                reservations.Clear();
+                return;
+            }
+
+            // The landing point: a covered hit lands on the GUARD, at a spot he will really occupy.
+            if (!TryPlanLanding(targetSide, targetIndex, coveredAllyIndex, attackerBody.position,
+                    out Vector3 targetSpot, out float targetWidth))
+            {
+                reservations.Clear();
+                return;
+            }
+
+            // The attacker: a reserved spot wins, else its own near flank.
             if (!reservations.TryGetValue(Key(attackerSide, attackerIndex), out Vector3 attackerSpot))
             {
-                if (stayPlanted)
-                {
-                    reservations.Clear();
-                    return;
-                }
-
                 float side = BattleSpots.AttackerSide(attackerBody.position, targetSpot);
-                attackerSpot = BattleSpots.Beside(
-                    targetSpot,
-                    BattleSpots.HalfWidth(attackerBody),
-                    targetHalf,
-                    side);
+                attackerSpot = BattleSpots.Beside(targetSpot, WidthOf(attackerSide, attackerIndex), targetWidth, side);
             }
 
             RunTo(attackerSide, attackerIndex, attackerSpot, cover: false);
             reservations.Clear();
+        }
+
+        /// <summary>
+        /// Works out where the blow lands. Without a cover that is simply the target's body. With one, it is the guard:
+        /// either the spot he is being sent to now, or - if he is already out on his own attack - the spot he really
+        /// occupies. A plan may never contain a position no unit will stand on.
+        /// </summary>
+        private static bool TryPlanLanding(CombatantSide targetSide, int targetIndex, int coveredAllyIndex,
+            Vector3 attackerSpot, out Vector3 spot, out float width)
+        {
+            // No cover: the blow lands on the target's own body.
+            if (coveredAllyIndex < 0)
+            {
+                RectTransform body = UnitAnchors.Get(targetSide, targetIndex);
+
+                if (body == null)
+                {
+                    // No view on screen (dead, not spawned): the sim still lands its damage. Nothing to stage.
+                    spot = attackerSpot;
+                    width = 0f;
+                    return false;
+                }
+
+                spot = body.position;
+                width = WidthOf(targetSide, targetIndex);
+                return true;
+            }
+
+            // Covered: the event's TARGET is the guard, CoveredAllyIndex is the ally he saved.
+            RectTransform guardBody = UnitAnchors.Get(CombatantSide.Party, targetIndex);
+            RectTransform allyBody = UnitAnchors.Get(CombatantSide.Party, coveredAllyIndex);
+            HeroUnitView guard = HudController.Instance?.FormationBoard?.GetHeroView(targetIndex);
+
+            if (guardBody == null || allyBody == null || guard == null)
+            {
+                spot = guardBody != null ? guardBody.position : attackerSpot;
+                width = WidthOf(CombatantSide.Party, targetIndex);
+                return guardBody != null;
+            }
+
+            if (guard.IsMoving)
+            {
+                // Do not drag him: the blow lands where he really is right now.
+                spot = guardBody.position;
+                width = guard.BodyWidth;
+                return true;
+            }
+
+            // Stand between the ally and the enemy that is coming - no board orientation needed.
+            float side = BattleSpots.AttackerSide(attackerSpot, allyBody.position);
+            spot = BattleSpots.Beside(allyBody.position, guard.BodyWidth,
+                WidthOf(CombatantSide.Party, coveredAllyIndex), side);
+            width = guard.BodyWidth;
+
+            guard.RunTo(spot, cover: true);
+            return true;
+        }
+
+        private static float WidthOf(CombatantSide side, int index)
+        {
+            if (side == CombatantSide.Party)
+            {
+                HeroUnitView view = HudController.Instance?.FormationBoard?.GetHeroView(index);
+                return view != null ? view.BodyWidth : 0f;
+            }
+
+            EnemyUnitView enemy = HudController.Instance?.EnemyStack?.GetEnemyView(index);
+            return enemy != null ? enemy.BodyWidth : 0f;
         }
 
         private static void PlayClip(CombatantSide side, int index, string clipSlot)

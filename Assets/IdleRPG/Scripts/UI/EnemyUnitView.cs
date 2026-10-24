@@ -68,6 +68,31 @@ namespace IdleRPG.UI
         /// </summary>
         private RectTransform BodyRect => spriteImage != null ? spriteImage.rectTransform : transform as RectTransform;
 
+        /// <summary>
+        /// How wide this enemy is DRAWN, in canvas units. Taken from the announced slot size, never from the live
+        /// sprite rect: a swing stretches that rect for its attack window.
+        /// </summary>
+        public float BodyWidth
+        {
+            get
+            {
+                RectTransform rect = BodyRect;
+
+                if (rect == null)
+                {
+                    return 0f;
+                }
+
+                CharacterAnimator art = EnsureAnimator();
+                float local = art != null && art.SlotSize.x > 0f ? art.SlotSize.x : rect.rect.width;
+
+                return local * Mathf.Abs(rect.lossyScale.x);
+            }
+        }
+
+        /// <summary>True while it is away from its seat (the beat planner must not drag a unit that is already out).</summary>
+        public bool IsMoving => lunge != null && lunge.IsBusy;
+
         /// <summary>Points this view at slot <paramref name="index"/> of the wave.</summary>
         public void Configure(int index)
         {

@@ -7,22 +7,14 @@ namespace IdleRPG.UI
     ///
     /// ELI5: two people standing side by side need a hand's width between their shoulders, or they overlap. This file
     /// owns that number. Nothing else in the game is allowed to invent it.
+    ///
+    /// Widths are the ANNOUNCED slot widths (how wide the unit is drawn at rest), never the live icon rect: a swing
+    /// grows that rect for its attack window, and a stretched rect would park two units a screen apart.
     /// </summary>
     public static class BattleSpots
     {
         /// <summary>Breathing room between two bodies, in canvas units.</summary>
         public const float ContactPadding = 18f;
-
-        /// <summary>Half the drawn width of a unit's body (the icon rect, not its pad).</summary>
-        public static float HalfWidth(RectTransform body)
-        {
-            if (body == null)
-            {
-                return 0f;
-            }
-
-            return body.rect.width * Mathf.Abs(body.lossyScale.x) * 0.5f;
-        }
 
         /// <summary>
         /// Which side of the TARGET the attacker stands on: +1 when the attacker is to the target's right, -1 when it
@@ -35,13 +27,13 @@ namespace IdleRPG.UI
         }
 
         /// <summary>
-        /// The point where a unit of <paramref name="selfHalfWidth"/> stands next to <paramref name="targetCentre"/>
+        /// The point where a unit of <paramref name="selfWidth"/> stands next to <paramref name="targetCentre"/>
         /// on <paramref name="side"/> (+1 = to the target's right, -1 = left), bodies never overlapping.
         /// </summary>
-        public static Vector3 Beside(Vector3 targetCentre, float selfHalfWidth, float targetHalfWidth, float side)
+        public static Vector3 Beside(Vector3 targetCentre, float selfWidth, float targetWidth, float side)
         {
             float sign = Mathf.Abs(side) < 0.001f ? 1f : Mathf.Sign(side);
-            float gap = selfHalfWidth + targetHalfWidth + ContactPadding;
+            float gap = (Mathf.Max(0f, selfWidth) + Mathf.Max(0f, targetWidth)) * 0.5f + ContactPadding;
 
             return new Vector3(targetCentre.x + sign * gap, targetCentre.y, targetCentre.z);
         }
