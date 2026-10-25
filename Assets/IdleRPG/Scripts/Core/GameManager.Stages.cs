@@ -105,6 +105,7 @@ namespace IdleRPG.Core
             RunKills = 0;
             RunStagesCleared = 0;
             runStartBinary = GameClock.NowBinary;
+            ResetRunCampState();
 
             SetState(State, GameState.Combat);
             combatManager.SetStage(CurrentStage, healParty: true);
@@ -282,6 +283,9 @@ namespace IdleRPG.Core
             int defeatedStage = CurrentStage;
 
             CurrentStage = StageRules.RollbackStage(CurrentStage, rollback);
+
+            // The stage is replayed: its camps must be offered again. The token and training are kept.
+            ResetCampCheckpoint();
 
             combatManager.StopRun();
             SetState(GameState.Boss, GameState.Defeat);

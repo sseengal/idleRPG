@@ -53,6 +53,13 @@ namespace IdleRPG.Save
         /// <summary>GameClock binary of when the current run began; 0 = not started yet (seeded on load).</summary>
         public double runStartBinary;
 
+        // --- Camp (run-scoped, additive). Tokens = -1 means "old save, fill to the run's capacity". ---
+        public int runCampTokens = -1;
+        public int runLastCampStage = 0;
+        public int runLastCampWave = 0;
+        public int runTrainAttackBonus = 0;
+        public int runTrainDefenseBonus = 0;
+
         // --- Level records (schema v5): one "key -> level" list for the whole game ---
         /// <summary>
         /// Every progression level as {key, level}. Keys are stable strings, never enum values (AD5): a hero stat is
@@ -186,6 +193,31 @@ namespace IdleRPG.Save
             if (runBestStage > highestStageReached)
             {
                 runBestStage = highestStageReached;
+            }
+
+            if (runCampTokens < -1)
+            {
+                runCampTokens = -1;
+            }
+
+            if (runLastCampStage < 0)
+            {
+                runLastCampStage = 0;
+            }
+
+            if (runLastCampWave < 0)
+            {
+                runLastCampWave = 0;
+            }
+
+            if (runTrainAttackBonus < 0)
+            {
+                runTrainAttackBonus = 0;
+            }
+
+            if (runTrainDefenseBonus < 0)
+            {
+                runTrainDefenseBonus = 0;
             }
 
             if (heroes == null)

@@ -159,6 +159,12 @@ namespace IdleRPG.Core
 
             combatManager.SetStatProvider(Resolver);
 
+            // Camp: the run's interlude. Created after combat so it can read the party, before StartRun so the
+            // wave gate is armed for the first checkpoint.
+            EnsureCampStateLoaded();
+            Camp = new CampService(this, monetization);
+            combatManager.SetWaveGate(Camp.ShouldHold);
+
             // Ability-Plan: the fight asks the ability service who is wearing what, by party index. Set BEFORE the
             // party is built below, so resuming a save arms the equipped abilities immediately.
             combatManager.AbilityProvider = index => Abilities.EquippedFor(partyConfig.GetHero(index));

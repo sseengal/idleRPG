@@ -21,6 +21,9 @@ namespace IdleRPG.Progression
         private readonly Dictionary<string, int> heroLevels = new Dictionary<string, int>();
         private readonly Dictionary<string, int> prestigeLevels = new Dictionary<string, int>();
 
+        private int runAttackBonus;
+        private int runDefenseBonus;
+
         public StatResolver(BalanceConfig balanceConfig, IEnumerable<StatUpgradeData> statUpgrades, IEnumerable<PrestigeUpgradeData> prestigeUpgrades)
         {
             this.balanceConfig = balanceConfig;
@@ -265,12 +268,14 @@ namespace IdleRPG.Progression
                 return 0d;
             }
 
-            return FormulaUtility.HeroStatValue(
+            double value = FormulaUtility.HeroStatValue(
                 hero.BaseAttack * (1d + Math.Max(0d, GearFraction(b => b.Atk, heroIndex))),
                 GetHeroLevel(hero, HeroStatType.Attack),
                 GetStatGainFraction(HeroStatType.Attack),
                 GlobalDamageMultiplier,
                 GetEffectMode(HeroStatType.Attack));
+
+            return value + runAttackBonus;
         }
 
         public double GetDefense(HeroData hero, int heroIndex)
@@ -280,12 +285,49 @@ namespace IdleRPG.Progression
                 return 0d;
             }
 
-            return FormulaUtility.HeroStatValue(
+            double value = FormulaUtility.HeroStatValue(
                 hero.BaseDefense * (1d + Math.Max(0d, GearFraction(b => b.Def, heroIndex))),
                 GetHeroLevel(hero, HeroStatType.Defense),
                 GetStatGainFraction(HeroStatType.Defense),
                 1d,
                 GetEffectMode(HeroStatType.Defense));
+
+            return value + runDefenseBonus;
+        }
+
+        // ------------------------------------------------------------------
+        // Run-only training (camp). Flat, reset on a new run, never saved as meta.
+        // ------------------------------------------------------------------
+        public int RunAttackBonus => runAttackBonus;
+
+        public int RunDefenseBonus => runDefenseBonus;
+
+        public void AddRunTrain(bool attack)
+        {
+            if (attack)
+            {
+                runAttackBonus++;
+            }
+            else
+            {
+                runDefenseBonus++;
+            }
+
+            StatsChanged?.Invoke();
+        }
+
+        public void SetRunBonuses(int attack, int defense)
+        {
+            runAttackBonus = Mathf.Max(0, attack);
+            runDefenseBonus = Mathf.Max(0, defense);
+            StatsChanged?.Invoke();
+        }
+
+        public void ResetRunBonuses()
+        {
+            runAttackBonus = 0;
+            runDefenseBonus = 0;
+            StatsChanged?.Invoke();
         }
 
         /// <summary>Gear bonus fraction for one stat, safe against a missing/rolling reader.</summary>

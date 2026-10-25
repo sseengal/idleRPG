@@ -191,6 +191,26 @@ namespace IdleRPG.Combat
             director?.SetStage(stage, healParty);
         }
 
+        /// <summary>Camp heal: a fraction of max HP, plus a fraction revive for the fallen.</summary>
+        public void HealPartyFraction(double healFraction, double reviveFraction)
+        {
+            simulator?.HealPartyFraction(healFraction, reviveFraction);
+        }
+
+        /// <summary>
+        /// The camp asks the wave flow to stop before a spawn. One hook, used by intro/mid/boss checkpoints.
+        /// </summary>
+        public void SetWaveGate(Func<int, int, bool> gate)
+        {
+            director?.SetWaveGate(gate);
+        }
+
+        /// <summary>Called by the camp after a choice; the held wave spawns now.</summary>
+        public void ResumeAfterCamp()
+        {
+            director?.ResumeAfterGate();
+        }
+
         public void StartRun()
         {
             if (simulator == null || director == null)

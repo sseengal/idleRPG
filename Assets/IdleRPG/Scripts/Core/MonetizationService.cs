@@ -113,6 +113,56 @@ namespace IdleRPG.Core
         }
 
         /// <summary>
+        /// Camp Short Rest+: the same 20% heal with or without an ad. No Ads buyers get it free; everyone else
+        /// watches one rewarded ad. No daily cap on purpose - the camp is the pacing beat, not an ad wall.
+        /// </summary>
+        public bool WatchAdForCampRest(Action onReward, Action onFinished = null)
+        {
+            if (onReward == null)
+            {
+                onFinished?.Invoke();
+                return false;
+            }
+
+            if (AdsDisabledByNoAds)
+            {
+                onReward();
+                onFinished?.Invoke();
+                return true;
+            }
+
+            if (ads == null)
+            {
+                GameEvents.RaiseToast("Ads are not available.");
+                onFinished?.Invoke();
+                return false;
+            }
+
+            if (!ads.IsRewardedAdReady)
+            {
+                GameEvents.RaiseToast("Ad not ready yet.");
+                onFinished?.Invoke();
+                return false;
+            }
+
+            ads.ShowRewardedAd(success =>
+            {
+                if (success)
+                {
+                    onReward();
+                }
+                else
+                {
+                    GameEvents.RaiseToast("Ad skipped - no rest.");
+                }
+
+                onFinished?.Invoke();
+            });
+
+            return true;
+        }
+
+        /// <summary>
         /// The single IAP funnel (B7 S1). The store confirms payment (<see cref="IIapService"/>), then this
         /// grants the product's contents through the normal till (gems) and shop (offline cap) - never directly.
         /// </summary>

@@ -87,7 +87,12 @@ namespace IdleRPG.Core
                 TotalKills = TotalKills,
                 TotalGoldEarned = TotalGoldEarned,
                 AscensionCount = AscensionCount,
-                LastPageIndex = LastPageIndex
+                LastPageIndex = LastPageIndex,
+                RunCampTokens = RunCampTokens,
+                RunLastCampStage = RunLastCampStage,
+                RunLastCampWave = RunLastCampWave,
+                RunTrainAttackBonus = RunTrainAttackBonus,
+                RunTrainDefenseBonus = RunTrainDefenseBonus
             };
         }
 
@@ -106,6 +111,8 @@ namespace IdleRPG.Core
             TotalGoldEarned = run.TotalGoldEarned;
             AscensionCount = run.AscensionCount;
             LastPageIndex = run.LastPageIndex;
+            SetRunCampState(run.RunCampTokens, run.RunLastCampStage, run.RunLastCampWave,
+                run.RunTrainAttackBonus, run.RunTrainDefenseBonus);
         }
 
         // ------------------------------------------------------------------

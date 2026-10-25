@@ -233,6 +233,12 @@ namespace IdleRPG.Debugging
                 Log(saved ? "Save written (F5)." : "Save failed (F5).");
             }
 
+            if (keyboard.f7Key.wasPressedThisFrame)
+            {
+                gameManager.Camp?.DebugOpen();
+                Log("Camp (F7): opened for inspection.");
+            }
+
             if (keyboard.f9Key.wasPressedThisFrame)
             {
                 gameManager.DeleteSave();

@@ -28,7 +28,7 @@ namespace IdleRPG.Data
         // ------------------------------------------------------------------
         [Header("Waves & Boss")]
         [Tooltip("Normal waves before a boss wave (design: 10 -> 1).")]
-        [SerializeField] private int normalWavesPerStage = 10;
+        [SerializeField] private int normalWavesPerStage = 9;
 
         [Tooltip("Smallest wave size. 1 = a lone enemy is possible. Boss waves always ignore this (always 1).")]
         [SerializeField] private int minEnemiesPerWave = 1;
@@ -89,6 +89,44 @@ namespace IdleRPG.Data
         [SerializeField] private float waveTransitionDelaySec = 0.5f;
 
         // ------------------------------------------------------------------
+        // Camp (the interlude between waves)
+        // ------------------------------------------------------------------
+        [Header("Camp")]
+        [Tooltip("Master switch for the camp interlude. Off = waves flow exactly as before.")]
+        [SerializeField] private bool campEnabled = true;
+
+        [Tooltip("A camp is offered after this many cleared waves (3 = after waves 3, 6, 9).")]
+        [SerializeField] private int campEveryWaves = 3;
+
+        [Tooltip("Free Short Rest heals this fraction of max HP (living heroes only).")]
+        [Range(0f, 1f)]
+        [SerializeField] private float campShortRestPercent = 0.10f;
+
+        [Tooltip("Short Rest after the ad (or free for No Ads) heals this fraction of max HP.")]
+        [Range(0f, 1f)]
+        [SerializeField] private float campShortRestAdPercent = 0.20f;
+
+        [Tooltip("Long Rest heals this fraction of max HP.")]
+        [Range(0f, 1f)]
+        [SerializeField] private float campLongRestPercent = 0.30f;
+
+        [Tooltip("Long Rest revives a fallen hero at this fraction of max HP.")]
+        [Range(0f, 1f)]
+        [SerializeField] private float campRevivePercent = 0.20f;
+
+        [Tooltip("Long Rest tokens granted at the start of a run.")]
+        [SerializeField] private int campTokensPerRun = 1;
+
+        [Tooltip("Seconds before the camp chooses for an idle player (Short Rest if hurt, else Train).")]
+        [SerializeField] private float campAutoSeconds = 10f;
+
+        [Tooltip("Flat attack gained by one Train choice, per hero, for the rest of the run.")]
+        [SerializeField] private int campTrainAttackPerTrain = 1;
+
+        [Tooltip("Flat defense gained by one Train choice, per hero, for the rest of the run.")]
+        [SerializeField] private int campTrainDefensePerTrain = 1;
+
+        // ------------------------------------------------------------------
         // Combat maths
         // ------------------------------------------------------------------
         [Header("Combat Maths")]
@@ -104,7 +142,7 @@ namespace IdleRPG.Data
         [SerializeField] private float criticalDamageMultiplier = 2f;
 
         [Tooltip("Heal heroes to full HP whenever a new stage begins.")]
-        [SerializeField] private bool healHeroesOnStageAdvance = true;
+        [SerializeField] private bool healHeroesOnStageAdvance = false;
 
         [Tooltip("Also heal heroes at the start of every wave. Off: damage carries across the stage.")]
         [SerializeField] private bool reviveHeroesEachWave = false;
@@ -314,6 +352,28 @@ namespace IdleRPG.Data
         public float CombatPaceMultiplier => Mathf.Clamp(combatPaceMultiplier, 0.25f, 10f);
 
         public bool HealHeroesOnStageAdvance => healHeroesOnStageAdvance;
+
+        /// <summary>True when the camp interlude may interrupt the wave flow.</summary>
+        public bool CampEnabled => campEnabled;
+
+        /// <summary>A camp is offered after this many cleared waves.</summary>
+        public int CampEveryWaves => Mathf.Max(1, campEveryWaves);
+
+        public float CampShortRestPercent => Mathf.Clamp01(campShortRestPercent);
+
+        public float CampShortRestAdPercent => Mathf.Clamp01(campShortRestAdPercent);
+
+        public float CampLongRestPercent => Mathf.Clamp01(campLongRestPercent);
+
+        public float CampRevivePercent => Mathf.Clamp01(campRevivePercent);
+
+        public int CampTokensPerRun => Mathf.Max(0, campTokensPerRun);
+
+        public float CampAutoSeconds => Mathf.Max(1f, campAutoSeconds);
+
+        public int CampTrainAttackPerTrain => Mathf.Max(0, campTrainAttackPerTrain);
+
+        public int CampTrainDefensePerTrain => Mathf.Max(0, campTrainDefensePerTrain);
 
         public bool ResetHeroLevelsOnAscension => resetHeroLevelsOnAscension;
 

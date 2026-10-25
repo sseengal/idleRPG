@@ -70,6 +70,11 @@ namespace IdleRPG.Core
             public double TotalGoldEarned;
             public int AscensionCount;
             public int LastPageIndex;
+            public int RunCampTokens;
+            public int RunLastCampStage;
+            public int RunLastCampWave;
+            public int RunTrainAttackBonus;
+            public int RunTrainDefenseBonus;
         }
         /// <summary>Builds the payload written to disk.</summary>
         public static SaveData Capture(Services services, RunState run)
@@ -114,6 +119,11 @@ namespace IdleRPG.Core
             data.totalGoldEarned = run.TotalGoldEarned;
             data.ascensionCount = run.AscensionCount;
             data.lastPageIndex = run.LastPageIndex;
+            data.runCampTokens = run.RunCampTokens;
+            data.runLastCampStage = run.RunLastCampStage;
+            data.runLastCampWave = run.RunLastCampWave;
+            data.runTrainAttackBonus = run.RunTrainAttackBonus;
+            data.runTrainDefenseBonus = run.RunTrainDefenseBonus;
             data.dailyStreakLastDate = services.DailyStreak?.LastClaimDate ?? "";
             data.dailyStreakCount = services.DailyStreak?.StreakCount ?? 0;
             services.AdCaps?.WriteToSave(data);
@@ -160,6 +170,11 @@ namespace IdleRPG.Core
             run.TotalGoldEarned = data.totalGoldEarned;
             run.AscensionCount = data.ascensionCount;
             run.LastPageIndex = data.lastPageIndex;
+            run.RunCampTokens = data.runCampTokens;
+            run.RunLastCampStage = Mathf.Max(0, data.runLastCampStage);
+            run.RunLastCampWave = Mathf.Max(0, data.runLastCampWave);
+            run.RunTrainAttackBonus = Mathf.Max(0, data.runTrainAttackBonus);
+            run.RunTrainDefenseBonus = Mathf.Max(0, data.runTrainDefenseBonus);
 
             services.Economy?.Restore(data.gold, data.gems, data.prestigeTokens);
             services.Resolver?.FillFromSave(data, services.Party);

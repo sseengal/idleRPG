@@ -184,6 +184,38 @@ namespace IdleRPG.Sim
             ResetCombatFlow();
         }
 
+        /// <summary>
+        /// Camp heal: living heroes gain a fraction of max HP; fallen heroes come back at a fraction.
+        /// A zero fraction means "do not touch this group".
+        /// </summary>
+        public void HealPartyFraction(double healFraction, double reviveFraction)
+        {
+            for (int i = 0; i < party.Length; i++)
+            {
+                Combatant hero = party[i];
+
+                if (hero == null)
+                {
+                    continue;
+                }
+
+                if (hero.IsAlive)
+                {
+                    if (healFraction > 0d)
+                    {
+                        hero.Heal(hero.MaxHealth * healFraction);
+                    }
+                }
+                else if (reviveFraction > 0d)
+                {
+                    hero.ReviveTo(hero.MaxHealth * reviveFraction);
+                }
+            }
+
+            partyWipeRaised = false;
+            ResetCombatFlow();
+        }
+
         /// <summary>Aborts the in-flight action: no swing flying, no recovery, no alternation memory.</summary>
         private void ResetCombatFlow()
         {

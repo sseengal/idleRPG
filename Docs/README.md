@@ -77,6 +77,7 @@ Docs/
   README.md            <- this index
   -- current --
   Game-Vision.md       <- CANON: story-led campaign, automatic combat, restart on death
+  Camp.md              <- the wave interlude: Short/Long Rest, Train, token, save, risks
   Checklist.md         <- master status: what is done, what is left
   Cleanup-Checks.md    <- the before/after gate for consolidation (no behaviour change)
   Combat-Sequencing.md <- how a blow reaches the screen: lane, timings, enemy casts, the one beat planner

@@ -428,6 +428,21 @@ namespace IdleRPG.Sim
             RestartTimer();
         }
 
+        /// <summary>Brings a fallen unit back with a fraction of its max health.</summary>
+        public void ReviveTo(double health)
+        {
+            if (IsAlive || health <= 0d)
+            {
+                return;
+            }
+
+            CurrentHealth = health > Stats.MaxHealth ? Stats.MaxHealth : health;
+            Shield = 0d;
+            guardSecondsRemaining = 0d;
+            guardFactor = 1d;
+            RestartTimer();
+        }
+
         /// <summary>Re-arms the attack timer to the standard half-interval stagger.</summary>
         public void RestartTimer()
         {

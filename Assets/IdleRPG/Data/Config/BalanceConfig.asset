@@ -15,7 +15,7 @@ MonoBehaviour:
   enemyHealthGrowth: 1.15
   enemyGoldGrowth: 1.12
   enemyAttackGrowth: 1.08
-  normalWavesPerStage: 10
+  normalWavesPerStage: 9
   minEnemiesPerWave: 1
   maxEnemiesPerWave: 3
   waveCountWeights:
@@ -40,10 +40,20 @@ MonoBehaviour:
     DailyCap: 3
     CooldownSec: 30
   waveTransitionDelaySec: 0.6
+  campEnabled: 1
+  campEveryWaves: 3
+  campShortRestPercent: 0.1
+  campShortRestAdPercent: 0.2
+  campLongRestPercent: 0.3
+  campRevivePercent: 0.2
+  campTokensPerRun: 1
+  campAutoSeconds: 10
+  campTrainAttackPerTrain: 1
+  campTrainDefensePerTrain: 1
   minDamageRatio: 0.15
   criticalChance: 0.05
   criticalDamageMultiplier: 2
-  healHeroesOnStageAdvance: 1
+  healHeroesOnStageAdvance: 0
   reviveHeroesEachWave: 0
   enemyTargeting: 0
   combatTickIntervalSec: 0.05

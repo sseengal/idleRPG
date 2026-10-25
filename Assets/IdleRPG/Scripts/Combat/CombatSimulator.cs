@@ -294,6 +294,12 @@ namespace IdleRPG.Combat
             encounter.HealParty();
         }
 
+        /// <summary>Camp heal: a fraction of max HP, plus a fraction revive for the fallen.</summary>
+        public void HealPartyFraction(double healFraction, double reviveFraction)
+        {
+            encounter.HealPartyFraction(healFraction, reviveFraction);
+        }
+
         // --- Encounter lifecycle ---
         /// <summary>Spawns a fresh enemy. Returns false when the enemy could not be built.</summary>
         public bool StartEncounter(EnemyData enemyData, int stage, bool isBoss, double externalGoldMultiplier = 1d)

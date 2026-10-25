@@ -132,6 +132,7 @@ namespace IdleRPG.EditorTools
             ScreenController screens = BuildNavBar(safeArea, battlePage, managementPage, tabs, damageRoot.gameObject);
             OfflineRewardsPopup offlinePopup = BuildOfflinePopup(modalRoot);
             DefeatModalUI defeatModal = BuildDefeatModal(modalRoot);
+            BuildCampPanel(modalRoot);
             ToastUI toast = BuildToast(safeArea);
             EnsureEventSystem();
 

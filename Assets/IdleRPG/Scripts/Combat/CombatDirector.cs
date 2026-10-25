@@ -28,6 +28,33 @@ namespace IdleRPG.Combat
         private double transitionRemaining;
         private bool transitionPending;
         private bool running;
+        private bool waitingForGate;
+
+        /// <summary>True while a camp (or other interlude) is holding the next wave.</summary>
+        public bool WaitingForGate => waitingForGate;
+
+        /// <summary>
+        /// Asked before a wave spawns. Returning true holds the wave until <see cref="ResumeAfterGate"/>.
+        /// Set once by the composition root; the director never knows what the interlude is.
+        /// </summary>
+        public Func<int, int, bool> WaveGate { get; set; }
+
+        public void SetWaveGate(Func<int, int, bool> gate)
+        {
+            WaveGate = gate;
+        }
+
+        /// <summary>Spawns the wave that the gate held.</summary>
+        public void ResumeAfterGate()
+        {
+            if (!waitingForGate)
+            {
+                return;
+            }
+
+            waitingForGate = false;
+            BeginWave(skipGate: true);
+        }
 
         // --- Events (the wrapper re-raises the ones GameManager listens to) ---
         public event Action<double> EnemyKilled;
@@ -88,6 +115,7 @@ namespace IdleRPG.Combat
             stepAccumulator = 0d;
             transitionPending = false;
             transitionRemaining = 0d;
+            waitingForGate = false;
 
             BeginWave();
         }
@@ -97,6 +125,7 @@ namespace IdleRPG.Combat
             running = false;
             transitionPending = false;
             transitionRemaining = 0d;
+            waitingForGate = false;
             simulator?.AbortEncounter();
         }
 
@@ -145,7 +174,7 @@ namespace IdleRPG.Combat
         /// </summary>
         public void Tick(double deltaTime)
         {
-            if (!running || simulator == null || balanceConfig == null || deltaTime <= 0d)
+            if (!running || waitingForGate || simulator == null || balanceConfig == null || deltaTime <= 0d)
             {
                 return;
             }
@@ -220,7 +249,7 @@ namespace IdleRPG.Combat
         // ------------------------------------------------------------------
         // Internals
         // ------------------------------------------------------------------
-        private void BeginWave()
+        private void BeginWave(bool skipGate = false)
         {
             if (simulator == null || waveConfig == null || balanceConfig == null)
             {
@@ -228,6 +257,13 @@ namespace IdleRPG.Combat
             }
 
             IsBossWave = WaveConfig.IsBossWave(CurrentWave, NormalWaves());
+
+            // One seam for every in-stage interlude: intro (wave 1), mid (wave 5), pre-boss (wave 10).
+            if (!skipGate && WaveGate != null && WaveGate(CurrentStage, CurrentWave))
+            {
+                waitingForGate = true;
+                return;
+            }
 
             // The factory owns composition, ranks and the per-wave budget (Step 11a); with one enemy per wave it
             // returns exactly what the old single-enemy path did.
