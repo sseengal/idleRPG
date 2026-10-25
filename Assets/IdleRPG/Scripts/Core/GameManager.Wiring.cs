@@ -58,6 +58,12 @@ namespace IdleRPG.Core
                 return false;
             }
 
+            // Battle log: one store holds every line the player reads. Installed here, before the save load, so a
+            // resumed session lands in the feed too. The names come from this object, so the store never needs the UI.
+            BattleLog.Install();
+            BattleLog.HeroNameResolver = HeroLogName;
+            BattleLog.EnemyNameResolver = EnemyLogName;
+
             Economy = new EconomyManager(balanceConfig);
             Economy.ApplyStartingBalances();
 
@@ -188,6 +194,47 @@ namespace IdleRPG.Core
 
             return true;
         }
+
+        /// <summary>Name of one hero in the battle log. One rule, used by every line.</summary>
+        private string HeroLogName(int heroIndex)
+        {
+            HeroData hero = partyConfig != null ? partyConfig.GetHero(heroIndex) : null;
+
+            if (hero != null && !string.IsNullOrEmpty(hero.HeroName))
+            {
+                return hero.HeroName;
+            }
+
+            return heroIndex < 0 ? "The party" : $"Hero {heroIndex + 1}";
+        }
+
+        /// <summary>
+        /// Name of one enemy in the battle log. When the wave holds several of the same archetype the slots are
+        /// suffixed A/B/C, so "Werewolf" x3 reads as Werewolf A, Werewolf B, Werewolf C in the log.
+        /// </summary>
+        private string EnemyLogName(int enemyIndex)
+        {
+            CombatSimulator simulator = combatManager != null ? combatManager.Simulator : null;
+            EnemyCombatant[] enemies = simulator != null ? simulator.Enemies : null;
+
+            if (enemies == null || enemies.Length == 0)
+            {
+                return "the enemy";
+            }
+
+            int index = Mathf.Clamp(enemyIndex, 0, enemies.Length - 1);
+            EnemyCombatant enemy = enemies[index];
+
+            if (enemy == null)
+            {
+                return "the enemy";
+            }
+
+            return enemies.Length > 1
+                ? string.Format("{0} {1}", enemy.DisplayName, (char)('A' + index))
+                : enemy.DisplayName;
+        }
+
 #if UNITY_EDITOR
 
         /// <summary>

@@ -1,11 +1,7 @@
 using System.Collections.Generic;
-using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using IdleRPG.Core;
-using IdleRPG.Data;
-using IdleRPG.Utils;
 
 namespace IdleRPG.UI
 {
@@ -62,13 +58,9 @@ namespace IdleRPG.UI
             }
 
             liveLines.Clear();
-            RefreshContentSize();
-            contentDirty = false;
 
-            if (content != null)
-            {
-                content.anchoredPosition = Vector2.zero;
-            }
+            // The frame-end pass resizes the content and pins it after the rebuild.
+            contentDirty = true;
         }
 
         private TextMeshProUGUI CreateLine()
@@ -90,8 +82,9 @@ namespace IdleRPG.UI
         }
 
         /// <summary>
-        /// Height is computed explicitly: the list grows line by line and a ContentSizeFitter would
-        /// need an extra layout pass to keep up. The scroll position is handled by FollowNewest().
+        /// Height is computed explicitly: the list grows line by line and a ContentSizeFitter would need an extra
+        /// layout pass to keep up. The numbers come from the content's own layout group, so the height matches
+        /// where the group actually puts the last line (a mismatch left a blank band under the newest line).
         /// </summary>
         private void RefreshContentSize()
         {
@@ -100,7 +93,19 @@ namespace IdleRPG.UI
                 return;
             }
 
-            float height = contentPadding * 2f + liveLines.Count * (lineHeight + lineSpacing);
+            float padTop = contentPadding;
+            float padBottom = contentPadding;
+            float gap = lineSpacing;
+
+            if (stack != null)
+            {
+                padTop = stack.padding.top;
+                padBottom = stack.padding.bottom;
+                gap = stack.spacing;
+            }
+
+            int count = liveLines.Count;
+            float height = padTop + padBottom + count * lineHeight + Mathf.Max(0, count - 1) * gap;
             content.sizeDelta = new Vector2(content.sizeDelta.x, Mathf.Max(1f, height));
         }
     }

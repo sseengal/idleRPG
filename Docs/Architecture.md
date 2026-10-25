@@ -391,6 +391,7 @@ ui             { lastScreenIndex, settings{...} }
 | B42 | **One sheet, one role.** The Archer became an enemy and the Soldier a hero, so no hero looks like a wave enemy; `hero_archer` save keys are renamed on load (save v8) | 24 Oct 2026 | Locked |
 | B43 | **A unit has a body; a pad has an owner.** A hero's view belongs to the hero and moves to a pad, never the other way round. Everything that must appear *on* a unit reads `BodyRect` once, at impact; nothing follows a dashing unit afterwards | 24 Oct 2026 | Locked |
 | B44 | **A plan may only contain a spot a unit will really occupy, and a support cast never moves.** `BeatDirector` is the single planner of a fight beat; it stages a landing point (target body, or the guard's cover spot / live body), then moves the attacker only when the target is hostile and the attack is not planted. Bodies are measured by announced slot width (`view.BodyWidth`), never the live icon rect, which a swing stretches | 24 Oct 2026 | Locked |
+| B45 | **The battle log has ONE owner: `BattleLog`.** It formats every sentence at action time (names change per wave), keeps a 200-line history, and raises `Appended`/`Cleared`. `CombatLogUI` is a dumb view: it redraws the window from the store on enable, and a recycled label is always moved to the last sibling because the layout group draws in hierarchy order. One broken listener cannot starve the rest (`GameEvents.SafeInvoke` isolates each subscriber) | 25 Oct 2026 | Locked |
 
 ### 6.4 Removals / avoid
 
@@ -447,7 +448,7 @@ appears exactly once across the new files) and by the regression gate after ever
 | `ContentGenerator` | `.cs` (entries + export) · `Apply.cs` (specs → assets) · `Parse.cs` (string→enum parsers) | 549 → 253 / 217 / 79 |
 | `SaveRoundTripMenu` | `.cs` (run, drift, payload, diff) · `Migrations.cs` (every older-schema migration check) | 521 → 351 / 170 |
 | `BalanceConfig` | `.cs` (raw tuning fields) · `Queries.cs` (derived reads: clamps, aliases, lookups) | 436 → 336 / 113 |
-| `CombatLogUI` | `.cs` (scroll/follow, aggregation, names) · `Pool.cs` (label rent/return/trim) · `Events.cs` | 414 → 342 / 90 / 190 |
+| `CombatLogUI` | `.cs` (store subscription, follow, colour map) · `Pool.cs` (label rent/return/trim/size) | 414 → 233 / 112 (the sentence builders moved to `Core/BattleLog.cs`) |
 | `GameEvents` | `.cs` (event declarations + `ResetAll`) · `Raise.cs` (internal Raise* helpers + `SafeInvoke` overloads) | 371 → 140 / 247 |
 | `SaveData` | `.cs` (payload + accessors + save keys) · `Records.cs` (the five per-entry record shapes) | 518 → 404 / 126 |
 | `StatResolver` | `.cs` (levels, derived stats) · `Save.cs` (save mapping in/out) | 364 → 274 / 106 |

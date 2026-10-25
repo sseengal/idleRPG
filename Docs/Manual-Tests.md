@@ -117,6 +117,16 @@ includes them (enforced at build time from B10).
 - [ ] **Fast attackers aren't lost**: at x1.6 a fast hero still gets its ~1.35 s quota (swing + recovery) — it is
       sequenced, never skipped.
 
+### Battle log checks (store + view, added 2026-10-25)
+- [ ] **Past 100 lines**: fight for 3+ minutes (over 100 lines). The oldest line leaves the top, the newest line
+      arrives at the bottom, and the newest line changes with every action — the feed never freezes.
+- [ ] **No blank band**: at 100 lines the newest line sits on the bottom edge with no empty strip below it.
+- [ ] **Page switch keeps history**: open Upgrades for 30 seconds, go back to Battle. Lines from the hidden time are
+      there, in order, and the feed is still pinned to the newest line.
+- [ ] **Drag pauses, release resumes**: drag the feed up, hold. New lines do not yank it. Release — it returns to
+      the newest line on the next action.
+- [ ] **One line per action**: no merged, throttled or `...N more` summary lines anywhere in the scroll.
+
 ### Lunge-position + animation checks (v2, added 2026-10-09)
 - [ ] **Side-by-side flank at body height**: a lunging unit stops BESIDE its target aligned to the target's BODY
       (the icons' `(0.5, 0.60)` centre — not the slot's top edge), with a clear gap — no diagonal overlap, no

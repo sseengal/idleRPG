@@ -184,13 +184,19 @@ namespace IdleRPG.Core
                 return;
             }
 
-            try
+            // Isolate each subscriber: one broken listener must never stop the rest of the chain.
+            Delegate[] listeners = handler.GetInvocationList();
+
+            for (int i = 0; i < listeners.Length; i++)
             {
-                handler();
-            }
-            catch (Exception exception)
-            {
-                LogSubscriberException(eventName, exception);
+                try
+                {
+                    ((Action)listeners[i])();
+                }
+                catch (Exception exception)
+                {
+                    LogSubscriberException(eventName, exception);
+                }
             }
         }
 
@@ -201,13 +207,18 @@ namespace IdleRPG.Core
                 return;
             }
 
-            try
+            Delegate[] listeners = handler.GetInvocationList();
+
+            for (int i = 0; i < listeners.Length; i++)
             {
-                handler(arg1);
-            }
-            catch (Exception exception)
-            {
-                LogSubscriberException(eventName, exception);
+                try
+                {
+                    ((Action<T1>)listeners[i])(arg1);
+                }
+                catch (Exception exception)
+                {
+                    LogSubscriberException(eventName, exception);
+                }
             }
         }
 
@@ -218,13 +229,18 @@ namespace IdleRPG.Core
                 return;
             }
 
-            try
+            Delegate[] listeners = handler.GetInvocationList();
+
+            for (int i = 0; i < listeners.Length; i++)
             {
-                handler(arg1, arg2);
-            }
-            catch (Exception exception)
-            {
-                LogSubscriberException(eventName, exception);
+                try
+                {
+                    ((Action<T1, T2>)listeners[i])(arg1, arg2);
+                }
+                catch (Exception exception)
+                {
+                    LogSubscriberException(eventName, exception);
+                }
             }
         }
 
@@ -235,13 +251,18 @@ namespace IdleRPG.Core
                 return;
             }
 
-            try
+            Delegate[] listeners = handler.GetInvocationList();
+
+            for (int i = 0; i < listeners.Length; i++)
             {
-                handler(arg1, arg2, arg3);
-            }
-            catch (Exception exception)
-            {
-                LogSubscriberException(eventName, exception);
+                try
+                {
+                    ((Action<T1, T2, T3>)listeners[i])(arg1, arg2, arg3);
+                }
+                catch (Exception exception)
+                {
+                    LogSubscriberException(eventName, exception);
+                }
             }
         }
 
@@ -252,13 +273,18 @@ namespace IdleRPG.Core
                 return;
             }
 
-            try
+            Delegate[] listeners = handler.GetInvocationList();
+
+            for (int i = 0; i < listeners.Length; i++)
             {
-                handler(arg1, arg2, arg3, arg4);
-            }
-            catch (Exception exception)
-            {
-                LogSubscriberException(eventName, exception);
+                try
+                {
+                    ((Action<T1, T2, T3, T4>)listeners[i])(arg1, arg2, arg3, arg4);
+                }
+                catch (Exception exception)
+                {
+                    LogSubscriberException(eventName, exception);
+                }
             }
         }
 
@@ -269,13 +295,18 @@ namespace IdleRPG.Core
                 return;
             }
 
-            try
+            Delegate[] listeners = handler.GetInvocationList();
+
+            for (int i = 0; i < listeners.Length; i++)
             {
-                handler(arg1, arg2, arg3, arg4, arg5);
-            }
-            catch (Exception exception)
-            {
-                LogSubscriberException(eventName, exception);
+                try
+                {
+                    ((Action<T1, T2, T3, T4, T5>)listeners[i])(arg1, arg2, arg3, arg4, arg5);
+                }
+                catch (Exception exception)
+                {
+                    LogSubscriberException(eventName, exception);
+                }
             }
         }
 
@@ -286,13 +317,18 @@ namespace IdleRPG.Core
                 return;
             }
 
-            try
+            Delegate[] listeners = handler.GetInvocationList();
+
+            for (int i = 0; i < listeners.Length; i++)
             {
-                handler(arg1, arg2, arg3, arg4, arg5, arg6);
-            }
-            catch (Exception exception)
-            {
-                LogSubscriberException(eventName, exception);
+                try
+                {
+                    ((Action<T1, T2, T3, T4, T5, T6>)listeners[i])(arg1, arg2, arg3, arg4, arg5, arg6);
+                }
+                catch (Exception exception)
+                {
+                    LogSubscriberException(eventName, exception);
+                }
             }
         }
 
@@ -303,13 +339,18 @@ namespace IdleRPG.Core
                 return;
             }
 
-            try
+            Delegate[] listeners = handler.GetInvocationList();
+
+            for (int i = 0; i < listeners.Length; i++)
             {
-                handler(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
-            }
-            catch (Exception exception)
-            {
-                LogSubscriberException(eventName, exception);
+                try
+                {
+                    ((Action<T1, T2, T3, T4, T5, T6, T7>)listeners[i])(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+                }
+                catch (Exception exception)
+                {
+                    LogSubscriberException(eventName, exception);
+                }
             }
         }
 
@@ -320,13 +361,18 @@ namespace IdleRPG.Core
                 return;
             }
 
-            try
+            Delegate[] listeners = handler.GetInvocationList();
+
+            for (int i = 0; i < listeners.Length; i++)
             {
-                handler(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
-            }
-            catch (Exception exception)
-            {
-                LogSubscriberException(eventName, exception);
+                try
+                {
+                    ((Action<T1, T2, T3, T4, T5, T6, T7, T8>)listeners[i])(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+                }
+                catch (Exception exception)
+                {
+                    LogSubscriberException(eventName, exception);
+                }
             }
         }
 

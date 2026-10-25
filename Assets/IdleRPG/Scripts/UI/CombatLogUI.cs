@@ -3,20 +3,19 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using IdleRPG.Core;
-using IdleRPG.Data;
-using IdleRPG.Utils;
 
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// Live battle feed ("Mage hits Ogre for 24").
+    /// Live battle feed ("Mage hits Ogre for 24"). A VIEW ONLY: the history lives in <see cref="BattleLog"/>.
     ///
-    /// ONE RULE: every action the game raises becomes its own line. Nothing is aggregated, throttled or
-    /// dropped. The visible list is a fixed-length scrollback (oldest lines are recycled) purely so a long
-    /// idle session cannot grow label memory without bound - the logging itself is total.
+    /// ONE RULE: every entry the store holds becomes its own line. Nothing is aggregated, throttled or dropped.
+    /// The visible list is a fixed-length window (oldest labels are recycled) purely so a long idle session cannot
+    /// grow label memory without bound.
     ///
-    /// The feed subscribes once for the component's lifetime (Awake/OnDestroy) so hiding the battle page can
-    /// never make it miss events, and it follows the newest line unless the player is genuinely dragging.
+    /// The view subscribes only while it is visible and redraws the window from the store on every enable, so a
+    /// hidden battle page can never lose, reorder or freeze the feed. Recycled labels are always moved to the end
+    /// of the hierarchy: the layout group draws in hierarchy order.
     /// </summary>
     public sealed partial class CombatLogUI : MonoBehaviour
     {
@@ -61,63 +60,96 @@ namespace IdleRPG.UI
         /// <summary>True only while the player is physically dragging the feed (set by the drag relay).</summary>
         public bool UserDragging { get; set; }
 
+        /// <summary>Layout group on the content; it owns the real padding and spacing used for the height.</summary>
+        private VerticalLayoutGroup stack;
+
+        /// <summary>True when the builder wired content + template; a half-wired feed never writes.</summary>
+        private bool wired;
+
         /// <summary>Lines were added this frame; the content height is recomputed once per frame, not per line.</summary>
         private bool contentDirty;
 
         private void Awake()
         {
-            if (lineTemplate == null || content == null)
+            wired = lineTemplate != null && content != null;
+
+            if (!wired)
             {
                 // Never disable the feed: log loudly, but keep the component alive so a late wire-up still works.
                 Debug.LogError("[CombatLogUI] lineTemplate/content not assigned; the feed shows nothing until wired.");
+                return;
             }
-            else
+
+            lineTemplate.gameObject.SetActive(false);
+            stack = content.GetComponent<VerticalLayoutGroup>();
+
+            for (int i = 0; i < Mathf.Max(1, poolSize); i++)
             {
-                lineTemplate.gameObject.SetActive(false);
+                pool.Enqueue(CreateLine());
+            }
+        }
 
-                for (int i = 0; i < Mathf.Max(1, poolSize); i++)
-                {
-                    pool.Enqueue(CreateLine());
-                }
+        /// <summary>
+        /// The view keeps NO history. It subscribes while visible and redraws the window from
+        /// <see cref="BattleLog"/> every time it comes back, so a hidden page cannot lose or freeze the feed.
+        /// </summary>
+        private void OnEnable()
+        {
+            BattleLog.Appended += OnAppended;
+            BattleLog.Cleared += OnCleared;
+            Rebuild();
+        }
+
+        private void OnDisable()
+        {
+            BattleLog.Appended -= OnAppended;
+            BattleLog.Cleared -= OnCleared;
+        }
+
+        /// <summary>Redraws the window from the store: oldest first, newest last.</summary>
+        private void Rebuild()
+        {
+            if (!wired)
+            {
+                return;
             }
 
-            // Subscribe once for the whole lifetime. A hidden battle page must not lose events.
-            GameEvents.EnemyDamaged += OnEnemyDamaged;
-            GameEvents.EnemyKilled += OnEnemyKilled;
-            GameEvents.HeroDamaged += OnHeroDamaged;
-            GameEvents.HeroDied += OnHeroDied;
-            GameEvents.Healed += OnHealed;
-            GameEvents.ShieldApplied += OnShieldApplied;
-            GameEvents.AbilityCast += OnAbilityCast;
-            GameEvents.AscensionCompleted += OnAscensionCompleted;
-            GameEvents.UpgradePurchased += OnUpgradePurchased;
-            GameEvents.OfflineRewardsClaimed += OnOfflineRewardsClaimed;
-            GameEvents.CombatMessage += OnCombatMessage;
-            GameEvents.SaveLoaded += OnSaveLoaded;
+            ClearLines();
+
+            IReadOnlyList<BattleLogEntry> entries = BattleLog.Entries;
+            int first = Mathf.Max(0, entries.Count - Mathf.Max(1, maxLines));
+
+            for (int i = first; i < entries.Count; i++)
+            {
+                Append(entries[i]);
+            }
         }
 
-        private void OnDestroy()
+        private void OnAppended(BattleLogEntry entry)
         {
-            GameEvents.EnemyDamaged -= OnEnemyDamaged;
-            GameEvents.EnemyKilled -= OnEnemyKilled;
-            GameEvents.HeroDamaged -= OnHeroDamaged;
-            GameEvents.HeroDied -= OnHeroDied;
-            GameEvents.Healed -= OnHealed;
-            GameEvents.ShieldApplied -= OnShieldApplied;
-            GameEvents.AbilityCast -= OnAbilityCast;
-            GameEvents.AscensionCompleted -= OnAscensionCompleted;
-            GameEvents.UpgradePurchased -= OnUpgradePurchased;
-            GameEvents.OfflineRewardsClaimed -= OnOfflineRewardsClaimed;
-            GameEvents.CombatMessage -= OnCombatMessage;
-            GameEvents.SaveLoaded -= OnSaveLoaded;
+            Append(entry);
         }
 
-        private void Update()
+        private void OnCleared()
+        {
+            ClearLines();
+        }
+
+        /// <summary>
+        /// Follow runs after the layout pass: the content height and the child positions are final by then, so the
+        /// newest line is pinned without fighting the ScrollRect (no clamping war, no self-pausing feed).
+        /// </summary>
+        private void LateUpdate()
         {
             if (contentDirty)
             {
                 RefreshContentSize();
                 contentDirty = false;
+
+                if (content != null)
+                {
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(content);
+                }
             }
 
             FollowNewest();
@@ -125,99 +157,77 @@ namespace IdleRPG.UI
 
         /// <summary>
         /// Pins the newest line into view. Only a real drag pauses this - the ScrollRect nudging the content
-        /// itself (clamping, momentum) is never mistaken for the player.
+        /// itself (clamping) is never mistaken for the player.
         /// </summary>
         private void FollowNewest()
         {
-            if (scrollRect == null || content == null || UserDragging)
+            if (scrollRect == null || content == null || scrollRect.viewport == null || UserDragging)
             {
                 return;
             }
 
-            content.anchoredPosition = new Vector2(content.anchoredPosition.x, OverflowY());
-        }
+            float overflow = content.rect.height - scrollRect.viewport.rect.height;
 
-        /// <summary>How far the content can scroll; 0 when everything already fits.</summary>
-        private float OverflowY()
-        {
-            if (scrollRect == null || scrollRect.viewport == null)
+            if (overflow <= 0f || content.anchoredPosition.y >= overflow - 0.5f)
             {
-                return 0f;
+                return;
             }
 
-            float overflow = content.rect.height - scrollRect.viewport.rect.height;
-            return overflow > 0f ? overflow : 0f;
+            scrollRect.verticalNormalizedPosition = 0f;
         }
 
         // ------------------------------------------------------------------
         // Line plumbing
         // ------------------------------------------------------------------
-        /// <summary>Adds one line. No budget, no merging - every call writes a line.</summary>
-        private void Append(string text, Color color)
+        /// <summary>Adds one line. No budget, no merging - every entry the store holds becomes a visible line.</summary>
+        private void Append(BattleLogEntry entry)
         {
-            if (lineTemplate == null || content == null)
+            if (!wired)
             {
                 return;
             }
 
             TextMeshProUGUI label = Rent();
+
+            // A recycled label keeps its old place in the hierarchy, and the layout group draws by that place.
+            // Put it at the end, or the newest line would surface at the TOP and the bottom would look frozen.
+            label.transform.SetAsLastSibling();
             label.gameObject.SetActive(true);
-            label.color = color;
-            label.SetText(text);
+            label.color = ColorFor(entry.Kind);
+            label.SetText(entry.Text);
             liveLines.Add(label);
 
             TrimToMax();
             contentDirty = true;
         }
 
-        // ------------------------------------------------------------------
-        // Name resolution (falls back to generic labels when data is unavailable)
-        // ------------------------------------------------------------------
-        private static string HeroName(int heroIndex)
+        private Color ColorFor(BattleLogKind kind)
         {
-            HudController hud = HudController.Instance;
-            GameManager manager = hud != null ? hud.GameManager : null;
-            PartyConfig party = manager != null ? manager.Party : null;
-
-            if (party == null || heroIndex < 0)
+            switch (kind)
             {
-                return "The party";
+                case BattleLogKind.Critical:
+                    return criticalColor;
+                case BattleLogKind.Incoming:
+                case BattleLogKind.Defeat:
+                    return incomingColor;
+                case BattleLogKind.EnemyKilled:
+                case BattleLogKind.Gold:
+                    return goldColor;
+                case BattleLogKind.HeroDied:
+                    return killColor;
+                case BattleLogKind.Ability:
+                case BattleLogKind.System:
+                    return eventColor;
+                case BattleLogKind.EnemyAbility:
+                    return enemyAbilityColor;
+                case BattleLogKind.Heal:
+                    return healColor;
+                case BattleLogKind.Guard:
+                    return guardColor;
+                default:
+                    return heroHitColor;
             }
-
-            HeroData hero = party.GetHero(heroIndex);
-            return hero != null ? hero.HeroName : string.Format("Hero {0}", heroIndex + 1);
         }
 
-        /// <summary>
-        /// Name of one enemy. When the wave holds several of the same archetype the slots are suffixed
-        /// A/B/C, so "Werewolf" x3 reads as Werewolf A, Werewolf B, Werewolf C in the log.
-        /// </summary>
-        private static string EnemyName(int enemyIndex = 0)
-        {
-            HudController hud = HudController.Instance;
-            GameManager manager = hud != null ? hud.GameManager : null;
-
-            if (manager == null || manager.Combat == null || manager.Combat.Simulator == null)
-            {
-                return "the enemy";
-            }
-
-            var enemies = manager.Combat.Simulator.Enemies;
-
-            if (enemies == null || enemies.Length == 0)
-            {
-                return "the enemy";
-            }
-
-            int index = Mathf.Clamp(enemyIndex, 0, enemies.Length - 1);
-            var enemy = enemies[index];
-
-            if (enemy == null)
-            {
-                return "the enemy";
-            }
-
-            return enemies.Length > 1 ? string.Format("{0} {1}", enemy.DisplayName, (char)('A' + index)) : enemy.DisplayName;
-        }
     }
 }
