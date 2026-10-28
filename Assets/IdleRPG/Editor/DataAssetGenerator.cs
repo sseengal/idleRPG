@@ -108,7 +108,6 @@ namespace IdleRPG.EditorTools
                 .Set("campLongRestPercent", 0.30f)
                 .Set("campRevivePercent", 0.20f)
                 .Set("campTokensPerRun", 1)
-                .Set("campAutoSeconds", 10f)
                 .Set("campTrainAttackPerTrain", 1)
                 .Set("campTrainDefensePerTrain", 1)
                 .Set("reviveHeroesEachWave", false)

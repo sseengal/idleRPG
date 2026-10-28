@@ -47,7 +47,6 @@ MonoBehaviour:
   campLongRestPercent: 0.3
   campRevivePercent: 0.2
   campTokensPerRun: 1
-  campAutoSeconds: 10
   campTrainAttackPerTrain: 1
   campTrainDefensePerTrain: 1
   minDamageRatio: 0.15

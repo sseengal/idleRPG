@@ -9,31 +9,44 @@ using IdleRPG.Sim;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// The camp panel: three heroes around a placeholder fire, their HP, and three choices.
-    /// It is a view. The camp service owns the timing, the token, the heal and the training.
+    /// The camp interlude as part of the battle page: a still scene in the viewport, choices in the
+    /// ability band, and the battle log untouched below.
+    ///
+    /// ELI5: while the party camps, the fighting area becomes a campfire scene and the ability buttons
+    /// become camp buttons. When a choice is made, the camp buttons go away and the ability buttons return.
+    /// The camp waits for a tap; nothing auto-proceeds.
     /// </summary>
     public sealed class CampPanelUI : MonoBehaviour
     {
-        [Header("Wiring")]
-        [SerializeField] private CanvasGroup group;
+        [Header("Battle page")]
+        [SerializeField] private GameObject campView;
+        [SerializeField] private GameObject campStrip;
+        [SerializeField] private GameObject abilityStrip;
+        [SerializeField] private GameObject formationBoard;
+        [SerializeField] private GameObject enemyStack;
+        [SerializeField] private ScreenController screens;
+        [SerializeField] private CanvasGroup campStripGroup;
+
+        [Header("Camp view")]
         [SerializeField] private Image[] actorImages;
         [SerializeField] private TextMeshProUGUI[] hpLabels;
         [SerializeField] private TextMeshProUGUI tokenLabel;
         [SerializeField] private TextMeshProUGUI trainingLabel;
-        [SerializeField] private TextMeshProUGUI autoLabel;
-        [SerializeField] private TextMeshProUGUI shortAdLabel;
-        [SerializeField] private TextMeshProUGUI longRestLabel;
-        [SerializeField] private TextMeshProUGUI trainButtonLabel;
-        [SerializeField] private TextMeshProUGUI trainNextLabel;
+
+        [Header("Camp strip")]
         [SerializeField] private Button shortFreeButton;
         [SerializeField] private Button shortAdButton;
         [SerializeField] private Button longRestButton;
         [SerializeField] private Button trainButton;
+        [SerializeField] private TextMeshProUGUI shortAdLabel;
+        [SerializeField] private TextMeshProUGUI longRestLabel;
+        [SerializeField] private TextMeshProUGUI longNoteLabel;
+        [SerializeField] private TextMeshProUGUI trainButtonLabel;
+        [SerializeField] private TextMeshProUGUI trainNextLabel;
 
         private GameManager manager;
         private CampService camp;
         private MonetizationService monetization;
-        private float autoRemaining;
 
         private void Start()
         {
@@ -50,13 +63,11 @@ namespace IdleRPG.UI
                 camp.Closed += OnCampClosed;
             }
 
+            ApplyState(camp != null && camp.IsOpen);
+
             if (camp != null && camp.IsOpen)
             {
-                OnCampOpened();
-            }
-            else
-            {
-                SetVisible(false);
+                Refresh();
             }
         }
 
@@ -71,61 +82,71 @@ namespace IdleRPG.UI
             RemoveButtonListeners();
         }
 
+        /// <summary>Only syncs the ad guard. There is deliberately no timer and no auto-choice.</summary>
         private void Update()
         {
-            if (camp == null || !camp.IsOpen || group == null || group.alpha <= 0f)
+            if (camp == null || !camp.IsOpen || campStripGroup == null)
             {
                 return;
             }
 
-            if (camp.IsAdPending)
+            bool ready = !camp.IsAdPending;
+
+            if (campStripGroup.interactable != ready)
             {
-                group.interactable = false;
-
-                if (autoLabel != null)
-                {
-                    autoLabel.SetText("ad playing…");
-                }
-
-                return;
-            }
-
-            group.interactable = true;
-            autoRemaining -= Time.unscaledDeltaTime;
-
-            if (autoLabel != null)
-            {
-                autoLabel.SetText($"auto in {Mathf.CeilToInt(autoRemaining)}…");
-            }
-
-            if (autoRemaining <= 0f)
-            {
-                camp.AutoChoose();
+                campStripGroup.interactable = ready;
             }
         }
 
         private void OnCampOpened()
         {
-            autoRemaining = camp != null ? camp.AutoSeconds : 10f;
-            SetVisible(true);
+            ApplyState(true);
             Refresh();
         }
 
         private void OnCampClosed()
         {
-            SetVisible(false);
+            ApplyState(false);
         }
 
-        private void SetVisible(bool visible)
+        private void ApplyState(bool open)
         {
-            if (group == null)
+            if (open && screens != null)
             {
-                return;
+                // The camp lives under the battle page, so bring that page forward. A forced choice must never
+                // wait unseen behind the party or upgrade tabs.
+                screens.ShowBattle();
             }
 
-            group.alpha = visible ? 1f : 0f;
-            group.interactable = visible;
-            group.blocksRaycasts = visible;
+            if (campView != null)
+            {
+                campView.SetActive(open);
+            }
+
+            if (campStrip != null)
+            {
+                campStrip.SetActive(open);
+            }
+
+            if (abilityStrip != null)
+            {
+                abilityStrip.SetActive(!open);
+            }
+
+            if (formationBoard != null)
+            {
+                formationBoard.SetActive(!open);
+            }
+
+            if (enemyStack != null)
+            {
+                enemyStack.SetActive(!open);
+            }
+
+            if (open && campStripGroup != null)
+            {
+                campStripGroup.interactable = camp == null || !camp.IsAdPending;
+            }
         }
 
         private void BuildActors()
@@ -190,10 +211,25 @@ namespace IdleRPG.UI
 
         private void RemoveButtonListeners()
         {
-            shortFreeButton?.onClick.RemoveAllListeners();
-            shortAdButton?.onClick.RemoveAllListeners();
-            longRestButton?.onClick.RemoveAllListeners();
-            trainButton?.onClick.RemoveAllListeners();
+            if (shortFreeButton != null)
+            {
+                shortFreeButton.onClick.RemoveAllListeners();
+            }
+
+            if (shortAdButton != null)
+            {
+                shortAdButton.onClick.RemoveAllListeners();
+            }
+
+            if (longRestButton != null)
+            {
+                longRestButton.onClick.RemoveAllListeners();
+            }
+
+            if (trainButton != null)
+            {
+                trainButton.onClick.RemoveAllListeners();
+            }
         }
 
         private void Refresh()
@@ -211,7 +247,7 @@ namespace IdleRPG.UI
                     if (hpLabels[i] != null)
                     {
                         hpLabels[i].SetText(hero == null
-                            ? "—"
+                            ? "-"
                             : hero.IsAlive
                                 ? $"{hero.DisplayName}  {hero.CurrentHealth:0}/{hero.MaxHealth:0}"
                                 : $"{hero.DisplayName}  FALLEN");
@@ -246,6 +282,11 @@ namespace IdleRPG.UI
                 {
                     longRestLabel.SetText(camp.CanLongRest ? "30% + REVIVE" : "TOKEN SPENT");
                 }
+
+                if (longNoteLabel != null)
+                {
+                    longNoteLabel.SetText(camp.Tokens == 1 ? "1 TOKEN" : $"{camp.Tokens} TOKENS");
+                }
             }
 
             if (shortAdLabel != null)
@@ -266,13 +307,8 @@ namespace IdleRPG.UI
 
                 if (trainNextLabel != null)
                 {
-                    trainNextLabel.SetText(nextAttack ? "next: DEF" : "next: ATK");
+                    trainNextLabel.SetText(nextAttack ? "NEXT: DEF" : "NEXT: ATK");
                 }
-            }
-
-            if (autoLabel != null)
-            {
-                autoLabel.SetText($"auto in {Mathf.CeilToInt(autoRemaining)}…");
             }
         }
     }

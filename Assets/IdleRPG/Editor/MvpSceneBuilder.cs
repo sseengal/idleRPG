@@ -127,12 +127,12 @@ namespace IdleRPG.EditorTools
 
             // The ability strip sits in the band between the viewport and the log. It used to be a second tab
             // beside the log, which meant the buttons were invisible during a fight - the one moment they matter.
-            BuildAbilityStrip(battleRect, partyConfig.ValidHeroCount);
+            AbilityPanelUI abilityStrip = BuildAbilityStrip(battleRect, partyConfig.ValidHeroCount);
             TabController tabs = BuildManagementPage(managementPage.GetComponent<RectTransform>(), partyConfig, prestigeUpgrades);
             ScreenController screens = BuildNavBar(safeArea, battlePage, managementPage, tabs, damageRoot.gameObject);
+            BuildCampLayer(battleRect, abilityStrip, formationBoard, enemyStack, screens, hudRoot);
             OfflineRewardsPopup offlinePopup = BuildOfflinePopup(modalRoot);
             DefeatModalUI defeatModal = BuildDefeatModal(modalRoot);
-            BuildCampPanel(modalRoot);
             ToastUI toast = BuildToast(safeArea);
             EnsureEventSystem();
 

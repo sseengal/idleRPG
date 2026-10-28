@@ -117,9 +117,6 @@ namespace IdleRPG.Data
         [Tooltip("Long Rest tokens granted at the start of a run.")]
         [SerializeField] private int campTokensPerRun = 1;
 
-        [Tooltip("Seconds before the camp chooses for an idle player (Short Rest if hurt, else Train).")]
-        [SerializeField] private float campAutoSeconds = 10f;
-
         [Tooltip("Flat attack gained by one Train choice, per hero, for the rest of the run.")]
         [SerializeField] private int campTrainAttackPerTrain = 1;
 
@@ -368,8 +365,6 @@ namespace IdleRPG.Data
         public float CampRevivePercent => Mathf.Clamp01(campRevivePercent);
 
         public int CampTokensPerRun => Mathf.Max(0, campTokensPerRun);
-
-        public float CampAutoSeconds => Mathf.Max(1f, campAutoSeconds);
 
         public int CampTrainAttackPerTrain => Mathf.Max(0, campTrainAttackPerTrain);
 

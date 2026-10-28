@@ -1,7 +1,6 @@
 using System;
 using IdleRPG.Core;
 using IdleRPG.Data;
-using IdleRPG.Sim;
 
 namespace IdleRPG.Progression
 {
@@ -44,8 +43,6 @@ namespace IdleRPG.Progression
         public bool TrainNextIsAttack =>
             manager != null && (manager.RunTrainAttackBonus + manager.RunTrainDefenseBonus) % 2 == 0;
 
-        public float AutoSeconds => manager != null && manager.Balance != null ? manager.Balance.CampAutoSeconds : 10f;
-
         /// <summary>
         /// Called by <see cref="CombatDirector"/> before a wave spawns. True = hold the wave; the camp panel
         /// opens and <see cref="Finish"/> resumes the director later.
@@ -86,7 +83,7 @@ namespace IdleRPG.Progression
             return true;
         }
 
-        /// <summary>True while the rewarded ad is playing; the auto timer must not resolve the camp under it.</summary>
+        /// <summary>True while the rewarded ad is playing; the camp ignores taps until it ends.</summary>
         public bool IsAdPending { get; private set; }
 
         /// <summary>Free 10%, or 20% after the ad (free for No Ads). Does not spend the token.</summary>
@@ -143,24 +140,7 @@ namespace IdleRPG.Progression
             Finish();
         }
 
-        /// <summary>Idle fallback: heal if hurt, otherwise train. Never spends the token or an ad.</summary>
-        public void AutoChoose()
-        {
-            if (!IsOpen || IsAdPending)
-            {
-                return;
-            }
-
-            if (AnyHurtOrFallen(0.5f))
-            {
-                ChooseShortRest(false);
-                return;
-            }
-
-            ChooseTrain();
-        }
-
-        /// <summary>Debug: open the panel now, without waiting for a checkpoint.</summary>
+        /// <summary>Debug: open the camp now, without waiting for a checkpoint.</summary>
         public void DebugOpen()
         {
             if (IsOpen || manager == null || manager.Combat == null)
@@ -187,30 +167,6 @@ namespace IdleRPG.Progression
             manager.HealPartyFraction(fraction, 0d);
             BattleLog.Append($"The party takes a short rest (+{fraction * 100f:0}% HP).", BattleLogKind.Heal);
             Finish();
-        }
-
-        private bool AnyHurtOrFallen(float threshold)
-        {
-            Combatant[] heroes = manager.Combat != null && manager.Combat.Simulator != null
-                ? manager.Combat.Simulator.Heroes
-                : null;
-
-            if (heroes == null)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < heroes.Length; i++)
-            {
-                Combatant hero = heroes[i];
-
-                if (hero != null && (!hero.IsAlive || hero.HealthPercent < threshold))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private void Finish()
