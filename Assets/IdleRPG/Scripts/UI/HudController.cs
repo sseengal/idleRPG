@@ -21,6 +21,9 @@ namespace IdleRPG.UI
                  "and the damage numbers.")]
         [SerializeField] private RectTransform modalRoot;
 
+        [Tooltip("HUD overlay layer for effects that must leave the battle stage (the gold flight to the header).")]
+        [SerializeField] private RectTransform vfxRoot;
+
         [Header("Views")]
         [Tooltip("The battle board (display only): one view per formation slot, built at runtime.")]
         [SerializeField] private FormationBoardView formationBoard;
@@ -75,11 +78,14 @@ namespace IdleRPG.UI
                 enemyStack.Refresh();
             }
 
-            // Gold-fly effect: coins launch from a dead enemy into the top-bar counter. The node is created on the
-            // same canvas that hosts the damage numbers, so coordinate space is shared.
+            // Gold-fly effect: coins launch from a dead enemy into the top-bar counter. The node stays on
+            // the HUD damage canvas so it can leave the battle stage and reach the header; the stage start
+            // point is converted to screen space by BattleStageSurface.
             if (damageTextPool != null)
             {
-                Transform hostParent = damageTextPool.transform.parent != null ? damageTextPool.transform.parent : transform;
+                Transform hostParent = vfxRoot != null
+                    ? vfxRoot
+                    : damageTextPool.transform.parent != null ? damageTextPool.transform.parent : transform;
                 GameObject host = UiRuntime.CreateNode("GoldFlyVfx", hostParent);
 
                 // Coin positions are resolved as local points of this rect, so give it the full parent size.
@@ -109,9 +115,13 @@ namespace IdleRPG.UI
                 runner = gameObject.AddComponent<CutsceneRunner>();
             }
 
-            RectTransform space = damageTextPool != null && damageTextPool.transform.parent is RectTransform root
-                ? root
-                : modalRoot;
+            // Shots are authored in screen fractions, so they use a full-screen HUD layer. The damage
+            // pool now lives inside the battle stage, which is only the viewport rect.
+            RectTransform space = vfxRoot != null
+                ? vfxRoot
+                : damageTextPool != null && damageTextPool.transform.parent is RectTransform root
+                    ? root
+                    : modalRoot;
 
             runner.SetSpace(space);
         }

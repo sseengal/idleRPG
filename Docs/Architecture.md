@@ -1,8 +1,9 @@
 # Idle RPG — Architecture & Scale-Up
 
 > 2D mobile idle RPG. Unity 6000.6.0f1, URP 2D (`Mobile_Renderer2D` / `PC_Renderer2D`), portrait, iOS + Android.
-> **Status 28 Oct 2026:** Foundation Phase 0 complete. URP 2D is the only pipeline; the battle stage is still
-> UI overlay until Phase 1. Abilities, gear and the roster swap are built (save v11).
+> **Status 28 Oct 2026:** Foundation Phase 1 complete. URP 2D is the only pipeline and the battle stage now
+> renders through `BattleStageCamera` into `BattleStageRT`; damage numbers live in the stage and the formation
+> board uses a viewport-to-texture input bridge. Abilities, gear and the roster swap are built (save v11).
 > This file is *how the game is built and how it scales*. Folder index: `README.md`.
 
 ---
@@ -476,9 +477,9 @@ Verification per step: clean recompile → `Run All Checks (regression)` PASS �
 | Item | State |
 |---|---|
 | Docs | 39 pages. Index `README.md`; status `Checklist.md`; backlog `Roadmap.md`; cleanup gate `Cleanup-Checks.md` |
-| Code | 253 C# files, 4 assemblies (`Sim` has zero Unity references) |
-| Last change | Foundation Phase 0: URP 2D renderers active, 28 Oct 2026 (save v11) |
-| Next | Phase 1: battle stage camera + RenderTexture; see `Foundation.md` |
+| Code | 254 C# files, 4 assemblies (`Sim` has zero Unity references) |
+| Last change | Foundation Phase 1: battle stage camera + RenderTexture, 28 Oct 2026 (save v11) |
+| Next | Phase 2: prefab hybrid for hero, enemy, ability and camp widgets; see `Foundation.md` |
 | Per-step contract | owner doc section -> one change -> recompile -> acceptance test -> docs+status -> manual test handoff |
 
 Handoff rules for the next steps: write the doc part for a system, then implement **one** small code change,

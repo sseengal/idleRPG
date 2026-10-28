@@ -89,7 +89,8 @@ namespace IdleRPG.EditorTools
 
         /// <summary>Bottom nav: Battle + the four management tabs, with active highlighting.</summary>
         private static ScreenController BuildNavBar(RectTransform safeArea, GameObject battlePage,
-            GameObject managementPage, TabController tabs, GameObject damageCanvas)
+            GameObject managementPage, TabController tabs, GameObject damageCanvas, GameObject battleStage,
+            GameObject stageCamera)
         {
             Image bar = KitPanel("NavBar", safeArea, UiTheme.Panel);
             PinBar(bar.rectTransform, top: false, NavBandHeight, UiSpace.ScreenMargin, UiSpace.Base);
@@ -134,7 +135,7 @@ namespace IdleRPG.EditorTools
             SceneWiringUtility.SetField(controller, "navButtons", buttons);
             SceneWiringUtility.SetField(controller, "navButtonBackgrounds", backgrounds);
             SceneWiringUtility.SetField(controller, "navButtonLabels", buttonLabels);
-            SceneWiringUtility.SetField(controller, "hideWhileBrowsing", new[] { damageCanvas });
+            SceneWiringUtility.SetField(controller, "hideWhileBrowsing", new[] { damageCanvas, battleStage, stageCamera });
             return controller;
         }
 

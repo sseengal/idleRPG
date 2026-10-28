@@ -1,6 +1,6 @@
 # Foundation — the locked architecture
 
-> **Status:** Phase 0 complete, 28 Oct 2026.
+> **Status:** Phase 1 complete, 28 Oct 2026. Manual owner play check pending.
 > **Scope:** the decisions that every later visual and feature change must follow.
 > **Parent:** `Architecture.md`. This page does not repeat balance numbers or screen measurements.
 
@@ -31,13 +31,13 @@ The cheaper route was rejected: UI-only arena effects cannot be clipped to the b
 - Mobile quality uses `Assets/Settings/Mobile_RPAsset.asset` with `Mobile_Renderer2D.asset`.
 - PC quality uses `Assets/Settings/PC_RPAsset.asset` with `PC_Renderer2D.asset`.
 - The old 3D `Mobile_Renderer.asset` and `PC_Renderer.asset` are removed, not kept as a fallback.
-- The arena is still Screen Space Overlay UI in Phase 0. Phase 1 moves it to a dedicated stage camera and RenderTexture.
+- The arena now renders through `BattleStageCamera` into `BattleStageRT`. The HUD shows that texture in the viewport.
 
 ## 4. Non-negotiable rules
 
 1. One pipeline. Never run Built-in and URP together.
 2. One battle surface. Effects apply to the stage RenderTexture, never to the whole screen.
-3. No buttons inside the battle stage. Input stays in the HUD overlay.
+3. No HUD chrome inside the stage. The formation board is the only interactive stage content; viewport taps cross the texture through `BattleStageSurface`'s input bridge.
 4. Prefabs for reusable views. The scene builder owns the shell, bands and safe areas.
 5. `GameManager` is a facade. New flow goes into a service.
 6. Cross-system events use the event hub. Local UI actions use direct calls.
@@ -49,7 +49,7 @@ The cheaper route was rejected: UI-only arena effects cannot be clipped to the b
 | Phase | Work | Done when |
 |---|---|---|
 | 0 | Truth pass, URP 2D renderers, baseline | Look unchanged; build and checks pass |
-| 1 | Battle stage camera + RenderTexture | Battle page pixel-matched; effects only inside the stage |
+| 1 | Battle stage camera + RenderTexture | **Complete 28 Oct 2026** — battle page renders in the stage; effects stay inside it |
 | 2 | Prefab hybrid | Hero, enemy, ability and camp widgets editable without code |
 | 3 | Services + event hub | Run and camp flow testable without the HUD |
 | 4 | Data split + save migrations | Old saves load; content is data-only |
@@ -59,6 +59,19 @@ The cheaper route was rejected: UI-only arena effects cannot be clipped to the b
 
 - Baseline captured at 1080 × 1920 before the pipeline switch.
 - Both quality levels now use a 2D renderer.
-- `Main Camera` still relies on URP's runtime-added camera data; Phase 1 adds the dedicated stage camera.
+- `Main Camera` still relies on URP's runtime-added camera data.
 - Docs corrected: save v11, current page bands, pipeline.
 - No gameplay code changed.
+
+## 7. Phase 1 record
+
+- `BattleStage` is a separate root: Screen Space - Camera canvas, UI layer, 1080 × 1920 reference and match-width scaling.
+- `BattleStageCamera` is a root object (not a canvas child), orthographic, depth −2, UI culling mask, with `UniversalAdditionalCameraData` added by name so the editor assembly needs no URP reference.
+- `BattleStageSurface` on `StageDisplay` creates a runtime RenderTexture at the viewport's pixel size, assigns it to the camera and the RawImage, and recreates it when the viewport resizes.
+- The authored viewport content moves into the stage in its original sibling order: backdrop, formation board, enemy stack, camp view. The RawImage stays in the HUD viewport behind a `RectMask2D`.
+- Damage numbers move into the stage, so their unit anchors and their parent share one coordinate space. The gold flight stays on `DamageCanvas`, because it must cross from the stage to the header; `BattleStageSurface.TryStageToScreen` converts its start point.
+- Input bridge: the stage raycaster is disabled for normal EventSystem use. A click on the viewport RawImage maps screen → texture pixels, raycasts the stage canvas, then bubbles the click to the Button on the hit area's parent. Formation tap-to-move works; no other stage control exists.
+- `ScreenController` hides the stage root while the management page is open.
+- Verified at 1080 × 1920: battle, boss wave and camp render in the stage; the header, ability strip, log and nav stay on the HUD. Formation hero selection works through the bridge. Damage numbers parent to `BattleStage`. EditMode tests 29/29 pass.
+- Performance reading (Editor, not a device): 28 draw calls, 16 set-pass calls, 1,546 triangles, against the Phase 0 baseline of 25 / 15 / 907.
+- Open: owner manual play check; low-end phone profile; rotation/resize smoke test; future stage effects (CRT etc.) still wait for the Phase 5 stage pass.

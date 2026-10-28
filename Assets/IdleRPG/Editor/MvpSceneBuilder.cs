@@ -108,6 +108,9 @@ namespace IdleRPG.EditorTools
             RectTransform modalCanvas = CreateModalCanvas(hudRoot);
             RectTransform safeArea = CreateSafeArea(canvasRoot);
 
+            RectTransform battleStage = CreateBattleStage(
+                out Camera stageCamera, out Canvas stageCanvas, out GraphicRaycaster stageRaycaster);
+
             // The modal canvas gets its own safe box. A card near a screen edge (the ranks sheet, the offline claim)
             // must clear a notch or a gesture bar just like the HUD bars do, so every card hangs off this node and
             // never off the raw canvas.
@@ -121,7 +124,17 @@ namespace IdleRPG.EditorTools
 
             BuildViewport(battlePage.GetComponent<RectTransform>(), damageRoot,
                 out FormationBoardView formationBoard, out EnemyStackView enemyStack,
-                out FloatingDamageTextPool damagePool, out RectTransform enemyAnchor);
+                out FloatingDamageTextPool damagePool, out RectTransform enemyAnchor,
+                out RectTransform viewportRect, out RawImage stageDisplay);
+
+            BattleStageSurface stageSurface = stageDisplay.gameObject.AddComponent<BattleStageSurface>();
+            SceneWiringUtility.SetField(stageSurface, "stageCamera", stageCamera);
+            SceneWiringUtility.SetField(stageSurface, "stageCanvas", stageCanvas);
+            SceneWiringUtility.SetField(stageSurface, "stageRoot", battleStage);
+            SceneWiringUtility.SetField(stageSurface, "viewport", viewportRect);
+            SceneWiringUtility.SetField(stageSurface, "display", stageDisplay);
+            SceneWiringUtility.SetField(stageSurface, "stageRaycaster", stageRaycaster);
+            SceneWiringUtility.SetField(stageSurface, "damageTextPool", damagePool);
             RectTransform battleRect = battlePage.GetComponent<RectTransform>();
             CombatLogUI combatLog = BuildCombatLog(battleRect);
 
@@ -129,7 +142,8 @@ namespace IdleRPG.EditorTools
             // beside the log, which meant the buttons were invisible during a fight - the one moment they matter.
             AbilityPanelUI abilityStrip = BuildAbilityStrip(battleRect, partyConfig.ValidHeroCount);
             TabController tabs = BuildManagementPage(managementPage.GetComponent<RectTransform>(), partyConfig, prestigeUpgrades);
-            ScreenController screens = BuildNavBar(safeArea, battlePage, managementPage, tabs, damageRoot.gameObject);
+            ScreenController screens = BuildNavBar(safeArea, battlePage, managementPage, tabs,
+                damageRoot.gameObject, battleStage.gameObject, stageCamera.gameObject);
             BuildCampLayer(battleRect, abilityStrip, formationBoard, enemyStack, screens, hudRoot);
             OfflineRewardsPopup offlinePopup = BuildOfflinePopup(modalRoot);
             DefeatModalUI defeatModal = BuildDefeatModal(modalRoot);
@@ -138,6 +152,7 @@ namespace IdleRPG.EditorTools
 
             SceneWiringUtility.SetField(hud, "gameManager", gameManager);
             SceneWiringUtility.SetField(hud, "modalRoot", modalRoot);
+            SceneWiringUtility.SetField(hud, "vfxRoot", damageRoot);
             SceneWiringUtility.SetField(hud, "formationBoard", formationBoard);
             SceneWiringUtility.SetField(hud, "enemyStack", enemyStack);
             SceneWiringUtility.SetField(hud, "damageTextPool", damagePool);
@@ -184,6 +199,73 @@ namespace IdleRPG.EditorTools
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = new Color(0.04f, 0.05f, 0.08f, 1f);
             camera.transform.position = new Vector3(0f, 0f, -10f);
+        }
+
+        /// <summary>
+        /// Builds the off-screen battle stage. The stage canvas is a separate root because a nested
+        /// canvas would inherit the HUD's Overlay mode. Its camera renders only UI-layer graphics
+        /// into the runtime render texture assigned by <see cref="BattleStageSurface"/>.
+        /// </summary>
+        private static RectTransform CreateBattleStage(out Camera stageCamera, out Canvas stageCanvas,
+            out GraphicRaycaster stageRaycaster)
+        {
+            GameObject stageObject = new GameObject("BattleStage",
+                typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
+
+            int uiLayer = LayerMask.NameToLayer("UI");
+            if (uiLayer >= 0)
+            {
+                stageObject.layer = uiLayer;
+            }
+
+            stageCanvas = stageObject.GetComponent<Canvas>();
+            stageCanvas.renderMode = RenderMode.ScreenSpaceCamera;
+            stageCanvas.planeDistance = 100f;
+            stageCanvas.sortingOrder = 0;
+
+            CanvasScaler scaler = stageObject.GetComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(ReferenceWidth, ReferenceHeight);
+            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            scaler.matchWidthOrHeight = 0f;
+
+            GameObject cameraObject = new GameObject("BattleStageCamera");
+            // Keep the camera OUT of the canvas hierarchy. A Screen Space - Camera canvas drives its
+            // root transform, so a child camera inherits the canvas scale (0.01 here) and moves with it.
+
+            if (uiLayer >= 0)
+            {
+                cameraObject.layer = uiLayer;
+            }
+
+            stageCamera = cameraObject.AddComponent<Camera>();
+            stageCamera.orthographic = true;
+            stageCamera.orthographicSize = 5f;
+            stageCamera.clearFlags = CameraClearFlags.SolidColor;
+            stageCamera.backgroundColor = new Color(0.04f, 0.05f, 0.08f, 1f);
+            stageCamera.cullingMask = uiLayer >= 0 ? 1 << uiLayer : ~0;
+            stageCamera.depth = -2f;
+            stageCamera.allowHDR = false;
+            stageCamera.allowMSAA = false;
+            stageCamera.nearClipPlane = 0.3f;
+            stageCamera.farClipPlane = 1000f;
+            stageCamera.transform.position = new Vector3(0f, 0f, -10f);
+            stageCanvas.worldCamera = stageCamera;
+
+            // URP is an optional package assembly from the editor assembly's point of view. Add its
+            // camera data by name so this builder stays usable in a Built-in debug project too.
+            System.Type cameraDataType = System.Type.GetType(
+                "UnityEngine.Rendering.Universal.UniversalAdditionalCameraData, Unity.RenderPipelines.Universal.Runtime");
+
+            if (cameraDataType != null && cameraObject.GetComponent(cameraDataType) == null)
+            {
+                cameraObject.AddComponent(cameraDataType);
+            }
+
+            stageRaycaster = stageObject.AddComponent<GraphicRaycaster>();
+            stageRaycaster.enabled = false;
+
+            return stageObject.GetComponent<RectTransform>();
         }
 
         private static RectTransform CreateCanvas(GameObject host)

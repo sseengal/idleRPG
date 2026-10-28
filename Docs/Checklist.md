@@ -12,12 +12,12 @@
 
 | Field | Value |
 |---|---|
-| Current step | **Foundation Phase 0 complete 28 Oct 2026**: URP 2D renderers active, baseline captured, docs corrected. Next: Phase 1 battle stage camera + RenderTexture (`Foundation.md`). Open feature work: ability assignments in the save, boss moves. Then B9' shipping checklist -> **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
+| Current step | **Foundation Phase 1 complete 28 Oct 2026**: battle stage camera + RenderTexture, damage numbers inside the stage, formation input bridge. Manual owner play check pending. Next: Phase 2 prefab hybrid (`Foundation.md`). Open feature work: ability assignments in the save, boss moves. Then B9' shipping checklist -> **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money**, and **MVP = store-submittable** (§1p). The gate stands for NEW systems: abilities, gear and the roster swap shipped after it, so read it as "no zones / affixes / relics before the base is done" |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
-| Last completed | The ability feature - one action lane, real shield/heal/damage effects, random enemy cast timing, enemy casts from stage 1, Archer -> Soldier roster swap (save v8), 2026-10-24 |
-| Next after this | You: one play check of the ability lane (press a cast, watch it queue, play, land). Then the B8' proof lap, the B9' shipping checklist, B10 live store wiring (AdMob + Unity Ads), B10b store packet, B1a/B1b device passes. **Art/UI runs alongside (§1s / `Art-Pipeline.md` §17): open `Scenes/UiLab.unity` or `Screenshots/ui-lab/uilab.png` and pick look A, B or C.** |
+| Last completed | **Foundation Phase 1** - battle stage camera + RenderTexture, damage/gold layer split, formation tap bridge (2026-10-28) |
+| Next after this | You: one manual play check of battle, boss wave and camp after the stage switch. Then **Foundation Phase 2** prefab hybrid (hero, enemy, ability, camp choice/card). Then the B8' proof lap, B9' shipping checklist, B10 live store wiring, B10b store packet, B1a/B1b device passes. **Art/UI runs alongside (§1s / `Art-Pipeline.md` §17).** |
 | MVP decisions (owner, 2026-09-27) | gate = **store-submittable**; **3 playable heroes** (a 4th needs the v1.1 roster UI); both stores at once; **art + audio = the final pass before submission**; no analytics SDK; full record + cuts in §1p |
 | Save schema | **v11** (`SaveData.cs:32`). v4 `runBestStage`; v5 one keyed `levels` list; v6 gear inventory; v7 ability assignment; v8 Archer -> Soldier roster swap; v9 Fireball renamed Shatter; v10 Charge renamed Holy Slash (id too); v11 Shield Wall renamed Guard. Additive migrations, no data loss (§1h / B35-B36, `Architecture.md` §4) |
 | Golden numbers | **VOID as a gate** until the full rebalance after feature complete (`Content.md` §10). `Run All Checks` fails those four lines by design; the baseline is not re-recorded now |
@@ -30,6 +30,19 @@ rebalance after feature complete** (`Content.md` §10): `Run All Checks` ends FA
 The log is a *contract with the player*, not decoration: any feature that produces or
 renames combat text (statuses, abilities, **enemy item drops**, **item usage in battle**, affixes, pets) must be
 re-checked for correct attribution, one line per wave, no mid-line renaming and no "... N more hits" flooding.
+
+## 0a. Foundation Phase 1 — battle stage RenderTexture  ·  **built 2026-10-28**
+
+- [x] `BattleStage` root + `BattleStageCamera` (orthographic, UI mask, URP camera data) + Screen Space - Camera canvas.
+- [x] Runtime `BattleStageRT` sized to the viewport; HUD `StageDisplay` RawImage shows it inside the existing mask.
+- [x] Authored viewport content moves into the stage in source order: backdrop, formation board, enemy stack, camp view.
+- [x] Damage numbers move into the stage; gold flight stays on `DamageCanvas` and converts its start point through `BattleStageSurface.TryStageToScreen`.
+- [x] Click bridge: viewport tap → texture pixels → stage raycast → bubble to the Button on the hit-area parent. Hero selection verified live.
+- [x] Camp renders in the stage; header, ability strip, log and nav stay on the HUD. Management page hides the stage root.
+- [x] EditMode tests **29/29 pass**. Editor reading: 28 draw calls, 16 set-pass, 1,546 triangles (Phase 0: 25 / 15 / 907).
+- [ ] **manual owner play check** after the stage switch (battle, boss, camp, a hero move).
+- [ ] low-end phone profile and rotation/resize smoke test.
+- [ ] stage-only effects (CRT, grain, flash) stay deferred to Phase 5.
 
 ## 1d. Compounding upgrades (B3d)  ·  **built + measured 2026-09-25**
 

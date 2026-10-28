@@ -119,13 +119,25 @@ namespace IdleRPG.UI
             Vector2 startLocal;
             Vector2 endLocal;
 
-            if (start == null
-                || !RectTransformUtility.ScreenPointToLocalPointInRectangle(hostRect,
-                    RectTransformUtility.WorldToScreenPoint(canvasCamera, start.TransformPoint(start.rect.center)),
-                    canvasCamera, out startLocal)
-                || !RectTransformUtility.ScreenPointToLocalPointInRectangle(hostRect,
-                    RectTransformUtility.WorldToScreenPoint(canvasCamera, header.GoldAnchor.TransformPoint(header.GoldAnchor.rect.center)),
-                    canvasCamera, out endLocal))
+            if (start == null)
+            {
+                return;
+            }
+
+            Vector3 startWorld = start.TransformPoint(start.rect.center);
+            Vector2 startScreen;
+
+            if (!BattleStageSurface.TryStageToScreen(startWorld, out startScreen))
+            {
+                startScreen = RectTransformUtility.WorldToScreenPoint(canvasCamera, startWorld);
+            }
+
+            Vector2 endScreen = RectTransformUtility.WorldToScreenPoint(
+                canvasCamera,
+                header.GoldAnchor.TransformPoint(header.GoldAnchor.rect.center));
+
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(hostRect, startScreen, canvasCamera, out startLocal)
+                || !RectTransformUtility.ScreenPointToLocalPointInRectangle(hostRect, endScreen, canvasCamera, out endLocal))
             {
                 return;
             }

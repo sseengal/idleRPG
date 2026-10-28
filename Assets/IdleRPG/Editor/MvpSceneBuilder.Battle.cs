@@ -142,10 +142,11 @@ namespace IdleRPG.EditorTools
         // ------------------------------------------------------------------
         private static void BuildViewport(RectTransform pageRoot, RectTransform damageRoot,
             out FormationBoardView formationBoard, out EnemyStackView enemyStack, out FloatingDamageTextPool damagePool,
-            out RectTransform enemyAnchor)
+            out RectTransform enemyAnchor, out RectTransform viewportRect, out RawImage stageDisplay)
         {
             GameObject viewport = UiFactory.Node("Viewport", pageRoot);
-            UiFactory.Anchor(viewport.GetComponent<RectTransform>(), new Vector2(0f, BattleViewportBottom), new Vector2(1f, StageRowMinY), UiSpace.ScreenMargin, UiSpace.Snug, UiSpace.ScreenMargin, UiSpace.Snug);
+            viewportRect = viewport.GetComponent<RectTransform>();
+            UiFactory.Anchor(viewportRect, new Vector2(0f, BattleViewportBottom), new Vector2(1f, StageRowMinY), UiSpace.ScreenMargin, UiSpace.Snug, UiSpace.ScreenMargin, UiSpace.Snug);
 
             // Clips the cover-fitted backdrop so its overflow never draws over the header or combat log.
             viewport.AddComponent<RectMask2D>();
@@ -212,6 +213,14 @@ namespace IdleRPG.EditorTools
             enemyAnchor = enemyAnchors[0];
 
             damagePool = BuildDamageTextPool(damageRoot);
+
+            // The display is the only child that stays in the HUD viewport. At runtime
+            // BattleStageSurface moves the authored stage content behind this RawImage.
+            GameObject displayObject = UiFactory.Node("StageDisplay", viewport.transform);
+            stageDisplay = displayObject.AddComponent<RawImage>();
+            UiFactory.Stretch(stageDisplay.rectTransform);
+            stageDisplay.raycastTarget = true;
+            stageDisplay.enabled = false;
         }
 
         /// <summary>Stage/wave row between the header and the battle screen, centered.</summary>
