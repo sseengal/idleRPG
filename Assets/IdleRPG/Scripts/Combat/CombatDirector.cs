@@ -63,8 +63,6 @@ namespace IdleRPG.Combat
         public event Action PartyWiped;
         public event Action BossFailed;
         public event Action<int, int, bool> WaveStarted;
-        /// <summary>(stage, wave) when the last enemy of a wave dies. The inter-wave pause starts here.</summary>
-        public event Action<int, int> WaveTransitionStarted;
 
         // --- State ---
         public int CurrentStage { get; private set; } = 1;
@@ -227,11 +225,6 @@ namespace IdleRPG.Combat
             if (simulator != null && simulator.AliveEnemyCount > 0)
             {
                 return;
-            }
-
-            if (!transitionPending)
-            {
-                WaveTransitionStarted?.Invoke(CurrentStage, CurrentWave);
             }
 
             transitionPending = true;

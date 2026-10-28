@@ -93,8 +93,6 @@ wave 10    BOSS
   the battle page forward. A forced choice never waits unseen behind the party or upgrade tabs.
 - The view and strip start hidden and switch on `CampService.Opened`; `Closed` puts the board,
   enemy stack and ability strip back.
-- Camp entry/exit uses the CRT transition (`Transitions.md`). Stage and camp get the full close/open;
-  normal waves only get a thin line flicker.
 - HP rows show current/max. A fallen hero is shown in gray and `FALLEN`.
 - Long Rest is disabled when the token is spent: `TOKEN SPENT`.
 - Short Rest+ label is `20% (AD)`, or `20% FREE` for No Ads buyers.

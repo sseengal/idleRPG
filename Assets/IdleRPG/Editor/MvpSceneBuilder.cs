@@ -133,7 +133,6 @@ namespace IdleRPG.EditorTools
             BuildCampLayer(battleRect, abilityStrip, formationBoard, enemyStack, screens, hudRoot);
             OfflineRewardsPopup offlinePopup = BuildOfflinePopup(modalRoot);
             DefeatModalUI defeatModal = BuildDefeatModal(modalRoot);
-            BuildCrtTransition(modalCanvas, hudRoot);
             ToastUI toast = BuildToast(safeArea);
             EnsureEventSystem();
 

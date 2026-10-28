@@ -40,12 +40,6 @@ MonoBehaviour:
     DailyCap: 3
     CooldownSec: 30
   waveTransitionDelaySec: 0.6
-  crtEnabled: 1
-  crtWaveStyle: 1
-  crtCloseSeconds: 0.12
-  crtOpenSeconds: 0.18
-  crtFlickerSeconds: 0.1
-  crtFlickerDim: 0.12
   campEnabled: 1
   campEveryWaves: 3
   campShortRestPercent: 0.1
