@@ -2,7 +2,7 @@
 
 > Owns: the structure under the UI (layers, safe boxes, bands) and every gap number.
 > Parent: `UI-UX.md` (screens, patterns, type scale) and `Architecture.md`.
-> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** 2026-10-14 (live scene, measured).
+> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** 2026-10-28 (live scene, measured).
 > Companions: `UiType.cs` (text), `UiTouch.cs` (fingers), `UiSpace.cs` (gaps).
 
 ---
@@ -59,7 +59,8 @@ builds both, so neither can change size with the screen.
 ### 2b. Bands inside the battle page
 
 Fractions of the page (so they follow whatever height the page gets): stage/wave row **0.93–0.99**, viewport
-**0.39–0.93**, log/abilities tab strip **0.34–0.39**, log or abilities panel **0–0.34**.
+**0.39–0.93**, log/abilities tab strip **0.28–0.39**, log or abilities panel **0–0.28**.
+Source: `LogTop = 0.28f`, `BattleViewportBottom = 0.39f` in `MvpSceneBuilder.cs`.
 
 ### 2c. The header is a row, not hand-placed chips (2026-10-14)
 

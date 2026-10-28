@@ -2,7 +2,7 @@
 
 > **Everything that describes this game lives here.** One folder, one source of truth per topic.
 > Root `README.md` is the quick start (clone → open → play); everything deeper is in this folder.
-> Last restructured: Step 11e (2026-09-21); Art-Pipeline.md added 2026-09-26; Launch-Plan.md added 2026-10-11; Character-Catalog.md, Stage-Ladder.md and Ability-Map.md added 2026-10-11; UI-Layout.md added 2026-10-14; Combat-Sequencing.md added 2026-10-24; doc consolidation pass 2026-10-24 (one current page per topic).
+> Last restructured: Step 11e (2026-09-21); Art-Pipeline.md added 2026-09-26; Launch-Plan.md added 2026-10-11; Character-Catalog.md, Stage-Ladder.md and Ability-Map.md added 2026-10-11; UI-Layout.md added 2026-10-14; Combat-Sequencing.md added 2026-10-24; doc consolidation pass 2026-10-24 (one current page per topic); Foundation.md added 2026-10-28.
 
 ---
 
@@ -39,6 +39,7 @@ the code wins and the page is fixed the same day.
 | Which enemy appears on which stage, and who is a boss? | **`Stage-Ladder.md`** (100 stages, 10 bands) |
 | What are the abilities, and how are they unlocked? | **`Ability-Map.md`** (named strips -> abilities, plus the unlock rule) |
 | How do I clean up the project without changing the game? | **`Cleanup-Checks.md`** (before/after gate: regression net, 14 EditMode tests, 5-minute smoke) |
+| What foundation are we building on? | **`Foundation.md`** (locked pipeline, arena layer, prefab and service policy) |
 | Why is the code shaped this way? Layers, decisions, rules | `Architecture.md` |
 | How does the simulation work (combat, formation, enemies)? | `Sim-Core.md` |
 | Content pipeline: specs, generator, validator, enemies/zones | `Content.md` (also: **when the golden numbers are re-recorded**) |

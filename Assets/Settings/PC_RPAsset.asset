@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   k_AssetVersion: 13
   k_AssetPreviousVersion: 13
-  m_RendererType: 1
+  m_RendererType: 2
   m_RendererData: {fileID: 0}
   m_RendererDataList:
-  - {fileID: 11400000, guid: f288ae1f4751b564a96ac7587541f7a2, type: 2}
+  - {fileID: 11400000, guid: be90f1ddd919b4ae68ea93c1ec614925, type: 2}
   m_DefaultRendererIndex: 0
   m_RequireDepthTexture: 1
   m_RequireOpaqueTexture: 1

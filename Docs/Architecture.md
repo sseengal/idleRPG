@@ -1,8 +1,8 @@
 # Idle RPG — Architecture & Scale-Up
 
-> 2D mobile idle RPG. Unity 6000.6.0f1, URP 2D, portrait, iOS + Android.
-> **Status 24 Oct 2026:** MVP shipped and playable. Combat runs in one action lane with art-measured
-> windows (`Combat-Sequencing.md`); abilities, gear and the roster swap are built (save v8).
+> 2D mobile idle RPG. Unity 6000.6.0f1, URP 2D (`Mobile_Renderer2D` / `PC_Renderer2D`), portrait, iOS + Android.
+> **Status 28 Oct 2026:** Foundation Phase 0 complete. URP 2D is the only pipeline; the battle stage is still
+> UI overlay until Phase 1. Abilities, gear and the roster swap are built (save v11).
 > This file is *how the game is built and how it scales*. Folder index: `README.md`.
 
 ---
@@ -26,6 +26,7 @@
 | `Content.md` | Zones, walls, affixes, encounter budgets, enemy archetypes, content pipeline + validator | **written** |
 | `Idle-Economy.md` | Ledger rates, offline model, bounty/expedition payouts, ads/gems/shop, anti-abuse, telemetry | **written** |
 | `UI-UX.md` | Screen inventory, return hub, wall guidance, presenter pattern, prefab policy, a11y/l10n | **written** |
+| `Foundation.md` | Locked pipeline, arena layer, prefab policy, service split, event hub, phase plan | **written** |
 
 ---
 
@@ -216,9 +217,9 @@ Definitions only - no logic. Every definition has a stable string `id` (the only
 
 ---
 
-## 4. Save contract (schema v8)
+## 4. Save contract (schema v11)
 
-**Shipped today: v8** (`SaveData.CurrentVersion`). Migrations are additive, so an old save loads with no data loss:
+**Shipped today: v11** (`SaveData.CurrentVersion`). Migrations are additive, so an old save loads with no data loss:
 
 | Version | Adds |
 |---|---|
@@ -323,7 +324,7 @@ ui             { lastScreenIndex, settings{...} }
 | AD2 | One gameplay driver: `RunController.Tick(dt)`; no coroutines in gameplay flow | Locked - **implemented in 7c** |
 | AD3 | `GameContext` built once and injected; no runtime `Find*`/`GetComponent` | Locked - **implemented in 7c** (panel `EnsureBound()` fallbacks retire in Step 8) |
 | AD4 | `SimContext` snapshot (rules + rng + `SimMode`) is the sim's only input besides specs | Locked |
-| AD5 | Save stores **ids + string keys only**; lists not dictionaries; generic records since v3, now **v8** (§4) | Locked |
+| AD5 | Save stores **ids + string keys only**; lists not dictionaries; generic records since v3, now **v11** (§4) | Locked |
 | AD6 | Offline always uses the measured `SimLedger` rate first; no second offline formula | Locked |
 | AD7 | Every payout path goes through the reward funnel + ledger | Locked |
 | AD8 | UI: dumb views + presenters, rows built from lists/prefab templates | Locked |
@@ -474,10 +475,10 @@ Verification per step: clean recompile → `Run All Checks (regression)` PASS �
 
 | Item | State |
 |---|---|
-| Docs | 33 pages. Index `README.md`; status `Checklist.md`; backlog `Roadmap.md`; cleanup gate `Cleanup-Checks.md` |
-| Code | 245 C# files, 4 assemblies (`Sim` has zero Unity references) |
-| Last change | Ability feature + one-lane combat, 24 Oct 2026 (save v8) |
-| Next | Owner play check of the ability lane, then B9' shipping checklist and B10 live SDKs |
+| Docs | 39 pages. Index `README.md`; status `Checklist.md`; backlog `Roadmap.md`; cleanup gate `Cleanup-Checks.md` |
+| Code | 253 C# files, 4 assemblies (`Sim` has zero Unity references) |
+| Last change | Foundation Phase 0: URP 2D renderers active, 28 Oct 2026 (save v11) |
+| Next | Phase 1: battle stage camera + RenderTexture; see `Foundation.md` |
 | Per-step contract | owner doc section -> one change -> recompile -> acceptance test -> docs+status -> manual test handoff |
 
 Handoff rules for the next steps: write the doc part for a system, then implement **one** small code change,
