@@ -37,6 +37,7 @@ namespace IdleRPG.Combat
         public event Action PartyWiped;
         public event Action BossFailed;
         public event Action<int, int, bool> WaveStarted;
+        public event Action<int, int> WaveTransitionStarted;
 
         // --- State ---
         public CombatSimulator Simulator => simulator;
@@ -141,6 +142,7 @@ namespace IdleRPG.Combat
 
             director = new CombatDirector();
             director.WaveStarted += OnDirectorWaveStarted;
+            director.WaveTransitionStarted += (stage, wave) => WaveTransitionStarted?.Invoke(stage, wave);
             director.WaveCleared += (stage, wave) =>
             {
                 WaveCleared?.Invoke(stage, wave);

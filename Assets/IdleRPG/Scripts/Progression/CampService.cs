@@ -44,12 +44,12 @@ namespace IdleRPG.Progression
             manager != null && (manager.RunTrainAttackBonus + manager.RunTrainDefenseBonus) % 2 == 0;
 
         /// <summary>
-        /// Called by <see cref="CombatDirector"/> before a wave spawns. True = hold the wave; the camp panel
-        /// opens and <see cref="Finish"/> resumes the director later.
+        /// True when a camp would be offered before <paramref name="nextWave"/>. Pure: it does not open the
+        /// camp or change any state. The UI uses it to pick the full CRT for a wave that leads into camp.
         /// </summary>
-        public bool ShouldHold(int stage, int nextWave)
+        public bool WouldHold(int stage, int nextWave)
         {
-            if (manager == null || manager.Balance == null || !manager.Balance.CampEnabled || IsOpen)
+            if (manager == null || manager.Balance == null || !manager.Balance.CampEnabled)
             {
                 return false;
             }
@@ -76,8 +76,22 @@ namespace IdleRPG.Progression
                 return false;
             }
 
+            return true;
+        }
+
+        /// <summary>
+        /// Called by <see cref="CombatDirector"/> before a wave spawns. True = hold the wave; the camp panel
+        /// opens and <see cref="Finish"/> resumes the director later.
+        /// </summary>
+        public bool ShouldHold(int stage, int nextWave)
+        {
+            if (IsOpen || !WouldHold(stage, nextWave))
+            {
+                return false;
+            }
+
             pendingStage = stage;
-            pendingWave = clearedWave;
+            pendingWave = nextWave - 1;
             IsOpen = true;
             Opened?.Invoke();
             return true;

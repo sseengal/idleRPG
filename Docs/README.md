@@ -2,7 +2,7 @@
 
 > **Everything that describes this game lives here.** One folder, one source of truth per topic.
 > Root `README.md` is the quick start (clone → open → play); everything deeper is in this folder.
-> Last restructured: Step 11e (2026-09-21); Art-Pipeline.md added 2026-09-26; Launch-Plan.md added 2026-10-11; Character-Catalog.md, Stage-Ladder.md and Ability-Map.md added 2026-10-11; UI-Layout.md added 2026-10-14; Combat-Sequencing.md added 2026-10-24; doc consolidation pass 2026-10-24 (one current page per topic).
+> Last restructured: Step 11e (2026-09-21); Art-Pipeline.md added 2026-09-26; Launch-Plan.md added 2026-10-11; Character-Catalog.md, Stage-Ladder.md and Ability-Map.md added 2026-10-11; UI-Layout.md added 2026-10-14; Combat-Sequencing.md added 2026-10-24; Transitions.md added 2026-10-28; doc consolidation pass 2026-10-24 (one current page per topic).
 
 ---
 
@@ -29,6 +29,7 @@ the code wins and the page is fixed the same day.
 |---|---|
 | What is this game now — endless, or a story? | **`Game-Vision.md`** (canon: story-led mini campaign, automatic combat, restart on death) |
 | How does a fight reach the screen, and how do abilities work? | **`Combat-Sequencing.md`** (the current page: lane, art-to-time, casts, enemy timing) |
+| How do waves, stages and camps change the screen? | **`Transitions.md`** (CRT close/open, flicker, timings, pause knob) |
 | What was the original combat research and the build log? | `Combat-Presentation.md` (23-24 Oct 2026 record; current behaviour is in `Combat-Sequencing.md`) |
 | Where do abilities stand, and what is still open? | **`Ability-Progress.md`** (checked against code 24 Oct 2026) |
 | What is the fight order, which strip plays, and what are the timings? | **`Combat-Sequencing.md`** (one page: lane, art-to-time, enemy timing, audit, checks) |
@@ -81,6 +82,7 @@ Docs/
   Checklist.md         <- master status: what is done, what is left
   Cleanup-Checks.md    <- the before/after gate for consolidation (no behaviour change)
   Combat-Sequencing.md <- how a blow reaches the screen: lane, timings, enemy casts, the one beat planner
+  Transitions.md       <- the CRT beat: flicker on waves, full close/open on stage and camp
   Cutscene-Plan.md     <- fixed plays (structure only today): steps, rules, QA
   Ability-Progress.md  <- ability status: what works, what is open
   Ability-Plan.md      <- the locked ability decisions

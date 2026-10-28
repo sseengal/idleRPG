@@ -88,6 +88,29 @@ namespace IdleRPG.Data
         [Tooltip("Delay between clearing a wave and spawning the next, in seconds.")]
         [SerializeField] private float waveTransitionDelaySec = 0.5f;
 
+        [Header("CRT Transition")]
+        [Tooltip("Master switch for the CRT screen effect. Off = no overlay; combat is unchanged.")]
+        [SerializeField] private bool crtEnabled = true;
+
+        [Tooltip("Normal-wave effect. Stage and camp always use the full CRT while the master switch is on.")]
+        [SerializeField] private CrtWaveMode crtWaveStyle = CrtWaveMode.Flicker;
+
+        [Tooltip("Seconds for the black bars to close.")]
+        [Min(0.02f)]
+        [SerializeField] private float crtCloseSeconds = 0.12f;
+
+        [Tooltip("Seconds for the black bars to open.")]
+        [Min(0.02f)]
+        [SerializeField] private float crtOpenSeconds = 0.18f;
+
+        [Tooltip("Seconds for the thin white line on a normal wave.")]
+        [Min(0.02f)]
+        [SerializeField] private float crtFlickerSeconds = 0.10f;
+
+        [Tooltip("Peak darkness of the normal-wave flicker (0 = line only, 0.5 = heavy).")]
+        [Range(0f, 0.5f)]
+        [SerializeField] private float crtFlickerDim = 0.12f;
+
         // ------------------------------------------------------------------
         // Camp (the interlude between waves)
         // ------------------------------------------------------------------

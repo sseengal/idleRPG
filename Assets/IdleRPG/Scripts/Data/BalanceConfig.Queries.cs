@@ -60,6 +60,18 @@ namespace IdleRPG.Data
 
         public float WaveTransitionDelaySec => Mathf.Max(0f, waveTransitionDelaySec);
 
+        public bool CrtEnabled => crtEnabled;
+
+        public CrtWaveMode CrtWaveStyle => crtWaveStyle;
+
+        public float CrtCloseSeconds => Mathf.Max(0.02f, crtCloseSeconds);
+
+        public float CrtOpenSeconds => Mathf.Max(0.02f, crtOpenSeconds);
+
+        public float CrtFlickerSeconds => Mathf.Max(0.02f, crtFlickerSeconds);
+
+        public float CrtFlickerDim => Mathf.Clamp(crtFlickerDim, 0f, 0.5f);
+
         public double MinDamageRatio => Mathf.Clamp(minDamageRatio, 0f, 1f);
 
         public float CriticalChance => Mathf.Clamp01(criticalChance);
