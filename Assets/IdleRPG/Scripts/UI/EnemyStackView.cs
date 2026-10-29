@@ -51,6 +51,7 @@ namespace IdleRPG.UI
         private float shakePixels;
         private float shakeDuration;
         private float clearPopTimer;
+        private float lastLayoutHeight = -1f;
 
         /// <summary>Wires the manager and pushes fresh damage anchors into the floating-text pool.</summary>
         public void Build(GameManager gameManager, FloatingDamageTextPool damagePool)
@@ -87,6 +88,13 @@ namespace IdleRPG.UI
             GameEvents.EnemySpawned += OnEnemySpawned;
             GameEvents.EnemyDamaged += OnEnemyDamaged;
             GameEvents.WaveCompleted += OnWaveCompleted;
+
+            // The camp hides this stack. A wave can spawn while it is hidden, so rebind from the sim
+            // as soon as the stack comes back instead of waiting for the next spawn event.
+            if (manager != null)
+            {
+                Refresh();
+            }
         }
 
         private void OnDisable()
@@ -142,6 +150,15 @@ namespace IdleRPG.UI
                 return;
             }
 
+            // The first refresh can run before the stage canvas has its final measured height. The slots then
+            // use a stale/pre-scale height and sit at the wrong vertical offset until the next wave.
+            // Re-run once the real height exists (and again after a screen resize).
+            float measuredHeight = container.rect.height;
+            if (measuredHeight > 1f && Mathf.Abs(measuredHeight - lastLayoutHeight) > 0.5f)
+            {
+                Refresh();
+            }
+
             if (shakeTimer > 0f)
             {
                 shakeTimer -= Time.deltaTime;
@@ -188,6 +205,7 @@ namespace IdleRPG.UI
             EnemyCombatant[] enemies = ResolveEnemies();
             int count = enemies == null ? 0 : Mathf.Min(enemies.Length, slots.Length);
             float height = container.rect.height > 1f ? container.rect.height : 400f;
+            lastLayoutHeight = height;
 
             // Fixed hero-like box per enemy; shrink only enough to fit the wave in the column.
             float slotHeight = count > 0 ? Mathf.Min(SlotHeight, (height - (count - 1) * SlotGap) / count) : SlotHeight;
