@@ -21,6 +21,8 @@ namespace IdleRPG.EditorTools
     {
         private const string EnemyUnitSlotPrefabPath =
             "Assets/IdleRPG/Prefabs/UI/Battle/EnemyUnitSlot.prefab";
+        private const string HeroUnitSlotPrefabPath =
+            "Assets/IdleRPG/Prefabs/UI/Battle/HeroUnitSlot.prefab";
 
         // ------------------------------------------------------------------
         // Header
@@ -179,6 +181,17 @@ namespace IdleRPG.EditorTools
             boardRect.sizeDelta = new Vector2(320f, 470f);
 
             formationBoard = boardObject.AddComponent<FormationBoardView>();
+
+            HeroUnitView heroPrefab = AssetDatabase.LoadAssetAtPath<HeroUnitView>(HeroUnitSlotPrefabPath);
+
+            if (heroPrefab == null)
+            {
+                Debug.LogError($"[MvpSceneBuilder] Missing hero slot prefab at {HeroUnitSlotPrefabPath}.");
+            }
+            else
+            {
+                SceneWiringUtility.SetField(formationBoard, "heroPrefab", heroPrefab);
+            }
 
             // Test pass 2026-09-30: bigger hero slots so placeholder art + HP bars read clearly.
             SceneWiringUtility.SetField(formationBoard, "slotSize", new Vector2(160f, 176f));

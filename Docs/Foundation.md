@@ -1,6 +1,6 @@
 # Foundation — the locked architecture
 
-> **Status:** Phase 2A complete, 29 Oct 2026. Phase 1 owner-confirmed.
+> **Status:** Phase 2B complete, 29 Oct 2026. Phase 1 owner-confirmed.
 > **Scope:** the decisions that every later visual and feature change must follow.
 > **Parent:** `Architecture.md`. This page does not repeat balance numbers or screen measurements.
 
@@ -50,7 +50,7 @@ The cheaper route was rejected: UI-only arena effects cannot be clipped to the b
 |---|---|---|
 | 0 | Truth pass, URP 2D renderers, baseline | Look unchanged; build and checks pass |
 | 1 | Battle stage camera + RenderTexture | **Complete 28 Oct 2026** — battle page renders in the stage; effects stay inside it |
-| 2 | Prefab hybrid | **In progress** — enemy slot prefab done; hero, ability and camp widgets next |
+| 2 | Prefab hybrid | **In progress** — enemy and hero slots are prefabs; ability and camp widgets next |
 | 3 | Services + event hub | Run and camp flow testable without the HUD |
 | 4 | Data split + save migrations | Old saves load; content is data-only |
 | 5 | Tests and polish | PlayMode smoke, screenshots, performance, a11y, l10n |
@@ -87,3 +87,10 @@ The cheaper route was rejected: UI-only arena effects cannot be clipped to the b
 - `MvpSceneBuilder.BuildEnemySlot` instantiates three connected prefab instances under `EnemyStack`; it fails loudly if the prefab is missing.
 - `EnemyStackView` still owns the anchor, size, stagger and wave count, so prefab and layout code keep separate jobs.
 - Verified: two-enemy wave renders with correct stack positions; prefab references survive scene save and play.
+
+### 2B — hero view prefab
+
+- `Assets/IdleRPG/Prefabs/UI/Battle/HeroUnitSlot.prefab` owns the icon, transparent hit area, name label, HP bar and `CanvasGroup`.
+- The root carries the `Button`; `FormationBoardView` binds its tap at runtime and still owns pads, selection and board layout.
+- `FormationBoardView` now has a serialized `heroPrefab`; the scene builder wires it. The old hand-built hero hierarchy and `BuildHpBar` were removed.
+- Verified: three heroes instantiate and render; tap selection changes `selectedHero`; lunge contact remains inside stage bounds.
