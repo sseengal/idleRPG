@@ -13,8 +13,19 @@ namespace IdleRPG.UI
     /// </summary>
     public static class BattleSpots
     {
-        /// <summary>Breathing room between two bodies, in canvas units.</summary>
+        /// <summary>Breathing room between two bodies, in DESIGN units (the 1080-wide canvas).</summary>
         public const float ContactPadding = 18f;
+
+        /// <summary>
+        /// Converts the design-unit padding into the world space of a unit. Body widths and
+        /// <see cref="RectTransform.position"/> are world-space; the stage canvas is scaled, so adding
+        /// 18 world units there would throw the attacker far outside the viewport.
+        /// </summary>
+        public static float PaddingFor(Transform space)
+        {
+            float scale = space != null ? Mathf.Abs(space.lossyScale.x) : 1f;
+            return ContactPadding * scale;
+        }
 
         /// <summary>
         /// Which side of the TARGET the attacker stands on: +1 when the attacker is to the target's right, -1 when it
@@ -29,11 +40,13 @@ namespace IdleRPG.UI
         /// <summary>
         /// The point where a unit of <paramref name="selfWidth"/> stands next to <paramref name="targetCentre"/>
         /// on <paramref name="side"/> (+1 = to the target's right, -1 = left), bodies never overlapping.
+        /// All widths, the centre and <paramref name="contactPadding"/> are in the same world space.
         /// </summary>
-        public static Vector3 Beside(Vector3 targetCentre, float selfWidth, float targetWidth, float side)
+        public static Vector3 Beside(Vector3 targetCentre, float selfWidth, float targetWidth, float side,
+            float contactPadding)
         {
             float sign = Mathf.Abs(side) < 0.001f ? 1f : Mathf.Sign(side);
-            float gap = (Mathf.Max(0f, selfWidth) + Mathf.Max(0f, targetWidth)) * 0.5f + ContactPadding;
+            float gap = (Mathf.Max(0f, selfWidth) + Mathf.Max(0f, targetWidth)) * 0.5f + contactPadding;
 
             return new Vector3(targetCentre.x + sign * gap, targetCentre.y, targetCentre.z);
         }

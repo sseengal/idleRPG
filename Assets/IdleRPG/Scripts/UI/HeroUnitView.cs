@@ -60,8 +60,10 @@ namespace IdleRPG.UI
         public bool IsSliding => slideT >= 0f;
 
         /// <summary>
-        /// How wide this hero is DRAWN, in canvas units. Taken from the announced slot size, never from the live icon
+        /// How wide this hero is DRAWN, in WORLD units. Taken from the announced slot size, never from the live icon
         /// rect: a swing stretches that rect for its attack window, and a stretched body would sit a screen away.
+        /// The slot size is local, so <see cref="Transform.lossyScale"/> converts it into the same space as
+        /// <see cref="Transform.position"/> (and <see cref="BattleSpots.Beside"/>).
         /// </summary>
         public float BodyWidth
         {

@@ -69,8 +69,9 @@ namespace IdleRPG.UI
         private RectTransform BodyRect => spriteImage != null ? spriteImage.rectTransform : transform as RectTransform;
 
         /// <summary>
-        /// How wide this enemy is DRAWN, in canvas units. Taken from the announced slot size, never from the live
-        /// sprite rect: a swing stretches that rect for its attack window.
+        /// How wide this enemy is DRAWN, in WORLD units. Taken from the announced slot size, never from the live
+        /// sprite rect: a swing stretches that rect for its attack window. The slot size is local, so
+        /// <see cref="Transform.lossyScale"/> converts it into the same space as <see cref="Transform.position"/>.
         /// </summary>
         public float BodyWidth
         {

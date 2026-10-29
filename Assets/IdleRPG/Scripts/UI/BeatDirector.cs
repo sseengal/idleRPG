@@ -64,6 +64,10 @@ namespace IdleRPG.UI
                 return;
             }
 
+            // Body widths and RectTransform.position are world-space. The 18-unit design padding is not:
+            // on the scaled stage canvas it must be converted, or the attacker lands far outside the view.
+            float contactPadding = BattleSpots.PaddingFor(attackerBody);
+
             // Play the clip on the announce, exactly as before: the strike frame still lands on the hit.
             PlayClip(attackerSide, attackerIndex, clipSlot);
 
@@ -78,7 +82,7 @@ namespace IdleRPG.UI
 
             // The landing point: a covered hit lands on the GUARD, at a spot he will really occupy.
             if (!TryPlanLanding(targetSide, targetIndex, coveredAllyIndex, attackerBody.position,
-                    out Vector3 targetSpot, out float targetWidth))
+                    contactPadding, out Vector3 targetSpot, out float targetWidth))
             {
                 reservations.Clear();
                 return;
@@ -88,7 +92,8 @@ namespace IdleRPG.UI
             if (!reservations.TryGetValue(Key(attackerSide, attackerIndex), out Vector3 attackerSpot))
             {
                 float side = BattleSpots.AttackerSide(attackerBody.position, targetSpot);
-                attackerSpot = BattleSpots.Beside(targetSpot, WidthOf(attackerSide, attackerIndex), targetWidth, side);
+                attackerSpot = BattleSpots.Beside(targetSpot, WidthOf(attackerSide, attackerIndex), targetWidth,
+                    side, contactPadding);
             }
 
             RunTo(attackerSide, attackerIndex, attackerSpot, cover: false);
@@ -101,7 +106,7 @@ namespace IdleRPG.UI
         /// occupies. A plan may never contain a position no unit will stand on.
         /// </summary>
         private static bool TryPlanLanding(CombatantSide targetSide, int targetIndex, int coveredAllyIndex,
-            Vector3 attackerSpot, out Vector3 spot, out float width)
+            Vector3 attackerSpot, float contactPadding, out Vector3 spot, out float width)
         {
             // No cover: the blow lands on the target's own body.
             if (coveredAllyIndex < 0)
@@ -144,7 +149,7 @@ namespace IdleRPG.UI
             // Stand between the ally and the enemy that is coming - no board orientation needed.
             float side = BattleSpots.AttackerSide(attackerSpot, allyBody.position);
             spot = BattleSpots.Beside(allyBody.position, guard.BodyWidth,
-                WidthOf(CombatantSide.Party, coveredAllyIndex), side);
+                WidthOf(CombatantSide.Party, coveredAllyIndex), side, contactPadding);
             width = guard.BodyWidth;
 
             guard.RunTo(spot, cover: true);

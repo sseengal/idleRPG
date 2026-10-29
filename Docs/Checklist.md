@@ -38,6 +38,7 @@ re-checked for correct attribution, one line per wave, no mid-line renaming and 
 - [x] Authored viewport content moves into the stage in source order: backdrop, formation board, enemy stack, camp view.
 - [x] Damage numbers move into the stage; gold flight stays on `DamageCanvas` and converts its start point through `BattleStageSurface.TryStageToScreen`.
 - [x] Click bridge: viewport tap → texture pixels → stage raycast → bubble to the Button on the hit-area parent. Hero selection verified live.
+- [x] Lunge gap converted from design units to stage world units; hero and enemy contact points verified inside the stage bounds.
 - [x] Camp renders in the stage; header, ability strip, log and nav stay on the HUD. Management page hides the stage root.
 - [x] EditMode tests **29/29 pass**. Editor reading: 28 draw calls, 16 set-pass, 1,546 triangles (Phase 0: 25 / 15 / 907).
 - [ ] **manual owner play check** after the stage switch (battle, boss, camp, a hero move).
