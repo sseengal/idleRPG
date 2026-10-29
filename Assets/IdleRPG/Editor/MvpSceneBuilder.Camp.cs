@@ -17,6 +17,8 @@ namespace IdleRPG.EditorTools
     {
         private const float CampActorY = 0.55f;
         private const float CampFireY = 0.38f;
+        private const string CampChoicePrefabPath =
+            "Assets/IdleRPG/Prefabs/UI/Battle/CampChoiceCard.prefab";
 
         private static void BuildCampLayer(RectTransform battlePage, AbilityPanelUI abilityStrip,
             FormationBoardView board, EnemyStackView stack, ScreenController screens, GameObject hudRoot)
@@ -114,39 +116,43 @@ namespace IdleRPG.EditorTools
         }
 
         /// <summary>
-        /// One camp choice. The factory's own label is hidden because the cell carries a title, a value and a
-        /// note, each a fraction of the cell height so nothing overflows the band.
+        /// One camp choice. The prefab owns the button, title, value and note. This method places the card and
+        /// supplies the four different labels and tints; the card keeps every band as a fraction of its height.
         /// </summary>
         private static Button BuildCampChoice(Transform parent, int index, int total, string title, string sub,
             string note, Color tint, Color textColor, Color noteColor,
             out TextMeshProUGUI subLabel, out TextMeshProUGUI noteLabel)
         {
-            Button cell = UiFactory.Button("CampChoice" + index, parent, string.Empty, "ui_panel_light",
-                UiType.Role.Small, textColor, null);
-            UiFactory.Anchor(cell.GetComponent<RectTransform>(),
-                new Vector2(index / (float)total, 0f), new Vector2((index + 1) / (float)total, 1f),
-                UiSpace.Small, UiSpace.Tight, UiSpace.Small, UiSpace.Tight);
-            cell.targetGraphic.color = tint;
+            CampChoiceView prefab = AssetDatabase.LoadAssetAtPath<CampChoiceView>(CampChoicePrefabPath);
 
-            Transform placeholder = cell.transform.Find("Label");
-            if (placeholder != null)
+            if (prefab == null)
             {
-                placeholder.gameObject.SetActive(false);
+                Debug.LogError($"[MvpSceneBuilder] Missing camp choice prefab at {CampChoicePrefabPath}.");
+                subLabel = null;
+                noteLabel = null;
+                return null;
             }
 
-            TextMeshProUGUI titleLabel = UiFactory.Text("Title", cell.transform, title, UiType.Role.Small,
-                TextAlignmentOptions.Center, textColor);
-            UiFactory.Anchor(titleLabel.rectTransform, new Vector2(0.05f, 0.55f), new Vector2(0.95f, 0.95f));
+            CampChoiceView cell = PrefabUtility.InstantiatePrefab(prefab, parent) as CampChoiceView;
 
-            subLabel = UiFactory.Text("Sub", cell.transform, sub, UiType.Role.Micro,
-                TextAlignmentOptions.Center, textColor);
-            UiFactory.Anchor(subLabel.rectTransform, new Vector2(0.05f, 0.30f), new Vector2(0.95f, 0.55f));
+            if (cell == null)
+            {
+                Debug.LogError("[MvpSceneBuilder] Could not instantiate the camp choice prefab.");
+                subLabel = null;
+                noteLabel = null;
+                return null;
+            }
 
-            noteLabel = UiFactory.Text("Note", cell.transform, note, UiType.Role.Micro,
-                TextAlignmentOptions.Center, noteColor);
-            UiFactory.Anchor(noteLabel.rectTransform, new Vector2(0.05f, 0.05f), new Vector2(0.95f, 0.30f));
+            cell.name = "CampChoice" + index;
+            cell.Apply(title, sub, note, tint, textColor, noteColor);
 
-            return cell;
+            UiFactory.Anchor((RectTransform)cell.transform,
+                new Vector2(index / (float)total, 0f), new Vector2((index + 1) / (float)total, 1f),
+                UiSpace.Small, UiSpace.Tight, UiSpace.Small, UiSpace.Tight);
+
+            subLabel = cell.SubLabel;
+            noteLabel = cell.NoteLabel;
+            return cell.Button;
         }
     }
 }

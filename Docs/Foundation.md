@@ -1,6 +1,6 @@
 # Foundation — the locked architecture
 
-> **Status:** Phase 2C complete, 29 Oct 2026. Phase 1 owner-confirmed.
+> **Status:** Phase 2D complete, 29 Oct 2026. Phase 2 owner check pending.
 > **Scope:** the decisions that every later visual and feature change must follow.
 > **Parent:** `Architecture.md`. This page does not repeat balance numbers or screen measurements.
 
@@ -50,7 +50,7 @@ The cheaper route was rejected: UI-only arena effects cannot be clipped to the b
 |---|---|---|
 | 0 | Truth pass, URP 2D renderers, baseline | Look unchanged; build and checks pass |
 | 1 | Battle stage camera + RenderTexture | **Complete 28 Oct 2026** — battle page renders in the stage; effects stay inside it |
-| 2 | Prefab hybrid | **In progress** — enemy, hero and ability cells are prefabs; camp widgets next |
+| 2 | Prefab hybrid | **Done** — enemy, hero, ability and camp choice cards are prefabs |
 | 3 | Services + event hub | Run and camp flow testable without the HUD |
 | 4 | Data split + save migrations | Old saves load; content is data-only |
 | 5 | Tests and polish | PlayMode smoke, screenshots, performance, a11y, l10n |
@@ -101,3 +101,10 @@ The cheaper route was rejected: UI-only arena effects cannot be clipped to the b
 - `AbilityCellView` carries those references and builds the existing `AbilityPanelUI.Row` at scene build time. The panel still updates every value each frame.
 - `MvpSceneBuilder.BuildAbilityButton` instantiates the prefab, names it `Hero{index}` and sets the three equal-width anchors. The old hand-built cell code was removed.
 - Verified: three cells instantiate; all row references are non-null; a cast request reaches the fight and starts the cooldown.
+
+### 2D — camp choice card prefab
+
+- `Assets/IdleRPG/Prefabs/UI/Battle/CampChoiceCard.prefab` owns the button, title, value and note.
+- `CampChoiceView` applies the four different labels and tints, and exposes the button and the two live labels to `CampPanelUI`.
+- `MvpSceneBuilder.BuildCampChoice` instantiates the prefab, names it `CampChoice{index}` and sets the four equal-width anchors. The camp scene, campfire and actors stay in the builder.
+- Verified: four cards instantiate; every `CampPanelUI` button and label reference is non-null; a short-rest tap closes the camp and restores the ability strip.
