@@ -19,6 +19,9 @@ namespace IdleRPG.EditorTools
     /// </summary>
     public static partial class MvpSceneBuilder
     {
+        private const string EnemyUnitSlotPrefabPath =
+            "Assets/IdleRPG/Prefabs/UI/Battle/EnemyUnitSlot.prefab";
+
         // ------------------------------------------------------------------
         // Header
         // ------------------------------------------------------------------
@@ -341,34 +344,31 @@ namespace IdleRPG.EditorTools
             return image;
         }
 
-        /// <summary>One enemy slot: sprite, name, HP bar and the boss frame. Laid out by <see cref="EnemyStackView"/>.</summary>
+        /// <summary>
+        /// One enemy slot: the prefab owns the sprite, name, HP bar and boss frame. The stack
+        /// (<see cref="EnemyStackView"/>) owns the anchor, size and wave count at runtime.
+        /// </summary>
         private static EnemyUnitView BuildEnemySlot(Transform parent, int index)
         {
-            GameObject slot = UiFactory.Node("EnemySlot" + index, parent);
-            RectTransform slotRect = slot.GetComponent<RectTransform>();
-            UiFactory.Anchor(slotRect, new Vector2(0f, 1f), new Vector2(1f, 1f));
+            EnemyUnitView prefab = AssetDatabase.LoadAssetAtPath<EnemyUnitView>(EnemyUnitSlotPrefabPath);
 
-            Image icon = UiFactory.Icon("Icon", slot.transform, Color.white);
-            UiFactory.CenterOn(icon.rectTransform, new Vector2(0.5f, 0.60f), new Vector2(128f, 128f));
-            icon.enabled = false;
+            if (prefab == null)
+            {
+                Debug.LogError($"[MvpSceneBuilder] Missing enemy slot prefab at {EnemyUnitSlotPrefabPath}.");
+                return null;
+            }
 
-            TextMeshProUGUI nameLabel = UiFactory.Text("Name", slot.transform, "Enemy", UiType.Role.Small,
-                TextAlignmentOptions.Center, UiTheme.Text);
-            // Fixed size + Masking, NOT auto-size and NOT Ellipsis: the slot narrows as the enemy stack grows, and
-            // with NoWrap an auto-sized or ellipsized label whose floor still does not fit renders NOTHING at all -
-            // a blank name plate. Masking draws the name and clips it at the slot edge.
-            nameLabel.overflowMode = TextOverflowModes.Masking;
-            UiFactory.Anchor(nameLabel.rectTransform, new Vector2(0f, 0.14f), new Vector2(1f, 0.32f));
+            EnemyUnitView slot = PrefabUtility.InstantiatePrefab(prefab, parent) as EnemyUnitView;
 
-            // Hero-identical bar layout: the slot is 160px wide, so the bar takes nearly the whole of it - the value
-            // text needs the width at the type scale.
-            HpBarView hpBar = CreateHpBar(slot.transform, "HpBar");
-            UiFactory.Anchor(hpBar.GetComponent<RectTransform>(), new Vector2(0.02f, 0.02f), new Vector2(0.98f, 0.12f));
+            if (slot == null)
+            {
+                Debug.LogError("[MvpSceneBuilder] Could not instantiate the enemy slot prefab.");
+                return null;
+            }
 
-            EnemyUnitView view = slot.AddComponent<EnemyUnitView>();
-            view.ConfigureRuntime(index, icon, hpBar, nameLabel, slotRect, null);
-
-            return view;
+            slot.name = "EnemySlot" + index;
+            slot.gameObject.SetActive(false);
+            return slot;
         }
 
         /// <summary>

@@ -12,12 +12,12 @@
 
 | Field | Value |
 |---|---|
-| Current step | **Foundation Phase 1 complete 28 Oct 2026**: battle stage camera + RenderTexture, damage numbers inside the stage, formation input bridge. Manual owner play check pending. Next: Phase 2 prefab hybrid (`Foundation.md`). Open feature work: ability assignments in the save, boss moves. Then B9' shipping checklist -> **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
+| Current step | **Foundation Phase 2A complete 29 Oct 2026**: enemy slot is a prefab; builder instantiates it. Next: Phase 2B hero view prefab (`Foundation.md`). Open feature work: ability assignments in the save, boss moves. Then B9' shipping checklist -> **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money**, and **MVP = store-submittable** (§1p). The gate stands for NEW systems: abilities, gear and the roster swap shipped after it, so read it as "no zones / affixes / relics before the base is done" |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
-| Last completed | **Foundation Phase 1** - battle stage camera + RenderTexture, damage/gold layer split, formation tap bridge (2026-10-28) |
-| Next after this | You: one manual play check of battle, boss wave and camp after the stage switch. Then **Foundation Phase 2** prefab hybrid (hero, enemy, ability, camp choice/card). Then the B8' proof lap, B9' shipping checklist, B10 live store wiring, B10b store packet, B1a/B1b device passes. **Art/UI runs alongside (§1s / `Art-Pipeline.md` §17).** |
+| Last completed | **Foundation Phase 2A** - enemy slot prefab, builder instantiates it (2026-10-29) |
+| Next after this | **Phase 2B**: hero view prefab, then ability cell and camp choice/card. After Phase 2, the B8' proof lap, B9' shipping checklist, B10 live store wiring, B10b store packet, B1a/B1b device passes. **Art/UI runs alongside (§1s / `Art-Pipeline.md` §17).** |
 | MVP decisions (owner, 2026-09-27) | gate = **store-submittable**; **3 playable heroes** (a 4th needs the v1.1 roster UI); both stores at once; **art + audio = the final pass before submission**; no analytics SDK; full record + cuts in §1p |
 | Save schema | **v11** (`SaveData.cs:32`). v4 `runBestStage`; v5 one keyed `levels` list; v6 gear inventory; v7 ability assignment; v8 Archer -> Soldier roster swap; v9 Fireball renamed Shatter; v10 Charge renamed Holy Slash (id too); v11 Shield Wall renamed Guard. Additive migrations, no data loss (§1h / B35-B36, `Architecture.md` §4) |
 | Golden numbers | **VOID as a gate** until the full rebalance after feature complete (`Content.md` §10). `Run All Checks` fails those four lines by design; the baseline is not re-recorded now |
@@ -42,9 +42,17 @@ re-checked for correct attribution, one line per wave, no mid-line renaming and 
 - [x] Enemy stack re-lays out when the measured column height becomes valid, and re-reads the wave when camp re-enables it. First start and scene reload now place the first wave correctly.
 - [x] Camp renders in the stage; header, ability strip, log and nav stay on the HUD. Management page hides the stage root.
 - [x] EditMode tests **29/29 pass**. Editor reading: 28 draw calls, 16 set-pass, 1,546 triangles (Phase 0: 25 / 15 / 907).
-- [ ] **manual owner play check** after the stage switch (battle, boss, camp, a hero move).
+- [x] **manual owner play check** after the stage switch (battle, boss, camp, a hero move) - owner confirmed 29 Oct 2026.
 - [ ] low-end phone profile and rotation/resize smoke test.
 - [ ] stage-only effects (CRT, grain, flash) stay deferred to Phase 5.
+
+## 0b. Foundation Phase 2 — prefab hybrid  ·  **in progress**
+
+- [x] **2A enemy slot**: `EnemyUnitSlot.prefab` owns icon, name, HP bar and boss slot; builder instantiates 3 connected instances; old hand-built path removed.
+- [ ] **2B hero view**: prefab with icon, hit area, name, HP bar, CanvasGroup; `FormationBoardView` gets a serialized prefab reference.
+- [ ] **2C ability cell**: prefab for portrait, name, ability, clock and cooldown fill.
+- [ ] **2D camp choice/card**: prefab for the choice cells, then optionally the camp view.
+- [ ] **manual owner play check** after each prefab slice.
 
 ## 1d. Compounding upgrades (B3d)  ·  **built + measured 2026-09-25**
 

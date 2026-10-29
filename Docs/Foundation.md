@@ -1,6 +1,6 @@
 # Foundation — the locked architecture
 
-> **Status:** Phase 1 complete, 28 Oct 2026. Manual owner play check pending.
+> **Status:** Phase 2A complete, 29 Oct 2026. Phase 1 owner-confirmed.
 > **Scope:** the decisions that every later visual and feature change must follow.
 > **Parent:** `Architecture.md`. This page does not repeat balance numbers or screen measurements.
 
@@ -50,7 +50,7 @@ The cheaper route was rejected: UI-only arena effects cannot be clipped to the b
 |---|---|---|
 | 0 | Truth pass, URP 2D renderers, baseline | Look unchanged; build and checks pass |
 | 1 | Battle stage camera + RenderTexture | **Complete 28 Oct 2026** — battle page renders in the stage; effects stay inside it |
-| 2 | Prefab hybrid | Hero, enemy, ability and camp widgets editable without code |
+| 2 | Prefab hybrid | **In progress** — enemy slot prefab done; hero, ability and camp widgets next |
 | 3 | Services + event hub | Run and camp flow testable without the HUD |
 | 4 | Data split + save migrations | Old saves load; content is data-only |
 | 5 | Tests and polish | PlayMode smoke, screenshots, performance, a11y, l10n |
@@ -76,4 +76,14 @@ The cheaper route was rejected: UI-only arena effects cannot be clipped to the b
 - `ScreenController` hides the stage root while the management page is open.
 - Verified at 1080 × 1920: battle, boss wave and camp render in the stage; the header, ability strip, log and nav stay on the HUD. Formation hero selection works through the bridge. Damage numbers parent to `BattleStage`. EditMode tests 29/29 pass.
 - Performance reading (Editor, not a device): 28 draw calls, 16 set-pass calls, 1,546 triangles, against the Phase 0 baseline of 25 / 15 / 907.
-- Open: owner manual play check; low-end phone profile; rotation/resize smoke test; future stage effects (CRT etc.) still wait for the Phase 5 stage pass.
+- Open: low-end phone profile; rotation/resize smoke test; future stage effects (CRT etc.) still wait for the Phase 5 stage pass.
+
+## 8. Phase 2 record
+
+### 2A — enemy slot prefab
+
+- `Assets/IdleRPG/Prefabs/UI/Battle/EnemyUnitSlot.prefab` owns the enemy icon, name label, HP bar and boss slot.
+- The prefab carries the wired `EnemyUnitView` and `HpBarView` references; the scene builder no longer constructs that hierarchy by code.
+- `MvpSceneBuilder.BuildEnemySlot` instantiates three connected prefab instances under `EnemyStack`; it fails loudly if the prefab is missing.
+- `EnemyStackView` still owns the anchor, size, stagger and wave count, so prefab and layout code keep separate jobs.
+- Verified: two-enemy wave renders with correct stack positions; prefab references survive scene save and play.
