@@ -23,6 +23,8 @@ namespace IdleRPG.EditorTools
             "Assets/IdleRPG/Prefabs/UI/Battle/EnemyUnitSlot.prefab";
         private const string HeroUnitSlotPrefabPath =
             "Assets/IdleRPG/Prefabs/UI/Battle/HeroUnitSlot.prefab";
+        private const string AbilityCellPrefabPath =
+            "Assets/IdleRPG/Prefabs/UI/Battle/AbilityCell.prefab";
 
         // ------------------------------------------------------------------
         // Header
@@ -280,57 +282,38 @@ namespace IdleRPG.EditorTools
         }
 
         /// <summary>
-        /// One hero's button: its picture on the left, its name and the ability it wears on the right, the cast
-        /// clock under them and a cooldown bar along the bottom. The whole cell is the button, so the tap target is
-        /// the full width instead of a small CAPTION-sized box.
+        /// One hero's ability cell: the prefab owns the portrait, name, ability, clock and cooldown bar. This
+        /// method only places the cell and returns the runtime row the ability panel drives.
         ///
-        /// Every band is a FRACTION of the cell, the same rule the old column used: the strip's height comes from a
-        /// constant, and fractions cannot overflow it whatever that constant becomes.
+        /// The cell is the button, so the tap target is the full width instead of a small CAPTION-sized box.
+        /// Every band is a FRACTION of the cell, so the strip's height cannot make the contents overflow.
         /// </summary>
         private static AbilityPanelUI.Row BuildAbilityButton(Transform parent, int index, int total)
         {
-            // The factory's own label stays unused - the cell carries three of its own.
-            Button cell = UiFactory.Button("Hero" + index, parent, string.Empty, "ui_button", UiType.Role.Small,
-                UiTheme.Text, () => { });
-            UiFactory.Anchor(cell.GetComponent<RectTransform>(),
+            AbilityCellView prefab = AssetDatabase.LoadAssetAtPath<AbilityCellView>(AbilityCellPrefabPath);
+
+            if (prefab == null)
+            {
+                Debug.LogError($"[MvpSceneBuilder] Missing ability cell prefab at {AbilityCellPrefabPath}.");
+                return null;
+            }
+
+            AbilityCellView cell = PrefabUtility.InstantiatePrefab(prefab, parent) as AbilityCellView;
+
+            if (cell == null)
+            {
+                Debug.LogError("[MvpSceneBuilder] Could not instantiate the ability cell prefab.");
+                return null;
+            }
+
+            GameObject instance = cell.gameObject;
+            instance.name = "Hero" + index;
+
+            UiFactory.Anchor((RectTransform)instance.transform,
                 new Vector2(index / (float)total, 0f), new Vector2((index + 1) / (float)total, 1f),
                 UiSpace.Small, UiSpace.Tight, UiSpace.Small, UiSpace.Tight);
 
-            Transform placeholder = cell.transform.Find("Label");
-            if (placeholder != null)
-            {
-                placeholder.gameObject.SetActive(false);
-            }
-
-            // Left sliver: the hero itself. preserveAspect keeps the sprite correct inside a non-square cell.
-            Image portrait = UiFactory.Icon("Portrait", cell.transform, Color.white);
-            UiFactory.Anchor(portrait.rectTransform, new Vector2(0.02f, 0.14f), new Vector2(0.28f, 0.95f));
-
-            TextMeshProUGUI name = UiFactory.Text("Name", cell.transform, string.Empty, UiType.Role.Micro,
-                TextAlignmentOptions.MidlineLeft, UiTheme.TextDim);
-            UiFactory.Anchor(name.rectTransform, new Vector2(0.30f, 0.70f), new Vector2(0.98f, 0.94f));
-
-            TextMeshProUGUI ability = UiFactory.Text("Ability", cell.transform, string.Empty, UiType.Role.Small,
-                TextAlignmentOptions.MidlineLeft, UiTheme.Text);
-            UiFactory.Anchor(ability.rectTransform, new Vector2(0.30f, 0.40f), new Vector2(0.98f, 0.70f));
-
-            TextMeshProUGUI clock = UiFactory.Text("Clock", cell.transform, string.Empty, UiType.Role.Small,
-                TextAlignmentOptions.MidlineLeft, UiTheme.Text);
-            UiFactory.Anchor(clock.rectTransform, new Vector2(0.30f, 0.12f), new Vector2(0.98f, 0.40f));
-
-            Image clockFill = CreateFilledImage("ClockFill", cell.transform, new Color(0.30f, 0.68f, 0.42f, 1f));
-            UiFactory.Anchor(clockFill.rectTransform, new Vector2(0.02f, 0f), new Vector2(0.98f, 0.08f));
-
-            return new AbilityPanelUI.Row
-            {
-                heroIndex = index,
-                portrait = portrait,
-                nameLabel = name,
-                abilityLabel = ability,
-                clockLabel = clock,
-                clockFill = clockFill,
-                castButton = cell
-            };
+            return cell.ToRow(index);
         }
 
         /// <summary>

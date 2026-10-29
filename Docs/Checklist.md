@@ -12,12 +12,12 @@
 
 | Field | Value |
 |---|---|
-| Current step | **Foundation Phase 2B complete 29 Oct 2026**: hero view is a prefab; formation board instantiates it. Next: Phase 2C ability cell prefab (`Foundation.md`). Open feature work: ability assignments in the save, boss moves. Then B9' shipping checklist -> **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
+| Current step | **Foundation Phase 2C complete 29 Oct 2026**: ability cells are prefabs. Next: Phase 2D camp choice/card prefab (`Foundation.md`). Open feature work: ability assignments in the save, boss moves. Then B9' shipping checklist -> **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money**, and **MVP = store-submittable** (§1p). The gate stands for NEW systems: abilities, gear and the roster swap shipped after it, so read it as "no zones / affixes / relics before the base is done" |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
-| Last completed | **Foundation Phase 2B** - hero view prefab, board instantiates it (2026-10-29) |
-| Next after this | **Phase 2C**: ability cell prefab, then camp choice/card. After Phase 2, the B8' proof lap, B9' shipping checklist, B10 live store wiring, B10b store packet, B1a/B1b device passes. **Art/UI runs alongside (§1s / `Art-Pipeline.md` §17).** |
+| Last completed | **Foundation Phase 2C** - ability cell prefab, builder instantiates it (2026-10-29) |
+| Next after this | **Phase 2D**: camp choice/card prefab. After Phase 2, the B8' proof lap, B9' shipping checklist, B10 live store wiring, B10b store packet, B1a/B1b device passes. **Art/UI runs alongside (§1s / `Art-Pipeline.md` §17).** |
 | MVP decisions (owner, 2026-09-27) | gate = **store-submittable**; **3 playable heroes** (a 4th needs the v1.1 roster UI); both stores at once; **art + audio = the final pass before submission**; no analytics SDK; full record + cuts in §1p |
 | Save schema | **v11** (`SaveData.cs:32`). v4 `runBestStage`; v5 one keyed `levels` list; v6 gear inventory; v7 ability assignment; v8 Archer -> Soldier roster swap; v9 Fireball renamed Shatter; v10 Charge renamed Holy Slash (id too); v11 Shield Wall renamed Guard. Additive migrations, no data loss (§1h / B35-B36, `Architecture.md` §4) |
 | Golden numbers | **VOID as a gate** until the full rebalance after feature complete (`Content.md` §10). `Run All Checks` fails those four lines by design; the baseline is not re-recorded now |
@@ -50,7 +50,7 @@ re-checked for correct attribution, one line per wave, no mid-line renaming and 
 
 - [x] **2A enemy slot**: `EnemyUnitSlot.prefab` owns icon, name, HP bar and boss slot; builder instantiates 3 connected instances; old hand-built path removed.
 - [x] **2B hero view**: `HeroUnitSlot.prefab` owns icon, hit area, name, HP bar, CanvasGroup and Button; board instantiates it and binds taps.
-- [ ] **2C ability cell**: prefab for portrait, name, ability, clock and cooldown fill.
+- [x] **2C ability cell**: `AbilityCell.prefab` owns portrait, name, ability, clock and cooldown fill; builder instantiates it.
 - [ ] **2D camp choice/card**: prefab for the choice cells, then optionally the camp view.
 - [ ] **manual owner play check** after each prefab slice.
 

@@ -1,9 +1,9 @@
 # Idle RPG — Architecture & Scale-Up
 
 > 2D mobile idle RPG. Unity 6000.6.0f1, URP 2D (`Mobile_Renderer2D` / `PC_Renderer2D`), portrait, iOS + Android.
-> **Status 29 Oct 2026:** Foundation Phase 2B complete. URP 2D is the only pipeline, the battle stage renders
-> through `BattleStageCamera` into `BattleStageRT`, and the enemy and hero slots are prefabs. Abilities, gear
-> and the roster swap are built (save v11).
+> **Status 29 Oct 2026:** Foundation Phase 2C complete. URP 2D is the only pipeline, the battle stage renders
+> through `BattleStageCamera` into `BattleStageRT`, and the enemy, hero and ability cells are prefabs. Abilities,
+> gear and the roster swap are built (save v11).
 > This file is *how the game is built and how it scales*. Folder index: `README.md`.
 
 ---
@@ -478,8 +478,8 @@ Verification per step: clean recompile → `Run All Checks (regression)` PASS �
 |---|---|
 | Docs | 39 pages. Index `README.md`; status `Checklist.md`; backlog `Roadmap.md`; cleanup gate `Cleanup-Checks.md` |
 | Code | 254 C# files, 4 assemblies (`Sim` has zero Unity references) |
-| Last change | Foundation Phase 2B: hero view prefab, 29 Oct 2026 (save v11) |
-| Next | Phase 2C: ability cell prefab; see `Foundation.md` |
+| Last change | Foundation Phase 2C: ability cell prefab, 29 Oct 2026 (save v11) |
+| Next | Phase 2D: camp choice/card prefab; see `Foundation.md` |
 | Per-step contract | owner doc section -> one change -> recompile -> acceptance test -> docs+status -> manual test handoff |
 
 Handoff rules for the next steps: write the doc part for a system, then implement **one** small code change,

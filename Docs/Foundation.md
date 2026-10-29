@@ -1,6 +1,6 @@
 # Foundation — the locked architecture
 
-> **Status:** Phase 2B complete, 29 Oct 2026. Phase 1 owner-confirmed.
+> **Status:** Phase 2C complete, 29 Oct 2026. Phase 1 owner-confirmed.
 > **Scope:** the decisions that every later visual and feature change must follow.
 > **Parent:** `Architecture.md`. This page does not repeat balance numbers or screen measurements.
 
@@ -50,7 +50,7 @@ The cheaper route was rejected: UI-only arena effects cannot be clipped to the b
 |---|---|---|
 | 0 | Truth pass, URP 2D renderers, baseline | Look unchanged; build and checks pass |
 | 1 | Battle stage camera + RenderTexture | **Complete 28 Oct 2026** — battle page renders in the stage; effects stay inside it |
-| 2 | Prefab hybrid | **In progress** — enemy and hero slots are prefabs; ability and camp widgets next |
+| 2 | Prefab hybrid | **In progress** — enemy, hero and ability cells are prefabs; camp widgets next |
 | 3 | Services + event hub | Run and camp flow testable without the HUD |
 | 4 | Data split + save migrations | Old saves load; content is data-only |
 | 5 | Tests and polish | PlayMode smoke, screenshots, performance, a11y, l10n |
@@ -94,3 +94,10 @@ The cheaper route was rejected: UI-only arena effects cannot be clipped to the b
 - The root carries the `Button`; `FormationBoardView` binds its tap at runtime and still owns pads, selection and board layout.
 - `FormationBoardView` now has a serialized `heroPrefab`; the scene builder wires it. The old hand-built hero hierarchy and `BuildHpBar` were removed.
 - Verified: three heroes instantiate and render; tap selection changes `selectedHero`; lunge contact remains inside stage bounds.
+
+### 2C — ability cell prefab
+
+- `Assets/IdleRPG/Prefabs/UI/Battle/AbilityCell.prefab` owns the portrait, name, ability name, clock and cooldown fill.
+- `AbilityCellView` carries those references and builds the existing `AbilityPanelUI.Row` at scene build time. The panel still updates every value each frame.
+- `MvpSceneBuilder.BuildAbilityButton` instantiates the prefab, names it `Hero{index}` and sets the three equal-width anchors. The old hand-built cell code was removed.
+- Verified: three cells instantiate; all row references are non-null; a cast request reaches the fight and starts the cooldown.
