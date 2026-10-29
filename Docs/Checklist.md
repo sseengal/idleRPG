@@ -12,7 +12,7 @@
 
 | Field | Value |
 |---|---|
-| Current step | **Foundation Phase 2D complete 29 Oct 2026**: camp choice cards are prefabs. Phase 2 owner check pending. Then B8' proof lap and B9' shipping checklist; open feature work: ability assignments in the save, boss moves. Then **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
+| Current step | **Foundation Phase 2D built 29 Oct 2026**: camp choice cards are prefabs. Phase 2 owner check pending. Then B8' proof lap and B9' shipping checklist; open feature work: ability assignments in the save, boss moves. Then **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money**, and **MVP = store-submittable** (§1p). The gate stands for NEW systems: abilities, gear and the roster swap shipped after it, so read it as "no zones / affixes / relics before the base is done" |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
@@ -52,6 +52,7 @@ re-checked for correct attribution, one line per wave, no mid-line renaming and 
 - [x] **2B hero view**: `HeroUnitSlot.prefab` owns icon, hit area, name, HP bar, CanvasGroup and Button; board instantiates it and binds taps.
 - [x] **2C ability cell**: `AbilityCell.prefab` owns portrait, name, ability, clock and cooldown fill; builder instantiates it.
 - [x] **2D camp choice/card**: `CampChoiceCard.prefab` owns button, title, value and note; builder instantiates four cards.
+- [x] Project check 29 Oct 2026: `Run All Checks (regression)` **PASS**; 0 console errors.
 - [ ] **manual owner play check** after each prefab slice.
 
 ## 1d. Compounding upgrades (B3d)  ·  **built + measured 2026-09-25**
@@ -1183,11 +1184,11 @@ and verified blind; **part 2** needs a real phone and the missing pieces only th
    timestamps. The diary survives its own failures (writing can never crash the game).
 5. **Android back button** - on a real Android phone only: one press **saves the game, then leaves**. (No effect on
    macOS/dev; verified by code review - a phone test is in the list below.)
-6. **Written save-compat policy** - the promise that saves never break: save format stays **v5**, additive keys only
-   (an old save must load and keep every number), any future format bump requires a migration + the save-drift test
-   in the same change, and the keyed strings in `SaveData.SaveKeys` are frozen once shipped (rename = throwing away
-   a player's progress). This is already the standing rule (see §0 / the drift suite) - it is now written down as
-   part of the release gate.
+6. **Written save-compat policy** - the promise that saves never break: the current save format is **v11**, additive
+   keys only (an old save must load and keep every number), any future format bump requires a migration + the
+   save-drift test in the same change, and the keyed strings in `SaveData.SaveKeys` are frozen once shipped (rename =
+   throwing away a player's progress). This is already the standing rule (see §0 / the drift suite) - it is now
+   written down as part of the release gate.
 
 ### Part 2 — what only you can do (owner)
 - [ ] Install the **Android** and **iOS** build modules in **Unity Hub** on this machine (the Go/No-Go console prints

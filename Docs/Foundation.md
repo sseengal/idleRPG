@@ -1,6 +1,6 @@
 # Foundation — the locked architecture
 
-> **Status:** Phase 2D complete, 29 Oct 2026. Phase 2 owner check pending.
+> **Status:** Phase 2D built, 29 Oct 2026. Phase 2 owner play check pending.
 > **Scope:** the decisions that every later visual and feature change must follow.
 > **Parent:** `Architecture.md`. This page does not repeat balance numbers or screen measurements.
 
@@ -50,7 +50,7 @@ The cheaper route was rejected: UI-only arena effects cannot be clipped to the b
 |---|---|---|
 | 0 | Truth pass, URP 2D renderers, baseline | Look unchanged; build and checks pass |
 | 1 | Battle stage camera + RenderTexture | **Complete 28 Oct 2026** — battle page renders in the stage; effects stay inside it |
-| 2 | Prefab hybrid | **Done** — enemy, hero, ability and camp choice cards are prefabs |
+| 2 | Prefab hybrid | **Built 29 Oct 2026** — enemy, hero, ability and camp choice cards are prefabs; owner play check pending |
 | 3 | Services + event hub | Run and camp flow testable without the HUD |
 | 4 | Data split + save migrations | Old saves load; content is data-only |
 | 5 | Tests and polish | PlayMode smoke, screenshots, performance, a11y, l10n |
