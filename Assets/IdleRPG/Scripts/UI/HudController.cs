@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using IdleRPG.Core;
 using IdleRPG.Data;
@@ -29,7 +30,20 @@ namespace IdleRPG.UI
         [SerializeField] private FormationBoardView formationBoard;
         [Tooltip("The enemy side: up to 3 stacked slots, each with its own HP bar.")]
         [SerializeField] private EnemyStackView enemyStack;
+
+        [Tooltip("The ability band. Hidden while a story scene owns the battle page.")]
+        [SerializeField] private AbilityPanelUI abilityStrip;
+
+        [Tooltip("The battle log. Its box grows while a story scene plays.")]
+        [SerializeField] private CombatLogUI combatLog;
         [SerializeField] private FloatingDamageTextPool damageTextPool;
+
+        [Header("Story")]
+        [Tooltip("Dev only: the scene the P hotkey replays. The schedule drives real playback later.")]
+        [SerializeField] private StorySceneDef debugStoryScene;
+
+        private StoryPlayer storyPlayer;
+        private BattlePageFocus battleFocus;
 
         public GameManager GameManager => gameManager;
 
@@ -43,6 +57,35 @@ namespace IdleRPG.UI
 
         /// <summary>The battle board: one view per hero (which can move between pads) and six pads to move to.</summary>
         public FormationBoardView FormationBoard => formationBoard;
+
+        /// <summary>The story projector. Null when the scene has no battle stage (debug scenes).</summary>
+        public StoryPlayer Story => storyPlayer;
+
+        /// <summary>The ability band (hidden while a scene plays).</summary>
+        public AbilityPanelUI AbilityStrip => abilityStrip;
+
+        /// <summary>The page focus: log grows, ability band fades, while a scene plays.</summary>
+        public BattlePageFocus BattleFocus => battleFocus;
+
+        /// <summary>Shows any story line that is still typing. Called when a scene ends or is skipped.</summary>
+        public void CompleteStoryText()
+        {
+            if (combatLog != null)
+            {
+                combatLog.CompleteTyping();
+            }
+        }
+
+        /// <summary>Dev only: replay the wired debug scene over the live fight.</summary>
+        public bool DebugPlayStory()
+        {
+            if (storyPlayer == null || debugStoryScene == null)
+            {
+                return false;
+            }
+
+            return storyPlayer.Play(debugStoryScene);
+        }
 
         private void Awake()
         {
@@ -124,6 +167,39 @@ namespace IdleRPG.UI
                     : modalRoot;
 
             runner.SetSpace(space);
+
+            // Story projector: one scene at a time, drawn inside the battle viewport. It is created here for the
+            // same reason as the cutscene projector - a future scene needs no scene wiring. The debug asset is
+            // wired on this component so the P hotkey can replay it without loading from Resources.
+            RectTransform stageRoot = BattleStageSurface.Instance != null ? BattleStageSurface.Instance.ContentRoot : null;
+
+            if (stageRoot != null)
+            {
+                // Page focus first: the story player drives it, so it must exist before the player binds.
+                if (combatLog != null && abilityStrip != null)
+                {
+                    battleFocus = gameObject.AddComponent<BattlePageFocus>();
+                    battleFocus.Setup(combatLog, abilityStrip);
+                }
+
+                storyPlayer = gameObject.AddComponent<StoryPlayer>();
+
+                if (storyPlayer.Setup(gameManager, stageRoot, modalRoot != null ? modalRoot : vfxRoot, battleFocus))
+                {
+                    // Bind after Setup: a scene requested during GameManager.Start is held until this line.
+                    gameManager.Story?.SetPlayer(PlayStory);
+                }
+                else
+                {
+                    storyPlayer = null;
+                }
+            }
+        }
+
+        /// <summary>Shows one scene. The service calls this and resumes the wave through the callback.</summary>
+        private bool PlayStory(StorySceneDef scene, Action onFinished)
+        {
+            return storyPlayer != null && storyPlayer.Play(scene, onFinished);
         }
 
         private void OnDestroy()

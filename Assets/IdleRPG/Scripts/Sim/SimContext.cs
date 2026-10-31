@@ -35,7 +35,7 @@ namespace IdleRPG.Sim
         public SimCaps Caps { get; private set; }
 
         /// <summary>True when per-hit/cosmetic events should be suppressed (offline, fast-forward).</summary>
-        public bool IsSilent => Mode.IsSilent();
+        public bool IsSilent => Mode != SimMode.Live;
 
         /// <summary>Replaces the rules in place (a balance change while an encounter is idle).</summary>
         public void ApplyRules(SimRules rules)

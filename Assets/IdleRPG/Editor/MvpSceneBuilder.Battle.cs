@@ -418,8 +418,8 @@ namespace IdleRPG.EditorTools
         LogScrollDragRelay dragRelay = scroll.gameObject.AddComponent<LogScrollDragRelay>();
         dragRelay.Bind(ui);
 
-            // The whole pool copies this template, so the font and the sentence size land everywhere.
-            TextMeshProUGUI template = UiFactory.Text("LineTemplate", content, "line", UiType.Role.Sentence,
+            // The whole pool copies this template, so the font and the dialogue size land everywhere.
+            TextMeshProUGUI template = UiFactory.Text("LineTemplate", content, "line", UiType.Role.Dialogue,
                 TextAlignmentOptions.MidlineLeft, UiTheme.Text);
             LayoutElement element = template.gameObject.AddComponent<LayoutElement>();
             element.minHeight = UiTheme.LogLineHeight;
@@ -433,7 +433,9 @@ namespace IdleRPG.EditorTools
             // Feed tuning (one line per action; the list is a 100-line scrollback window).
             SceneWiringUtility.SetField(ui, "maxLines", 100);
             SceneWiringUtility.SetField(ui, "lineHeight", UiTheme.LogLineHeight);
-            SceneWiringUtility.SetField(ui, "lineSpacing", 2);
+            SceneWiringUtility.SetField(ui, "lineSpacing", 4);
+            SceneWiringUtility.SetField(ui, "typewriter", true);
+            SceneWiringUtility.SetField(ui, "typewriterCharsPerSecond", 45f);
             SceneWiringUtility.SetField(ui, "heroHitColor", UiTheme.Text);
             SceneWiringUtility.SetField(ui, "criticalColor", UiTheme.AccentLight);
             SceneWiringUtility.SetField(ui, "goldColor", UiTheme.AccentLight);

@@ -56,6 +56,28 @@ namespace IdleRPG.Tests
         }
 
         [Test]
+        public void Say_KeepsSpeakerApartFromTheLine()
+        {
+            BattleLog.Say("Knight", "Weapons ready!");
+
+            Assert.AreEqual(1, BattleLog.Entries.Count);
+            Assert.AreEqual("Knight", BattleLog.Entries[0].Speaker);
+            Assert.AreEqual("Weapons ready!", BattleLog.Entries[0].Text);
+            Assert.AreEqual(BattleLogKind.Dialogue, BattleLog.Entries[0].Kind);
+            Assert.AreEqual("Knight: Weapons ready!", BattleLog.Entries[0].ToString());
+        }
+
+        [Test]
+        public void Say_WithoutSpeaker_StoresTheLineAlone()
+        {
+            BattleLog.Say(null, "The forest is quiet.");
+
+            Assert.AreEqual(1, BattleLog.Entries.Count);
+            Assert.IsTrue(string.IsNullOrEmpty(BattleLog.Entries[0].Speaker));
+            Assert.AreEqual("The forest is quiet.", BattleLog.Entries[0].Text);
+        }
+
+        [Test]
         public void Append_DropsTheOldest_WhenTheHistoryIsFull()
         {
             int extra = 5;

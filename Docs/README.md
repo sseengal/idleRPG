@@ -2,7 +2,7 @@
 
 > **Everything that describes this game lives here.** One folder, one source of truth per topic.
 > Root `README.md` is the quick start (clone → open → play); everything deeper is in this folder.
-> Last restructured: Step 11e (2026-09-21); Art-Pipeline.md added 2026-09-26; Launch-Plan.md added 2026-10-11; Character-Catalog.md, Stage-Ladder.md and Ability-Map.md added 2026-10-11; UI-Layout.md added 2026-10-14; Combat-Sequencing.md added 2026-10-24; doc consolidation pass 2026-10-24 (one current page per topic); Foundation.md added 2026-10-28.
+> Last restructured: Step 11e (2026-09-21); Art-Pipeline.md added 2026-09-26; Launch-Plan.md added 2026-10-11; Character-Catalog.md, Stage-Ladder.md and Ability-Map.md added 2026-10-11; UI-Layout.md added 2026-10-14; Combat-Sequencing.md added 2026-10-24; doc consolidation pass 2026-10-24 (one current page per topic); Foundation.md added 2026-10-28; Story canon + node scripts + scene injection system added 2026-10-29; Battle-Log.md added 2026-10-31.
 
 ---
 
@@ -14,6 +14,10 @@ decision was reached. A replaced page must carry a status line at the top and po
 | Topic | Current page | Kept as the record |
 |---|---|---|
 | Fight order, strip choice, timings, enemy cast timing | **`Combat-Sequencing.md`** | `Combat-Presentation.md` (23 Oct research + 24 Oct build log) |
+| Story premise, cast, artifact rules, video split | **`Story-Canon.md`** | — |
+| Node scripts: beats and words | **`Story-Nodes.md`** | — |
+| Story scene injection: cues, wave rules, queue, skip | **`Story-Scenes.md`** | — (old one-node plan replaced 29 Oct 2026) |
+| Battle log: store, view, colours, typewriter, layout | **`Battle-Log.md`** | — |
 | Ability status: what works, what is open | **`Ability-Progress.md`** | — |
 | Ability design decisions | **`Ability-Plan.md`** (decisions) | built behaviour lives in `Combat-Sequencing.md` |
 | Which hero or enemy owns which ability | **`Ability-Map.md`** | — |
@@ -28,6 +32,10 @@ the code wins and the page is fixed the same day.
 | Question | Document |
 |---|---|
 | What is this game now — endless, or a story? | **`Game-Vision.md`** (canon: story-led mini campaign, automatic combat, restart on death) |
+| What is the story premise, cast and artifact rules? | **`Story-Canon.md`** (canon: the Second Dawn, Greenwake, video vs in-game split) |
+| What happens in each node, and what are the exact words? | **`Story-Nodes.md`** (node 1 script, text budget, 3-step add-a-scene test) |
+| How is a story scene injected before or after a fight? | **`Story-Scenes.md`** (system: cues, wave rules, random, priority, queue, skip, resume) |
+| How does the battle log store, colour and type text? | **`Battle-Log.md`** (store, view, 48 VT323, gold names, typewriter, wrapping) |
 | How does a fight reach the screen, and how do abilities work? | **`Combat-Sequencing.md`** (the current page: lane, art-to-time, casts, enemy timing) |
 | What was the original combat research and the build log? | `Combat-Presentation.md` (23-24 Oct 2026 record; current behaviour is in `Combat-Sequencing.md`) |
 | Where do abilities stand, and what is still open? | **`Ability-Progress.md`** (checked against code 24 Oct 2026) |
@@ -46,7 +54,7 @@ the code wins and the page is fixed the same day.
 | Rates, offline payouts, currencies, time-based monetisation | `Idle-Economy.md` |
 | Monetisation plan: sources, sinks, IAP mock, guards | `Monetisation.md` |
 | Levelling, prestige, tracks, roster | `Progression.md` |
-| Screens, navigation, log contract, accessibility | `UI-UX.md` |
+| Screens, navigation, type scale, accessibility | `UI-UX.md` (log contract: `Battle-Log.md`) |
 | Containers, the spacing ladder, mobile scaling | **`UI-Layout.md`** |
 | Art pipeline: HD-2D look, asset volume, tooling, perf budgets (G11/G12) | `Art-Pipeline.md` |
 
@@ -78,6 +86,10 @@ Docs/
   README.md            <- this index
   -- current --
   Game-Vision.md       <- CANON: story-led campaign, automatic combat, restart on death
+  Story-Canon.md       <- CANON: the Second Dawn, cast, Greenwake, video vs in-game
+  Story-Nodes.md       <- node scripts: beats, words, text budget
+  Story-Scenes.md      <- how a scene is injected, timed, skipped, resumed
+  Battle-Log.md        <- log store, view, colours, typewriter, wrapping
   Camp.md              <- the wave interlude: Short/Long Rest, Train, token, save, risks
   Checklist.md         <- master status: what is done, what is left
   Cleanup-Checks.md    <- the before/after gate for consolidation (no behaviour change)
@@ -94,7 +106,7 @@ Docs/
   Progression.md       <- currencies, tracks, prestige, roster
   Idle-Economy.md      <- rates, offline payouts
   Monetisation.md      <- sources, sinks, IAP mock, guards
-  UI-UX.md             <- screens, navigation, battle-log contract
+  UI-UX.md             <- screens, navigation, type scale (log contract: Battle-Log.md)
   UI-Layout.md         <- containers, the spacing ladder, mobile scaling
   Art-Pipeline.md      <- HD-2D look, asset volume, perf budgets
   Audio-Plan.md        <- cues, music, licences, the audio build order

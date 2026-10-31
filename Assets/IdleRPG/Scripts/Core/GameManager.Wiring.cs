@@ -163,7 +163,12 @@ namespace IdleRPG.Core
             // wave gate is armed for the first checkpoint.
             EnsureCampStateLoaded();
             Camp = new CampService(this, monetization);
-            combatManager.SetWaveGate(Camp.ShouldHold);
+
+            // Story scenes share the same seam. Story is asked first; if it holds, the camp is not opened for
+            // that wave. The two never target the same wave today, and the order is fixed here.
+            Story = new StoryService(this, storySchedule);
+            combatManager.SetWaveGate((stage, wave) =>
+                Story.ShouldHold(stage, wave) || Camp.ShouldHold(stage, wave));
 
             // Ability-Plan: the fight asks the ability service who is wearing what, by party index. Set BEFORE the
             // party is built below, so resuming a save arms the equipped abilities immediately.

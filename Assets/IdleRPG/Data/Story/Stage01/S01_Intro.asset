@@ -1,0 +1,256 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bdd8c3cd0f6d5471e9a5970cd3765a25, type: 3}
+  m_Name: S01_Intro
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.StorySceneDef
+  id: s01_intro
+  pauseBattle: 1
+  skippable: 1
+  hardCapSeconds: 54
+  actors:
+  - id: knight
+    displayName: Knight
+    art: {fileID: 11400000, guid: 427020df9c6764ad1b4b59611c1c602e, type: 2}
+    facesLeft: 0
+    scale: 1
+  - id: mage
+    displayName: Mage
+    art: {fileID: 11400000, guid: f9830d3fedb0c430198e7727758aee9b, type: 2}
+    facesLeft: 0
+    scale: 1
+  - id: soldier
+    displayName: Soldier
+    art: {fileID: 11400000, guid: fb0452c54a0e649af8eb7f52aedd3ea0, type: 2}
+    facesLeft: 0
+    scale: 1
+  - id: slime
+    displayName: Slime
+    art: {fileID: 11400000, guid: 37502ee7c33104a7482f7a988123a521, type: 2}
+    facesLeft: 1
+    scale: 1
+  beats:
+  - time: 0.5
+    verb: 0
+    actorId: knight
+    spot: {x: 0.2, y: 0.4}
+    duration: 1.2
+    text: 
+    bubble: 0
+    clip: 
+  - time: 1
+    verb: 0
+    actorId: mage
+    spot: {x: 0.31, y: 0.33}
+    duration: 1.2
+    text: 
+    bubble: 0
+    clip: 
+  - time: 1.5
+    verb: 0
+    actorId: soldier
+    spot: {x: 0.42, y: 0.27}
+    duration: 1.2
+    text: 
+    bubble: 0
+    clip: 
+  - time: 4.2
+    verb: 3
+    actorId: soldier
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: 
+    bubble: 3
+    clip: 
+  - time: 4.8
+    verb: 4
+    actorId: soldier
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: Something's wrong here. There's not a single bird, not even an insect.
+    bubble: 0
+    clip: 
+  - time: 9
+    verb: 3
+    actorId: knight
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: 
+    bubble: 2
+    clip: 
+  - time: 9.6
+    verb: 4
+    actorId: knight
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: Stay alert. I don't like how these trees seem to be watching us.
+    bubble: 0
+    clip: 
+  - time: 13.8
+    verb: 3
+    actorId: mage
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: 
+    bubble: 1
+    clip: 
+  - time: 14.4
+    verb: 4
+    actorId: mage
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: That's because they are... This forest is alive.
+    bubble: 0
+    clip: 
+  - time: 18
+    verb: 3
+    actorId: soldier
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: 
+    bubble: 0
+    clip: 
+  - time: 18.6
+    verb: 4
+    actorId: soldier
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: You could've mentioned that before we walked in!
+    bubble: 0
+    clip: 
+  - time: 22
+    verb: 3
+    actorId: mage
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: 
+    bubble: 2
+    clip: 
+  - time: 22.5
+    verb: 4
+    actorId: mage
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: Quiet. Something's moving.
+    bubble: 0
+    clip: 
+  - time: 25.3
+    verb: 1
+    actorId: knight
+    spot: {x: 0.24, y: 0.4}
+    duration: 1
+    text: 
+    bubble: 0
+    clip: 
+  - time: 26.5
+    verb: 1
+    actorId: knight
+    spot: {x: 0.2, y: 0.4}
+    duration: 1
+    text: 
+    bubble: 0
+    clip: 
+  - time: 28.3
+    verb: 0
+    actorId: slime
+    spot: {x: 0.8, y: 0.4}
+    duration: 2.8
+    text: 
+    bubble: 0
+    clip: 
+  - time: 31.7
+    verb: 3
+    actorId: slime
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: 
+    bubble: 1
+    clip: 
+  - time: 32.3
+    verb: 3
+    actorId: knight
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: 
+    bubble: 2
+    clip: 
+  - time: 32.9
+    verb: 4
+    actorId: knight
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: What in the blazes is that?
+    bubble: 0
+    clip: 
+  - time: 36.3
+    verb: 3
+    actorId: mage
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: 
+    bubble: 0
+    clip: 
+  - time: 36.9
+    verb: 4
+    actorId: mage
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: A living slime. And it's heading straight for us.
+    bubble: 0
+    clip: 
+  - time: 41.1
+    verb: 4
+    actorId: soldier
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: Well, let's give it a warm welcome!
+    bubble: 0
+    clip: 
+  - time: 44.3
+    verb: 3
+    actorId: knight
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: 
+    bubble: 2
+    clip: 
+  - time: 44.8
+    verb: 4
+    actorId: knight
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: Weapons ready!
+    bubble: 0
+    clip: 
+  - time: 47.6
+    verb: 2
+    actorId: knight
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: 
+    bubble: 0
+    clip: Attack01
+  - time: 47.8
+    verb: 2
+    actorId: soldier
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: 
+    bubble: 0
+    clip: Attack01
+  - time: 48.4
+    verb: 6
+    actorId: 
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: 
+    bubble: 0
+    clip: 

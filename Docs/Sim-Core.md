@@ -3,6 +3,8 @@
 > Owns: the Unity-free combat + reward simulation (`Assets/IdleRPG/Scripts/Sim/`).
 > Parent: `Architecture.md` (§2 layers, §3 data catalog, §4 save, E1-E14 rules).
 > **Location:** `Docs/` (folder index: `README.md`). **Last verified:** 24 Oct 2026 (re-read against the code).
+> **Drift note (29 Oct 2026):** gear (v6) and the roster swap (v8) changed the runtime only - they reach the sim as
+> numbers through `ICombatStatProvider`, so nothing under `Sim/` changed. Source of truth is still `Sim/` itself.
 > Specs the Steps 7-13 changes; acceptance tests live in `Roadmap.md`.
 > **Rule: this folder never references `UnityEngine`** (no `Mathf`, no `Vector2`, no `Debug`).
 >

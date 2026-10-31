@@ -33,6 +33,12 @@ namespace IdleRPG.Combat
             int min = balance.MinEnemiesPerWave;
             int max = balance.MaxEnemiesPerWave;
 
+            // Authored overrides win over the recipe. Used by the node 1 intro so the wave matches one slime.
+            if (balance.TryGetWaveSizeOverride(stage, wave, out int forcedCount))
+            {
+                return Clamp(forcedCount, 1, BalanceConfig.HardEnemyCap);
+            }
+
             if (max <= min)
             {
                 return min;

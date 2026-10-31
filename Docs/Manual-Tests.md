@@ -126,6 +126,11 @@ includes them (enforced at build time from B10).
 - [ ] **Drag pauses, release resumes**: drag the feed up, hold. New lines do not yank it. Release — it returns to
       the newest line on the next action.
 - [ ] **One line per action**: no merged, throttled or `...N more` summary lines anywhere in the scroll.
+- [ ] **Long lines wrap inside the box**: a long story line (the intro's first Soldier line) wraps to two or
+      three rows, stays inside the log, and its row is tall enough. No text crosses the right edge or the box bottom.
+- [ ] **All log text is 48**: combat and story lines both use the 48 VT323 Dialogue role.
+- [ ] **Speaker names stand out**: story names are gold; the spoken words are near-white. Names and words are easy
+      to scan apart on a long line.
 
 ### Lunge-position + animation checks (v2, added 2026-10-09)
 - [ ] **Side-by-side flank at body height**: a lunging unit stops BESIDE its target aligned to the target's BODY
@@ -413,6 +418,47 @@ a careful look. It is safe to open while a fight runs.
       `false` afterwards.
 
 If a size looks wrong, change the number in `UiType.cs` — one place, and every screen follows.
+
+---
+
+## 2o. Story scene — `S01_Intro` (added 2026-10-29, runs after the story slice is built)
+
+Run on the battle page, fresh save or after F9 (delete save). Everything else is unchanged.
+
+### Setup
+- Open `Main.unity`, press Play. The fight should stop before wave 1.
+- If it does not, the gate or the pending-scene bind is broken (`Story-Scenes.md` §7, boot order).
+
+### The scene
+- Three Guard actors walk in from the left: Knight, Mage, Soldier. They stop without overlapping.
+- One Slime creeps in from the right and stops inside the frame.
+- The first story line shows the speaker name in gold immediately, then the words type out one character at a time.
+- Each later line finishes the previous line before it starts typing.
+- No damage numbers, no HP changes, no swings for the whole scene.
+- The battle log stays visible and readable.
+
+### Controls
+- Tap while a line is typing: the line completes immediately, then the scene ends. The wave spawns.
+- Tap again: nothing happens.
+- Let a scene run past its cap on purpose (temporarily set a beat time too high): it still ends.
+- Background the app for 10 s, return: no stuck wave, no replay, no duplicate actors.
+
+### After the scene
+- Wave 1 spawns once. Stage 1, wave 1 in the header.
+- Formation and HP are the same as before the scene.
+- Camp still opens before wave 4 (it must not be skipped by the story gate).
+- Press `P`: the scene plays again over the live fight (debug only).
+
+### Layout
+- Repeat on the tallest and shortest device profiles. Bubble stays inside the viewport.
+- No actor leaves the frame at either extreme.
+
+### Fail signs
+- Wave 1 spawns behind the scene, or twice.
+- Two scenes play at once.
+- The log shows combat lines inside the scene.
+- The scene plays behind the Upgrades page.
+- A tap does nothing, or a second tap restarts it.
 
 ---
 

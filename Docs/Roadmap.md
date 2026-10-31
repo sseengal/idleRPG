@@ -4,6 +4,8 @@
 > Parent: `Architecture.md` (§6 decision log). Design detail lives in the topic docs, not here.
 > Status values: `TODO` | `WIP` | `DONE` | `BLOCKED` | `DEFERRED`.
 > **Location:** `Docs/` (folder index: `README.md`). **Last verified:** B6 (2026-09-27) - status board refreshed.
+> **Drift note (29 Oct 2026):** written before abilities, gear and the roster swap shipped. For current behaviour read
+> `Combat-Sequencing.md`, `Ability-Progress.md` and `Inventory-AS-BUILT.md` first; re-read this page before planning from it.
 
 ---
 

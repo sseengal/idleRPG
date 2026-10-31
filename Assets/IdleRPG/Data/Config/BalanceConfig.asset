@@ -25,6 +25,10 @@ MonoBehaviour:
     weight: 50
   - count: 3
     weight: 25
+  waveSizeOverrides:
+  - stage: 1
+    wave: 1
+    count: 1
   waveHealthMultiplier: 1
   waveAttackMultiplier: 1
   waveGoldMultiplier: 1

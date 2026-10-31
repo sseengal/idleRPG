@@ -49,9 +49,9 @@ namespace IdleRPG.UI
         // This file owns look only - fonts, colours, sprites.
 
         /// <summary>
-        /// How tall one line of the combat log is. Derived from the sentence role, so it follows the scale.
+        /// How tall one line of the combat log is. Derived from the dialogue role, so the log follows the scale.
         /// </summary>
-        public static float LogLineHeight => UiType.LineHeight(UiType.Role.Sentence);
+        public static float LogLineHeight => UiType.LineHeight(UiType.Role.Dialogue);
 
         /// <summary>Applies a theme font + size to a text object (font, material and size together).</summary>
         public static void ApplyFont(TextMeshProUGUI text, TMP_FontAsset font, float size)

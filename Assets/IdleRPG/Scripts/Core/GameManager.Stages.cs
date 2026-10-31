@@ -321,6 +321,9 @@ namespace IdleRPG.Core
         /// </summary>
         private void Update()
         {
+            // Story bind guard: releases a held wave if the HUD never appears. No-op otherwise.
+            Story?.Tick(Time.unscaledDeltaTime);
+
             if (!defeatBeatActive)
             {
                 return;

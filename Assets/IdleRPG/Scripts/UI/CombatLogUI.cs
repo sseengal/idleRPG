@@ -31,11 +31,11 @@ namespace IdleRPG.UI
         [Tooltip("Labels created up front (the pool grows on demand up to the scrollback length).")]
         [SerializeField] private int poolSize = 40;
 
-        [Tooltip("Line height in reference pixels.")]
-        [SerializeField] private float lineHeight = 34f;
+        [Tooltip("Line height in reference pixels. The dialogue role sets the default.")]
+        [SerializeField] private float lineHeight = UiTheme.LogLineHeight;
 
         [Tooltip("Vertical gap between lines.")]
-        [SerializeField] private float lineSpacing = 2f;
+        [SerializeField] private float lineSpacing = 4f;
 
         [Tooltip("Padding above and below the list.")]
         [SerializeField] private float contentPadding = 12f;
@@ -54,6 +54,13 @@ namespace IdleRPG.UI
         [Tooltip("Colour of an enemy ability line. Loud on purpose: the player must spot it in the scroll.")]
         [SerializeField] private Color enemyAbilityColor = new Color(1f, 0.55f, 0.15f, 1f);
 
+        [Header("Typewriter")]
+        [Tooltip("Reveal story dialogue one character at a time, classic JRPG style. Combat lines stay whole.")]
+        [SerializeField] private bool typewriter = true;
+
+        [Tooltip("Typing speed in characters per second. Uses real time, so a paused fight cannot stop it.")]
+        [SerializeField] private float typewriterCharsPerSecond = 45f;
+
         private readonly List<TextMeshProUGUI> liveLines = new List<TextMeshProUGUI>();
         private readonly Queue<TextMeshProUGUI> pool = new Queue<TextMeshProUGUI>();
 
@@ -68,6 +75,17 @@ namespace IdleRPG.UI
 
         /// <summary>Lines were added this frame; the content height is recomputed once per frame, not per line.</summary>
         private bool contentDirty;
+
+        /// <summary>The one story line that is still revealing. Older lines are always whole.</summary>
+        private TextMeshProUGUI typingLabel;
+
+        private BattleLogEntry typingEntry;
+        private int typingChars;
+        private float typingCarry;
+        private bool typingActive;
+
+        /// <summary>History redraws must not replay the effect on an old line.</summary>
+        private bool suppressTyping;
 
         private void Awake()
         {
@@ -104,6 +122,7 @@ namespace IdleRPG.UI
         {
             BattleLog.Appended -= OnAppended;
             BattleLog.Cleared -= OnCleared;
+            StopTyping();
         }
 
         /// <summary>Redraws the window from the store: oldest first, newest last.</summary>
@@ -119,10 +138,14 @@ namespace IdleRPG.UI
             IReadOnlyList<BattleLogEntry> entries = BattleLog.Entries;
             int first = Mathf.Max(0, entries.Count - Mathf.Max(1, maxLines));
 
+            suppressTyping = true;
+
             for (int i = first; i < entries.Count; i++)
             {
                 Append(entries[i]);
             }
+
+            suppressTyping = false;
         }
 
         private void OnAppended(BattleLogEntry entry)
@@ -141,6 +164,8 @@ namespace IdleRPG.UI
         /// </summary>
         private void LateUpdate()
         {
+            AdvanceTyping();
+
             if (contentDirty)
             {
                 RefreshContentSize();
@@ -179,6 +204,17 @@ namespace IdleRPG.UI
         // ------------------------------------------------------------------
         // Line plumbing
         // ------------------------------------------------------------------
+        /// <summary>Pins the feed to its newest line. Used while the log box changes height.</summary>
+        public void PinToBottom()
+        {
+            if (scrollRect == null || UserDragging)
+            {
+                return;
+            }
+
+            scrollRect.verticalNormalizedPosition = 0f;
+        }
+
         /// <summary>Adds one line. No budget, no merging - every entry the store holds becomes a visible line.</summary>
         private void Append(BattleLogEntry entry)
         {
@@ -194,11 +230,146 @@ namespace IdleRPG.UI
             label.transform.SetAsLastSibling();
             label.gameObject.SetActive(true);
             label.color = ColorFor(entry.Kind);
-            label.SetText(entry.Text);
+            label.richText = true;
+            label.textWrappingMode = TextWrappingModes.Normal;
+            UiType.Apply(label, UiType.Role.Dialogue);
+
+            // A story line starts with the speaker only and reveals its words frame by frame. Any older
+            // half-typed line finishes first, so the player never loses a sentence.
+            CompleteTyping();
+
+            bool shouldType = typewriter && !suppressTyping &&
+                              entry.Kind == BattleLogKind.Dialogue &&
+                              !string.IsNullOrEmpty(entry.Text);
+
+            if (shouldType)
+            {
+                typingLabel = label;
+                typingEntry = entry;
+                typingChars = 0;
+                typingCarry = 0f;
+                typingActive = true;
+                label.SetText(DisplayText(entry, string.Empty));
+            }
+            else
+            {
+                label.SetText(DisplayText(entry));
+            }
+
+            ApplyPreferredHeight(label);
             liveLines.Add(label);
 
             TrimToMax();
             contentDirty = true;
+        }
+
+        /// <summary>
+        /// Builds the visible string. The speaker name gets its own gold colour; the words keep the line colour.
+        /// TMP ignores rich-text tags when it measures, so wrapped heights still fit the real text.
+        /// </summary>
+        private string DisplayText(BattleLogEntry entry)
+        {
+            return DisplayText(entry, entry.Text);
+        }
+
+        private string DisplayText(BattleLogEntry entry, string body)
+        {
+            if (body == null)
+            {
+                body = string.Empty;
+            }
+
+            if (string.IsNullOrEmpty(entry.Speaker))
+            {
+                return body;
+            }
+
+            string gold = ColorUtility.ToHtmlStringRGB(UiTheme.AccentLight);
+            return $"<color=#{gold}>{entry.Speaker}</color>: {body}";
+        }
+
+        /// <summary>
+        /// Reveals the current story line. Time is unscaled, so pausing the fight cannot stall the text.
+        /// The row height is measured only when the visible text needs another row.
+        /// </summary>
+        private void AdvanceTyping()
+        {
+            if (!typingActive)
+            {
+                return;
+            }
+
+            if (typingLabel == null || !typingLabel.gameObject.activeInHierarchy)
+            {
+                StopTyping();
+                return;
+            }
+
+            string body = typingEntry.Text ?? string.Empty;
+
+            if (!typewriter || typewriterCharsPerSecond <= 0f || body.Length == 0)
+            {
+                CompleteTyping();
+                return;
+            }
+
+            typingCarry += typewriterCharsPerSecond * Time.unscaledDeltaTime;
+            int shown = typingChars + Mathf.FloorToInt(typingCarry);
+
+            if (shown >= body.Length)
+            {
+                CompleteTyping();
+                return;
+            }
+
+            if (shown <= typingChars)
+            {
+                return;
+            }
+
+            typingCarry -= shown - typingChars;
+            typingChars = shown;
+
+            float before = PreferredHeight(typingLabel);
+            typingLabel.SetText(DisplayText(typingEntry, body.Substring(0, typingChars)));
+            float after = ApplyPreferredHeight(typingLabel);
+
+            if (Mathf.Abs(after - before) > 0.5f)
+            {
+                contentDirty = true;
+            }
+        }
+
+        /// <summary>Shows the whole current story line at once. Used when a scene ends or is skipped.</summary>
+        public void CompleteTyping()
+        {
+            if (!typingActive)
+            {
+                return;
+            }
+
+            if (typingLabel != null)
+            {
+                typingLabel.SetText(DisplayText(typingEntry));
+                ApplyPreferredHeight(typingLabel);
+            }
+
+            StopTyping();
+            contentDirty = true;
+        }
+
+        private void StopTyping()
+        {
+            typingActive = false;
+            typingLabel = null;
+            typingChars = 0;
+            typingCarry = 0f;
+        }
+
+        private float PreferredHeight(TextMeshProUGUI label)
+        {
+            LayoutElement element = label != null ? label.GetComponent<LayoutElement>() : null;
+            return element != null ? element.preferredHeight : lineHeight;
         }
 
         private Color ColorFor(BattleLogKind kind)
@@ -218,6 +389,8 @@ namespace IdleRPG.UI
                 case BattleLogKind.Ability:
                 case BattleLogKind.System:
                     return eventColor;
+                case BattleLogKind.Dialogue:
+                    return heroHitColor;
                 case BattleLogKind.EnemyAbility:
                     return enemyAbilityColor;
                 case BattleLogKind.Heal:

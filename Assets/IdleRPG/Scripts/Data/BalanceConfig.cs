@@ -46,6 +46,9 @@ namespace IdleRPG.Data
             new WaveCountWeight(3, 25)
         };
 
+        [Tooltip("Authored wave sizes that override the recipe. count 0 = ignored. Used for the node 1 intro fight.")]
+        [SerializeField] private List<WaveSizeOverride> waveSizeOverrides = new List<WaveSizeOverride>();
+
         [Tooltip("Multi-enemy budget: total wave HP compared to a one-enemy wave. 1 = same clear time, " +
                  "each enemy gets 1/count of the pool.")]
         [SerializeField] private float waveHealthMultiplier = 1f;
@@ -385,6 +388,29 @@ namespace IdleRPG.Data
 
         /// <summary>The wave-size recipe (see <see cref="WaveCountWeight"/>). Never null.</summary>
         public List<WaveCountWeight> WaveCountWeights => waveCountWeights != null ? waveCountWeights : new List<WaveCountWeight>();
+
+        /// <summary>Authored wave sizes. Never null.</summary>
+        public List<WaveSizeOverride> WaveSizeOverrides => waveSizeOverrides != null ? waveSizeOverrides : new List<WaveSizeOverride>();
+
+        /// <summary>True when an authored size exists for this exact stage and wave.</summary>
+        public bool TryGetWaveSizeOverride(int stage, int wave, out int count)
+        {
+            List<WaveSizeOverride> overrides = WaveSizeOverrides;
+
+            for (int i = 0; i < overrides.Count; i++)
+            {
+                WaveSizeOverride entry = overrides[i];
+
+                if (entry.stage == stage && entry.wave == wave && entry.count > 0)
+                {
+                    count = entry.count;
+                    return true;
+                }
+            }
+
+            count = 0;
+            return false;
+        }
 
         /// <summary>
         /// Average wave size implied by the recipe. The offline estimator uses this (not the max), so a varied

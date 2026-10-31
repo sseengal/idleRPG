@@ -23,6 +23,9 @@ namespace IdleRPG.Core
         Event,
         Defeat,
         System,
+
+        /// <summary>A spoken line from a story scene. The speaker is stored apart from the words so the view can colour it.</summary>
+        Dialogue,
     }
 
     /// <summary>One frozen line. Text is built once, when the action happens.</summary>
@@ -30,18 +33,29 @@ namespace IdleRPG.Core
     {
         public long Sequence { get; }
 
+        /// <summary>The spoken words. For dialogue this does not include the speaker's name.</summary>
         public string Text { get; }
 
         public BattleLogKind Kind { get; }
 
+        /// <summary>The name the view may colour separately. Empty for combat and system lines.</summary>
+        public string Speaker { get; }
+
         public BattleLogEntry(long sequence, string text, BattleLogKind kind)
+            : this(sequence, text, kind, null)
+        {
+        }
+
+        public BattleLogEntry(long sequence, string text, BattleLogKind kind, string speaker)
         {
             Sequence = sequence;
             Text = text;
             Kind = kind;
+            Speaker = speaker;
         }
 
-        public override string ToString() => Text;
+        public override string ToString() =>
+            string.IsNullOrEmpty(Speaker) ? Text : $"{Speaker}: {Text}";
     }
 
     /// <summary>
@@ -135,14 +149,14 @@ namespace IdleRPG.Core
         }
 
         /// <summary>The only write path. Empty text is ignored so a broken caller cannot write a blank line.</summary>
-        public static void Append(string text, BattleLogKind kind = BattleLogKind.Event)
+        public static void Append(string text, BattleLogKind kind = BattleLogKind.Event, string speaker = null)
         {
             if (string.IsNullOrEmpty(text))
             {
                 return;
             }
 
-            BattleLogEntry entry = new BattleLogEntry(++nextSequence, text, kind);
+            BattleLogEntry entry = new BattleLogEntry(++nextSequence, text, kind, speaker);
             entries.Add(entry);
 
             while (entries.Count > Capacity)
@@ -171,6 +185,17 @@ namespace IdleRPG.Core
                     Debug.LogError($"[BattleLog] A listener of 'Appended' threw: {exception}");
                 }
             }
+        }
+
+        /// <summary>One spoken line from a story scene. The speaker is kept apart so the view can colour the name.</summary>
+        public static void Say(string speaker, string line)
+        {
+            if (string.IsNullOrEmpty(line))
+            {
+                return;
+            }
+
+            Append(line, BattleLogKind.Dialogue, speaker);
         }
 
         /// <summary>Wipes the history and tells the view to do the same.</summary>

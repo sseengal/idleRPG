@@ -42,6 +42,11 @@ namespace IdleRPG.UI
                 return;
             }
 
+            if (label == typingLabel)
+            {
+                StopTyping();
+            }
+
             label.gameObject.SetActive(false);
             pool.Enqueue(label);
         }
@@ -52,6 +57,8 @@ namespace IdleRPG.UI
         /// </summary>
         private void ClearLines()
         {
+            StopTyping();
+
             for (int i = 0; i < liveLines.Count; i++)
             {
                 Return(liveLines[i]);
@@ -67,6 +74,7 @@ namespace IdleRPG.UI
         {
             TextMeshProUGUI label = Instantiate(lineTemplate, content);
             label.rectTransform.localScale = Vector3.one;
+            label.textWrappingMode = TextWrappingModes.Normal;
 
             LayoutElement element = label.gameObject.GetComponent<LayoutElement>();
             if (element == null)
@@ -105,8 +113,60 @@ namespace IdleRPG.UI
             }
 
             int count = liveLines.Count;
-            float height = padTop + padBottom + count * lineHeight + Mathf.Max(0, count - 1) * gap;
+            float height = padTop + padBottom;
+
+            for (int i = 0; i < count; i++)
+            {
+                height += ApplyPreferredHeight(liveLines[i]);
+            }
+
+            height += Mathf.Max(0, count - 1) * gap;
             content.sizeDelta = new Vector2(content.sizeDelta.x, Mathf.Max(1f, height));
+        }
+
+        /// <summary>
+        /// Gives one line the height its wrapped text needs. Dialogue is larger than combat lines, and a long
+        /// sentence can take two or three rows; a fixed row height was what let text spill out of the box.
+        /// </summary>
+        private float ApplyPreferredHeight(TextMeshProUGUI label)
+        {
+            if (label == null)
+            {
+                return lineHeight;
+            }
+
+            float width = ContentTextWidth();
+            float preferred = width > 1f ? label.GetPreferredValues(label.text, width, 0f).y : lineHeight;
+            float height = Mathf.Max(lineHeight, preferred);
+
+            LayoutElement element = label.GetComponent<LayoutElement>();
+
+            if (element == null)
+            {
+                element = label.gameObject.AddComponent<LayoutElement>();
+            }
+
+            element.minHeight = height;
+            element.preferredHeight = height;
+            return height;
+        }
+
+        /// <summary>Usable label width: the content box minus its layout padding.</summary>
+        private float ContentTextWidth()
+        {
+            float width = content != null ? content.rect.width : 0f;
+
+            if (width <= 1f && scrollRect != null && scrollRect.viewport != null)
+            {
+                width = scrollRect.viewport.rect.width;
+            }
+
+            if (stack != null)
+            {
+                width -= stack.padding.left + stack.padding.right;
+            }
+
+            return Mathf.Max(0f, width);
         }
     }
 }

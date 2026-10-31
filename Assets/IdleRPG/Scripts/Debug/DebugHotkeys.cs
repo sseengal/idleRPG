@@ -133,6 +133,17 @@ namespace IdleRPG.Debugging
                 ToggleAllAbilities();
             }
 
+            // Story slice: replay the scene wired on the HUD. No schedule yet, so this is the only way to see
+            // the scene while the layer is being built.
+            if (keyboard.pKey.wasPressedThisFrame)
+            {
+                IdleRPG.UI.HudController hud = IdleRPG.UI.HudController.Instance;
+                bool played = hud != null && hud.DebugPlayStory();
+                Log(played
+                    ? "Story (P): playing the debug scene over the live fight."
+                    : "Story (P): nothing played - missing scene asset, or a scene is already running.");
+            }
+
             if (keyboard.gKey.wasPressedThisFrame)
             {
                 gameManager.Economy.AddGold(goldGrantAmount);

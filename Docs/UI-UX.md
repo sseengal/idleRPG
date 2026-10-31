@@ -61,7 +61,8 @@ Every piece of text picks a **role**, never a number. The roles live in one file
 | Display | 56 | Silkscreen | currency values, the reward number |
 | Title | 48 | Silkscreen | card / screen / modal titles |
 | Section | 40 | Silkscreen | section heads, button captions |
-| Sentence | 36 | VT323 | running text: the battle log, effect lines |
+| Sentence | 36 | VT323 | effect lines outside the battle log |
+| Dialogue | 48 | VT323 | every battle log line, including combat. Speaker names are gold; body text is near-white |
 | Damage | 32 | Silkscreen | floating damage (crit text is x1.3) |
 | Small | 30 | Silkscreen | nav tabs, tags, costs, column heads |
 | Micro | 26 | Silkscreen | captions - never something the player must act on |
@@ -69,6 +70,11 @@ Every piece of text picks a **role**, never a number. The roles live in one file
 Two rules hold it together:
 - **Chrome is Silkscreen, sentences are VT323.** VT323's x-height is only 0.41 of its size, so it reads smaller
   than Silkscreen at the same number; it never carries a label the player reads at a glance.
+- **The battle log is all Dialogue 48.** Speaker names are gold (`AccentLight`), the words are near-white, and
+  lines have a 4-unit gap. The name is stored apart from the words so only the name changes colour.
+- **Story text types.** The speaker name appears at once; the words reveal at 45 characters per second in real
+  time. Combat lines never type. A new line, scene end, or skip shows the rest at once.
+  The store, view, colours and layout contract live in `Battle-Log.md`.
 - **Micro is the floor.** Nothing is smaller. On a 1080-wide phone one canvas unit is about 0.4 dp, so Micro's
   cap height is about 1.0 mm - the smallest text a phone can carry.
 

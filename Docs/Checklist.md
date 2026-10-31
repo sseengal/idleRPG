@@ -12,7 +12,8 @@
 
 | Field | Value |
 |---|---|
-| Current step | **Foundation Phase 2D built 29 Oct 2026**: camp choice cards are prefabs. Phase 2 owner check pending. Then B8' proof lap and B9' shipping checklist; open feature work: ability assignments in the save, boss moves. Then **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
+| Current step | **Foundation Phase 2D built 29 Oct 2026**: camp choice cards are prefabs. Phase 2 owner check pending. Then B8' proof lap and B9' shipping checklist. **No open feature work**: ability assignments ship in the save (v7) and boss moves are content-only (`EnemyData.abilities`, no code change). Then **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
+| Story slice (new, 29 Oct 2026) | **Steps 1-4, transitions, intro rewrite, wave pin and log fixes built (30 Oct).** Arena fade 0.35 s, log focus 0.30 s. `S01_Intro`: 4 actors, 27 beats, 48.4 s, cap 54. Wave 1 pinned to one Slime. All battle-log lines use 48 VT323; speaker names are gold over near-white words; story text types at 45 cps. `Run All Checks` PASS, 31/31 EditMode tests. **Open: phone aspect, real device background, force battle page.** Canon: `Story-Canon.md`. System: `Story-Scenes.md`. Script: `Story-Nodes.md` |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money**, and **MVP = store-submittable** (§1p). The gate stands for NEW systems: abilities, gear and the roster swap shipped after it, so read it as "no zones / affixes / relics before the base is done" |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
@@ -54,6 +55,46 @@ re-checked for correct attribution, one line per wave, no mid-line renaming and 
 - [x] **2D camp choice/card**: `CampChoiceCard.prefab` owns button, title, value and note; builder instantiates four cards.
 - [x] Project check 29 Oct 2026: `Run All Checks (regression)` **PASS**; 0 console errors.
 - [ ] **manual owner play check** after each prefab slice.
+
+## 0c. Story slice — one node, one scene  ·  **in progress 29 Oct 2026**
+
+Scope: one in-game scene (`S01_Intro`) at node 1, injected before wave 1. No map, no title screen, no
+mid/outro, no meta. Docs: `Story-Canon.md`, `Story-Scenes.md`, `Story-Nodes.md`.
+
+System (must exist before content grows):
+- [x] `StorySceneDef` (scene = data asset) + `StoryScheduleDef` (cue, stage range, wave spec, priority, play limit).
+- [x] `StoryPlayer` + `StoryLayer` (actors, bubble, skip overlay, hide/restore battle views).
+- [x] `StoryService` (matching, queue, hold, resume).
+- [x] Cues: `BeforeWave` and `AfterWave` are live. `StageCleared`, `Defeat`, `Manual` are data only.
+- [x] Random wave injection is deterministic (FNV-1a of scene id + stage + wave + rule index), so a relaunch never re-rolls.
+- [x] Six actor slots, one bubble, one skip hint. Offline card no longer opens at boot.
+- [x] `BattleLogKind.Dialogue` and `BattleLog.Say(name, line)`. `RequestAbility` refuses while paused.
+
+Content (node 1, `S01_Intro`):
+- [x] Actors: Knight, Mage, Soldier walk in from the left; one Slime creeps in from the right.
+- [x] 27 beats, 48.4 s of content, cap 54 s, nine log lines, seven bubbles. Script in `Story-Nodes.md` §3.
+- [x] Hard rules: no rewards, no mechanics explained, every scene skippable.
+- [x] Pin stage 1 wave 1 to one Slime (`WaveSizeOverride`: stage 1, wave 1, count 1). Verified `ResolveCount(1,1)=1`; wave 2 stays 2.
+- [x] Battle log: long lines wrap, per-line height grows, all lines use the 48 VT323 Dialogue role, and speaker names are gold over near-white words (30 Oct).
+- [x] Story typewriter: speaker name appears at once, words reveal at 45 characters per second, new lines finish the old one, and scene end/skip completes the current line (30 Oct).
+
+Presentation (30 Oct 2026):
+- [x] Arena-only fade (`StageTransition`, cover/reveal 0.35 s, scene time starts after reveal).
+- [x] Skip during the opening reveal interrupts the fade cleanly. No stuck exit phase (fixed 30 Oct).
+- [x] Battle log expands into the ability band; ability band fades out and becomes inert (`BattlePageFocus`, 0.30 s, under the black).
+- [ ] Force the battle page when a scene starts.
+
+Build order (test after every step):
+- [x] 1. Data types + `S01_Intro.asset` + `Stage01_Schedule.asset`.
+- [x] 2. `StoryLayer` + `StoryPlayer`; `P` replays the scene over a live fight. Manual smoke passed 29 Oct: actors, bubble, log, pause, skip, restore.
+- [x] 3. `BattleLogKind.Dialogue` + `RequestAbility` pause guard. Verified 29 Oct: three dialogue lines carry the Dialogue kind; a cast is refused while the scene owns the screen.
+- [x] 4. `StoryService` + `BeforeWave` gate at stage 1, wave 1. Verified 29 Oct: gate holds wave 1, 3 dialogue lines, wave spawns once, `OncePerStage` blocks a replay, combat resumes.
+- [~] 5. Skip, hard cap, background return, tall/short phone aspect. Skip, cap and the huge-delta/background jump pass 29 Oct. **Phone aspect and a real device background test are still open.**
+- [~] 6. Manual QA + `Run All Checks`. `Run All Checks` **PASS**, 31/31 EditMode tests pass 30 Oct. The phone checklist (`Manual-Tests.md` §2o) is still open.
+
+Acceptance: press Play -> intro plays once -> wave 1 spawns. No double spawn. Fight frozen for the whole
+scene. Log reads as dialogue, typed one character at a time with a gold speaker name. Tap completes the line
+and skips. Node 2 is not written until this passes.
 
 ## 1d. Compounding upgrades (B3d)  ·  **built + measured 2026-09-25**
 
@@ -102,6 +143,10 @@ stage 4 -> 5 (clear), wipe on 5 -> fallback 4, cascade 4 -> 3 -> clear -> 4, gol
 gems 3 unchanged across the bounce, 131 upgrades bought -> ceiling moved to 6, milestone at stage 5 paid
 +5 gems (3 -> 8), stage 10 paid +5 again (8 -> 13), ascend reset to stage 1 with best kept at 11 and
 **no** re-climb gems, post-ascend climb restarted from 1 and bounced at 4.
+
+`[x]` **Closed 29 Oct 2026** — fixed on both sides. `SimLedger.Trim` snaps sub-`MinMeaningfulGold`
+`windowTotal` crumbs to 0, and `IdleTimeService.ResolveRate` only accepts a rate `>= MinUsableGoldPerSecond`
+(0.001), so a near-zero residue now falls through to the saved rate or the estimate. Original report kept below.
 
 `[!]` **Open blocker found while playing (next step):** `IdleTimeService.ResolveRate` accepts any
 `savedGoldPerSecond > 0`, so a near-zero ledger residue (seen live: `1.58e-15`, floating-point
@@ -1969,7 +2014,8 @@ the battle-log contract is checked, and the touched screen has had a device smok
 ### 13 — Ability system  `[x] shipped 2026-10-24`  (record, not open work)
 > Built: `AbilityDef` + `abilities.json` (11 abilities), cooldown-only casts in the action lane,
 > shield/heal/damage effects, enemy auto-cast with random timing, ABILITIES tab, save v7/v8.
-> Open only: hero auto-cast (deferred, `Ability-Plan.md` decision 6) and ability assignments in the save.
+> Open only: hero auto-cast (deferred, `Ability-Plan.md` decision 6). Ability assignments are **saved**:
+> `SaveData.abilityAssignments` (v7), written and read by `AbilityService`, migrated in `SaveMigrations`.
 > Current behaviour: `Combat-Sequencing.md`. Status: `Ability-Progress.md`. The list below is the original
 > plan, kept so the wording is not lost.
 - [ ] `AbilityData` + `EffectSpec` rows; `AbilityRuntime` (cooldown/charges/trigger)

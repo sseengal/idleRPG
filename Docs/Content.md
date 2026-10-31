@@ -3,6 +3,8 @@
 > Owns: what the player fights and how hard it gets, plus the content pipeline.
 > Parent: `Architecture.md` (§3.1 combat SOs, §3.3 pipeline, A2-A4, C4).
 > **Location:** `Docs/` (folder index: `README.md`). **Last verified:** Step 11e (2026-09-21).
+> **Drift note (29 Oct 2026):** predates gear (save v6) and the roster swap (v8). The validator now also checks loop
+> health, upgrade effect mode and the rotation map. Treat the tuning tables below as the original design, not current numbers.
 > Specs Steps 8, 11, 13, 15 + every future content drop.
 
 ---

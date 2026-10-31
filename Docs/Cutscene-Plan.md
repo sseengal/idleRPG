@@ -4,6 +4,9 @@
 > one in a single readable place; `CutsceneRunner` walks the list, pauses the fight and puts it back. It draws nothing -
 > there are no bars, no title, no text and no key. The old test effect (bars + title on `N`) was removed by owner
 > decision: structure first, effects when a real shot asks for them.
+>
+> **This page is for fight-bound plays only** - moves and clips on the units already in the fight.
+> Story scenes (actors walking in, bubbles, dialogue in the log) are a different system: **`Story-Scenes.md`**.
 
 ---
 

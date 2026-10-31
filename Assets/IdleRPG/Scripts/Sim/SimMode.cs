@@ -15,13 +15,4 @@ namespace IdleRPG.Sim
         /// <summary>Headless estimate (offline payout, Balance Lab): result only, no view events.</summary>
         Offline = 2
     }
-
-    public static class SimModeExtensions
-    {
-        /// <summary>True when per-hit/cosmetic events should be suppressed.</summary>
-        public static bool IsSilent(this SimMode mode)
-        {
-            return mode != SimMode.Live;
-        }
-    }
 }

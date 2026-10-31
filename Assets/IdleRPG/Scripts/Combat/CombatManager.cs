@@ -79,6 +79,12 @@ namespace IdleRPG.Combat
         /// </summary>
         public bool RequestAbility(int heroIndex)
         {
+            // A story scene owns the screen while Paused. Nothing may queue a cast behind the picture.
+            if (Paused)
+            {
+                return false;
+            }
+
             return simulator != null &&
                    simulator.CurrentEncounter != null &&
                    simulator.CurrentEncounter.RequestAbility(heroIndex);
@@ -206,9 +212,16 @@ namespace IdleRPG.Combat
         }
 
         /// <summary>Called by the camp after a choice; the held wave spawns now.</summary>
-        public void ResumeAfterCamp()
+        /// <summary>Spawns the wave that a gate held (story or camp).</summary>
+        public void ResumeAfterGate()
         {
             director?.ResumeAfterGate();
+        }
+
+        /// <summary>Kept for the camp caller; both interlude types use the same gate.</summary>
+        public void ResumeAfterCamp()
+        {
+            ResumeAfterGate();
         }
 
         public void StartRun()

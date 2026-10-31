@@ -6,6 +6,9 @@
 > Specs Steps 14-18. Acceptance tests live in `Roadmap.md`.
 >
 > **Built today:** gold stat tracks, ascension, automation cards, gear (save v6) and one ability per hero (save v7).
+> **Drift note (29 Oct 2026):** hero stats and prestige still run on `StatUpgradeData` / `PrestigeUpgradeData`. The
+> generic `ProgressionTrack` + `TrackService` exist and serve the gem tracks only, so §4 below is a target for the
+> migration, not a description of every track today.
 > Stars, relics, expeditions, scrolls and the L2/L3 prestige layers below are **design targets**, not code.
 
 ---

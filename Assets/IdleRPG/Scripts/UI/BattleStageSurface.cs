@@ -39,6 +39,12 @@ namespace IdleRPG.UI
         /// <summary>The live surface, used by overlay effects that need a stage-space point.</summary>
         public static BattleStageSurface Instance { get; private set; }
 
+        /// <summary>
+        /// Root the stage content lives under. Authored viewport children are moved here in Awake, so a
+        /// runtime view (the story layer) must parent here to draw inside the battle viewport.
+        /// </summary>
+        public RectTransform ContentRoot => stageRoot;
+
         private void Awake()
         {
             if (stageCamera == null || stageCanvas == null || stageRoot == null || viewport == null || display == null)

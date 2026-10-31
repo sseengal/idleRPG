@@ -39,7 +39,10 @@ namespace IdleRPG.UI
             Sentence,
             Small,
             Micro,
-            Damage
+            Damage,
+
+            /// <summary>Running dialogue in the battle log. Bigger than Sentence, same VT323 font.</summary>
+            Dialogue
         }
 
         // ------------------------------------------------------------------
@@ -52,6 +55,9 @@ namespace IdleRPG.UI
         public const float Small = 30f;
         public const float Micro = 26f;
         public const float Damage = 32f;
+
+        /// <summary>Story dialogue in the battle log. One size up from Sentence, same readable font.</summary>
+        public const float Dialogue = 48f;
 
         /// <summary>Crit damage text is this much bigger than <see cref="Damage"/>.</summary>
         public const float CritScale = 1.3f;
@@ -83,6 +89,8 @@ namespace IdleRPG.UI
                     return Micro;
                 case Role.Damage:
                     return Damage;
+                case Role.Dialogue:
+                    return Dialogue;
                 case Role.Sentence:
                 default:
                     return Sentence;
@@ -92,13 +100,14 @@ namespace IdleRPG.UI
         /// <summary>The font for a role: VT323 for running sentences, Silkscreen for everything else.</summary>
         public static TMP_FontAsset Font(Role role)
         {
-            return role == Role.Sentence ? UiTheme.Sentence : UiTheme.Display;
+            return role == Role.Sentence || role == Role.Dialogue ? UiTheme.Sentence : UiTheme.Display;
         }
 
         /// <summary>How tall one line of this role is, in canvas units.</summary>
         public static float LineHeight(Role role)
         {
-            return Size(role) * (role == Role.Sentence ? LeadingSentence : LeadingChrome);
+            bool sentence = role == Role.Sentence || role == Role.Dialogue;
+            return Size(role) * (sentence ? LeadingSentence : LeadingChrome);
         }
 
         /// <summary>Applies the role's font and its size.</summary>

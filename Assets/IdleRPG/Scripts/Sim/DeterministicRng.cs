@@ -70,23 +70,12 @@ namespace IdleRPG.Sim
 
         /// <summary>
         /// Derives an independent stream from this one for a named purpose
-        /// (e.g. <c>Fork(RngStream.Critical)</c>), so unrelated rolls stay stable.
+        /// (a different salt per kind of roll), so unrelated rolls stay stable.
         /// </summary>
         public DeterministicRng Fork(long salt)
         {
             ulong mixed = state ^ (unchecked((ulong)salt) * Gamma);
             return new DeterministicRng(unchecked((long)mixed));
         }
-    }
-
-    /// <summary>Purpose tags for <see cref="DeterministicRng.Fork"/> - one stream per kind of roll.</summary>
-    public static class RngStream
-    {
-        public const long Targeting = 1L;
-        public const long Critical = 2L;
-        public const long Loot = 3L;
-        public const long Ability = 4L;
-        public const long Spawn = 5L;
-        public const long Status = 6L;
     }
 }

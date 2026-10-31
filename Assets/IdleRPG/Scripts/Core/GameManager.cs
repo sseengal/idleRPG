@@ -289,10 +289,8 @@ namespace IdleRPG.Core
                 Save?.SaveNow("first-run");
             }
 
-            // Offer offline earnings (no-op on a fresh install or a very short absence).
-            EvaluateOffline();
-
-            // Every-morning gift: auto-claim silently when there is a streak to pay.
+            // Offline earnings are out of the JRPG loop (Game-Vision, Story-Canon). The payout service stays in
+            // the code for the debug tools, but it must not open a card over a story scene at boot.
             TryClaimDailyStreak();
 
             // Tip 1 of the first-run hints: "tap UPGRADE to hit harder" (once per install).
