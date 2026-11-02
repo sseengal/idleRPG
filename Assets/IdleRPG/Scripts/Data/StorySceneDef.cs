@@ -131,8 +131,11 @@ namespace IdleRPG.Data
         [Tooltip("Stop the fight for the whole scene. Leave on for anything the player should watch.")]
         [SerializeField] private bool pauseBattle = true;
 
-        [Tooltip("A tap (or Space) ends the scene early. Leave on.")]
+        [Tooltip("The separate SKIP SCENE button can end the scene early. Leave on.")]
         [SerializeField] private bool skippable = true;
+
+        [Tooltip("Wait for a tap after every spoken line. First tap finishes typing, second moves on.")]
+        [SerializeField] private bool waitForContinue = false;
 
         [Tooltip("Hard stop in real seconds. Even a broken beat can never trap the player.")]
         [SerializeField] private float hardCapSeconds = 14f;
@@ -147,6 +150,8 @@ namespace IdleRPG.Data
         public bool PauseBattle => pauseBattle;
 
         public bool Skippable => skippable;
+
+        public bool WaitForContinue => waitForContinue;
 
         /// <summary>Never below 1 second, so a zero cannot disable the safety net.</summary>
         public float HardCapSeconds => Mathf.Max(1f, hardCapSeconds);
@@ -191,12 +196,14 @@ namespace IdleRPG.Data
 
 #if UNITY_EDITOR
         /// <summary>Editor-only content write used by the asset seeder. Runtime never calls it.</summary>
-        public void EditorSetContent(string sceneId, StoryActorDef[] newActors, StoryBeat[] newBeats, float capSeconds)
+        public void EditorSetContent(string sceneId, StoryActorDef[] newActors, StoryBeat[] newBeats, float capSeconds,
+            bool tapToContinue = false)
         {
             id = sceneId ?? string.Empty;
             actors = newActors ?? Array.Empty<StoryActorDef>();
             beats = newBeats ?? Array.Empty<StoryBeat>();
             hardCapSeconds = Mathf.Max(1f, capSeconds);
+            waitForContinue = tapToContinue;
         }
 #endif
 

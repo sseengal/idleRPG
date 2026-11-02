@@ -72,6 +72,7 @@ namespace IdleRPG.UI
         {
             if (combatLog != null)
             {
+                combatLog.CompleteStoryTyping();
                 combatLog.CompleteTyping();
             }
         }
@@ -184,7 +185,7 @@ namespace IdleRPG.UI
 
                 storyPlayer = gameObject.AddComponent<StoryPlayer>();
 
-                if (storyPlayer.Setup(gameManager, stageRoot, modalRoot != null ? modalRoot : vfxRoot, battleFocus))
+                if (storyPlayer.Setup(gameManager, stageRoot, modalRoot != null ? modalRoot : vfxRoot, battleFocus, combatLog))
                 {
                     // Bind after Setup: a scene requested during GameManager.Start is held until this line.
                     gameManager.Story?.SetPlayer(PlayStory);

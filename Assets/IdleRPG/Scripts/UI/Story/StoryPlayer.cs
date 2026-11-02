@@ -22,12 +22,16 @@ namespace IdleRPG.UI
         private StoryLayer layer;
         private StageTransition transition;
         private BattlePageFocus focus;
+        private CombatLogUI storyLog;
         private StorySceneDef scene;
         private Action finished;
 
         private float clock;
+        private float realClock;
         private int nextBeat;
         private bool pausedByScene;
+        private bool waitingForContinue;
+        private bool pendingEnd;
 
         private enum Phase
         {
@@ -47,10 +51,11 @@ namespace IdleRPG.UI
         /// anywhere ends the scene. Returns false when the stage is missing (debug scenes).
         /// </summary>
         public bool Setup(GameManager gameManager, RectTransform stageRoot, RectTransform overlayRoot,
-            BattlePageFocus pageFocus)
+            BattlePageFocus pageFocus, CombatLogUI log)
         {
             manager = gameManager;
             focus = pageFocus;
+            storyLog = log;
 
             if (stageRoot == null)
             {
@@ -61,7 +66,7 @@ namespace IdleRPG.UI
             GameObject node = UiRuntime.CreateNode("StoryLayer", stageRoot);
             node.transform.SetAsLastSibling();
             layer = node.AddComponent<StoryLayer>();
-            layer.Build(stageRoot, overlayRoot, Skip);
+            layer.Build(stageRoot, overlayRoot, Advance, Skip);
 
             // Created after the layer, so the fade draws over actors and damage numbers. It is clipped to
             // the arena render texture, so the HUD can never dim with it.
@@ -83,7 +88,10 @@ namespace IdleRPG.UI
             scene = definition;
             finished = onFinished;
             clock = 0f;
+            realClock = 0f;
             nextBeat = 0;
+            waitingForContinue = false;
+            pendingEnd = false;
             phase = Phase.Opening;
 
             pausedByScene = scene.PauseBattle && manager != null && manager.Combat != null;
@@ -114,6 +122,32 @@ namespace IdleRPG.UI
             }
         }
 
+        /// <summary>
+        /// Tap/click advance. First tap finishes the story line; the next tap resumes the scene clock.
+        /// </summary>
+        public void Advance()
+        {
+            if (phase != Phase.Playing || !waitingForContinue)
+            {
+                return;
+            }
+
+            if (storyLog != null && storyLog.CompleteStoryTyping())
+            {
+                return;
+            }
+
+            waitingForContinue = false;
+            storyLog?.SetStoryWaiting(false);
+
+            // The scene clock was frozen at the line's timestamp. Move it to the next beat so the
+            // next movement or line starts immediately instead of waiting out the old gap.
+            if (nextBeat < scene.Beats.Length)
+            {
+                clock = Mathf.Max(clock, scene.Beats[nextBeat].time);
+            }
+        }
+
         /// <summary>Black is on screen: swap the fight for the scene, then reveal.</summary>
         private void OnCovered()
         {
@@ -123,9 +157,13 @@ namespace IdleRPG.UI
             }
 
             layer.Begin(scene);
+            storyLog?.BeginStory();
             focus?.Enter();
             clock = 0f;
+            realClock = 0f;
             nextBeat = 0;
+            waitingForContinue = false;
+            pendingEnd = false;
             phase = Phase.Playing;
 
             if (transition != null)
@@ -141,13 +179,36 @@ namespace IdleRPG.UI
                 return;
             }
 
-            clock += Time.unscaledDeltaTime;
+            realClock += Time.unscaledDeltaTime;
 
-            if (clock >= scene.HardCapSeconds)
+            if (realClock >= scene.HardCapSeconds)
             {
                 Finish();
                 return;
             }
+
+            if (waitingForContinue)
+            {
+                if (WasAdvancePressed())
+                {
+                    Advance();
+                }
+
+                return;
+            }
+
+            if (pendingEnd)
+            {
+                if (layer == null || !layer.IsAnimating)
+                {
+                    pendingEnd = false;
+                    Finish();
+                }
+
+                return;
+            }
+
+            clock += Time.unscaledDeltaTime;
 
             StoryBeat[] beats = scene.Beats;
 
@@ -156,15 +217,10 @@ namespace IdleRPG.UI
                 Apply(beats[nextBeat]);
                 nextBeat++;
 
-                if (phase != Phase.Playing)
+                if (phase != Phase.Playing || waitingForContinue)
                 {
                     return;
                 }
-            }
-
-            if (scene.Skippable && WasSkipPressed())
-            {
-                Finish();
             }
         }
 
@@ -196,6 +252,13 @@ namespace IdleRPG.UI
 
                 case StoryVerb.Say:
                     SayLine(index, beat.text);
+
+                    if (scene.WaitForContinue && !string.IsNullOrEmpty(beat.text))
+                    {
+                        waitingForContinue = true;
+                        storyLog?.SetStoryWaiting(true);
+                    }
+
                     break;
 
                 case StoryVerb.Hide:
@@ -204,7 +267,16 @@ namespace IdleRPG.UI
                     break;
 
                 case StoryVerb.End:
-                    Finish();
+                    if (layer != null && layer.IsAnimating)
+                    {
+                        // Let the final swing finish before the curtain falls.
+                        pendingEnd = true;
+                    }
+                    else
+                    {
+                        Finish();
+                    }
+
                     break;
             }
         }
@@ -246,6 +318,9 @@ namespace IdleRPG.UI
             }
 
             // A scene may end while its last line is still typing. Finish the sentence before the curtain falls.
+            waitingForContinue = false;
+            storyLog?.SetStoryWaiting(false);
+            storyLog?.CompleteStoryTyping();
             HudController.Instance?.CompleteStoryText();
 
             phase = Phase.Ending;
@@ -273,6 +348,7 @@ namespace IdleRPG.UI
                 layer.End();
             }
 
+            storyLog?.EndStory();
             focus?.Exit();
 
             if (transition != null)
@@ -307,7 +383,7 @@ namespace IdleRPG.UI
             callback?.Invoke();
         }
 
-        private static bool WasSkipPressed()
+        private static bool WasAdvancePressed()
         {
             Keyboard keyboard = Keyboard.current;
             return keyboard != null && keyboard.spaceKey.wasPressedThisFrame;

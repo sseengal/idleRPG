@@ -72,8 +72,8 @@ Two rules hold it together:
   than Silkscreen at the same number; it never carries a label the player reads at a glance.
 - **The battle log is all Dialogue 48.** Speaker names are gold (`AccentLight`), the words are near-white, and
   lines have a 4-unit gap. The name is stored apart from the words so only the name changes colour.
-- **Story text types.** The speaker name appears at once; the words reveal at 45 characters per second in real
-  time. Combat lines never type. A new line, scene end, or skip shows the rest at once.
+- **Story text types.** The log switches to one-line story mode. The speaker name appears at once; the words
+  reveal at 45 characters per second in real time. `TAP TO CONTINUE` completes the line; the next tap advances. `SKIP SCENE` is a separate button. Combat lines never type. A scene end or skip shows the rest.
   The store, view, colours and layout contract live in `Battle-Log.md`.
 - **Micro is the floor.** Nothing is smaller. On a 1080-wide phone one canvas unit is about 0.4 dp, so Micro's
   cap height is about 1.0 mm - the smallest text a phone can carry.

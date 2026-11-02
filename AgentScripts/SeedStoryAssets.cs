@@ -43,10 +43,13 @@ public static class SeedStoryAssets
     private static StorySceneDef CreateScene(CharacterArtSet knight, CharacterArtSet mage,
         CharacterArtSet soldier, CharacterArtSet slime)
     {
-        AssetDatabase.DeleteAsset(ScenePath);
+        StorySceneDef scene = AssetDatabase.LoadAssetAtPath<StorySceneDef>(ScenePath);
 
-        StorySceneDef scene = ScriptableObject.CreateInstance<StorySceneDef>();
-        AssetDatabase.CreateAsset(scene, ScenePath);
+        if (scene == null)
+        {
+            scene = ScriptableObject.CreateInstance<StorySceneDef>();
+            AssetDatabase.CreateAsset(scene, ScenePath);
+        }
 
         StoryActorDef[] actors =
         {
@@ -58,9 +61,9 @@ public static class SeedStoryAssets
 
         StoryBeat[] beats =
         {
-            new StoryBeat(0.5f, StoryVerb.Enter, "knight", new Vector2(0.20f, 0.40f), 1.2f),
+            new StoryBeat(0.5f, StoryVerb.Enter, "soldier", new Vector2(0.20f, 0.40f), 1.2f),
             new StoryBeat(1.0f, StoryVerb.Enter, "mage", new Vector2(0.31f, 0.33f), 1.2f),
-            new StoryBeat(1.5f, StoryVerb.Enter, "soldier", new Vector2(0.42f, 0.27f), 1.2f),
+            new StoryBeat(1.5f, StoryVerb.Enter, "knight", new Vector2(0.42f, 0.27f), 1.2f),
             new StoryBeat(4.2f, StoryVerb.Bubble, "soldier", default, 0f, string.Empty, BubbleKind.Question),
             new StoryBeat(4.8f, StoryVerb.Say, "soldier", default, 0f,
                 "Something's wrong here. There's not a single bird, not even an insect."),
@@ -75,8 +78,8 @@ public static class SeedStoryAssets
                 "You could've mentioned that before we walked in!"),
             new StoryBeat(22.0f, StoryVerb.Bubble, "mage", default, 0f, string.Empty, BubbleKind.Bang),
             new StoryBeat(22.5f, StoryVerb.Say, "mage", default, 0f, "Quiet. Something's moving."),
-            new StoryBeat(25.3f, StoryVerb.WalkTo, "knight", new Vector2(0.24f, 0.40f), 1.0f),
-            new StoryBeat(26.5f, StoryVerb.WalkTo, "knight", new Vector2(0.20f, 0.40f), 1.0f),
+            new StoryBeat(25.3f, StoryVerb.WalkTo, "knight", new Vector2(0.46f, 0.27f), 1.0f),
+            new StoryBeat(26.5f, StoryVerb.WalkTo, "knight", new Vector2(0.42f, 0.27f), 1.0f),
             new StoryBeat(28.3f, StoryVerb.Enter, "slime", new Vector2(0.80f, 0.40f), 2.8f),
             new StoryBeat(31.7f, StoryVerb.Bubble, "slime", default, 0f, string.Empty, BubbleKind.Dots),
             new StoryBeat(32.3f, StoryVerb.Bubble, "knight", default, 0f, string.Empty, BubbleKind.Bang),
@@ -93,7 +96,7 @@ public static class SeedStoryAssets
             new StoryBeat(48.4f, StoryVerb.End)
         };
 
-        scene.EditorSetContent("s01_intro", actors, beats, 54f);
+        scene.EditorSetContent("s01_intro", actors, beats, 120f, tapToContinue: true);
 
         EditorUtility.SetDirty(scene);
         AssetDatabase.SaveAssets();
@@ -102,10 +105,13 @@ public static class SeedStoryAssets
 
     private static StoryScheduleDef CreateSchedule(StorySceneDef scene)
     {
-        AssetDatabase.DeleteAsset(SchedulePath);
+        StoryScheduleDef schedule = AssetDatabase.LoadAssetAtPath<StoryScheduleDef>(SchedulePath);
 
-        StoryScheduleDef schedule = ScriptableObject.CreateInstance<StoryScheduleDef>();
-        AssetDatabase.CreateAsset(schedule, SchedulePath);
+        if (schedule == null)
+        {
+            schedule = ScriptableObject.CreateInstance<StoryScheduleDef>();
+            AssetDatabase.CreateAsset(schedule, SchedulePath);
+        }
 
         StoryRule rule = new StoryRule
         {

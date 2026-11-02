@@ -41,12 +41,14 @@ namespace IdleRPG.UI
         }
 
         private readonly List<ActorView> actors = new List<ActorView>(MaxActors);
+        private readonly List<ActorView> depthOrder = new List<ActorView>(MaxActors);
 
         private RectTransform root;
         private Image bubble;
         private TextMeshProUGUI bubbleText;
         private GameObject skipRoot;
-        private GameObject skipHint;
+        private Button skipButton;
+        private Action advanceAction;
         private Action skipAction;
 
         private StorySceneDef scene;
@@ -58,7 +60,7 @@ namespace IdleRPG.UI
         private bool enemiesWereActive;
 
         /// <summary>Builds the actor slots, the bubble and the skip overlay. Called once by the player.</summary>
-        public void Build(RectTransform stageRoot, RectTransform overlayRoot, Action onSkip)
+        public void Build(RectTransform stageRoot, RectTransform overlayRoot, Action onAdvance, Action onSkip)
         {
             root = transform as RectTransform;
 
@@ -89,12 +91,7 @@ namespace IdleRPG.UI
             }
 
             BuildBubble();
-            BuildSkip(overlayRoot, onSkip);
-
-            skipHint = UiRuntime.CreateText(root, "SkipHint", "TAP TO SKIP",
-                UiType.Role.Small, TextAlignmentOptions.Center, UiTheme.TextDim).gameObject;
-            UiRuntime.Anchor(skipHint.GetComponent<RectTransform>(), new Vector2(0.2f, 0.05f), new Vector2(0.8f, 0.09f));
-            skipHint.SetActive(false);
+            BuildSkip(overlayRoot, onAdvance, onSkip);
         }
 
         /// <summary>Prepares one scene: binds the art, hides every actor and dims the fight behind it.</summary>
@@ -134,12 +131,12 @@ namespace IdleRPG.UI
 
             if (skipRoot != null)
             {
-                skipRoot.SetActive(scene.Skippable);
+                skipRoot.SetActive(true);
             }
 
-            if (skipHint != null)
+            if (skipButton != null)
             {
-                skipHint.SetActive(scene.Skippable);
+                skipButton.gameObject.SetActive(scene.Skippable);
             }
 
             begun = true;
@@ -160,11 +157,6 @@ namespace IdleRPG.UI
             if (skipRoot != null)
             {
                 skipRoot.SetActive(false);
-            }
-
-            if (skipHint != null)
-            {
-                skipHint.SetActive(false);
             }
 
             RestoreBattleViews();
@@ -204,6 +196,27 @@ namespace IdleRPG.UI
             {
                 view.Animator.PlayIdle();
             }
+
+            SortByDepth();
+        }
+
+        /// <summary>True while any visible actor still has a one-shot clip running.</summary>
+        public bool IsAnimating
+        {
+            get
+            {
+                for (int i = 0; i < actors.Count; i++)
+                {
+                    ActorView view = actors[i];
+
+                    if (view.Image.gameObject.activeSelf && view.Animator.IsBusy())
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
         }
 
         /// <summary>Walks an actor from where it stands to <paramref name="spot"/>.</summary>
@@ -233,6 +246,8 @@ namespace IdleRPG.UI
                 SetSpot(view.Rect, spot);
                 view.Animator.PlayIdle();
             }
+
+            SortByDepth();
         }
 
         /// <summary>Plays one named clip (Attack01, Ability, Hurt, Death). Empty or unknown falls back to Idle.</summary>
@@ -310,6 +325,7 @@ namespace IdleRPG.UI
 
             UiRuntime.CenterOn(bubble.rectTransform, point, size);
             bubble.gameObject.SetActive(true);
+            bubble.transform.SetAsLastSibling();
         }
 
         /// <summary>Hides one actor and any bubble that belonged to it.</summary>
@@ -325,6 +341,7 @@ namespace IdleRPG.UI
             view.Moving = false;
             view.Image.gameObject.SetActive(false);
             HideBubble();
+            SortByDepth();
         }
 
         /// <summary>Moves walking actors. Uses unscaled time, so a paused fight cannot stop a scene.</summary>
@@ -352,7 +369,49 @@ namespace IdleRPG.UI
                 {
                     view.Moving = false;
                     view.Animator.PlayIdle();
+                    SortByDepth();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Draws the actor nearest the camera last. A lower y is nearer the player, so the depth
+        /// order is computed from the live anchor, not from the actor array order.
+        /// </summary>
+        private void SortByDepth()
+        {
+            if (root == null)
+            {
+                return;
+            }
+
+            depthOrder.Clear();
+
+            for (int i = 0; i < actors.Count; i++)
+            {
+                ActorView view = actors[i];
+
+                if (view.Image.gameObject.activeSelf)
+                {
+                    depthOrder.Add(view);
+                }
+            }
+
+            if (depthOrder.Count == 0)
+            {
+                return;
+            }
+
+            depthOrder.Sort((a, b) => b.Rect.anchorMin.y.CompareTo(a.Rect.anchorMin.y));
+
+            for (int i = 0; i < depthOrder.Count; i++)
+            {
+                depthOrder[i].Rect.SetSiblingIndex(i);
+            }
+
+            if (bubble != null && bubble.gameObject.activeSelf)
+            {
+                bubble.transform.SetAsLastSibling();
             }
         }
 
@@ -394,8 +453,9 @@ namespace IdleRPG.UI
             bubble.gameObject.SetActive(false);
         }
 
-        private void BuildSkip(RectTransform overlayRoot, Action onSkip)
+        private void BuildSkip(RectTransform overlayRoot, Action onAdvance, Action onSkip)
         {
+            advanceAction = onAdvance;
             skipAction = onSkip;
 
             if (overlayRoot == null)
@@ -414,9 +474,19 @@ namespace IdleRPG.UI
             Button button = hit.gameObject.AddComponent<Button>();
             button.targetGraphic = hit;
             button.transition = Selectable.Transition.None;
-            button.onClick.AddListener(SkipClicked);
+            button.onClick.AddListener(AdvanceClicked);
+
+            // The skip button sits above the full-screen advance surface, so it wins its own taps.
+            skipButton = UiRuntime.CreateButton(skipRoot.transform, "SkipScene", "SKIP SCENE",
+                new Vector2(0.72f, 0.90f), new Vector2(0.96f, 0.975f), SkipClicked,
+                UiTheme.PanelLight, null, UiType.Role.Small);
 
             skipRoot.SetActive(false);
+        }
+
+        private void AdvanceClicked()
+        {
+            advanceAction?.Invoke();
         }
 
         private void SkipClicked()

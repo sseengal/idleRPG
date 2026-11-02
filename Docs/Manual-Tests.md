@@ -430,17 +430,20 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 - If it does not, the gate or the pending-scene bind is broken (`Story-Scenes.md` §7, boot order).
 
 ### The scene
-- Three Guard actors walk in from the left: Knight, Mage, Soldier. They stop without overlapping.
+- Soldier walks in first, Mage second, Knight last. Knight settles right/front.
 - One Slime creeps in from the right and stops inside the frame.
-- The first story line shows the speaker name in gold immediately, then the words type out one character at a time.
-- Each later line finishes the previous line before it starts typing.
+- The normal battle feed hides; one story line appears in the log box.
+- The speaker name appears in gold immediately, then the words type one character at a time.
+- `TAP TO CONTINUE` completes the line; tap again moves to the next line.
+- A long word starts on the next line as a whole; it never jumps lines halfway through typing.
+- Older story lines disappear; only the current line is visible.
 - No damage numbers, no HP changes, no swings for the whole scene.
-- The battle log stays visible and readable.
+- The log box stays visible and readable.
 
 ### Controls
-- Tap while a line is typing: the line completes immediately, then the scene ends. The wave spawns.
-- Tap again: nothing happens.
-- Let a scene run past its cap on purpose (temporarily set a beat time too high): it still ends.
+- Tap while a line is typing: the line completes. Tap again: the next line starts.
+- `SKIP SCENE` ends the whole scene; the wave spawns.
+- Let a scene run past its cap on purpose (temporarily set a beat time too high): it still ends at the 120 s cap.
 - Background the app for 10 s, return: no stuck wave, no replay, no duplicate actors.
 
 ### After the scene
@@ -457,6 +460,8 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 - Wave 1 spawns behind the scene, or twice.
 - Two scenes play at once.
 - The log shows combat lines inside the scene.
+- Old story lines pile up above the current line.
+- A full-screen tap ends the whole scene instead of advancing.
 - The scene plays behind the Upgrades page.
 - A tap does nothing, or a second tap restarts it.
 

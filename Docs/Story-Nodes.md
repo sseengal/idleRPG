@@ -36,19 +36,19 @@ they are not evil. They only do what the light tells them.
 
 ---
 
-## 3. `S01_Intro` — final (30 Oct 2026)
+## 3. `S01_Intro` — final (2 Nov 2026)
 
 **Plays:** before wave 1 of stage 1 (`BeforeWave`, stage 1, wave 1).
-**Length:** 48.4 s of content. Hard cap 54 s. Skippable. Once per stage.
-**Bubble:** symbols only. **Log:** nine lines.
+**Length:** 48.4 s of automatic content. Hard cap 120 s real time. Skippable. Once per stage.
+**Interaction:** tap after each spoken line. **Bubble:** symbols only. **Log:** one line at a time.
 
 ### Actors
 
 | Id | Screen name | Art set | Facing | Notes |
 |---|---|---|---|---|
-| `knight` | Knight | `Knight_Art` | right | Enters first |
-| `mage` | Mage | `Wizard_Art` | right | Sees the forest is alive |
-| `soldier` | Soldier | `Soldier_Art` | right | Speaks first and last before the order |
+| `knight` | Knight | `Knight_Art` | right | Enters last, right/front. Glances right at 25.3 s |
+| `mage` | Mage | `Wizard_Art` | right | Enters second, middle. Sees the forest is alive |
+| `soldier` | Soldier | `Soldier_Art` | right | Enters first, left/back. Speaks first and last before the order |
 | `slime` | Slime | `Slime_Art` | left | Creeps in at 28.3 s |
 
 Art sets live in `Assets/IdleRPG/Data/Characters/`. The Mage uses `Wizard_Art`; the screen name stays “Mage”.
@@ -58,9 +58,9 @@ Art sets live in `Assets/IdleRPG/Data/Characters/`. The Mage uses `Wizard_Art`; 
 | Time | Verb | Actor | Spot (x/y) | Duration | Text | Bubble |
 |---|---|---|---|---|---|---|
 | 0.0 | — | — | — | — | Empty forest. Fade reveals it | — |
-| 0.5 | Enter | knight | .20 / .40 | 1.2 | — | — |
+| 0.5 | Enter | soldier | .20 / .40 | 1.2 | — | — |
 | 1.0 | Enter | mage | .31 / .33 | 1.2 | — | — |
-| 1.5 | Enter | soldier | .42 / .27 | 1.2 | — | — |
+| 1.5 | Enter | knight | .42 / .27 | 1.2 | — | — |
 | 4.2 | Bubble | soldier | — | — | — | `?` |
 | 4.8 | Say | soldier | — | — | Something's wrong here. There's not a single bird, not even an insect. | — |
 | 9.0 | Bubble | knight | — | — | — | `!` |
@@ -71,8 +71,8 @@ Art sets live in `Assets/IdleRPG/Data/Characters/`. The Mage uses `Wizard_Art`; 
 | 18.6 | Say | soldier | — | — | You could've mentioned that before we walked in! | — |
 | 22.0 | Bubble | mage | — | — | — | `!` |
 | 22.5 | Say | mage | — | — | Quiet. Something's moving. | — |
-| 25.3 | WalkTo | knight | .24 / .40 | 1.0 | Looks right | — |
-| 26.5 | WalkTo | knight | .20 / .40 | 1.0 | Looks back | — |
+| 25.3 | WalkTo | knight | .46 / .27 | 1.0 | Looks right | — |
+| 26.5 | WalkTo | knight | .42 / .27 | 1.0 | Looks back | — |
 | 28.3 | Enter | slime | .80 / .40 | 2.8 | Slow creep | — |
 | 31.7 | Bubble | slime | — | — | — | `…` |
 | 32.3 | Bubble | knight | — | — | — | `!` |
@@ -106,19 +106,23 @@ Knight: Weapons ready!
 
 No line explains the shard, the king, or time. The player already saw the video.
 
-On screen, the speaker name appears first in gold, then the words type at 45 characters per second. The
-store keeps the whole line; the typewriter is only a view effect. See `Battle-Log.md`.
+On screen, the log switches to **one-line story mode**: the normal feed hides, the speaker name appears in
+gold, and the words type at 45 characters per second. `TAP TO CONTINUE` completes the line; the next tap
+moves on. `SKIP SCENE` ends the whole scene. The store keeps the whole line; the typewriter is only a view
+effect. See `Battle-Log.md`.
 
 ### What this scene must prove
 
-1. The party walks in, settles, and does not start talking immediately.
+1. Soldier walks in first, then Mage, then Knight; Knight settles right/front.
 2. The pauses are visible. No line or bubble sneaks into a pause.
 3. Seven bubbles, one at a time, above the correct speaker.
-4. Knight's two small steps read as a glance, not a walk to a new place.
+4. Knight's two small steps read as a glance, and he stays right/front.
 5. The slime takes about 2.8 s to arrive. It does not pop in.
-6. Nine lines reach the log once, in order, with the right speaker.
+6. The log shows one line at a time; tap finishes the typing, then moves on.
 7. Combat stays frozen; the wave spawns once after “Weapons ready!” and the fade.
-8. Skip and the 54 s cap both end the scene cleanly.
+8. Skip and the 120 s cap both end the scene cleanly.
+9. Knight draws in front of Mage, and Mage in front of Soldier.
+10. The final attack swing finishes before the fade to black.
 
 Wave 1 is pinned to **one Slime** (stage 1, wave 1) so the wave matches the single slime on screen.
 The pin is a `WaveSizeOverride` in `BalanceConfig`: stage 1, wave 1, count 1.
@@ -175,8 +179,9 @@ The scene does **not** grant the shard. The grant is a game rule outside the sce
 | Mid length | 5-8 s |
 | Outro length | 8-12 s |
 | Pauses | Intro 0.8-1.6 s. Mid 0.4-0.8 s. Outro 0.6-1.0 s |
-| Hard cap | Planned content + 5-8 s |
-| Skip | Always on |
+| Hard cap | Timed scene: content + 5-8 s. Tap mode: 120 s real-time safety net |
+| Tap to continue | Optional per scene. One tap per spoken line; first tap finishes typing |
+| Skip | Always on; separate `SKIP SCENE` button |
 | Scenes that grant rewards | None. Ever |
 
 Why: the node intro is the one place to spend time, and it plays once per stage. A player who skips loses

@@ -35,7 +35,7 @@ manual call.
 | `StoryScheduleDef` | asset | when a scene plays | yes - one new row per scene |
 | `StoryService` | Core | holds the schedule, holds the fight, queues scenes | no |
 | `StoryPlayer` | UI | walks beats on real time; skip; hard cap | no |
-| `StoryLayer` | UI | actors, bubble, skip hint, hide the board | no |
+| `StoryLayer` | UI | actors, bubble, advance surface, skip button, hide the board | no |
 
 Why the schedule is separate from the scene: the same scene may play in more than one place, and two
 scenes may be due at the same moment. Putting the trigger inside the scene asset looks simpler today and
@@ -68,8 +68,9 @@ enum PlayLimit  { EveryTime, OncePerStage, OncePerRun }
 |---|---|---|---|
 | `id` | string | required | Stable id. Used by save and random rolls. Never rename after ship |
 | `pauseBattle` | bool | true | Stop the fight for the whole scene |
-| `skippable` | bool | true | One tap (or Space) ends it |
-| `hardCapSeconds` | float | 14 | Ends the scene even if a beat is wrong. Never 0 |
+| `skippable` | bool | true | The separate `SKIP SCENE` button can end it |
+| `waitForContinue` | bool | false | Wait after every `Say`; first tap finishes typing, second moves on |
+| `hardCapSeconds` | float | 14 | Real-time stop. Never 0 |
 | `actors` | `StoryActorDef[]` | required | Up to 6 in v1 |
 | `beats` | `StoryBeat[]` | required | Sorted by `time` on validate |
 
@@ -83,6 +84,8 @@ Rules:
 - `Enter` start side is inferred: `spot.x < 0.5` walks in from the left edge, else from the right.
 - `Say` stores `displayName` as the speaker and `text` as the words. The log colours the name gold
   and types the words at 45 characters per second. The scene never writes raw log text or markup.
+- When `waitForContinue` is on, the scene clock stops after each `Say`. The first tap finishes the
+  typing; the second tap resumes. The prompt is at the bottom of the one-line story box.
 - `Bubble` shows one symbol, or 1-3 words when `bubble = Word`. Bubble symbols are instant; the
   typewriter applies to the log, not the bubble.
 - `End` finishes early. The hard cap is the safety net.
@@ -242,8 +245,8 @@ These rules hold for every scene, at every cue.
 | **Hide** | Formation board, enemy stack and ability band hide. The battle log stays visible and readable |
 | **Abilities** | `RequestAbility` returns false while paused. No cast can queue behind a scene |
 | **One at a time** | A second play request is ignored or queued. Never two scenes |
-| **Skip** | One tap, or Space. A second tap does nothing. Skipping loses nothing |
-| **Hard cap** | Real time, not fight time. A broken beat can never trap the player |
+| **Skip** | The separate `SKIP SCENE` button ends the scene. A full-screen tap or Space advances the current line; it never skips the whole scene |
+| **Hard cap** | Real time (120 s on `S01_Intro`), never the paused scene clock. A broken or idle scene cannot hold the wave forever |
 | **Real time** | `Time.unscaledDeltaTime`. A long frame jumps to the beat it should be on |
 | **Background** | Return after the cap: the scene ends. No stuck state, no replay |
 | **Resume** | The held wave spawns with the same stage, wave and formation |
@@ -257,14 +260,33 @@ Bubble rules:
 - The bubble hides when its actor moves. It never follows mid-walk.
 - Symbols only by default. A word bubble is 1-3 words and never a full sentence.
 
+Actor depth:
+
+- A lower `y` is nearer the camera. `StoryLayer` sorts visible actors by `y` and draws the front actor
+  last; the actor array order is not the draw order.
+- Current intro: Knight `.27` in front, Mage `.33` in the middle, Soldier `.40` at the back.
+
+End and tap rules:
+
+- Tapping after a line sets the scene clock to the next beat, so the next beat starts immediately.
+  The old absolute-time gap is not paid twice.
+- `End` waits while any visible actor still has a one-shot clip. The final swing finishes before the
+  fade to black.
+
 Log rules:
 
 - `BattleLogKind.Dialogue`, written by `BattleLog.Say(name, line)`.
-- Story lines type out at **45 characters per second** in real time. The speaker name appears at once,
-  then the words reveal one character at a time. Combat lines always appear whole.
-- A new line finishes the previous one first. Ending or skipping a scene finishes the current line.
-- The log store keeps the full text, so a page rebuild shows complete history, never half-typed lines.
+- While a scene plays, the log switches to **one-line story mode**: the normal feed hides, the current
+  line is the only text, and a prompt sits at the bottom. Previous story lines are replaced.
+- Story lines type at **45 characters per second** in real time. The complete sentence is laid out
+  once and TMP reveals it with `maxVisibleCharacters`, so wrapping is decided from the whole word and
+  never reflows mid-word. The speaker name appears at once. Combat lines always appear whole.
+- With `waitForContinue`, the scene clock stops after each line. `TAP TO CONTINUE` completes the typewriter;
+  tap again resumes. A separate `SKIP SCENE` button ends the whole scene.
+- The log store keeps the full text, but `Dialogue` entries are hidden from the normal feed. Story lines
+  never reappear as a wall after the scene. Combat history is preserved.
 - Speaker names are gold; the words are near-white. All log lines use the 48 VT323 role.
+- The hard cap is real time (120 s on `S01_Intro`), so a waiting scene cannot hold the wave forever.
 
 ### Transitions (built 30 Oct 2026)
 
@@ -328,8 +350,9 @@ Assets/IdleRPG/Data/Story/
 
 ### Add a scene
 
-**Fast path (current assets):** edit `AgentScripts/SeedStoryAssets.cs`, then rerun its seeder. The seeder
-deletes and recreates `S01_Intro.asset` and `Stage01_Schedule.asset`, so review the diff after it runs.
+**Fast path (current assets):** edit `AgentScripts/SeedStoryAssets.cs`, then rerun its seeder. It updates
+the existing `S01_Intro.asset` and `Stage01_Schedule.asset` in place, so their GUIDs and scene references stay
+valid. Review the diff after it runs.
 
 **Normal path (new scene):**
 
@@ -350,9 +373,10 @@ If step 8 needs code, the structure is wrong. Fix the structure, not the scene.
 
 `S01_Intro` is the reference scene:
 
-- four actors: `knight`, `mage`, `soldier` on the right, `slime` on the left;
-- 27 beats, 48.4 s of content, 54 s hard cap;
-- 9 `Say` lines and 7 bubbles;
+- four actors: `soldier`, `mage`, `knight` on the right, `slime` on the left;
+- 27 beats, 48.4 s of automatic content, 120 s real-time cap;
+- 9 `Say` lines and 7 bubbles; the player taps after each spoken line;
+- Soldier enters first, Mage second, Knight last on the right/front; Knight's glance stays right;
 - party enters, pauses, talks, looks around, slime creeps in, knight calls weapons ready,
   `Attack01` flourish, `End`;
 - stage 1, wave 1 is pinned to exactly one Slime so the wave matches the picture.
@@ -427,7 +451,7 @@ same wave today; keep the order anyway.
 | `Scripts/UI/BattlePageFocus.cs` | Log grows; ability band fades out and becomes inert. |
 | `Scripts/UI/HudController.cs` | Creates `StoryPlayer`, binds it to `StoryService`, owns `CompleteStoryText`. |
 | `Scripts/Core/BattleLog.cs` | `Dialogue` kind, `Say(speaker, line)`, `Speaker` field. |
-| `Scripts/UI/CombatLogUI.cs` | Gold speaker, 48 VT323, typewriter, wrapping. See `Battle-Log.md`. |
+| `Scripts/UI/CombatLogUI.cs` | Story mode, one-line story view, prompt, typewriter, wrapping. See `Battle-Log.md`. |
 | `Scripts/Combat/CombatManager.cs` | `RequestAbility` returns false while paused; `ResumeAfterGate`. |
 | `Scripts/Debug/DebugHotkeys*.cs` | `P` replays the wired debug scene. |
 | `Scripts/Data/BalanceConfig.cs` + `WaveComposition.cs` | Authored wave size override. |
@@ -437,7 +461,7 @@ same wave today; keep the order anyway.
 
 | Asset / object | Job |
 |---|---|
-| `Data/Story/Stage01/S01_Intro.asset` | Current intro: 4 actors, 27 beats, 48.4 s content, 54 s cap. |
+| `Data/Story/Stage01/S01_Intro.asset` | Current intro: 4 actors, 27 beats, 48.4 s content, 120 s cap, `waitForContinue` on. |
 | `Data/Story/Stage01/Stage01_Schedule.asset` | One `BeforeWave` rule: stage 1, wave 1, `OncePerStage`, priority 10. |
 | `Data/Config/BalanceConfig.asset` | `waveSizeOverrides`: stage 1, wave 1, count 1. |
 | `HudController.debugStoryScene` | Scene used by `P`. |
@@ -460,7 +484,8 @@ One call each; no new system:
 - The battle page is not forced when a scene starts. A scene behind a menu is still possible.
 - Play limits are memory-only. A relaunch can replay a "once" scene.
 - `StageCleared`, `Defeat` and `Manual` cues are defined, not hooked.
-- Word bubbles are not typewritten; only log dialogue is.
+- Word bubbles are not typewritten; only the one-line story box is.
+- With `waitForContinue`, an idle player holds the wave until the 120 s real-time cap. The skip button is the escape.
 
 ---
 
@@ -472,7 +497,7 @@ One call each; no new system:
 | 2 | Build `StoryLayer` + `StoryPlayer`; `P` plays the scene over a live fight | 3 heroes and 1 slime enter; bubbles and 9 log lines; wave resumes |
 | 3 | Add the `Dialogue` log kind + the ability pause guard | 9 typed lines, gold names, no cast queued |
 | 4 | Add `StoryService` and the `BeforeWave` gate | Press Play -> intro -> wave 1. Once. One Slime. No double spawn |
-| 5 | Skip, hard cap, background, phone aspect | Tap completes the line and skips. Return from background leaves no stuck state |
+| 5 | Skip, hard cap, background, phone aspect | Tap completes the line; second tap advances; `SKIP SCENE` ends. Return from background leaves no stuck state |
 | 6 | `Run All Checks` + manual QA | PASS, 31/31 EditMode; phone pass still open |
 
 `AfterWave`, `StageCleared` and `Defeat` are specified here but **not built** in the first slice. Each is a
@@ -487,13 +512,15 @@ single hook when its scene exists.
 - Board and enemy stack hide; the log stays visible.
 - Six actors stay inside the frame on a tall and a short phone.
 - Bubble sits above the head, never leaves the frame.
-- Skip works by tap. A second tap does nothing. The current line completes first.
+- Skip works by tap on the separate `SKIP SCENE` button. A second tap does nothing. The current line completes first.
+- Tap-to-continue: first tap completes the typed line, second tap advances.
+- The story box shows one line only; old dialogue does not reappear in the combat feed.
 - Hard cap ends a scene with a broken beat and completes its line.
 - Background and return: no stuck wave, no replay.
 - Queue: two scenes at the same wave both play, in priority order.
 - `Random` rule plays the same waves after a relaunch.
 - A wave never spawns twice, and no wave is skipped.
-- Story log: name gold, words near-white, 48 VT323, typed at 45 cps; combat lines whole.
+- Story log: name gold, words near-white, 48 VT323; combat lines whole.
 - Wave 1: exactly one Slime, matching the single slime on screen.
 - Zero console errors.
 

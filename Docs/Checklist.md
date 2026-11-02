@@ -13,7 +13,7 @@
 | Field | Value |
 |---|---|
 | Current step | **Foundation Phase 2D built 29 Oct 2026**: camp choice cards are prefabs. Phase 2 owner check pending. Then B8' proof lap and B9' shipping checklist. **No open feature work**: ability assignments ship in the save (v7) and boss moves are content-only (`EnemyData.abilities`, no code change). Then **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
-| Story slice (new, 29 Oct 2026) | **Steps 1-4, transitions, intro rewrite, wave pin and log fixes built (30 Oct).** Arena fade 0.35 s, log focus 0.30 s. `S01_Intro`: 4 actors, 27 beats, 48.4 s, cap 54. Wave 1 pinned to one Slime. All battle-log lines use 48 VT323; speaker names are gold over near-white words; story text types at 45 cps. `Run All Checks` PASS, 31/31 EditMode tests. **Open: phone aspect, real device background, force battle page.** Canon: `Story-Canon.md`. System: `Story-Scenes.md`. Script: `Story-Nodes.md` |
+| Story slice (new, 29 Oct 2026) | **Steps 1-4, transitions, intro rewrite, wave pin and log fixes built (2 Nov).** Arena fade 0.35 s, log focus 0.30 s. `S01_Intro`: 4 actors, 27 beats, 48.4 s automatic content, 120 s tap-mode cap. Soldier enters first; Knight last/right/front. One-line story box with tap-to-continue. `Run All Checks` PASS, 31/31 EditMode tests. **Open: phone aspect, real device background, force battle page.** Canon: `Story-Canon.md`. System: `Story-Scenes.md`. Script: `Story-Nodes.md` |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money**, and **MVP = store-submittable** (§1p). The gate stands for NEW systems: abilities, gear and the roster swap shipped after it, so read it as "no zones / affixes / relics before the base is done" |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
@@ -67,16 +67,17 @@ System (must exist before content grows):
 - [x] `StoryService` (matching, queue, hold, resume).
 - [x] Cues: `BeforeWave` and `AfterWave` are live. `StageCleared`, `Defeat`, `Manual` are data only.
 - [x] Random wave injection is deterministic (FNV-1a of scene id + stage + wave + rule index), so a relaunch never re-rolls.
-- [x] Six actor slots, one bubble, one skip hint. Offline card no longer opens at boot.
+- [x] Six actor slots, one bubble, one full-screen advance surface, one `SKIP SCENE` button. Offline card no longer opens at boot.
 - [x] `BattleLogKind.Dialogue` and `BattleLog.Say(name, line)`. `RequestAbility` refuses while paused.
 
 Content (node 1, `S01_Intro`):
-- [x] Actors: Knight, Mage, Soldier walk in from the left; one Slime creeps in from the right.
-- [x] 27 beats, 48.4 s of content, cap 54 s, nine log lines, seven bubbles. Script in `Story-Nodes.md` §3.
+- [x] Actors: Soldier walks in first, Mage second, Knight last and right/front; one Slime creeps in from the right.
+- [x] 27 beats, 48.4 s of automatic content, 120 s real-time cap, nine spoken lines, seven bubbles. Script in `Story-Nodes.md` §3.
 - [x] Hard rules: no rewards, no mechanics explained, every scene skippable.
 - [x] Pin stage 1 wave 1 to one Slime (`WaveSizeOverride`: stage 1, wave 1, count 1). Verified `ResolveCount(1,1)=1`; wave 2 stays 2.
 - [x] Battle log: long lines wrap, per-line height grows, all lines use the 48 VT323 Dialogue role, and speaker names are gold over near-white words (30 Oct).
-- [x] Story typewriter: speaker name appears at once, words reveal at 45 characters per second, new lines finish the old one, and scene end/skip completes the current line (30 Oct).
+- [x] Story typewriter: one-line story mode, name at once, words at 45 cps, `TAP TO CONTINUE` for both finish and advance, `SKIP SCENE` separate, scene end/skip completes the line (2 Nov).
+- [x] Story pacing/depth: tap jumps to the next beat immediately; Knight draws in front, then Mage, then Soldier; final attack clip finishes before the fade (2 Nov).
 
 Presentation (30 Oct 2026):
 - [x] Arena-only fade (`StageTransition`, cover/reveal 0.35 s, scene time starts after reveal).
@@ -90,11 +91,11 @@ Build order (test after every step):
 - [x] 3. `BattleLogKind.Dialogue` + `RequestAbility` pause guard. Verified 29 Oct: three dialogue lines carry the Dialogue kind; a cast is refused while the scene owns the screen.
 - [x] 4. `StoryService` + `BeforeWave` gate at stage 1, wave 1. Verified 29 Oct: gate holds wave 1, 3 dialogue lines, wave spawns once, `OncePerStage` blocks a replay, combat resumes.
 - [~] 5. Skip, hard cap, background return, tall/short phone aspect. Skip, cap and the huge-delta/background jump pass 29 Oct. **Phone aspect and a real device background test are still open.**
-- [~] 6. Manual QA + `Run All Checks`. `Run All Checks` **PASS**, 31/31 EditMode tests pass 30 Oct. The phone checklist (`Manual-Tests.md` §2o) is still open.
+- [~] 6. Manual QA + `Run All Checks`. `Run All Checks` **PASS**, 31/31 EditMode tests pass 2 Nov. The phone checklist (`Manual-Tests.md` §2o) is still open.
 
 Acceptance: press Play -> intro plays once -> wave 1 spawns. No double spawn. Fight frozen for the whole
-scene. Log reads as dialogue, typed one character at a time with a gold speaker name. Tap completes the line
-and skips. Node 2 is not written until this passes.
+scene. One story line at a time, gold speaker name, typed text. First tap finishes the line; second tap
+advances. `SKIP SCENE` ends the scene. Node 2 is not written until this passes.
 
 ## 1d. Compounding upgrades (B3d)  ·  **built + measured 2026-09-25**
 

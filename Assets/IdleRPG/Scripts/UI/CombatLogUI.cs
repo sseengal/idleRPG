@@ -87,6 +87,17 @@ namespace IdleRPG.UI
         /// <summary>History redraws must not replay the effect on an old line.</summary>
         private bool suppressTyping;
 
+        // Story mode: one line at a time, normal feed hidden, prompt at the bottom.
+        private GameObject storyPanel;
+        private TextMeshProUGUI storyText;
+        private TextMeshProUGUI storyPrompt;
+        private BattleLogEntry storyEntry;
+        private bool storyMode;
+        private bool storyWaiting;
+        private bool storyTyping;
+        private int storyChars;
+        private float storyCarry;
+
         private void Awake()
         {
             wired = lineTemplate != null && content != null;
@@ -105,6 +116,28 @@ namespace IdleRPG.UI
             {
                 pool.Enqueue(CreateLine());
             }
+
+            BuildStoryPanel();
+        }
+
+        private void BuildStoryPanel()
+        {
+            RectTransform panel = UiRuntime.CreateNode("StoryMode", transform).GetComponent<RectTransform>();
+            storyPanel = panel.gameObject;
+            UiRuntime.Stretch(panel, UiSpace.Medium, UiSpace.Small, UiSpace.Medium, UiSpace.Base);
+
+            storyText = UiRuntime.CreateText(panel, "Line", string.Empty,
+                UiType.Role.Dialogue, TextAlignmentOptions.TopLeft, UiTheme.Text);
+            storyText.textWrappingMode = TextWrappingModes.Normal;
+            storyText.richText = true;
+            UiRuntime.Anchor(storyText.rectTransform, new Vector2(0f, 0.18f), Vector2.one);
+
+            storyPrompt = UiRuntime.CreateText(panel, "Prompt", "TAP TO CONTINUE",
+                UiType.Role.Small, TextAlignmentOptions.Center, UiTheme.AccentLight);
+            UiRuntime.Anchor(storyPrompt.rectTransform, Vector2.zero, new Vector2(1f, 0.16f));
+            storyPrompt.gameObject.SetActive(false);
+
+            storyPanel.SetActive(false);
         }
 
         /// <summary>
@@ -115,6 +148,22 @@ namespace IdleRPG.UI
         {
             BattleLog.Appended += OnAppended;
             BattleLog.Cleared += OnCleared;
+
+            if (storyMode)
+            {
+                if (storyPanel != null)
+                {
+                    storyPanel.SetActive(true);
+                }
+
+                if (scrollRect != null)
+                {
+                    scrollRect.gameObject.SetActive(false);
+                }
+
+                return;
+            }
+
             Rebuild();
         }
 
@@ -123,6 +172,7 @@ namespace IdleRPG.UI
             BattleLog.Appended -= OnAppended;
             BattleLog.Cleared -= OnCleared;
             StopTyping();
+            StopStoryTyping();
         }
 
         /// <summary>Redraws the window from the store: oldest first, newest last.</summary>
@@ -142,6 +192,13 @@ namespace IdleRPG.UI
 
             for (int i = first; i < entries.Count; i++)
             {
+                // Story dialogue is a scene view, not feed history. Keep it out of the normal log
+                // even after the scene ends; the store still holds the entry.
+                if (entries[i].Kind == BattleLogKind.Dialogue)
+                {
+                    continue;
+                }
+
                 Append(entries[i]);
             }
 
@@ -150,6 +207,16 @@ namespace IdleRPG.UI
 
         private void OnAppended(BattleLogEntry entry)
         {
+            if (storyMode)
+            {
+                if (entry.Kind == BattleLogKind.Dialogue)
+                {
+                    ShowStory(entry);
+                }
+
+                return;
+            }
+
             Append(entry);
         }
 
@@ -164,6 +231,13 @@ namespace IdleRPG.UI
         /// </summary>
         private void LateUpdate()
         {
+            if (storyMode)
+            {
+                AdvanceStoryTyping();
+                UpdateStoryPrompt();
+                return;
+            }
+
             AdvanceTyping();
 
             if (contentDirty)
@@ -274,24 +348,211 @@ namespace IdleRPG.UI
 
         private string DisplayText(BattleLogEntry entry, string body)
         {
+            return FormatLine(entry.Speaker, body);
+        }
+
+        private string FormatLine(string speaker, string body)
+        {
             if (body == null)
             {
                 body = string.Empty;
             }
 
-            if (string.IsNullOrEmpty(entry.Speaker))
+            if (string.IsNullOrEmpty(speaker))
             {
                 return body;
             }
 
             string gold = ColorUtility.ToHtmlStringRGB(UiTheme.AccentLight);
-            return $"<color=#{gold}>{entry.Speaker}</color>: {body}";
+            return $"<color=#{gold}>{speaker}</color>: {body}";
+        }
+
+        /// <summary>Hides the normal feed and shows the one-line story view in the same log box.</summary>
+        public void BeginStory()
+        {
+            if (!wired)
+            {
+                return;
+            }
+
+            storyMode = true;
+            storyWaiting = false;
+            storyTyping = false;
+            storyChars = 0;
+            storyCarry = 0f;
+            storyEntry = default;
+
+            StopTyping();
+
+            if (storyPanel != null)
+            {
+                storyPanel.SetActive(true);
+            }
+
+            if (scrollRect != null)
+            {
+                scrollRect.gameObject.SetActive(false);
+            }
+
+            if (storyText != null)
+            {
+                storyText.SetText(string.Empty);
+                storyText.maxVisibleCharacters = 0;
+            }
+
+            if (storyPrompt != null)
+            {
+                storyPrompt.gameObject.SetActive(false);
+            }
+        }
+
+        /// <summary>Puts the normal feed back. Story lines stay out of the feed.</summary>
+        public void EndStory()
+        {
+            if (!storyMode)
+            {
+                return;
+            }
+
+            storyMode = false;
+            storyWaiting = false;
+            StopStoryTyping();
+
+            if (storyPanel != null)
+            {
+                storyPanel.SetActive(false);
+            }
+
+            if (scrollRect != null)
+            {
+                scrollRect.gameObject.SetActive(true);
+            }
+
+            Rebuild();
+        }
+
+        /// <summary>Shows or hides the tap prompt for the current line.</summary>
+        public void SetStoryWaiting(bool waiting)
+        {
+            if (!storyMode)
+            {
+                return;
+            }
+
+            storyWaiting = waiting;
+            UpdateStoryPrompt();
         }
 
         /// <summary>
-        /// Reveals the current story line. Time is unscaled, so pausing the fight cannot stall the text.
-        /// The row height is measured only when the visible text needs another row.
+        /// Finishes the current story line. Returns true when it actually completed typing, so the
+        /// first tap can finish the text and the second tap can advance.
         /// </summary>
+        public bool CompleteStoryTyping()
+        {
+            if (!storyMode || !storyTyping)
+            {
+                return false;
+            }
+
+            if (storyText != null)
+            {
+                storyText.maxVisibleCharacters = int.MaxValue;
+            }
+
+            storyTyping = false;
+            UpdateStoryPrompt();
+            return true;
+        }
+
+        private void ShowStory(BattleLogEntry entry)
+        {
+            storyEntry = entry;
+            storyWaiting = false;
+            storyChars = 0;
+            storyCarry = 0f;
+
+            string body = entry.Text ?? string.Empty;
+            storyTyping = typewriter && typewriterCharsPerSecond > 0f && body.Length > 0;
+
+            if (storyText != null)
+            {
+                storyText.color = ColorFor(BattleLogKind.Dialogue);
+
+                // Lay out the complete sentence once. Wrapping then uses whole words and never
+                // reflows when the next character arrives.
+                storyText.SetText(DisplayText(entry));
+                storyText.maxVisibleCharacters = storyTyping
+                    ? StoryPrefixCharacters(entry)
+                    : int.MaxValue;
+            }
+
+            UpdateStoryPrompt();
+        }
+
+        private int StoryPrefixCharacters(BattleLogEntry entry)
+        {
+            return string.IsNullOrEmpty(entry.Speaker) ? 0 : entry.Speaker.Length + 2;
+        }
+
+        private void AdvanceStoryTyping()
+        {
+            if (!storyTyping || storyText == null)
+            {
+                return;
+            }
+
+            string body = storyEntry.Text ?? string.Empty;
+
+            if (!typewriter || typewriterCharsPerSecond <= 0f || body.Length == 0)
+            {
+                CompleteStoryTyping();
+                return;
+            }
+
+            storyCarry += typewriterCharsPerSecond * Time.unscaledDeltaTime;
+            int shown = storyChars + Mathf.FloorToInt(storyCarry);
+
+            if (shown >= body.Length)
+            {
+                CompleteStoryTyping();
+                return;
+            }
+
+            if (shown <= storyChars)
+            {
+                return;
+            }
+
+            storyCarry -= shown - storyChars;
+            storyChars = shown;
+            storyText.maxVisibleCharacters = StoryPrefixCharacters(storyEntry) + storyChars;
+        }
+
+        private void UpdateStoryPrompt()
+        {
+            if (storyPrompt == null)
+            {
+                return;
+            }
+
+            bool show = storyMode && storyWaiting;
+            storyPrompt.gameObject.SetActive(show);
+
+            if (!show)
+            {
+                return;
+            }
+
+            storyPrompt.SetText("TAP TO CONTINUE");
+        }
+
+        private void StopStoryTyping()
+        {
+            storyTyping = false;
+            storyChars = 0;
+            storyCarry = 0f;
+        }
+
         private void AdvanceTyping()
         {
             if (!typingActive)

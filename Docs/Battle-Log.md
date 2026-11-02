@@ -17,7 +17,7 @@ The battle log is a **history store plus one view**.
 - `CombatLogUI` is a view only. It shows the newest **100** lines, recycles old labels, and never
   drops or merges a line.
 - It stays visible while a story scene plays. The fight is frozen, so story lines never mix with
-  damage lines.
+  damage lines. During a scene the view switches to **one-line story mode**; the normal feed returns after.
 - Hiding the battle page does not lose history. The view redraws from the store when it returns.
 
 Two rules matter for every future change:
@@ -52,6 +52,7 @@ Heal, Guard, Gold, Event, Defeat, System, Dialogue
 ```
 
 `Dialogue` means a story line. It is the only kind that has a speaker and the only kind that types.
+During a scene it is shown in the one-line story box; it is filtered out of the normal feed after the scene.
 
 ### Write API
 
@@ -95,10 +96,13 @@ Stored result:
 | `BattleLog.Clear()` | Clears the store and tells views. `Install` also writes `-- session resumed --`. |
 | View `OnEnable` | Subscribes, clears labels, redraws every entry in the visible window. |
 | New entry | `Append` adds to store, then calls every listener. |
-| View `Append` | Rents a label, moves it to the end, paints it, starts typing if it is a story line. |
-| View `LateUpdate` | Advances typing, rebuilds content height when needed, pins the newest line. |
+| View `Append` | In story mode, shows one `Dialogue` line in the story box; otherwise paints a feed line. |
+| View `LateUpdate` | Advances typing, updates the tap prompt, rebuilds content height, pins the newest line. |
 | View `OnDisable` | Unsubscribes and stops typing. The store is untouched. |
 | View trim | Oldest labels return to the pool. The store keeps its own 200. |
+
+**Story mode:** `BeginStory` hides the scroll feed, shows one line and a prompt, and keeps the store.
+`EndStory` restores the feed. `Rebuild` skips `Dialogue` entries, so old story lines never reappear as a wall.
 
 **Rebuild rule:** history redraws with `suppressTyping = true`. An old story line never replays its
 typewriter effect after a page switch.
@@ -179,33 +183,38 @@ Story lines type; combat lines do not.
 | `typewriter` | `true` | `CombatLogUI` Inspector |
 | `typewriterCharsPerSecond` | `45` | `CombatLogUI` Inspector |
 
-Behaviour:
+Story lines are shown in story mode only:
 
-1. The speaker name appears at once, followed by `: `.
-2. The body reveals left to right in **real time** (`Time.unscaledDeltaTime`).
-3. A new line finishes the previous line first.
-4. Scene end, hard cap or skip calls `HudController.CompleteStoryText()` and shows the whole line.
-5. Page rebuild shows full lines, not half-typed history.
-6. While typing, the row height is remeasured only when the visible text needs another row.
-7. The content height is marked dirty only when that height changes.
+- The speaker name appears at once, followed by `: `.
+- The complete sentence is laid out once; `maxVisibleCharacters` reveals it left to right in
+  **real time** (`Time.unscaledDeltaTime`). Wrapping is decided from the whole text, so a word never
+  jumps to a new line halfway through being typed.
+- `TAP TO CONTINUE` completes the typewriter; the next tap advances.
+- `SKIP SCENE` is a separate button; it is not the same tap.
+- Scene end, hard cap or skip calls `HudController.CompleteStoryText()` and shows the whole line.
+- Page rebuild shows full lines, not half-typed history.
+- There is no auto-advance; the scene uses a real-time hard cap.
 
 Relevant methods:
 
 | Method | Job |
 |---|---|
-| `CombatLogUI.Append` | Starts or skips typing for one entry. |
-| `CombatLogUI.AdvanceTyping` | Adds characters, updates the one label, marks height dirty only on a row change. |
-| `CombatLogUI.CompleteTyping` | Shows the whole current line. Public. |
+| `CombatLogUI.Append` | Paints one feed entry. Story entries use the story box instead. |
+| `CombatLogUI.BeginStory` / `EndStory` | Hides/restores the normal feed for a scene. |
+| `CombatLogUI.ShowStory` | Sets the one current story line and starts its typewriter. |
+| `CombatLogUI.AdvanceStoryTyping` | Adds characters to the story line. |
+| `CombatLogUI.CompleteStoryTyping` | Shows the whole current line and returns true if it completed. |
+| `CombatLogUI.SetStoryWaiting` | Shows/hides `TAP TO CONTINUE`. |
 | `HudController.CompleteStoryText` | Called by `StoryPlayer.Finish`. |
-| `StoryPlayer.Finish` | Completes the line before the closing fade. |
+| `StoryPlayer.Advance` | First tap completes typing; second resumes the scene clock. |
 
-Typing state:
+Story typing state:
 
 ```
-typingActive, typingLabel, typingEntry, typingChars, typingCarry
+storyEntry, storyMode, storyWaiting, storyTyping, storyChars, storyCarry
 ```
 
-Only **one** line types at a time. `ClearLines`, `Return` and `OnDisable` stop typing safely.
+Only **one** line types at a time. `ClearLines`, `Return`, `EndStory` and `OnDisable` stop typing safely.
 
 Do not type the whole rich-text string blindly. Substringing `<color=...>` would break the tag. The
 view keeps `Speaker` and `Text` apart and rebuilds the string each tick.
