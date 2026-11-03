@@ -131,7 +131,7 @@ The first wave is **bats**. `S02_Rupture` establishes the bat panic; wave 1 foll
 
 **Asset:** the party is still walking right. The slime is gone. The ground shakes. Bats flee from the forest centre on the right and cross to the left. Two fly past; two stop ahead of the party. No combat.
 
-**Interaction:** automatic. Skippable. No tap-to-continue.
+**Interaction:** tap after each spoken line. **Bubble:** symbols only. **Log:** one line at a time.
 
 ### Actors
 

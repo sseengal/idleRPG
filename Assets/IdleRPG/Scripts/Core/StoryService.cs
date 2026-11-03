@@ -57,6 +57,7 @@ namespace IdleRPG.Core
         private readonly List<Candidate> candidates = new List<Candidate>();
         private readonly Dictionary<long, int> stageCounts = new Dictionary<long, int>();
         private readonly Dictionary<int, int> runCounts = new Dictionary<int, int>();
+        private StorySceneDef[] scheduledScenes;
 
         private SceneRequest request;
         private QueuedScene? current;
@@ -81,6 +82,42 @@ namespace IdleRPG.Core
 
         /// <summary>Scenes waiting after the current one.</summary>
         public int PendingCount => queue.Count + (current.HasValue ? 1 : 0);
+
+        /// <summary>
+        /// Unique scenes referenced by the schedule, in schedule order. Dev/test only; one place for the
+        /// scene deck, so tests cannot drift from the real placements.
+        /// </summary>
+        public StorySceneDef[] ScheduledScenes
+        {
+            get
+            {
+                if (scheduledScenes != null)
+                {
+                    return scheduledScenes;
+                }
+
+                if (schedule == null)
+                {
+                    scheduledScenes = Array.Empty<StorySceneDef>();
+                    return scheduledScenes;
+                }
+
+                List<StorySceneDef> scenes = new List<StorySceneDef>();
+
+                for (int i = 0; i < schedule.Rules.Length; i++)
+                {
+                    StorySceneDef scene = schedule.Rules[i].scene;
+
+                    if (scene != null && !scenes.Contains(scene))
+                    {
+                        scenes.Add(scene);
+                    }
+                }
+
+                scheduledScenes = scenes.ToArray();
+                return scheduledScenes;
+            }
+        }
 
         /// <summary>Binds the UI that can show scenes. Flushes a scene that was requested before the HUD existed.</summary>
         public void SetPlayer(SceneRequest player)

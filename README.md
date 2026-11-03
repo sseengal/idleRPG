@@ -128,6 +128,8 @@ app sandbox. Set a real `companyName` before store submission (it moves that pat
 | `B` / `A` / `R` / `S` | Watch ad for the gold boost, request ascension, resume after defeat, skip to the next stage |
 | `F` | Buy instant income (gem sink #2) through the real shop path |
 | `M` | Mute / unmute the placeholder SFX |
+| `P` | Replay the current scheduled story scene |
+| `PgUp` / `PgDn` | Play the previous / next scheduled story scene |
 | `L` | Log live state (stage, economy, rates, run stats, save info) |
 | `F8` / `F9` | **Full reset** (save + backups + PlayerPrefs + scene reload) / delete the save file only |
 

@@ -454,12 +454,15 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 - **Soldier:** “Watch out!”
 - **Mage:** “They're running from something.”
 - **Knight:** “Hold formation!”
+- Each spoken line waits for a tap. The first tap finishes the typing; the next tap moves on.
 - The two hovering bats remain in the way. No damage and no HP changes.
 - No battle happens before the second scene. The log and stage do not reset between the two scenes.
 
 ### Controls
-- Tap while a line is typing: the line completes. Tap again: the next line starts.
+- Tap while a line is typing: the line completes. Tap again: the next line starts. This applies to both scenes.
 - `SKIP SCENE` ends the whole scene; in scene 2, the wave still waits for the scene to finish.
+- Press `P` to replay the selected scheduled scene over the live fight.
+- Press `PgUp` / `PgDn` to play the previous / next scheduled story scene. These use the real schedule, not a separate test list.
 - Background the app for 10 s, return: no stuck wave, no replay, no duplicate actors.
 
 ### After the opening

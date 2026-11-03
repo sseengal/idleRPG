@@ -149,7 +149,7 @@ namespace IdleRPG.Data
         [SerializeField] private bool skippable = true;
 
         [Tooltip("Wait for a tap after every spoken line. First tap finishes typing, second moves on.")]
-        [SerializeField] private bool waitForContinue = false;
+        [SerializeField] private bool waitForContinue = true;
 
         [Tooltip("Hard stop in real seconds. Even a broken beat can never trap the player.")]
         [SerializeField] private float hardCapSeconds = 14f;
@@ -211,7 +211,7 @@ namespace IdleRPG.Data
 #if UNITY_EDITOR
         /// <summary>Editor-only content write used by the asset seeder. Runtime never calls it.</summary>
         public void EditorSetContent(string sceneId, StoryActorDef[] newActors, StoryBeat[] newBeats, float capSeconds,
-            bool tapToContinue = false)
+            bool tapToContinue = true)
         {
             id = sceneId ?? string.Empty;
             actors = newActors ?? Array.Empty<StoryActorDef>();

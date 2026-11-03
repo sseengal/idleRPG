@@ -69,7 +69,7 @@ enum PlayLimit  { EveryTime, OncePerStage, OncePerRun }
 | `id` | string | required | Stable id. Used by save and random rolls. Never rename after ship |
 | `pauseBattle` | bool | true | Stop the fight for the whole scene |
 | `skippable` | bool | true | The separate `SKIP SCENE` button can end it |
-| `waitForContinue` | bool | false | Wait after every `Say`; first tap finishes typing, second moves on |
+| `waitForContinue` | bool | true | Wait after every `Say`; first tap finishes typing, second moves on. Tap is the default for every scene. |
 | `hardCapSeconds` | float | 14 | Real-time stop. Never 0 |
 | `actors` | `StoryActorDef[]` | required | Any count; actor images are created on demand |
 | `beats` | `StoryBeat[]` | required | Sorted by `time` on validate |
@@ -366,11 +366,13 @@ and scene references stay valid. Review the diff after it runs.
 4. Fill `beats` in time order. Use `Enter` for the first appearance, `WalkTo` for later moves,
    `Place` to show an actor already at a spot, `Face` for a look left/right, `Shake` for a stage quake,
    `Bubble` for a symbol or short word, `Say` for a log line, `End` for an early finish.
-5. Set `hardCapSeconds` as a safety net. It is not pacing.
-6. Add one rule to the node's schedule (`Assets > Create > Idle RPG/Story/Story Schedule`, or the
+5. Leave `tapToContinue` on. It is the normal scene contract. Turn it off only for a scene with no spoken
+   lines.
+6. Set `hardCapSeconds` as a safety net. It is not pacing.
+7. Add one rule to the node's schedule (`Assets > Create > Idle RPG/Story/Story Schedule`, or the
    existing node schedule): cue, stage range, wave rule, scene, priority, play limit.
-7. Assign the schedule to `GameManager.storySchedule` in `Main.unity` if this is a new node schedule.
-8. Press Play. Check the gate, the fade, the log, the skip and the wave spawn.
+8. Assign the schedule to `GameManager.storySchedule` in `Main.unity` if this is a new node schedule.
+9. Press Play. Use `P` / `PgUp` / `PgDn` for the scene test deck.
 
 If step 8 needs code, the structure is wrong. Fix the structure, not the scene.
 
@@ -399,7 +401,20 @@ If step 8 needs code, the structure is wrong. Fix the structure, not the scene.
 - Knight: “Hold formation!”;
 - wave 1 starts with the two hovering bats.
 
-Use it as the shape for a new intro, but do not copy its words. The script lives in `Story-Nodes.md`.
+### Testing scenes
+
+The test deck reads `StoryService.ScheduledScenes`, so it always uses the real schedule:
+
+- `P` replays the selected scene over the live fight.
+- `PgUp` plays the previous scheduled scene.
+- `PgDn` plays the next scheduled scene.
+
+The deck does not keep a second scene list. A scene added to `Stage01_Schedule.asset` appears in the deck
+automatically. Scenes already playing are ignored.
+
+Use this for the first-pass look at blocking, timing, tap flow and skip. Use the full manual test for the
+wave handoff and the no-damage proof.
+
 
 
 ---
@@ -480,10 +495,10 @@ same wave today; keep the order anyway.
 | Asset / object | Job |
 |---|---|
 | `Data/Story/Stage01/S01_Intro.asset` | Built intro: 4 actors, `waitForContinue` on. |
-| `Data/Story/Stage01/S02_Rupture.asset` | Built rupture: 3 heroes + 4 bats, automatic, shake, no tap. |
+| `Data/Story/Stage01/S02_Rupture.asset` | Built rupture: 3 heroes + 4 bats, shake, tap-to-continue on. |
 | `Data/Story/Stage01/Stage01_Schedule.asset` | Two `BeforeWave` rules at stage 1, wave 1: Intro priority 10, Rupture priority 5. Both once per stage. |
 | `Data/Config/BalanceConfig.asset` | No wave-size override for stage 1, wave 1. |
-| `HudController.debugStoryScene` | Scene used by `P`. |
+| `HudController` + `StoryService.ScheduledScenes` | `P` replay, `PgUp` / `PgDn` previous/next scheduled scene. |
 | `HudController.combatLog`, `abilityStrip` | Wired by the builder. |
 | `Main.unity` | Story layer is created at runtime; no prefab scene object. |
 

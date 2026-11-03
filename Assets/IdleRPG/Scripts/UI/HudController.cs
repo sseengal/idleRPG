@@ -44,6 +44,7 @@ namespace IdleRPG.UI
 
         private StoryPlayer storyPlayer;
         private BattlePageFocus battleFocus;
+        private int debugSceneIndex;
 
         public GameManager GameManager => gameManager;
 
@@ -77,15 +78,77 @@ namespace IdleRPG.UI
             }
         }
 
-        /// <summary>Dev only: replay the wired debug scene over the live fight.</summary>
+        /// <summary>Dev only: replay the current scheduled scene over the live fight.</summary>
         public bool DebugPlayStory()
         {
-            if (storyPlayer == null || debugStoryScene == null)
+            return DebugPlayStory(DebugStoryScene());
+        }
+
+        /// <summary>Dev only: move through the scheduled scenes and play the selected one.</summary>
+        public bool DebugStepStory(int delta)
+        {
+            if (storyPlayer == null || storyPlayer.IsPlaying)
             {
                 return false;
             }
 
-            return storyPlayer.Play(debugStoryScene);
+            StorySceneDef[] scenes = DebugStoryScenes();
+
+            if (scenes.Length == 0)
+            {
+                return DebugPlayStory(debugStoryScene);
+            }
+
+            debugSceneIndex = (debugSceneIndex + delta) % scenes.Length;
+
+            if (debugSceneIndex < 0)
+            {
+                debugSceneIndex += scenes.Length;
+            }
+
+            return DebugPlayStory(scenes[debugSceneIndex]);
+        }
+
+        /// <summary>Dev only: the id of the scene the P/PgUp/PgDn deck is pointing at.</summary>
+        public string DebugStoryName
+        {
+            get
+            {
+                StorySceneDef scene = DebugStoryScene();
+                return scene != null ? scene.Id : "none";
+            }
+        }
+
+        private bool DebugPlayStory(StorySceneDef scene)
+        {
+            if (storyPlayer == null || scene == null)
+            {
+                return false;
+            }
+
+            return storyPlayer.Play(scene);
+        }
+
+        private StorySceneDef DebugStoryScene()
+        {
+            StorySceneDef[] scenes = DebugStoryScenes();
+
+            if (scenes.Length == 0)
+            {
+                return debugStoryScene;
+            }
+
+            debugSceneIndex = Mathf.Clamp(debugSceneIndex, 0, scenes.Length - 1);
+            return scenes[debugSceneIndex];
+        }
+
+        private StorySceneDef[] DebugStoryScenes()
+        {
+            StorySceneDef[] scenes = gameManager != null && gameManager.Story != null
+                ? gameManager.Story.ScheduledScenes
+                : null;
+
+            return scenes ?? Array.Empty<StorySceneDef>();
         }
 
         private void Awake()

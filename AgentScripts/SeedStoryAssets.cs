@@ -150,7 +150,7 @@ public static class SeedStoryAssets
             new StoryBeat(6.6f, StoryVerb.End)
         };
 
-        scene.EditorSetContent("s02_rupture", actors, beats, 12f, tapToContinue: false);
+        scene.EditorSetContent("s02_rupture", actors, beats, 12f, tapToContinue: true);
 
         EditorUtility.SetDirty(scene);
         AssetDatabase.SaveAssets();

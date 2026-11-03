@@ -15,7 +15,7 @@ MonoBehaviour:
   id: s02_rupture
   pauseBattle: 1
   skippable: 1
-  waitForContinue: 0
+  waitForContinue: 1
   hardCapSeconds: 12
   actors:
   - id: knight
