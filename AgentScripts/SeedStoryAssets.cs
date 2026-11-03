@@ -127,14 +127,14 @@ public static class SeedStoryAssets
 
         StoryBeat[] beats =
         {
-            new StoryBeat(0.0f, StoryVerb.Place, "soldier", new Vector2(0.30f, 0.40f)),
-            new StoryBeat(0.0f, StoryVerb.Place, "mage", new Vector2(0.42f, 0.34f)),
-            new StoryBeat(0.0f, StoryVerb.Place, "knight", new Vector2(0.54f, 0.28f)),
-            new StoryBeat(0.10f, StoryVerb.WalkTo, "soldier", new Vector2(0.38f, 0.40f), 2.8f),
-            new StoryBeat(0.16f, StoryVerb.WalkTo, "mage", new Vector2(0.50f, 0.34f), 3.0f),
-            new StoryBeat(0.22f, StoryVerb.WalkTo, "knight", new Vector2(0.62f, 0.28f), 3.2f),
+            new StoryBeat(0.0f, StoryVerb.Place, "soldier", new Vector2(0.18f, 0.40f)),
+            new StoryBeat(0.0f, StoryVerb.Place, "mage", new Vector2(0.30f, 0.34f)),
+            new StoryBeat(0.0f, StoryVerb.Place, "knight", new Vector2(0.42f, 0.28f)),
+            new StoryBeat(0.10f, StoryVerb.WalkTo, "soldier", new Vector2(0.26f, 0.40f), 2.8f),
+            new StoryBeat(0.16f, StoryVerb.WalkTo, "mage", new Vector2(0.38f, 0.34f), 3.0f),
+            new StoryBeat(0.22f, StoryVerb.WalkTo, "knight", new Vector2(0.50f, 0.28f), 3.2f),
             new StoryBeat(2.0f, StoryVerb.Say, "soldier", default, 0f, "We lost it."),
-            new StoryBeat(2.8f, StoryVerb.Shake, string.Empty, default, 0.8f),
+            new StoryBeat(2.8f, StoryVerb.Shake, string.Empty, default, 1.0f),
             new StoryBeat(3.2f, StoryVerb.Say, "soldier", default, 0f, "Watch out!"),
             new StoryBeat(3.8f, StoryVerb.Enter, "batA", new Vector2(0.98f, 0.70f), 0.2f),
             new StoryBeat(3.9f, StoryVerb.WalkTo, "batA", new Vector2(-0.25f, 0.70f), 1.0f),

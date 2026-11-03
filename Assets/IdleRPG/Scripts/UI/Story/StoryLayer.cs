@@ -23,7 +23,7 @@ namespace IdleRPG.UI
 
         private const float BubbleLift = 0.11f;
         private const float BubbleEdge = 0.14f;
-        private const float ShakeAmplitude = 7f;
+        private const float ShakeAmplitude = 24f;
         private static readonly Vector2 SymbolBubbleSize = new Vector2(72f, 56f);
         private static readonly Vector2 WordBubbleSize = new Vector2(280f, 96f);
 
@@ -51,6 +51,7 @@ namespace IdleRPG.UI
         private bool shaking;
         private Image bubble;
         private TextMeshProUGUI bubbleText;
+        private BubbleKind bubbleKind;
         private GameObject skipRoot;
         private Button skipButton;
         private Action advanceAction;
@@ -323,6 +324,12 @@ namespace IdleRPG.UI
         /// <summary>Shows a small ellipsis over the speaker. The log owns the line; the bubble only marks who is talking.</summary>
         public void Speech(int actorIndex)
         {
+            // A live ! or ? is the stronger signifier. Do not replace it with ellipses.
+            if (bubbleKind == BubbleKind.Bang || bubbleKind == BubbleKind.Question)
+            {
+                return;
+            }
+
             Bubble(actorIndex, BubbleKind.Dots, string.Empty);
         }
 
@@ -371,6 +378,7 @@ namespace IdleRPG.UI
 
             bubbleText.SetText(content);
             UiType.ApplyAuto(bubbleText, role);
+            bubbleKind = kind;
 
             Vector2 size = kind == BubbleKind.Word
                 ? WordBubbleSize
@@ -537,6 +545,8 @@ namespace IdleRPG.UI
 
         private void HideBubble()
         {
+            bubbleKind = BubbleKind.None;
+
             if (bubble != null)
             {
                 bubble.gameObject.SetActive(false);

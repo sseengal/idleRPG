@@ -264,6 +264,7 @@ Bubble rules:
 
 - One bubble in the whole layer. It attaches above the speaking actor.
 - All symbol bubbles (`…`, `!`, `?`) use one shared size, so scenes cannot drift.
+- A live `!` or `?` is the stronger signifier. It suppresses the automatic ellipsis for that line.
 - x is clamped so the bubble never leaves the viewport.
 - The bubble hides when its actor moves. It never follows mid-walk.
 - Symbols only by default. A word bubble is 1-3 words and never a full sentence.
