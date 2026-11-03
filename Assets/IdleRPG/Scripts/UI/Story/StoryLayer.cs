@@ -318,10 +318,10 @@ namespace IdleRPG.UI
             view.Animator.PlayClip(frames, view.Art.FpsFor(slot));
         }
 
-        /// <summary>Shows the speaker bubble above the actor. The name is the signifier; the log owns the line.</summary>
-        public void Speech(int actorIndex, string speaker)
+        /// <summary>Shows a tiny ellipsis over the speaker. The log owns the line; the bubble only marks who is talking.</summary>
+        public void Speech(int actorIndex)
         {
-            Bubble(actorIndex, BubbleKind.Word, speaker);
+            Bubble(actorIndex, BubbleKind.Dots, string.Empty);
         }
 
         /// <summary>Shows the bubble above an actor. The bubble never follows a walking actor.</summary>
@@ -370,7 +370,11 @@ namespace IdleRPG.UI
             bubbleText.SetText(content);
             UiType.ApplyAuto(bubbleText, role);
 
-            Vector2 size = kind == BubbleKind.Word ? new Vector2(280f, 96f) : new Vector2(120f, 88f);
+            Vector2 size = kind == BubbleKind.Word
+                ? new Vector2(280f, 96f)
+                : kind == BubbleKind.Dots
+                    ? new Vector2(48f, 40f)
+                    : new Vector2(120f, 88f);
             Vector2 at = view.Rect.anchorMin;
             Vector2 point = new Vector2(
                 Mathf.Clamp(at.x, BubbleEdge, 1f - BubbleEdge),

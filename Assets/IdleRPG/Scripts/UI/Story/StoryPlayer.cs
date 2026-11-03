@@ -267,7 +267,7 @@ namespace IdleRPG.UI
                 case StoryVerb.Say:
                     if (index >= 0 && index < scene.Actors.Length)
                     {
-                        layer.Speech(index, scene.Actors[index].displayName);
+                        layer.Speech(index);
                     }
 
                     SayLine(index, beat.text);

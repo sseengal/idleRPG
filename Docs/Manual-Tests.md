@@ -455,7 +455,7 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 - **Mage:** “They're running from something.”
 - **Knight:** “Hold formation!”
 - Each spoken line waits for a tap. The first tap finishes the typing; the next tap moves on.
-- Each spoken line shows a name bubble above that character: Soldier, Mage or Knight.
+- Each spoken line shows a tiny ellipsis bubble above that character: Soldier, Mage or Knight.
 - The two hovering bats remain in the way. No damage and no HP changes.
 - No battle happens before the second scene. The log and stage do not reset between the two scenes.
 

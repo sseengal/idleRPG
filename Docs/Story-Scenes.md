@@ -86,8 +86,8 @@ Rules:
 - `Face` flips an actor to look left or right without moving it. `faceLeft = true` looks left.
 - `Shake` shakes the arena stage for `duration` seconds. It restores the stage position on end, skip and cap.
 - `Say` stores `displayName` as the speaker and `text` as the words. The log colours the name gold
-  and types the words at 45 characters per second. Every spoken line also raises a name bubble over
-  the speaker, so the speaking character is visible without reading the log. The scene never writes
+  and types the words at 45 characters per second. Every spoken line also raises a tiny ellipsis bubble
+  over the speaker, so the speaking character is visible without reading the log. The scene never writes
   raw log text or markup.
 - When `waitForContinue` is on, the scene clock stops after each `Say`. The first tap finishes the
   typing; the second tap resumes. The prompt is at the bottom of the one-line story box.
