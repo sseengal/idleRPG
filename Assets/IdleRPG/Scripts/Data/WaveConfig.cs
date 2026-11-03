@@ -18,6 +18,11 @@ namespace IdleRPG.Data
         [Tooltip("Rotated across boss waves. Falls back to the last normal enemy if empty.")]
         [SerializeField] private List<EnemyData> bossEnemies = new List<EnemyData>();
 
+        [Header("Stage Wave Plans")]
+        [Tooltip("Optional authored normal-wave lists. A matching stage/wave overrides the rotation; " +
+                 "stages without a plan keep the old pools and rotation.")]
+        [SerializeField] private List<StageWavePlan> stageWavePlans = new List<StageWavePlan>();
+
         public int NormalEnemyCount => normalEnemies == null ? 0 : normalEnemies.Count;
 
         public int BossEnemyCount => bossEnemies == null ? 0 : bossEnemies.Count;
@@ -32,6 +37,12 @@ namespace IdleRPG.Data
         public EnemyData GetEnemyFor(int stage, int wave, int normalWavesPerStage)
         {
             bool isBossWave = IsBossWave(wave, normalWavesPerStage);
+
+            if (!isBossWave && TryGetPlannedWave(stage, wave, out EnemyData planned, out _))
+            {
+                return planned;
+            }
+
             List<EnemyData> pool = PoolForStage(isBossWave ? bossEnemies : normalEnemies, stage);
 
             EnemyData picked = PickFromPool(pool, stage, wave);
@@ -65,6 +76,12 @@ namespace IdleRPG.Data
         public List<EnemyData> GetEnemiesFor(int stage, int wave, int normalWavesPerStage, int count)
         {
             List<EnemyData> team = new List<EnemyData>();
+
+            if (!IsBossWave(wave, normalWavesPerStage) &&
+                TryBuildPlannedTeam(stage, wave, team))
+            {
+                return team;
+            }
 
             EnemyData primary = GetEnemyFor(stage, wave, normalWavesPerStage);
             if (primary == null)
@@ -103,11 +120,91 @@ namespace IdleRPG.Data
             return team;
         }
 
+        /// <summary>
+        /// Normal wave count for a stage. A plan can shorten a stage without changing the global count.
+        /// </summary>
+        public int NormalWaveCountFor(int stage, int fallback)
+        {
+            if (stageWavePlans != null)
+            {
+                for (int i = 0; i < stageWavePlans.Count; i++)
+                {
+                    StageWavePlan plan = stageWavePlans[i];
+
+                    if (plan != null && plan.Stage == Mathf.Max(1, stage) && plan.NormalWaveCount > 0)
+                    {
+                        return plan.NormalWaveCount;
+                    }
+                }
+            }
+
+            return Mathf.Max(1, fallback);
+        }
+
+        /// <summary>
+        /// Builds an authored mixed team. Duplicate wave rows are intentional. The first plan with rows
+        /// for this wave wins; missing plans/waves fall through to the old pool path.
+        /// </summary>
+        private bool TryBuildPlannedTeam(int stage, int wave, List<EnemyData> team)
+        {
+            if (stageWavePlans == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < stageWavePlans.Count; i++)
+            {
+                StageWavePlan plan = stageWavePlans[i];
+
+                if (plan == null || plan.Stage != Mathf.Max(1, stage))
+                {
+                    continue;
+                }
+
+                plan.AppendWave(wave, team, MaxTeamSize);
+
+                if (team.Count > 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>A wave is a boss wave when it is the (normalWavesPerStage + 1)-th wave of a stage.</summary>
         public static bool IsBossWave(int wave, int normalWavesPerStage)
         {
             int safeNormalWaves = Mathf.Max(1, normalWavesPerStage);
             return wave >= safeNormalWaves + 1;
+        }
+
+        /// <summary>
+        /// Looks up an authored normal wave. The first matching non-null plan wins. Missing plans,
+        /// missing waves, and empty entries all fall back to the old rotation.
+        /// </summary>
+        private bool TryGetPlannedWave(int stage, int wave, out EnemyData enemy, out int count)
+        {
+            enemy = null;
+            count = 0;
+
+            if (stageWavePlans == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < stageWavePlans.Count; i++)
+            {
+                StageWavePlan plan = stageWavePlans[i];
+
+                if (plan != null && plan.Stage == Mathf.Max(1, stage) &&
+                    plan.TryGetWave(wave, out enemy, out count))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>Team size ceiling (mirrors <see cref="BalanceConfig.HardEnemyCap"/> and the sim cap).</summary>

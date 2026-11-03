@@ -84,8 +84,7 @@ namespace IdleRPG.Debugging
                 return;
             }
 
-            int normalWaves = gameManager.Balance != null ? gameManager.Balance.NormalWavesPerStage : 10;
-            int wavesPerStage = Mathf.Max(1, normalWaves) + 1;
+            int wavesPerStage = gameManager.Combat != null ? gameManager.Combat.WavesPerStage : 1;
             int wave = Mathf.Clamp(gameManager.Combat.CurrentWave + delta, 1, wavesPerStage);
 
             gameManager.Combat.SetProgress(gameManager.CurrentStage, wave, healParty: true);

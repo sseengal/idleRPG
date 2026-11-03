@@ -1,9 +1,11 @@
-# Story Canon — The Second Dawn (29 Oct 2026)
+# Story Canon — The Second Dawn (2 Nov 2026)
 
 > **Status: CANON for story.** This page replaces the earlier premise.
 > It owns the premise, the cast, the artifact rules and the route. It does not own scene playback
-> (see `Story-Scenes.md`) or node scripts (see `Story-Nodes.md`).
-> **Built today: none.** The first build target is one node and one in-game scene.
+> (see `Story-Scenes.md`), the Greenwake chapter story (see `Story-Greenwake.md`) or node scripts
+> (see `Story-Nodes.md`).
+> **Built today:** `S01_Intro` in stage 1. Greenwake chapter story locked. Mid, King, Outro and Defeat
+> scenes are planned.
 
 ---
 
@@ -62,11 +64,13 @@ These rules are fixed. If a later scene breaks one, the scene is wrong.
 
 1. **It stores time.** Breaking it sends the world back once, to a set point.
 2. **It broke into shards.** Each shard holds a piece of that stored time.
-3. **A shard wakes matter.** It does not make life. It makes mud, roots and water move. This is why the
-   slimes in Greenwake exist.
+3. **A shard leaks stored time.** The leak accelerates existing life and churns dead matter. It does
+   not make life and it does not invent creatures. This is the bloom in Greenwake and the slimes in it.
+   The Guard do not know this at first. A Soldier may ask, “Is that a ... Slime!?”; that is first contact, not canon.
 4. **Only the king remembers the first timeline.** The Black Knight does not. His campaign repeats.
 5. **A shard can pull the Guard back to the last ground they held.** This is the in-world reason a wipe
-   returns the party to the node. It is not explained until the player has lost once.
+   returns the party to the node. It is not explained until the player has lost once. The shard cannot
+   rewind the world; it can only hold on to the people the breaking light marked.
 6. **Nobody lectures.** No character explains a shard, time, or the plot. The player learns from what
    happens and from one short line at the moment it matters.
 
@@ -79,7 +83,7 @@ is fixed. Nodes 2-10 are placeholders until their content is written.
 
 | Node | Stage | Place | What it is for |
 |---|---|---|---|
-| 1 | 1 | **Greenwake Forest** | The shard woke the wood. Recover it. Teach the loop |
+| 1 | 1 | **Greenwake Forest** | A time leak is growing a living bloom around an old hollow tree. Recover the shard. Teach the loop |
 | 2 | 2 | Ashen Road | Open. First sign of the army |
 | 3 | 3 | River Gate | Open. A choice that costs time |
 | 4 | 4 | Hollow Village | Open. People who do not believe the warning |
@@ -100,7 +104,7 @@ two nodes.
 | Where | What | Length | When |
 |---|---|---|---|
 | **Prerendered video** | Siege, artifact, time reversal, the king's order | 60-65 s | New Game only. Skippable. Never on Continue |
-| **In-game scene** | The Guard arrives at Greenwake. First threat. First goal | 12-14 s | Stage 1 start, before wave 1 |
+| **In-game scene** | The Guard arrives at Greenwake. First threat. First goal | 48 s | Stage 1 start, before wave 1 |
 
 Rule: the video never explains a mechanic. It shows a shard fall into the forest. The in-game outro
 reveals what a shard is.
@@ -154,7 +158,8 @@ Rules:
 - One rewind happened. It cannot happen again at this scale.
 - The king remembers. Nobody else does.
 - The Black Knight repeats his campaign without knowing it was already won.
-- Shards carry fragments of the stored time. They are the only "memory" in the world.
+- Shards carry fragments of the stored time. They leak it as accelerated growth and churn.
+- Only the intact Second Dawn could rewind the world. A shard can pull the marked Guard back, not the world.
 - A wipe rewinds the Guard, not the world. That is why the enemy is the same and the party keeps its gear.
 
 ---
@@ -163,18 +168,22 @@ Rules:
 
 Answer these only when a node needs the answer. Do not answer them in a document the player reads.
 
+**Answered by the Greenwake chapter lock:** one shard fell by chance into the hollow of Greenwake's
+oldest tree. The fall was not arranged and the shard was not called. The old root network spread the
+leak into a local bloom.
+
 1. What is the kingdom called?
 2. What is the Black Knight's name and motive?
 3. How many shards exist, and what happens when all are found?
-4. Why did one shard fall in Greenwake?
-5. Who made the Second Dawn?
-6. Does the king survive the campaign?
+4. Who made the Second Dawn?
+5. Does the king survive the campaign?
 
 ---
 
 ## Related docs
 
 - `Story-Scenes.md` — how a scene is injected, timed, skipped and resumed (system).
+- `Story-Greenwake.md` — the locked chapter 1 story: bloom, Slime King, cost and ending.
 - `Story-Nodes.md` — node 1 script and the text budget.
 - `Game-Vision.md` — the campaign shape and the loop.
 - `Cutscene-Plan.md` — fixed plays bound to live fight units (a different tool).

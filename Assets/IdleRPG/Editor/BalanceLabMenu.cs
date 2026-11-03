@@ -243,17 +243,17 @@ namespace IdleRPG.EditorTools
 
             report.AppendLine($"-- pace x{pace:0.##} --");
 
-            double normalWaves = balance.NormalWavesPerStage;
+            double normalWaves = waves.NormalWaveCountFor(1, balance.NormalWavesPerStage);
 
-            for (int wave = 1; wave <= balance.NormalWavesPerStage + 1; wave++)
+            for (int wave = 1; wave <= normalWaves + 1; wave++)
             {
-                EnemyData data = waves.GetEnemyFor(1, wave, balance.NormalWavesPerStage);
+                EnemyData data = waves.GetEnemyFor(1, wave, (int)normalWaves);
                 if (data == null)
                 {
                     continue;
                 }
 
-                bool isBoss = WaveConfig.IsBossWave(wave, balance.NormalWavesPerStage);
+                bool isBoss = WaveConfig.IsBossWave(wave, (int)normalWaves);
                 WaveRun waveRun = RunWave(balance, party, data, 1, isBoss, rules);
 
                 report.AppendLine(string.Format("  {0,-18} {1,7:0} HP  TTK {2,6:0.0}s {3}{4}",
@@ -336,11 +336,12 @@ namespace IdleRPG.EditorTools
             simulator.EnemyKilled += onKill;
 
             StageRun run = new StageRun();
-            int lastWave = balance.NormalWavesPerStage + 1;
+            int normalWaveCount = waves.NormalWaveCountFor(stage, balance.NormalWavesPerStage);
+            int lastWave = normalWaveCount + 1;
 
             for (int wave = 1; wave <= lastWave; wave++)
             {
-                bool isBoss = WaveConfig.IsBossWave(wave, balance.NormalWavesPerStage);
+                bool isBoss = WaveConfig.IsBossWave(wave, normalWaveCount);
                 EnemyCombatant[] team = EncounterFactory.Build(waves, balance, stage, wave, isBoss, rules);
 
                 if (team == null || team.Length == 0)

@@ -250,6 +250,19 @@ namespace IdleRPG.UI
             SortByDepth();
         }
 
+        /// <summary>Flips an actor to look left or right without moving it.</summary>
+        public void Face(int actorIndex, bool faceLeft)
+        {
+            ActorView view = Get(actorIndex);
+
+            if (view == null)
+            {
+                return;
+            }
+
+            view.Animator.FacingLeft = faceLeft;
+        }
+
         /// <summary>Plays one named clip (Attack01, Ability, Hurt, Death). Empty or unknown falls back to Idle.</summary>
         public void PlayClip(int actorIndex, string slot)
         {

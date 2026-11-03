@@ -1,8 +1,8 @@
-# Story Nodes — scripts (29 Oct 2026)
+# Story Nodes — scripts (2 Nov 2026)
 
-> **Status: node 1 is the first build target. `S01_Intro` is final; `S01_Mid` and `S01_Outro` are outlines.**
+> **Status: `S01_Intro` is built (9 lines, 32 beats). `S01_Mid` and `S01_Outro` are outlines. `S01_King` and `S01_Defeat` are planned.**
 > This page owns the words and the beats. It does not own how a scene is played — see `Story-Scenes.md`.
-> Canon, cast and rules: `Story-Canon.md`.
+> Canon, cast and rules: `Story-Canon.md`. Chapter story truth: `Story-Greenwake.md`.
 
 ---
 
@@ -12,7 +12,7 @@
 |---|---|
 | **Fight** | One wave. 1-3 enemies. |
 | **Node** | One stage. 9 normal fights + 1 boss fight = 10 fights. |
-| **Scene** | One short play inside the battle view. 5-14 seconds. |
+| **Scene** | One short play inside the battle view. Intro 30-50 s; mid and outro 5-12 s. |
 
 A scene has no knowledge of a stage or a wave. The schedule decides where it plays. That is what makes a
 scene reusable before a wave, after a wave, at a node start, at a node end, or on a manual call.
@@ -26,85 +26,77 @@ scene reusable before a wave, after a wave, at a node start, at a node end, or o
 | Id | `stage01` |
 | Place | Greenwake Forest |
 | Title | The Waking Wood |
-| Blurb (map card) | The king's light fell here. The wood is awake. Find the shard. |
+| Blurb (map card) | The king's light fell here. The wood is growing wrong. Find the shard. |
 | Objective | Recover the first shard and find the way out |
-| Boss | Slime King (the shard grew it as a guard) |
-| Scenes | `S01_Intro`, `S01_Mid`, `S01_Outro` |
+| Boss | Slime King (the bloom knotted around the shard) |
+| Scenes | `S01_Intro`, `S01_Mid`, `S01_King`, `S01_Outro`, `S01_Defeat` |
 
-Why the enemies are slimes: the shard wakes matter. Mud, roots and water move. They are not alive and
-they are not evil. They only do what the light tells them.
+Why the enemies are what they are: the shard leaks stored time. It speeds up living plants and churns
+dead matter. The slimes are mud, roots and water moving in the leak. The bats and wolves are real
+animals driven out of the bloom. Nothing here is evil. The Guard are cutting through a fever.
+
+The chapter story is locked in `Story-Greenwake.md`. The wave structure is also the geography: waves 1-2 are the bat panic, wave 3 brings the first wolf, wave 4 is the pack, waves 5-6 are the slime wall, and wave 7 is the heart. The first slime is an intro actor, not a wave. Wave 1 must be bats.
 
 ---
 
-## 3. `S01_Intro` — final (2 Nov 2026)
+## 3. `S01_Intro` — built (2 Nov 2026)
 
 **Plays:** before wave 1 of stage 1 (`BeforeWave`, stage 1, wave 1).
-**Length:** 48.4 s of automatic content. Hard cap 120 s real time. Skippable. Once per stage.
+**Length:** 39.0 s of automatic content. Hard cap 120 s real time. Skippable. Once per stage.
+**Asset:** 32 beats; the slime enters from the left and passes between the party. The party faces it and turns as it passes. No combat.
 **Interaction:** tap after each spoken line. **Bubble:** symbols only. **Log:** one line at a time.
 
 ### Actors
 
 | Id | Screen name | Art set | Facing | Notes |
 |---|---|---|---|---|
-| `knight` | Knight | `Knight_Art` | right | Enters last, right/front. Glances right at 25.3 s |
-| `mage` | Mage | `Wizard_Art` | right | Enters second, middle. Sees the forest is alive |
-| `soldier` | Soldier | `Soldier_Art` | right | Enters first, left/back. Speaks first and last before the order |
-| `slime` | Slime | `Slime_Art` | left | Creeps in at 28.3 s |
+| `knight` | Knight | `Knight_Art` | right | Right/front. Orders the party aside, then decides to follow |
+| `mage` | Mage | `Wizard_Art` | right | Middle. Patient and thoughtful. Hears the sound first; stops the attack |
+| `soldier` | Soldier | `Soldier_Art` | right | Left/back. The audience. Speaks plain; reacts first |
+| `slime` | Slime | `Slime_Art` | left | Passes between the party. Slow. Does not attack or look at them |
 
 Art sets live in `Assets/IdleRPG/Data/Characters/`. The Mage uses `Wizard_Art`; the screen name stays “Mage”.
 
-### Beats
+### Sequence
 
-| Time | Verb | Actor | Spot (x/y) | Duration | Text | Bubble |
-|---|---|---|---|---|---|---|
-| 0.0 | — | — | — | — | Empty forest. Fade reveals it | — |
-| 0.5 | Enter | soldier | .20 / .40 | 1.2 | — | — |
-| 1.0 | Enter | mage | .31 / .33 | 1.2 | — | — |
-| 1.5 | Enter | knight | .42 / .27 | 1.2 | — | — |
-| 4.2 | Bubble | soldier | — | — | — | `?` |
-| 4.8 | Say | soldier | — | — | Something's wrong here. There's not a single bird, not even an insect. | — |
-| 9.0 | Bubble | knight | — | — | — | `!` |
-| 9.6 | Say | knight | — | — | Stay alert. I don't like how these trees seem to be watching us. | — |
-| 13.8 | Bubble | mage | — | — | — | `…` |
-| 14.4 | Say | mage | — | — | That's because they are... This forest is alive. | — |
-| 18.0 | Bubble | soldier | — | — | Hide the bubble before the next turn | — |
-| 18.6 | Say | soldier | — | — | You could've mentioned that before we walked in! | — |
-| 22.0 | Bubble | mage | — | — | — | `!` |
-| 22.5 | Say | mage | — | — | Quiet. Something's moving. | — |
-| 25.3 | WalkTo | knight | .46 / .27 | 1.0 | Looks right | — |
-| 26.5 | WalkTo | knight | .42 / .27 | 1.0 | Looks back | — |
-| 28.3 | Enter | slime | .80 / .40 | 2.8 | Slow creep | — |
-| 31.7 | Bubble | slime | — | — | — | `…` |
-| 32.3 | Bubble | knight | — | — | — | `!` |
-| 32.9 | Say | knight | — | — | What in the blazes is that? | — |
-| 36.3 | Bubble | mage | — | — | Hide the bubble before the next turn | — |
-| 36.9 | Say | mage | — | — | A living slime. And it's heading straight for us. | — |
-| 41.1 | Say | soldier | — | — | Well, let's give it a warm welcome! | — |
-| 44.3 | Bubble | knight | — | — | — | `!` |
-| 44.8 | Say | knight | — | — | Weapons ready! | — |
-| 47.6 | PlayClip | knight | — | — | `Attack01` | — |
-| 47.8 | PlayClip | soldier | — | — | `Attack01` | — |
-| 48.4 | End | — | — | — | Wave 1 spawns | — |
+| # | Beat | Action | Dialogue |
+|---|---|---|---|
+| 1 | Lost | The overgrown road. No birds. No insects. The markers are buried | **Soldier:** We've been walking for hours now. The markers are gone. |
+| 2 | Order | The Knight keeps the party moving | **Knight:** We must keep moving. |
+| 3 | Sound | The Mage stops. The others halt | **Mage:** Wait. Do you hear that? |
+| 4 | Look behind | Shuffling behind them. All three face left. Shock | **Knight:** Move aside! |
+| 5 | Split | Mage moves to the same upper line as Soldier. Knight drops low. The Soldier readies his weapon | **Soldier:** Weapons ready! |
+| 6 | Stop | The Mage stops the swing before it lands | **Mage:** Wait! |
+| 7 | Pass | The slime enters from the left and passes through the vertical gap. The party tracks it: Soldier, then Mage, then Knight turn right as it passes | — |
+| 8 | After | The Soldier lowers his blade | **Soldier:** Is that a ... Slime!? |
+| 9 | Read | The Knight watches it go | **Knight:** It didn't notice us. |
+| 10 | Follow | The Mage watches it move deeper in. The party decides to follow | **Mage:** Let us follow it and see where it takes us. |
+| 11 | End | The party follows the slime deeper into the forest | — |
 
-The pauses are the gaps: **1.0-1.5 s** before the first line, **0.8-1.0 s** between turns. They are
-deliberate. Do not tighten them without watching the whole scene.
+Notes:
 
+- **“Move aside!” comes after the look behind.** All three face left first; then the Knight clears the party out of the way.
+- **The split is vertical.** Mage and Soldier stand on the same upper line. Mage and Knight keep facing left and walk backwards to give the slime way. The slime passes through the gap; the party does not overlap it.
+- **The party tracks the slime.** They face left when it enters. Soldier turns right as it passes him, then Mage, then Knight.
+- **No combat.** The slime passes; the party does not attack. The attack swing is stopped by the Mage.
+- **“Is that a ... Slime!?” is the Soldier’s first guess, not canon.** He does not know what the party is dealing with. The slime is churned matter, not a creature (`Story-Greenwake.md` §5).
+- **Telling is allowed.** The narrative stage direction “The party decides to follow” is the intended level of narration. Do not replace it with extra dialogue.
 
 ### What the log shows
 
 ```
-Soldier: Something's wrong here. There's not a single bird, not even an insect.
-Knight: Stay alert. I don't like how these trees seem to be watching us.
-Mage: That's because they are... This forest is alive.
-Soldier: You could've mentioned that before we walked in!
-Mage: Quiet. Something's moving.
-Knight: What in the blazes is that?
-Mage: A living slime. And it's heading straight for us.
-Soldier: Well, let's give it a warm welcome!
-Knight: Weapons ready!
+Soldier: We've been walking for hours now. The markers are gone.
+Knight: We must keep moving.
+Mage: Wait. Do you hear that?
+Knight: Move aside!
+Soldier: Weapons ready!
+Mage: Wait!
+Soldier: Is that a ... Slime!?
+Knight: It didn't notice us.
+Mage: Let us follow it and see where it takes us.
 ```
 
-No line explains the shard, the king, or time. The player already saw the video.
+No line explains the shard, the king, time, or the bloom. The player already saw the video. The party does not know what a slime is yet; the Soldier names it first.
 
 On screen, the log switches to **one-line story mode**: the normal feed hides, the speaker name appears in
 gold, and the words type at 45 characters per second. `TAP TO CONTINUE` completes the line; the next tap
@@ -113,38 +105,44 @@ effect. See `Battle-Log.md`.
 
 ### What this scene must prove
 
-1. Soldier walks in first, then Mage, then Knight; Knight settles right/front.
-2. The pauses are visible. No line or bubble sneaks into a pause.
-3. Seven bubbles, one at a time, above the correct speaker.
-4. Knight's two small steps read as a glance, and he stays right/front.
-5. The slime takes about 2.8 s to arrive. It does not pop in.
-6. The log shows one line at a time; tap finishes the typing, then moves on.
-7. Combat stays frozen; the wave spawns once after “Weapons ready!” and the fade.
-8. Skip and the 120 s cap both end the scene cleanly.
-9. Knight draws in front of Mage, and Mage in front of Soldier.
-10. The final attack swing finishes before the fade to black.
+1. The Guard is lost: the road is gone and the markers are buried.
+2. The wood is wrong: no birds, no insects, too much green.
+3. The Mage hears the sound before the others and stops the attack.
+4. All three face left and look behind **before** the Knight says “Move aside!”
+5. Mage moves to the same upper line as Soldier; Knight drops low. The Soldier readies; the Mage stops the swing.
+6. The slime passes through the gap. The party tracks it: Soldier, then Mage, then Knight turn right.
+7. The Soldier asks, “Is that a ... Slime!?” because he does not know better.
+8. The Knight says it didn’t notice them; the Mage proposes following it.
+9. The party follows the slime deeper in. No combat plays in the scene.
+10. Skip and the 120 s cap both end the scene cleanly.
 
-Wave 1 is pinned to **one Slime** (stage 1, wave 1) so the wave matches the single slime on screen.
-The pin is a `WaveSizeOverride` in `BalanceConfig`: stage 1, wave 1, count 1.
+### Wave handoff
+
+Wave 1 must **not** be a slime. The party has just spared one; spawning a slime immediately undercuts the scene.
+
+The first wave is **bats**. `Stage01_WavePlan.asset` is linked to `WaveConfig`: waves 1-2 are bats, wave 3 is bats + the first werewolf, wave 4 is werewolves, wave 5 is slimes + the last werewolf, and wave 6 is slimes. Stage 1 has 6 normal waves; wave 7 is the boss from the boss pool. The old `WaveSizeOverride` that pinned stage 1, wave 1 to one slime has been removed.
+
 
 ---
 
 ## 4. `S01_Mid` — outline (not final)
 
-**Plays:** before wave 6 of stage 1 (rule: `BeforeWave`, stage 1, wave 6).
+**Plays:** before wave 5 of stage 1 (rule: `BeforeWave`, stage 1, wave 5).
 **Length:** about 5 s. Cap 8 s.
-**Purpose:** raise the stakes. The light is calling the creatures. The Guard decides to follow it.
+**Purpose:** the slime wall. The slimes are not attacking; they are pressed into a choke at the root
+lip. They block the only way through. The Guard must clear the path. Three lines only. Do not explain
+the shard.
 
 | Time | Verb | Actor | Text | Bubble |
 |---|---|---|---|---|
 | 0.3 | Enter | slimeA | — | — |
-| 1.0 | Bubble | slimeA | — | `?` |
-| 1.6 | Say | mage | The light is calling them. | — |
-| 2.6 | Bubble | knight | — | `!` |
-| 3.0 | Say | knight | Then we take the light. | — |
-| 4.6 | End | — | — | — |
+| 1.0 | Say | soldier | They're not fighting. | — |
+| 2.0 | Say | mage | They're not. | — |
+| 3.0 | Say | knight | They're in the way. Clear it. | — |
+| 4.5 | End | — | — | — |
 
-Two lines only. Do not explain the shard.
+The slimes do not attack in this scene. The fight that follows is an obstacle, not a hunt. The player
+should feel the difference. Do not add a line that calls them innocent.
 
 ---
 
@@ -152,7 +150,11 @@ Two lines only. Do not explain the shard.
 
 **Plays:** after the boss of stage 1 (rule: `StageCleared`, stage 1).
 **Length:** about 6 s. Cap 10 s.
-**Purpose:** confirm the shard, close the node, point to the road.
+**Purpose:** confirm the shard, show the cost, close the node, point to the road. The bloom has collapsed.
+The ordinary forest survives. The Guard have taken the thing that kept a living pocket alive.
+
+The table below is a placeholder. The final pass must land on cost, not a joke. The old “guarded badly”
+line undercuts the chapter and should not survive the rewrite.
 
 | Time | Verb | Actor | Text | Bubble |
 |---|---|---|---|---|
@@ -164,6 +166,30 @@ Two lines only. Do not explain the shard.
 | 5.8 | End | — | — | — |
 
 The scene does **not** grant the shard. The grant is a game rule outside the scene. A scene is a picture.
+
+**Story alignment (2 Nov 2026):** “It grew a king to guard it” is the Mage’s reading, not chapter truth.
+The Slime King is a knot of roots and mud around the shard; it has no intent (`Story-Greenwake.md` §6).
+The image can suggest a guardian. The script must not confirm one.
+
+### `S01_King` — planned (not written)
+
+**Plays:** before wave 7 of stage 1 (`BeforeWave`, stage 1, wave 7).
+**Length:** 4-6 s. Cap 8 s.
+**Purpose:** show the heart of the bloom. The old hollow tree, the shard inside it, the Slime King wrapped
+around it. The King does not speak and does not explain itself. It moves only when the Guard step
+between it and the shard.
+
+The scene must establish the boss’s behaviour before combat: it covers the shard, not the road. Keep it
+to two lines at most. Do not call it a guardian in dialogue; let the image do that work.
+
+### `S01_Defeat` — planned (not written)
+
+**Plays:** on a party wipe in stage 1.
+**Length:** 3-5 s. Cap 8 s.
+**Purpose:** show the shard pulling the marked Guard back. The world does not rewind. The same road and
+enemies are there. Wounds are closed. Gear is kept. The Guard do not understand why.
+
+No lecture. No explanation of the rule. The player learns it by seeing the same ground again.
 
 ---
 
@@ -193,7 +219,8 @@ nothing. Mid and outro stay short so a retry never drags.
 
 1. Duplicate `S01_Intro` and save it as `S01_Mid` with its own beats.
 2. Add one row to `Stage01_Schedule`:
-   `BeforeWave · stage 1 · wave 6 · S01_Mid`.
+   `BeforeWave · stage 1 · wave 5 · S01_Mid`.
+   The planned rows are `BeforeWave · stage 1 · wave 7 · S01_King` and `Defeat · stage 1 · S01_Defeat`.
 3. Press Play. No code change.
 
 If step 3 needs code, the structure is wrong. Fix the structure, not the scene.

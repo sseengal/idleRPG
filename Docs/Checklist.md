@@ -13,7 +13,7 @@
 | Field | Value |
 |---|---|
 | Current step | **Foundation Phase 2D built 29 Oct 2026**: camp choice cards are prefabs. Phase 2 owner check pending. Then B8' proof lap and B9' shipping checklist. **No open feature work**: ability assignments ship in the save (v7) and boss moves are content-only (`EnemyData.abilities`, no code change). Then **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
-| Story slice (new, 29 Oct 2026) | **Steps 1-4, transitions, intro rewrite, wave pin and log fixes built (2 Nov).** Arena fade 0.35 s, log focus 0.30 s. `S01_Intro`: 4 actors, 27 beats, 48.4 s automatic content, 120 s tap-mode cap. Soldier enters first; Knight last/right/front. One-line story box with tap-to-continue. `Run All Checks` PASS, 31/31 EditMode tests. **Open: phone aspect, real device background, force battle page.** Canon: `Story-Canon.md`. System: `Story-Scenes.md`. Script: `Story-Nodes.md` |
+| Story slice (new, 29 Oct 2026) | **Steps 1-4, transitions, intro rewrite, wave pin and log fixes built (2 Nov).** Arena fade 0.35 s, log focus 0.30 s. `S01_Intro`: 4 actors, 32 beats, 39.0 s automatic content, nine spoken lines, three bubbles. Owner dialogue rewrite built. First wave is bats through the stage wave plan. One-line story box with tap-to-continue. `Run All Checks` currently fails on 4 DevOverlay type-scale labels (unrelated to this pass); story asset was checked on disk, Unity import pending. **Open: phone aspect, real device background, force battle page.** Canon: `Story-Canon.md`. Chapter story: `Story-Greenwake.md`. System: `Story-Scenes.md`. Script: `Story-Nodes.md` |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money**, and **MVP = store-submittable** (§1p). The gate stands for NEW systems: abilities, gear and the roster swap shipped after it, so read it as "no zones / affixes / relics before the base is done" |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
@@ -58,8 +58,10 @@ re-checked for correct attribution, one line per wave, no mid-line renaming and 
 
 ## 0c. Story slice — one node, one scene  ·  **in progress 29 Oct 2026**
 
-Scope: one in-game scene (`S01_Intro`) at node 1, injected before wave 1. No map, no title screen, no
-mid/outro, no meta. Docs: `Story-Canon.md`, `Story-Scenes.md`, `Story-Nodes.md`.
+Scope: the first build is one in-game scene (`S01_Intro`) at node 1, injected before wave 1. The
+chapter story is now locked beyond that scene: `S01_Mid`, `S01_King`, `S01_Outro` and `S01_Defeat` are
+planned but not built. No map, no title screen, no meta. Docs: `Story-Canon.md`,
+`Story-Greenwake.md`, `Story-Scenes.md`, `Story-Nodes.md`.
 
 System (must exist before content grows):
 - [x] `StorySceneDef` (scene = data asset) + `StoryScheduleDef` (cue, stage range, wave spec, priority, play limit).
@@ -71,10 +73,13 @@ System (must exist before content grows):
 - [x] `BattleLogKind.Dialogue` and `BattleLog.Say(name, line)`. `RequestAbility` refuses while paused.
 
 Content (node 1, `S01_Intro`):
-- [x] Actors: Soldier walks in first, Mage second, Knight last and right/front; one Slime creeps in from the right.
-- [x] 27 beats, 48.4 s of automatic content, 120 s real-time cap, nine spoken lines, seven bubbles. Script in `Story-Nodes.md` §3.
+- [x] **Chapter story locked (2 Nov 2026):** `Story-Greenwake.md` owns the time leak, living bloom, Slime King, wave/place progression and the Guard’s theft. Mid/King/Outro/Defeat are planned, not built.
+- [x] **Intro 1 built (2 Nov 2026):** 9 lines, 32 beats, 39.0 s automatic content. Lost party; slime passes; party follows. Soldier asks, “Is that a ... Slime!?”
+- [x] Actors in the built asset: Soldier walks in first, Mage second, Knight last and right/front; one Slime creeps in from the right.
+- [x] Built asset: 32 beats, 39.0 s of automatic content, 120 s real-time cap, nine spoken lines, three bubbles. Script in `Story-Nodes.md` §3.
 - [x] Hard rules: no rewards, no mechanics explained, every scene skippable.
-- [x] Pin stage 1 wave 1 to one Slime (`WaveSizeOverride`: stage 1, wave 1, count 1). Verified `ResolveCount(1,1)=1`; wave 2 stays 2.
+- [x] Old wave-1 pin removed.
+- [x] **Wave plan:** `Stage01_WavePlan.asset` is linked to `WaveConfig`. Stage 1 has 6 normal waves: 1-2 bats, 3 bats + first werewolf, 4 werewolves, 5 slimes + last werewolf, 6 slimes; wave 7 uses the boss pool. Verified by runtime lookup and `Run All Checks` PASS.
 - [x] Battle log: long lines wrap, per-line height grows, all lines use the 48 VT323 Dialogue role, and speaker names are gold over near-white words (30 Oct).
 - [x] Story typewriter: one-line story mode, name at once, words at 45 cps, `TAP TO CONTINUE` for both finish and advance, `SKIP SCENE` separate, scene end/skip completes the line (2 Nov).
 - [x] Story pacing/depth: tap jumps to the next beat immediately; Knight draws in front, then Mage, then Soldier; final attack clip finishes before the fade (2 Nov).

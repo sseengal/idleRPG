@@ -128,9 +128,10 @@ namespace IdleRPG.EditorTools
             SimRules rules = SimRulesFactory.FromBalance(balance);
             double total = 0d;
 
-            for (int wave = 1; wave <= balance.NormalWavesPerStage + 1; wave++)
+            for (int wave = 1; wave <= waves.NormalWaveCountFor(stage, balance.NormalWavesPerStage) + 1; wave++)
             {
-                bool isBoss = WaveConfig.IsBossWave(wave, balance.NormalWavesPerStage);
+                int normalWaves = waves.NormalWaveCountFor(stage, balance.NormalWavesPerStage);
+                bool isBoss = WaveConfig.IsBossWave(wave, normalWaves);
                 EnemyCombatant[] team = EncounterFactory.Build(waves, balance, stage, wave, isBoss, rules);
 
                 if (team == null)

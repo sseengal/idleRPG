@@ -25,7 +25,10 @@ namespace IdleRPG.Data
         Hide = 5,
 
         /// <summary>End the scene early. The hard cap is the safety net.</summary>
-        End = 6
+        End = 6,
+
+        /// <summary>Flip the actor to look left or right without moving it.</summary>
+        Face = 7
     }
 
     /// <summary>The feeling a speech bubble shows. Words are the exception, not the rule.</summary>
@@ -102,8 +105,12 @@ namespace IdleRPG.Data
         [Tooltip("Clip slot for PlayClip: Idle, Walk, Attack01, Hurt, Death, Ability.")]
         public string clip;
 
+        [Tooltip("Face: true = look left, false = look right.")]
+        public bool faceLeft;
+
         public StoryBeat(float time, StoryVerb verb, string actorId = "", Vector2 spot = default,
-            float duration = 0f, string text = "", BubbleKind bubble = BubbleKind.None, string clip = "")
+            float duration = 0f, string text = "", BubbleKind bubble = BubbleKind.None, string clip = "",
+            bool faceLeft = false)
         {
             this.time = time;
             this.verb = verb;
@@ -113,6 +120,7 @@ namespace IdleRPG.Data
             this.text = text;
             this.bubble = bubble;
             this.clip = clip;
+            this.faceLeft = faceLeft;
         }
     }
 

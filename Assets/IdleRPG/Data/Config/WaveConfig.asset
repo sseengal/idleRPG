@@ -87,3 +87,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8c93379c666ed4d77831b256c2001e59, type: 2}
   - {fileID: 11400000, guid: 5639ba09a464a4342b5f892e2e04edc5, type: 2}
   - {fileID: 11400000, guid: 3617896b7a6764ef599392a93729ee7b, type: 2}
+  stageWavePlans:
+  - {fileID: 11400000, guid: d75e111bb5deb4cf295f4666aaf0e3e2, type: 2}

@@ -192,6 +192,29 @@ story sequencing and the MVP are finished (§10, "When the baseline is re-record
 Heroes use the same recipe with `heroes.json` + `party.json`; at MVP the party must not exceed the 3 formation
 slots, and the check warns if it does.
 
+## 8b. Stage wave plans (authored pacing) · added 2026-11-02
+
+The normal enemy rotation is good for the long ladder, but a story chapter needs an authored order.
+A **`StageWavePlan`** asset overrides the rotating pool for one stage:
+
+- `stage` — the stage it belongs to;
+- `normalWaveCount` — how many normal waves this stage has (0 = use `BalanceConfig.NormalWavesPerStage`);
+- `waves` — normal-wave entries with `wave`, `enemy`, and `count` (1-3);
+- boss waves are not in the plan; they still come from `WaveConfig.bossEnemies`.
+
+`WaveConfig.stageWavePlans` holds the plans. Lookup is:
+
+1. a matching plan/wave;
+2. otherwise the old rotating pool.
+
+A stage with no plan is unchanged. The first plan is `Data/Config/Stage01_WavePlan.asset`:
+6 normal waves — bats, first wolf, pack, last wolf at the wall, slimes; wave 7 is the Slime King.
+Duplicate wave rows are intentional: wave 3 is bats + a werewolf, wave 5 is slimes + a werewolf.
+
+Authoring is data-only. A plan asset can be created from `Create > Idle RPG > Data > Stage Wave Plan`.
+The content generator writes `normalEnemies` and `bossEnemies`; it does not clear `stageWavePlans`.
+
+
 ## 9. Hero-add checklist (must stay 100% data)
 
 1. Add a `HeroData` entry to `heroes.json` (id, name, icon key, role, tags, base stats, interval, rarity, unlock).

@@ -55,7 +55,7 @@ Supporting pieces built around those five:
 ## 3. Data model
 
 ```csharp
-enum StoryVerb  { Enter, WalkTo, PlayClip, Bubble, Say, Hide, End }
+enum StoryVerb  { Enter, WalkTo, PlayClip, Bubble, Say, Hide, End, Face }
 enum BubbleKind { None, Dots, Bang, Question, Word }
 enum StoryCue   { BeforeWave, AfterWave, StageCleared, Defeat, Manual }
 enum WaveMode   { Any, Exact, EveryN, Random }
@@ -77,11 +77,12 @@ enum PlayLimit  { EveryTime, OncePerStage, OncePerRun }
 `StoryActorDef`: `id`, `displayName`, `art` (`CharacterArtSet`), `facesLeft`, `scale`.
 
 `StoryBeat`: `time`, `verb`, `actorId`, `spot` (0..1 inside the viewport), `duration`, `text`,
-`bubble`, `clip`.
+`bubble`, `clip`, `faceLeft`.
 
 Rules:
 
 - `Enter` start side is inferred: `spot.x < 0.5` walks in from the left edge, else from the right.
+- `Face` flips an actor to look left or right without moving it. `faceLeft = true` looks left.
 - `Say` stores `displayName` as the speaker and `text` as the words. The log colours the name gold
   and types the words at 45 characters per second. The scene never writes raw log text or markup.
 - When `waitForContinue` is on, the scene clock stops after each `Say`. The first tap finishes the
@@ -360,7 +361,7 @@ valid. Review the diff after it runs.
 2. Set a stable `id`. Never rename it after ship; random rolls and future save data use it.
 3. Fill `actors`: `id`, `displayName`, art set, facing, scale. Up to six.
 4. Fill `beats` in time order. Use `Enter` for the first appearance, `WalkTo` for later moves,
-   `Bubble` for a symbol or short word, `Say` for a log line, `End` for an early finish.
+   `Face` for a look left/right, `Bubble` for a symbol or short word, `Say` for a log line, `End` for an early finish.
 5. Set `hardCapSeconds` to content length + 5-8 s. It is a safety net, not pacing.
 6. Add one rule to the node's schedule (`Assets > Create > Idle RPG/Story/Story Schedule`, or the
    existing node schedule): cue, stage range, wave rule, scene, priority, play limit.
@@ -374,12 +375,15 @@ If step 8 needs code, the structure is wrong. Fix the structure, not the scene.
 `S01_Intro` is the reference scene:
 
 - four actors: `soldier`, `mage`, `knight` on the right, `slime` on the left;
-- 27 beats, 48.4 s of automatic content, 120 s real-time cap;
-- 9 `Say` lines and 7 bubbles; the player taps after each spoken line;
-- Soldier enters first, Mage second, Knight last on the right/front; Knight's glance stays right;
-- party enters, pauses, talks, looks around, slime creeps in, knight calls weapons ready,
-  `Attack01` flourish, `End`;
-- stage 1, wave 1 is pinned to exactly one Slime so the wave matches the picture.
+- 32 beats, 39.0 s of automatic content, 120 s real-time cap;
+- 9 `Say` lines and 3 bubbles; the player taps after each spoken line;
+- Soldier enters first, Mage second, Knight last on the right/front;
+- the party is lost; all three face left when they hear the sound behind them;
+- Mage and Soldier stand on the same upper line; Mage and Knight keep facing left and walk backwards to give the slime way;
+- the party splits vertically; the slime enters from the left, passes through the gap, and exits right;
+- the party tracks the slime: Soldier, then Mage, then Knight turn right as it passes;
+- party follows the slime; `End`;
+- stage 1, wave 1 is two bats through `Stage01_WavePlan.asset`.
 
 Use it as the shape for a new intro, but do not copy its words. The script lives in `Story-Nodes.md`.
 
@@ -461,7 +465,7 @@ same wave today; keep the order anyway.
 
 | Asset / object | Job |
 |---|---|
-| `Data/Story/Stage01/S01_Intro.asset` | Current intro: 4 actors, 27 beats, 48.4 s content, 120 s cap, `waitForContinue` on. |
+| `Data/Story/Stage01/S01_Intro.asset` | Built intro: 4 actors, 32 beats, 39.0 s content, 120 s cap, `waitForContinue` on. |
 | `Data/Story/Stage01/Stage01_Schedule.asset` | One `BeforeWave` rule: stage 1, wave 1, `OncePerStage`, priority 10. |
 | `Data/Config/BalanceConfig.asset` | `waveSizeOverrides`: stage 1, wave 1, count 1. |
 | `HudController.debugStoryScene` | Scene used by `P`. |

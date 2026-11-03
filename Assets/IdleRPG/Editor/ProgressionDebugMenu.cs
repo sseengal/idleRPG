@@ -152,7 +152,7 @@ namespace IdleRPG.EditorTools
         /// </summary>
         private static double EstimateStageGold(BalanceConfig balance, WaveConfig waves, int stage)
         {
-            int normalWaves = balance.NormalWavesPerStage;
+            int normalWaves = waves.NormalWaveCountFor(stage, balance.NormalWavesPerStage);
             int poolSize = Mathf.Max(1, waves.NormalEnemyCount);
             double wavesPerEnemy = normalWaves / (double)poolSize;
             double gold = 0d;
@@ -188,7 +188,7 @@ namespace IdleRPG.EditorTools
 
             double pace = balance.CombatPaceMultiplier;
             double critFactor = 1d + balance.CriticalChance * (balance.CriticalDamageMultiplier - 1d);
-            int normalWaves = balance.NormalWavesPerStage;
+            int normalWaves = waves.NormalWaveCountFor(1, balance.NormalWavesPerStage);
             int poolSize = Mathf.Max(1, waves.NormalEnemyCount);
             double wavesPerEnemy = normalWaves / (double)poolSize;
 

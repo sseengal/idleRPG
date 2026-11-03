@@ -245,6 +245,11 @@ namespace IdleRPG.UI
                     layer.PlayClip(index, beat.clip);
                     break;
 
+                case StoryVerb.Face:
+                    RequireActor(index, beat);
+                    layer.Face(index, beat.faceLeft);
+                    break;
+
                 case StoryVerb.Bubble:
                     RequireActor(index, beat);
                     layer.Bubble(index, beat.bubble, beat.text);

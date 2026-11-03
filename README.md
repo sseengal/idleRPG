@@ -4,7 +4,8 @@ A **2D mobile RPG** with a JRPG shape: a short story campaign, automatic one-at-
 three-hero party, abilities, gear and permanent upgrades. Idle earnings stay in the code but are out of
 the core loop.
 
-Target: **Unity 6000.6.0f1**, URP 2D, portrait, iOS + Android. Story canon: `Docs/Story-Canon.md`.
+Target: **Unity 6000.6.0f1**, URP 2D, portrait, iOS + Android. Story canon: `Docs/Story-Canon.md`;
+chapter 1 story: `Docs/Story-Greenwake.md`.
 
 ---
 
@@ -202,6 +203,7 @@ debug menus, the console log and the Unity MCP bridge. A manual pass takes ~5 mi
 | `Docs/README.md` | index: where to look, standing rules, folder layout |
 | `Docs/Game-Vision.md` | **CANON**: story-led campaign, automatic combat, the core loop |
 | `Docs/Story-Canon.md` | **CANON**: the Second Dawn, cast, Greenwake, video vs in-game split |
+| `Docs/Story-Greenwake.md` | **CANON**: chapter 1 story: living bloom, Slime King, cost, ending |
 | `Docs/Story-Nodes.md` | node scripts: beats, words, text budget |
 | `Docs/Story-Scenes.md` | how a scene is injected before/after a fight, timed, skipped, resumed (as-built map) |
 | `Docs/Battle-Log.md` | battle-log store, view, colours, typewriter, wrapping, tests |

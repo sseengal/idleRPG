@@ -73,7 +73,7 @@ namespace IdleRPG.Combat
 
         public bool IsRunning => running;
 
-        public int WavesPerStage => balanceConfig == null ? 11 : balanceConfig.NormalWavesPerStage + 1;
+        public int WavesPerStage => balanceConfig == null ? 11 : NormalWaves() + 1;
 
         public double TransitionRemaining => transitionRemaining;
 
@@ -305,7 +305,8 @@ namespace IdleRPG.Combat
 
         private int NormalWaves()
         {
-            return balanceConfig != null ? balanceConfig.NormalWavesPerStage : 10;
+            int fallback = balanceConfig != null ? balanceConfig.NormalWavesPerStage : 10;
+            return waveConfig != null ? waveConfig.NormalWaveCountFor(CurrentStage, fallback) : fallback;
         }
 
         private static int Clamp(int value, int min, int max)

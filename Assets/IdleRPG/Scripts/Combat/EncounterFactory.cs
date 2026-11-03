@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using IdleRPG.Data;
 using IdleRPG.Sim;
 using IdleRPG.Utils;
+using UnityEngine;
 
 namespace IdleRPG.Combat
 {
@@ -39,7 +40,9 @@ namespace IdleRPG.Combat
                 return null;
             }
 
-            int normalWaves = balance != null ? balance.NormalWavesPerStage : 10;
+            int normalWaves = isBoss
+                ? Mathf.Max(1, wave - 1)
+                : (balance != null ? balance.NormalWavesPerStage : 10);
 
             // Wave size comes from the recipe (Step 11d): hash(stage, wave) -> 1..3, bosses always 1.
             // A positive override is for probes and tests that need an exact count.

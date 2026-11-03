@@ -431,13 +431,17 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 
 ### The scene
 - Soldier walks in first, Mage second, Knight last. Knight settles right/front.
-- One Slime creeps in from the right and stops inside the frame.
+- At the sound behind them, all three face left.
+- The party splits vertically. Mage moves to the same upper line as Soldier. Mage and Knight keep facing left and walk backwards to give the slime way. The gap is visible.
+- One slime enters from the left, passes through the gap, and exits right.
+- The party tracks it: Soldier turns right, then Mage, then Knight.
+- Soldier readies and starts a swing; Mage stops it. No damage is dealt.
 - The normal battle feed hides; one story line appears in the log box.
 - The speaker name appears in gold immediately, then the words type one character at a time.
 - `TAP TO CONTINUE` completes the line; tap again moves to the next line.
 - A long word starts on the next line as a whole; it never jumps lines halfway through typing.
 - Older story lines disappear; only the current line is visible.
-- No damage numbers, no HP changes, no swings for the whole scene.
+- No damage numbers and no HP changes for the whole scene.
 - The log box stays visible and readable.
 
 ### Controls
@@ -447,7 +451,7 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 - Background the app for 10 s, return: no stuck wave, no replay, no duplicate actors.
 
 ### After the scene
-- Wave 1 spawns once. Stage 1, wave 1 in the header.
+- Wave 1 spawns once. Stage 1, wave 1 in the header. Wave 1 is two bats.
 - Formation and HP are the same as before the scene.
 - Camp still opens before wave 4 (it must not be skipped by the story gate).
 - Press `P`: the scene plays again over the live fight (debug only).
