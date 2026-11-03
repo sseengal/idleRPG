@@ -17,6 +17,8 @@ MonoBehaviour:
   skippable: 1
   waitForContinue: 1
   hardCapSeconds: 120
+  fadeInSeconds: 0.35
+  fadeOutSeconds: 1.8
   actors:
   - id: knight
     displayName: Knight
@@ -354,7 +356,7 @@ MonoBehaviour:
     bubble: 0
     clip: 
     faceLeft: 0
-  - time: 41.5
+  - time: 39
     verb: 6
     actorId: 
     spot: {x: 0, y: 0}

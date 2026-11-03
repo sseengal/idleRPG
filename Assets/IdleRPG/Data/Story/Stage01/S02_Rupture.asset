@@ -16,7 +16,9 @@ MonoBehaviour:
   pauseBattle: 1
   skippable: 1
   waitForContinue: 1
-  hardCapSeconds: 12
+  hardCapSeconds: 30
+  fadeInSeconds: 1.8
+  fadeOutSeconds: 0.35
   actors:
   - id: knight
     displayName: Knight
@@ -43,70 +45,60 @@ MonoBehaviour:
     art: {fileID: 11400000, guid: 8fffee5c157dc4a14a5a9489f299b29b, type: 2}
     facesLeft: 1
     scale: 1
-  - id: batC
-    displayName: Bat
-    art: {fileID: 11400000, guid: 8fffee5c157dc4a14a5a9489f299b29b, type: 2}
-    facesLeft: 1
-    scale: 1
-  - id: batD
-    displayName: Bat
-    art: {fileID: 11400000, guid: 8fffee5c157dc4a14a5a9489f299b29b, type: 2}
-    facesLeft: 1
-    scale: 1
   beats:
   - time: 0
     verb: 8
     actorId: soldier
     spot: {x: 0.36, y: 0.4}
     duration: 0
-    text: 
+    text:
     bubble: 0
-    clip: 
+    clip:
     faceLeft: 0
   - time: 0
     verb: 8
     actorId: mage
     spot: {x: 0.48, y: 0.34}
     duration: 0
-    text: 
+    text:
     bubble: 0
-    clip: 
+    clip:
     faceLeft: 0
   - time: 0
     verb: 8
     actorId: knight
     spot: {x: 0.62, y: 0.28}
     duration: 0
-    text: 
+    text:
     bubble: 0
-    clip: 
+    clip:
     faceLeft: 0
   - time: 0.1
     verb: 1
     actorId: soldier
     spot: {x: 0.44, y: 0.4}
-    duration: 1.4
-    text: 
+    duration: 2.8
+    text:
     bubble: 0
-    clip: 
+    clip:
     faceLeft: 0
   - time: 0.1
     verb: 1
     actorId: mage
     spot: {x: 0.56, y: 0.34}
-    duration: 1.4
-    text: 
+    duration: 2.8
+    text:
     bubble: 0
-    clip: 
+    clip:
     faceLeft: 0
   - time: 0.1
     verb: 1
     actorId: knight
     spot: {x: 0.7, y: 0.28}
-    duration: 1.4
-    text: 
+    duration: 2.8
+    text:
     bubble: 0
-    clip: 
+    clip:
     faceLeft: 0
   - time: 2
     verb: 4
@@ -115,88 +107,52 @@ MonoBehaviour:
     duration: 0
     text: We lost it.
     bubble: 0
-    clip: 
+    clip:
     faceLeft: 0
   - time: 2.8
     verb: 9
-    actorId: 
+    actorId:
     spot: {x: 0, y: 0}
     duration: 0.8
-    text: 
+    text:
     bubble: 0
-    clip: 
+    clip:
     faceLeft: 0
   - time: 3.5
     verb: 0
     actorId: batA
     spot: {x: 0.98, y: 0.7}
     duration: 0.12
-    text: 
+    text:
     bubble: 0
-    clip: 
+    clip:
     faceLeft: 0
   - time: 3.6
     verb: 1
     actorId: batA
-    spot: {x: -0.06, y: 0.7}
+    spot: {x: -0.25, y: 0.7}
     duration: 0.55
-    text: 
+    text:
     bubble: 0
-    clip: 
+    clip:
     faceLeft: 0
   - time: 3.7
     verb: 0
     actorId: batB
     spot: {x: 0.98, y: 0.52}
     duration: 0.12
-    text: 
+    text:
     bubble: 0
-    clip: 
+    clip:
     faceLeft: 0
   - time: 3.8
     verb: 1
     actorId: batB
-    spot: {x: -0.06, y: 0.52}
+    spot: {x: -0.25, y: 0.52}
     duration: 0.55
-    text: 
+    text:
     bubble: 0
-    clip: 
-    faceLeft: 0
-  - time: 3.9
-    verb: 0
-    actorId: batC
-    spot: {x: 0.98, y: 0.58}
-    duration: 0.15
-    text: 
-    bubble: 0
-    clip: 
-    faceLeft: 0
-  - time: 4
-    verb: 1
-    actorId: batC
-    spot: {x: 0.78, y: 0.58}
-    duration: 0.65
-    text: 
-    bubble: 0
-    clip: 
-    faceLeft: 0
-  - time: 4.1
-    verb: 0
-    actorId: batD
-    spot: {x: 0.98, y: 0.2}
-    duration: 0.15
-    text: 
-    bubble: 0
-    clip: 
-    faceLeft: 0
-  - time: 4.2
-    verb: 1
-    actorId: batD
-    spot: {x: 0.84, y: 0.2}
-    duration: 0.65
-    text: 
-    bubble: 0
-    clip: 
+    clip:
     faceLeft: 0
   - time: 4.2
     verb: 4
@@ -205,7 +161,25 @@ MonoBehaviour:
     duration: 0
     text: Watch out!
     bubble: 0
-    clip: 
+    clip:
+    faceLeft: 0
+  - time: 4.3
+    verb: 5
+    actorId: batA
+    spot: {x: 0, y: 0}
+    duration: 0
+    text:
+    bubble: 0
+    clip:
+    faceLeft: 0
+  - time: 4.5
+    verb: 5
+    actorId: batB
+    spot: {x: 0, y: 0}
+    duration: 0
+    text:
+    bubble: 0
+    clip:
     faceLeft: 0
   - time: 4.8
     verb: 4
@@ -214,16 +188,16 @@ MonoBehaviour:
     duration: 0
     text: They're running from something.
     bubble: 0
-    clip: 
+    clip:
     faceLeft: 0
   - time: 5.8
     verb: 3
     actorId: knight
     spot: {x: 0, y: 0}
     duration: 0
-    text: 
+    text:
     bubble: 2
-    clip: 
+    clip:
     faceLeft: 0
   - time: 5.9
     verb: 4
@@ -232,14 +206,14 @@ MonoBehaviour:
     duration: 0
     text: Hold formation!
     bubble: 0
-    clip: 
+    clip:
     faceLeft: 0
   - time: 6.6
     verb: 6
-    actorId: 
+    actorId:
     spot: {x: 0, y: 0}
     duration: 0
-    text: 
+    text:
     bubble: 0
-    clip: 
+    clip:
     faceLeft: 0

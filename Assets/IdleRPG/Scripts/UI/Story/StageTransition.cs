@@ -30,6 +30,9 @@ namespace IdleRPG.UI
         /// <summary>True while a cover or reveal is running.</summary>
         public bool IsBusy => busy;
 
+        /// <summary>True when the curtain is fully down and no fade is running.</summary>
+        public bool IsCovered => group != null && !busy && group.alpha >= 0.999f;
+
         /// <summary>Creates the curtain as the last child of the stage, so it draws over actors and numbers.</summary>
         public static StageTransition Create(RectTransform stageRoot)
         {
@@ -49,13 +52,25 @@ namespace IdleRPG.UI
         /// <summary>Fades the arena to black, then runs <paramref name="onCovered"/>.</summary>
         public void Cover(Action onCovered)
         {
-            Begin(coverSeconds, 1f, onCovered);
+            Cover(coverSeconds, onCovered);
+        }
+
+        /// <summary>Fades the arena to black over <paramref name="seconds"/>, then runs the callback.</summary>
+        public void Cover(float seconds, Action onCovered)
+        {
+            Begin(seconds, 1f, onCovered);
         }
 
         /// <summary>Fades the arena back in, then runs <paramref name="onRevealed"/>.</summary>
         public void Reveal(Action onRevealed)
         {
-            Begin(revealSeconds, 0f, onRevealed);
+            Reveal(revealSeconds, onRevealed);
+        }
+
+        /// <summary>Fades the arena back in over <paramref name="seconds"/>, then runs the callback.</summary>
+        public void Reveal(float seconds, Action onRevealed)
+        {
+            Begin(seconds, 0f, onRevealed);
         }
 
         /// <summary>Jumps to black without a fade (used when a page was hidden and must not pop).</summary>

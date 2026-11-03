@@ -99,10 +99,10 @@ public static class SeedStoryAssets
             new StoryBeat(38.6f, StoryVerb.WalkTo, "soldier", new Vector2(0.36f, 0.40f), 1.6f),
             new StoryBeat(38.7f, StoryVerb.WalkTo, "mage", new Vector2(0.48f, 0.34f), 1.6f),
             new StoryBeat(38.8f, StoryVerb.WalkTo, "knight", new Vector2(0.62f, 0.28f), 1.6f),
-            new StoryBeat(41.5f, StoryVerb.End)
+            new StoryBeat(39.0f, StoryVerb.End)
         };
 
-        scene.EditorSetContent("s01_intro", actors, beats, 120f, tapToContinue: true);
+        scene.EditorSetContent("s01_intro", actors, beats, 120f, tapToContinue: true, fadeOut: 1.8f);
 
         EditorUtility.SetDirty(scene);
         AssetDatabase.SaveAssets();
@@ -120,9 +120,7 @@ public static class SeedStoryAssets
             new StoryActorDef("mage", "Mage", mage, false),
             new StoryActorDef("soldier", "Soldier", soldier, false),
             new StoryActorDef("batA", "Bat", bat, true),
-            new StoryActorDef("batB", "Bat", bat, true),
-            new StoryActorDef("batC", "Bat", bat, true),
-            new StoryActorDef("batD", "Bat", bat, true)
+            new StoryActorDef("batB", "Bat", bat, true)
         };
 
         StoryBeat[] beats =
@@ -130,27 +128,25 @@ public static class SeedStoryAssets
             new StoryBeat(0.0f, StoryVerb.Place, "soldier", new Vector2(0.36f, 0.40f)),
             new StoryBeat(0.0f, StoryVerb.Place, "mage", new Vector2(0.48f, 0.34f)),
             new StoryBeat(0.0f, StoryVerb.Place, "knight", new Vector2(0.62f, 0.28f)),
-            new StoryBeat(0.1f, StoryVerb.WalkTo, "soldier", new Vector2(0.44f, 0.40f), 1.4f),
-            new StoryBeat(0.1f, StoryVerb.WalkTo, "mage", new Vector2(0.56f, 0.34f), 1.4f),
-            new StoryBeat(0.1f, StoryVerb.WalkTo, "knight", new Vector2(0.70f, 0.28f), 1.4f),
+            new StoryBeat(0.1f, StoryVerb.WalkTo, "soldier", new Vector2(0.44f, 0.40f), 2.8f),
+            new StoryBeat(0.1f, StoryVerb.WalkTo, "mage", new Vector2(0.56f, 0.34f), 2.8f),
+            new StoryBeat(0.1f, StoryVerb.WalkTo, "knight", new Vector2(0.70f, 0.28f), 2.8f),
             new StoryBeat(2.0f, StoryVerb.Say, "soldier", default, 0f, "We lost it."),
             new StoryBeat(2.8f, StoryVerb.Shake, string.Empty, default, 0.8f),
             new StoryBeat(3.5f, StoryVerb.Enter, "batA", new Vector2(0.98f, 0.70f), 0.12f),
-            new StoryBeat(3.6f, StoryVerb.WalkTo, "batA", new Vector2(-0.06f, 0.70f), 0.55f),
+            new StoryBeat(3.6f, StoryVerb.WalkTo, "batA", new Vector2(-0.25f, 0.70f), 0.55f),
             new StoryBeat(3.7f, StoryVerb.Enter, "batB", new Vector2(0.98f, 0.52f), 0.12f),
-            new StoryBeat(3.8f, StoryVerb.WalkTo, "batB", new Vector2(-0.06f, 0.52f), 0.55f),
-            new StoryBeat(3.9f, StoryVerb.Enter, "batC", new Vector2(0.98f, 0.58f), 0.15f),
-            new StoryBeat(4.0f, StoryVerb.WalkTo, "batC", new Vector2(0.78f, 0.58f), 0.65f),
-            new StoryBeat(4.1f, StoryVerb.Enter, "batD", new Vector2(0.98f, 0.20f), 0.15f),
-            new StoryBeat(4.2f, StoryVerb.WalkTo, "batD", new Vector2(0.84f, 0.20f), 0.65f),
+            new StoryBeat(3.8f, StoryVerb.WalkTo, "batB", new Vector2(-0.25f, 0.52f), 0.55f),
             new StoryBeat(4.2f, StoryVerb.Say, "soldier", default, 0f, "Watch out!"),
+            new StoryBeat(4.3f, StoryVerb.Hide, "batA"),
+            new StoryBeat(4.5f, StoryVerb.Hide, "batB"),
             new StoryBeat(4.8f, StoryVerb.Say, "mage", default, 0f, "They're running from something."),
             new StoryBeat(5.8f, StoryVerb.Bubble, "knight", default, 0f, string.Empty, BubbleKind.Bang),
             new StoryBeat(5.9f, StoryVerb.Say, "knight", default, 0f, "Hold formation!"),
             new StoryBeat(6.6f, StoryVerb.End)
         };
 
-        scene.EditorSetContent("s02_rupture", actors, beats, 12f, tapToContinue: true);
+        scene.EditorSetContent("s02_rupture", actors, beats, 30f, tapToContinue: true, fadeIn: 1.8f);
 
         EditorUtility.SetDirty(scene);
         AssetDatabase.SaveAssets();

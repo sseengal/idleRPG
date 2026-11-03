@@ -129,7 +129,7 @@ The first wave is **bats**. `S02_Rupture` establishes the bat panic; wave 1 foll
 
 **Plays:** before wave 1 of stage 1, immediately after `S01_Intro`. Both are `BeforeWave` rules at wave 1; the queue plays Intro, then Rupture, then releases the wave once. No battle between the scenes.
 
-**Asset:** the party is still walking right. The slime is gone. The ground shakes. Bats flee from the forest centre on the right and cross to the left. Two fly past; two stop ahead of the party. No combat.
+**Asset:** the party is still walking right. The slime is gone. The ground shakes. Bats flee from the forest centre on the right and cross to the left. Two fly past and leave the screen. No combat.
 
 **Interaction:** tap after each spoken line. **Bubble:** symbols only. **Log:** one line at a time.
 
@@ -140,10 +140,8 @@ The first wave is **bats**. `S02_Rupture` establishes the bat panic; wave 1 foll
 | `knight` | Knight | `Knight_Art` | right | Right/front. Orders the party to hold |
 | `mage` | Mage | `Wizard_Art` | right | Middle. Reads the animal panic |
 | `soldier` | Soldier | `Soldier_Art` | right | Left/front. Reacts first |
-| `batA` | Bat | `Bat_Art` | left | Flies past, right to left |
-| `batB` | Bat | `Bat_Art` | left | Flies past, right to left |
-| `batC` | Bat | `Bat_Art` | left | Stops and hovers ahead of the party |
-| `batD` | Bat | `Bat_Art` | left | Stops and hovers ahead of the party |
+| `batA` | Bat | `Bat_Art` | left | Flies past, right to left, then leaves the screen |
+| `batB` | Bat | `Bat_Art` | left | Flies past, right to left, then leaves the screen |
 
 ### Sequence
 
@@ -152,12 +150,11 @@ The first wave is **bats**. `S02_Rupture` establishes the bat panic; wave 1 foll
 | 1 | Moving | The party is already walking right; the slime is absent | — |
 | 2 | Lost | The party stops. The forest is empty | **Soldier:** We lost it. |
 | 3 | Quake | The ground shakes. No character explains it | — |
-| 4 | Flight | Bat A and Bat B cross from right to left at speed | — |
-| 5 | Hover | Bat C and Bat D stop ahead of the party and hover | — |
-| 6 | Warning | The party sees the bats cutting through their line | **Soldier:** Watch out! |
-| 7 | Cause | The Mage reads the panic, not an attack | **Mage:** They're running from something. |
-| 8 | Hold | The Knight gives the order; the bats remain in the way | **Knight:** Hold formation! |
-| 9 | Fight | Wave 1 begins with two bats | — |
+| 4 | Flight | Bat A and Bat B cross from right to left at speed, then leave the screen | — |
+| 5 | Warning | The party sees the bats cutting through their line | **Soldier:** Watch out! |
+| 6 | Cause | The Mage reads the panic, not an attack | **Mage:** They're running from something. |
+| 7 | Hold | The Knight gives the order | **Knight:** Hold formation! |
+| 8 | Fight | Wave 1 begins with two bats | — |
 
 ### What the log shows
 
@@ -171,7 +168,7 @@ Knight: Hold formation!
 Notes:
 
 - **The bats are fleeing, not hunting.** Right is the forest centre. The bats fly from right to left; the Guard walks right into what drove them out.
-- **Two pass; two hover.** The two hoverers are the pair that becomes wave 1. The two flyers show the stampede.
+- **Two pass; no hover in this pass.** The two bats leave the screen. Wave 1 still uses two bats.
 - **No shard, no king, no root explanation.** The image and the lines do the work.
 - **No damage.** The shake is visual. The first hit happens in combat.
 - **No timing target.** Adjust the beat spacing in the asset; do not rewrite this page around a total runtime.

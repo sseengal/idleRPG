@@ -34,7 +34,7 @@ manual call.
 | `StorySceneDef` | asset | one play: actors + beats | yes - new asset per scene |
 | `StoryScheduleDef` | asset | when a scene plays | yes - one new row per scene |
 | `StoryService` | Core | holds the schedule, holds the fight, queues scenes | no |
-| `StoryPlayer` | UI | walks beats on real time; skip; hard cap | no |
+| `StoryPlayer` | UI | walks beats on unscaled time; tap waits do not count toward the cap; skip; black hand-off | no |
 | `StoryLayer` | UI | actors, bubble, advance surface, skip button, hide the board | no |
 
 Why the schedule is separate from the scene: the same scene may play in more than one place, and two
@@ -70,7 +70,9 @@ enum PlayLimit  { EveryTime, OncePerStage, OncePerRun }
 | `pauseBattle` | bool | true | Stop the fight for the whole scene |
 | `skippable` | bool | true | The separate `SKIP SCENE` button can end it |
 | `waitForContinue` | bool | true | Legacy asset value; every spoken line waits for a tap. The player enforces this. |
-| `hardCapSeconds` | float | 14 | Real-time stop. Never 0 |
+| `hardCapSeconds` | float | 14 | Active scene time stop. Waiting for a tap does not count |
+| `fadeInSeconds` | float | 0.35 | Fade from black when the scene starts |
+| `fadeOutSeconds` | float | 0.35 | Fade to black when the scene ends |
 | `actors` | `StoryActorDef[]` | required | Any count; actor images are created on demand |
 | `beats` | `StoryBeat[]` | required | Sorted by `time` on validate |
 
@@ -251,7 +253,7 @@ These rules hold for every scene, at every cue.
 | **Abilities** | `RequestAbility` returns false while paused. No cast can queue behind a scene |
 | **One at a time** | A second play request is ignored or queued. Never two scenes |
 | **Skip** | The separate `SKIP SCENE` button ends the scene. A full-screen tap or Space advances the current line; it never skips the whole scene |
-| **Hard cap** | Real time (120 s on `S01_Intro`), never the paused scene clock. A broken or idle scene cannot hold the wave forever |
+| **Hard cap** | Active scene time only. Waiting for a tap does not count. A broken or idle scene cannot hold the wave forever |
 | **Real time** | `Time.unscaledDeltaTime`. A long frame jumps to the beat it should be on |
 | **Background** | Return after the cap: the scene ends. No stuck state, no replay |
 | **Resume** | The held wave spawns with the same stage, wave and formation |
@@ -291,7 +293,7 @@ Log rules:
 - The log store keeps the full text, but `Dialogue` entries are hidden from the normal feed. Story lines
   never reappear as a wall after the scene. Combat history is preserved.
 - Speaker names are gold; the words are near-white. All log lines use the 48 VT323 role.
-- The hard cap is real time (120 s on `S01_Intro`), so a waiting scene cannot hold the wave forever.
+- The hard cap counts active scene time only. Waiting on a tap does not end the scene.
 
 ### Transitions (built 30 Oct 2026)
 
@@ -299,8 +301,11 @@ The scene enters and leaves through a **fade inside the arena only**.
 
 - `StageTransition` is a black overlay under the battle stage root. It covers actors and damage
   numbers, never the header, log, nav or popups.
-- `Cover` 0.35 s -> swap the picture -> `Reveal` 0.35 s. Unscaled time.
+- `Cover` and `Reveal` use a scene-level fade duration. The default is short; the opening uses a slow
+  fade out and a slow fade in.
 - Scene clock and hard cap start **after** the reveal. Fades are not scene time.
+- When another queued scene follows, the hand-off stays on black. The next scene reveals itself; the
+  battle never flashes between the two scenes.
 - Skip works only while content runs; it starts the closing fade.
 - A fade can be interrupted. A skip during the opening reveal starts the exit cover from the current alpha.
   It must never leave the scene in its exit phase.
@@ -397,11 +402,11 @@ If step 8 needs code, the structure is wrong. Fix the structure, not the scene.
 - the party is still moving right; the slime is gone;
 - Soldier: “We lost it.”;
 - the ground shakes;
-- two bats fly past from right to left; two stop and hover ahead;
+- two bats fly past from right to left and leave the screen;
 - Soldier: “Watch out!”;
 - Mage: “They're running from something.”;
 - Knight: “Hold formation!”;
-- wave 1 starts with the two hovering bats.
+- wave 1 starts with two bats.
 
 ### Testing scenes
 
@@ -480,9 +485,9 @@ same wave today; keep the order anyway.
 | `Scripts/Core/GameManager.Story.cs` | `storySchedule` field and `Story` service property. |
 | `Scripts/Core/GameManager.Wiring.cs` | Creates the service; composes the wave gate. |
 | `Scripts/Core/GameManager.Stages.cs` | Calls `Story.Tick` so a binding timeout cannot stall a wave. |
-| `Scripts/UI/Story/StoryPlayer.cs` | Real-time clock, beat dispatch, skip, hard cap, fade hand-off. |
+| `Scripts/UI/Story/StoryPlayer.cs` | Active-time clock, beat dispatch, skip, hard cap, black scene hand-off. |
 | `Scripts/UI/Story/StoryLayer.cs` | Actor images on demand, one bubble, skip overlay, stage shake, hide/restore board and enemy stack. |
-| `Scripts/UI/Story/StageTransition.cs` | Arena-only black cover/reveal. Interruptible fade. |
+| `Scripts/UI/Story/StageTransition.cs` | Arena-only black cover/reveal; per-scene duration; interruptible fade. |
 | `Scripts/UI/BattlePageFocus.cs` | Log grows; ability band fades out and becomes inert. |
 | `Scripts/UI/HudController.cs` | Creates `StoryPlayer`, binds it to `StoryService`, owns `CompleteStoryText`. |
 | `Scripts/Core/BattleLog.cs` | `Dialogue` kind, `Say(speaker, line)`, `Speaker` field. |
@@ -497,7 +502,7 @@ same wave today; keep the order anyway.
 | Asset / object | Job |
 |---|---|
 | `Data/Story/Stage01/S01_Intro.asset` | Built intro: 4 actors, `waitForContinue` on. |
-| `Data/Story/Stage01/S02_Rupture.asset` | Built rupture: 3 heroes + 4 bats, shake, tap-to-continue on. |
+| `Data/Story/Stage01/S02_Rupture.asset` | Built rupture: 3 heroes + 2 bats, shake, tap-to-continue on. |
 | `Data/Story/Stage01/Stage01_Schedule.asset` | Two `BeforeWave` rules at stage 1, wave 1: Intro priority 10, Rupture priority 5. Both once per stage. |
 | `Data/Config/BalanceConfig.asset` | No wave-size override for stage 1, wave 1. |
 | `HudController` + `StoryService.ScheduledScenes` | `P` replay, `J` / `K` previous/next scheduled scene. |

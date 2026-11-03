@@ -151,8 +151,14 @@ namespace IdleRPG.Data
         [Tooltip("Deprecated asset flag. Every spoken line waits for a tap; the player enforces it.")]
         [SerializeField] private bool waitForContinue = true;
 
-        [Tooltip("Hard stop in real seconds. Even a broken beat can never trap the player.")]
+        [Tooltip("Hard stop in active seconds. Waiting for a tap does not count. Even a broken beat can never trap the player.")]
         [SerializeField] private float hardCapSeconds = 14f;
+
+        [Tooltip("Fade from black when the scene starts.")]
+        [SerializeField] private float fadeInSeconds = 0.35f;
+
+        [Tooltip("Fade to black when the scene ends.")]
+        [SerializeField] private float fadeOutSeconds = 0.35f;
 
         [SerializeField] private StoryActorDef[] actors = Array.Empty<StoryActorDef>();
 
@@ -170,6 +176,10 @@ namespace IdleRPG.Data
 
         /// <summary>Never below 1 second, so a zero cannot disable the safety net.</summary>
         public float HardCapSeconds => Mathf.Max(1f, hardCapSeconds);
+
+        public float FadeInSeconds => Mathf.Max(0f, fadeInSeconds);
+
+        public float FadeOutSeconds => Mathf.Max(0f, fadeOutSeconds);
 
         public StoryActorDef[] Actors => actors ?? Array.Empty<StoryActorDef>();
 
@@ -212,13 +222,15 @@ namespace IdleRPG.Data
 #if UNITY_EDITOR
         /// <summary>Editor-only content write used by the asset seeder. Runtime never calls it.</summary>
         public void EditorSetContent(string sceneId, StoryActorDef[] newActors, StoryBeat[] newBeats, float capSeconds,
-            bool tapToContinue = true)
+            bool tapToContinue = true, float fadeIn = 0.35f, float fadeOut = 0.35f)
         {
             id = sceneId ?? string.Empty;
             actors = newActors ?? Array.Empty<StoryActorDef>();
             beats = newBeats ?? Array.Empty<StoryBeat>();
             hardCapSeconds = Mathf.Max(1f, capSeconds);
             waitForContinue = tapToContinue;
+            fadeInSeconds = Mathf.Max(0f, fadeIn);
+            fadeOutSeconds = Mathf.Max(0f, fadeOut);
         }
 #endif
 

@@ -436,8 +436,7 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 - One slime enters from the left, passes through the gap, and exits right.
 - The party tracks it: Soldier turns right, then Mage, then Knight.
 - Soldier readies and starts a swing; Mage stops it. No damage is dealt.
-- The party follows the slime out. The scene holds on the follow before the fade.
-- The normal battle feed hides; one story line appears in the log box.
+- The party follows the slime out. The scene holds on the follow before the slow fade to black.
 - The speaker name appears in gold immediately, then the words type one character at a time.
 - `TAP TO CONTINUE` completes the line; tap again moves to the next line.
 - A long word starts on the next line as a whole; it never jumps lines halfway through typing.
@@ -446,17 +445,17 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 - The log box stays visible and readable.
 
 ### Scene 2 — `S02_Rupture`
-- After the fade, the party is still moving right. The slime is nowhere on screen.
+- After the slow fade in, the party is still moving right. The slime is nowhere on screen.
 - **Soldier:** “We lost it.”
 - The ground shakes. The arena moves; the HUD and log stay steady.
 - Two bats fly from right to left at high speed and pass the party.
-- Two more bats stop ahead of the party and hover.
+- Both bats pass fully off the left edge and are hidden.
 - **Soldier:** “Watch out!”
 - **Mage:** “They're running from something.”
 - **Knight:** “Hold formation!”
 - Each spoken line waits for a tap. The first tap finishes the typing; the next tap moves on.
 - Each spoken line shows a tiny ellipsis bubble above that character: Soldier, Mage or Knight.
-- The two hovering bats remain in the way. No damage and no HP changes.
+- No damage and no HP changes.
 - No battle happens before the second scene. The log and stage do not reset between the two scenes.
 
 ### Controls

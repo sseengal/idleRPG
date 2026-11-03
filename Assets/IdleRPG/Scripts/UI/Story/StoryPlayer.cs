@@ -18,6 +18,8 @@ namespace IdleRPG.UI
     /// </summary>
     public sealed class StoryPlayer : MonoBehaviour
     {
+        private const float DefaultFadeSeconds = 0.35f;
+
         private GameManager manager;
         private StoryLayer layer;
         private StageTransition transition;
@@ -101,9 +103,9 @@ namespace IdleRPG.UI
                 manager.Combat.Paused = true;
             }
 
-            if (transition != null)
+            if (transition != null && !transition.IsCovered)
             {
-                transition.Cover(OnCovered);
+                transition.Cover(DefaultFadeSeconds, OnCovered);
             }
             else
             {
@@ -168,7 +170,7 @@ namespace IdleRPG.UI
 
             if (transition != null)
             {
-                transition.Reveal(null);
+                transition.Reveal(scene.FadeInSeconds, null);
             }
         }
 
@@ -179,14 +181,6 @@ namespace IdleRPG.UI
                 return;
             }
 
-            realClock += Time.unscaledDeltaTime;
-
-            if (realClock >= scene.HardCapSeconds)
-            {
-                Finish();
-                return;
-            }
-
             if (waitingForContinue)
             {
                 if (WasAdvancePressed())
@@ -194,6 +188,16 @@ namespace IdleRPG.UI
                     Advance();
                 }
 
+                return;
+            }
+
+            realClock += Time.unscaledDeltaTime;
+
+            if (realClock >= scene.HardCapSeconds)
+            {
+                Debug.LogWarning($"[StoryPlayer] Hard cap ended '{scene.Id}' while it was advancing. " +
+                                 "The scene may be missing its End beat or a beat may be too late.");
+                Finish();
                 return;
             }
 
@@ -346,7 +350,7 @@ namespace IdleRPG.UI
 
             if (transition != null)
             {
-                transition.Cover(OnCoveredForExit);
+                transition.Cover(scene.FadeOutSeconds, OnCoveredForExit);
             }
             else
             {
@@ -354,7 +358,7 @@ namespace IdleRPG.UI
             }
         }
 
-        /// <summary>Black is on screen: drop the scene, then reveal the fight.</summary>
+        /// <summary>Black is on screen: drop the scene, then hand off to the next scene while black.</summary>
         private void OnCoveredForExit()
         {
             if (phase != Phase.Ending)
@@ -370,20 +374,16 @@ namespace IdleRPG.UI
             storyLog?.EndStory();
             focus?.Exit();
 
-            if (transition != null)
-            {
-                transition.Reveal(OnExitDone);
-            }
-            else
-            {
-                OnExitDone();
-            }
-        }
+            // Keep the curtain and the pause through the hand-off. If the service starts another scene
+            // in this callback, that scene reveals the arena itself; the fight never flashes between them.
+            Action callback = finished;
+            finished = null;
+            scene = null;
+            phase = Phase.Idle;
 
-        /// <summary>Reveal is done: resume combat, then tell the service the scene is over.</summary>
-        private void OnExitDone()
-        {
-            if (phase != Phase.Ending)
+            callback?.Invoke();
+
+            if (phase != Phase.Idle)
             {
                 return;
             }
@@ -394,12 +394,11 @@ namespace IdleRPG.UI
             }
 
             pausedByScene = false;
-            scene = null;
-            phase = Phase.Idle;
 
-            Action callback = finished;
-            finished = null;
-            callback?.Invoke();
+            if (transition != null)
+            {
+                transition.Reveal(DefaultFadeSeconds, null);
+            }
         }
 
         private static bool WasAdvancePressed()
