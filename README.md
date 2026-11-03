@@ -130,6 +130,7 @@ app sandbox. Set a real `companyName` before store submission (it moves that pat
 | `M` | Mute / unmute the placeholder SFX |
 | `P` | Replay the current scheduled story scene |
 | `Left` / `Right` | Play the previous / next scheduled story scene |
+| `PREV` / `NEXT` | Editor-only scene test buttons at the top-left |
 | `L` | Log live state (stage, economy, rates, run stats, save info) |
 | `F8` / `F9` | **Full reset** (save + backups + PlayerPrefs + scene reload) / delete the save file only |
 

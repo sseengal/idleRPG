@@ -420,9 +420,11 @@ The test deck reads `StoryService.ScheduledScenes`, so it always uses the real s
 - `P` replays the selected scene over the live fight.
 - `Left` plays the previous scheduled scene.
 - `Right` plays the next scheduled scene.
+- In the editor, small **PREV** / **NEXT** buttons are also visible at the top-left.
+- Pressing either control during a scene skips the current scene and starts the requested one after the quick exit fade.
 
 The deck does not keep a second scene list. A scene added to `Stage01_Schedule.asset` appears in the deck
-automatically. Scenes already playing are ignored.
+automatically.
 
 Use this for the first-pass look at blocking, timing, tap flow and skip. Use the full manual test for the
 wave handoff and the no-damage proof.

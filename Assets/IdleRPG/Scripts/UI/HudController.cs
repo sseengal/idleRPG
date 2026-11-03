@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 using IdleRPG.Core;
 using IdleRPG.Data;
 
@@ -45,6 +46,7 @@ namespace IdleRPG.UI
         private StoryPlayer storyPlayer;
         private BattlePageFocus battleFocus;
         private int debugSceneIndex = -1;
+        private int pendingDebugStep;
 
         public GameManager GameManager => gameManager;
 
@@ -87,9 +89,17 @@ namespace IdleRPG.UI
         /// <summary>Dev only: move through the scheduled scenes and play the selected one.</summary>
         public bool DebugStepStory(int delta)
         {
-            if (storyPlayer == null || storyPlayer.IsPlaying)
+            if (storyPlayer == null)
             {
                 return false;
+            }
+
+            if (storyPlayer.IsPlaying)
+            {
+                // A test shortcut should interrupt the current scene, not feel dead.
+                pendingDebugStep = delta;
+                storyPlayer.Skip();
+                return true;
             }
 
             StorySceneDef[] scenes = DebugStoryScenes();
@@ -259,6 +269,9 @@ namespace IdleRPG.UI
                 {
                     // Bind after Setup: a scene requested during GameManager.Start is held until this line.
                     gameManager.Story?.SetPlayer(PlayStory);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    BuildStoryTestDeck();
+#endif
                 }
                 else
                 {
@@ -271,6 +284,49 @@ namespace IdleRPG.UI
         private bool PlayStory(StorySceneDef scene, Action onFinished)
         {
             return storyPlayer != null && storyPlayer.Play(scene, onFinished);
+        }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        /// <summary>Two clickable controls for the scene deck. The keyboard path is not always focused.</summary>
+        private void BuildStoryTestDeck()
+        {
+            RectTransform parent = modalRoot != null ? modalRoot : vfxRoot;
+
+            if (parent == null)
+            {
+                return;
+            }
+
+            GameObject deck = UiRuntime.CreateNode("StoryTestDeck", parent);
+            RectTransform deckRect = deck.transform as RectTransform;
+
+            if (deckRect != null)
+            {
+                UiRuntime.Stretch(deckRect);
+            }
+
+            Color background = new Color(0.12f, 0.18f, 0.28f, 0.92f);
+
+            UiRuntime.CreateButton(deck.transform, "PrevStory", "PREV",
+                new Vector2(0.02f, 0.88f), new Vector2(0.13f, 0.94f),
+                () => { DebugStepStory(-1); }, background, null, UiType.Role.Micro);
+
+            UiRuntime.CreateButton(deck.transform, "NextStory", "NEXT",
+                new Vector2(0.14f, 0.88f), new Vector2(0.25f, 0.94f),
+                () => { DebugStepStory(1); }, background, null, UiType.Role.Micro);
+        }
+#endif
+
+        private void Update()
+        {
+            if (pendingDebugStep == 0 || storyPlayer == null || storyPlayer.IsPlaying)
+            {
+                return;
+            }
+
+            int delta = pendingDebugStep;
+            pendingDebugStep = 0;
+            DebugStepStory(delta);
         }
 
         private void OnDestroy()

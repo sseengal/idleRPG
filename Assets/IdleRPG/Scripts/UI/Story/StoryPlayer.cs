@@ -120,7 +120,7 @@ namespace IdleRPG.UI
         {
             if (phase == Phase.Playing)
             {
-                Finish();
+                Finish(fast: true);
             }
         }
 
@@ -333,7 +333,7 @@ namespace IdleRPG.UI
                              "which is not in the scene. The beat is skipped.");
         }
 
-        private void Finish()
+        private void Finish(bool fast = false)
         {
             if (phase != Phase.Playing)
             {
@@ -350,7 +350,7 @@ namespace IdleRPG.UI
 
             if (transition != null)
             {
-                transition.Cover(scene.FadeOutSeconds, OnCoveredForExit);
+                transition.Cover(fast ? DefaultFadeSeconds : scene.FadeOutSeconds, OnCoveredForExit);
             }
             else
             {
