@@ -318,6 +318,12 @@ namespace IdleRPG.UI
             view.Animator.PlayClip(frames, view.Art.FpsFor(slot));
         }
 
+        /// <summary>Shows the speaker bubble above the actor. The name is the signifier; the log owns the line.</summary>
+        public void Speech(int actorIndex, string speaker)
+        {
+            Bubble(actorIndex, BubbleKind.Word, speaker);
+        }
+
         /// <summary>Shows the bubble above an actor. The bubble never follows a walking actor.</summary>
         public void Bubble(int actorIndex, BubbleKind kind, string text)
         {

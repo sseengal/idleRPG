@@ -148,7 +148,7 @@ namespace IdleRPG.Data
         [Tooltip("The separate SKIP SCENE button can end the scene early. Leave on.")]
         [SerializeField] private bool skippable = true;
 
-        [Tooltip("Wait for a tap after every spoken line. First tap finishes typing, second moves on.")]
+        [Tooltip("Deprecated asset flag. Every spoken line waits for a tap; the player enforces it.")]
         [SerializeField] private bool waitForContinue = true;
 
         [Tooltip("Hard stop in real seconds. Even a broken beat can never trap the player.")]
@@ -165,7 +165,8 @@ namespace IdleRPG.Data
 
         public bool Skippable => skippable;
 
-        public bool WaitForContinue => waitForContinue;
+        /// <summary>Legacy asset flag. Playback always waits after a spoken line.</summary>
+        public bool WaitForContinue => true;
 
         /// <summary>Never below 1 second, so a zero cannot disable the safety net.</summary>
         public float HardCapSeconds => Mathf.Max(1f, hardCapSeconds);

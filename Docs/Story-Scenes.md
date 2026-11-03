@@ -69,7 +69,7 @@ enum PlayLimit  { EveryTime, OncePerStage, OncePerRun }
 | `id` | string | required | Stable id. Used by save and random rolls. Never rename after ship |
 | `pauseBattle` | bool | true | Stop the fight for the whole scene |
 | `skippable` | bool | true | The separate `SKIP SCENE` button can end it |
-| `waitForContinue` | bool | true | Wait after every `Say`; first tap finishes typing, second moves on. Tap is the default for every scene. |
+| `waitForContinue` | bool | true | Legacy asset value; every spoken line waits for a tap. The player enforces this. |
 | `hardCapSeconds` | float | 14 | Real-time stop. Never 0 |
 | `actors` | `StoryActorDef[]` | required | Any count; actor images are created on demand |
 | `beats` | `StoryBeat[]` | required | Sorted by `time` on validate |
@@ -86,7 +86,9 @@ Rules:
 - `Face` flips an actor to look left or right without moving it. `faceLeft = true` looks left.
 - `Shake` shakes the arena stage for `duration` seconds. It restores the stage position on end, skip and cap.
 - `Say` stores `displayName` as the speaker and `text` as the words. The log colours the name gold
-  and types the words at 45 characters per second. The scene never writes raw log text or markup.
+  and types the words at 45 characters per second. Every spoken line also raises a name bubble over
+  the speaker, so the speaking character is visible without reading the log. The scene never writes
+  raw log text or markup.
 - When `waitForContinue` is on, the scene clock stops after each `Say`. The first tap finishes the
   typing; the second tap resumes. The prompt is at the bottom of the one-line story box.
 - `Bubble` shows one symbol, or 1-3 words when `bubble = Word`. Bubble symbols are instant; the
@@ -372,7 +374,7 @@ and scene references stay valid. Review the diff after it runs.
 7. Add one rule to the node's schedule (`Assets > Create > Idle RPG/Story/Story Schedule`, or the
    existing node schedule): cue, stage range, wave rule, scene, priority, play limit.
 8. Assign the schedule to `GameManager.storySchedule` in `Main.unity` if this is a new node schedule.
-9. Press Play. Use `P` / `PgUp` / `PgDn` for the scene test deck.
+9. Press Play. Use `P` / `J` / `K` for the scene test deck.
 
 If step 8 needs code, the structure is wrong. Fix the structure, not the scene.
 
@@ -406,8 +408,8 @@ If step 8 needs code, the structure is wrong. Fix the structure, not the scene.
 The test deck reads `StoryService.ScheduledScenes`, so it always uses the real schedule:
 
 - `P` replays the selected scene over the live fight.
-- `PgUp` plays the previous scheduled scene.
-- `PgDn` plays the next scheduled scene.
+- `J` plays the previous scheduled scene.
+- `K` plays the next scheduled scene.
 
 The deck does not keep a second scene list. A scene added to `Stage01_Schedule.asset` appears in the deck
 automatically. Scenes already playing are ignored.
@@ -486,7 +488,7 @@ same wave today; keep the order anyway.
 | `Scripts/Core/BattleLog.cs` | `Dialogue` kind, `Say(speaker, line)`, `Speaker` field. |
 | `Scripts/UI/CombatLogUI.cs` | Story mode, one-line story view, prompt, typewriter, wrapping. See `Battle-Log.md`. |
 | `Scripts/Combat/CombatManager.cs` | `RequestAbility` returns false while paused; `ResumeAfterGate`. |
-| `Scripts/Debug/DebugHotkeys*.cs` | `P` replays the wired debug scene. |
+| `Scripts/Debug/DebugHotkeys*.cs` | `P` replays the selected scheduled scene; `J` / `K` step the deck. |
 | `Scripts/Data/BalanceConfig.cs` + `WaveComposition.cs` | Authored wave size override. |
 | `Scripts/Tests/BattleLogTests.cs` | Store contract and speaker split. |
 
@@ -498,7 +500,7 @@ same wave today; keep the order anyway.
 | `Data/Story/Stage01/S02_Rupture.asset` | Built rupture: 3 heroes + 4 bats, shake, tap-to-continue on. |
 | `Data/Story/Stage01/Stage01_Schedule.asset` | Two `BeforeWave` rules at stage 1, wave 1: Intro priority 10, Rupture priority 5. Both once per stage. |
 | `Data/Config/BalanceConfig.asset` | No wave-size override for stage 1, wave 1. |
-| `HudController` + `StoryService.ScheduledScenes` | `P` replay, `PgUp` / `PgDn` previous/next scheduled scene. |
+| `HudController` + `StoryService.ScheduledScenes` | `P` replay, `J` / `K` previous/next scheduled scene. |
 | `HudController.combatLog`, `abilityStrip` | Wired by the builder. |
 | `Main.unity` | Story layer is created at runtime; no prefab scene object. |
 

@@ -265,9 +265,14 @@ namespace IdleRPG.UI
                     break;
 
                 case StoryVerb.Say:
+                    if (index >= 0 && index < scene.Actors.Length)
+                    {
+                        layer.Speech(index, scene.Actors[index].displayName);
+                    }
+
                     SayLine(index, beat.text);
 
-                    if (scene.WaitForContinue && !string.IsNullOrEmpty(beat.text))
+                    if (!string.IsNullOrEmpty(beat.text))
                     {
                         waitingForContinue = true;
                         storyLog?.SetStoryWaiting(true);

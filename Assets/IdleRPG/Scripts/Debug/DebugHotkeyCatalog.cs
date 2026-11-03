@@ -46,7 +46,7 @@ namespace IdleRPG.Debugging
             new DebugHotkeyEntry("F3", "toggle this overlay"),
             new DebugHotkeyEntry("F4", "unlock / lock every ability (test)"),
             new DebugHotkeyEntry("P", "play the current story scene over the fight"),
-            new DebugHotkeyEntry("PgUp / PgDn", "play previous / next scheduled story scene"),
+            new DebugHotkeyEntry("J / K", "play previous / next scheduled story scene"),
             new DebugHotkeyEntry("F5", "save now"),
             new DebugHotkeyEntry("F8", "FULL RESET (save + backups + prefs + reload)"),
             new DebugHotkeyEntry("F9", "delete the save file only"),

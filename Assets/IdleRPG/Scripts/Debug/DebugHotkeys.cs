@@ -132,7 +132,7 @@ namespace IdleRPG.Debugging
                 ToggleAllAbilities();
             }
 
-            // Story deck: replay the current scheduled scene. PgUp / PgDn walk the schedule below.
+            // Story deck: replay the current scheduled scene. J / K walk the schedule below.
             if (keyboard.pKey.wasPressedThisFrame)
             {
                 IdleRPG.UI.HudController hud = IdleRPG.UI.HudController.Instance;
@@ -143,24 +143,24 @@ namespace IdleRPG.Debugging
                     : $"Story (P): nothing played - missing scene asset, or a scene is already running ('{scene}').");
             }
 
-            // Story deck: PgUp / PgDn walk the actual schedule and play each scene. This is the fast pass
-            // for every scene without replaying the run or editing the scene asset list.
-            if (keyboard.pageUpKey.wasPressedThisFrame)
+            // Story deck: J / K walk the actual schedule and play each scene. This is the fast pass for
+            // every scene without replaying the run or editing the scene asset list.
+            if (keyboard.jKey.wasPressedThisFrame)
             {
                 IdleRPG.UI.HudController hud = IdleRPG.UI.HudController.Instance;
                 bool played = hud != null && hud.DebugStepStory(-1);
                 Log(played
-                    ? $"Story (PgUp): playing '{hud.DebugStoryName}'."
-                    : "Story (PgUp): nothing played - missing schedule scene, or a scene is already running.");
+                    ? $"Story (J): playing '{hud.DebugStoryName}'."
+                    : "Story (J): nothing played - missing schedule scene, or a scene is already running.");
             }
 
-            if (keyboard.pageDownKey.wasPressedThisFrame)
+            if (keyboard.kKey.wasPressedThisFrame)
             {
                 IdleRPG.UI.HudController hud = IdleRPG.UI.HudController.Instance;
                 bool played = hud != null && hud.DebugStepStory(1);
                 Log(played
-                    ? $"Story (PgDn): playing '{hud.DebugStoryName}'."
-                    : "Story (PgDn): nothing played - missing schedule scene, or a scene is already running.");
+                    ? $"Story (K): playing '{hud.DebugStoryName}'."
+                    : "Story (K): nothing played - missing schedule scene, or a scene is already running.");
             }
 
             if (keyboard.gKey.wasPressedThisFrame)

@@ -109,7 +109,7 @@ namespace IdleRPG.UI
             return DebugPlayStory(scenes[debugSceneIndex]);
         }
 
-        /// <summary>Dev only: the id of the scene the P/PgUp/PgDn deck is pointing at.</summary>
+        /// <summary>Dev only: the id of the scene the P/J/K deck is pointing at.</summary>
         public string DebugStoryName
         {
             get
