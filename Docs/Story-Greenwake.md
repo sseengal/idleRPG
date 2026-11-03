@@ -149,11 +149,11 @@ geography.
 | 1–2 | The edge of Greenwake | Bats, flushed from the canopy by a root rupture | The Guard is lost; the bats panic and fly out through the party. The fight is a collision, not a hunt. |
 | 3 | The edge | Bats and the first werewolf | The first predator follows the flock. The mixed wave is the transition into the wolf act. |
 | 4 | The broken ground | Werewolves | The pack. A clean fight with a real threat. |
-| 5 | The root lip | Slimes and the last werewolf | The last predator is caught at the wall. `S01_Mid` starts here. The Guard must cut through. |
+| 5 | The root lip | Slimes and the last werewolf | The last predator is caught at the wall. `S03_Wall` starts here. The Guard must cut through. |
 | 6 | The root lip | Slimes | The wall is pure bloom now. Nothing else remains. |
-| 7 | The heart | The old hollow tree, the Slime King, the shard | `S01_King` and the boss fight. |
-| After clear | The hollow | Collapsed bloom, ordinary forest beyond | `S01_Outro`: the theft and the cost. |
-| On defeat | Last ground held | The same road and enemies, wounds closed | `S01_Defeat`: the rewind. |
+| 7 | The heart | The old hollow tree, the Slime King, the shard | `S04_King` and the boss fight. |
+| After clear | The hollow | Collapsed bloom, ordinary forest beyond | `S05_Outro`: the theft and the cost. |
+| On defeat | Last ground held | The same road and enemies, wounds closed | `S06_Defeat`: the rewind. |
 
 This progression explains the stage’s enemy pool. The bats and wolves are real animals driven out by
 the bloom. The slimes are the bloom’s matter. The Slime King is the knot at the source.
@@ -167,16 +167,17 @@ It also makes the mid scene a real threshold instead of a random pause.
 
 ## 9. Scene sequence
 
-Exact words and timings live in `Story-Nodes.md`. This table owns only what each scene must do.
+Exact words live in `Story-Nodes.md`. This table owns only what each scene must do.
 
 | Scene | Cue | What the player must understand |
 |---|---|---|
 | `S01_Intro` | Stage start | The Guard is lost. A single slime passes toward the center; the party follows it. The Soldier asks what it is; the player learns it is not a creature. |
-| `S01_Mid` | Wave 5, before the wave | The slimes are piled at a choke and are not attacking. The last werewolf is caught there. The Guard must cut through. |
-| `S01_King` | Wave 7, before the boss | The old hollow tree is the source. The Slime King is wrapped around it. It is in the way. |
+| `S02_Rupture` | Same start, directly after Intro | The party loses the slime. The ground shakes. Bats flee outward; some pass, some stop. The first fight is a collision. |
+| `S03_Wall` | Wave 5, before the wave | The slimes are piled at a choke and are not attacking. The last werewolf is caught there. The Guard must cut through. |
+| `S04_King` | Wave 7, before the boss | The old hollow tree is the source. The Slime King is wrapped around it. It is in the way. |
 | Boss fight | Wave 7 combat | The King defends the shard, not the road. It pulls itself back around the shard when cut. |
-| `S01_Outro` | Stage clear | The shard is taken. The bloom collapses. The ordinary forest survives. The Guard have stolen the thing that kept a living place alive. |
-| `S01_Defeat` | Party wipe | The shard pulls the marked Guard back to the last ground they held. The world does not rewind. Gear comes back. |
+| `S05_Outro` | Stage clear | The shard is taken. The bloom collapses. The ordinary forest survives. The Guard have stolen the thing that kept a living place alive. |
+| `S06_Defeat` | Party wipe | The shard pulls the marked Guard back to the last ground they held. The world does not rewind. Gear comes back. |
 
 The chapter does not need a scene for every wave. The environment, enemy mix and intro line carry the
 progression between the story scenes.

@@ -421,7 +421,7 @@ If a size looks wrong, change the number in `UiType.cs` — one place, and every
 
 ---
 
-## 2o. Story scene — `S01_Intro` (added 2026-10-29, runs after the story slice is built)
+## 2o. Story opening — `S01_Intro` + `S02_Rupture` (added 2026-10-29, updated 2026-11-03)
 
 Run on the battle page, fresh save or after F9 (delete save). Everything else is unchanged.
 
@@ -429,13 +429,14 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 - Open `Main.unity`, press Play. The fight should stop before wave 1.
 - If it does not, the gate or the pending-scene bind is broken (`Story-Scenes.md` §7, boot order).
 
-### The scene
+### Scene 1 — `S01_Intro`
 - Soldier walks in first, Mage second, Knight last. Knight settles right/front.
 - At the sound behind them, all three face left.
 - The party splits vertically. Mage moves to the same upper line as Soldier. Mage and Knight keep facing left and walk backwards to give the slime way. The gap is visible.
 - One slime enters from the left, passes through the gap, and exits right.
 - The party tracks it: Soldier turns right, then Mage, then Knight.
 - Soldier readies and starts a swing; Mage stops it. No damage is dealt.
+- The party follows the slime out. The scene holds on the follow before the fade.
 - The normal battle feed hides; one story line appears in the log box.
 - The speaker name appears in gold immediately, then the words type one character at a time.
 - `TAP TO CONTINUE` completes the line; tap again moves to the next line.
@@ -444,15 +445,26 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 - No damage numbers and no HP changes for the whole scene.
 - The log box stays visible and readable.
 
+### Scene 2 — `S02_Rupture`
+- After the fade, the party is still moving right. The slime is nowhere on screen.
+- **Soldier:** “We lost it.”
+- The ground shakes. The arena moves; the HUD and log stay steady.
+- Two bats fly from right to left at high speed and pass the party.
+- Two more bats stop ahead of the party and hover.
+- **Soldier:** “Watch out!”
+- **Mage:** “They're running from something.”
+- **Knight:** “Hold formation!”
+- The two hovering bats remain in the way. No damage and no HP changes.
+- No battle happens before the second scene. The log and stage do not reset between the two scenes.
+
 ### Controls
 - Tap while a line is typing: the line completes. Tap again: the next line starts.
-- `SKIP SCENE` ends the whole scene; the wave spawns.
-- Let a scene run past its cap on purpose (temporarily set a beat time too high): it still ends at the 120 s cap.
+- `SKIP SCENE` ends the whole scene; in scene 2, the wave still waits for the scene to finish.
 - Background the app for 10 s, return: no stuck wave, no replay, no duplicate actors.
 
-### After the scene
+### After the opening
 - Wave 1 spawns once. Stage 1, wave 1 in the header. Wave 1 is two bats.
-- Formation and HP are the same as before the scene.
+- Formation and HP are the same as before the scenes.
 - Camp still opens before wave 4 (it must not be skipped by the story gate).
 - Press `P`: the scene plays again over the live fight (debug only).
 

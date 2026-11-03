@@ -13,7 +13,7 @@
 | Field | Value |
 |---|---|
 | Current step | **Foundation Phase 2D built 29 Oct 2026**: camp choice cards are prefabs. Phase 2 owner check pending. Then B8' proof lap and B9' shipping checklist. **No open feature work**: ability assignments ship in the save (v7) and boss moves are content-only (`EnemyData.abilities`, no code change). Then **B10 live SDKs** -> B10b store packet -> B1a / art+audio / B1b |
-| Story slice (new, 29 Oct 2026) | **Steps 1-4, transitions, intro rewrite, wave pin and log fixes built (2 Nov).** Arena fade 0.35 s, log focus 0.30 s. `S01_Intro`: 4 actors, 32 beats, 39.0 s automatic content, nine spoken lines, three bubbles. Owner dialogue rewrite built. First wave is bats through the stage wave plan. One-line story box with tap-to-continue. `Run All Checks` currently fails on 4 DevOverlay type-scale labels (unrelated to this pass); story asset was checked on disk, Unity import pending. **Open: phone aspect, real device background, force battle page.** Canon: `Story-Canon.md`. Chapter story: `Story-Greenwake.md`. System: `Story-Scenes.md`. Script: `Story-Nodes.md` |
+| Story slice (new, 29 Oct 2026) | **Steps 1-4, transitions, intro rewrite, rupture scene, wave plan and log fixes built (2 Nov).** `S01_Intro` and `S02_Rupture` play before wave 1. First wave is bats through the stage wave plan. One-line story box with tap-to-continue. `Run All Checks` currently fails on 4 DevOverlay type-scale labels (unrelated to this pass); story assets imported, runtime QA pending. **Open: phone aspect, real device background, force battle page.** Canon: `Story-Canon.md`. Chapter story: `Story-Greenwake.md`. System: `Story-Scenes.md`. Script: `Story-Nodes.md` |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money**, and **MVP = store-submittable** (§1p). The gate stands for NEW systems: abilities, gear and the roster swap shipped after it, so read it as "no zones / affixes / relics before the base is done" |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
@@ -56,12 +56,12 @@ re-checked for correct attribution, one line per wave, no mid-line renaming and 
 - [x] Project check 29 Oct 2026: `Run All Checks (regression)` **PASS**; 0 console errors.
 - [ ] **manual owner play check** after each prefab slice.
 
-## 0c. Story slice — one node, one scene  ·  **in progress 29 Oct 2026**
+## 0c. Story slice — one node, opening scenes  ·  **in progress 29 Oct 2026**
 
-Scope: the first build is one in-game scene (`S01_Intro`) at node 1, injected before wave 1. The
-chapter story is now locked beyond that scene: `S01_Mid`, `S01_King`, `S01_Outro` and `S01_Defeat` are
-planned but not built. No map, no title screen, no meta. Docs: `Story-Canon.md`,
-`Story-Greenwake.md`, `Story-Scenes.md`, `Story-Nodes.md`.
+Scope: the first build is the opening of node 1, injected before wave 1:
+`S01_Intro` and `S02_Rupture`. The chapter story is now locked beyond that opening:
+`S03_Wall`, `S04_King`, `S05_Outro` and `S06_Defeat` are planned but not built. No map, no title screen,
+no meta. Docs: `Story-Canon.md`, `Story-Greenwake.md`, `Story-Scenes.md`, `Story-Nodes.md`.
 
 System (must exist before content grows):
 - [x] `StorySceneDef` (scene = data asset) + `StoryScheduleDef` (cue, stage range, wave spec, priority, play limit).
@@ -69,14 +69,15 @@ System (must exist before content grows):
 - [x] `StoryService` (matching, queue, hold, resume).
 - [x] Cues: `BeforeWave` and `AfterWave` are live. `StageCleared`, `Defeat`, `Manual` are data only.
 - [x] Random wave injection is deterministic (FNV-1a of scene id + stage + wave + rule index), so a relaunch never re-rolls.
-- [x] Six actor slots, one bubble, one full-screen advance surface, one `SKIP SCENE` button. Offline card no longer opens at boot.
+- [x] Actor images are created on demand; one bubble, one full-screen advance surface, one `SKIP SCENE` button. Offline card no longer opens at boot.
 - [x] `BattleLogKind.Dialogue` and `BattleLog.Say(name, line)`. `RequestAbility` refuses while paused.
 
-Content (node 1, `S01_Intro`):
-- [x] **Chapter story locked (2 Nov 2026):** `Story-Greenwake.md` owns the time leak, living bloom, Slime King, wave/place progression and the Guard’s theft. Mid/King/Outro/Defeat are planned, not built.
-- [x] **Intro 1 built (2 Nov 2026):** 9 lines, 32 beats, 39.0 s automatic content. Lost party; slime passes; party follows. Soldier asks, “Is that a ... Slime!?”
-- [x] Actors in the built asset: Soldier walks in first, Mage second, Knight last and right/front; one Slime creeps in from the right.
-- [x] Built asset: 32 beats, 39.0 s of automatic content, 120 s real-time cap, nine spoken lines, three bubbles. Script in `Story-Nodes.md` §3.
+Content (node 1, opening scenes):
+- [x] **Chapter story locked (2 Nov 2026):** `Story-Greenwake.md` owns the time leak, living bloom, Slime King, wave/place progression and the Guard’s theft. Wall/King/Outro/Defeat are planned, not built.
+- [x] **Opening built (2 Nov 2026):** the lost party meets a slime and follows it. Soldier asks, “Is that a ... Slime!?”
+- [x] **Rupture built (3 Nov 2026):** the slime is lost; the ground shakes; bats flee from the forest centre; two pass and two hover; wave 1 follows.
+- [x] Actors in the built intro: Soldier walks in first, Mage second, Knight last and right/front; the slime enters from the left and passes through the gap.
+- [x] Built assets: `S01_Intro` and `S02_Rupture`; script in `Story-Nodes.md` §3 and §4.
 - [x] Hard rules: no rewards, no mechanics explained, every scene skippable.
 - [x] Old wave-1 pin removed.
 - [x] **Wave plan:** `Stage01_WavePlan.asset` is linked to `WaveConfig`. Stage 1 has 6 normal waves: 1-2 bats, 3 bats + first werewolf, 4 werewolves, 5 slimes + last werewolf, 6 slimes; wave 7 uses the boss pool. Verified by runtime lookup and `Run All Checks` PASS.
@@ -91,15 +92,15 @@ Presentation (30 Oct 2026):
 - [ ] Force the battle page when a scene starts.
 
 Build order (test after every step):
-- [x] 1. Data types + `S01_Intro.asset` + `Stage01_Schedule.asset`.
+- [x] 1. Data types + `S01_Intro.asset` + `S02_Rupture.asset` + `Stage01_Schedule.asset`.
 - [x] 2. `StoryLayer` + `StoryPlayer`; `P` replays the scene over a live fight. Manual smoke passed 29 Oct: actors, bubble, log, pause, skip, restore.
 - [x] 3. `BattleLogKind.Dialogue` + `RequestAbility` pause guard. Verified 29 Oct: three dialogue lines carry the Dialogue kind; a cast is refused while the scene owns the screen.
 - [x] 4. `StoryService` + `BeforeWave` gate at stage 1, wave 1. Verified 29 Oct: gate holds wave 1, 3 dialogue lines, wave spawns once, `OncePerStage` blocks a replay, combat resumes.
 - [~] 5. Skip, hard cap, background return, tall/short phone aspect. Skip, cap and the huge-delta/background jump pass 29 Oct. **Phone aspect and a real device background test are still open.**
-- [~] 6. Manual QA + `Run All Checks`. `Run All Checks` **PASS**, 31/31 EditMode tests pass 2 Nov. The phone checklist (`Manual-Tests.md` §2o) is still open.
+- [~] 6. Manual QA + `Run All Checks`. Last run flagged 4 DevOverlay labels; story assets imported, runtime QA pending. The phone checklist (`Manual-Tests.md` §2o) is still open.
 
-Acceptance: press Play -> intro plays once -> wave 1 spawns. No double spawn. Fight frozen for the whole
-scene. One story line at a time, gold speaker name, typed text. First tap finishes the line; second tap
+Acceptance: press Play -> Intro -> Rupture -> wave 1. No double spawn. Fight frozen for both scenes.
+One story line at a time, gold speaker name, typed text. First tap finishes the line; second tap
 advances. `SKIP SCENE` ends the scene. Node 2 is not written until this passes.
 
 ## 1d. Compounding upgrades (B3d)  ·  **built + measured 2026-09-25**

@@ -8,7 +8,7 @@ using IdleRPG.Data;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// The screen a story scene plays on: up to six actor images, one speech bubble, one skip overlay.
+    /// The screen a story scene plays on: actor images, one speech bubble, one skip overlay.
     ///
     /// ELI5: the stage hands and the bubble. <see cref="StoryPlayer"/> says "Knight walks to here" or
     /// "Mage shows a question mark"; this class moves the pictures. It owns no timing and no game state.
@@ -18,14 +18,12 @@ namespace IdleRPG.UI
     /// </summary>
     public sealed class StoryLayer : MonoBehaviour
     {
-        /// <summary>Actor slots. The scene asset may define fewer; extra slots stay hidden.</summary>
-        public const int MaxActors = 6;
-
         /// <summary>Base actor slot size in stage units. The actor's own scale multiplies this.</summary>
         private const float ActorSlot = 160f;
 
         private const float BubbleLift = 0.11f;
         private const float BubbleEdge = 0.14f;
+        private const float ShakeAmplitude = 7f;
 
         private sealed class ActorView
         {
@@ -40,10 +38,15 @@ namespace IdleRPG.UI
             public bool Moving;
         }
 
-        private readonly List<ActorView> actors = new List<ActorView>(MaxActors);
-        private readonly List<ActorView> depthOrder = new List<ActorView>(MaxActors);
+        private readonly List<ActorView> actors = new List<ActorView>();
+        private readonly List<ActorView> depthOrder = new List<ActorView>();
 
         private RectTransform root;
+        private RectTransform shakeRoot;
+        private Vector2 shakeHome;
+        private float shakeDuration;
+        private float shakeRemaining;
+        private bool shaking;
         private Image bubble;
         private TextMeshProUGUI bubbleText;
         private GameObject skipRoot;
@@ -59,7 +62,7 @@ namespace IdleRPG.UI
         private bool boardWasActive;
         private bool enemiesWereActive;
 
-        /// <summary>Builds the actor slots, the bubble and the skip overlay. Called once by the player.</summary>
+        /// <summary>Builds the bubble and the skip overlay. Actor views are created when a scene needs them.</summary>
         public void Build(RectTransform stageRoot, RectTransform overlayRoot, Action onAdvance, Action onSkip)
         {
             root = transform as RectTransform;
@@ -71,24 +74,10 @@ namespace IdleRPG.UI
                 return;
             }
 
+            shakeRoot = stageRoot;
             root.SetParent(stageRoot, false);
             UiRuntime.Stretch(root);
             root.SetAsLastSibling();
-
-            for (int i = 0; i < MaxActors; i++)
-            {
-                Image image = UiRuntime.CreateIcon("StoryActor" + i, root);
-                CharacterAnimator animator = image.gameObject.AddComponent<CharacterAnimator>();
-                animator.SetSlotSize(new Vector2(ActorSlot, ActorSlot));
-                image.gameObject.SetActive(false);
-
-                actors.Add(new ActorView
-                {
-                    Image = image,
-                    Rect = image.rectTransform,
-                    Animator = animator
-                });
-            }
 
             BuildBubble();
             BuildSkip(overlayRoot, onAdvance, onSkip);
@@ -105,6 +94,14 @@ namespace IdleRPG.UI
             }
 
             HideBubble();
+
+            if (shaking)
+            {
+                StopShake();
+            }
+
+            shakeHome = shakeRoot != null ? shakeRoot.anchoredPosition : Vector2.zero;
+            EnsureActors(scene.Actors.Length);
 
             for (int i = 0; i < actors.Count; i++)
             {
@@ -146,6 +143,7 @@ namespace IdleRPG.UI
         public void End()
         {
             HideBubble();
+            StopShake();
 
             for (int i = 0; i < actors.Count; i++)
             {
@@ -197,6 +195,24 @@ namespace IdleRPG.UI
                 view.Animator.PlayIdle();
             }
 
+            SortByDepth();
+        }
+
+        /// <summary>Shows an actor already at <paramref name="spot"/>. No edge entry, no walk.</summary>
+        public void Place(int actorIndex, Vector2 spot)
+        {
+            ActorView view = Get(actorIndex);
+
+            if (view == null)
+            {
+                return;
+            }
+
+            view.Moving = false;
+            view.Image.gameObject.SetActive(true);
+            SetSpot(view.Rect, spot);
+            view.Animator.PlayIdle();
+            HideBubble();
             SortByDepth();
         }
 
@@ -261,6 +277,24 @@ namespace IdleRPG.UI
             }
 
             view.Animator.FacingLeft = faceLeft;
+        }
+
+        /// <summary>Shakes the arena stage, not the HUD. The position is always restored.</summary>
+        public void Shake(float duration)
+        {
+            if (shakeRoot == null || duration <= 0f)
+            {
+                return;
+            }
+
+            if (!shaking)
+            {
+                shakeHome = shakeRoot.anchoredPosition;
+            }
+
+            shakeDuration = duration;
+            shakeRemaining = duration;
+            shaking = true;
         }
 
         /// <summary>Plays one named clip (Attack01, Ability, Hurt, Death). Empty or unknown falls back to Idle.</summary>
@@ -385,6 +419,32 @@ namespace IdleRPG.UI
                     SortByDepth();
                 }
             }
+
+            if (!shaking)
+            {
+                return;
+            }
+
+            shakeRemaining -= Time.unscaledDeltaTime;
+
+            if (shakeRemaining <= 0f)
+            {
+                StopShake();
+                return;
+            }
+
+            float falloff = shakeRemaining / shakeDuration;
+            shakeRoot.anchoredPosition = shakeHome + UnityEngine.Random.insideUnitCircle * (ShakeAmplitude * falloff);
+        }
+
+        private void StopShake()
+        {
+            shaking = false;
+
+            if (shakeRoot != null)
+            {
+                shakeRoot.anchoredPosition = shakeHome;
+            }
         }
 
         /// <summary>
@@ -436,6 +496,25 @@ namespace IdleRPG.UI
             }
 
             return actors[index];
+        }
+
+        private void EnsureActors(int count)
+        {
+            while (actors.Count < count)
+            {
+                int index = actors.Count;
+                Image image = UiRuntime.CreateIcon("StoryActor" + index, root);
+                CharacterAnimator animator = image.gameObject.AddComponent<CharacterAnimator>();
+                animator.SetSlotSize(new Vector2(ActorSlot, ActorSlot));
+                image.gameObject.SetActive(false);
+
+                actors.Add(new ActorView
+                {
+                    Image = image,
+                    Rect = image.rectTransform,
+                    Animator = animator
+                });
+            }
         }
 
         private static void SetSpot(RectTransform rect, Vector2 spot)

@@ -1,11 +1,11 @@
 # Story Scenes — the injection system (as built 31 Oct 2026)
 
-> **Status: current. `BeforeWave`/`AfterWave` gate built; `S01_Intro` plays before wave 1.**
+> **Status: current. `BeforeWave`/`AfterWave` gate built; `S01_Intro` and `S02_Rupture` play before wave 1.**
 > `StageCleared`, `Defeat` and `Manual` are defined but not hooked yet.
-> Desk gate: `Run All Checks` PASS, **31/31** EditMode tests. Phone pass still open.
+> Desk gate: last run flagged 4 DevOverlay type-scale labels (unrelated); story assets imported, runtime QA pending. Phone pass still open.
 > This page owns **how** a scene is placed, timed, paused, skipped and resumed.
 > It does not own the words: see `Story-Nodes.md`. It does not own the premise: see `Story-Canon.md`.
-> The battle log view and typewriter are documented in `Battle-Log.md`.
+> Do not treat scene length as a fixed target. Timings are authoring data.
 
 ---
 
@@ -48,14 +48,14 @@ Supporting pieces built around those five:
 | `StageTransition` | Black cover/reveal inside the arena only. 0.35 s each way. |
 | `BattlePageFocus` | Grows the log and fades the ability band while a scene plays. 0.30 s. |
 | `BattleLog` + `CombatLogUI` | Stores the words and draws them. Story lines type; see `Battle-Log.md`. |
-| `BalanceConfig.WaveSizeOverride` | Pins one wave size. Stage 1, wave 1 = one Slime. |
+| `BalanceConfig.WaveSizeOverride` | Pins one wave size. No longer used for stage 1, wave 1. |
 
 ---
 
 ## 3. Data model
 
 ```csharp
-enum StoryVerb  { Enter, WalkTo, PlayClip, Bubble, Say, Hide, End, Face }
+enum StoryVerb  { Enter, WalkTo, PlayClip, Bubble, Say, Hide, End, Face, Place, Shake }
 enum BubbleKind { None, Dots, Bang, Question, Word }
 enum StoryCue   { BeforeWave, AfterWave, StageCleared, Defeat, Manual }
 enum WaveMode   { Any, Exact, EveryN, Random }
@@ -71,7 +71,7 @@ enum PlayLimit  { EveryTime, OncePerStage, OncePerRun }
 | `skippable` | bool | true | The separate `SKIP SCENE` button can end it |
 | `waitForContinue` | bool | false | Wait after every `Say`; first tap finishes typing, second moves on |
 | `hardCapSeconds` | float | 14 | Real-time stop. Never 0 |
-| `actors` | `StoryActorDef[]` | required | Up to 6 in v1 |
+| `actors` | `StoryActorDef[]` | required | Any count; actor images are created on demand |
 | `beats` | `StoryBeat[]` | required | Sorted by `time` on validate |
 
 `StoryActorDef`: `id`, `displayName`, `art` (`CharacterArtSet`), `facesLeft`, `scale`.
@@ -82,7 +82,9 @@ enum PlayLimit  { EveryTime, OncePerStage, OncePerRun }
 Rules:
 
 - `Enter` start side is inferred: `spot.x < 0.5` walks in from the left edge, else from the right.
+- `Place` shows an actor at `spot` without an edge walk. Use it when a scene continues from the last frame.
 - `Face` flips an actor to look left or right without moving it. `faceLeft = true` looks left.
+- `Shake` shakes the arena stage for `duration` seconds. It restores the stage position on end, skip and cap.
 - `Say` stores `displayName` as the speaker and `text` as the words. The log colours the name gold
   and types the words at 45 characters per second. The scene never writes raw log text or markup.
 - When `waitForContinue` is on, the scene clock stops after each `Say`. The first tap finishes the
@@ -118,7 +120,7 @@ seam exists; a cue is never faked by a timer.
 
 | Cue | Moment the player sees | Code seam | Status |
 |---|---|---|---|
-| `BeforeWave` | Before a fight starts. Wave 1 = node intro; wave 6 = mid; wave 10 = boss intro | `CombatDirector.WaveGate(stage, wave)` | **v1** |
+| `BeforeWave` | Before a fight starts. Wave 1 = opening scenes; wave 5 = wall; wave 7 = boss intro | `CombatDirector.WaveGate(stage, wave)` | **v1** |
 | `AfterWave` | After a fight ends, before the next one starts | Same gate, matched against `wave - 1` | next slice (same gate) |
 | `StageCleared` | After the boss dies, before the stage advances | `GameManager.OnStageCleared` hook | next slice |
 | `Defeat` | After a party wipe, before the retry | `GameManager.OnPartyWiped` hook | next slice |
@@ -133,7 +135,7 @@ Notes:
   Use `StageCleared` for anything after the boss.
 - A `Random` rule can land on the boss wave. If that is wrong for the scene, add an exact rule, an
   `EveryN` rule, or a stage range that keeps it away.
-- There is no `RunStart` cue. A node intro is `BeforeWave`, stage 1, wave 1. Fewer cues, no special path.
+- There is no `RunStart` cue. The opening scenes are `BeforeWave`, stage 1, wave 1. Fewer cues, no special path.
 - `Manual` during a scene is ignored. One play at a time, always.
 
 ---
@@ -153,7 +155,7 @@ At a cue, a rule matches when **all** of these are true:
 | Mode | Matches when | Example use |
 |---|---|---|
 | `Any` | Every wave | A rare event that the play limit controls |
-| `Exact` | `wave == spec.wave` | Intro at wave 1, mid at wave 6 |
+| `Exact` | `wave == spec.wave` | Opening scenes at wave 1, wall at wave 5 |
 | `EveryN` | `(wave - offset) % everyN == 0` | A reminder every 3 fights |
 | `Random` | `Hash(...) < chance` | "Before a random wave" |
 
@@ -311,8 +313,8 @@ The scene enters and leaves through a **fade inside the arena only**.
 
 Still to come: force the battle page when a scene starts.
 
-Scene length: a first-time node intro may run **30-50 s**. Mid and outro stay short. The budget is in
-`Story-Nodes.md` §6.
+Scene length is not a design target. Keep the picture as long as it needs. Use the hard cap only as a
+safety net.
 
 ### Boot order (must not lose the first scene)
 
@@ -338,8 +340,9 @@ with a plain `event Action` at boot.
 Assets/IdleRPG/Data/Story/
   Stage01/
     S01_Intro.asset
-    S01_Mid.asset
-    S01_Outro.asset
+    S02_Rupture.asset
+    S03_Wall.asset
+    S05_Outro.asset
     Stage01_Schedule.asset
   Stage02/
     ...
@@ -352,17 +355,18 @@ Assets/IdleRPG/Data/Story/
 ### Add a scene
 
 **Fast path (current assets):** edit `AgentScripts/SeedStoryAssets.cs`, then rerun its seeder. It updates
-the existing `S01_Intro.asset` and `Stage01_Schedule.asset` in place, so their GUIDs and scene references stay
-valid. Review the diff after it runs.
+the existing `S01_Intro.asset`, `S02_Rupture.asset` and `Stage01_Schedule.asset` in place, so their GUIDs
+and scene references stay valid. Review the diff after it runs.
 
 **Normal path (new scene):**
 
 1. Create the asset: `Assets > Create > Idle RPG/Story/Story Scene`. Save it under the node folder.
 2. Set a stable `id`. Never rename it after ship; random rolls and future save data use it.
-3. Fill `actors`: `id`, `displayName`, art set, facing, scale. Up to six.
+3. Fill `actors`: `id`, `displayName`, art set, facing, scale. Any count; images are created on demand.
 4. Fill `beats` in time order. Use `Enter` for the first appearance, `WalkTo` for later moves,
-   `Face` for a look left/right, `Bubble` for a symbol or short word, `Say` for a log line, `End` for an early finish.
-5. Set `hardCapSeconds` to content length + 5-8 s. It is a safety net, not pacing.
+   `Place` to show an actor already at a spot, `Face` for a look left/right, `Shake` for a stage quake,
+   `Bubble` for a symbol or short word, `Say` for a log line, `End` for an early finish.
+5. Set `hardCapSeconds` as a safety net. It is not pacing.
 6. Add one rule to the node's schedule (`Assets > Create > Idle RPG/Story/Story Schedule`, or the
    existing node schedule): cue, stage range, wave rule, scene, priority, play limit.
 7. Assign the schedule to `GameManager.storySchedule` in `Main.unity` if this is a new node schedule.
@@ -370,20 +374,30 @@ valid. Review the diff after it runs.
 
 If step 8 needs code, the structure is wrong. Fix the structure, not the scene.
 
-### Current intro anatomy
+### Current opening anatomy
 
-`S01_Intro` is the reference scene:
+`S01_Intro` is the first scene:
 
 - four actors: `soldier`, `mage`, `knight` on the right, `slime` on the left;
-- 32 beats, 39.0 s of automatic content, 120 s real-time cap;
 - 9 `Say` lines and 3 bubbles; the player taps after each spoken line;
 - Soldier enters first, Mage second, Knight last on the right/front;
 - the party is lost; all three face left when they hear the sound behind them;
 - Mage and Soldier stand on the same upper line; Mage and Knight keep facing left and walk backwards to give the slime way;
 - the party splits vertically; the slime enters from the left, passes through the gap, and exits right;
 - the party tracks the slime: Soldier, then Mage, then Knight turn right as it passes;
-- party follows the slime; `End`;
+- party follows the slime out before the fade;
 - stage 1, wave 1 is two bats through `Stage01_WavePlan.asset`.
+
+`S02_Rupture` is the second scene:
+
+- the party is still moving right; the slime is gone;
+- Soldier: “We lost it.”;
+- the ground shakes;
+- two bats fly past from right to left; two stop and hover ahead;
+- Soldier: “Watch out!”;
+- Mage: “They're running from something.”;
+- Knight: “Hold formation!”;
+- wave 1 starts with the two hovering bats.
 
 Use it as the shape for a new intro, but do not copy its words. The script lives in `Story-Nodes.md`.
 
@@ -408,8 +422,8 @@ Rules:
 1. No scene-specific code. Ever.
 2. A scene never reads game state. If it must react, the service selects a different scene.
 3. A scene never changes game state. Rewards and unlocks are game rules, before or after the play.
-4. Six actor slots and one bubble in v1. Raise both only when a real scene needs it, and raise them in
-   one place (`StoryLayer`).
+4. One bubble in v1. Actor images are created on demand, so a scene may use any count. Keep the layout
+   readable on a phone.
 
 ---
 
@@ -450,7 +464,7 @@ same wave today; keep the order anyway.
 | `Scripts/Core/GameManager.Wiring.cs` | Creates the service; composes the wave gate. |
 | `Scripts/Core/GameManager.Stages.cs` | Calls `Story.Tick` so a binding timeout cannot stall a wave. |
 | `Scripts/UI/Story/StoryPlayer.cs` | Real-time clock, beat dispatch, skip, hard cap, fade hand-off. |
-| `Scripts/UI/Story/StoryLayer.cs` | Six actor slots, one bubble, skip overlay, hide/restore board and enemy stack. |
+| `Scripts/UI/Story/StoryLayer.cs` | Actor images on demand, one bubble, skip overlay, stage shake, hide/restore board and enemy stack. |
 | `Scripts/UI/Story/StageTransition.cs` | Arena-only black cover/reveal. Interruptible fade. |
 | `Scripts/UI/BattlePageFocus.cs` | Log grows; ability band fades out and becomes inert. |
 | `Scripts/UI/HudController.cs` | Creates `StoryPlayer`, binds it to `StoryService`, owns `CompleteStoryText`. |
@@ -465,9 +479,10 @@ same wave today; keep the order anyway.
 
 | Asset / object | Job |
 |---|---|
-| `Data/Story/Stage01/S01_Intro.asset` | Built intro: 4 actors, 32 beats, 39.0 s content, 120 s cap, `waitForContinue` on. |
-| `Data/Story/Stage01/Stage01_Schedule.asset` | One `BeforeWave` rule: stage 1, wave 1, `OncePerStage`, priority 10. |
-| `Data/Config/BalanceConfig.asset` | `waveSizeOverrides`: stage 1, wave 1, count 1. |
+| `Data/Story/Stage01/S01_Intro.asset` | Built intro: 4 actors, `waitForContinue` on. |
+| `Data/Story/Stage01/S02_Rupture.asset` | Built rupture: 3 heroes + 4 bats, automatic, shake, no tap. |
+| `Data/Story/Stage01/Stage01_Schedule.asset` | Two `BeforeWave` rules at stage 1, wave 1: Intro priority 10, Rupture priority 5. Both once per stage. |
+| `Data/Config/BalanceConfig.asset` | No wave-size override for stage 1, wave 1. |
 | `HudController.debugStoryScene` | Scene used by `P`. |
 | `HudController.combatLog`, `abilityStrip` | Wired by the builder. |
 | `Main.unity` | Story layer is created at runtime; no prefab scene object. |
@@ -500,9 +515,9 @@ One call each; no new system:
 | 1 | Write the data types and both assets | Compiles. The scene shows its beats in the inspector |
 | 2 | Build `StoryLayer` + `StoryPlayer`; `P` plays the scene over a live fight | 3 heroes and 1 slime enter; bubbles and 9 log lines; wave resumes |
 | 3 | Add the `Dialogue` log kind + the ability pause guard | 9 typed lines, gold names, no cast queued |
-| 4 | Add `StoryService` and the `BeforeWave` gate | Press Play -> intro -> wave 1. Once. One Slime. No double spawn |
+| 4 | Add `StoryService` and the `BeforeWave` gate | Press Play -> intro -> rupture -> wave 1. Once. No double spawn |
 | 5 | Skip, hard cap, background, phone aspect | Tap completes the line; second tap advances; `SKIP SCENE` ends. Return from background leaves no stuck state |
-| 6 | `Run All Checks` + manual QA | PASS, 31/31 EditMode; phone pass still open |
+| 6 | `Run All Checks` + manual QA | Last run flagged 4 DevOverlay labels; story assets imported, runtime QA pending. Phone pass still open |
 
 `AfterWave`, `StageCleared` and `Defeat` are specified here but **not built** in the first slice. Each is a
 single hook when its scene exists.
@@ -514,7 +529,7 @@ single hook when its scene exists.
 - Scene plays at the intended cue and only once per hold.
 - Fight is frozen: no swings, no numbers, no HP change.
 - Board and enemy stack hide; the log stays visible.
-- Six actors stay inside the frame on a tall and a short phone.
+- All scene actors stay inside the frame on a tall and a short phone.
 - Bubble sits above the head, never leaves the frame.
 - Skip works by tap on the separate `SKIP SCENE` button. A second tap does nothing. The current line completes first.
 - Tap-to-continue: first tap completes the typed line, second tap advances.
@@ -525,7 +540,7 @@ single hook when its scene exists.
 - `Random` rule plays the same waves after a relaunch.
 - A wave never spawns twice, and no wave is skipped.
 - Story log: name gold, words near-white, 48 VT323; combat lines whole.
-- Wave 1: exactly one Slime, matching the single slime on screen.
+- Wave 1: two bats. `S01_Intro` and `S02_Rupture` play first; neither deals damage.
 - Zero console errors.
 
 ---
@@ -541,7 +556,7 @@ Game+, branching choices, portraits, voice, localisation, a custom scene editor 
 
 | # | Decision | Recommendation |
 |---|---|---|
-| 1 | Six actor slots, or eight? | Six. Raise only when a scene needs it |
+| 1 | Actor image count: fixed pool, or create on demand? | Create on demand. No arbitrary cap |
 | 2 | Queue several scenes at one moment, or play one? | Queue. Losses are silent and hard to spot |
 | 3 | Persist "played" flags now? | No. Memory now; save v12 when a scene must not replay |
 | 4 | Force the battle page when a scene starts? | Yes. A scene behind a menu is a bug. **Still open** |

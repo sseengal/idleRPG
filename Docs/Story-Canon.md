@@ -101,10 +101,10 @@ two nodes.
 
 ## 6. Video and in-game split
 
-| Where | What | Length | When |
-|---|---|---|---|
-| **Prerendered video** | Siege, artifact, time reversal, the king's order | 60-65 s | New Game only. Skippable. Never on Continue |
-| **In-game scene** | The Guard arrives at Greenwake. First threat. First goal | 48 s | Stage 1 start, before wave 1 |
+| Where | What | When |
+|---|---|---|
+| **Prerendered video** | Siege, artifact, time reversal, the king's order | New Game only. Skippable. Never on Continue |
+| **In-game scene** | The Guard arrives at Greenwake. First threat. First goal | Stage 1 start, before wave 1 |
 
 Rule: the video never explains a mechanic. It shows a shard fall into the forest. The in-game outro
 reveals what a shard is.

@@ -1,0 +1,245 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bdd8c3cd0f6d5471e9a5970cd3765a25, type: 3}
+  m_Name: S02_Rupture
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.StorySceneDef
+  id: s02_rupture
+  pauseBattle: 1
+  skippable: 1
+  waitForContinue: 0
+  hardCapSeconds: 12
+  actors:
+  - id: knight
+    displayName: Knight
+    art: {fileID: 11400000, guid: 427020df9c6764ad1b4b59611c1c602e, type: 2}
+    facesLeft: 0
+    scale: 1
+  - id: mage
+    displayName: Mage
+    art: {fileID: 11400000, guid: f9830d3fedb0c430198e7727758aee9b, type: 2}
+    facesLeft: 0
+    scale: 1
+  - id: soldier
+    displayName: Soldier
+    art: {fileID: 11400000, guid: fb0452c54a0e649af8eb7f52aedd3ea0, type: 2}
+    facesLeft: 0
+    scale: 1
+  - id: batA
+    displayName: Bat
+    art: {fileID: 11400000, guid: 8fffee5c157dc4a14a5a9489f299b29b, type: 2}
+    facesLeft: 1
+    scale: 1
+  - id: batB
+    displayName: Bat
+    art: {fileID: 11400000, guid: 8fffee5c157dc4a14a5a9489f299b29b, type: 2}
+    facesLeft: 1
+    scale: 1
+  - id: batC
+    displayName: Bat
+    art: {fileID: 11400000, guid: 8fffee5c157dc4a14a5a9489f299b29b, type: 2}
+    facesLeft: 1
+    scale: 1
+  - id: batD
+    displayName: Bat
+    art: {fileID: 11400000, guid: 8fffee5c157dc4a14a5a9489f299b29b, type: 2}
+    facesLeft: 1
+    scale: 1
+  beats:
+  - time: 0
+    verb: 8
+    actorId: soldier
+    spot: {x: 0.36, y: 0.4}
+    duration: 0
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 0
+    verb: 8
+    actorId: mage
+    spot: {x: 0.48, y: 0.34}
+    duration: 0
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 0
+    verb: 8
+    actorId: knight
+    spot: {x: 0.62, y: 0.28}
+    duration: 0
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 0.1
+    verb: 1
+    actorId: soldier
+    spot: {x: 0.44, y: 0.4}
+    duration: 1.4
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 0.1
+    verb: 1
+    actorId: mage
+    spot: {x: 0.56, y: 0.34}
+    duration: 1.4
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 0.1
+    verb: 1
+    actorId: knight
+    spot: {x: 0.7, y: 0.28}
+    duration: 1.4
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 2
+    verb: 4
+    actorId: soldier
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: We lost it.
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 2.8
+    verb: 9
+    actorId: 
+    spot: {x: 0, y: 0}
+    duration: 0.8
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 3.5
+    verb: 0
+    actorId: batA
+    spot: {x: 0.98, y: 0.7}
+    duration: 0.12
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 3.6
+    verb: 1
+    actorId: batA
+    spot: {x: -0.06, y: 0.7}
+    duration: 0.55
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 3.7
+    verb: 0
+    actorId: batB
+    spot: {x: 0.98, y: 0.52}
+    duration: 0.12
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 3.8
+    verb: 1
+    actorId: batB
+    spot: {x: -0.06, y: 0.52}
+    duration: 0.55
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 3.9
+    verb: 0
+    actorId: batC
+    spot: {x: 0.98, y: 0.58}
+    duration: 0.15
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 4
+    verb: 1
+    actorId: batC
+    spot: {x: 0.78, y: 0.58}
+    duration: 0.65
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 4.1
+    verb: 0
+    actorId: batD
+    spot: {x: 0.98, y: 0.2}
+    duration: 0.15
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 4.2
+    verb: 1
+    actorId: batD
+    spot: {x: 0.84, y: 0.2}
+    duration: 0.65
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 4.2
+    verb: 4
+    actorId: soldier
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: Watch out!
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 4.8
+    verb: 4
+    actorId: mage
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: They're running from something.
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 5.8
+    verb: 3
+    actorId: knight
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: 
+    bubble: 2
+    clip: 
+    faceLeft: 0
+  - time: 5.9
+    verb: 4
+    actorId: knight
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: Hold formation!
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 6.6
+    verb: 6
+    actorId: 
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0

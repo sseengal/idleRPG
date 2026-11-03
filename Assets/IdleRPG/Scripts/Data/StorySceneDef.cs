@@ -28,7 +28,13 @@ namespace IdleRPG.Data
         End = 6,
 
         /// <summary>Flip the actor to look left or right without moving it.</summary>
-        Face = 7
+        Face = 7,
+
+        /// <summary>Show an actor at a spot without walking in from the edge.</summary>
+        Place = 8,
+
+        /// <summary>Shake the arena stage for the beat's duration. No actor is required.</summary>
+        Shake = 9
     }
 
     /// <summary>The feeling a speech bubble shows. Words are the exception, not the rule.</summary>

@@ -250,6 +250,15 @@ namespace IdleRPG.UI
                     layer.Face(index, beat.faceLeft);
                     break;
 
+                case StoryVerb.Place:
+                    RequireActor(index, beat);
+                    layer.Place(index, beat.spot);
+                    break;
+
+                case StoryVerb.Shake:
+                    layer.Shake(beat.duration);
+                    break;
+
                 case StoryVerb.Bubble:
                     RequireActor(index, beat);
                     layer.Bubble(index, beat.bubble, beat.text);

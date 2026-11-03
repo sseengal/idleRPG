@@ -10,7 +10,8 @@ using UnityEngine;
 public static class SeedStoryAssets
 {
     private const string Folder = "Assets/IdleRPG/Data/Story/Stage01";
-    private const string ScenePath = Folder + "/S01_Intro.asset";
+    private const string IntroPath = Folder + "/S01_Intro.asset";
+    private const string RupturePath = Folder + "/S02_Rupture.asset";
     private const string SchedulePath = Folder + "/Stage01_Schedule.asset";
 
     public static void Run()
@@ -21,35 +22,33 @@ public static class SeedStoryAssets
         CharacterArtSet mage = Load<CharacterArtSet>("Assets/IdleRPG/Data/Characters/Wizard_Art.asset");
         CharacterArtSet soldier = Load<CharacterArtSet>("Assets/IdleRPG/Data/Characters/Soldier_Art.asset");
         CharacterArtSet slime = Load<CharacterArtSet>("Assets/IdleRPG/Data/Characters/Slime_Art.asset");
+        CharacterArtSet bat = Load<CharacterArtSet>("Assets/IdleRPG/Data/Characters/Bat_Art.asset");
 
-        if (knight == null || mage == null || soldier == null || slime == null)
+        if (knight == null || mage == null || soldier == null || slime == null || bat == null)
         {
             Debug.LogError("[SeedStoryAssets] Missing one or more character art sets. Aborted.");
             return;
         }
 
-        StorySceneDef scene = CreateScene(knight, mage, soldier, slime);
-        StoryScheduleDef schedule = CreateSchedule(scene);
+        StorySceneDef intro = CreateIntro(knight, mage, soldier, slime);
+        StorySceneDef rupture = CreateRupture(knight, mage, soldier, bat);
+        StoryScheduleDef schedule = CreateSchedule(intro, rupture);
 
-        EditorUtility.SetDirty(scene);
+        EditorUtility.SetDirty(intro);
+        EditorUtility.SetDirty(rupture);
         EditorUtility.SetDirty(schedule);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log($"[SeedStoryAssets] Created {ScenePath} ({scene.Actors.Length} actors, {scene.Beats.Length} beats) " +
-                  $"and {SchedulePath} ({schedule.Count} rule).");
+        Debug.Log($"[SeedStoryAssets] Wrote {IntroPath} ({intro.Actors.Length} actors, {intro.Beats.Length} beats), " +
+                  $"{RupturePath} ({rupture.Actors.Length} actors, {rupture.Beats.Length} beats), " +
+                  $"and {SchedulePath} ({schedule.Count} rules).");
     }
 
-    private static StorySceneDef CreateScene(CharacterArtSet knight, CharacterArtSet mage,
+    private static StorySceneDef CreateIntro(CharacterArtSet knight, CharacterArtSet mage,
         CharacterArtSet soldier, CharacterArtSet slime)
     {
-        StorySceneDef scene = AssetDatabase.LoadAssetAtPath<StorySceneDef>(ScenePath);
-
-        if (scene == null)
-        {
-            scene = ScriptableObject.CreateInstance<StorySceneDef>();
-            AssetDatabase.CreateAsset(scene, ScenePath);
-        }
+        StorySceneDef scene = LoadOrCreateScene(IntroPath);
 
         StoryActorDef[] actors =
         {
@@ -96,7 +95,11 @@ public static class SeedStoryAssets
             new StoryBeat(36.2f, StoryVerb.WalkTo, "soldier", new Vector2(0.30f, 0.40f), 1.8f),
             new StoryBeat(36.4f, StoryVerb.WalkTo, "mage", new Vector2(0.42f, 0.34f), 1.8f),
             new StoryBeat(36.6f, StoryVerb.WalkTo, "knight", new Vector2(0.56f, 0.28f), 1.8f),
-            new StoryBeat(39.0f, StoryVerb.End)
+            new StoryBeat(38.6f, StoryVerb.WalkTo, "slime", new Vector2(1.15f, 0.32f), 1.2f),
+            new StoryBeat(38.6f, StoryVerb.WalkTo, "soldier", new Vector2(0.36f, 0.40f), 1.6f),
+            new StoryBeat(38.7f, StoryVerb.WalkTo, "mage", new Vector2(0.48f, 0.34f), 1.6f),
+            new StoryBeat(38.8f, StoryVerb.WalkTo, "knight", new Vector2(0.62f, 0.28f), 1.6f),
+            new StoryBeat(41.5f, StoryVerb.End)
         };
 
         scene.EditorSetContent("s01_intro", actors, beats, 120f, tapToContinue: true);
@@ -106,7 +109,55 @@ public static class SeedStoryAssets
         return scene;
     }
 
-    private static StoryScheduleDef CreateSchedule(StorySceneDef scene)
+    private static StorySceneDef CreateRupture(CharacterArtSet knight, CharacterArtSet mage,
+        CharacterArtSet soldier, CharacterArtSet bat)
+    {
+        StorySceneDef scene = LoadOrCreateScene(RupturePath);
+
+        StoryActorDef[] actors =
+        {
+            new StoryActorDef("knight", "Knight", knight, false),
+            new StoryActorDef("mage", "Mage", mage, false),
+            new StoryActorDef("soldier", "Soldier", soldier, false),
+            new StoryActorDef("batA", "Bat", bat, true),
+            new StoryActorDef("batB", "Bat", bat, true),
+            new StoryActorDef("batC", "Bat", bat, true),
+            new StoryActorDef("batD", "Bat", bat, true)
+        };
+
+        StoryBeat[] beats =
+        {
+            new StoryBeat(0.0f, StoryVerb.Place, "soldier", new Vector2(0.36f, 0.40f)),
+            new StoryBeat(0.0f, StoryVerb.Place, "mage", new Vector2(0.48f, 0.34f)),
+            new StoryBeat(0.0f, StoryVerb.Place, "knight", new Vector2(0.62f, 0.28f)),
+            new StoryBeat(0.1f, StoryVerb.WalkTo, "soldier", new Vector2(0.44f, 0.40f), 1.4f),
+            new StoryBeat(0.1f, StoryVerb.WalkTo, "mage", new Vector2(0.56f, 0.34f), 1.4f),
+            new StoryBeat(0.1f, StoryVerb.WalkTo, "knight", new Vector2(0.70f, 0.28f), 1.4f),
+            new StoryBeat(2.0f, StoryVerb.Say, "soldier", default, 0f, "We lost it."),
+            new StoryBeat(2.8f, StoryVerb.Shake, string.Empty, default, 0.8f),
+            new StoryBeat(3.5f, StoryVerb.Enter, "batA", new Vector2(0.98f, 0.70f), 0.12f),
+            new StoryBeat(3.6f, StoryVerb.WalkTo, "batA", new Vector2(-0.06f, 0.70f), 0.55f),
+            new StoryBeat(3.7f, StoryVerb.Enter, "batB", new Vector2(0.98f, 0.52f), 0.12f),
+            new StoryBeat(3.8f, StoryVerb.WalkTo, "batB", new Vector2(-0.06f, 0.52f), 0.55f),
+            new StoryBeat(3.9f, StoryVerb.Enter, "batC", new Vector2(0.98f, 0.58f), 0.15f),
+            new StoryBeat(4.0f, StoryVerb.WalkTo, "batC", new Vector2(0.78f, 0.58f), 0.65f),
+            new StoryBeat(4.1f, StoryVerb.Enter, "batD", new Vector2(0.98f, 0.20f), 0.15f),
+            new StoryBeat(4.2f, StoryVerb.WalkTo, "batD", new Vector2(0.84f, 0.20f), 0.65f),
+            new StoryBeat(4.2f, StoryVerb.Say, "soldier", default, 0f, "Watch out!"),
+            new StoryBeat(4.8f, StoryVerb.Say, "mage", default, 0f, "They're running from something."),
+            new StoryBeat(5.8f, StoryVerb.Bubble, "knight", default, 0f, string.Empty, BubbleKind.Bang),
+            new StoryBeat(5.9f, StoryVerb.Say, "knight", default, 0f, "Hold formation!"),
+            new StoryBeat(6.6f, StoryVerb.End)
+        };
+
+        scene.EditorSetContent("s02_rupture", actors, beats, 12f, tapToContinue: false);
+
+        EditorUtility.SetDirty(scene);
+        AssetDatabase.SaveAssets();
+        return scene;
+    }
+
+    private static StoryScheduleDef CreateSchedule(StorySceneDef intro, StorySceneDef rupture)
     {
         StoryScheduleDef schedule = AssetDatabase.LoadAssetAtPath<StoryScheduleDef>(SchedulePath);
 
@@ -116,23 +167,44 @@ public static class SeedStoryAssets
             AssetDatabase.CreateAsset(schedule, SchedulePath);
         }
 
-        StoryRule rule = new StoryRule
+        schedule.EditorSetRules(new[]
+        {
+            Rule(intro, 10),
+            Rule(rupture, 5)
+        });
+
+        EditorUtility.SetDirty(schedule);
+        AssetDatabase.SaveAssets();
+        return schedule;
+    }
+
+    private static StoryRule Rule(StorySceneDef scene, int priority)
+    {
+        return new StoryRule
         {
             cue = StoryCue.BeforeWave,
             scene = scene,
             minStage = 1,
             maxStage = 1,
             wave = new StoryWaveSpec(WaveMode.Exact, 1),
-            priority = 10,
+            priority = priority,
             playLimit = PlayLimit.OncePerStage,
             maxPerStage = 1
         };
+    }
 
-        schedule.EditorSetRules(new[] { rule });
+    private static StorySceneDef LoadOrCreateScene(string path)
+    {
+        StorySceneDef scene = AssetDatabase.LoadAssetAtPath<StorySceneDef>(path);
 
-        EditorUtility.SetDirty(schedule);
-        AssetDatabase.SaveAssets();
-        return schedule;
+        if (scene != null)
+        {
+            return scene;
+        }
+
+        scene = ScriptableObject.CreateInstance<StorySceneDef>();
+        AssetDatabase.CreateAsset(scene, path);
+        return scene;
     }
 
     private static void SetActor(SerializedProperty actor, string id, string displayName,
@@ -196,6 +268,7 @@ public static class SeedStoryAssets
         beat.FindPropertyRelative("clip").stringValue = string.Empty;
         beat.FindPropertyRelative("bubble").enumValueIndex = (int)BubbleKind.None;
         beat.FindPropertyRelative("duration").floatValue = 0f;
+        beat.FindPropertyRelative("faceLeft").boolValue = false;
         SetSpot(beat, 0f, 0f);
     }
 

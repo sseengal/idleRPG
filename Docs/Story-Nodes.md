@@ -1,8 +1,9 @@
 # Story Nodes — scripts (2 Nov 2026)
 
-> **Status: `S01_Intro` is built (9 lines, 32 beats). `S01_Mid` and `S01_Outro` are outlines. `S01_King` and `S01_Defeat` are planned.**
+> **Status: `S01_Intro` and `S02_Rupture` are built. `S03_Wall` and `S05_Outro` are outlines. `S04_King` and `S06_Defeat` are planned.**
 > This page owns the words and the beats. It does not own how a scene is played — see `Story-Scenes.md`.
 > Canon, cast and rules: `Story-Canon.md`. Chapter story truth: `Story-Greenwake.md`.
+> Do not tune this page around an exact total runtime. Scene timing is authoring data, not a contract.
 
 ---
 
@@ -12,7 +13,7 @@
 |---|---|
 | **Fight** | One wave. 1-3 enemies. |
 | **Node** | One stage. 9 normal fights + 1 boss fight = 10 fights. |
-| **Scene** | One short play inside the battle view. Intro 30-50 s; mid and outro 5-12 s. |
+| **Scene** | One short play inside the battle view. Keep it as long as its picture needs; timing is authoring data. |
 
 A scene has no knowledge of a stage or a wave. The schedule decides where it plays. That is what makes a
 scene reusable before a wave, after a wave, at a node start, at a node end, or on a manual call.
@@ -29,7 +30,7 @@ scene reusable before a wave, after a wave, at a node start, at a node end, or o
 | Blurb (map card) | The king's light fell here. The wood is growing wrong. Find the shard. |
 | Objective | Recover the first shard and find the way out |
 | Boss | Slime King (the bloom knotted around the shard) |
-| Scenes | `S01_Intro`, `S01_Mid`, `S01_King`, `S01_Outro`, `S01_Defeat` |
+| Scenes | `S01_Intro`, `S02_Rupture`, `S03_Wall`, `S04_King`, `S05_Outro`, `S06_Defeat` |
 
 Why the enemies are what they are: the shard leaks stored time. It speeds up living plants and churns
 dead matter. The slimes are mud, roots and water moving in the leak. The bats and wolves are real
@@ -42,8 +43,7 @@ The chapter story is locked in `Story-Greenwake.md`. The wave structure is also 
 ## 3. `S01_Intro` — built (2 Nov 2026)
 
 **Plays:** before wave 1 of stage 1 (`BeforeWave`, stage 1, wave 1).
-**Length:** 39.0 s of automatic content. Hard cap 120 s real time. Skippable. Once per stage.
-**Asset:** 32 beats; the slime enters from the left and passes between the party. The party faces it and turns as it passes. No combat.
+**Asset:** the slime enters from the left and passes between the party. The party faces it and turns as it passes. No combat. The party follows it out before the fade.
 **Interaction:** tap after each spoken line. **Bubble:** symbols only. **Log:** one line at a time.
 
 ### Actors
@@ -120,50 +120,101 @@ effect. See `Battle-Log.md`.
 
 Wave 1 must **not** be a slime. The party has just spared one; spawning a slime immediately undercuts the scene.
 
-The first wave is **bats**. `Stage01_WavePlan.asset` is linked to `WaveConfig`: waves 1-2 are bats, wave 3 is bats + the first werewolf, wave 4 is werewolves, wave 5 is slimes + the last werewolf, and wave 6 is slimes. Stage 1 has 6 normal waves; wave 7 is the boss from the boss pool. The old `WaveSizeOverride` that pinned stage 1, wave 1 to one slime has been removed.
+The first wave is **bats**. `S02_Rupture` establishes the bat panic; wave 1 follows it. `Stage01_WavePlan.asset` is linked to `WaveConfig`: waves 1-2 are bats, wave 3 is bats + the first werewolf, wave 4 is werewolves, wave 5 is slimes + the last werewolf, and wave 6 is slimes. Stage 1 has 6 normal waves; wave 7 is the boss from the boss pool. The old `WaveSizeOverride` that pinned stage 1, wave 1 to one slime has been removed.
 
 
 ---
 
-## 4. `S01_Mid` — outline (not final)
+## 4. `S02_Rupture` — built
+
+**Plays:** before wave 1 of stage 1, immediately after `S01_Intro`. Both are `BeforeWave` rules at wave 1; the queue plays Intro, then Rupture, then releases the wave once. No battle between the scenes.
+
+**Asset:** the party is still walking right. The slime is gone. The ground shakes. Bats flee from the forest centre on the right and cross to the left. Two fly past; two stop ahead of the party. No combat.
+
+**Interaction:** automatic. Skippable. No tap-to-continue.
+
+### Actors
+
+| Id | Screen name | Art set | Facing | Notes |
+|---|---|---|---|---|
+| `knight` | Knight | `Knight_Art` | right | Right/front. Orders the party to hold |
+| `mage` | Mage | `Wizard_Art` | right | Middle. Reads the animal panic |
+| `soldier` | Soldier | `Soldier_Art` | right | Left/front. Reacts first |
+| `batA` | Bat | `Bat_Art` | left | Flies past, right to left |
+| `batB` | Bat | `Bat_Art` | left | Flies past, right to left |
+| `batC` | Bat | `Bat_Art` | left | Stops and hovers ahead of the party |
+| `batD` | Bat | `Bat_Art` | left | Stops and hovers ahead of the party |
+
+### Sequence
+
+| # | Beat | Action | Dialogue |
+|---|---|---|---|
+| 1 | Moving | The party is already walking right; the slime is absent | — |
+| 2 | Lost | The party stops. The forest is empty | **Soldier:** We lost it. |
+| 3 | Quake | The ground shakes. No character explains it | — |
+| 4 | Flight | Bat A and Bat B cross from right to left at speed | — |
+| 5 | Hover | Bat C and Bat D stop ahead of the party and hover | — |
+| 6 | Warning | The party sees the bats cutting through their line | **Soldier:** Watch out! |
+| 7 | Cause | The Mage reads the panic, not an attack | **Mage:** They're running from something. |
+| 8 | Hold | The Knight gives the order; the bats remain in the way | **Knight:** Hold formation! |
+| 9 | Fight | Wave 1 begins with two bats | — |
+
+### What the log shows
+
+```
+Soldier: We lost it.
+Soldier: Watch out!
+Mage: They're running from something.
+Knight: Hold formation!
+```
+
+Notes:
+
+- **The bats are fleeing, not hunting.** Right is the forest centre. The bats fly from right to left; the Guard walks right into what drove them out.
+- **Two pass; two hover.** The two hoverers are the pair that becomes wave 1. The two flyers show the stampede.
+- **No shard, no king, no root explanation.** The image and the lines do the work.
+- **No damage.** The shake is visual. The first hit happens in combat.
+- **No timing target.** Adjust the beat spacing in the asset; do not rewrite this page around a total runtime.
+
+---
+
+## 5. `S03_Wall` — outline (not final)
 
 **Plays:** before wave 5 of stage 1 (rule: `BeforeWave`, stage 1, wave 5).
-**Length:** about 5 s. Cap 8 s.
 **Purpose:** the slime wall. The slimes are not attacking; they are pressed into a choke at the root
 lip. They block the only way through. The Guard must clear the path. Three lines only. Do not explain
 the shard.
 
-| Time | Verb | Actor | Text | Bubble |
-|---|---|---|---|---|
-| 0.3 | Enter | slimeA | — | — |
-| 1.0 | Say | soldier | They're not fighting. | — |
-| 2.0 | Say | mage | They're not. | — |
-| 3.0 | Say | knight | They're in the way. Clear it. | — |
-| 4.5 | End | — | — | — |
+| # | Beat | Actor | Text |
+|---|---|---|---|
+| 1 | Enter | slimeA | — |
+| 2 | Say | soldier | They're not fighting. |
+| 3 | Say | mage | They're not. |
+| 4 | Say | knight | They're in the way. Clear it. |
+| 5 | End | — | — |
 
 The slimes do not attack in this scene. The fight that follows is an obstacle, not a hunt. The player
 should feel the difference. Do not add a line that calls them innocent.
 
 ---
 
-## 5. `S01_Outro` — outline (not final)
+## 6. `S05_Outro` — outline (not final)
 
 **Plays:** after the boss of stage 1 (rule: `StageCleared`, stage 1).
-**Length:** about 6 s. Cap 10 s.
 **Purpose:** confirm the shard, show the cost, close the node, point to the road. The bloom has collapsed.
 The ordinary forest survives. The Guard have taken the thing that kept a living pocket alive.
 
 The table below is a placeholder. The final pass must land on cost, not a joke. The old “guarded badly”
 line undercuts the chapter and should not survive the rewrite.
 
-| Time | Verb | Actor | Text | Bubble |
-|---|---|---|---|---|
-| 0.3 | Bubble | mage | — | `…` |
-| 1.0 | Say | mage | The shard. It grew a king to guard it. | — |
-| 2.6 | Bubble | knight | — | `!` |
-| 3.0 | Say | knight | It guarded badly. | — |
-| 4.4 | Say | soldier | One piece. The rest are still out there. | — |
-| 5.8 | End | — | — | — |
+| # | Beat | Actor | Text |
+|---|---|---|---|
+| 1 | Bubble | mage | `…` |
+| 2 | Say | mage | The shard. It grew a king to guard it. |
+| 3 | Bubble | knight | `!` |
+| 4 | Say | knight | It guarded badly. |
+| 5 | Say | soldier | One piece. The rest are still out there. |
+| 6 | End | — | — |
 
 The scene does **not** grant the shard. The grant is a game rule outside the scene. A scene is a picture.
 
@@ -171,10 +222,9 @@ The scene does **not** grant the shard. The grant is a game rule outside the sce
 The Slime King is a knot of roots and mud around the shard; it has no intent (`Story-Greenwake.md` §6).
 The image can suggest a guardian. The script must not confirm one.
 
-### `S01_King` — planned (not written)
+### `S04_King` — planned (not written)
 
 **Plays:** before wave 7 of stage 1 (`BeforeWave`, stage 1, wave 7).
-**Length:** 4-6 s. Cap 8 s.
 **Purpose:** show the heart of the bloom. The old hollow tree, the shard inside it, the Slime King wrapped
 around it. The King does not speak and does not explain itself. It moves only when the Guard step
 between it and the shard.
@@ -182,10 +232,9 @@ between it and the shard.
 The scene must establish the boss’s behaviour before combat: it covers the shard, not the road. Keep it
 to two lines at most. Do not call it a guardian in dialogue; let the image do that work.
 
-### `S01_Defeat` — planned (not written)
+### `S06_Defeat` — planned (not written)
 
 **Plays:** on a party wipe in stage 1.
-**Length:** 3-5 s. Cap 8 s.
 **Purpose:** show the shard pulling the marked Guard back. The world does not rewind. The same road and
 enemies are there. Wounds are closed. Gear is kept. The Guard do not understand why.
 
@@ -193,7 +242,7 @@ No lecture. No explanation of the rule. The player learns it by seeing the same 
 
 ---
 
-## 6. Text budget (hard rules)
+## 7. Text budget (hard rules)
 
 | Rule | Limit |
 |---|---|
@@ -201,33 +250,26 @@ No lecture. No explanation of the rule. The player learns it by seeing the same 
 | Mid-node / outro lines | 3-4 |
 | Words per log line | 12 is the guide. A longer intro line is allowed if its hold is longer |
 | Bubble text | One symbol, or 1-3 words |
-| Intro length | 30-50 s |
-| Mid length | 5-8 s |
-| Outro length | 8-12 s |
-| Pauses | Intro 0.8-1.6 s. Mid 0.4-0.8 s. Outro 0.6-1.0 s |
-| Hard cap | Timed scene: content + 5-8 s. Tap mode: 120 s real-time safety net |
 | Tap to continue | Optional per scene. One tap per spoken line; first tap finishes typing |
 | Skip | Always on; separate `SKIP SCENE` button |
 | Scenes that grant rewards | None. Ever |
 
-Why: the node intro is the one place to spend time, and it plays once per stage. A player who skips loses
-nothing. Mid and outro stay short so a retry never drags.
+Timing is authoring data, not a contract. Keep a scene as long as its picture needs and no longer. Do not
+write a total runtime into this page.
 
 ---
 
-## 7. How to add the next scene (the 3-step test)
+## 8. How to add the next scene (the 3-step test)
 
-1. Duplicate `S01_Intro` and save it as `S01_Mid` with its own beats.
-2. Add one row to `Stage01_Schedule`:
-   `BeforeWave · stage 1 · wave 5 · S01_Mid`.
-   The planned rows are `BeforeWave · stage 1 · wave 7 · S01_King` and `Defeat · stage 1 · S01_Defeat`.
+1. Duplicate `S01_Intro` or `S02_Rupture` and save it with its own beats.
+2. Add one row to `Stage01_Schedule`.
 3. Press Play. No code change.
 
 If step 3 needs code, the structure is wrong. Fix the structure, not the scene.
 
 ---
 
-## 8. Nodes 2-10
+## 9. Nodes 2-10
 
 One line each until they are written. Names come from `Story-Canon.md` §5 and are provisional.
 

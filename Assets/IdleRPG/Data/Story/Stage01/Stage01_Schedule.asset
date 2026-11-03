@@ -26,3 +26,16 @@ MonoBehaviour:
     priority: 10
     playLimit: 1
     maxPerStage: 1
+  - cue: 0
+    scene: {fileID: 11400000, guid: b7f6c1a2d3e44f5b8c9d0e1f2a3b4c5d, type: 2}
+    minStage: 1
+    maxStage: 1
+    wave:
+      mode: 1
+      wave: 1
+      everyN: 3
+      offset: 0
+      chance: 0.25
+    priority: 5
+    playLimit: 1
+    maxPerStage: 1

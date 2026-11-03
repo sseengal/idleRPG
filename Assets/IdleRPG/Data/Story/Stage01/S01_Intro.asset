@@ -318,7 +318,43 @@ MonoBehaviour:
     bubble: 0
     clip: 
     faceLeft: 0
-  - time: 39
+  - time: 38.6
+    verb: 1
+    actorId: slime
+    spot: {x: 1.15, y: 0.32}
+    duration: 1.2
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 38.6
+    verb: 1
+    actorId: soldier
+    spot: {x: 0.36, y: 0.4}
+    duration: 1.6
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 38.7
+    verb: 1
+    actorId: mage
+    spot: {x: 0.48, y: 0.34}
+    duration: 1.6
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 38.8
+    verb: 1
+    actorId: knight
+    spot: {x: 0.62, y: 0.28}
+    duration: 1.6
+    text: 
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 41.5
     verb: 6
     actorId: 
     spot: {x: 0, y: 0}
