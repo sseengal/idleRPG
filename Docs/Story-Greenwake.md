@@ -172,7 +172,7 @@ Exact words live in `Story-Nodes.md`. This table owns only what each scene must 
 | Scene | Cue | What the player must understand |
 |---|---|---|
 | `S01_Intro` | Stage start | The Guard is lost. A single slime passes toward the center; the party follows it. The Soldier asks what it is; the player learns it is not a creature. |
-| `S02_Rupture` | Same start, directly after Intro | The party loses the slime. The ground shakes. Two bats flee outward and leave the screen. The first fight is a collision. |
+| `S02_Rupture` | Same start, directly after Intro | The party loses the slime. The ground shakes. Two bats flee outward; two more enter and hover. The first fight is a collision. |
 | `S03_Wall` | Wave 5, before the wave | The slimes are piled at a choke and are not attacking. The last werewolf is caught there. The Guard must cut through. |
 | `S04_King` | Wave 7, before the boss | The old hollow tree is the source. The Slime King is wrapped around it. It is in the way. |
 | Boss fight | Wave 7 combat | The King defends the shard, not the road. It pulls itself back around the shard when cut. |

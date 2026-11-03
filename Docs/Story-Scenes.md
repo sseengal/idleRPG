@@ -400,13 +400,15 @@ If step 8 needs code, the structure is wrong. Fix the structure, not the scene.
 
 `S02_Rupture` is the second scene:
 
-- the party is still moving right; the slime is gone;
+- the party is still moving right; the three walk starts are staggered so the animation is not in lockstep; the slime is gone;
 - Soldier: “We lost it.”;
 - the ground shakes;
 - Soldier: “Watch out!”;
 - two bats fly past from right to left and leave the screen;
+- the party turns left to track them, then turns right again;
 - Mage: “They're running from something.”;
 - Soldier: “Look out. More incoming!”;
+- two more bats enter and stop ahead of the party;
 - Knight: “Hold formation!”;
 - wave 1 starts with two bats.
 
@@ -504,7 +506,7 @@ same wave today; keep the order anyway.
 | Asset / object | Job |
 |---|---|
 | `Data/Story/Stage01/S01_Intro.asset` | Built intro: 4 actors, `waitForContinue` on. |
-| `Data/Story/Stage01/S02_Rupture.asset` | Built rupture: 3 heroes + 2 bats, shake, tap-to-continue on. |
+| `Data/Story/Stage01/S02_Rupture.asset` | Built rupture: 3 heroes + 4 bats, shake, tap-to-continue on. |
 | `Data/Story/Stage01/Stage01_Schedule.asset` | Two `BeforeWave` rules at stage 1, wave 1: Intro priority 10, Rupture priority 5. Both once per stage. |
 | `Data/Config/BalanceConfig.asset` | No wave-size override for stage 1, wave 1. |
 | `HudController` + `StoryService.ScheduledScenes` | `P` replay, `J` / `K` previous/next scheduled scene. |

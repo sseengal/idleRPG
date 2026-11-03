@@ -450,9 +450,11 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 - The ground shakes. The arena moves; the HUD and log stay steady.
 - **Soldier:** “Watch out!”
 - Two bats fly from right to left at a readable speed and pass the party.
+- The party turns left to track the bats, then turns right again before the dialogue continues.
 - Both bats pass fully off the left edge and are hidden.
 - **Mage:** “They're running from something.”
 - **Soldier:** “Look out. More incoming!”
+- Two more bats enter and hover ahead of the party.
 - **Knight:** “Hold formation!”
 - Each spoken line waits for a tap. The first tap finishes the typing; the next tap moves on.
 - Each spoken line shows a small ellipsis bubble above that character: Soldier, Mage or Knight.

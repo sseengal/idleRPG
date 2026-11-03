@@ -75,7 +75,7 @@ System (must exist before content grows):
 Content (node 1, opening scenes):
 - [x] **Chapter story locked (2 Nov 2026):** `Story-Greenwake.md` owns the time leak, living bloom, Slime King, wave/place progression and the Guard’s theft. Wall/King/Outro/Defeat are planned, not built.
 - [x] **Opening built (2 Nov 2026):** the lost party meets a slime and follows it. Soldier asks, “Is that a ... Slime!?”
-- [x] **Rupture built (3 Nov 2026):** the slime is lost; the ground shakes; bats flee from the forest centre; two pass and leave; wave 1 follows.
+- [x] **Rupture built (3 Nov 2026):** the slime is lost; the ground shakes; two bats fly past; two more enter and hover; wave 1 follows.
 - [x] Actors in the built intro: Soldier walks in first, Mage second, Knight last and right/front; the slime enters from the left and passes through the gap.
 - [x] Built assets: `S01_Intro` and `S02_Rupture`; script in `Story-Nodes.md` §3 and §4.
 - [x] Hard rules: no rewards, no mechanics explained, every scene skippable.

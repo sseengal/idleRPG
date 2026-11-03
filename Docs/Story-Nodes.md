@@ -129,7 +129,7 @@ The first wave is **bats**. `S02_Rupture` establishes the bat panic; wave 1 foll
 
 **Plays:** before wave 1 of stage 1, immediately after `S01_Intro`. Both are `BeforeWave` rules at wave 1; the queue plays Intro, then Rupture, then releases the wave once. No battle between the scenes.
 
-**Asset:** the party is still walking right. The slime is gone. The ground shakes. Bats flee from the forest centre on the right and cross to the left. Two fly past and leave the screen. No combat.
+**Asset:** the party is still walking right. The slime is gone. The ground shakes. Bats flee from the forest centre on the right and cross to the left. Two fly past; two more enter and hover ahead. No combat.
 
 **Interaction:** tap after each spoken line. **Bubble:** symbols only. **Log:** one line at a time.
 
@@ -142,6 +142,8 @@ The first wave is **bats**. `S02_Rupture` establishes the bat panic; wave 1 foll
 | `soldier` | Soldier | `Soldier_Art` | right | Left/front. Reacts first |
 | `batA` | Bat | `Bat_Art` | left | Flies past, right to left, then leaves the screen |
 | `batB` | Bat | `Bat_Art` | left | Flies past, right to left, then leaves the screen |
+| `batC` | Bat | `Bat_Art` | left | Enters after “More incoming!” and hovers |
+| `batD` | Bat | `Bat_Art` | left | Enters after “More incoming!” and hovers |
 
 ### Sequence
 
@@ -154,8 +156,9 @@ The first wave is **bats**. `S02_Rupture` establishes the bat panic; wave 1 foll
 | 5 | Flight | Bat A and Bat B cross from right to left, then leave the screen | — |
 | 6 | Cause | The Mage reads the panic, not an attack | **Mage:** They're running from something. |
 | 7 | More | The Soldier sees the next threat | **Soldier:** Look out. More incoming! |
-| 8 | Hold | The Knight gives the order | **Knight:** Hold formation! |
-| 9 | Fight | Wave 1 begins with two bats | — |
+| 8 | Hover | Bat C and Bat D enter and stop ahead of the party | — |
+| 9 | Hold | The Knight gives the order | **Knight:** Hold formation! |
+| 10 | Fight | Wave 1 begins with two bats | — |
 
 ### What the log shows
 
@@ -171,7 +174,8 @@ Notes:
 
 - **The bats are fleeing, not hunting.** Right is the forest centre. The bats fly from right to left; the Guard walks right into what drove them out.
 - **The warning arrives first.** “Watch out!” comes before the bats enter; the flight is the answer to the line.
-- **Two pass; no hover in this pass.** The two bats leave the screen. Wave 1 still uses two bats.
+- **Two pass; two hover.** The flyers show the panic. The two that enter after “More incoming!” are the pair that becomes wave 1.
+- **The party tracks the fliers.** They face the bats as they pass behind, then face right again before the dialogue continues.
 - **No shard, no king, no root explanation.** The image and the lines do the work.
 - **No damage.** The shake is visual. The first hit happens in combat.
 - **No timing target.** Adjust the beat spacing in the asset; do not rewrite this page around a total runtime.

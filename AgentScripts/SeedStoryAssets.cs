@@ -120,17 +120,19 @@ public static class SeedStoryAssets
             new StoryActorDef("mage", "Mage", mage, false),
             new StoryActorDef("soldier", "Soldier", soldier, false),
             new StoryActorDef("batA", "Bat", bat, true),
-            new StoryActorDef("batB", "Bat", bat, true)
+            new StoryActorDef("batB", "Bat", bat, true),
+            new StoryActorDef("batC", "Bat", bat, true),
+            new StoryActorDef("batD", "Bat", bat, true)
         };
 
         StoryBeat[] beats =
         {
-            new StoryBeat(0.0f, StoryVerb.Place, "soldier", new Vector2(0.36f, 0.40f)),
-            new StoryBeat(0.0f, StoryVerb.Place, "mage", new Vector2(0.48f, 0.34f)),
-            new StoryBeat(0.0f, StoryVerb.Place, "knight", new Vector2(0.62f, 0.28f)),
-            new StoryBeat(0.1f, StoryVerb.WalkTo, "soldier", new Vector2(0.44f, 0.40f), 2.8f),
-            new StoryBeat(0.1f, StoryVerb.WalkTo, "mage", new Vector2(0.56f, 0.34f), 2.8f),
-            new StoryBeat(0.1f, StoryVerb.WalkTo, "knight", new Vector2(0.70f, 0.28f), 2.8f),
+            new StoryBeat(0.0f, StoryVerb.Place, "soldier", new Vector2(0.30f, 0.40f)),
+            new StoryBeat(0.0f, StoryVerb.Place, "mage", new Vector2(0.42f, 0.34f)),
+            new StoryBeat(0.0f, StoryVerb.Place, "knight", new Vector2(0.54f, 0.28f)),
+            new StoryBeat(0.10f, StoryVerb.WalkTo, "soldier", new Vector2(0.38f, 0.40f), 2.8f),
+            new StoryBeat(0.16f, StoryVerb.WalkTo, "mage", new Vector2(0.50f, 0.34f), 3.0f),
+            new StoryBeat(0.22f, StoryVerb.WalkTo, "knight", new Vector2(0.62f, 0.28f), 3.2f),
             new StoryBeat(2.0f, StoryVerb.Say, "soldier", default, 0f, "We lost it."),
             new StoryBeat(2.8f, StoryVerb.Shake, string.Empty, default, 0.8f),
             new StoryBeat(3.2f, StoryVerb.Say, "soldier", default, 0f, "Watch out!"),
@@ -138,13 +140,23 @@ public static class SeedStoryAssets
             new StoryBeat(3.9f, StoryVerb.WalkTo, "batA", new Vector2(-0.25f, 0.70f), 1.0f),
             new StoryBeat(4.0f, StoryVerb.Enter, "batB", new Vector2(0.98f, 0.52f), 0.2f),
             new StoryBeat(4.1f, StoryVerb.WalkTo, "batB", new Vector2(-0.25f, 0.52f), 1.0f),
+            new StoryBeat(4.5f, StoryVerb.Face, "soldier", faceLeft: true),
+            new StoryBeat(4.6f, StoryVerb.Face, "mage", faceLeft: true),
+            new StoryBeat(4.7f, StoryVerb.Face, "knight", faceLeft: true),
             new StoryBeat(5.0f, StoryVerb.Hide, "batA"),
+            new StoryBeat(5.1f, StoryVerb.Face, "soldier"),
             new StoryBeat(5.2f, StoryVerb.Hide, "batB"),
-            new StoryBeat(5.4f, StoryVerb.Say, "mage", default, 0f, "They're running from something."),
-            new StoryBeat(6.0f, StoryVerb.Say, "soldier", default, 0f, "Look out. More incoming!"),
-            new StoryBeat(6.7f, StoryVerb.Bubble, "knight", default, 0f, string.Empty, BubbleKind.Bang),
-            new StoryBeat(6.8f, StoryVerb.Say, "knight", default, 0f, "Hold formation!"),
-            new StoryBeat(7.5f, StoryVerb.End)
+            new StoryBeat(5.2f, StoryVerb.Face, "mage"),
+            new StoryBeat(5.3f, StoryVerb.Face, "knight"),
+            new StoryBeat(5.6f, StoryVerb.Say, "mage", default, 0f, "They're running from something."),
+            new StoryBeat(6.2f, StoryVerb.Say, "soldier", default, 0f, "Look out. More incoming!"),
+            new StoryBeat(6.4f, StoryVerb.Enter, "batC", new Vector2(0.98f, 0.58f), 0.2f),
+            new StoryBeat(6.5f, StoryVerb.WalkTo, "batC", new Vector2(0.78f, 0.58f), 0.55f),
+            new StoryBeat(6.6f, StoryVerb.Enter, "batD", new Vector2(0.98f, 0.20f), 0.2f),
+            new StoryBeat(6.7f, StoryVerb.WalkTo, "batD", new Vector2(0.84f, 0.20f), 0.55f),
+            new StoryBeat(7.2f, StoryVerb.Bubble, "knight", default, 0f, string.Empty, BubbleKind.Bang),
+            new StoryBeat(7.3f, StoryVerb.Say, "knight", default, 0f, "Hold formation!"),
+            new StoryBeat(8.0f, StoryVerb.End)
         };
 
         scene.EditorSetContent("s02_rupture", actors, beats, 30f, tapToContinue: true, fadeIn: 1.8f);
