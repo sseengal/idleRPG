@@ -24,6 +24,8 @@ namespace IdleRPG.UI
         private const float BubbleLift = 0.11f;
         private const float BubbleEdge = 0.14f;
         private const float ShakeAmplitude = 7f;
+        private static readonly Vector2 SymbolBubbleSize = new Vector2(72f, 56f);
+        private static readonly Vector2 WordBubbleSize = new Vector2(280f, 96f);
 
         private sealed class ActorView
         {
@@ -318,7 +320,7 @@ namespace IdleRPG.UI
             view.Animator.PlayClip(frames, view.Art.FpsFor(slot));
         }
 
-        /// <summary>Shows a tiny ellipsis over the speaker. The log owns the line; the bubble only marks who is talking.</summary>
+        /// <summary>Shows a small ellipsis over the speaker. The log owns the line; the bubble only marks who is talking.</summary>
         public void Speech(int actorIndex)
         {
             Bubble(actorIndex, BubbleKind.Dots, string.Empty);
@@ -371,10 +373,8 @@ namespace IdleRPG.UI
             UiType.ApplyAuto(bubbleText, role);
 
             Vector2 size = kind == BubbleKind.Word
-                ? new Vector2(280f, 96f)
-                : kind == BubbleKind.Dots
-                    ? new Vector2(48f, 40f)
-                    : new Vector2(120f, 88f);
+                ? WordBubbleSize
+                : SymbolBubbleSize;
             Vector2 at = view.Rect.anchorMin;
             Vector2 point = new Vector2(
                 Mathf.Clamp(at.x, BubbleEdge, 1f - BubbleEdge),

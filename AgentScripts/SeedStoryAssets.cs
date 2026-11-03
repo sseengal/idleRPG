@@ -133,17 +133,18 @@ public static class SeedStoryAssets
             new StoryBeat(0.1f, StoryVerb.WalkTo, "knight", new Vector2(0.70f, 0.28f), 2.8f),
             new StoryBeat(2.0f, StoryVerb.Say, "soldier", default, 0f, "We lost it."),
             new StoryBeat(2.8f, StoryVerb.Shake, string.Empty, default, 0.8f),
-            new StoryBeat(3.5f, StoryVerb.Enter, "batA", new Vector2(0.98f, 0.70f), 0.12f),
-            new StoryBeat(3.6f, StoryVerb.WalkTo, "batA", new Vector2(-0.25f, 0.70f), 0.55f),
-            new StoryBeat(3.7f, StoryVerb.Enter, "batB", new Vector2(0.98f, 0.52f), 0.12f),
-            new StoryBeat(3.8f, StoryVerb.WalkTo, "batB", new Vector2(-0.25f, 0.52f), 0.55f),
-            new StoryBeat(4.2f, StoryVerb.Say, "soldier", default, 0f, "Watch out!"),
-            new StoryBeat(4.3f, StoryVerb.Hide, "batA"),
-            new StoryBeat(4.5f, StoryVerb.Hide, "batB"),
-            new StoryBeat(4.8f, StoryVerb.Say, "mage", default, 0f, "They're running from something."),
-            new StoryBeat(5.8f, StoryVerb.Bubble, "knight", default, 0f, string.Empty, BubbleKind.Bang),
-            new StoryBeat(5.9f, StoryVerb.Say, "knight", default, 0f, "Hold formation!"),
-            new StoryBeat(6.6f, StoryVerb.End)
+            new StoryBeat(3.2f, StoryVerb.Say, "soldier", default, 0f, "Watch out!"),
+            new StoryBeat(3.8f, StoryVerb.Enter, "batA", new Vector2(0.98f, 0.70f), 0.2f),
+            new StoryBeat(3.9f, StoryVerb.WalkTo, "batA", new Vector2(-0.25f, 0.70f), 1.0f),
+            new StoryBeat(4.0f, StoryVerb.Enter, "batB", new Vector2(0.98f, 0.52f), 0.2f),
+            new StoryBeat(4.1f, StoryVerb.WalkTo, "batB", new Vector2(-0.25f, 0.52f), 1.0f),
+            new StoryBeat(5.0f, StoryVerb.Hide, "batA"),
+            new StoryBeat(5.2f, StoryVerb.Hide, "batB"),
+            new StoryBeat(5.4f, StoryVerb.Say, "mage", default, 0f, "They're running from something."),
+            new StoryBeat(6.0f, StoryVerb.Say, "soldier", default, 0f, "Look out. More incoming!"),
+            new StoryBeat(6.7f, StoryVerb.Bubble, "knight", default, 0f, string.Empty, BubbleKind.Bang),
+            new StoryBeat(6.8f, StoryVerb.Say, "knight", default, 0f, "Hold formation!"),
+            new StoryBeat(7.5f, StoryVerb.End)
         };
 
         scene.EditorSetContent("s02_rupture", actors, beats, 30f, tapToContinue: true, fadeIn: 1.8f);

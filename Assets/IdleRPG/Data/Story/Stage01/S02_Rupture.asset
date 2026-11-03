@@ -118,43 +118,7 @@ MonoBehaviour:
     bubble: 0
     clip:
     faceLeft: 0
-  - time: 3.5
-    verb: 0
-    actorId: batA
-    spot: {x: 0.98, y: 0.7}
-    duration: 0.12
-    text:
-    bubble: 0
-    clip:
-    faceLeft: 0
-  - time: 3.6
-    verb: 1
-    actorId: batA
-    spot: {x: -0.25, y: 0.7}
-    duration: 0.55
-    text:
-    bubble: 0
-    clip:
-    faceLeft: 0
-  - time: 3.7
-    verb: 0
-    actorId: batB
-    spot: {x: 0.98, y: 0.52}
-    duration: 0.12
-    text:
-    bubble: 0
-    clip:
-    faceLeft: 0
-  - time: 3.8
-    verb: 1
-    actorId: batB
-    spot: {x: -0.25, y: 0.52}
-    duration: 0.55
-    text:
-    bubble: 0
-    clip:
-    faceLeft: 0
-  - time: 4.2
+  - time: 3.2
     verb: 4
     actorId: soldier
     spot: {x: 0, y: 0}
@@ -163,7 +127,43 @@ MonoBehaviour:
     bubble: 0
     clip:
     faceLeft: 0
-  - time: 4.3
+  - time: 3.8
+    verb: 0
+    actorId: batA
+    spot: {x: 0.98, y: 0.7}
+    duration: 0.2
+    text:
+    bubble: 0
+    clip:
+    faceLeft: 0
+  - time: 3.9
+    verb: 1
+    actorId: batA
+    spot: {x: -0.25, y: 0.7}
+    duration: 1
+    text:
+    bubble: 0
+    clip:
+    faceLeft: 0
+  - time: 4
+    verb: 0
+    actorId: batB
+    spot: {x: 0.98, y: 0.52}
+    duration: 0.2
+    text:
+    bubble: 0
+    clip:
+    faceLeft: 0
+  - time: 4.1
+    verb: 1
+    actorId: batB
+    spot: {x: -0.25, y: 0.52}
+    duration: 1
+    text:
+    bubble: 0
+    clip:
+    faceLeft: 0
+  - time: 5
     verb: 5
     actorId: batA
     spot: {x: 0, y: 0}
@@ -172,7 +172,7 @@ MonoBehaviour:
     bubble: 0
     clip:
     faceLeft: 0
-  - time: 4.5
+  - time: 5.2
     verb: 5
     actorId: batB
     spot: {x: 0, y: 0}
@@ -181,7 +181,7 @@ MonoBehaviour:
     bubble: 0
     clip:
     faceLeft: 0
-  - time: 4.8
+  - time: 5.4
     verb: 4
     actorId: mage
     spot: {x: 0, y: 0}
@@ -190,7 +190,16 @@ MonoBehaviour:
     bubble: 0
     clip:
     faceLeft: 0
-  - time: 5.8
+  - time: 6
+    verb: 4
+    actorId: soldier
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: Look out. More incoming!
+    bubble: 0
+    clip:
+    faceLeft: 0
+  - time: 6.7
     verb: 3
     actorId: knight
     spot: {x: 0, y: 0}
@@ -199,7 +208,7 @@ MonoBehaviour:
     bubble: 2
     clip:
     faceLeft: 0
-  - time: 5.9
+  - time: 6.8
     verb: 4
     actorId: knight
     spot: {x: 0, y: 0}
@@ -208,7 +217,7 @@ MonoBehaviour:
     bubble: 0
     clip:
     faceLeft: 0
-  - time: 6.6
+  - time: 7.5
     verb: 6
     actorId:
     spot: {x: 0, y: 0}

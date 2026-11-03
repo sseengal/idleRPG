@@ -150,11 +150,12 @@ The first wave is **bats**. `S02_Rupture` establishes the bat panic; wave 1 foll
 | 1 | Moving | The party is already walking right; the slime is absent | — |
 | 2 | Lost | The party stops. The forest is empty | **Soldier:** We lost it. |
 | 3 | Quake | The ground shakes. No character explains it | — |
-| 4 | Flight | Bat A and Bat B cross from right to left at speed, then leave the screen | — |
-| 5 | Warning | The party sees the bats cutting through their line | **Soldier:** Watch out! |
+| 4 | Warning | The Soldier sees movement before the bats arrive | **Soldier:** Watch out! |
+| 5 | Flight | Bat A and Bat B cross from right to left, then leave the screen | — |
 | 6 | Cause | The Mage reads the panic, not an attack | **Mage:** They're running from something. |
-| 7 | Hold | The Knight gives the order | **Knight:** Hold formation! |
-| 8 | Fight | Wave 1 begins with two bats | — |
+| 7 | More | The Soldier sees the next threat | **Soldier:** Look out. More incoming! |
+| 8 | Hold | The Knight gives the order | **Knight:** Hold formation! |
+| 9 | Fight | Wave 1 begins with two bats | — |
 
 ### What the log shows
 
@@ -162,12 +163,14 @@ The first wave is **bats**. `S02_Rupture` establishes the bat panic; wave 1 foll
 Soldier: We lost it.
 Soldier: Watch out!
 Mage: They're running from something.
+Soldier: Look out. More incoming!
 Knight: Hold formation!
 ```
 
 Notes:
 
 - **The bats are fleeing, not hunting.** Right is the forest centre. The bats fly from right to left; the Guard walks right into what drove them out.
+- **The warning arrives first.** “Watch out!” comes before the bats enter; the flight is the answer to the line.
 - **Two pass; no hover in this pass.** The two bats leave the screen. Wave 1 still uses two bats.
 - **No shard, no king, no root explanation.** The image and the lines do the work.
 - **No damage.** The shake is visual. The first hit happens in combat.

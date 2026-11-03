@@ -88,7 +88,7 @@ Rules:
 - `Face` flips an actor to look left or right without moving it. `faceLeft = true` looks left.
 - `Shake` shakes the arena stage for `duration` seconds. It restores the stage position on end, skip and cap.
 - `Say` stores `displayName` as the speaker and `text` as the words. The log colours the name gold
-  and types the words at 45 characters per second. Every spoken line also raises a tiny ellipsis bubble
+  and types the words at 45 characters per second. Every spoken line also raises a small ellipsis bubble
   over the speaker, so the speaking character is visible without reading the log. The scene never writes
   raw log text or markup.
 - When `waitForContinue` is on, the scene clock stops after each `Say`. The first tap finishes the
@@ -263,6 +263,7 @@ These rules hold for every scene, at every cue.
 Bubble rules:
 
 - One bubble in the whole layer. It attaches above the speaking actor.
+- All symbol bubbles (`…`, `!`, `?`) use one shared size, so scenes cannot drift.
 - x is clamped so the bubble never leaves the viewport.
 - The bubble hides when its actor moves. It never follows mid-walk.
 - Symbols only by default. A word bubble is 1-3 words and never a full sentence.
@@ -402,9 +403,10 @@ If step 8 needs code, the structure is wrong. Fix the structure, not the scene.
 - the party is still moving right; the slime is gone;
 - Soldier: “We lost it.”;
 - the ground shakes;
-- two bats fly past from right to left and leave the screen;
 - Soldier: “Watch out!”;
+- two bats fly past from right to left and leave the screen;
 - Mage: “They're running from something.”;
+- Soldier: “Look out. More incoming!”;
 - Knight: “Hold formation!”;
 - wave 1 starts with two bats.
 
