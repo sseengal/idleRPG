@@ -381,7 +381,7 @@ and scene references stay valid. Review the diff after it runs.
 7. Add one rule to the node's schedule (`Assets > Create > Idle RPG/Story/Story Schedule`, or the
    existing node schedule): cue, stage range, wave rule, scene, priority, play limit.
 8. Assign the schedule to `GameManager.storySchedule` in `Main.unity` if this is a new node schedule.
-9. Press Play. Use `P` / `Left` / `Right` for the scene test deck.
+9. Press Play. Use `Left` / `Right` for the scene test deck.
 
 If step 8 needs code, the structure is wrong. Fix the structure, not the scene.
 
@@ -417,10 +417,8 @@ If step 8 needs code, the structure is wrong. Fix the structure, not the scene.
 
 The test deck reads `StoryService.ScheduledScenes`, so it always uses the real schedule:
 
-- `P` replays the selected scene over the live fight.
 - `Left` plays the previous scheduled scene.
 - `Right` plays the next scheduled scene.
-- In the editor, small **PREV** / **NEXT** buttons are also visible at the top-left.
 - Pressing either control during a scene skips the current scene and starts the requested one after the quick exit fade.
 
 The deck does not keep a second scene list. A scene added to `Stage01_Schedule.asset` appears in the deck
@@ -500,7 +498,7 @@ same wave today; keep the order anyway.
 | `Scripts/Core/BattleLog.cs` | `Dialogue` kind, `Say(speaker, line)`, `Speaker` field. |
 | `Scripts/UI/CombatLogUI.cs` | Story mode, one-line story view, prompt, typewriter, wrapping. See `Battle-Log.md`. |
 | `Scripts/Combat/CombatManager.cs` | `RequestAbility` returns false while paused; `ResumeAfterGate`. |
-| `Scripts/Debug/DebugHotkeys*.cs` | `P` replays the selected scheduled scene; `Left` / `Right` step the deck. |
+| `Scripts/Debug/DebugHotkeys*.cs` | `Left` / `Right` step the scheduled scene deck. |
 | `Scripts/Data/BalanceConfig.cs` + `WaveComposition.cs` | Authored wave size override. |
 | `Scripts/Tests/BattleLogTests.cs` | Store contract and speaker split. |
 
@@ -512,7 +510,6 @@ same wave today; keep the order anyway.
 | `Data/Story/Stage01/S02_Rupture.asset` | Built rupture: 3 heroes + 4 bats, shake, tap-to-continue on. |
 | `Data/Story/Stage01/Stage01_Schedule.asset` | Two `BeforeWave` rules at stage 1, wave 1: Intro priority 10, Rupture priority 5. Both once per stage. |
 | `Data/Config/BalanceConfig.asset` | No wave-size override for stage 1, wave 1. |
-| `HudController` + `StoryService.ScheduledScenes` | `P` replay, `Left` / `Right` previous/next scheduled scene. |
 | `HudController.combatLog`, `abilityStrip` | Wired by the builder. |
 | `Main.unity` | Story layer is created at runtime; no prefab scene object. |
 
@@ -542,7 +539,6 @@ One call each; no new system:
 | # | Step | Test |
 |---|---|---|
 | 1 | Write the data types and both assets | Compiles. The scene shows its beats in the inspector |
-| 2 | Build `StoryLayer` + `StoryPlayer`; `P` plays the scene over a live fight | 3 heroes and 1 slime enter; bubbles and 9 log lines; wave resumes |
 | 3 | Add the `Dialogue` log kind + the ability pause guard | 9 typed lines, gold names, no cast queued |
 | 4 | Add `StoryService` and the `BeforeWave` gate | Press Play -> intro -> rupture -> wave 1. Once. No double spawn |
 | 5 | Skip, hard cap, background, phone aspect | Tap completes the line; second tap advances; `SKIP SCENE` ends. Return from background leaves no stuck state |

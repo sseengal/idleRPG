@@ -119,6 +119,12 @@ namespace IdleRPG.Core
             }
         }
 
+        /// <summary>Drops queued scenes without touching the running one. Used by the dev scene deck.</summary>
+        public void ClearPending()
+        {
+            queue.Clear();
+        }
+
         /// <summary>Binds the UI that can show scenes. Flushes a scene that was requested before the HUD existed.</summary>
         public void SetPlayer(SceneRequest player)
         {

@@ -464,9 +464,7 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 ### Controls
 - Tap while a line is typing: the line completes. Tap again: the next line starts. This applies to both scenes.
 - `SKIP SCENE` ends the whole scene; in scene 2, the wave still waits for the scene to finish.
-- Press `P` to replay the selected scheduled scene over the live fight.
 - Press `Left` / `Right` to play the previous / next scheduled story scene. These use the real schedule, not a separate test list.
-- Use the small **PREV** / **NEXT** editor buttons at the top-left if keyboard focus is unreliable.
 - Press a control during a scene: it skips the current scene and starts the requested one after the quick exit fade.
 - Background the app for 10 s, return: no stuck wave, no replay, no duplicate actors.
 
@@ -474,7 +472,6 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 - Wave 1 spawns once. Stage 1, wave 1 in the header. Wave 1 is two bats.
 - Formation and HP are the same as before the scenes.
 - Camp still opens before wave 4 (it must not be skipped by the story gate).
-- Press `P`: the scene plays again over the live fight (debug only).
 
 ### Layout
 - Repeat on the tallest and shortest device profiles. Bubble stays inside the viewport.

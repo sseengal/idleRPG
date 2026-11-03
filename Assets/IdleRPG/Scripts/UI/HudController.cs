@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.UI;
 using IdleRPG.Core;
 using IdleRPG.Data;
 
@@ -96,7 +95,9 @@ namespace IdleRPG.UI
 
             if (storyPlayer.IsPlaying)
             {
-                // A test shortcut should interrupt the current scene, not feel dead.
+                // A test shortcut should interrupt the current scene, not feel dead. Drop queued production
+                // scenes first, otherwise the service would start its own next scene after the skip.
+                gameManager?.Story?.ClearPending();
                 pendingDebugStep = delta;
                 storyPlayer.Skip();
                 return true;
@@ -269,9 +270,6 @@ namespace IdleRPG.UI
                 {
                     // Bind after Setup: a scene requested during GameManager.Start is held until this line.
                     gameManager.Story?.SetPlayer(PlayStory);
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                    BuildStoryTestDeck();
-#endif
                 }
                 else
                 {
@@ -285,37 +283,6 @@ namespace IdleRPG.UI
         {
             return storyPlayer != null && storyPlayer.Play(scene, onFinished);
         }
-
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        /// <summary>Two clickable controls for the scene deck. The keyboard path is not always focused.</summary>
-        private void BuildStoryTestDeck()
-        {
-            RectTransform parent = modalRoot != null ? modalRoot : vfxRoot;
-
-            if (parent == null)
-            {
-                return;
-            }
-
-            GameObject deck = UiRuntime.CreateNode("StoryTestDeck", parent);
-            RectTransform deckRect = deck.transform as RectTransform;
-
-            if (deckRect != null)
-            {
-                UiRuntime.Stretch(deckRect);
-            }
-
-            Color background = new Color(0.12f, 0.18f, 0.28f, 0.92f);
-
-            UiRuntime.CreateButton(deck.transform, "PrevStory", "PREV",
-                new Vector2(0.02f, 0.88f), new Vector2(0.13f, 0.94f),
-                () => { DebugStepStory(-1); }, background, null, UiType.Role.Micro);
-
-            UiRuntime.CreateButton(deck.transform, "NextStory", "NEXT",
-                new Vector2(0.14f, 0.88f), new Vector2(0.25f, 0.94f),
-                () => { DebugStepStory(1); }, background, null, UiType.Role.Micro);
-        }
-#endif
 
         private void Update()
         {

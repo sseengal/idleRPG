@@ -93,7 +93,7 @@ Presentation (30 Oct 2026):
 
 Build order (test after every step):
 - [x] 1. Data types + `S01_Intro.asset` + `S02_Rupture.asset` + `Stage01_Schedule.asset`.
-- [x] 2. `StoryLayer` + `StoryPlayer`; `P` replays the scene over a live fight. Manual smoke passed 29 Oct: actors, bubble, log, pause, skip, restore.
+- [x] 2. `StoryLayer` + `StoryPlayer`; `Left` / `Right` replay the scene over a live fight. Manual smoke passed 29 Oct: actors, bubble, log, pause, skip, restore.
 - [x] 3. `BattleLogKind.Dialogue` + `RequestAbility` pause guard. Verified 29 Oct: three dialogue lines carry the Dialogue kind; a cast is refused while the scene owns the screen.
 - [x] 4. `StoryService` + `BeforeWave` gate at stage 1, wave 1. Verified 29 Oct: gate holds wave 1, 3 dialogue lines, wave spawns once, `OncePerStage` blocks a replay, combat resumes.
 - [~] 5. Skip, hard cap, background return, tall/short phone aspect. Skip, cap and the huge-delta/background jump pass 29 Oct. **Phone aspect and a real device background test are still open.**

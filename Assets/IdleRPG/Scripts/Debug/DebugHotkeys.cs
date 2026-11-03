@@ -132,17 +132,6 @@ namespace IdleRPG.Debugging
                 ToggleAllAbilities();
             }
 
-            // Story deck: replay the current scheduled scene. J / K walk the schedule below.
-            if (keyboard.pKey.wasPressedThisFrame)
-            {
-                IdleRPG.UI.HudController hud = IdleRPG.UI.HudController.Instance;
-                bool played = hud != null && hud.DebugPlayStory();
-                string scene = hud != null ? hud.DebugStoryName : "none";
-                Log(played
-                    ? $"Story (P): playing '{scene}' over the live fight."
-                    : $"Story (P): nothing played - missing scene asset, or a scene is already running ('{scene}').");
-            }
-
             // Story deck: Left / Right walk the actual schedule and play each scene. This is the fast pass
             // for every scene without replaying the run or editing the scene asset list.
             if (keyboard.leftArrowKey.wasPressedThisFrame)
