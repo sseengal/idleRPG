@@ -143,24 +143,24 @@ namespace IdleRPG.Debugging
                     : $"Story (P): nothing played - missing scene asset, or a scene is already running ('{scene}').");
             }
 
-            // Story deck: J / K walk the actual schedule and play each scene. This is the fast pass for
-            // every scene without replaying the run or editing the scene asset list.
-            if (keyboard.jKey.wasPressedThisFrame)
+            // Story deck: Left / Right walk the actual schedule and play each scene. This is the fast pass
+            // for every scene without replaying the run or editing the scene asset list.
+            if (keyboard.leftArrowKey.wasPressedThisFrame)
             {
                 IdleRPG.UI.HudController hud = IdleRPG.UI.HudController.Instance;
                 bool played = hud != null && hud.DebugStepStory(-1);
                 Log(played
-                    ? $"Story (J): playing '{hud.DebugStoryName}'."
-                    : "Story (J): nothing played - missing schedule scene, or a scene is already running.");
+                    ? $"Story (Left): playing '{hud.DebugStoryName}'."
+                    : "Story (Left): nothing played - missing schedule scene, or a scene is already running.");
             }
 
-            if (keyboard.kKey.wasPressedThisFrame)
+            if (keyboard.rightArrowKey.wasPressedThisFrame)
             {
                 IdleRPG.UI.HudController hud = IdleRPG.UI.HudController.Instance;
                 bool played = hud != null && hud.DebugStepStory(1);
                 Log(played
-                    ? $"Story (K): playing '{hud.DebugStoryName}'."
-                    : "Story (K): nothing played - missing schedule scene, or a scene is already running.");
+                    ? $"Story (Right): playing '{hud.DebugStoryName}'."
+                    : "Story (Right): nothing played - missing schedule scene, or a scene is already running.");
             }
 
             if (keyboard.gKey.wasPressedThisFrame)

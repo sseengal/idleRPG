@@ -465,7 +465,7 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 - Tap while a line is typing: the line completes. Tap again: the next line starts. This applies to both scenes.
 - `SKIP SCENE` ends the whole scene; in scene 2, the wave still waits for the scene to finish.
 - Press `P` to replay the selected scheduled scene over the live fight.
-- Press `J` / `K` to play the previous / next scheduled story scene. These use the real schedule, not a separate test list.
+- Press `Left` / `Right` to play the previous / next scheduled story scene. These use the real schedule, not a separate test list.
 - Background the app for 10 s, return: no stuck wave, no replay, no duplicate actors.
 
 ### After the opening

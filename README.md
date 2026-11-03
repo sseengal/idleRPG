@@ -129,7 +129,7 @@ app sandbox. Set a real `companyName` before store submission (it moves that pat
 | `F` | Buy instant income (gem sink #2) through the real shop path |
 | `M` | Mute / unmute the placeholder SFX |
 | `P` | Replay the current scheduled story scene |
-| `J` / `K` | Play the previous / next scheduled story scene |
+| `Left` / `Right` | Play the previous / next scheduled story scene |
 | `L` | Log live state (stage, economy, rates, run stats, save info) |
 | `F8` / `F9` | **Full reset** (save + backups + PlayerPrefs + scene reload) / delete the save file only |
 

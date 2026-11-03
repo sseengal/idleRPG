@@ -44,7 +44,7 @@ namespace IdleRPG.UI
 
         private StoryPlayer storyPlayer;
         private BattlePageFocus battleFocus;
-        private int debugSceneIndex;
+        private int debugSceneIndex = -1;
 
         public GameManager GameManager => gameManager;
 
@@ -99,11 +99,18 @@ namespace IdleRPG.UI
                 return DebugPlayStory(debugStoryScene);
             }
 
-            debugSceneIndex = (debugSceneIndex + delta) % scenes.Length;
-
             if (debugSceneIndex < 0)
             {
-                debugSceneIndex += scenes.Length;
+                debugSceneIndex = delta > 0 ? 0 : scenes.Length - 1;
+            }
+            else
+            {
+                debugSceneIndex = (debugSceneIndex + delta) % scenes.Length;
+
+                if (debugSceneIndex < 0)
+                {
+                    debugSceneIndex += scenes.Length;
+                }
             }
 
             return DebugPlayStory(scenes[debugSceneIndex]);
