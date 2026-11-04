@@ -207,6 +207,7 @@ debug menus, the console log and the Unity MCP bridge. A manual pass takes ~5 mi
 | `Docs/Story-Greenwake.md` | **CANON**: chapter 1 story: living bloom, Slime King, cost, ending |
 | `Docs/Story-Nodes.md` | node scripts: beats, words, text budget |
 | `Docs/Story-Scenes.md` | how a scene is injected before/after a fight, timed, skipped, resumed (as-built map) |
+| `Docs/Battle-Swirl.md` | the arena whirl that starts a fight: timing, trigger rules, shader knobs, tests |
 | `Docs/Battle-Log.md` | battle-log store, view, colours, typewriter, wrapping, tests |
 | `Docs/Checklist.md` | **master progress record** - what is done, what is left, current step |
 | `Docs/Cleanup-Checks.md` | the before/after gate for any consolidation work (no behaviour change) |

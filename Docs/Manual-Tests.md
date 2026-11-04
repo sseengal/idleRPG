@@ -447,15 +447,19 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 ### Scene 2 — `S02_Rupture`
 - After the slow fade in, the party is still moving right. The slime is nowhere on screen.
 - **Soldier:** “We lost it.”
-- The ground shakes. The arena moves; the HUD and log stay steady.
+- The ground shakes for three seconds. One second in, **Soldier:** “Whoa!!!”. **Soldier:** “Watch out!” follows only after the quake stops. The arena moves; the HUD and log stay steady.
 - **Soldier:** “Watch out!”
 - Two bats fly from right to left at a readable speed and pass the party.
 - The party turns left to track the bats, then turns right again before the dialogue continues.
 - Both bats pass fully off the left edge and are hidden.
-- **Mage:** “They're running from something.”
+- **Mage:** “What was that!?”
 - **Soldier:** “Look out. More incoming!”
 - Two more bats enter and hover ahead of the party.
+- **Mage:** “Bats! What's happening?”
+- **Soldier:** “They are coming right at us!”
 - **Knight:** “Hold formation!”
+- When the scene ends, the arena picture winds into black (~2 s), never unwinds. The fight then fades
+  in (~0.45 s) and combat starts only after the fade. The header and log stay still.
 - Each spoken line waits for a tap. The first tap finishes the typing; the next tap moves on.
 - Each spoken line shows a small ellipsis bubble above that character: Soldier, Mage or Knight.
 - No damage and no HP changes.
@@ -463,7 +467,6 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 
 ### Controls
 - Tap while a line is typing: the line completes. Tap again: the next line starts. This applies to both scenes.
-- `SKIP SCENE` ends the whole scene; in scene 2, the wave still waits for the scene to finish.
 - Press `Left` / `Right` to play the previous / next scheduled story scene. These use the real schedule, not a separate test list.
 - Press a control during a scene: it skips the current scene and starts the requested one after the quick exit fade.
 - Background the app for 10 s, return: no stuck wave, no replay, no duplicate actors.

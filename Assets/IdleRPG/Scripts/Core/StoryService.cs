@@ -84,6 +84,12 @@ namespace IdleRPG.Core
         public int PendingCount => queue.Count + (current.HasValue ? 1 : 0);
 
         /// <summary>
+        /// True when another scene is already queued. The battle swirl uses it to stay out of
+        /// scene-to-scene hand-offs: only the last scene before a wave may whirl.
+        /// </summary>
+        public bool HasQueuedScenes => queue.Count > 0;
+
+        /// <summary>
         /// Unique scenes referenced by the schedule, in schedule order. Dev/test only; one place for the
         /// scene deck, so tests cannot drift from the real placements.
         /// </summary>

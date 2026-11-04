@@ -35,6 +35,11 @@ namespace IdleRPG.UI
         [SerializeField] private FloatingDamageTextPool damageTextPool;
 
         private RenderTexture stageTexture;
+        private RectTransform contentRoot;
+        private Vector2 shakeHome;
+        private float shakeDuration;
+        private float shakeRemaining;
+        private bool shaking;
 
         /// <summary>The live surface, used by overlay effects that need a stage-space point.</summary>
         public static BattleStageSurface Instance { get; private set; }
@@ -43,7 +48,24 @@ namespace IdleRPG.UI
         /// Root the stage content lives under. Authored viewport children are moved here in Awake, so a
         /// runtime view (the story layer) must parent here to draw inside the battle viewport.
         /// </summary>
-        public RectTransform ContentRoot => stageRoot;
+        public RectTransform ContentRoot => contentRoot != null ? contentRoot : stageRoot;
+
+        /// <summary>True while the arena is quaking. A story scene waits for it before it plays more beats.</summary>
+        public bool IsShaking => shaking;
+
+        /// <summary>The viewport RawImage that shows the stage render texture.</summary>
+        public RawImage Display => display;
+
+        /// <summary>Swaps the material on the viewport display. Null restores the default material.</summary>
+        public void SetDisplayMaterial(Material material)
+        {
+            if (display == null)
+            {
+                return;
+            }
+
+            display.material = material;
+        }
 
         private void Awake()
         {
@@ -91,6 +113,57 @@ namespace IdleRPG.UI
         private void LateUpdate()
         {
             RebuildTextureIfNeeded();
+
+            if (!shaking)
+            {
+                return;
+            }
+
+            shakeRemaining -= Time.unscaledDeltaTime;
+
+            if (shakeRemaining <= 0f)
+            {
+                StopShake();
+                return;
+            }
+
+            float falloff = shakeRemaining / shakeDuration;
+            Vector2 offset = UnityEngine.Random.insideUnitCircle * (24f * falloff);
+            contentRoot.anchoredPosition = shakeHome + offset;
+        }
+
+        /// <summary>Shakes the arena content for a scene quake. Skipping or ending restores it.</summary>
+        public void Shake(float duration)
+        {
+            if (contentRoot == null || duration <= 0f)
+            {
+                return;
+            }
+
+            if (!shaking)
+            {
+                shakeHome = contentRoot.anchoredPosition;
+            }
+
+            shakeDuration = duration;
+            shakeRemaining = duration;
+            shaking = true;
+        }
+
+        /// <summary>Stops the quake and puts the arena content back where it was.</summary>
+        public void StopShake()
+        {
+            if (!shaking)
+            {
+                return;
+            }
+
+            shaking = false;
+
+            if (contentRoot != null)
+            {
+                contentRoot.anchoredPosition = shakeHome;
+            }
         }
 
         private void OnDestroy()
@@ -109,6 +182,7 @@ namespace IdleRPG.UI
         /// </summary>
         private void MoveContentIntoStage()
         {
+            EnsureContentRoot();
             Transform displayTransform = display.transform;
 
             // Capture in order before moving. Reparenting removes each child from the viewport, so a
@@ -126,12 +200,38 @@ namespace IdleRPG.UI
 
             for (int i = 0; i < stageChildren.Count; i++)
             {
-                stageChildren[i].SetParent(stageRoot, false);
+                stageChildren[i].SetParent(contentRoot, false);
             }
 
-            if (damageTextPool != null && damageTextPool.transform.parent != stageRoot)
+            if (damageTextPool != null && damageTextPool.transform.parent != contentRoot)
             {
-                damageTextPool.transform.SetParent(stageRoot, false);
+                damageTextPool.transform.SetParent(contentRoot, false);
+            }
+        }
+
+        /// <summary>
+        /// One full-size child holds the arena art. Shaking this child moves the stage inside the
+        /// viewport while the screen-space canvas itself stays attached to its camera.
+        /// </summary>
+        private void EnsureContentRoot()
+        {
+            if (contentRoot != null)
+            {
+                return;
+            }
+
+            GameObject node = new GameObject("StageContent", typeof(RectTransform));
+            contentRoot = node.GetComponent<RectTransform>();
+            contentRoot.SetParent(stageRoot, false);
+            contentRoot.anchorMin = Vector2.zero;
+            contentRoot.anchorMax = Vector2.one;
+            contentRoot.offsetMin = Vector2.zero;
+            contentRoot.offsetMax = Vector2.zero;
+
+            int uiLayer = LayerMask.NameToLayer("UI");
+            if (uiLayer >= 0)
+            {
+                node.layer = uiLayer;
             }
         }
 

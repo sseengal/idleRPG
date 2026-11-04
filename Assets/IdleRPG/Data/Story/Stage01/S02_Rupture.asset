@@ -61,54 +61,54 @@ MonoBehaviour:
     actorId: soldier
     spot: {x: 0.18, y: 0.4}
     duration: 0
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
   - time: 0
     verb: 8
     actorId: mage
     spot: {x: 0.3, y: 0.34}
     duration: 0
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
   - time: 0
     verb: 8
     actorId: knight
     spot: {x: 0.42, y: 0.28}
     duration: 0
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
   - time: 0.1
     verb: 1
     actorId: soldier
     spot: {x: 0.26, y: 0.4}
     duration: 2.8
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
   - time: 0.16
     verb: 1
     actorId: mage
     spot: {x: 0.38, y: 0.34}
     duration: 3
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
   - time: 0.22
     verb: 1
     actorId: knight
     spot: {x: 0.5, y: 0.28}
     duration: 3.2
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
   - time: 2
     verb: 4
@@ -117,212 +117,239 @@ MonoBehaviour:
     duration: 0
     text: We lost it.
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 2.8
+  - time: 2.7
     verb: 9
-    actorId:
+    actorId: 
     spot: {x: 0, y: 0}
-    duration: 1
-    text:
+    duration: 3
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 3.2
+  - time: 3.7
+    verb: 4
+    actorId: soldier
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: Whoa!!!
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 5.8
     verb: 4
     actorId: soldier
     spot: {x: 0, y: 0}
     duration: 0
     text: Watch out!
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 3.8
+  - time: 6.4
     verb: 0
     actorId: batA
     spot: {x: 0.98, y: 0.7}
     duration: 0.2
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 3.9
+  - time: 6.5
     verb: 1
     actorId: batA
     spot: {x: -0.25, y: 0.7}
     duration: 1
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 4
+  - time: 6.6
     verb: 0
     actorId: batB
     spot: {x: 0.98, y: 0.52}
     duration: 0.2
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 4.1
+  - time: 6.7
     verb: 1
     actorId: batB
     spot: {x: -0.25, y: 0.52}
     duration: 1
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 4.5
+  - time: 7.1
     verb: 7
     actorId: soldier
     spot: {x: 0, y: 0}
     duration: 0
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 1
-  - time: 4.6
+  - time: 7.2
     verb: 7
     actorId: mage
     spot: {x: 0, y: 0}
     duration: 0
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 1
-  - time: 4.7
+  - time: 7.3
     verb: 7
     actorId: knight
     spot: {x: 0, y: 0}
     duration: 0
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 1
-  - time: 5
+  - time: 7.6
     verb: 5
     actorId: batA
     spot: {x: 0, y: 0}
     duration: 0
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 5.1
+  - time: 7.7
     verb: 7
     actorId: soldier
     spot: {x: 0, y: 0}
     duration: 0
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 5.2
+  - time: 7.8
     verb: 5
     actorId: batB
     spot: {x: 0, y: 0}
     duration: 0
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 5.2
+  - time: 7.8
     verb: 7
     actorId: mage
     spot: {x: 0, y: 0}
     duration: 0
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 5.3
+  - time: 7.9
     verb: 7
     actorId: knight
     spot: {x: 0, y: 0}
     duration: 0
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 5.6
+  - time: 8.2
     verb: 4
     actorId: mage
     spot: {x: 0, y: 0}
     duration: 0
-    text: They're running from something.
+    text: What was that!?
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 6.2
+  - time: 8.8
     verb: 4
     actorId: soldier
     spot: {x: 0, y: 0}
     duration: 0
     text: Look out. More incoming!
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 6.4
+  - time: 9
     verb: 0
     actorId: batC
     spot: {x: 0.98, y: 0.58}
     duration: 0.2
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 6.5
+  - time: 9.1
     verb: 1
     actorId: batC
     spot: {x: 0.78, y: 0.58}
     duration: 0.55
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 6.6
+  - time: 9.2
     verb: 0
     actorId: batD
     spot: {x: 0.98, y: 0.2}
     duration: 0.2
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 6.7
+  - time: 9.3
     verb: 1
     actorId: batD
     spot: {x: 0.84, y: 0.2}
     duration: 0.55
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 7.2
+  - time: 10
+    verb: 4
+    actorId: mage
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: Bats! What's happening?
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 10.5
+    verb: 4
+    actorId: soldier
+    spot: {x: 0, y: 0}
+    duration: 0
+    text: They are coming right at us!
+    bubble: 0
+    clip: 
+    faceLeft: 0
+  - time: 11
     verb: 3
     actorId: knight
     spot: {x: 0, y: 0}
     duration: 0
-    text:
+    text: 
     bubble: 2
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 7.3
+  - time: 11.1
     verb: 4
     actorId: knight
     spot: {x: 0, y: 0}
     duration: 0
     text: Hold formation!
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0
-  - time: 8
+  - time: 11.8
     verb: 6
-    actorId:
+    actorId: 
     spot: {x: 0, y: 0}
     duration: 0
-    text:
+    text: 
     bubble: 0
-    clip:
+    clip: 
     faceLeft: 0

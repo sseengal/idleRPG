@@ -19,10 +19,12 @@ namespace IdleRPG.UI
     public sealed class StoryPlayer : MonoBehaviour
     {
         private const float DefaultFadeSeconds = 0.35f;
+        private const float BattleRevealSeconds = 0.45f;
 
         private GameManager manager;
         private StoryLayer layer;
         private StageTransition transition;
+        private BattleSwirl swirl;
         private BattlePageFocus focus;
         private CombatLogUI storyLog;
         private StorySceneDef scene;
@@ -34,6 +36,8 @@ namespace IdleRPG.UI
         private bool pausedByScene;
         private bool waitingForContinue;
         private bool pendingEnd;
+        private bool swirlExit;
+        private bool suppressWhirlOnce;
 
         private enum Phase
         {
@@ -68,11 +72,21 @@ namespace IdleRPG.UI
             GameObject node = UiRuntime.CreateNode("StoryLayer", stageRoot);
             node.transform.SetAsLastSibling();
             layer = node.AddComponent<StoryLayer>();
-            layer.Build(stageRoot, overlayRoot, Advance, Skip);
+            layer.Build(stageRoot, overlayRoot, Advance);
 
             // Created after the layer, so the fade draws over actors and damage numbers. It is clipped to
             // the arena render texture, so the HUD can never dim with it.
             transition = StageTransition.Create(stageRoot);
+
+            // The battle swirl drives the arena display material. It needs no UI of its own, so it
+            // lives on this object next to the projector.
+            swirl = gameObject.AddComponent<BattleSwirl>();
+
+            if (!swirl.Setup(BattleStageSurface.Instance))
+            {
+                swirl = null;
+            }
+
             return layer.enabled;
         }
 
@@ -94,6 +108,7 @@ namespace IdleRPG.UI
             nextBeat = 0;
             waitingForContinue = false;
             pendingEnd = false;
+            swirlExit = false;
             phase = Phase.Opening;
 
             pausedByScene = scene.PauseBattle && manager != null && manager.Combat != null;
@@ -143,8 +158,9 @@ namespace IdleRPG.UI
             storyLog?.SetStoryWaiting(false);
 
             // The scene clock was frozen at the line's timestamp. Move it to the next beat so the
-            // next movement or line starts immediately instead of waiting out the old gap.
-            if (nextBeat < scene.Beats.Length)
+            // next movement or line starts immediately instead of waiting out the old gap. A quake must
+            // play out in real time, so a tap cannot jump the clock while the arena is shaking.
+            if (nextBeat < scene.Beats.Length && (layer == null || !layer.IsShaking))
             {
                 clock = Mathf.Max(clock, scene.Beats[nextBeat].time);
             }
@@ -347,6 +363,12 @@ namespace IdleRPG.UI
             HudController.Instance?.CompleteStoryText();
 
             phase = Phase.Ending;
+            swirlExit = false;
+
+            if (TrySwirlExit())
+            {
+                return;
+            }
 
             if (transition != null)
             {
@@ -356,6 +378,52 @@ namespace IdleRPG.UI
             {
                 OnCoveredForExit();
             }
+        }
+
+        /// <summary>
+        /// A scene that ends into a fight gets the old-school whirl instead of a fade. A scene followed by
+        /// another scene keeps the fade, so the whirl can never play between two scenes.
+        /// </summary>
+        private bool TrySwirlExit()
+        {
+            if (swirl == null)
+            {
+                return false;
+            }
+
+            if (suppressWhirlOnce)
+            {
+                suppressWhirlOnce = false;
+                return false;
+            }
+
+            // A wave must still be waiting. A scene replayed from the debug deck runs over a live wave,
+            // so it must not whirl; only the scene that releases the wave may.
+            if (manager == null || manager.Story == null || !manager.Story.IsHolding)
+            {
+                Debug.Log($"[StoryPlayer] '{scene?.Id}' faded out: no wave was waiting, so no battle whirl.");
+                return false;
+            }
+
+            if (manager.Story.HasQueuedScenes)
+            {
+                return false;
+            }
+
+            if (transition != null)
+            {
+                // The scene may still be half faded. Clear the curtain so the whirl starts from the picture.
+                transition.Reveal(0f, null);
+            }
+
+            swirlExit = swirl.Play(OnCoveredForExit);
+            return swirlExit;
+        }
+
+        /// <summary>Dev only: the next scene end is a test jump, so the battle whirl must not play.</summary>
+        public void SuppressNextWhirl()
+        {
+            suppressWhirlOnce = true;
         }
 
         /// <summary>Black is on screen: drop the scene, then hand off to the next scene while black.</summary>
@@ -385,6 +453,39 @@ namespace IdleRPG.UI
 
             if (phase != Phase.Idle)
             {
+                // A new scene took the picture. Drop the whirl so its arena is not left black.
+                if (swirlExit)
+                {
+                    swirlExit = false;
+                    swirl?.Release();
+                }
+
+                return;
+            }
+
+            if (swirlExit)
+            {
+                swirlExit = false;
+
+                // The arena is black from the whirl. Hold it with the curtain, put the picture back, then
+                // fade the fight in. Combat stays paused until the fade is finished, so the wave is seen
+                // standing still before the first swing.
+                if (transition != null)
+                {
+                    transition.SnapCovered();
+                }
+
+                swirl?.Release();
+
+                if (transition != null)
+                {
+                    transition.Reveal(BattleRevealSeconds, ResumeFighting);
+                }
+                else
+                {
+                    ResumeFighting();
+                }
+
                 return;
             }
 
@@ -401,6 +502,17 @@ namespace IdleRPG.UI
             }
         }
 
+        /// <summary>Combat may run once the player can see it.</summary>
+        private void ResumeFighting()
+        {
+            if (pausedByScene && manager != null && manager.Combat != null)
+            {
+                manager.Combat.Paused = false;
+            }
+
+            pausedByScene = false;
+        }
+
         private static bool WasAdvancePressed()
         {
             Keyboard keyboard = Keyboard.current;
@@ -409,6 +521,8 @@ namespace IdleRPG.UI
 
         private void OnDestroy()
         {
+            swirl?.Release();
+
             if (pausedByScene && manager != null && manager.Combat != null)
             {
                 manager.Combat.Paused = false;

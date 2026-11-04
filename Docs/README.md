@@ -2,7 +2,7 @@
 
 > **Everything that describes this game lives here.** One folder, one source of truth per topic.
 > Root `README.md` is the quick start (clone → open → play); everything deeper is in this folder.
-> Last restructured: Step 11e (2026-09-21); Art-Pipeline.md added 2026-09-26; Launch-Plan.md added 2026-10-11; Character-Catalog.md, Stage-Ladder.md and Ability-Map.md added 2026-10-11; UI-Layout.md added 2026-10-14; Combat-Sequencing.md added 2026-10-24; doc consolidation pass 2026-10-24 (one current page per topic); Foundation.md added 2026-10-28; Story canon + node scripts + scene injection system added 2026-10-29; Battle-Log.md added 2026-10-31; Story-Greenwake.md chapter bible added 2026-11-02.
+> Last restructured: Step 11e (2026-09-21); Art-Pipeline.md added 2026-09-26; Launch-Plan.md added 2026-10-11; Character-Catalog.md, Stage-Ladder.md and Ability-Map.md added 2026-10-11; UI-Layout.md added 2026-10-14; Combat-Sequencing.md added 2026-10-24; doc consolidation pass 2026-10-24 (one current page per topic); Foundation.md added 2026-10-28; Story canon + node scripts + scene injection system added 2026-10-29; Battle-Log.md added 2026-10-31; Story-Greenwake.md chapter bible added 2026-11-02; Battle-Swirl.md added 2026-11-04.
 
 ---
 
@@ -18,6 +18,7 @@ decision was reached. A replaced page must carry a status line at the top and po
 | Greenwake chapter story: bloom, Slime King, cost, ending | **`Story-Greenwake.md`** | — |
 | Node scripts: beats and words | **`Story-Nodes.md`** | — |
 | Story scene injection: cues, wave rules, queue, skip | **`Story-Scenes.md`** | — (old one-node plan replaced 29 Oct 2026) |
+| Battle swirl: arena whirl, timing, trigger gate, knobs | **`Battle-Swirl.md`** | — |
 | Battle log: store, view, colours, typewriter, layout | **`Battle-Log.md`** | — |
 | Ability status: what works, what is open | **`Ability-Progress.md`** | — |
 | Ability design decisions | **`Ability-Plan.md`** (decisions) | built behaviour lives in `Combat-Sequencing.md` |
@@ -37,6 +38,7 @@ the code wins and the page is fixed the same day.
 | What actually happens in Greenwake, and why does the shard matter? | **`Story-Greenwake.md`** (locked chapter story: time leak, living bloom, Slime King, theft) |
 | What happens in each node, and what are the exact words? | **`Story-Nodes.md`** (node 1 script, text budget, 3-step add-a-scene test) |
 | How is a story scene injected before or after a fight? | **`Story-Scenes.md`** (system: cues, wave rules, random, priority, queue, skip, resume) |
+| How does a fight start after a story scene? | **`Battle-Swirl.md`** (whirl → black → fade → combat unpauses) |
 | How does the battle log store, colour and type text? | **`Battle-Log.md`** (store, view, 48 VT323, gold names, typewriter, wrapping) |
 | How does a fight reach the screen, and how do abilities work? | **`Combat-Sequencing.md`** (the current page: lane, art-to-time, casts, enemy timing) |
 | What was the original combat research and the build log? | `Combat-Presentation.md` (23-24 Oct 2026 record; current behaviour is in `Combat-Sequencing.md`) |
@@ -92,6 +94,7 @@ Docs/
   Story-Greenwake.md   <- CANON: chapter 1 story: bloom, Slime King, cost, ending
   Story-Nodes.md       <- node scripts: beats, words, text budget
   Story-Scenes.md      <- how a scene is injected, timed, skipped, resumed
+  Battle-Swirl.md      <- the arena whirl that starts a fight: timing, gate, knobs
   Battle-Log.md        <- log store, view, colours, typewriter, wrapping
   Camp.md              <- the wave interlude: Short/Long Rest, Train, token, save, risks
   Checklist.md         <- master status: what is done, what is left

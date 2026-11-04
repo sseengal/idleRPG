@@ -86,7 +86,9 @@ Rules:
 - `Enter` start side is inferred: `spot.x < 0.5` walks in from the left edge, else from the right.
 - `Place` shows an actor at `spot` without an edge walk. Use it when a scene continues from the last frame.
 - `Face` flips an actor to look left or right without moving it. `faceLeft = true` looks left.
-- `Shake` shakes the arena stage for `duration` seconds. It restores the stage position on end, skip and cap.
+- `Shake` shakes the arena content for `duration` seconds. It restores the content on end, skip and cap.
+  While the arena quakes, a tap cannot push the scene clock forward, so a line placed after the quake
+  cannot play early. A line placed inside the quake window plays at its own time.
 - `Say` stores `displayName` as the speaker and `text` as the words. The log colours the name gold
   and types the words at 45 characters per second. Every spoken line also raises a small ellipsis bubble
   over the speaker, so the speaking character is visible without reading the log. The scene never writes
@@ -403,14 +405,18 @@ If step 8 needs code, the structure is wrong. Fix the structure, not the scene.
 
 - the party is still moving right; the three walk starts are staggered so the animation is not in lockstep; the slime is gone;
 - Soldier: “We lost it.”;
-- the ground shakes;
+- the ground shakes; Soldier: “Whoa!!!”; the scene holds until the quake stops;
 - Soldier: “Watch out!”;
 - two bats fly past from right to left and leave the screen;
 - the party turns left to track them, then turns right again;
-- Mage: “They're running from something.”;
+- Mage: “What was that!?”;
 - Soldier: “Look out. More incoming!”;
 - two more bats enter and stop ahead of the party;
+- Mage: “Bats! What's happening?”;
+- Soldier: “They are coming right at us!”;
 - Knight: “Hold formation!”;
+- when the scene ends, the arena picture winds into black over ~2 s, the fight fades in over ~0.45 s,
+  and combat starts only after that fade (the HUD stays still; full page in `Battle-Swirl.md`);
 - wave 1 starts with two bats.
 
 ### Testing scenes
@@ -493,6 +499,7 @@ same wave today; keep the order anyway.
 | `Scripts/UI/Story/StoryPlayer.cs` | Active-time clock, beat dispatch, skip, hard cap, black scene hand-off. |
 | `Scripts/UI/Story/StoryLayer.cs` | Actor images on demand, one bubble, skip overlay, stage shake, hide/restore board and enemy stack. |
 | `Scripts/UI/Story/StageTransition.cs` | Arena-only black cover/reveal; per-scene duration; interruptible fade. |
+| `Scripts/UI/BattleSwirl.cs` | Whirl shader on the arena display: winds the fight picture into black when a scene ends. The curtain holds the black, the fight fades in, then combat starts. The HUD never moves. Full page: `Battle-Swirl.md`. |
 | `Scripts/UI/BattlePageFocus.cs` | Log grows; ability band fades out and becomes inert. |
 | `Scripts/UI/HudController.cs` | Creates `StoryPlayer`, binds it to `StoryService`, owns `CompleteStoryText`. |
 | `Scripts/Core/BattleLog.cs` | `Dialogue` kind, `Say(speaker, line)`, `Speaker` field. |

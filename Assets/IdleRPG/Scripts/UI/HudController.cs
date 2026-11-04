@@ -99,6 +99,7 @@ namespace IdleRPG.UI
                 // scenes first, otherwise the service would start its own next scene after the skip.
                 gameManager?.Story?.ClearPending();
                 pendingDebugStep = delta;
+                storyPlayer.SuppressNextWhirl();
                 storyPlayer.Skip();
                 return true;
             }

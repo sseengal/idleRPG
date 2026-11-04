@@ -151,22 +151,27 @@ The first wave is **bats**. `S02_Rupture` establishes the bat panic; wave 1 foll
 |---|---|---|---|
 | 1 | Moving | The party is already walking right; the slime is absent | — |
 | 2 | Lost | The party stops. The forest is empty | **Soldier:** We lost it. |
-| 3 | Quake | The ground shakes. No character explains it | — |
+| 3 | Quake | The ground shakes. The Soldier reacts; the scene waits for the quake to stop | **Soldier:** Whoa!!! |
 | 4 | Warning | The Soldier sees movement before the bats arrive | **Soldier:** Watch out! |
 | 5 | Flight | Bat A and Bat B cross from right to left, then leave the screen | — |
-| 6 | Cause | The Mage reads the panic, not an attack | **Mage:** They're running from something. |
+| 6 | Cause | The Mage reads the panic, not an attack | **Mage:** What was that!? |
 | 7 | More | The Soldier sees the next threat | **Soldier:** Look out. More incoming! |
 | 8 | Hover | Bat C and Bat D enter and stop ahead of the party | — |
-| 9 | Hold | The Knight gives the order | **Knight:** Hold formation! |
-| 10 | Fight | Wave 1 begins with two bats | — |
+| 9 | Alarm | The Mage sees the bats turn on the party | **Mage:** Bats! What's happening? |
+| 10 | Charge | The Soldier calls the attack | **Soldier:** They are coming right at us! |
+| 11 | Hold | The Knight gives the order | **Knight:** Hold formation! |
+| 12 | Fight | Wave 1 begins with two bats | — |
 
 ### What the log shows
 
 ```
 Soldier: We lost it.
+Soldier: Whoa!!!
 Soldier: Watch out!
-Mage: They're running from something.
+Mage: What was that!?
 Soldier: Look out. More incoming!
+Mage: Bats! What's happening?
+Soldier: They are coming right at us!
 Knight: Hold formation!
 ```
 
@@ -177,7 +182,7 @@ Notes:
 - **Two pass; two hover.** The flyers show the panic. The two that enter after “More incoming!” are the pair that becomes wave 1.
 - **The party tracks the fliers.** They face the bats as they pass behind, then face right again before the dialogue continues.
 - **No shard, no king, no root explanation.** The image and the lines do the work.
-- **No damage.** The shake is visual. The first hit happens in combat.
+- **The quake is camera shake.** It runs for three seconds or until the scene is skipped; it deals no damage.
 - **No timing target.** Adjust the beat spacing in the asset; do not rewrite this page around a total runtime.
 
 ---

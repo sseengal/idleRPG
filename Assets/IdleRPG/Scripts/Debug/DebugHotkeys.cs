@@ -152,6 +152,23 @@ namespace IdleRPG.Debugging
                     : "Story (Right): nothing played - missing schedule scene, or a scene is already running.");
             }
 
+            // TEMP: replay the battle whirl on the live arena, so the effect can be judged at will.
+            if (keyboard.yKey.wasPressedThisFrame)
+            {
+                IdleRPG.UI.BattleSwirl swirl = FindAnyObjectByType<IdleRPG.UI.BattleSwirl>();
+
+                if (swirl == null)
+                {
+                    Log("Battle whirl (Y): no swirl component (the arena surface is missing).");
+                }
+                else
+                {
+                    Log(swirl.Play(swirl.Release)
+                        ? "Battle whirl (Y): playing."
+                        : "Battle whirl (Y): already running, or the whirl is disabled.");
+                }
+            }
+
             if (keyboard.gKey.wasPressedThisFrame)
             {
                 gameManager.Economy.AddGold(goldGrantAmount);

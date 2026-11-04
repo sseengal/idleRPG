@@ -8,7 +8,7 @@ using IdleRPG.Data;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// The screen a story scene plays on: actor images, one speech bubble, one skip overlay.
+    /// The screen a story scene plays on: actor images, one speech bubble, one tap-to-advance overlay.
     ///
     /// ELI5: the stage hands and the bubble. <see cref="StoryPlayer"/> says "Knight walks to here" or
     /// "Mage shows a question mark"; this class moves the pictures. It owns no timing and no game state.
@@ -53,9 +53,7 @@ namespace IdleRPG.UI
         private TextMeshProUGUI bubbleText;
         private BubbleKind bubbleKind;
         private GameObject skipRoot;
-        private Button skipButton;
         private Action advanceAction;
-        private Action skipAction;
 
         private StorySceneDef scene;
         private bool begun;
@@ -65,8 +63,8 @@ namespace IdleRPG.UI
         private bool boardWasActive;
         private bool enemiesWereActive;
 
-        /// <summary>Builds the bubble and the skip overlay. Actor views are created when a scene needs them.</summary>
-        public void Build(RectTransform stageRoot, RectTransform overlayRoot, Action onAdvance, Action onSkip)
+        /// <summary>Builds the bubble and the tap-to-advance surface. Actor views are created when a scene needs them.</summary>
+        public void Build(RectTransform stageRoot, RectTransform overlayRoot, Action onAdvance)
         {
             root = transform as RectTransform;
 
@@ -83,7 +81,7 @@ namespace IdleRPG.UI
             root.SetAsLastSibling();
 
             BuildBubble();
-            BuildSkip(overlayRoot, onAdvance, onSkip);
+            BuildSkip(overlayRoot, onAdvance);
         }
 
         /// <summary>Prepares one scene: binds the art, hides every actor and dims the fight behind it.</summary>
@@ -98,10 +96,7 @@ namespace IdleRPG.UI
 
             HideBubble();
 
-            if (shaking)
-            {
-                StopShake();
-            }
+            StopShake();
 
             shakeHome = shakeRoot != null ? shakeRoot.anchoredPosition : Vector2.zero;
             EnsureActors(scene.Actors.Length);
@@ -134,11 +129,6 @@ namespace IdleRPG.UI
                 skipRoot.SetActive(true);
             }
 
-            if (skipButton != null)
-            {
-                skipButton.gameObject.SetActive(scene.Skippable);
-            }
-
             begun = true;
         }
 
@@ -167,6 +157,11 @@ namespace IdleRPG.UI
 
         /// <summary>True while a scene owns the layer (used by tests and the player).</summary>
         public bool IsBegun => begun;
+
+        /// <summary>True while the arena is quaking. The battle surface owns the quake timer.</summary>
+        public bool IsShaking => BattleStageSurface.Instance != null
+            ? BattleStageSurface.Instance.IsShaking
+            : shaking;
 
         /// <summary>Walks an actor in from the nearest screen edge to <paramref name="spot"/>.</summary>
         public void Enter(int actorIndex, Vector2 spot, float duration)
@@ -282,9 +277,15 @@ namespace IdleRPG.UI
             view.Animator.FacingLeft = faceLeft;
         }
 
-        /// <summary>Shakes the arena stage, not the HUD. The position is always restored.</summary>
+        /// <summary>Shakes the arena content, not the HUD. The content is always restored.</summary>
         public void Shake(float duration)
         {
+            if (BattleStageSurface.Instance != null)
+            {
+                BattleStageSurface.Instance.Shake(duration);
+                return;
+            }
+
             if (shakeRoot == null || duration <= 0f)
             {
                 return;
@@ -458,6 +459,7 @@ namespace IdleRPG.UI
         private void StopShake()
         {
             shaking = false;
+            BattleStageSurface.Instance?.StopShake();
 
             if (shakeRoot != null)
             {
@@ -565,10 +567,9 @@ namespace IdleRPG.UI
             bubble.gameObject.SetActive(false);
         }
 
-        private void BuildSkip(RectTransform overlayRoot, Action onAdvance, Action onSkip)
+        private void BuildSkip(RectTransform overlayRoot, Action onAdvance)
         {
             advanceAction = onAdvance;
-            skipAction = onSkip;
 
             if (overlayRoot == null)
             {
@@ -588,22 +589,12 @@ namespace IdleRPG.UI
             button.transition = Selectable.Transition.None;
             button.onClick.AddListener(AdvanceClicked);
 
-            // The skip button sits above the full-screen advance surface, so it wins its own taps.
-            skipButton = UiRuntime.CreateButton(skipRoot.transform, "SkipScene", "SKIP SCENE",
-                new Vector2(0.72f, 0.90f), new Vector2(0.96f, 0.975f), SkipClicked,
-                UiTheme.PanelLight, null, UiType.Role.Small);
-
             skipRoot.SetActive(false);
         }
 
         private void AdvanceClicked()
         {
             advanceAction?.Invoke();
-        }
-
-        private void SkipClicked()
-        {
-            skipAction?.Invoke();
         }
 
         private void HideBattleViews()
