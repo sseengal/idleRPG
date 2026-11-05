@@ -118,15 +118,24 @@ Shader "IdleRPG/UI Whirl"
                 angle += (_Radius - min(radius, _Radius)) * _Twist * arms * progress;
                 uv = float2(cos(angle), sin(angle)) * radius;
 
-                // Pull everything into the centre. At progress 1 no pixel is inside the picture.
-                uv /= (1.0001 - progress);
+                // Pull everything into the centre. The cube curve keeps the picture readable for most of
+                // the beat and drains it at the end. At progress 1 no pixel is inside the picture.
+                float pull = progress * progress * progress;
+                uv /= max(0.0001, 1.0 - pull);
                 uv += 0.5;
 
-                // The texture clamps, so far samples smear the edge inward instead of cutting the corners.
-                fixed4 color = IN.color * tex2D(_MainTex, uv);
+                // Samples that fall outside the picture are the void, so the picture is gone at progress 1.
+                fixed4 color = IN.color;
 
-                // Drain to black only at the very end, so the swirl reads at full brightness for most of the beat.
-                color.rgb *= 1.0 - smoothstep(0.85, 1.0, progress);
+                if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0)
+                {
+                    color.rgb = 0.0;
+                    color.a = 1.0;
+                }
+                else
+                {
+                    color *= tex2D(_MainTex, uv);
+                }
 
                 #ifdef UNITY_UI_CLIP_RECT
                 color.a *= UnityGet2DClipping(IN.worldPosition.xy, _ClipRect);

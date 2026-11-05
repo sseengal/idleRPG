@@ -15,7 +15,7 @@ Status: **built 2026-11-04**, in use at the story → wave hand-off.
 
 | Piece | File | Job |
 |---|---|---|
-| Shader | `Assets/IdleRPG/Art/Shaders/UI_Whirl.shader` | Polar twist + pull to centre + drain to black. UI pass, so it obeys the viewport's `RectMask2D` clip. |
+| Shader | `Assets/IdleRPG/Art/Shaders/UI_Whirl.shader` | Polar twist + pull to centre. Pixels that fall outside the picture are black, so the frame drains as it winds. UI pass, so it obeys the viewport's `RectMask2D` clip. |
 | Material | `Assets/IdleRPG/Resources/UI_Whirl.mat` | The knobs. Loaded by name, so the shader is always in the build. |
 | Driver | `Assets/IdleRPG/Scripts/UI/BattleSwirl.cs` | Puts the material on the arena display and drives `_Progress` 0 → 1 over `coverSeconds`. |
 | Arena hook | `Assets/IdleRPG/Scripts/UI/BattleStageSurface.cs` | `Display` (the RawImage that shows the stage render texture) and `SetDisplayMaterial(...)`. |
@@ -30,7 +30,7 @@ picture itself. That is why there is no hitch and the fight can be swapped behin
 
 | Time | What happens | Code |
 |---|---|---|
-| 0.00 – 2.00 s | The arena winds into a spiral, then drains to black. Full brightness for most of the beat; the dim runs `0.85 → 1.0` of progress. | `BattleSwirl.Update` → `_Progress` |
+| 0.00 – 2.00 s | The arena winds into a spiral while it pulls into the centre; the frame drains out to black. | `BattleSwirl.Update` → `_Progress` |
 | at 2.00 s | Black. The stage curtain snaps up (`SnapCovered`) and the picture is restored behind it (`Release`). | `StoryPlayer.OnCoveredForExit` |
 | same frame | The scene is dropped and the wave is released, so the enemies spawn **behind the black**. | `StoryPlayer` hand-off |
 | 0.00 – 0.45 s after | The fight fades in from black. The enemies stand still. | `StageTransition.Reveal` |
@@ -65,7 +65,9 @@ The plain fade stays for every other exit.
 | `_Radius` | `UI_Whirl.mat` | **0.85** | Radius where the wind starts to weaken toward the rim. |
 | fade-in | `StoryPlayer.BattleRevealSeconds` | **0.45** | Fade from black to the fight. |
 
-Drain-to-black window: `smoothstep(0.85, 1.0, progress)` in the shader.
+Black is not a brightness ramp. The shader draws black for every sample that falls outside the picture,
+and the pull (`uv /= 1 − progress³`) empties the frame only near the end. Measured coverage on a flat
+test picture: **100 % at 0, 82 % at 0.25, 77 % at 0.5, 34 % at 0.75, 7 % at 0.9, 0 % at 1**.
 
 ## 5. Testing
 
@@ -75,8 +77,8 @@ Drain-to-black window: `smoothstep(0.85, 1.0, progress)` in the shader.
   scene 2 only.
 - If it does not play, the console says why on that frame:
   `[StoryPlayer] '<scene>' faded out: no wave was waiting, so no battle whirl.`
-- Shader check without playing: blit the material to a RenderTexture at `_Progress` 0 / 0.5 / 0.9 / 1.
-  Expect a whole picture at 0 and 0.5, a dimmed picture at 0.9, black at 1.
+- Shader check without playing: blit the material to a RenderTexture at `_Progress` 0 / 0.5 / 1.
+  Expect the whole picture at 0, a wound picture with black at the rim at 0.5, and black at 1.
 
 ## 6. Rules that keep it correct
 
