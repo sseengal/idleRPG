@@ -85,7 +85,8 @@ namespace IdleRPG.Data
         [SerializeField] private List<AdPlacementDef> adPlacements = new List<AdPlacementDef>
         {
             new AdPlacementDef(AdPlacementId.GoldBoost, 5, 300f),
-            new AdPlacementDef(AdPlacementId.DoubleOffline, 3, 30f)
+            new AdPlacementDef(AdPlacementId.DoubleOffline, 3, 30f),
+            new AdPlacementDef(AdPlacementId.RunRevive, 3, 300f)
         };
 
         [Tooltip("Delay between clearing a wave and spawning the next, in seconds.")]
@@ -189,6 +190,14 @@ namespace IdleRPG.Data
         [Tooltip("Classic prestige loop: hero ATK/HP/DEF levels reset to 0 on ascension. " +
                  "Off = hero levels are permanent (tokens become a pure bonus layer).")]
         [SerializeField] private bool resetHeroLevelsOnAscension = true;
+
+        // ------------------------------------------------------------------
+        // Run end (pivot)
+        // ------------------------------------------------------------------
+        [Header("Run End (pivot)")]
+        [Tooltip("When on, a party wipe ENDS the run: bank Perk Points + show the run-over card and WAIT for " +
+                 "NEXT RUN (no auto-resume). Off restores the legacy one-stage bounce.")]
+        [SerializeField] private bool runEndsOnDeath = true;
 
         // ------------------------------------------------------------------
         // Stat upgrades

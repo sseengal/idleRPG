@@ -53,6 +53,11 @@ namespace IdleRPG.Data
                 }
             }
 
+            if (placementId == AdPlacementId.RunRevive)
+            {
+                return new AdPlacementDef(AdPlacementId.RunRevive, 3, 300f);
+            }
+
             return placementId == AdPlacementId.GoldBoost
                 ? new AdPlacementDef(AdPlacementId.GoldBoost, 5, 300f)
                 : new AdPlacementDef(AdPlacementId.DoubleOffline, 3, 30f);
@@ -77,6 +82,9 @@ namespace IdleRPG.Data
         public float PrestigeExponent => Mathf.Max(0f, prestigeExponent);
 
         public int MinStageToAscend => Mathf.Max(1, minStageToAscend);
+
+        /// <summary>When on, a wipe ends the run (pivot). Off keeps the legacy one-stage bounce.</summary>
+        public bool RunEndsOnDeath => runEndsOnDeath;
 
         public float OfflineCapSeconds => Mathf.Max(0f, offlineCapSeconds);
 

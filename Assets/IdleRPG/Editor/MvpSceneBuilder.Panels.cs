@@ -96,7 +96,7 @@ namespace IdleRPG.EditorTools
             PinBar(bar.rectTransform, top: false, NavBandHeight, UiSpace.ScreenMargin, UiSpace.Base);
             ScreenController controller = bar.gameObject.AddComponent<ScreenController>();
 
-            string[] labels = { "BATTLE", "PARTY", "UPGRADES", "ASCEND", "SHOP" };
+            string[] labels = { "BATTLE", "PARTY", "UPGRADES", "PERKS", "SHOP" };
             Button[] buttons = new Button[labels.Length];
             Image[] backgrounds = new Image[labels.Length];
             TextMeshProUGUI[] buttonLabels = new TextMeshProUGUI[labels.Length];
@@ -299,7 +299,7 @@ namespace IdleRPG.EditorTools
             UiFactory.Stretch(panel.GetComponent<RectTransform>());
             AscensionPanelUI ui = panel.AddComponent<AscensionPanelUI>();
 
-            TextMeshProUGUI yieldLabel = UiFactory.Text("Yield", panel.transform, "Ascend for 0 tokens", UiType.Role.Section,
+            TextMeshProUGUI yieldLabel = UiFactory.Text("Yield", panel.transform, "End Run for 0 Perk Points", UiType.Role.Section,
                 TextAlignmentOptions.Center, TextColor);
             UiFactory.Anchor(yieldLabel.rectTransform, new Vector2(0.03f, BandTitleBottom), new Vector2(0.97f, BandTop));
 
@@ -307,7 +307,7 @@ namespace IdleRPG.EditorTools
                 TextAlignmentOptions.Center, DimTextColor);
             UiFactory.Anchor(requirementLabel.rectTransform, new Vector2(0.03f, BandSubLineBottom), new Vector2(0.97f, BandTitleBottom));
 
-            Button ascendButton = UiFactory.Button("AscendButton", panel.transform, "ASCEND", "ui_button_gold", UiType.Role.Section, TextColor, null);
+            Button ascendButton = UiFactory.Button("AscendButton", panel.transform, "END RUN", "ui_button_gold", UiType.Role.Section, TextColor, null);
             UiFactory.Anchor(ascendButton.GetComponent<RectTransform>(), new Vector2(0.24f, BandActionBottom), new Vector2(0.76f, BandActionTop));
             TextMeshProUGUI ascendButtonLabel = ascendButton.GetComponentInChildren<TextMeshProUGUI>();
 
@@ -340,7 +340,7 @@ namespace IdleRPG.EditorTools
             return panel;
         }
 
-        /// <summary>How many ASCEND rows the panel needs: token-priced upgrades only (B7 S4).</summary>
+        /// <summary>How many PERKS rows the panel needs: perk-point-priced upgrades only (B7 S4).</summary>
         private static int TokenRowCount(List<PrestigeUpgradeData> prestigeUpgrades)
         {
             int count = 0;

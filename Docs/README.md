@@ -2,7 +2,7 @@
 
 > **Everything that describes this game lives here.** One folder, one source of truth per topic.
 > Root `README.md` is the quick start (clone → open → play); everything deeper is in this folder.
-> Last restructured: Step 11e (2026-09-21); Art-Pipeline.md added 2026-09-26; Launch-Plan.md added 2026-10-11; Character-Catalog.md, Stage-Ladder.md and Ability-Map.md added 2026-10-11; UI-Layout.md added 2026-10-14; Combat-Sequencing.md added 2026-10-24; doc consolidation pass 2026-10-24 (one current page per topic); Foundation.md added 2026-10-28; Story canon + node scripts + scene injection system added 2026-10-29; Battle-Log.md added 2026-10-31; Story-Greenwake.md chapter bible added 2026-11-02; Battle-Swirl.md added 2026-11-04.
+> Last restructured: Step 11e (2026-09-21); Art-Pipeline.md added 2026-09-26; Launch-Plan.md added 2026-10-11; Character-Catalog.md, Stage-Ladder.md and Ability-Map.md added 2026-10-11; UI-Layout.md added 2026-10-14; Combat-Sequencing.md added 2026-10-24; doc consolidation pass 2026-10-24 (one current page per topic); Foundation.md added 2026-10-28; Story canon + node scripts + scene injection system added 2026-10-29; Battle-Log.md added 2026-10-31; Story-Greenwake.md chapter bible added 2026-11-02; Battle-Swirl.md added 2026-11-04; Run-Loop.md (CANON core loop: automated battler + run-end meta) added 2026-11-07.
 
 ---
 
@@ -13,6 +13,7 @@ decision was reached. A replaced page must carry a status line at the top and po
 
 | Topic | Current page | Kept as the record |
 |---|---|---|
+| Core loop: automated battler, run end, meta progression | **`Run-Loop.md`** | `Game-Vision.md` (story-campaign vision; now the flavor wrapper) |
 | Fight order, strip choice, timings, enemy cast timing | **`Combat-Sequencing.md`** | `Combat-Presentation.md` (23 Oct research + 24 Oct build log) |
 | Story premise, cast, artifact rules, video split | **`Story-Canon.md`** | — |
 | Greenwake chapter story: bloom, Slime King, cost, ending | **`Story-Greenwake.md`** | — |
@@ -33,7 +34,8 @@ the code wins and the page is fixed the same day.
 
 | Question | Document |
 |---|---|
-| What is this game now — endless, or a story? | **`Game-Vision.md`** (canon: story-led mini campaign, automatic combat, restart on death) |
+| What is this game now — what is the core loop? | **`Run-Loop.md`** (canon: automated battler, spend run gold, die, bank meta, restart stage 1) |
+| What was the story-campaign vision? | `Game-Vision.md` (record: story-led mini campaign; now the flavor wrapper) |
 | What is the story premise, cast and artifact rules? | **`Story-Canon.md`** (canon: the Second Dawn, Greenwake, video vs in-game split) |
 | What actually happens in Greenwake, and why does the shard matter? | **`Story-Greenwake.md`** (locked chapter story: time leak, living bloom, Slime King, theft) |
 | What happens in each node, and what are the exact words? | **`Story-Nodes.md`** (node 1 script, text budget, 3-step add-a-scene test) |
@@ -89,7 +91,8 @@ the code wins and the page is fixed the same day.
 Docs/
   README.md            <- this index
   -- current --
-  Game-Vision.md       <- CANON: story-led campaign, automatic combat, restart on death
+  Run-Loop.md          <- CANON: automated battler, run end, meta progression (the spine)
+  Game-Vision.md       <- record: story-campaign vision; now the flavor wrapper (superseded by Run-Loop.md)
   Story-Canon.md       <- CANON: the Second Dawn, cast, Greenwake, video vs in-game
   Story-Greenwake.md   <- CANON: chapter 1 story: bloom, Slime King, cost, ending
   Story-Nodes.md       <- node scripts: beats, words, text budget
@@ -110,6 +113,7 @@ Docs/
   Sim-Core.md          <- pure simulation design
   Content.md           <- specs, generator, validator, enemies/zones
   Progression.md       <- currencies, tracks, prestige, roster
+  Training.md          <- permanent gold tree: two branches, 600 nodes, effects
   Idle-Economy.md      <- rates, offline payouts
   Monetisation.md      <- sources, sinks, IAP mock, guards
   UI-UX.md             <- screens, navigation, type scale (log contract: Battle-Log.md)

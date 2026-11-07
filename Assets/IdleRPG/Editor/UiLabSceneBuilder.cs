@@ -49,7 +49,7 @@ namespace IdleRPG.EditorTools
             "Goblin A hits Knight for 3.2K"
         };
 
-        private static readonly string[] NavLabels = { "BATTLE", "PARTY", "UPGRADES", "ASCEND", "SHOP" };
+        private static readonly string[] NavLabels = { "BATTLE", "PARTY", "UPGRADES", "PERKS", "SHOP" };
 
         /// <summary>One candidate look: a font, its sizes, and a complete palette for it.</summary>
         private sealed class Look

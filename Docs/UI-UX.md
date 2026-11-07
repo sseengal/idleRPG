@@ -134,6 +134,16 @@ Overlays: offline popup (modal, own canvas), return hub, toasts, confirms, dev o
 Rules: max 5 nav items, max 1 tab level inside a page, every list scrolls, every action toasts a confirmation,
 close is always top-left, primary button reachable one-handed (1080x1920 reference, safe-area aware).
 
+### 2a. Start screen (lobby) - one header, one nav
+
+- The lobby is a full-screen page on its own canvas above the battle HUD. It **reuses the real header**
+  (`HudHeaderUI`): `StartScreenUI` re-parents that object into the lobby canvas while the lobby is open and puts it
+  back before a run starts (`DetachSharedHeader`). No second currency bar is drawn anywhere.
+- **The bottom nav shows the open tab**: the selected page is gold, the rest are dark. Opening TRAINING highlights
+  TRAINING; going back to BATTLE highlights BATTLE.
+- Pages that are not built yet show a one-line status note instead of an empty page.
+
+
 ## 3. Battle screen (multi-enemy + formation)
 
 ```

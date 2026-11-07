@@ -22,7 +22,7 @@ namespace IdleRPG.UI
         [Tooltip("Layers that only belong to the battle page (e.g. the damage-number canvas).")]
         [SerializeField] private GameObject[] hideWhileBrowsing;
 
-        [Header("Bottom navigation (Battle, Upgrades, Ascend, Shop)")]
+        [Header("Bottom navigation (Battle, Party, Upgrades, Perks, Shop)")]
         [SerializeField] private Button[] navButtons;
         [SerializeField] private Image[] navButtonBackgrounds;
         [SerializeField] private TextMeshProUGUI[] navButtonLabels;

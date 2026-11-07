@@ -39,6 +39,14 @@ namespace IdleRPG.Progression
         /// <summary>Raised whenever any level or multiplier changes (combat should refresh).</summary>
         public event Action StatsChanged;
 
+        /// <summary>Training service (permanent gold tree) - flat stat bonuses are read from it.</summary>
+        public TrainingService Training { get; set; }
+
+        private double TrainingBonus(TrainingEffect effect)
+        {
+            return Training != null ? Training.TotalFor(effect) : 0d;
+        }
+
         /// <summary>
         /// Optional per-hero gear reader (set by the composition root). Returns flat
         /// bonuses as fractions of the hero's base stats; null means no gear yet.
@@ -253,12 +261,14 @@ namespace IdleRPG.Progression
                 return 0d;
             }
 
-            return FormulaUtility.HeroStatValue(
+            double value = FormulaUtility.HeroStatValue(
                 hero.BaseHealth * (1d + Math.Max(0d, GearFraction(b => b.Hp, heroIndex))),
                 GetHeroLevel(hero, HeroStatType.Health),
                 GetStatGainFraction(HeroStatType.Health),
                 GlobalHealthMultiplier,
                 GetEffectMode(HeroStatType.Health));
+
+            return value + TrainingBonus(TrainingEffect.HpFlat);
         }
 
         public double GetAttack(HeroData hero, int heroIndex)
@@ -275,7 +285,7 @@ namespace IdleRPG.Progression
                 GlobalDamageMultiplier,
                 GetEffectMode(HeroStatType.Attack));
 
-            return value + runAttackBonus;
+            return value + runAttackBonus + TrainingBonus(TrainingEffect.AttackFlat);
         }
 
         public double GetDefense(HeroData hero, int heroIndex)
@@ -292,7 +302,7 @@ namespace IdleRPG.Progression
                 1d,
                 GetEffectMode(HeroStatType.Defense));
 
-            return value + runDefenseBonus;
+            return value + runDefenseBonus + TrainingBonus(TrainingEffect.ArmorFlat);
         }
 
         // ------------------------------------------------------------------

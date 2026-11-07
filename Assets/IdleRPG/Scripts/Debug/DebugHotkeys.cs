@@ -132,43 +132,6 @@ namespace IdleRPG.Debugging
                 ToggleAllAbilities();
             }
 
-            // Story deck: Left / Right walk the actual schedule and play each scene. This is the fast pass
-            // for every scene without replaying the run or editing the scene asset list.
-            if (keyboard.leftArrowKey.wasPressedThisFrame)
-            {
-                IdleRPG.UI.HudController hud = IdleRPG.UI.HudController.Instance;
-                bool played = hud != null && hud.DebugStepStory(-1);
-                Log(played
-                    ? $"Story (Left): playing '{hud.DebugStoryName}'."
-                    : "Story (Left): nothing played - missing schedule scene, or a scene is already running.");
-            }
-
-            if (keyboard.rightArrowKey.wasPressedThisFrame)
-            {
-                IdleRPG.UI.HudController hud = IdleRPG.UI.HudController.Instance;
-                bool played = hud != null && hud.DebugStepStory(1);
-                Log(played
-                    ? $"Story (Right): playing '{hud.DebugStoryName}'."
-                    : "Story (Right): nothing played - missing schedule scene, or a scene is already running.");
-            }
-
-            // TEMP: replay the battle whirl on the live arena, so the effect can be judged at will.
-            if (keyboard.yKey.wasPressedThisFrame)
-            {
-                IdleRPG.UI.BattleSwirl swirl = FindAnyObjectByType<IdleRPG.UI.BattleSwirl>();
-
-                if (swirl == null)
-                {
-                    Log("Battle whirl (Y): no swirl component (the arena surface is missing).");
-                }
-                else
-                {
-                    Log(swirl.Play(swirl.Release)
-                        ? "Battle whirl (Y): playing."
-                        : "Battle whirl (Y): already running, or the whirl is disabled.");
-                }
-            }
-
             if (keyboard.gKey.wasPressedThisFrame)
             {
                 gameManager.Economy.AddGold(goldGrantAmount);
@@ -207,6 +170,13 @@ namespace IdleRPG.Debugging
             {
                 bool ascended = gameManager.RequestAscension();
                 Log(ascended ? "Ascension requested." : "Ascension refused (stage gate or no tokens).");
+            }
+
+            // Pivot: end the run on purpose (bank meta + restart stage 1). This is the path death will use in B2.
+            if (keyboard.nKey.wasPressedThisFrame)
+            {
+                bool ended = gameManager.EndRun();
+                Log(ended ? "Run ended (N): shards banked, restarting run." : "Run end refused (not wired).");
             }
 
             if (keyboard.dKey.wasPressedThisFrame)
@@ -285,7 +255,36 @@ namespace IdleRPG.Debugging
             {
                 // Fresh install: disk state wiped, PlayerPrefs wiped, scene reloaded (F9 only deletes the file).
                 bool reset = gameManager.ResetGame();
-                Log(reset ? "Full reset (F8): save + backups + prefs wiped, scene reloading." : "Full reset (F8): disk wiped, reload refused.");
+                Log(reset ? "Full reset (F8): save + backups + prefs wiped, reloading the boot/splash scene." : "Full reset (F8): disk wiped, reload refused.");
+            }
+
+            if (keyboard.f6Key.wasPressedThisFrame)
+            {
+                // Replay the splash: reload the BOOT scene (index 0) WITHOUT wiping the save.
+                if (UnityEngine.SceneManagement.SceneManager.sceneCountInBuildSettings > 0)
+                {
+                    UnityEngine.SceneManagement.SceneManager.LoadScene(0, UnityEngine.SceneManagement.LoadSceneMode.Single);
+                    Log("Splash (F6): reloading boot scene.");
+                }
+                else
+                {
+                    Log("Splash (F6): no build scenes configured.");
+                }
+            }
+
+            if (keyboard.f1Key.wasPressedThisFrame)
+            {
+                IdleRPG.UI.StartScreenUI start = IdleRPG.UI.StartScreenUI.Instance;
+
+                if (start != null)
+                {
+                    start.ShowLobby();
+                    Log("Start Screen (F1): opened (game paused).");
+                }
+                else
+                {
+                    Log("Start Screen (F1): not present in this scene.");
+                }
             }
 
             if (keyboard.f10Key.wasPressedThisFrame)

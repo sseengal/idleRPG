@@ -62,7 +62,7 @@ namespace IdleRPG.Core
 
             if (!CanAscend)
             {
-                GameEvents.RaiseToast($"Reach stage {balanceConfig.MinStageToAscend} to ascend.");
+                GameEvents.RaiseToast($"Reach stage {balanceConfig.MinStageToAscend} to end the run.");
                 return false;
             }
 
@@ -80,7 +80,7 @@ namespace IdleRPG.Core
             double endedGold = RunGoldEarned;
 
             GameEvents.RaiseAscensionCompleted(tokens, endedStage);
-            LogFlow($"Ascended for {tokens:0} token(s) from run best stage {endedStage} | " +
+            LogFlow($"Ended run for {tokens:0} Perk Point(s) from stage {endedStage} | " +
                     $"{Ascension.DescribeMultipliers()} | {Economy}");
 
             ResetProgressForAscension(HighestStageReached);
@@ -88,6 +88,137 @@ namespace IdleRPG.Core
             GameEvents.RaiseToast(string.Format("Run ended - stage {0}  ·  +{1:0} tokens  ·  {2} gold",
                 endedStage, tokens, NumberFormatter.Format(endedGold)));
             return true;
+        }
+
+        /// <summary>True while this run still has its one rewarded-ad revive available.</summary>
+        public bool CanRevive => !reviveUsedThisRun;
+
+        private bool reviveUsedThisRun;
+
+        /// <summary>What ending the run right now would bank (same value the run-over card / PERKS page shows).</summary>
+        public double RunEndPreviewTokens
+        {
+            get
+            {
+                int depth = Mathf.Max(RunBestStage, CurrentStage);
+                return RunStagesCleared >= 1 ? Math.Max(1d, UngatedYield(depth)) : 0d;
+            }
+        }
+
+        /// <summary>
+        /// Ends the CURRENT run on purpose: grant the meta (prestige tokens) for the depth reached, wipe gold and hero
+        /// levels, then start a fresh run at stage 1. This is the pivot's "run over" path - the same reset ascension
+        /// uses, but WITHOUT the manual stage gate, so death can call it. Returns false only when not wired.
+        ///
+        /// ELI5: cash the run in, keep a little forever, go again. A very short run (below the gate) still ends
+        /// cleanly and simply pays nothing.
+        /// </summary>
+        public bool EndRun()
+        {
+            if (!isWired)
+            {
+                return false;
+            }
+
+            defeatBeatActive = false;
+
+            int endedStage = RunBestStage;
+            double endedGold = RunGoldEarned;
+
+            combatManager.StopRun();
+            SetState(State, GameState.Ascension);
+
+            double tokens = BankRunReward();
+
+            LogFlow($"Run ended at stage {endedStage} -> +{tokens:0} Perk Points | {Ascension.DescribeMultipliers()} | {Economy}");
+
+            GameEvents.RaiseToast(tokens > 0d
+                ? string.Format("Run ended - stage {0}  ·  +{1:0} Perk Points  ·  {2} gold", endedStage, tokens, NumberFormatter.Format(endedGold))
+                : string.Format("Run ended - stage {0}  ·  {1} gold", endedStage, NumberFormatter.Format(endedGold)));
+
+            reviveUsedThisRun = false;
+            StartRun(1);
+            return true;
+        }
+
+        /// <summary>
+        /// Party wipe under the pivot: the run ENDS. Bank the reward, show the run-over card, then WAIT for the player
+        /// (NEXT RUN). No bounce, no auto-resume.
+        /// </summary>
+        private void EndRunOnWipe()
+        {
+            defeatBeatActive = false;
+
+            combatManager.StopRun();
+            SetState(State, GameState.Defeat);
+            RaiseStageChanged();
+
+            // Do NOT bank yet: the card offers REVIVE (ad) or NEXT RUN (which banks + restarts). Banking only when
+            // the run truly ends keeps the revive from ever double-paying.
+            GameEvents.RaiseDefeatShown(CurrentStage, CurrentStage);
+            LogFlow($"RUN OVER on stage {CurrentStage} (REVIVE or NEXT RUN).");
+        }
+
+        /// <summary>NEXT RUN on the run-over card: bank the reward, then start a fresh run from stage 1.</summary>
+        public void ConfirmEndRun()
+        {
+            EndRun();
+        }
+
+        /// <summary>Run-over card REVIVE (rewarded ad): resume the SAME stage and mark the revive used for this run.</summary>
+        private void ReviveRun()
+        {
+            reviveUsedThisRun = true;
+            StartRun(CurrentStage);
+            LogFlow($"REVIVED on stage {CurrentStage} (ad).");
+        }
+
+        /// <summary>
+        /// The pivot reward: a run that cleared at least one stage banks at least one Perk Point, scaled by the deepest
+        /// stage reached. Grants, resets hero levels (gold is PERMANENT now), resets the run counters, and returns it.
+        /// </summary>
+        private double BankRunReward()
+        {
+            int depth = Mathf.Max(RunBestStage, CurrentStage);
+            double tokens = RunStagesCleared >= 1 ? Math.Max(1d, UngatedYield(depth)) : 0d;
+
+            if (tokens > 0d)
+            {
+                Economy.AddTokens(tokens);
+            }
+
+            // Gold is PERMANENT now (spent on Training) - a run end no longer wipes it.
+            if (balanceConfig == null || balanceConfig.ResetHeroLevelsOnAscension)
+            {
+                Resolver.ResetHeroLevels();
+            }
+
+            if (tokens > 0d)
+            {
+                GameEvents.RaiseAscensionCompleted(tokens, depth);
+            }
+
+            CurrentStage = 1;
+            RunBestStage = 1;
+            RunGoldEarned = 0d;
+            RunKills = 0;
+            RunStagesCleared = 0;
+            runStartBinary = GameClock.NowBinary;
+            ResetRunCampState();
+            combatManager.SetStage(1, healParty: true);
+
+            return tokens;
+        }
+
+        /// <summary>Token curve without the manual-ascend stage gate (the "always pay something" pivot reward).</summary>
+        private double UngatedYield(int depth)
+        {
+            if (balanceConfig == null)
+            {
+                return 0d;
+            }
+
+            return FormulaUtility.PrestigeTokenReward(depth, balanceConfig.PrestigeStageDivisor, balanceConfig.PrestigeExponent);
         }
 
         /// <summary>
@@ -263,6 +394,13 @@ namespace IdleRPG.Core
             // farmed; drops are the repeatable reward).
             Gear?.TryBossDrop(stage);
 
+            // Training "Finish Gold %": a small bonus on every cleared stage (placeholder formula; tune later).
+            double finishPct = Training != null ? Training.TotalFor(TrainingEffect.FinishGoldPercent) : 0d;
+            if (finishPct > 0d && Rewards != null)
+            {
+                Rewards.GrantGold((10d + 10d * stage) * finishPct, RewardService.Source.Combat);
+            }
+
             SetState(GameState.Boss, GameState.Combat);
             combatManager.SetStage(CurrentStage, healParty: balanceConfig != null && balanceConfig.HealHeroesOnStageAdvance);
             RaiseStageChanged();
@@ -279,6 +417,12 @@ namespace IdleRPG.Core
         /// </summary>
         private void OnPartyWiped()
         {
+            if (balanceConfig != null && balanceConfig.RunEndsOnDeath)
+            {
+                EndRunOnWipe();
+                return;
+            }
+
             int rollback = balanceConfig != null ? balanceConfig.StageRollbackOnDefeat : 1;
             int defeatedStage = CurrentStage;
 

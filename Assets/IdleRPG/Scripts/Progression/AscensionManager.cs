@@ -72,7 +72,7 @@ namespace IdleRPG.Progression
         public IReadOnlyList<PrestigeUpgradeData> TokenUpgrades => tokenUpgrades;
 
         /// <summary>
-        /// Grants tokens, wipes gold and (optionally) hero levels. Returns false when the
+        /// Grants tokens and resets hero levels (gold is PERMANENT now). Returns false when the
         /// player has not reached the minimum stage. Gems and prestige levels always persist.
         /// </summary>
         public bool TryAscend(int highestStageReached, out double tokensEarned)
@@ -91,7 +91,6 @@ namespace IdleRPG.Progression
             }
 
             economy.AddTokens(tokensEarned);
-            economy.ResetGold();
 
             if (balanceConfig == null || balanceConfig.ResetHeroLevelsOnAscension)
             {

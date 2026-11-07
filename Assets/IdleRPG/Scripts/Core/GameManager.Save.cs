@@ -62,8 +62,10 @@ namespace IdleRPG.Core
                 return false;
             }
 
-            Debug.Log($"[GameManager] Full reset: save, backups and PlayerPrefs wiped; reloading '{scene.name}'.");
-            SceneManager.LoadScene(scene.buildIndex, LoadSceneMode.Single);
+            // Reload the BOOT scene (index 0) so the splash greets the player again; fall back to this scene.
+            int target = SceneManager.sceneCountInBuildSettings > 0 ? 0 : scene.buildIndex;
+            Debug.Log($"[GameManager] Full reset: save, backups and PlayerPrefs wiped; reloading build scene {target} (boot/splash).");
+            SceneManager.LoadScene(target, LoadSceneMode.Single);
             return true;
         }
 

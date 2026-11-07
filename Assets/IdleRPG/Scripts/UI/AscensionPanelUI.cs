@@ -9,7 +9,7 @@ using IdleRPG.Utils;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// Panel B: ascension. Shows the token yield, an "Ascend" button with a two-tap confirm,
+    /// Panel B: the PERKS page. Shows the Perk Point yield and an "END RUN" button with a two-tap confirm,
     /// and the permanent upgrade tree.
     /// </summary>
     public sealed class AscensionPanelUI : MonoBehaviour
@@ -109,13 +109,6 @@ namespace IdleRPG.UI
                 return;
             }
 
-            if (!manager.CanAscend)
-            {
-                int required = manager.Balance != null ? manager.Balance.MinStageToAscend : 10;
-                GameEvents.RaiseToast($"Reach stage {required} to ascend.");
-                return;
-            }
-
             if (!confirmArmed)
             {
                 confirmArmed = true;
@@ -134,7 +127,7 @@ namespace IdleRPG.UI
                 return;
             }
 
-            manager.RequestAscension();
+            manager.EndRun();
             DisarmConfirm();
         }
 
@@ -156,7 +149,7 @@ namespace IdleRPG.UI
 
             if (ascendButtonLabel != null)
             {
-                ascendButtonLabel.SetText("ASCEND");
+                ascendButtonLabel.SetText("END RUN");
             }
         }
 
@@ -194,25 +187,21 @@ namespace IdleRPG.UI
                 return;
             }
 
-            double yield = manager.PrestigeTokenYield;
-            int required = manager.Balance != null ? manager.Balance.MinStageToAscend : 10;
+            double yield = manager.RunEndPreviewTokens;
 
             if (yieldLabel != null)
             {
-                yieldLabel.SetText(string.Format("Ascend for <color=#D08CFF>{0}</color> tokens", NumberFormatter.Format(yield)));
+                yieldLabel.SetText(string.Format("End Run for <color=#D08CFF>{0}</color> Perk Points", NumberFormatter.Format(yield)));
             }
 
             if (requirementLabel != null)
             {
-                requirementLabel.SetText(string.Format(
-                    manager.CanAscend ? "This run: stage {0}  -  ready" : "This run: stage {0}  -  reach stage {1}",
-                    manager.RunBestStage,
-                    required));
+                requirementLabel.SetText(string.Format("This run: stage {0}  -  end any time", manager.RunBestStage));
             }
 
             if (ascendButton != null)
             {
-                ascendButton.interactable = manager.CanAscend && yield > 0d;
+                ascendButton.interactable = true;
             }
 
             RefreshRows();

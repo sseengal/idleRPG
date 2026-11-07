@@ -1,0 +1,5469 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a071d6819e724351b79f085f1d338d9, type: 3}
+  m_Name: TrainingTree
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.TrainingTreeDef
+  nodes:
+  - nodeID: L000
+    branch: 0
+    effect: 0
+    amount: 3
+    costGold: 25
+    order: 0
+    requiresLeftNodes: 0
+    title: Attack +3
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L001
+    branch: 0
+    effect: 1
+    amount: 20
+    costGold: 33
+    order: 1
+    requiresLeftNodes: 0
+    title: Armor +20
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L002
+    branch: 0
+    effect: 2
+    amount: 20
+    costGold: 41
+    order: 2
+    requiresLeftNodes: 0
+    title: Max HP +20
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L003
+    branch: 0
+    effect: 3
+    amount: 1
+    costGold: 49
+    order: 3
+    requiresLeftNodes: 0
+    title: Camp Heal +1
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L004
+    branch: 0
+    effect: 0
+    amount: 4
+    costGold: 57
+    order: 4
+    requiresLeftNodes: 0
+    title: Attack +4
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L005
+    branch: 0
+    effect: 1
+    amount: 21
+    costGold: 65
+    order: 5
+    requiresLeftNodes: 0
+    title: Armor +21
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L006
+    branch: 0
+    effect: 2
+    amount: 21
+    costGold: 73
+    order: 6
+    requiresLeftNodes: 0
+    title: Max HP +21
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L007
+    branch: 0
+    effect: 3
+    amount: 2
+    costGold: 81
+    order: 7
+    requiresLeftNodes: 0
+    title: Camp Heal +2
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L008
+    branch: 0
+    effect: 0
+    amount: 5
+    costGold: 89
+    order: 8
+    requiresLeftNodes: 0
+    title: Attack +5
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L009
+    branch: 0
+    effect: 1
+    amount: 22
+    costGold: 97
+    order: 9
+    requiresLeftNodes: 0
+    title: Armor +22
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L010
+    branch: 0
+    effect: 2
+    amount: 22
+    costGold: 105
+    order: 10
+    requiresLeftNodes: 0
+    title: Max HP +22
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L011
+    branch: 0
+    effect: 3
+    amount: 3
+    costGold: 113
+    order: 11
+    requiresLeftNodes: 0
+    title: Camp Heal +3
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L012
+    branch: 0
+    effect: 0
+    amount: 6
+    costGold: 121
+    order: 12
+    requiresLeftNodes: 0
+    title: Attack +6
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L013
+    branch: 0
+    effect: 1
+    amount: 23
+    costGold: 129
+    order: 13
+    requiresLeftNodes: 0
+    title: Armor +23
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L014
+    branch: 0
+    effect: 2
+    amount: 23
+    costGold: 137
+    order: 14
+    requiresLeftNodes: 0
+    title: Max HP +23
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L015
+    branch: 0
+    effect: 3
+    amount: 4
+    costGold: 145
+    order: 15
+    requiresLeftNodes: 0
+    title: Camp Heal +4
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L016
+    branch: 0
+    effect: 0
+    amount: 7
+    costGold: 153
+    order: 16
+    requiresLeftNodes: 0
+    title: Attack +7
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L017
+    branch: 0
+    effect: 1
+    amount: 24
+    costGold: 161
+    order: 17
+    requiresLeftNodes: 0
+    title: Armor +24
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L018
+    branch: 0
+    effect: 2
+    amount: 24
+    costGold: 169
+    order: 18
+    requiresLeftNodes: 0
+    title: Max HP +24
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L019
+    branch: 0
+    effect: 3
+    amount: 5
+    costGold: 177
+    order: 19
+    requiresLeftNodes: 0
+    title: Camp Heal +5
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L020
+    branch: 0
+    effect: 0
+    amount: 8
+    costGold: 185
+    order: 20
+    requiresLeftNodes: 0
+    title: Attack +8
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L021
+    branch: 0
+    effect: 1
+    amount: 25
+    costGold: 193
+    order: 21
+    requiresLeftNodes: 0
+    title: Armor +25
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L022
+    branch: 0
+    effect: 2
+    amount: 25
+    costGold: 201
+    order: 22
+    requiresLeftNodes: 0
+    title: Max HP +25
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L023
+    branch: 0
+    effect: 3
+    amount: 6
+    costGold: 209
+    order: 23
+    requiresLeftNodes: 0
+    title: Camp Heal +6
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L024
+    branch: 0
+    effect: 0
+    amount: 9
+    costGold: 217
+    order: 24
+    requiresLeftNodes: 0
+    title: Attack +9
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L025
+    branch: 0
+    effect: 1
+    amount: 26
+    costGold: 225
+    order: 25
+    requiresLeftNodes: 0
+    title: Armor +26
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L026
+    branch: 0
+    effect: 2
+    amount: 26
+    costGold: 233
+    order: 26
+    requiresLeftNodes: 0
+    title: Max HP +26
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L027
+    branch: 0
+    effect: 3
+    amount: 7
+    costGold: 241
+    order: 27
+    requiresLeftNodes: 0
+    title: Camp Heal +7
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L028
+    branch: 0
+    effect: 0
+    amount: 10
+    costGold: 249
+    order: 28
+    requiresLeftNodes: 0
+    title: Attack +10
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L029
+    branch: 0
+    effect: 1
+    amount: 27
+    costGold: 257
+    order: 29
+    requiresLeftNodes: 0
+    title: Armor +27
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L030
+    branch: 0
+    effect: 2
+    amount: 27
+    costGold: 265
+    order: 30
+    requiresLeftNodes: 0
+    title: Max HP +27
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L031
+    branch: 0
+    effect: 3
+    amount: 8
+    costGold: 273
+    order: 31
+    requiresLeftNodes: 0
+    title: Camp Heal +8
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L032
+    branch: 0
+    effect: 0
+    amount: 11
+    costGold: 281
+    order: 32
+    requiresLeftNodes: 0
+    title: Attack +11
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L033
+    branch: 0
+    effect: 1
+    amount: 28
+    costGold: 289
+    order: 33
+    requiresLeftNodes: 0
+    title: Armor +28
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L034
+    branch: 0
+    effect: 2
+    amount: 28
+    costGold: 297
+    order: 34
+    requiresLeftNodes: 0
+    title: Max HP +28
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L035
+    branch: 0
+    effect: 3
+    amount: 9
+    costGold: 305
+    order: 35
+    requiresLeftNodes: 0
+    title: Camp Heal +9
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L036
+    branch: 0
+    effect: 0
+    amount: 12
+    costGold: 313
+    order: 36
+    requiresLeftNodes: 0
+    title: Attack +12
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L037
+    branch: 0
+    effect: 1
+    amount: 29
+    costGold: 321
+    order: 37
+    requiresLeftNodes: 0
+    title: Armor +29
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L038
+    branch: 0
+    effect: 2
+    amount: 29
+    costGold: 329
+    order: 38
+    requiresLeftNodes: 0
+    title: Max HP +29
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L039
+    branch: 0
+    effect: 3
+    amount: 10
+    costGold: 337
+    order: 39
+    requiresLeftNodes: 0
+    title: Camp Heal +10
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L040
+    branch: 0
+    effect: 0
+    amount: 13
+    costGold: 345
+    order: 40
+    requiresLeftNodes: 0
+    title: Attack +13
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L041
+    branch: 0
+    effect: 1
+    amount: 30
+    costGold: 353
+    order: 41
+    requiresLeftNodes: 0
+    title: Armor +30
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L042
+    branch: 0
+    effect: 2
+    amount: 30
+    costGold: 361
+    order: 42
+    requiresLeftNodes: 0
+    title: Max HP +30
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L043
+    branch: 0
+    effect: 3
+    amount: 11
+    costGold: 369
+    order: 43
+    requiresLeftNodes: 0
+    title: Camp Heal +11
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L044
+    branch: 0
+    effect: 0
+    amount: 14
+    costGold: 377
+    order: 44
+    requiresLeftNodes: 0
+    title: Attack +14
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L045
+    branch: 0
+    effect: 1
+    amount: 31
+    costGold: 385
+    order: 45
+    requiresLeftNodes: 0
+    title: Armor +31
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L046
+    branch: 0
+    effect: 2
+    amount: 31
+    costGold: 393
+    order: 46
+    requiresLeftNodes: 0
+    title: Max HP +31
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L047
+    branch: 0
+    effect: 3
+    amount: 12
+    costGold: 401
+    order: 47
+    requiresLeftNodes: 0
+    title: Camp Heal +12
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L048
+    branch: 0
+    effect: 0
+    amount: 15
+    costGold: 409
+    order: 48
+    requiresLeftNodes: 0
+    title: Attack +15
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L049
+    branch: 0
+    effect: 1
+    amount: 32
+    costGold: 417
+    order: 49
+    requiresLeftNodes: 0
+    title: Armor +32
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L050
+    branch: 0
+    effect: 2
+    amount: 32
+    costGold: 425
+    order: 50
+    requiresLeftNodes: 0
+    title: Max HP +32
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L051
+    branch: 0
+    effect: 3
+    amount: 13
+    costGold: 433
+    order: 51
+    requiresLeftNodes: 0
+    title: Camp Heal +13
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L052
+    branch: 0
+    effect: 0
+    amount: 16
+    costGold: 441
+    order: 52
+    requiresLeftNodes: 0
+    title: Attack +16
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L053
+    branch: 0
+    effect: 1
+    amount: 33
+    costGold: 449
+    order: 53
+    requiresLeftNodes: 0
+    title: Armor +33
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L054
+    branch: 0
+    effect: 2
+    amount: 33
+    costGold: 457
+    order: 54
+    requiresLeftNodes: 0
+    title: Max HP +33
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L055
+    branch: 0
+    effect: 3
+    amount: 14
+    costGold: 465
+    order: 55
+    requiresLeftNodes: 0
+    title: Camp Heal +14
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L056
+    branch: 0
+    effect: 0
+    amount: 17
+    costGold: 473
+    order: 56
+    requiresLeftNodes: 0
+    title: Attack +17
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L057
+    branch: 0
+    effect: 1
+    amount: 34
+    costGold: 481
+    order: 57
+    requiresLeftNodes: 0
+    title: Armor +34
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L058
+    branch: 0
+    effect: 2
+    amount: 34
+    costGold: 489
+    order: 58
+    requiresLeftNodes: 0
+    title: Max HP +34
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L059
+    branch: 0
+    effect: 3
+    amount: 15
+    costGold: 497
+    order: 59
+    requiresLeftNodes: 0
+    title: Camp Heal +15
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L060
+    branch: 0
+    effect: 0
+    amount: 18
+    costGold: 505
+    order: 60
+    requiresLeftNodes: 0
+    title: Attack +18
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L061
+    branch: 0
+    effect: 1
+    amount: 35
+    costGold: 513
+    order: 61
+    requiresLeftNodes: 0
+    title: Armor +35
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L062
+    branch: 0
+    effect: 2
+    amount: 35
+    costGold: 521
+    order: 62
+    requiresLeftNodes: 0
+    title: Max HP +35
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L063
+    branch: 0
+    effect: 3
+    amount: 16
+    costGold: 529
+    order: 63
+    requiresLeftNodes: 0
+    title: Camp Heal +16
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L064
+    branch: 0
+    effect: 0
+    amount: 19
+    costGold: 537
+    order: 64
+    requiresLeftNodes: 0
+    title: Attack +19
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L065
+    branch: 0
+    effect: 1
+    amount: 36
+    costGold: 545
+    order: 65
+    requiresLeftNodes: 0
+    title: Armor +36
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L066
+    branch: 0
+    effect: 2
+    amount: 36
+    costGold: 553
+    order: 66
+    requiresLeftNodes: 0
+    title: Max HP +36
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L067
+    branch: 0
+    effect: 3
+    amount: 17
+    costGold: 561
+    order: 67
+    requiresLeftNodes: 0
+    title: Camp Heal +17
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L068
+    branch: 0
+    effect: 0
+    amount: 20
+    costGold: 569
+    order: 68
+    requiresLeftNodes: 0
+    title: Attack +20
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L069
+    branch: 0
+    effect: 1
+    amount: 37
+    costGold: 577
+    order: 69
+    requiresLeftNodes: 0
+    title: Armor +37
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L070
+    branch: 0
+    effect: 2
+    amount: 37
+    costGold: 585
+    order: 70
+    requiresLeftNodes: 0
+    title: Max HP +37
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L071
+    branch: 0
+    effect: 3
+    amount: 18
+    costGold: 593
+    order: 71
+    requiresLeftNodes: 0
+    title: Camp Heal +18
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L072
+    branch: 0
+    effect: 0
+    amount: 21
+    costGold: 601
+    order: 72
+    requiresLeftNodes: 0
+    title: Attack +21
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L073
+    branch: 0
+    effect: 1
+    amount: 38
+    costGold: 609
+    order: 73
+    requiresLeftNodes: 0
+    title: Armor +38
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L074
+    branch: 0
+    effect: 2
+    amount: 38
+    costGold: 617
+    order: 74
+    requiresLeftNodes: 0
+    title: Max HP +38
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L075
+    branch: 0
+    effect: 3
+    amount: 19
+    costGold: 625
+    order: 75
+    requiresLeftNodes: 0
+    title: Camp Heal +19
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L076
+    branch: 0
+    effect: 0
+    amount: 22
+    costGold: 633
+    order: 76
+    requiresLeftNodes: 0
+    title: Attack +22
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L077
+    branch: 0
+    effect: 1
+    amount: 39
+    costGold: 641
+    order: 77
+    requiresLeftNodes: 0
+    title: Armor +39
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L078
+    branch: 0
+    effect: 2
+    amount: 39
+    costGold: 649
+    order: 78
+    requiresLeftNodes: 0
+    title: Max HP +39
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L079
+    branch: 0
+    effect: 3
+    amount: 20
+    costGold: 657
+    order: 79
+    requiresLeftNodes: 0
+    title: Camp Heal +20
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L080
+    branch: 0
+    effect: 0
+    amount: 23
+    costGold: 665
+    order: 80
+    requiresLeftNodes: 0
+    title: Attack +23
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L081
+    branch: 0
+    effect: 1
+    amount: 40
+    costGold: 673
+    order: 81
+    requiresLeftNodes: 0
+    title: Armor +40
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L082
+    branch: 0
+    effect: 2
+    amount: 40
+    costGold: 681
+    order: 82
+    requiresLeftNodes: 0
+    title: Max HP +40
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L083
+    branch: 0
+    effect: 3
+    amount: 21
+    costGold: 689
+    order: 83
+    requiresLeftNodes: 0
+    title: Camp Heal +21
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L084
+    branch: 0
+    effect: 0
+    amount: 24
+    costGold: 697
+    order: 84
+    requiresLeftNodes: 0
+    title: Attack +24
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L085
+    branch: 0
+    effect: 1
+    amount: 41
+    costGold: 705
+    order: 85
+    requiresLeftNodes: 0
+    title: Armor +41
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L086
+    branch: 0
+    effect: 2
+    amount: 41
+    costGold: 713
+    order: 86
+    requiresLeftNodes: 0
+    title: Max HP +41
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L087
+    branch: 0
+    effect: 3
+    amount: 22
+    costGold: 721
+    order: 87
+    requiresLeftNodes: 0
+    title: Camp Heal +22
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L088
+    branch: 0
+    effect: 0
+    amount: 25
+    costGold: 729
+    order: 88
+    requiresLeftNodes: 0
+    title: Attack +25
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L089
+    branch: 0
+    effect: 1
+    amount: 42
+    costGold: 737
+    order: 89
+    requiresLeftNodes: 0
+    title: Armor +42
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L090
+    branch: 0
+    effect: 2
+    amount: 42
+    costGold: 745
+    order: 90
+    requiresLeftNodes: 0
+    title: Max HP +42
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L091
+    branch: 0
+    effect: 3
+    amount: 23
+    costGold: 753
+    order: 91
+    requiresLeftNodes: 0
+    title: Camp Heal +23
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L092
+    branch: 0
+    effect: 0
+    amount: 26
+    costGold: 761
+    order: 92
+    requiresLeftNodes: 0
+    title: Attack +26
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L093
+    branch: 0
+    effect: 1
+    amount: 43
+    costGold: 769
+    order: 93
+    requiresLeftNodes: 0
+    title: Armor +43
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L094
+    branch: 0
+    effect: 2
+    amount: 43
+    costGold: 777
+    order: 94
+    requiresLeftNodes: 0
+    title: Max HP +43
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L095
+    branch: 0
+    effect: 3
+    amount: 24
+    costGold: 785
+    order: 95
+    requiresLeftNodes: 0
+    title: Camp Heal +24
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L096
+    branch: 0
+    effect: 0
+    amount: 27
+    costGold: 793
+    order: 96
+    requiresLeftNodes: 0
+    title: Attack +27
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L097
+    branch: 0
+    effect: 1
+    amount: 44
+    costGold: 801
+    order: 97
+    requiresLeftNodes: 0
+    title: Armor +44
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L098
+    branch: 0
+    effect: 2
+    amount: 44
+    costGold: 809
+    order: 98
+    requiresLeftNodes: 0
+    title: Max HP +44
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L099
+    branch: 0
+    effect: 3
+    amount: 25
+    costGold: 817
+    order: 99
+    requiresLeftNodes: 0
+    title: Camp Heal +25
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L100
+    branch: 0
+    effect: 0
+    amount: 28
+    costGold: 825
+    order: 100
+    requiresLeftNodes: 0
+    title: Attack +28
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L101
+    branch: 0
+    effect: 1
+    amount: 45
+    costGold: 833
+    order: 101
+    requiresLeftNodes: 0
+    title: Armor +45
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L102
+    branch: 0
+    effect: 2
+    amount: 45
+    costGold: 841
+    order: 102
+    requiresLeftNodes: 0
+    title: Max HP +45
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L103
+    branch: 0
+    effect: 3
+    amount: 26
+    costGold: 849
+    order: 103
+    requiresLeftNodes: 0
+    title: Camp Heal +26
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L104
+    branch: 0
+    effect: 0
+    amount: 29
+    costGold: 857
+    order: 104
+    requiresLeftNodes: 0
+    title: Attack +29
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L105
+    branch: 0
+    effect: 1
+    amount: 46
+    costGold: 865
+    order: 105
+    requiresLeftNodes: 0
+    title: Armor +46
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L106
+    branch: 0
+    effect: 2
+    amount: 46
+    costGold: 873
+    order: 106
+    requiresLeftNodes: 0
+    title: Max HP +46
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L107
+    branch: 0
+    effect: 3
+    amount: 27
+    costGold: 881
+    order: 107
+    requiresLeftNodes: 0
+    title: Camp Heal +27
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L108
+    branch: 0
+    effect: 0
+    amount: 30
+    costGold: 889
+    order: 108
+    requiresLeftNodes: 0
+    title: Attack +30
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L109
+    branch: 0
+    effect: 1
+    amount: 47
+    costGold: 897
+    order: 109
+    requiresLeftNodes: 0
+    title: Armor +47
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L110
+    branch: 0
+    effect: 2
+    amount: 47
+    costGold: 905
+    order: 110
+    requiresLeftNodes: 0
+    title: Max HP +47
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L111
+    branch: 0
+    effect: 3
+    amount: 28
+    costGold: 913
+    order: 111
+    requiresLeftNodes: 0
+    title: Camp Heal +28
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L112
+    branch: 0
+    effect: 0
+    amount: 31
+    costGold: 921
+    order: 112
+    requiresLeftNodes: 0
+    title: Attack +31
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L113
+    branch: 0
+    effect: 1
+    amount: 48
+    costGold: 929
+    order: 113
+    requiresLeftNodes: 0
+    title: Armor +48
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L114
+    branch: 0
+    effect: 2
+    amount: 48
+    costGold: 937
+    order: 114
+    requiresLeftNodes: 0
+    title: Max HP +48
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L115
+    branch: 0
+    effect: 3
+    amount: 29
+    costGold: 945
+    order: 115
+    requiresLeftNodes: 0
+    title: Camp Heal +29
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L116
+    branch: 0
+    effect: 0
+    amount: 32
+    costGold: 953
+    order: 116
+    requiresLeftNodes: 0
+    title: Attack +32
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L117
+    branch: 0
+    effect: 1
+    amount: 49
+    costGold: 961
+    order: 117
+    requiresLeftNodes: 0
+    title: Armor +49
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L118
+    branch: 0
+    effect: 2
+    amount: 49
+    costGold: 969
+    order: 118
+    requiresLeftNodes: 0
+    title: Max HP +49
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L119
+    branch: 0
+    effect: 3
+    amount: 30
+    costGold: 977
+    order: 119
+    requiresLeftNodes: 0
+    title: Camp Heal +30
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L120
+    branch: 0
+    effect: 0
+    amount: 33
+    costGold: 985
+    order: 120
+    requiresLeftNodes: 0
+    title: Attack +33
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L121
+    branch: 0
+    effect: 1
+    amount: 50
+    costGold: 993
+    order: 121
+    requiresLeftNodes: 0
+    title: Armor +50
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L122
+    branch: 0
+    effect: 2
+    amount: 50
+    costGold: 1001
+    order: 122
+    requiresLeftNodes: 0
+    title: Max HP +50
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L123
+    branch: 0
+    effect: 3
+    amount: 31
+    costGold: 1009
+    order: 123
+    requiresLeftNodes: 0
+    title: Camp Heal +31
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L124
+    branch: 0
+    effect: 0
+    amount: 34
+    costGold: 1017
+    order: 124
+    requiresLeftNodes: 0
+    title: Attack +34
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L125
+    branch: 0
+    effect: 1
+    amount: 51
+    costGold: 1025
+    order: 125
+    requiresLeftNodes: 0
+    title: Armor +51
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L126
+    branch: 0
+    effect: 2
+    amount: 51
+    costGold: 1033
+    order: 126
+    requiresLeftNodes: 0
+    title: Max HP +51
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L127
+    branch: 0
+    effect: 3
+    amount: 32
+    costGold: 1041
+    order: 127
+    requiresLeftNodes: 0
+    title: Camp Heal +32
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L128
+    branch: 0
+    effect: 0
+    amount: 35
+    costGold: 1049
+    order: 128
+    requiresLeftNodes: 0
+    title: Attack +35
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L129
+    branch: 0
+    effect: 1
+    amount: 52
+    costGold: 1057
+    order: 129
+    requiresLeftNodes: 0
+    title: Armor +52
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L130
+    branch: 0
+    effect: 2
+    amount: 52
+    costGold: 1065
+    order: 130
+    requiresLeftNodes: 0
+    title: Max HP +52
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L131
+    branch: 0
+    effect: 3
+    amount: 33
+    costGold: 1073
+    order: 131
+    requiresLeftNodes: 0
+    title: Camp Heal +33
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L132
+    branch: 0
+    effect: 0
+    amount: 36
+    costGold: 1081
+    order: 132
+    requiresLeftNodes: 0
+    title: Attack +36
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L133
+    branch: 0
+    effect: 1
+    amount: 53
+    costGold: 1089
+    order: 133
+    requiresLeftNodes: 0
+    title: Armor +53
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L134
+    branch: 0
+    effect: 2
+    amount: 53
+    costGold: 1097
+    order: 134
+    requiresLeftNodes: 0
+    title: Max HP +53
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L135
+    branch: 0
+    effect: 3
+    amount: 34
+    costGold: 1105
+    order: 135
+    requiresLeftNodes: 0
+    title: Camp Heal +34
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L136
+    branch: 0
+    effect: 0
+    amount: 37
+    costGold: 1113
+    order: 136
+    requiresLeftNodes: 0
+    title: Attack +37
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L137
+    branch: 0
+    effect: 1
+    amount: 54
+    costGold: 1121
+    order: 137
+    requiresLeftNodes: 0
+    title: Armor +54
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L138
+    branch: 0
+    effect: 2
+    amount: 54
+    costGold: 1129
+    order: 138
+    requiresLeftNodes: 0
+    title: Max HP +54
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L139
+    branch: 0
+    effect: 3
+    amount: 35
+    costGold: 1137
+    order: 139
+    requiresLeftNodes: 0
+    title: Camp Heal +35
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L140
+    branch: 0
+    effect: 0
+    amount: 38
+    costGold: 1145
+    order: 140
+    requiresLeftNodes: 0
+    title: Attack +38
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L141
+    branch: 0
+    effect: 1
+    amount: 55
+    costGold: 1153
+    order: 141
+    requiresLeftNodes: 0
+    title: Armor +55
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L142
+    branch: 0
+    effect: 2
+    amount: 55
+    costGold: 1161
+    order: 142
+    requiresLeftNodes: 0
+    title: Max HP +55
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L143
+    branch: 0
+    effect: 3
+    amount: 36
+    costGold: 1169
+    order: 143
+    requiresLeftNodes: 0
+    title: Camp Heal +36
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L144
+    branch: 0
+    effect: 0
+    amount: 39
+    costGold: 1177
+    order: 144
+    requiresLeftNodes: 0
+    title: Attack +39
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L145
+    branch: 0
+    effect: 1
+    amount: 56
+    costGold: 1185
+    order: 145
+    requiresLeftNodes: 0
+    title: Armor +56
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L146
+    branch: 0
+    effect: 2
+    amount: 56
+    costGold: 1193
+    order: 146
+    requiresLeftNodes: 0
+    title: Max HP +56
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L147
+    branch: 0
+    effect: 3
+    amount: 37
+    costGold: 1201
+    order: 147
+    requiresLeftNodes: 0
+    title: Camp Heal +37
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L148
+    branch: 0
+    effect: 0
+    amount: 40
+    costGold: 1209
+    order: 148
+    requiresLeftNodes: 0
+    title: Attack +40
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L149
+    branch: 0
+    effect: 1
+    amount: 57
+    costGold: 1217
+    order: 149
+    requiresLeftNodes: 0
+    title: Armor +57
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L150
+    branch: 0
+    effect: 2
+    amount: 57
+    costGold: 1225
+    order: 150
+    requiresLeftNodes: 0
+    title: Max HP +57
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L151
+    branch: 0
+    effect: 3
+    amount: 38
+    costGold: 1233
+    order: 151
+    requiresLeftNodes: 0
+    title: Camp Heal +38
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L152
+    branch: 0
+    effect: 0
+    amount: 41
+    costGold: 1241
+    order: 152
+    requiresLeftNodes: 0
+    title: Attack +41
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L153
+    branch: 0
+    effect: 1
+    amount: 58
+    costGold: 1249
+    order: 153
+    requiresLeftNodes: 0
+    title: Armor +58
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L154
+    branch: 0
+    effect: 2
+    amount: 58
+    costGold: 1257
+    order: 154
+    requiresLeftNodes: 0
+    title: Max HP +58
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L155
+    branch: 0
+    effect: 3
+    amount: 39
+    costGold: 1265
+    order: 155
+    requiresLeftNodes: 0
+    title: Camp Heal +39
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L156
+    branch: 0
+    effect: 0
+    amount: 42
+    costGold: 1273
+    order: 156
+    requiresLeftNodes: 0
+    title: Attack +42
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L157
+    branch: 0
+    effect: 1
+    amount: 59
+    costGold: 1281
+    order: 157
+    requiresLeftNodes: 0
+    title: Armor +59
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L158
+    branch: 0
+    effect: 2
+    amount: 59
+    costGold: 1289
+    order: 158
+    requiresLeftNodes: 0
+    title: Max HP +59
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L159
+    branch: 0
+    effect: 3
+    amount: 40
+    costGold: 1297
+    order: 159
+    requiresLeftNodes: 0
+    title: Camp Heal +40
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L160
+    branch: 0
+    effect: 0
+    amount: 43
+    costGold: 1305
+    order: 160
+    requiresLeftNodes: 0
+    title: Attack +43
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L161
+    branch: 0
+    effect: 1
+    amount: 60
+    costGold: 1313
+    order: 161
+    requiresLeftNodes: 0
+    title: Armor +60
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L162
+    branch: 0
+    effect: 2
+    amount: 60
+    costGold: 1321
+    order: 162
+    requiresLeftNodes: 0
+    title: Max HP +60
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L163
+    branch: 0
+    effect: 3
+    amount: 41
+    costGold: 1329
+    order: 163
+    requiresLeftNodes: 0
+    title: Camp Heal +41
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L164
+    branch: 0
+    effect: 0
+    amount: 44
+    costGold: 1337
+    order: 164
+    requiresLeftNodes: 0
+    title: Attack +44
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L165
+    branch: 0
+    effect: 1
+    amount: 61
+    costGold: 1345
+    order: 165
+    requiresLeftNodes: 0
+    title: Armor +61
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L166
+    branch: 0
+    effect: 2
+    amount: 61
+    costGold: 1353
+    order: 166
+    requiresLeftNodes: 0
+    title: Max HP +61
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L167
+    branch: 0
+    effect: 3
+    amount: 42
+    costGold: 1361
+    order: 167
+    requiresLeftNodes: 0
+    title: Camp Heal +42
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L168
+    branch: 0
+    effect: 0
+    amount: 45
+    costGold: 1369
+    order: 168
+    requiresLeftNodes: 0
+    title: Attack +45
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L169
+    branch: 0
+    effect: 1
+    amount: 62
+    costGold: 1377
+    order: 169
+    requiresLeftNodes: 0
+    title: Armor +62
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L170
+    branch: 0
+    effect: 2
+    amount: 62
+    costGold: 1385
+    order: 170
+    requiresLeftNodes: 0
+    title: Max HP +62
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L171
+    branch: 0
+    effect: 3
+    amount: 43
+    costGold: 1393
+    order: 171
+    requiresLeftNodes: 0
+    title: Camp Heal +43
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L172
+    branch: 0
+    effect: 0
+    amount: 46
+    costGold: 1401
+    order: 172
+    requiresLeftNodes: 0
+    title: Attack +46
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L173
+    branch: 0
+    effect: 1
+    amount: 63
+    costGold: 1409
+    order: 173
+    requiresLeftNodes: 0
+    title: Armor +63
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L174
+    branch: 0
+    effect: 2
+    amount: 63
+    costGold: 1417
+    order: 174
+    requiresLeftNodes: 0
+    title: Max HP +63
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L175
+    branch: 0
+    effect: 3
+    amount: 44
+    costGold: 1425
+    order: 175
+    requiresLeftNodes: 0
+    title: Camp Heal +44
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L176
+    branch: 0
+    effect: 0
+    amount: 47
+    costGold: 1433
+    order: 176
+    requiresLeftNodes: 0
+    title: Attack +47
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L177
+    branch: 0
+    effect: 1
+    amount: 64
+    costGold: 1441
+    order: 177
+    requiresLeftNodes: 0
+    title: Armor +64
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L178
+    branch: 0
+    effect: 2
+    amount: 64
+    costGold: 1449
+    order: 178
+    requiresLeftNodes: 0
+    title: Max HP +64
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L179
+    branch: 0
+    effect: 3
+    amount: 45
+    costGold: 1457
+    order: 179
+    requiresLeftNodes: 0
+    title: Camp Heal +45
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L180
+    branch: 0
+    effect: 0
+    amount: 48
+    costGold: 1465
+    order: 180
+    requiresLeftNodes: 0
+    title: Attack +48
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L181
+    branch: 0
+    effect: 1
+    amount: 65
+    costGold: 1473
+    order: 181
+    requiresLeftNodes: 0
+    title: Armor +65
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L182
+    branch: 0
+    effect: 2
+    amount: 65
+    costGold: 1481
+    order: 182
+    requiresLeftNodes: 0
+    title: Max HP +65
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L183
+    branch: 0
+    effect: 3
+    amount: 46
+    costGold: 1489
+    order: 183
+    requiresLeftNodes: 0
+    title: Camp Heal +46
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L184
+    branch: 0
+    effect: 0
+    amount: 49
+    costGold: 1497
+    order: 184
+    requiresLeftNodes: 0
+    title: Attack +49
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L185
+    branch: 0
+    effect: 1
+    amount: 66
+    costGold: 1505
+    order: 185
+    requiresLeftNodes: 0
+    title: Armor +66
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L186
+    branch: 0
+    effect: 2
+    amount: 66
+    costGold: 1513
+    order: 186
+    requiresLeftNodes: 0
+    title: Max HP +66
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L187
+    branch: 0
+    effect: 3
+    amount: 47
+    costGold: 1521
+    order: 187
+    requiresLeftNodes: 0
+    title: Camp Heal +47
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L188
+    branch: 0
+    effect: 0
+    amount: 50
+    costGold: 1529
+    order: 188
+    requiresLeftNodes: 0
+    title: Attack +50
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L189
+    branch: 0
+    effect: 1
+    amount: 67
+    costGold: 1537
+    order: 189
+    requiresLeftNodes: 0
+    title: Armor +67
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L190
+    branch: 0
+    effect: 2
+    amount: 67
+    costGold: 1545
+    order: 190
+    requiresLeftNodes: 0
+    title: Max HP +67
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L191
+    branch: 0
+    effect: 3
+    amount: 48
+    costGold: 1553
+    order: 191
+    requiresLeftNodes: 0
+    title: Camp Heal +48
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L192
+    branch: 0
+    effect: 0
+    amount: 51
+    costGold: 1561
+    order: 192
+    requiresLeftNodes: 0
+    title: Attack +51
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L193
+    branch: 0
+    effect: 1
+    amount: 68
+    costGold: 1569
+    order: 193
+    requiresLeftNodes: 0
+    title: Armor +68
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L194
+    branch: 0
+    effect: 2
+    amount: 68
+    costGold: 1577
+    order: 194
+    requiresLeftNodes: 0
+    title: Max HP +68
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L195
+    branch: 0
+    effect: 3
+    amount: 49
+    costGold: 1585
+    order: 195
+    requiresLeftNodes: 0
+    title: Camp Heal +49
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L196
+    branch: 0
+    effect: 0
+    amount: 52
+    costGold: 1593
+    order: 196
+    requiresLeftNodes: 0
+    title: Attack +52
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L197
+    branch: 0
+    effect: 1
+    amount: 69
+    costGold: 1601
+    order: 197
+    requiresLeftNodes: 0
+    title: Armor +69
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L198
+    branch: 0
+    effect: 2
+    amount: 69
+    costGold: 1609
+    order: 198
+    requiresLeftNodes: 0
+    title: Max HP +69
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L199
+    branch: 0
+    effect: 3
+    amount: 50
+    costGold: 1617
+    order: 199
+    requiresLeftNodes: 0
+    title: Camp Heal +50
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L200
+    branch: 0
+    effect: 0
+    amount: 53
+    costGold: 1625
+    order: 200
+    requiresLeftNodes: 0
+    title: Attack +53
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L201
+    branch: 0
+    effect: 1
+    amount: 70
+    costGold: 1633
+    order: 201
+    requiresLeftNodes: 0
+    title: Armor +70
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L202
+    branch: 0
+    effect: 2
+    amount: 70
+    costGold: 1641
+    order: 202
+    requiresLeftNodes: 0
+    title: Max HP +70
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L203
+    branch: 0
+    effect: 3
+    amount: 51
+    costGold: 1649
+    order: 203
+    requiresLeftNodes: 0
+    title: Camp Heal +51
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L204
+    branch: 0
+    effect: 0
+    amount: 54
+    costGold: 1657
+    order: 204
+    requiresLeftNodes: 0
+    title: Attack +54
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L205
+    branch: 0
+    effect: 1
+    amount: 71
+    costGold: 1665
+    order: 205
+    requiresLeftNodes: 0
+    title: Armor +71
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L206
+    branch: 0
+    effect: 2
+    amount: 71
+    costGold: 1673
+    order: 206
+    requiresLeftNodes: 0
+    title: Max HP +71
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L207
+    branch: 0
+    effect: 3
+    amount: 52
+    costGold: 1681
+    order: 207
+    requiresLeftNodes: 0
+    title: Camp Heal +52
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L208
+    branch: 0
+    effect: 0
+    amount: 55
+    costGold: 1689
+    order: 208
+    requiresLeftNodes: 0
+    title: Attack +55
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L209
+    branch: 0
+    effect: 1
+    amount: 72
+    costGold: 1697
+    order: 209
+    requiresLeftNodes: 0
+    title: Armor +72
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L210
+    branch: 0
+    effect: 2
+    amount: 72
+    costGold: 1705
+    order: 210
+    requiresLeftNodes: 0
+    title: Max HP +72
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L211
+    branch: 0
+    effect: 3
+    amount: 53
+    costGold: 1713
+    order: 211
+    requiresLeftNodes: 0
+    title: Camp Heal +53
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L212
+    branch: 0
+    effect: 0
+    amount: 56
+    costGold: 1721
+    order: 212
+    requiresLeftNodes: 0
+    title: Attack +56
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L213
+    branch: 0
+    effect: 1
+    amount: 73
+    costGold: 1729
+    order: 213
+    requiresLeftNodes: 0
+    title: Armor +73
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L214
+    branch: 0
+    effect: 2
+    amount: 73
+    costGold: 1737
+    order: 214
+    requiresLeftNodes: 0
+    title: Max HP +73
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L215
+    branch: 0
+    effect: 3
+    amount: 54
+    costGold: 1745
+    order: 215
+    requiresLeftNodes: 0
+    title: Camp Heal +54
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L216
+    branch: 0
+    effect: 0
+    amount: 57
+    costGold: 1753
+    order: 216
+    requiresLeftNodes: 0
+    title: Attack +57
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L217
+    branch: 0
+    effect: 1
+    amount: 74
+    costGold: 1761
+    order: 217
+    requiresLeftNodes: 0
+    title: Armor +74
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L218
+    branch: 0
+    effect: 2
+    amount: 74
+    costGold: 1769
+    order: 218
+    requiresLeftNodes: 0
+    title: Max HP +74
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L219
+    branch: 0
+    effect: 3
+    amount: 55
+    costGold: 1777
+    order: 219
+    requiresLeftNodes: 0
+    title: Camp Heal +55
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L220
+    branch: 0
+    effect: 0
+    amount: 58
+    costGold: 1785
+    order: 220
+    requiresLeftNodes: 0
+    title: Attack +58
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L221
+    branch: 0
+    effect: 1
+    amount: 75
+    costGold: 1793
+    order: 221
+    requiresLeftNodes: 0
+    title: Armor +75
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L222
+    branch: 0
+    effect: 2
+    amount: 75
+    costGold: 1801
+    order: 222
+    requiresLeftNodes: 0
+    title: Max HP +75
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L223
+    branch: 0
+    effect: 3
+    amount: 56
+    costGold: 1809
+    order: 223
+    requiresLeftNodes: 0
+    title: Camp Heal +56
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L224
+    branch: 0
+    effect: 0
+    amount: 59
+    costGold: 1817
+    order: 224
+    requiresLeftNodes: 0
+    title: Attack +59
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L225
+    branch: 0
+    effect: 1
+    amount: 76
+    costGold: 1825
+    order: 225
+    requiresLeftNodes: 0
+    title: Armor +76
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L226
+    branch: 0
+    effect: 2
+    amount: 76
+    costGold: 1833
+    order: 226
+    requiresLeftNodes: 0
+    title: Max HP +76
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L227
+    branch: 0
+    effect: 3
+    amount: 57
+    costGold: 1841
+    order: 227
+    requiresLeftNodes: 0
+    title: Camp Heal +57
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L228
+    branch: 0
+    effect: 0
+    amount: 60
+    costGold: 1849
+    order: 228
+    requiresLeftNodes: 0
+    title: Attack +60
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L229
+    branch: 0
+    effect: 1
+    amount: 77
+    costGold: 1857
+    order: 229
+    requiresLeftNodes: 0
+    title: Armor +77
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L230
+    branch: 0
+    effect: 2
+    amount: 77
+    costGold: 1865
+    order: 230
+    requiresLeftNodes: 0
+    title: Max HP +77
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L231
+    branch: 0
+    effect: 3
+    amount: 58
+    costGold: 1873
+    order: 231
+    requiresLeftNodes: 0
+    title: Camp Heal +58
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L232
+    branch: 0
+    effect: 0
+    amount: 61
+    costGold: 1881
+    order: 232
+    requiresLeftNodes: 0
+    title: Attack +61
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L233
+    branch: 0
+    effect: 1
+    amount: 78
+    costGold: 1889
+    order: 233
+    requiresLeftNodes: 0
+    title: Armor +78
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L234
+    branch: 0
+    effect: 2
+    amount: 78
+    costGold: 1897
+    order: 234
+    requiresLeftNodes: 0
+    title: Max HP +78
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L235
+    branch: 0
+    effect: 3
+    amount: 59
+    costGold: 1905
+    order: 235
+    requiresLeftNodes: 0
+    title: Camp Heal +59
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L236
+    branch: 0
+    effect: 0
+    amount: 62
+    costGold: 1913
+    order: 236
+    requiresLeftNodes: 0
+    title: Attack +62
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L237
+    branch: 0
+    effect: 1
+    amount: 79
+    costGold: 1921
+    order: 237
+    requiresLeftNodes: 0
+    title: Armor +79
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L238
+    branch: 0
+    effect: 2
+    amount: 79
+    costGold: 1929
+    order: 238
+    requiresLeftNodes: 0
+    title: Max HP +79
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L239
+    branch: 0
+    effect: 3
+    amount: 60
+    costGold: 1937
+    order: 239
+    requiresLeftNodes: 0
+    title: Camp Heal +60
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L240
+    branch: 0
+    effect: 0
+    amount: 63
+    costGold: 1945
+    order: 240
+    requiresLeftNodes: 0
+    title: Attack +63
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L241
+    branch: 0
+    effect: 1
+    amount: 80
+    costGold: 1953
+    order: 241
+    requiresLeftNodes: 0
+    title: Armor +80
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L242
+    branch: 0
+    effect: 2
+    amount: 80
+    costGold: 1961
+    order: 242
+    requiresLeftNodes: 0
+    title: Max HP +80
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L243
+    branch: 0
+    effect: 3
+    amount: 61
+    costGold: 1969
+    order: 243
+    requiresLeftNodes: 0
+    title: Camp Heal +61
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L244
+    branch: 0
+    effect: 0
+    amount: 64
+    costGold: 1977
+    order: 244
+    requiresLeftNodes: 0
+    title: Attack +64
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L245
+    branch: 0
+    effect: 1
+    amount: 81
+    costGold: 1985
+    order: 245
+    requiresLeftNodes: 0
+    title: Armor +81
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L246
+    branch: 0
+    effect: 2
+    amount: 81
+    costGold: 1993
+    order: 246
+    requiresLeftNodes: 0
+    title: Max HP +81
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L247
+    branch: 0
+    effect: 3
+    amount: 62
+    costGold: 2001
+    order: 247
+    requiresLeftNodes: 0
+    title: Camp Heal +62
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L248
+    branch: 0
+    effect: 0
+    amount: 65
+    costGold: 2009
+    order: 248
+    requiresLeftNodes: 0
+    title: Attack +65
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L249
+    branch: 0
+    effect: 1
+    amount: 82
+    costGold: 2017
+    order: 249
+    requiresLeftNodes: 0
+    title: Armor +82
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L250
+    branch: 0
+    effect: 2
+    amount: 82
+    costGold: 2025
+    order: 250
+    requiresLeftNodes: 0
+    title: Max HP +82
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L251
+    branch: 0
+    effect: 3
+    amount: 63
+    costGold: 2033
+    order: 251
+    requiresLeftNodes: 0
+    title: Camp Heal +63
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L252
+    branch: 0
+    effect: 0
+    amount: 66
+    costGold: 2041
+    order: 252
+    requiresLeftNodes: 0
+    title: Attack +66
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L253
+    branch: 0
+    effect: 1
+    amount: 83
+    costGold: 2049
+    order: 253
+    requiresLeftNodes: 0
+    title: Armor +83
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L254
+    branch: 0
+    effect: 2
+    amount: 83
+    costGold: 2057
+    order: 254
+    requiresLeftNodes: 0
+    title: Max HP +83
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L255
+    branch: 0
+    effect: 3
+    amount: 64
+    costGold: 2065
+    order: 255
+    requiresLeftNodes: 0
+    title: Camp Heal +64
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L256
+    branch: 0
+    effect: 0
+    amount: 67
+    costGold: 2073
+    order: 256
+    requiresLeftNodes: 0
+    title: Attack +67
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L257
+    branch: 0
+    effect: 1
+    amount: 84
+    costGold: 2081
+    order: 257
+    requiresLeftNodes: 0
+    title: Armor +84
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L258
+    branch: 0
+    effect: 2
+    amount: 84
+    costGold: 2089
+    order: 258
+    requiresLeftNodes: 0
+    title: Max HP +84
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L259
+    branch: 0
+    effect: 3
+    amount: 65
+    costGold: 2097
+    order: 259
+    requiresLeftNodes: 0
+    title: Camp Heal +65
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L260
+    branch: 0
+    effect: 0
+    amount: 68
+    costGold: 2105
+    order: 260
+    requiresLeftNodes: 0
+    title: Attack +68
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L261
+    branch: 0
+    effect: 1
+    amount: 85
+    costGold: 2113
+    order: 261
+    requiresLeftNodes: 0
+    title: Armor +85
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L262
+    branch: 0
+    effect: 2
+    amount: 85
+    costGold: 2121
+    order: 262
+    requiresLeftNodes: 0
+    title: Max HP +85
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L263
+    branch: 0
+    effect: 3
+    amount: 66
+    costGold: 2129
+    order: 263
+    requiresLeftNodes: 0
+    title: Camp Heal +66
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L264
+    branch: 0
+    effect: 0
+    amount: 69
+    costGold: 2137
+    order: 264
+    requiresLeftNodes: 0
+    title: Attack +69
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L265
+    branch: 0
+    effect: 1
+    amount: 86
+    costGold: 2145
+    order: 265
+    requiresLeftNodes: 0
+    title: Armor +86
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L266
+    branch: 0
+    effect: 2
+    amount: 86
+    costGold: 2153
+    order: 266
+    requiresLeftNodes: 0
+    title: Max HP +86
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L267
+    branch: 0
+    effect: 3
+    amount: 67
+    costGold: 2161
+    order: 267
+    requiresLeftNodes: 0
+    title: Camp Heal +67
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L268
+    branch: 0
+    effect: 0
+    amount: 70
+    costGold: 2169
+    order: 268
+    requiresLeftNodes: 0
+    title: Attack +70
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L269
+    branch: 0
+    effect: 1
+    amount: 87
+    costGold: 2177
+    order: 269
+    requiresLeftNodes: 0
+    title: Armor +87
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L270
+    branch: 0
+    effect: 2
+    amount: 87
+    costGold: 2185
+    order: 270
+    requiresLeftNodes: 0
+    title: Max HP +87
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L271
+    branch: 0
+    effect: 3
+    amount: 68
+    costGold: 2193
+    order: 271
+    requiresLeftNodes: 0
+    title: Camp Heal +68
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L272
+    branch: 0
+    effect: 0
+    amount: 71
+    costGold: 2201
+    order: 272
+    requiresLeftNodes: 0
+    title: Attack +71
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L273
+    branch: 0
+    effect: 1
+    amount: 88
+    costGold: 2209
+    order: 273
+    requiresLeftNodes: 0
+    title: Armor +88
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L274
+    branch: 0
+    effect: 2
+    amount: 88
+    costGold: 2217
+    order: 274
+    requiresLeftNodes: 0
+    title: Max HP +88
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L275
+    branch: 0
+    effect: 3
+    amount: 69
+    costGold: 2225
+    order: 275
+    requiresLeftNodes: 0
+    title: Camp Heal +69
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L276
+    branch: 0
+    effect: 0
+    amount: 72
+    costGold: 2233
+    order: 276
+    requiresLeftNodes: 0
+    title: Attack +72
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L277
+    branch: 0
+    effect: 1
+    amount: 89
+    costGold: 2241
+    order: 277
+    requiresLeftNodes: 0
+    title: Armor +89
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L278
+    branch: 0
+    effect: 2
+    amount: 89
+    costGold: 2249
+    order: 278
+    requiresLeftNodes: 0
+    title: Max HP +89
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L279
+    branch: 0
+    effect: 3
+    amount: 70
+    costGold: 2257
+    order: 279
+    requiresLeftNodes: 0
+    title: Camp Heal +70
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L280
+    branch: 0
+    effect: 0
+    amount: 73
+    costGold: 2265
+    order: 280
+    requiresLeftNodes: 0
+    title: Attack +73
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L281
+    branch: 0
+    effect: 1
+    amount: 90
+    costGold: 2273
+    order: 281
+    requiresLeftNodes: 0
+    title: Armor +90
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L282
+    branch: 0
+    effect: 2
+    amount: 90
+    costGold: 2281
+    order: 282
+    requiresLeftNodes: 0
+    title: Max HP +90
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L283
+    branch: 0
+    effect: 3
+    amount: 71
+    costGold: 2289
+    order: 283
+    requiresLeftNodes: 0
+    title: Camp Heal +71
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L284
+    branch: 0
+    effect: 0
+    amount: 74
+    costGold: 2297
+    order: 284
+    requiresLeftNodes: 0
+    title: Attack +74
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L285
+    branch: 0
+    effect: 1
+    amount: 91
+    costGold: 2305
+    order: 285
+    requiresLeftNodes: 0
+    title: Armor +91
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L286
+    branch: 0
+    effect: 2
+    amount: 91
+    costGold: 2313
+    order: 286
+    requiresLeftNodes: 0
+    title: Max HP +91
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L287
+    branch: 0
+    effect: 3
+    amount: 72
+    costGold: 2321
+    order: 287
+    requiresLeftNodes: 0
+    title: Camp Heal +72
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L288
+    branch: 0
+    effect: 0
+    amount: 75
+    costGold: 2329
+    order: 288
+    requiresLeftNodes: 0
+    title: Attack +75
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L289
+    branch: 0
+    effect: 1
+    amount: 92
+    costGold: 2337
+    order: 289
+    requiresLeftNodes: 0
+    title: Armor +92
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L290
+    branch: 0
+    effect: 2
+    amount: 92
+    costGold: 2345
+    order: 290
+    requiresLeftNodes: 0
+    title: Max HP +92
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L291
+    branch: 0
+    effect: 3
+    amount: 73
+    costGold: 2353
+    order: 291
+    requiresLeftNodes: 0
+    title: Camp Heal +73
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L292
+    branch: 0
+    effect: 0
+    amount: 76
+    costGold: 2361
+    order: 292
+    requiresLeftNodes: 0
+    title: Attack +76
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L293
+    branch: 0
+    effect: 1
+    amount: 93
+    costGold: 2369
+    order: 293
+    requiresLeftNodes: 0
+    title: Armor +93
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L294
+    branch: 0
+    effect: 2
+    amount: 93
+    costGold: 2377
+    order: 294
+    requiresLeftNodes: 0
+    title: Max HP +93
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L295
+    branch: 0
+    effect: 3
+    amount: 74
+    costGold: 2385
+    order: 295
+    requiresLeftNodes: 0
+    title: Camp Heal +74
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L296
+    branch: 0
+    effect: 0
+    amount: 77
+    costGold: 2393
+    order: 296
+    requiresLeftNodes: 0
+    title: Attack +77
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L297
+    branch: 0
+    effect: 1
+    amount: 94
+    costGold: 2401
+    order: 297
+    requiresLeftNodes: 0
+    title: Armor +94
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L298
+    branch: 0
+    effect: 2
+    amount: 94
+    costGold: 2409
+    order: 298
+    requiresLeftNodes: 0
+    title: Max HP +94
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L299
+    branch: 0
+    effect: 3
+    amount: 75
+    costGold: 2417
+    order: 299
+    requiresLeftNodes: 0
+    title: Camp Heal +75
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L300
+    branch: 0
+    effect: 0
+    amount: 78
+    costGold: 2425
+    order: 300
+    requiresLeftNodes: 0
+    title: Attack +78
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L301
+    branch: 0
+    effect: 1
+    amount: 95
+    costGold: 2433
+    order: 301
+    requiresLeftNodes: 0
+    title: Armor +95
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L302
+    branch: 0
+    effect: 2
+    amount: 95
+    costGold: 2441
+    order: 302
+    requiresLeftNodes: 0
+    title: Max HP +95
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L303
+    branch: 0
+    effect: 3
+    amount: 76
+    costGold: 2449
+    order: 303
+    requiresLeftNodes: 0
+    title: Camp Heal +76
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L304
+    branch: 0
+    effect: 0
+    amount: 79
+    costGold: 2457
+    order: 304
+    requiresLeftNodes: 0
+    title: Attack +79
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L305
+    branch: 0
+    effect: 1
+    amount: 96
+    costGold: 2465
+    order: 305
+    requiresLeftNodes: 0
+    title: Armor +96
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L306
+    branch: 0
+    effect: 2
+    amount: 96
+    costGold: 2473
+    order: 306
+    requiresLeftNodes: 0
+    title: Max HP +96
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L307
+    branch: 0
+    effect: 3
+    amount: 77
+    costGold: 2481
+    order: 307
+    requiresLeftNodes: 0
+    title: Camp Heal +77
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L308
+    branch: 0
+    effect: 0
+    amount: 80
+    costGold: 2489
+    order: 308
+    requiresLeftNodes: 0
+    title: Attack +80
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L309
+    branch: 0
+    effect: 1
+    amount: 97
+    costGold: 2497
+    order: 309
+    requiresLeftNodes: 0
+    title: Armor +97
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L310
+    branch: 0
+    effect: 2
+    amount: 97
+    costGold: 2505
+    order: 310
+    requiresLeftNodes: 0
+    title: Max HP +97
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L311
+    branch: 0
+    effect: 3
+    amount: 78
+    costGold: 2513
+    order: 311
+    requiresLeftNodes: 0
+    title: Camp Heal +78
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L312
+    branch: 0
+    effect: 0
+    amount: 81
+    costGold: 2521
+    order: 312
+    requiresLeftNodes: 0
+    title: Attack +81
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L313
+    branch: 0
+    effect: 1
+    amount: 98
+    costGold: 2529
+    order: 313
+    requiresLeftNodes: 0
+    title: Armor +98
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L314
+    branch: 0
+    effect: 2
+    amount: 98
+    costGold: 2537
+    order: 314
+    requiresLeftNodes: 0
+    title: Max HP +98
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L315
+    branch: 0
+    effect: 3
+    amount: 79
+    costGold: 2545
+    order: 315
+    requiresLeftNodes: 0
+    title: Camp Heal +79
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L316
+    branch: 0
+    effect: 0
+    amount: 82
+    costGold: 2553
+    order: 316
+    requiresLeftNodes: 0
+    title: Attack +82
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L317
+    branch: 0
+    effect: 1
+    amount: 99
+    costGold: 2561
+    order: 317
+    requiresLeftNodes: 0
+    title: Armor +99
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L318
+    branch: 0
+    effect: 2
+    amount: 99
+    costGold: 2569
+    order: 318
+    requiresLeftNodes: 0
+    title: Max HP +99
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L319
+    branch: 0
+    effect: 3
+    amount: 80
+    costGold: 2577
+    order: 319
+    requiresLeftNodes: 0
+    title: Camp Heal +80
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L320
+    branch: 0
+    effect: 0
+    amount: 83
+    costGold: 2585
+    order: 320
+    requiresLeftNodes: 0
+    title: Attack +83
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L321
+    branch: 0
+    effect: 1
+    amount: 100
+    costGold: 2593
+    order: 321
+    requiresLeftNodes: 0
+    title: Armor +100
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L322
+    branch: 0
+    effect: 2
+    amount: 100
+    costGold: 2601
+    order: 322
+    requiresLeftNodes: 0
+    title: Max HP +100
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L323
+    branch: 0
+    effect: 3
+    amount: 81
+    costGold: 2609
+    order: 323
+    requiresLeftNodes: 0
+    title: Camp Heal +81
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L324
+    branch: 0
+    effect: 0
+    amount: 84
+    costGold: 2617
+    order: 324
+    requiresLeftNodes: 0
+    title: Attack +84
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L325
+    branch: 0
+    effect: 1
+    amount: 101
+    costGold: 2625
+    order: 325
+    requiresLeftNodes: 0
+    title: Armor +101
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L326
+    branch: 0
+    effect: 2
+    amount: 101
+    costGold: 2633
+    order: 326
+    requiresLeftNodes: 0
+    title: Max HP +101
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L327
+    branch: 0
+    effect: 3
+    amount: 82
+    costGold: 2641
+    order: 327
+    requiresLeftNodes: 0
+    title: Camp Heal +82
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L328
+    branch: 0
+    effect: 0
+    amount: 85
+    costGold: 2649
+    order: 328
+    requiresLeftNodes: 0
+    title: Attack +85
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L329
+    branch: 0
+    effect: 1
+    amount: 102
+    costGold: 2657
+    order: 329
+    requiresLeftNodes: 0
+    title: Armor +102
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L330
+    branch: 0
+    effect: 2
+    amount: 102
+    costGold: 2665
+    order: 330
+    requiresLeftNodes: 0
+    title: Max HP +102
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L331
+    branch: 0
+    effect: 3
+    amount: 83
+    costGold: 2673
+    order: 331
+    requiresLeftNodes: 0
+    title: Camp Heal +83
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L332
+    branch: 0
+    effect: 0
+    amount: 86
+    costGold: 2681
+    order: 332
+    requiresLeftNodes: 0
+    title: Attack +86
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L333
+    branch: 0
+    effect: 1
+    amount: 103
+    costGold: 2689
+    order: 333
+    requiresLeftNodes: 0
+    title: Armor +103
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L334
+    branch: 0
+    effect: 2
+    amount: 103
+    costGold: 2697
+    order: 334
+    requiresLeftNodes: 0
+    title: Max HP +103
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L335
+    branch: 0
+    effect: 3
+    amount: 84
+    costGold: 2705
+    order: 335
+    requiresLeftNodes: 0
+    title: Camp Heal +84
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L336
+    branch: 0
+    effect: 0
+    amount: 87
+    costGold: 2713
+    order: 336
+    requiresLeftNodes: 0
+    title: Attack +87
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L337
+    branch: 0
+    effect: 1
+    amount: 104
+    costGold: 2721
+    order: 337
+    requiresLeftNodes: 0
+    title: Armor +104
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L338
+    branch: 0
+    effect: 2
+    amount: 104
+    costGold: 2729
+    order: 338
+    requiresLeftNodes: 0
+    title: Max HP +104
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L339
+    branch: 0
+    effect: 3
+    amount: 85
+    costGold: 2737
+    order: 339
+    requiresLeftNodes: 0
+    title: Camp Heal +85
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L340
+    branch: 0
+    effect: 0
+    amount: 88
+    costGold: 2745
+    order: 340
+    requiresLeftNodes: 0
+    title: Attack +88
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L341
+    branch: 0
+    effect: 1
+    amount: 105
+    costGold: 2753
+    order: 341
+    requiresLeftNodes: 0
+    title: Armor +105
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L342
+    branch: 0
+    effect: 2
+    amount: 105
+    costGold: 2761
+    order: 342
+    requiresLeftNodes: 0
+    title: Max HP +105
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L343
+    branch: 0
+    effect: 3
+    amount: 86
+    costGold: 2769
+    order: 343
+    requiresLeftNodes: 0
+    title: Camp Heal +86
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L344
+    branch: 0
+    effect: 0
+    amount: 89
+    costGold: 2777
+    order: 344
+    requiresLeftNodes: 0
+    title: Attack +89
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L345
+    branch: 0
+    effect: 1
+    amount: 106
+    costGold: 2785
+    order: 345
+    requiresLeftNodes: 0
+    title: Armor +106
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L346
+    branch: 0
+    effect: 2
+    amount: 106
+    costGold: 2793
+    order: 346
+    requiresLeftNodes: 0
+    title: Max HP +106
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L347
+    branch: 0
+    effect: 3
+    amount: 87
+    costGold: 2801
+    order: 347
+    requiresLeftNodes: 0
+    title: Camp Heal +87
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L348
+    branch: 0
+    effect: 0
+    amount: 90
+    costGold: 2809
+    order: 348
+    requiresLeftNodes: 0
+    title: Attack +90
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L349
+    branch: 0
+    effect: 1
+    amount: 107
+    costGold: 2817
+    order: 349
+    requiresLeftNodes: 0
+    title: Armor +107
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L350
+    branch: 0
+    effect: 2
+    amount: 107
+    costGold: 2825
+    order: 350
+    requiresLeftNodes: 0
+    title: Max HP +107
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L351
+    branch: 0
+    effect: 3
+    amount: 88
+    costGold: 2833
+    order: 351
+    requiresLeftNodes: 0
+    title: Camp Heal +88
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L352
+    branch: 0
+    effect: 0
+    amount: 91
+    costGold: 2841
+    order: 352
+    requiresLeftNodes: 0
+    title: Attack +91
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L353
+    branch: 0
+    effect: 1
+    amount: 108
+    costGold: 2849
+    order: 353
+    requiresLeftNodes: 0
+    title: Armor +108
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L354
+    branch: 0
+    effect: 2
+    amount: 108
+    costGold: 2857
+    order: 354
+    requiresLeftNodes: 0
+    title: Max HP +108
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L355
+    branch: 0
+    effect: 3
+    amount: 89
+    costGold: 2865
+    order: 355
+    requiresLeftNodes: 0
+    title: Camp Heal +89
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L356
+    branch: 0
+    effect: 0
+    amount: 92
+    costGold: 2873
+    order: 356
+    requiresLeftNodes: 0
+    title: Attack +92
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L357
+    branch: 0
+    effect: 1
+    amount: 109
+    costGold: 2881
+    order: 357
+    requiresLeftNodes: 0
+    title: Armor +109
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L358
+    branch: 0
+    effect: 2
+    amount: 109
+    costGold: 2889
+    order: 358
+    requiresLeftNodes: 0
+    title: Max HP +109
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L359
+    branch: 0
+    effect: 3
+    amount: 90
+    costGold: 2897
+    order: 359
+    requiresLeftNodes: 0
+    title: Camp Heal +90
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L360
+    branch: 0
+    effect: 0
+    amount: 93
+    costGold: 2905
+    order: 360
+    requiresLeftNodes: 0
+    title: Attack +93
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L361
+    branch: 0
+    effect: 1
+    amount: 110
+    costGold: 2913
+    order: 361
+    requiresLeftNodes: 0
+    title: Armor +110
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L362
+    branch: 0
+    effect: 2
+    amount: 110
+    costGold: 2921
+    order: 362
+    requiresLeftNodes: 0
+    title: Max HP +110
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L363
+    branch: 0
+    effect: 3
+    amount: 91
+    costGold: 2929
+    order: 363
+    requiresLeftNodes: 0
+    title: Camp Heal +91
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L364
+    branch: 0
+    effect: 0
+    amount: 94
+    costGold: 2937
+    order: 364
+    requiresLeftNodes: 0
+    title: Attack +94
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L365
+    branch: 0
+    effect: 1
+    amount: 111
+    costGold: 2945
+    order: 365
+    requiresLeftNodes: 0
+    title: Armor +111
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L366
+    branch: 0
+    effect: 2
+    amount: 111
+    costGold: 2953
+    order: 366
+    requiresLeftNodes: 0
+    title: Max HP +111
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L367
+    branch: 0
+    effect: 3
+    amount: 92
+    costGold: 2961
+    order: 367
+    requiresLeftNodes: 0
+    title: Camp Heal +92
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L368
+    branch: 0
+    effect: 0
+    amount: 95
+    costGold: 2969
+    order: 368
+    requiresLeftNodes: 0
+    title: Attack +95
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L369
+    branch: 0
+    effect: 1
+    amount: 112
+    costGold: 2977
+    order: 369
+    requiresLeftNodes: 0
+    title: Armor +112
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L370
+    branch: 0
+    effect: 2
+    amount: 112
+    costGold: 2985
+    order: 370
+    requiresLeftNodes: 0
+    title: Max HP +112
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L371
+    branch: 0
+    effect: 3
+    amount: 93
+    costGold: 2993
+    order: 371
+    requiresLeftNodes: 0
+    title: Camp Heal +93
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L372
+    branch: 0
+    effect: 0
+    amount: 96
+    costGold: 3001
+    order: 372
+    requiresLeftNodes: 0
+    title: Attack +96
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L373
+    branch: 0
+    effect: 1
+    amount: 113
+    costGold: 3009
+    order: 373
+    requiresLeftNodes: 0
+    title: Armor +113
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L374
+    branch: 0
+    effect: 2
+    amount: 113
+    costGold: 3017
+    order: 374
+    requiresLeftNodes: 0
+    title: Max HP +113
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L375
+    branch: 0
+    effect: 3
+    amount: 94
+    costGold: 3025
+    order: 375
+    requiresLeftNodes: 0
+    title: Camp Heal +94
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L376
+    branch: 0
+    effect: 0
+    amount: 97
+    costGold: 3033
+    order: 376
+    requiresLeftNodes: 0
+    title: Attack +97
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L377
+    branch: 0
+    effect: 1
+    amount: 114
+    costGold: 3041
+    order: 377
+    requiresLeftNodes: 0
+    title: Armor +114
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L378
+    branch: 0
+    effect: 2
+    amount: 114
+    costGold: 3049
+    order: 378
+    requiresLeftNodes: 0
+    title: Max HP +114
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L379
+    branch: 0
+    effect: 3
+    amount: 95
+    costGold: 3057
+    order: 379
+    requiresLeftNodes: 0
+    title: Camp Heal +95
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L380
+    branch: 0
+    effect: 0
+    amount: 98
+    costGold: 3065
+    order: 380
+    requiresLeftNodes: 0
+    title: Attack +98
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L381
+    branch: 0
+    effect: 1
+    amount: 115
+    costGold: 3073
+    order: 381
+    requiresLeftNodes: 0
+    title: Armor +115
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L382
+    branch: 0
+    effect: 2
+    amount: 115
+    costGold: 3081
+    order: 382
+    requiresLeftNodes: 0
+    title: Max HP +115
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L383
+    branch: 0
+    effect: 3
+    amount: 96
+    costGold: 3089
+    order: 383
+    requiresLeftNodes: 0
+    title: Camp Heal +96
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L384
+    branch: 0
+    effect: 0
+    amount: 99
+    costGold: 3097
+    order: 384
+    requiresLeftNodes: 0
+    title: Attack +99
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L385
+    branch: 0
+    effect: 1
+    amount: 116
+    costGold: 3105
+    order: 385
+    requiresLeftNodes: 0
+    title: Armor +116
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L386
+    branch: 0
+    effect: 2
+    amount: 116
+    costGold: 3113
+    order: 386
+    requiresLeftNodes: 0
+    title: Max HP +116
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L387
+    branch: 0
+    effect: 3
+    amount: 97
+    costGold: 3121
+    order: 387
+    requiresLeftNodes: 0
+    title: Camp Heal +97
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L388
+    branch: 0
+    effect: 0
+    amount: 100
+    costGold: 3129
+    order: 388
+    requiresLeftNodes: 0
+    title: Attack +100
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L389
+    branch: 0
+    effect: 1
+    amount: 117
+    costGold: 3137
+    order: 389
+    requiresLeftNodes: 0
+    title: Armor +117
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L390
+    branch: 0
+    effect: 2
+    amount: 117
+    costGold: 3145
+    order: 390
+    requiresLeftNodes: 0
+    title: Max HP +117
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L391
+    branch: 0
+    effect: 3
+    amount: 98
+    costGold: 3153
+    order: 391
+    requiresLeftNodes: 0
+    title: Camp Heal +98
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L392
+    branch: 0
+    effect: 0
+    amount: 101
+    costGold: 3161
+    order: 392
+    requiresLeftNodes: 0
+    title: Attack +101
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L393
+    branch: 0
+    effect: 1
+    amount: 118
+    costGold: 3169
+    order: 393
+    requiresLeftNodes: 0
+    title: Armor +118
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L394
+    branch: 0
+    effect: 2
+    amount: 118
+    costGold: 3177
+    order: 394
+    requiresLeftNodes: 0
+    title: Max HP +118
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L395
+    branch: 0
+    effect: 3
+    amount: 99
+    costGold: 3185
+    order: 395
+    requiresLeftNodes: 0
+    title: Camp Heal +99
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L396
+    branch: 0
+    effect: 0
+    amount: 102
+    costGold: 3193
+    order: 396
+    requiresLeftNodes: 0
+    title: Attack +102
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L397
+    branch: 0
+    effect: 1
+    amount: 119
+    costGold: 3201
+    order: 397
+    requiresLeftNodes: 0
+    title: Armor +119
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L398
+    branch: 0
+    effect: 2
+    amount: 119
+    costGold: 3209
+    order: 398
+    requiresLeftNodes: 0
+    title: Max HP +119
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L399
+    branch: 0
+    effect: 3
+    amount: 100
+    costGold: 3217
+    order: 399
+    requiresLeftNodes: 0
+    title: Camp Heal +100
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L400
+    branch: 0
+    effect: 0
+    amount: 103
+    costGold: 3225
+    order: 400
+    requiresLeftNodes: 0
+    title: Attack +103
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L401
+    branch: 0
+    effect: 1
+    amount: 120
+    costGold: 3233
+    order: 401
+    requiresLeftNodes: 0
+    title: Armor +120
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L402
+    branch: 0
+    effect: 2
+    amount: 120
+    costGold: 3241
+    order: 402
+    requiresLeftNodes: 0
+    title: Max HP +120
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L403
+    branch: 0
+    effect: 3
+    amount: 101
+    costGold: 3249
+    order: 403
+    requiresLeftNodes: 0
+    title: Camp Heal +101
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L404
+    branch: 0
+    effect: 0
+    amount: 104
+    costGold: 3257
+    order: 404
+    requiresLeftNodes: 0
+    title: Attack +104
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L405
+    branch: 0
+    effect: 1
+    amount: 121
+    costGold: 3265
+    order: 405
+    requiresLeftNodes: 0
+    title: Armor +121
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L406
+    branch: 0
+    effect: 2
+    amount: 121
+    costGold: 3273
+    order: 406
+    requiresLeftNodes: 0
+    title: Max HP +121
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L407
+    branch: 0
+    effect: 3
+    amount: 102
+    costGold: 3281
+    order: 407
+    requiresLeftNodes: 0
+    title: Camp Heal +102
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L408
+    branch: 0
+    effect: 0
+    amount: 105
+    costGold: 3289
+    order: 408
+    requiresLeftNodes: 0
+    title: Attack +105
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L409
+    branch: 0
+    effect: 1
+    amount: 122
+    costGold: 3297
+    order: 409
+    requiresLeftNodes: 0
+    title: Armor +122
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L410
+    branch: 0
+    effect: 2
+    amount: 122
+    costGold: 3305
+    order: 410
+    requiresLeftNodes: 0
+    title: Max HP +122
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L411
+    branch: 0
+    effect: 3
+    amount: 103
+    costGold: 3313
+    order: 411
+    requiresLeftNodes: 0
+    title: Camp Heal +103
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L412
+    branch: 0
+    effect: 0
+    amount: 106
+    costGold: 3321
+    order: 412
+    requiresLeftNodes: 0
+    title: Attack +106
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L413
+    branch: 0
+    effect: 1
+    amount: 123
+    costGold: 3329
+    order: 413
+    requiresLeftNodes: 0
+    title: Armor +123
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L414
+    branch: 0
+    effect: 2
+    amount: 123
+    costGold: 3337
+    order: 414
+    requiresLeftNodes: 0
+    title: Max HP +123
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L415
+    branch: 0
+    effect: 3
+    amount: 104
+    costGold: 3345
+    order: 415
+    requiresLeftNodes: 0
+    title: Camp Heal +104
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L416
+    branch: 0
+    effect: 0
+    amount: 107
+    costGold: 3353
+    order: 416
+    requiresLeftNodes: 0
+    title: Attack +107
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L417
+    branch: 0
+    effect: 1
+    amount: 124
+    costGold: 3361
+    order: 417
+    requiresLeftNodes: 0
+    title: Armor +124
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L418
+    branch: 0
+    effect: 2
+    amount: 124
+    costGold: 3369
+    order: 418
+    requiresLeftNodes: 0
+    title: Max HP +124
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L419
+    branch: 0
+    effect: 3
+    amount: 105
+    costGold: 3377
+    order: 419
+    requiresLeftNodes: 0
+    title: Camp Heal +105
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L420
+    branch: 0
+    effect: 0
+    amount: 108
+    costGold: 3385
+    order: 420
+    requiresLeftNodes: 0
+    title: Attack +108
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L421
+    branch: 0
+    effect: 1
+    amount: 125
+    costGold: 3393
+    order: 421
+    requiresLeftNodes: 0
+    title: Armor +125
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L422
+    branch: 0
+    effect: 2
+    amount: 125
+    costGold: 3401
+    order: 422
+    requiresLeftNodes: 0
+    title: Max HP +125
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L423
+    branch: 0
+    effect: 3
+    amount: 106
+    costGold: 3409
+    order: 423
+    requiresLeftNodes: 0
+    title: Camp Heal +106
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L424
+    branch: 0
+    effect: 0
+    amount: 109
+    costGold: 3417
+    order: 424
+    requiresLeftNodes: 0
+    title: Attack +109
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L425
+    branch: 0
+    effect: 1
+    amount: 126
+    costGold: 3425
+    order: 425
+    requiresLeftNodes: 0
+    title: Armor +126
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L426
+    branch: 0
+    effect: 2
+    amount: 126
+    costGold: 3433
+    order: 426
+    requiresLeftNodes: 0
+    title: Max HP +126
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L427
+    branch: 0
+    effect: 3
+    amount: 107
+    costGold: 3441
+    order: 427
+    requiresLeftNodes: 0
+    title: Camp Heal +107
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L428
+    branch: 0
+    effect: 0
+    amount: 110
+    costGold: 3449
+    order: 428
+    requiresLeftNodes: 0
+    title: Attack +110
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L429
+    branch: 0
+    effect: 1
+    amount: 127
+    costGold: 3457
+    order: 429
+    requiresLeftNodes: 0
+    title: Armor +127
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L430
+    branch: 0
+    effect: 2
+    amount: 127
+    costGold: 3465
+    order: 430
+    requiresLeftNodes: 0
+    title: Max HP +127
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L431
+    branch: 0
+    effect: 3
+    amount: 108
+    costGold: 3473
+    order: 431
+    requiresLeftNodes: 0
+    title: Camp Heal +108
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L432
+    branch: 0
+    effect: 0
+    amount: 111
+    costGold: 3481
+    order: 432
+    requiresLeftNodes: 0
+    title: Attack +111
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L433
+    branch: 0
+    effect: 1
+    amount: 128
+    costGold: 3489
+    order: 433
+    requiresLeftNodes: 0
+    title: Armor +128
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L434
+    branch: 0
+    effect: 2
+    amount: 128
+    costGold: 3497
+    order: 434
+    requiresLeftNodes: 0
+    title: Max HP +128
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L435
+    branch: 0
+    effect: 3
+    amount: 109
+    costGold: 3505
+    order: 435
+    requiresLeftNodes: 0
+    title: Camp Heal +109
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L436
+    branch: 0
+    effect: 0
+    amount: 112
+    costGold: 3513
+    order: 436
+    requiresLeftNodes: 0
+    title: Attack +112
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L437
+    branch: 0
+    effect: 1
+    amount: 129
+    costGold: 3521
+    order: 437
+    requiresLeftNodes: 0
+    title: Armor +129
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L438
+    branch: 0
+    effect: 2
+    amount: 129
+    costGold: 3529
+    order: 438
+    requiresLeftNodes: 0
+    title: Max HP +129
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L439
+    branch: 0
+    effect: 3
+    amount: 110
+    costGold: 3537
+    order: 439
+    requiresLeftNodes: 0
+    title: Camp Heal +110
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L440
+    branch: 0
+    effect: 0
+    amount: 113
+    costGold: 3545
+    order: 440
+    requiresLeftNodes: 0
+    title: Attack +113
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L441
+    branch: 0
+    effect: 1
+    amount: 130
+    costGold: 3553
+    order: 441
+    requiresLeftNodes: 0
+    title: Armor +130
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L442
+    branch: 0
+    effect: 2
+    amount: 130
+    costGold: 3561
+    order: 442
+    requiresLeftNodes: 0
+    title: Max HP +130
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L443
+    branch: 0
+    effect: 3
+    amount: 111
+    costGold: 3569
+    order: 443
+    requiresLeftNodes: 0
+    title: Camp Heal +111
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L444
+    branch: 0
+    effect: 0
+    amount: 114
+    costGold: 3577
+    order: 444
+    requiresLeftNodes: 0
+    title: Attack +114
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L445
+    branch: 0
+    effect: 1
+    amount: 131
+    costGold: 3585
+    order: 445
+    requiresLeftNodes: 0
+    title: Armor +131
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L446
+    branch: 0
+    effect: 2
+    amount: 131
+    costGold: 3593
+    order: 446
+    requiresLeftNodes: 0
+    title: Max HP +131
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L447
+    branch: 0
+    effect: 3
+    amount: 112
+    costGold: 3601
+    order: 447
+    requiresLeftNodes: 0
+    title: Camp Heal +112
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L448
+    branch: 0
+    effect: 0
+    amount: 115
+    costGold: 3609
+    order: 448
+    requiresLeftNodes: 0
+    title: Attack +115
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L449
+    branch: 0
+    effect: 1
+    amount: 132
+    costGold: 3617
+    order: 449
+    requiresLeftNodes: 0
+    title: Armor +132
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L450
+    branch: 0
+    effect: 2
+    amount: 132
+    costGold: 3625
+    order: 450
+    requiresLeftNodes: 0
+    title: Max HP +132
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L451
+    branch: 0
+    effect: 3
+    amount: 113
+    costGold: 3633
+    order: 451
+    requiresLeftNodes: 0
+    title: Camp Heal +113
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L452
+    branch: 0
+    effect: 0
+    amount: 116
+    costGold: 3641
+    order: 452
+    requiresLeftNodes: 0
+    title: Attack +116
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L453
+    branch: 0
+    effect: 1
+    amount: 133
+    costGold: 3649
+    order: 453
+    requiresLeftNodes: 0
+    title: Armor +133
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L454
+    branch: 0
+    effect: 2
+    amount: 133
+    costGold: 3657
+    order: 454
+    requiresLeftNodes: 0
+    title: Max HP +133
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L455
+    branch: 0
+    effect: 3
+    amount: 114
+    costGold: 3665
+    order: 455
+    requiresLeftNodes: 0
+    title: Camp Heal +114
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L456
+    branch: 0
+    effect: 0
+    amount: 117
+    costGold: 3673
+    order: 456
+    requiresLeftNodes: 0
+    title: Attack +117
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L457
+    branch: 0
+    effect: 1
+    amount: 134
+    costGold: 3681
+    order: 457
+    requiresLeftNodes: 0
+    title: Armor +134
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L458
+    branch: 0
+    effect: 2
+    amount: 134
+    costGold: 3689
+    order: 458
+    requiresLeftNodes: 0
+    title: Max HP +134
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L459
+    branch: 0
+    effect: 3
+    amount: 115
+    costGold: 3697
+    order: 459
+    requiresLeftNodes: 0
+    title: Camp Heal +115
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L460
+    branch: 0
+    effect: 0
+    amount: 118
+    costGold: 3705
+    order: 460
+    requiresLeftNodes: 0
+    title: Attack +118
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L461
+    branch: 0
+    effect: 1
+    amount: 135
+    costGold: 3713
+    order: 461
+    requiresLeftNodes: 0
+    title: Armor +135
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L462
+    branch: 0
+    effect: 2
+    amount: 135
+    costGold: 3721
+    order: 462
+    requiresLeftNodes: 0
+    title: Max HP +135
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L463
+    branch: 0
+    effect: 3
+    amount: 116
+    costGold: 3729
+    order: 463
+    requiresLeftNodes: 0
+    title: Camp Heal +116
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L464
+    branch: 0
+    effect: 0
+    amount: 119
+    costGold: 3737
+    order: 464
+    requiresLeftNodes: 0
+    title: Attack +119
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L465
+    branch: 0
+    effect: 1
+    amount: 136
+    costGold: 3745
+    order: 465
+    requiresLeftNodes: 0
+    title: Armor +136
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L466
+    branch: 0
+    effect: 2
+    amount: 136
+    costGold: 3753
+    order: 466
+    requiresLeftNodes: 0
+    title: Max HP +136
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L467
+    branch: 0
+    effect: 3
+    amount: 117
+    costGold: 3761
+    order: 467
+    requiresLeftNodes: 0
+    title: Camp Heal +117
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L468
+    branch: 0
+    effect: 0
+    amount: 120
+    costGold: 3769
+    order: 468
+    requiresLeftNodes: 0
+    title: Attack +120
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L469
+    branch: 0
+    effect: 1
+    amount: 137
+    costGold: 3777
+    order: 469
+    requiresLeftNodes: 0
+    title: Armor +137
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L470
+    branch: 0
+    effect: 2
+    amount: 137
+    costGold: 3785
+    order: 470
+    requiresLeftNodes: 0
+    title: Max HP +137
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L471
+    branch: 0
+    effect: 3
+    amount: 118
+    costGold: 3793
+    order: 471
+    requiresLeftNodes: 0
+    title: Camp Heal +118
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L472
+    branch: 0
+    effect: 0
+    amount: 121
+    costGold: 3801
+    order: 472
+    requiresLeftNodes: 0
+    title: Attack +121
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L473
+    branch: 0
+    effect: 1
+    amount: 138
+    costGold: 3809
+    order: 473
+    requiresLeftNodes: 0
+    title: Armor +138
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L474
+    branch: 0
+    effect: 2
+    amount: 138
+    costGold: 3817
+    order: 474
+    requiresLeftNodes: 0
+    title: Max HP +138
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L475
+    branch: 0
+    effect: 3
+    amount: 119
+    costGold: 3825
+    order: 475
+    requiresLeftNodes: 0
+    title: Camp Heal +119
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L476
+    branch: 0
+    effect: 0
+    amount: 122
+    costGold: 3833
+    order: 476
+    requiresLeftNodes: 0
+    title: Attack +122
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L477
+    branch: 0
+    effect: 1
+    amount: 139
+    costGold: 3841
+    order: 477
+    requiresLeftNodes: 0
+    title: Armor +139
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L478
+    branch: 0
+    effect: 2
+    amount: 139
+    costGold: 3849
+    order: 478
+    requiresLeftNodes: 0
+    title: Max HP +139
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L479
+    branch: 0
+    effect: 3
+    amount: 120
+    costGold: 3857
+    order: 479
+    requiresLeftNodes: 0
+    title: Camp Heal +120
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L480
+    branch: 0
+    effect: 0
+    amount: 123
+    costGold: 3865
+    order: 480
+    requiresLeftNodes: 0
+    title: Attack +123
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L481
+    branch: 0
+    effect: 1
+    amount: 140
+    costGold: 3873
+    order: 481
+    requiresLeftNodes: 0
+    title: Armor +140
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L482
+    branch: 0
+    effect: 2
+    amount: 140
+    costGold: 3881
+    order: 482
+    requiresLeftNodes: 0
+    title: Max HP +140
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L483
+    branch: 0
+    effect: 3
+    amount: 121
+    costGold: 3889
+    order: 483
+    requiresLeftNodes: 0
+    title: Camp Heal +121
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L484
+    branch: 0
+    effect: 0
+    amount: 124
+    costGold: 3897
+    order: 484
+    requiresLeftNodes: 0
+    title: Attack +124
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L485
+    branch: 0
+    effect: 1
+    amount: 141
+    costGold: 3905
+    order: 485
+    requiresLeftNodes: 0
+    title: Armor +141
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L486
+    branch: 0
+    effect: 2
+    amount: 141
+    costGold: 3913
+    order: 486
+    requiresLeftNodes: 0
+    title: Max HP +141
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L487
+    branch: 0
+    effect: 3
+    amount: 122
+    costGold: 3921
+    order: 487
+    requiresLeftNodes: 0
+    title: Camp Heal +122
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L488
+    branch: 0
+    effect: 0
+    amount: 125
+    costGold: 3929
+    order: 488
+    requiresLeftNodes: 0
+    title: Attack +125
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L489
+    branch: 0
+    effect: 1
+    amount: 142
+    costGold: 3937
+    order: 489
+    requiresLeftNodes: 0
+    title: Armor +142
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L490
+    branch: 0
+    effect: 2
+    amount: 142
+    costGold: 3945
+    order: 490
+    requiresLeftNodes: 0
+    title: Max HP +142
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L491
+    branch: 0
+    effect: 3
+    amount: 123
+    costGold: 3953
+    order: 491
+    requiresLeftNodes: 0
+    title: Camp Heal +123
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L492
+    branch: 0
+    effect: 0
+    amount: 126
+    costGold: 3961
+    order: 492
+    requiresLeftNodes: 0
+    title: Attack +126
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L493
+    branch: 0
+    effect: 1
+    amount: 143
+    costGold: 3969
+    order: 493
+    requiresLeftNodes: 0
+    title: Armor +143
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L494
+    branch: 0
+    effect: 2
+    amount: 143
+    costGold: 3977
+    order: 494
+    requiresLeftNodes: 0
+    title: Max HP +143
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L495
+    branch: 0
+    effect: 3
+    amount: 124
+    costGold: 3985
+    order: 495
+    requiresLeftNodes: 0
+    title: Camp Heal +124
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L496
+    branch: 0
+    effect: 0
+    amount: 127
+    costGold: 3993
+    order: 496
+    requiresLeftNodes: 0
+    title: Attack +127
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L497
+    branch: 0
+    effect: 1
+    amount: 144
+    costGold: 4001
+    order: 497
+    requiresLeftNodes: 0
+    title: Armor +144
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L498
+    branch: 0
+    effect: 2
+    amount: 144
+    costGold: 4009
+    order: 498
+    requiresLeftNodes: 0
+    title: Max HP +144
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L499
+    branch: 0
+    effect: 3
+    amount: 125
+    costGold: 4017
+    order: 499
+    requiresLeftNodes: 0
+    title: Camp Heal +125
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L500
+    branch: 0
+    effect: 0
+    amount: 128
+    costGold: 4025
+    order: 500
+    requiresLeftNodes: 0
+    title: Attack +128
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L501
+    branch: 0
+    effect: 1
+    amount: 145
+    costGold: 4033
+    order: 501
+    requiresLeftNodes: 0
+    title: Armor +145
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L502
+    branch: 0
+    effect: 2
+    amount: 145
+    costGold: 4041
+    order: 502
+    requiresLeftNodes: 0
+    title: Max HP +145
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L503
+    branch: 0
+    effect: 3
+    amount: 126
+    costGold: 4049
+    order: 503
+    requiresLeftNodes: 0
+    title: Camp Heal +126
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L504
+    branch: 0
+    effect: 0
+    amount: 129
+    costGold: 4057
+    order: 504
+    requiresLeftNodes: 0
+    title: Attack +129
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L505
+    branch: 0
+    effect: 1
+    amount: 146
+    costGold: 4065
+    order: 505
+    requiresLeftNodes: 0
+    title: Armor +146
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L506
+    branch: 0
+    effect: 2
+    amount: 146
+    costGold: 4073
+    order: 506
+    requiresLeftNodes: 0
+    title: Max HP +146
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L507
+    branch: 0
+    effect: 3
+    amount: 127
+    costGold: 4081
+    order: 507
+    requiresLeftNodes: 0
+    title: Camp Heal +127
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L508
+    branch: 0
+    effect: 0
+    amount: 130
+    costGold: 4089
+    order: 508
+    requiresLeftNodes: 0
+    title: Attack +130
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L509
+    branch: 0
+    effect: 1
+    amount: 147
+    costGold: 4097
+    order: 509
+    requiresLeftNodes: 0
+    title: Armor +147
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L510
+    branch: 0
+    effect: 2
+    amount: 147
+    costGold: 4105
+    order: 510
+    requiresLeftNodes: 0
+    title: Max HP +147
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L511
+    branch: 0
+    effect: 3
+    amount: 128
+    costGold: 4113
+    order: 511
+    requiresLeftNodes: 0
+    title: Camp Heal +128
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L512
+    branch: 0
+    effect: 0
+    amount: 131
+    costGold: 4121
+    order: 512
+    requiresLeftNodes: 0
+    title: Attack +131
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L513
+    branch: 0
+    effect: 1
+    amount: 148
+    costGold: 4129
+    order: 513
+    requiresLeftNodes: 0
+    title: Armor +148
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L514
+    branch: 0
+    effect: 2
+    amount: 148
+    costGold: 4137
+    order: 514
+    requiresLeftNodes: 0
+    title: Max HP +148
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L515
+    branch: 0
+    effect: 3
+    amount: 129
+    costGold: 4145
+    order: 515
+    requiresLeftNodes: 0
+    title: Camp Heal +129
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L516
+    branch: 0
+    effect: 0
+    amount: 132
+    costGold: 4153
+    order: 516
+    requiresLeftNodes: 0
+    title: Attack +132
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L517
+    branch: 0
+    effect: 1
+    amount: 149
+    costGold: 4161
+    order: 517
+    requiresLeftNodes: 0
+    title: Armor +149
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L518
+    branch: 0
+    effect: 2
+    amount: 149
+    costGold: 4169
+    order: 518
+    requiresLeftNodes: 0
+    title: Max HP +149
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L519
+    branch: 0
+    effect: 3
+    amount: 130
+    costGold: 4177
+    order: 519
+    requiresLeftNodes: 0
+    title: Camp Heal +130
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L520
+    branch: 0
+    effect: 0
+    amount: 133
+    costGold: 4185
+    order: 520
+    requiresLeftNodes: 0
+    title: Attack +133
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L521
+    branch: 0
+    effect: 1
+    amount: 150
+    costGold: 4193
+    order: 521
+    requiresLeftNodes: 0
+    title: Armor +150
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L522
+    branch: 0
+    effect: 2
+    amount: 150
+    costGold: 4201
+    order: 522
+    requiresLeftNodes: 0
+    title: Max HP +150
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L523
+    branch: 0
+    effect: 3
+    amount: 131
+    costGold: 4209
+    order: 523
+    requiresLeftNodes: 0
+    title: Camp Heal +131
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L524
+    branch: 0
+    effect: 0
+    amount: 134
+    costGold: 4217
+    order: 524
+    requiresLeftNodes: 0
+    title: Attack +134
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L525
+    branch: 0
+    effect: 1
+    amount: 151
+    costGold: 4225
+    order: 525
+    requiresLeftNodes: 0
+    title: Armor +151
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L526
+    branch: 0
+    effect: 2
+    amount: 151
+    costGold: 4233
+    order: 526
+    requiresLeftNodes: 0
+    title: Max HP +151
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L527
+    branch: 0
+    effect: 3
+    amount: 132
+    costGold: 4241
+    order: 527
+    requiresLeftNodes: 0
+    title: Camp Heal +132
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L528
+    branch: 0
+    effect: 0
+    amount: 135
+    costGold: 4249
+    order: 528
+    requiresLeftNodes: 0
+    title: Attack +135
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L529
+    branch: 0
+    effect: 1
+    amount: 152
+    costGold: 4257
+    order: 529
+    requiresLeftNodes: 0
+    title: Armor +152
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L530
+    branch: 0
+    effect: 2
+    amount: 152
+    costGold: 4265
+    order: 530
+    requiresLeftNodes: 0
+    title: Max HP +152
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L531
+    branch: 0
+    effect: 3
+    amount: 133
+    costGold: 4273
+    order: 531
+    requiresLeftNodes: 0
+    title: Camp Heal +133
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L532
+    branch: 0
+    effect: 0
+    amount: 136
+    costGold: 4281
+    order: 532
+    requiresLeftNodes: 0
+    title: Attack +136
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L533
+    branch: 0
+    effect: 1
+    amount: 153
+    costGold: 4289
+    order: 533
+    requiresLeftNodes: 0
+    title: Armor +153
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L534
+    branch: 0
+    effect: 2
+    amount: 153
+    costGold: 4297
+    order: 534
+    requiresLeftNodes: 0
+    title: Max HP +153
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L535
+    branch: 0
+    effect: 3
+    amount: 134
+    costGold: 4305
+    order: 535
+    requiresLeftNodes: 0
+    title: Camp Heal +134
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L536
+    branch: 0
+    effect: 0
+    amount: 137
+    costGold: 4313
+    order: 536
+    requiresLeftNodes: 0
+    title: Attack +137
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L537
+    branch: 0
+    effect: 1
+    amount: 154
+    costGold: 4321
+    order: 537
+    requiresLeftNodes: 0
+    title: Armor +154
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L538
+    branch: 0
+    effect: 2
+    amount: 154
+    costGold: 4329
+    order: 538
+    requiresLeftNodes: 0
+    title: Max HP +154
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L539
+    branch: 0
+    effect: 3
+    amount: 135
+    costGold: 4337
+    order: 539
+    requiresLeftNodes: 0
+    title: Camp Heal +135
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L540
+    branch: 0
+    effect: 0
+    amount: 138
+    costGold: 4345
+    order: 540
+    requiresLeftNodes: 0
+    title: Attack +138
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L541
+    branch: 0
+    effect: 1
+    amount: 155
+    costGold: 4353
+    order: 541
+    requiresLeftNodes: 0
+    title: Armor +155
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L542
+    branch: 0
+    effect: 2
+    amount: 155
+    costGold: 4361
+    order: 542
+    requiresLeftNodes: 0
+    title: Max HP +155
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L543
+    branch: 0
+    effect: 3
+    amount: 136
+    costGold: 4369
+    order: 543
+    requiresLeftNodes: 0
+    title: Camp Heal +136
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L544
+    branch: 0
+    effect: 0
+    amount: 139
+    costGold: 4377
+    order: 544
+    requiresLeftNodes: 0
+    title: Attack +139
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L545
+    branch: 0
+    effect: 1
+    amount: 156
+    costGold: 4385
+    order: 545
+    requiresLeftNodes: 0
+    title: Armor +156
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L546
+    branch: 0
+    effect: 2
+    amount: 156
+    costGold: 4393
+    order: 546
+    requiresLeftNodes: 0
+    title: Max HP +156
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L547
+    branch: 0
+    effect: 3
+    amount: 137
+    costGold: 4401
+    order: 547
+    requiresLeftNodes: 0
+    title: Camp Heal +137
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L548
+    branch: 0
+    effect: 0
+    amount: 140
+    costGold: 4409
+    order: 548
+    requiresLeftNodes: 0
+    title: Attack +140
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L549
+    branch: 0
+    effect: 1
+    amount: 157
+    costGold: 4417
+    order: 549
+    requiresLeftNodes: 0
+    title: Armor +157
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L550
+    branch: 0
+    effect: 2
+    amount: 157
+    costGold: 4425
+    order: 550
+    requiresLeftNodes: 0
+    title: Max HP +157
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L551
+    branch: 0
+    effect: 3
+    amount: 138
+    costGold: 4433
+    order: 551
+    requiresLeftNodes: 0
+    title: Camp Heal +138
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L552
+    branch: 0
+    effect: 0
+    amount: 141
+    costGold: 4441
+    order: 552
+    requiresLeftNodes: 0
+    title: Attack +141
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L553
+    branch: 0
+    effect: 1
+    amount: 158
+    costGold: 4449
+    order: 553
+    requiresLeftNodes: 0
+    title: Armor +158
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L554
+    branch: 0
+    effect: 2
+    amount: 158
+    costGold: 4457
+    order: 554
+    requiresLeftNodes: 0
+    title: Max HP +158
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L555
+    branch: 0
+    effect: 3
+    amount: 139
+    costGold: 4465
+    order: 555
+    requiresLeftNodes: 0
+    title: Camp Heal +139
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L556
+    branch: 0
+    effect: 0
+    amount: 142
+    costGold: 4473
+    order: 556
+    requiresLeftNodes: 0
+    title: Attack +142
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L557
+    branch: 0
+    effect: 1
+    amount: 159
+    costGold: 4481
+    order: 557
+    requiresLeftNodes: 0
+    title: Armor +159
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L558
+    branch: 0
+    effect: 2
+    amount: 159
+    costGold: 4489
+    order: 558
+    requiresLeftNodes: 0
+    title: Max HP +159
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L559
+    branch: 0
+    effect: 3
+    amount: 140
+    costGold: 4497
+    order: 559
+    requiresLeftNodes: 0
+    title: Camp Heal +140
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L560
+    branch: 0
+    effect: 0
+    amount: 143
+    costGold: 4505
+    order: 560
+    requiresLeftNodes: 0
+    title: Attack +143
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L561
+    branch: 0
+    effect: 1
+    amount: 160
+    costGold: 4513
+    order: 561
+    requiresLeftNodes: 0
+    title: Armor +160
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L562
+    branch: 0
+    effect: 2
+    amount: 160
+    costGold: 4521
+    order: 562
+    requiresLeftNodes: 0
+    title: Max HP +160
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L563
+    branch: 0
+    effect: 3
+    amount: 141
+    costGold: 4529
+    order: 563
+    requiresLeftNodes: 0
+    title: Camp Heal +141
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L564
+    branch: 0
+    effect: 0
+    amount: 144
+    costGold: 4537
+    order: 564
+    requiresLeftNodes: 0
+    title: Attack +144
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L565
+    branch: 0
+    effect: 1
+    amount: 161
+    costGold: 4545
+    order: 565
+    requiresLeftNodes: 0
+    title: Armor +161
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L566
+    branch: 0
+    effect: 2
+    amount: 161
+    costGold: 4553
+    order: 566
+    requiresLeftNodes: 0
+    title: Max HP +161
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L567
+    branch: 0
+    effect: 3
+    amount: 142
+    costGold: 4561
+    order: 567
+    requiresLeftNodes: 0
+    title: Camp Heal +142
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L568
+    branch: 0
+    effect: 0
+    amount: 145
+    costGold: 4569
+    order: 568
+    requiresLeftNodes: 0
+    title: Attack +145
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L569
+    branch: 0
+    effect: 1
+    amount: 162
+    costGold: 4577
+    order: 569
+    requiresLeftNodes: 0
+    title: Armor +162
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L570
+    branch: 0
+    effect: 2
+    amount: 162
+    costGold: 4585
+    order: 570
+    requiresLeftNodes: 0
+    title: Max HP +162
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L571
+    branch: 0
+    effect: 3
+    amount: 143
+    costGold: 4593
+    order: 571
+    requiresLeftNodes: 0
+    title: Camp Heal +143
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L572
+    branch: 0
+    effect: 0
+    amount: 146
+    costGold: 4601
+    order: 572
+    requiresLeftNodes: 0
+    title: Attack +146
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L573
+    branch: 0
+    effect: 1
+    amount: 163
+    costGold: 4609
+    order: 573
+    requiresLeftNodes: 0
+    title: Armor +163
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L574
+    branch: 0
+    effect: 2
+    amount: 163
+    costGold: 4617
+    order: 574
+    requiresLeftNodes: 0
+    title: Max HP +163
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L575
+    branch: 0
+    effect: 3
+    amount: 144
+    costGold: 4625
+    order: 575
+    requiresLeftNodes: 0
+    title: Camp Heal +144
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L576
+    branch: 0
+    effect: 0
+    amount: 147
+    costGold: 4633
+    order: 576
+    requiresLeftNodes: 0
+    title: Attack +147
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L577
+    branch: 0
+    effect: 1
+    amount: 164
+    costGold: 4641
+    order: 577
+    requiresLeftNodes: 0
+    title: Armor +164
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L578
+    branch: 0
+    effect: 2
+    amount: 164
+    costGold: 4649
+    order: 578
+    requiresLeftNodes: 0
+    title: Max HP +164
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L579
+    branch: 0
+    effect: 3
+    amount: 145
+    costGold: 4657
+    order: 579
+    requiresLeftNodes: 0
+    title: Camp Heal +145
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L580
+    branch: 0
+    effect: 0
+    amount: 148
+    costGold: 4665
+    order: 580
+    requiresLeftNodes: 0
+    title: Attack +148
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L581
+    branch: 0
+    effect: 1
+    amount: 165
+    costGold: 4673
+    order: 581
+    requiresLeftNodes: 0
+    title: Armor +165
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L582
+    branch: 0
+    effect: 2
+    amount: 165
+    costGold: 4681
+    order: 582
+    requiresLeftNodes: 0
+    title: Max HP +165
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L583
+    branch: 0
+    effect: 3
+    amount: 146
+    costGold: 4689
+    order: 583
+    requiresLeftNodes: 0
+    title: Camp Heal +146
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L584
+    branch: 0
+    effect: 0
+    amount: 149
+    costGold: 4697
+    order: 584
+    requiresLeftNodes: 0
+    title: Attack +149
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L585
+    branch: 0
+    effect: 1
+    amount: 166
+    costGold: 4705
+    order: 585
+    requiresLeftNodes: 0
+    title: Armor +166
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L586
+    branch: 0
+    effect: 2
+    amount: 166
+    costGold: 4713
+    order: 586
+    requiresLeftNodes: 0
+    title: Max HP +166
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L587
+    branch: 0
+    effect: 3
+    amount: 147
+    costGold: 4721
+    order: 587
+    requiresLeftNodes: 0
+    title: Camp Heal +147
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L588
+    branch: 0
+    effect: 0
+    amount: 150
+    costGold: 4729
+    order: 588
+    requiresLeftNodes: 0
+    title: Attack +150
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L589
+    branch: 0
+    effect: 1
+    amount: 167
+    costGold: 4737
+    order: 589
+    requiresLeftNodes: 0
+    title: Armor +167
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L590
+    branch: 0
+    effect: 2
+    amount: 167
+    costGold: 4745
+    order: 590
+    requiresLeftNodes: 0
+    title: Max HP +167
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L591
+    branch: 0
+    effect: 3
+    amount: 148
+    costGold: 4753
+    order: 591
+    requiresLeftNodes: 0
+    title: Camp Heal +148
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L592
+    branch: 0
+    effect: 0
+    amount: 151
+    costGold: 4761
+    order: 592
+    requiresLeftNodes: 0
+    title: Attack +151
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L593
+    branch: 0
+    effect: 1
+    amount: 168
+    costGold: 4769
+    order: 593
+    requiresLeftNodes: 0
+    title: Armor +168
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L594
+    branch: 0
+    effect: 2
+    amount: 168
+    costGold: 4777
+    order: 594
+    requiresLeftNodes: 0
+    title: Max HP +168
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L595
+    branch: 0
+    effect: 3
+    amount: 149
+    costGold: 4785
+    order: 595
+    requiresLeftNodes: 0
+    title: Camp Heal +149
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L596
+    branch: 0
+    effect: 0
+    amount: 152
+    costGold: 4793
+    order: 596
+    requiresLeftNodes: 0
+    title: Attack +152
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L597
+    branch: 0
+    effect: 1
+    amount: 169
+    costGold: 4801
+    order: 597
+    requiresLeftNodes: 0
+    title: Armor +169
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L598
+    branch: 0
+    effect: 2
+    amount: 169
+    costGold: 4809
+    order: 598
+    requiresLeftNodes: 0
+    title: Max HP +169
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: L599
+    branch: 0
+    effect: 3
+    amount: 150
+    costGold: 4817
+    order: 599
+    requiresLeftNodes: 0
+    title: Camp Heal +150
+    description: 'LEFT branch: spend gold to train a permanent stat.'
+  - nodeID: R0
+    branch: 1
+    effect: 6
+    amount: 1
+    costGold: 1000
+    order: 0
+    requiresLeftNodes: 0
+    title: Active Skill Slot
+    description: Unlocks the first active ability for all heroes.
+  - nodeID: R1
+    branch: 1
+    effect: 4
+    amount: 0.1
+    costGold: 2500
+    order: 1
+    requiresLeftNodes: 13
+    title: Battle Gold +10%
+    description: More gold from every battle.
+  - nodeID: R2
+    branch: 1
+    effect: 5
+    amount: 0.15
+    costGold: 5000
+    order: 2
+    requiresLeftNodes: 26
+    title: Finish Gold +15%
+    description: Bonus gold for finishing a level.
+  - nodeID: R3
+    branch: 1
+    effect: 7
+    amount: 5
+    costGold: 8000
+    order: 3
+    requiresLeftNodes: 38
+    title: Camp Experience +5
+    description: Placeholder - needs the experience system.
+  - nodeID: R4
+    branch: 1
+    effect: 8
+    amount: 0.15
+    costGold: 12000
+    order: 4
+    requiresLeftNodes: 44
+    title: Level-Up Heal 15%
+    description: Placeholder - needs the level system.
+  - nodeID: R5
+    branch: 1
+    effect: 9
+    amount: 10
+    costGold: 20000
+    order: 5
+    requiresLeftNodes: 50
+    title: Survive Once + Shield
+    description: Placeholder - survive a death once, gain shield stacks.

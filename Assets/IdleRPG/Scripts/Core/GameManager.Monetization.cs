@@ -38,6 +38,18 @@ namespace IdleRPG.Core
             return monetization != null && monetization.WatchAdForGoldBoost();
         }
 
+        /// <summary>Run-over card REVIVE: one rewarded-ad revive of the current run (once per run).</summary>
+        public bool WatchAdForRunRevive()
+        {
+            if (!CanRevive)
+            {
+                GameEvents.RaiseToast("You already revived this run.");
+                return false;
+            }
+
+            return monetization != null && monetization.WatchAdForRunRevive(ReviveRun);
+        }
+
         /// <summary>
         /// The single IAP funnel (B7 S1). The store confirms payment (<see cref="IIapService"/>), then the goods
         /// are granted through the normal till (gems) and shop (offline cap) - never directly.

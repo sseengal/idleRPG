@@ -112,6 +112,23 @@ namespace IdleRPG.Core
             });
         }
 
+        /// <summary>Run-over card REVIVE: one rewarded-ad revive of the current run (No Ads buyers get it free).</summary>
+        public bool WatchAdForRunRevive(Action onReward)
+        {
+            if (onReward == null)
+            {
+                return false;
+            }
+
+            if (AdsDisabledByNoAds)
+            {
+                onReward();
+                return true;
+            }
+
+            return TryShowAdPlacement(AdPlacementId.RunRevive, onReward);
+        }
+
         /// <summary>
         /// Camp Short Rest+: the same 20% heal with or without an ad. No Ads buyers get it free; everyone else
         /// watches one rewarded ad. No daily cap on purpose - the camp is the pacing beat, not an ad wall.

@@ -358,7 +358,7 @@ namespace IdleRPG.Core
 
         private static void OnAscensionCompleted(double tokensEarned, int newHighestStage)
         {
-            Append(string.Format("Ascended - +{0} token(s), best stage {1}",
+            Append(string.Format("End Run - +{0} Perk Point(s), best stage {1}",
                 NumberFormatter.Format(tokensEarned), newHighestStage), BattleLogKind.Gold);
         }
 

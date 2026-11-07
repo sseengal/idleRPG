@@ -96,14 +96,14 @@ namespace IdleRPG.Progression
 
             if (!useAd || monetization == null)
             {
-                ApplyShortRest(manager.Balance.CampShortRestPercent);
+                ApplyShortRest(manager.Balance.CampShortRestPercent + TrainingCampHealBonus());
                 return;
             }
 
             IsAdPending = true;
 
             bool started = monetization.WatchAdForCampRest(
-                () => ApplyShortRest(manager.Balance.CampShortRestAdPercent),
+                () => ApplyShortRest(manager.Balance.CampShortRestAdPercent + TrainingCampHealBonus()),
                 () => IsAdPending = false);
 
             if (!started)
@@ -120,7 +120,7 @@ namespace IdleRPG.Progression
                 return;
             }
 
-            manager.HealPartyFraction(manager.Balance.CampLongRestPercent, manager.Balance.CampRevivePercent);
+            manager.HealPartyFraction(manager.Balance.CampLongRestPercent + TrainingCampHealBonus(), manager.Balance.CampRevivePercent);
             BattleLog.Append($"The party makes camp (+{manager.Balance.CampLongRestPercent * 100f:0}% HP, fallen revived).",
                 BattleLogKind.Heal);
             Finish();
@@ -154,6 +154,14 @@ namespace IdleRPG.Progression
             pausedCombatForDebug = true;
             manager.Combat.Paused = true;
             Opened?.Invoke();
+        }
+
+        /// <summary>Training "Camp Heal +N" nodes add percentage points of camp healing (as a fraction).</summary>
+        private double TrainingCampHealBonus()
+        {
+            return manager != null && manager.Training != null
+                ? manager.Training.TotalFor(IdleRPG.Data.TrainingEffect.CampHealPercent) / 100.0
+                : 0d;
         }
 
         private void ApplyShortRest(double fraction)

@@ -7,13 +7,9 @@ using IdleRPG.Utils;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// The defeat summary modal (Run-Identity pass). On a party wipe the loop still restarts by itself after a short
-    /// beat - this card makes that beat legible and puts the run's end where the player is already thinking about it:
-    /// restart the fight now, or cash the run in and ascend.
-    ///
-    /// It is opened by <see cref="GameEvents.DefeatShown"/> (which the GameManager raises only when its cooldown
-    /// allows the full card - a hard wall bounces repeatedly, so a card on every wipe would spam the player) and hides
-    /// itself when the game state leaves <see cref="GameState.Defeat"/>, which is exactly when the run restarts.
+    /// The run-over card. On a party wipe the run ENDS: the reward is banked and this card shows what was earned.
+    /// There is no auto-resume - the player taps NEXT RUN to start a fresh run (or the card simply stays). It is
+    /// opened by <see cref="GameEvents.DefeatShown"/> and hides when the game state leaves the run-over state.
     /// </summary>
     public sealed class DefeatModalUI : MonoBehaviour
     {
@@ -27,8 +23,6 @@ namespace IdleRPG.UI
         [SerializeField] private Button ascendButton;
 
         private GameManager manager;
-        private float countdownRemaining;
-        private float countdownTotal;
 
         /// <summary>Modal dialogs must sit above every other canvas, whatever the scene was built with.</summary>
         private const int ModalSortingOrder = 100;
@@ -69,22 +63,6 @@ namespace IdleRPG.UI
             GameEvents.GameStateChanged -= OnGameStateChanged;
         }
 
-        private void Update()
-        {
-            if (root == null || !root.activeSelf || countdownTotal <= 0f)
-            {
-                return;
-            }
-
-            countdownRemaining -= Time.deltaTime;
-
-            if (countdownLabel != null)
-            {
-                int whole = Mathf.CeilToInt(countdownRemaining);
-                countdownLabel.SetText(whole <= 0 ? "Resuming…" : string.Format("resuming in {0}…", whole));
-            }
-        }
-
         private void OnDefeatShown(int defeatedStage, int resumeStage)
         {
             EnsureManager();
@@ -95,7 +73,7 @@ namespace IdleRPG.UI
 
             if (titleLabel != null)
             {
-                titleLabel.SetText(string.Format("DEFEAT — stage {0}", defeatedStage));
+                titleLabel.SetText(string.Format("RUN OVER — stage {0}", defeatedStage));
             }
 
             if (summaryLabel != null)
@@ -106,22 +84,21 @@ namespace IdleRPG.UI
 
             if (ascendLabel != null)
             {
-                ascendLabel.SetText(manager.CanAscend
-                    ? string.Format("Ascend for {0} tokens", NumberFormatter.Format(manager.PrestigeTokenYield))
-                    : string.Format("Reach stage {0} to ascend", manager.Balance != null ? manager.Balance.MinStageToAscend : 10));
+                ascendLabel.SetText(string.Format("+{0} Perk Points on the next run", NumberFormatter.Format(manager.RunEndPreviewTokens)));
             }
 
+            // Two choices: REVIVE (rewarded ad, once per run) or NEXT RUN (bank + restart). Neither auto-fires.
             if (ascendButton != null)
             {
-                ascendButton.interactable = manager.CanAscend;
+                ascendButton.gameObject.SetActive(true);
+                ascendButton.interactable = manager.CanRevive;
             }
-
-            countdownTotal = manager.Balance != null ? manager.Balance.DefeatModalSeconds : 10f;
-            countdownRemaining = countdownTotal;
 
             if (countdownLabel != null)
             {
-                countdownLabel.SetText(string.Format("resuming in {0}…", Mathf.CeilToInt(countdownTotal)));
+                countdownLabel.SetText(manager.CanRevive
+                    ? "Watch an ad to revive this run once."
+                    : "Revive used this run - NEXT RUN to go again.");
             }
 
             if (root != null)
@@ -144,7 +121,7 @@ namespace IdleRPG.UI
             EnsureManager();
             if (manager != null)
             {
-                manager.ResumeAfterDefeat();
+                manager.ConfirmEndRun();
             }
         }
 
@@ -153,7 +130,7 @@ namespace IdleRPG.UI
             EnsureManager();
             if (manager != null)
             {
-                manager.RequestAscension();
+                manager.WatchAdForRunRevive();
             }
         }
 
@@ -170,8 +147,6 @@ namespace IdleRPG.UI
 
         private void Hide()
         {
-            countdownTotal = 0f;
-
             if (root != null)
             {
                 root.SetActive(false);

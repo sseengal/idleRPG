@@ -43,6 +43,9 @@ namespace IdleRPG.Core
         [Tooltip("The permanent upgrade tree (+% Gold, +% Damage, +% HP).")]
         [SerializeField] private List<PrestigeUpgradeData> prestigeUpgrades = new List<PrestigeUpgradeData>();
 
+        [Tooltip("The Training tree (two vertical branches, bought with gold).")]
+        [SerializeField] private TrainingTreeDef trainingTree;
+
         [Tooltip("The automation cards (auto-buy manager, speed button). B6.")]
         [SerializeField] private List<AutomationDef> automationDefs = new List<AutomationDef>();
 
@@ -166,6 +169,9 @@ namespace IdleRPG.Core
 
         /// <summary>Hero abilities (Ability-Plan S2). Reads the stage at unlock time, so the gate is never stale.</summary>
         public AbilityService Abilities { get; private set; }
+
+        /// <summary>The Training tree (permanent gold upgrades).</summary>
+        public TrainingService Training { get; private set; }
 
         /// <summary>
         /// Debug/testing hook: replace the shared game clock's "today" (e.g. yesterday/tomorrow) without touching

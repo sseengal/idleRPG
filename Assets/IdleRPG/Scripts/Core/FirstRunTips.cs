@@ -10,7 +10,7 @@ namespace IdleRPG.Core
     ///
     /// Plain words: the game already has a little message line at the bottom of the screen. This service speaks
     /// through it, three times, to a brand-new player: "tap UPGRADE to hit harder", "you can buy an upgrade — buy
-    /// it", "ascension is ready — ascend and keep a bonus". Each hint fires once and is remembered in the save's
+    /// it", "the run reward is ready — end the run to keep Perk Points". Each hint fires once and is remembered in the save's
     /// existing keyed list (the same notebook the automation settings use), so it never repeats and comes back
     /// after a full reset — a fresh save is, again, a new player.
     ///
@@ -79,7 +79,7 @@ namespace IdleRPG.Core
             if ((mask & TipAscension) == 0 && ascensionReady != null && ascensionReady())
             {
                 mask |= TipAscension;
-                GameEvents.RaiseToast("Ascension is ready - ascend and keep a bonus for the next run.");
+                GameEvents.RaiseToast("Your run reward is ready - end the run to keep Perk Points.");
             }
         }
 

@@ -67,7 +67,8 @@ namespace IdleRPG.Core
                 DailyStreak = DailyStreak,
                 AdCaps = AdCaps,
                 FirstRunTips = FirstRunTips,
-                Abilities = Abilities
+                Abilities = Abilities,
+                Training = Training
             };
         }
 
@@ -126,7 +127,8 @@ namespace IdleRPG.Core
         {
             double prestige = Resolver != null ? Resolver.GlobalGoldMultiplier : 1d;
             double boost = Boost != null ? Boost.GoldMultiplier : 1d;
-            return rawGold * prestige * boost;
+            double training = 1d + (Training != null ? Training.TotalFor(TrainingEffect.BattleGoldPercent) : 0d);
+            return rawGold * prestige * boost * training;
         }
     }
 }

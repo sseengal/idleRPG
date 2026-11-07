@@ -67,8 +67,14 @@ namespace IdleRPG.Core
             Economy = new EconomyManager(balanceConfig);
             Economy.ApplyStartingBalances();
 
+            // Training: the permanent gold tree (two vertical branches). Created before the save load so its
+            // unlock ids restore with everything else.
+            Training = new TrainingService(Economy, trainingTree);
+
             Resolver = new StatResolver(balanceConfig, statUpgrades, prestigeUpgrades);
             Resolver.StatsChanged += OnStatsChanged;
+            Resolver.Training = Training;
+            Training.Changed += Resolver.NotifyGearChanged;
 
             // Step M1.6: gear owns boss drops + the inventory. The resolver reads its summed bonuses.
             Gear = new ItemService(balanceConfig, partyConfig, Economy, Resolver.GetUtilityLevel);
@@ -109,6 +115,7 @@ namespace IdleRPG.Core
             // Ability-Plan S2: abilities are bought with tokens and wear a stage gate, so the service asks for the
             // CURRENT stage at unlock time rather than caching one at construction.
             Abilities = new AbilityService(Economy, () => CurrentStage);
+            Training.FirstAbilityUnlockRequested = () => Abilities?.OpenAllForMvp(partyConfig.Heroes);
 
             // Step 10a/10b: the board the party stands on. Created **before** the load so a saved layout can be
             // restored into it; with no saved layout the default placement (the MVP's fixed lanes) is used, so a

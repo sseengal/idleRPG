@@ -10,7 +10,10 @@ namespace IdleRPG.Data
         GoldBoost = 0,
 
         /// <summary>Welcome-back popup: double the quoted offline gold.</summary>
-        DoubleOffline = 1
+        DoubleOffline = 1,
+
+        /// <summary>Run-over card: one rewarded-ad revive of the current run (once per run, daily-capped).</summary>
+        RunRevive = 2
     }
 
     /// <summary>

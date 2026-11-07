@@ -50,6 +50,9 @@ namespace IdleRPG.Core
 
             /// <summary>Hero abilities: the unlock levels and which hero wears which.</summary>
             public AbilityService Abilities;
+
+            /// <summary>The Training tree unlocks.</summary>
+            public TrainingService Training;
         }
 
         /// <summary>The run and lifetime numbers the save needs that no service owns.</summary>
@@ -132,6 +135,8 @@ namespace IdleRPG.Core
                 data.SetLevel(SaveData.SaveKeys.TipMask(), services.FirstRunTips.Mask);
             }
 
+            services.Training?.WriteToSave(data);
+
             return data;
         }
 
@@ -188,6 +193,7 @@ namespace IdleRPG.Core
             services.AdCaps?.Restore(data.adRedemptions);
             services.FirstRunTips?.Restore(data.GetLevel(SaveData.SaveKeys.TipMask()));
             services.Abilities?.LoadFromSave(data);
+            services.Training?.LoadFromSave(data);
 
             return run;
         }

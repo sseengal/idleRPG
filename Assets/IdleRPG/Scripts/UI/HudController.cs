@@ -38,14 +38,8 @@ namespace IdleRPG.UI
         [SerializeField] private CombatLogUI combatLog;
         [SerializeField] private FloatingDamageTextPool damageTextPool;
 
-        [Header("Story")]
-        [Tooltip("Dev only: the scene the P hotkey replays. The schedule drives real playback later.")]
-        [SerializeField] private StorySceneDef debugStoryScene;
-
         private StoryPlayer storyPlayer;
         private BattlePageFocus battleFocus;
-        private int debugSceneIndex = -1;
-        private int pendingDebugStep;
 
         public GameManager GameManager => gameManager;
 
@@ -77,97 +71,6 @@ namespace IdleRPG.UI
                 combatLog.CompleteStoryTyping();
                 combatLog.CompleteTyping();
             }
-        }
-
-        /// <summary>Dev only: replay the current scheduled scene over the live fight.</summary>
-        public bool DebugPlayStory()
-        {
-            return DebugPlayStory(DebugStoryScene());
-        }
-
-        /// <summary>Dev only: move through the scheduled scenes and play the selected one.</summary>
-        public bool DebugStepStory(int delta)
-        {
-            if (storyPlayer == null)
-            {
-                return false;
-            }
-
-            if (storyPlayer.IsPlaying)
-            {
-                // A test shortcut should interrupt the current scene, not feel dead. Drop queued production
-                // scenes first, otherwise the service would start its own next scene after the skip.
-                gameManager?.Story?.ClearPending();
-                pendingDebugStep = delta;
-                storyPlayer.SuppressNextWhirl();
-                storyPlayer.Skip();
-                return true;
-            }
-
-            StorySceneDef[] scenes = DebugStoryScenes();
-
-            if (scenes.Length == 0)
-            {
-                return DebugPlayStory(debugStoryScene);
-            }
-
-            if (debugSceneIndex < 0)
-            {
-                debugSceneIndex = delta > 0 ? 0 : scenes.Length - 1;
-            }
-            else
-            {
-                debugSceneIndex = (debugSceneIndex + delta) % scenes.Length;
-
-                if (debugSceneIndex < 0)
-                {
-                    debugSceneIndex += scenes.Length;
-                }
-            }
-
-            return DebugPlayStory(scenes[debugSceneIndex]);
-        }
-
-        /// <summary>Dev only: the id of the scene the P/J/K deck is pointing at.</summary>
-        public string DebugStoryName
-        {
-            get
-            {
-                StorySceneDef scene = DebugStoryScene();
-                return scene != null ? scene.Id : "none";
-            }
-        }
-
-        private bool DebugPlayStory(StorySceneDef scene)
-        {
-            if (storyPlayer == null || scene == null)
-            {
-                return false;
-            }
-
-            return storyPlayer.Play(scene);
-        }
-
-        private StorySceneDef DebugStoryScene()
-        {
-            StorySceneDef[] scenes = DebugStoryScenes();
-
-            if (scenes.Length == 0)
-            {
-                return debugStoryScene;
-            }
-
-            debugSceneIndex = Mathf.Clamp(debugSceneIndex, 0, scenes.Length - 1);
-            return scenes[debugSceneIndex];
-        }
-
-        private StorySceneDef[] DebugStoryScenes()
-        {
-            StorySceneDef[] scenes = gameManager != null && gameManager.Story != null
-                ? gameManager.Story.ScheduledScenes
-                : null;
-
-            return scenes ?? Array.Empty<StorySceneDef>();
         }
 
         private void Awake()
@@ -283,18 +186,6 @@ namespace IdleRPG.UI
         private bool PlayStory(StorySceneDef scene, Action onFinished)
         {
             return storyPlayer != null && storyPlayer.Play(scene, onFinished);
-        }
-
-        private void Update()
-        {
-            if (pendingDebugStep == 0 || storyPlayer == null || storyPlayer.IsPlaying)
-            {
-                return;
-            }
-
-            int delta = pendingDebugStep;
-            pendingDebugStep = 0;
-            DebugStepStory(delta);
         }
 
         private void OnDestroy()
