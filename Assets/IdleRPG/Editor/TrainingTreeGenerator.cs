@@ -3,75 +3,61 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 using IdleRPG.Data;
+using IdleRPG.Economy;
 
 namespace IdleRPG.EditorTools
 {
     /// <summary>
-    /// Generates the Training tree asset (75 LEFT stat nodes + the sparse RIGHT branch) from a curve here.
-    /// Placeholder numbers - tune later. Menu: Tools > Idle RPG > Generate Training Tree.
+    /// Generates the Training tree asset: one Gold chain per hero (Attack / Armor / Max HP) plus the sparse
+    /// party track, which is paid with Perk Tokens and gated by the LOWEST hero's chain depth.
+    /// Menu: Tools > Idle RPG > Generate Training Tree. Numbers are placeholders - tune later.
     /// </summary>
     public static class TrainingTreeGenerator
     {
         public const string TreePath = "Assets/IdleRPG/Data/Training/TrainingTree.asset";
-        // 75 visual levels x 8 nodes (two full sets per level).
-        private const int LeftNodeCount = 600;
+
+        private const string PartyConfigPath = "Assets/IdleRPG/Data/Config/PartyConfig.asset";
+
+        // 150 full cycles of Attack -> Armor -> Max HP = 450 nodes per hero.
+        private const int AppearancesPerHero = 150;
 
         [MenuItem("Tools/Idle RPG/Generate Training Tree", priority = 20)]
         public static void Generate()
         {
-            List<TrainingNode> nodes = new List<TrainingNode>();
+            PartyConfig party = AssetDatabase.LoadAssetAtPath<PartyConfig>(PartyConfigPath);
 
-            // LEFT: dense linear chain cycling Attack -> Armor -> Max HP -> Camp Heal.
-            for (int i = 0; i < LeftNodeCount; i++)
+            if (party == null || party.Heroes == null || party.ValidHeroCount == 0)
             {
-                int slot = i % 4;
-                int appearance = i / 4;   // 0..149 - one per time this kind appears; amount steps +1 each time
-                TrainingEffect effect;
-                double amount;
-                string title;
-
-                switch (slot)
-                {
-                    case 0:
-                        effect = TrainingEffect.AttackFlat;
-                        amount = 3 + appearance;
-                        title = "Attack +" + (3 + appearance);
-                        break;
-                    case 1:
-                        effect = TrainingEffect.ArmorFlat;
-                        amount = 20 + appearance;
-                        title = "Armor +" + (20 + appearance);
-                        break;
-                    case 2:
-                        effect = TrainingEffect.HpFlat;
-                        amount = 20 + appearance;
-                        title = "Max HP +" + (20 + appearance);
-                        break;
-                    default:
-                        effect = TrainingEffect.CampHealPercent;
-                        amount = 1 + appearance;
-                        title = "Camp Heal +" + (1 + appearance);
-                        break;
-                }
-
-                TrainingNode node = new TrainingNode();
-                node.EditorSet($"L{i:000}", TrainingBranch.Left, effect, amount, 25 + i * 8, i, 0, title,
-                    "LEFT branch: spend gold to train a permanent stat.");
-                nodes.Add(node);
+                Debug.LogError($"[TrainingTreeGenerator] No party roster at {PartyConfigPath}; tree not generated.");
+                return;
             }
 
-            // RIGHT: sparse big nodes, gated by how many LEFT nodes are unlocked.
-            AddRight(nodes, 0, 0, TrainingEffect.UnlockFirstAbility, 1d, 1000d,
+            List<TrainingNode> nodes = new List<TrainingNode>();
+
+            for (int i = 0; i < party.Heroes.Count; i++)
+            {
+                HeroData hero = party.Heroes[i];
+
+                if (hero != null)
+                {
+                    AddHeroChain(nodes, hero);
+                }
+            }
+
+            // PARTY track: paid with Perk Tokens, gated by the LOWEST hero LEFT count.
+            AddParty(nodes, 0, 0, TrainingEffect.UnlockFirstAbility, 1d, 2d,
                 "Active Skill Slot", "Unlocks the first active ability for all heroes.");
-            AddRight(nodes, 1, 13, TrainingEffect.BattleGoldPercent, 0.10d, 2500d,
+            AddParty(nodes, 1, 13, TrainingEffect.BattleGoldPercent, 0.10d, 4d,
                 "Battle Gold +10%", "More gold from every battle.");
-            AddRight(nodes, 2, 26, TrainingEffect.FinishGoldPercent, 0.15d, 5000d,
+            AddParty(nodes, 2, 26, TrainingEffect.CampHealPercent, 25d, 6d,
+                "Camp Healing +25", "Every camp heals the whole party for more.");
+            AddParty(nodes, 3, 38, TrainingEffect.FinishGoldPercent, 0.15d, 8d,
                 "Finish Gold +15%", "Bonus gold for finishing a level.");
-            AddRight(nodes, 3, 38, TrainingEffect.CampExperience, 5d, 8000d,
+            AddParty(nodes, 4, 44, TrainingEffect.CampExperience, 5d, 12d,
                 "Camp Experience +5", "Placeholder - needs the experience system.");
-            AddRight(nodes, 4, 44, TrainingEffect.LevelUpHealPercent, 0.15d, 12000d,
+            AddParty(nodes, 5, 50, TrainingEffect.LevelUpHealPercent, 0.15d, 18d,
                 "Level-Up Heal 15%", "Placeholder - needs the level system.");
-            AddRight(nodes, 5, 50, TrainingEffect.SurviveDeathShield, 10d, 20000d,
+            AddParty(nodes, 6, 50, TrainingEffect.SurviveDeathShield, 10d, 30d,
                 "Survive Once + Shield", "Placeholder - survive a death once, gain shield stacks.");
 
             Directory.CreateDirectory(Path.GetDirectoryName(TreePath));
@@ -91,11 +77,54 @@ namespace IdleRPG.EditorTools
             Debug.Log($"[TrainingTreeGenerator] Built {nodes.Count} nodes into {TreePath}.");
         }
 
-        private static void AddRight(List<TrainingNode> nodes, int index, int requiresLeft, TrainingEffect effect,
-            double amount, double cost, string title, string description)
+        /// <summary>One hero's Gold chain: Attack, Armor, Max HP, repeating, +1 to the amount on every appearance.</summary>
+        private static void AddHeroChain(List<TrainingNode> nodes, HeroData hero)
+        {
+            string heroId = hero.HeroID;
+            int order = 0;
+
+            for (int appearance = 0; appearance < AppearancesPerHero; appearance++)
+            {
+                for (int slot = 0; slot < 3; slot++)
+                {
+                    TrainingEffect effect;
+                    double amount;
+                    string title;
+
+                    switch (slot)
+                    {
+                        case 0:
+                            effect = TrainingEffect.AttackFlat;
+                            amount = 3 + appearance;
+                            title = "Attack +" + (3 + appearance);
+                            break;
+                        case 1:
+                            effect = TrainingEffect.ArmorFlat;
+                            amount = 20 + appearance;
+                            title = "Armor +" + (20 + appearance);
+                            break;
+                        default:
+                            effect = TrainingEffect.HpFlat;
+                            amount = 20 + appearance;
+                            title = "Max HP +" + (20 + appearance);
+                            break;
+                    }
+
+                    TrainingNode node = new TrainingNode();
+                    node.EditorSet($"{heroId}:L{order:000}", heroId, TrainingBranch.Left, effect, amount, 25 + order * 8,
+                        CurrencyType.Gold, order, 0, title, $"{hero.HeroName}'s permanent gold track.");
+                    nodes.Add(node);
+                    order++;
+                }
+            }
+        }
+
+        private static void AddParty(List<TrainingNode> nodes, int index, int requiresLeft, TrainingEffect effect,
+            double amount, double tokens, string title, string description)
         {
             TrainingNode node = new TrainingNode();
-            node.EditorSet($"R{index}", TrainingBranch.Right, effect, amount, cost, index, requiresLeft, title, description);
+            node.EditorSet($"party:R{index}", string.Empty, TrainingBranch.Right, effect, amount, tokens,
+                CurrencyType.PrestigeTokens, index, requiresLeft, title, description);
             nodes.Add(node);
         }
     }

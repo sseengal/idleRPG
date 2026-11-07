@@ -7,9 +7,9 @@ using IdleRPG.Save;
 namespace IdleRPG.Progression
 {
     /// <summary>
-    /// The Training tree: which nodes the player has unlocked, the gold checkout, the branch gates, and the
-    /// per-effect totals. LEFT nodes are a linear chain (each needs the one below); RIGHT nodes are gated by how far
-    /// LEFT has climbed. Persisted as "train.&lt;id&gt;" keys in the save's keyed level list (like ability unlocks).
+    /// The Training tree: one Gold chain PER HERO (Attack / Armor / Max HP) and a party track paid with Perk Tokens
+    /// and gated by the LOWEST hero's chain depth. Owns unlocks, the single currency checkout, the branch gates and
+    /// the per-effect totals. Persisted as "train.&lt;nodeID&gt;" keys in the save's keyed level list.
     /// </summary>
     public sealed class TrainingService
     {
@@ -18,13 +18,22 @@ namespace IdleRPG.Progression
         private readonly EconomyManager economy;
         private readonly TrainingTreeDef tree;
         private readonly HashSet<string> unlocked = new HashSet<string>();
-        private readonly Dictionary<int, TrainingNode> leftByOrder = new Dictionary<int, TrainingNode>();
+
+        /// <summary>Every node id in the tree; used to drop stale save keys from older tree shapes.</summary>
+        private readonly HashSet<string> allNodeIds = new HashSet<string>();
+
+        /// <summary>heroId -> (order -> node) for the LEFT chains.</summary>
+        private readonly Dictionary<string, Dictionary<int, TrainingNode>> leftByHero =
+            new Dictionary<string, Dictionary<int, TrainingNode>>();
+
+        /// <summary>Hero ids in tree order (Knight, Mage, Soldier...).</summary>
+        private readonly List<string> heroIds = new List<string>();
 
         public TrainingService(EconomyManager economy, TrainingTreeDef tree)
         {
             this.economy = economy;
             this.tree = tree;
-            BuildLeftIndex();
+            BuildIndexes();
         }
 
         /// <summary>Raised when a node is unlocked or the service loads (UI refreshes).</summary>
@@ -37,24 +46,91 @@ namespace IdleRPG.Progression
 
         public int UnlockedCount => unlocked.Count;
 
-        /// <summary>How many LEFT nodes are unlocked (the RIGHT-branch gate).</summary>
-        public int LeftUnlockedCount
+        /// <summary>Hero ids that own a LEFT chain, in tree order.</summary>
+        public IReadOnlyList<string> HeroIds => heroIds;
+
+        // ------------------------------------------------------------------
+        // Gates and totals
+        // ------------------------------------------------------------------
+        /// <summary>How many LEFT nodes this hero has unlocked.</summary>
+        public int LeftUnlockedCount(string heroId)
+        {
+            int count = 0;
+            Dictionary<int, TrainingNode> chain = GetChain(heroId);
+
+            if (chain == null)
+            {
+                return 0;
+            }
+
+            foreach (TrainingNode node in chain.Values)
+            {
+                if (node != null && unlocked.Contains(node.NodeID))
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        /// <summary>Every hero's LEFT nodes added together (all columns).</summary>
+        public int TotalLeftUnlockedCount
         {
             get
             {
                 int count = 0;
-                IReadOnlyList<TrainingNode> nodes = tree != null ? tree.Nodes : Array.Empty<TrainingNode>();
 
-                for (int i = 0; i < nodes.Count; i++)
+                for (int i = 0; i < heroIds.Count; i++)
                 {
-                    if (nodes[i].Branch == TrainingBranch.Left && unlocked.Contains(nodes[i].NodeID))
-                    {
-                        count++;
-                    }
+                    count += LeftUnlockedCount(heroIds[i]);
                 }
 
                 return count;
             }
+        }
+
+        /// <summary>The weakest hero's LEFT count - the party track gate.</summary>
+        public int LowestLeftCount
+        {
+            get
+            {
+                int lowest = int.MaxValue;
+
+                for (int i = 0; i < heroIds.Count; i++)
+                {
+                    int count = LeftUnlockedCount(heroIds[i]);
+
+                    if (count < lowest)
+                    {
+                        lowest = count;
+                    }
+                }
+
+                return lowest == int.MaxValue ? 0 : lowest;
+            }
+        }
+
+        /// <summary>The hero currently holding the party track back (lowest LEFT count). False when there are none.</summary>
+        public bool TryGetLaggard(out string heroId, out int count)
+        {
+            heroId = string.Empty;
+            count = 0;
+            int lowest = int.MaxValue;
+
+            for (int i = 0; i < heroIds.Count; i++)
+            {
+                int current = LeftUnlockedCount(heroIds[i]);
+
+                if (current < lowest)
+                {
+                    lowest = current;
+                    heroId = heroIds[i];
+                    count = current;
+                }
+            }
+
+            return heroId.Length > 0;
         }
 
         public bool IsUnlocked(TrainingNode node)
@@ -62,7 +138,35 @@ namespace IdleRPG.Progression
             return node != null && unlocked.Contains(node.NodeID);
         }
 
-        /// <summary>True when the node can be bought right now (gate satisfied, deferred effects excluded, gold enough).</summary>
+        /// <summary>True when the branch gate is satisfied (ignores currency and owned state).</summary>
+        public bool IsGateMet(TrainingNode node)
+        {
+            if (node == null)
+            {
+                return false;
+            }
+
+            if (node.Branch == TrainingBranch.Right)
+            {
+                return LowestLeftCount >= node.RequiresLeftNodes;
+            }
+
+            if (node.Order <= 0)
+            {
+                return true;
+            }
+
+            TrainingNode previous = FindLeft(node.HeroID, node.Order - 1);
+            return previous != null && unlocked.Contains(previous.NodeID);
+        }
+
+        /// <summary>True when the player holds enough of the node's own currency.</summary>
+        public bool CanAffordNode(TrainingNode node)
+        {
+            return node != null && (economy == null || economy.CanAfford(node.CostCurrency, node.Cost));
+        }
+
+        /// <summary>True when the node can be bought right now (gate + currency + not owned + not deferred).</summary>
         public bool CanUnlock(TrainingNode node)
         {
             if (node == null || IsUnlocked(node) || node.IsDeferred)
@@ -70,26 +174,10 @@ namespace IdleRPG.Progression
                 return false;
             }
 
-            if (economy != null && !economy.CanAfford(CurrencyType.Gold, node.CostGold))
-            {
-                return false;
-            }
-
-            if (node.Branch == TrainingBranch.Left)
-            {
-                if (node.Order > 0)
-                {
-                    TrainingNode previous = FindLeft(node.Order - 1);
-                    return previous != null && unlocked.Contains(previous.NodeID);
-                }
-
-                return true;
-            }
-
-            return LeftUnlockedCount >= node.RequiresLeftNodes;
+            return IsGateMet(node) && CanAffordNode(node);
         }
 
-        /// <summary>Spends gold and unlocks the node. Returns false when it cannot be bought.</summary>
+        /// <summary>Spends the node's currency and unlocks it. Returns false when it cannot be bought.</summary>
         public bool TryUnlock(TrainingNode node)
         {
             if (!CanUnlock(node))
@@ -97,7 +185,7 @@ namespace IdleRPG.Progression
                 return false;
             }
 
-            if (economy != null && !economy.SpendGold(node.CostGold))
+            if (economy != null && !economy.SpendCurrency(node.CostCurrency, node.Cost))
             {
                 return false;
             }
@@ -113,23 +201,52 @@ namespace IdleRPG.Progression
             return true;
         }
 
-        /// <summary>Sum of every unlocked node's amount for one effect (flat stats + fractions).</summary>
+        /// <summary>Sum of the PARTY track's unlocked amounts for one effect (money, camp heal, ability slot).</summary>
         public double TotalFor(TrainingEffect effect)
         {
-            double total = 0d;
             IReadOnlyList<TrainingNode> nodes = tree != null ? tree.Nodes : Array.Empty<TrainingNode>();
+            double total = 0d;
 
             for (int i = 0; i < nodes.Count; i++)
             {
-                if (nodes[i].Effect == effect && unlocked.Contains(nodes[i].NodeID))
+                TrainingNode node = nodes[i];
+
+                if (node != null && node.IsPartyNode && node.Effect == effect && unlocked.Contains(node.NodeID))
                 {
-                    total += nodes[i].Amount;
+                    total += node.Amount;
                 }
             }
 
             return total;
         }
 
+        /// <summary>Sum of ONE hero's unlocked amounts for one effect (their flat stats).</summary>
+        public double TotalFor(TrainingEffect effect, string heroId)
+        {
+            IReadOnlyList<TrainingNode> nodes = tree != null ? tree.Nodes : Array.Empty<TrainingNode>();
+            double total = 0d;
+
+            if (string.IsNullOrEmpty(heroId))
+            {
+                return 0d;
+            }
+
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                TrainingNode node = nodes[i];
+
+                if (node != null && node.HeroID == heroId && node.Effect == effect && unlocked.Contains(node.NodeID))
+                {
+                    total += node.Amount;
+                }
+            }
+
+            return total;
+        }
+
+        // ------------------------------------------------------------------
+        // Save
+        // ------------------------------------------------------------------
         public void LoadFromSave(SaveData data)
         {
             unlocked.Clear();
@@ -144,7 +261,7 @@ namespace IdleRPG.Progression
                         record.key.StartsWith(KeyPrefix, StringComparison.Ordinal))
                     {
                         string id = record.key.Substring(KeyPrefix.Length);
-                        if (id.Length > 0)
+                        if (id.Length > 0 && allNodeIds.Contains(id))
                         {
                             unlocked.Add(id);
                         }
@@ -168,14 +285,27 @@ namespace IdleRPG.Progression
             }
         }
 
-        private TrainingNode FindLeft(int order)
+        // ------------------------------------------------------------------
+        // Indexes
+        // ------------------------------------------------------------------
+        private Dictionary<int, TrainingNode> GetChain(string heroId)
         {
-            return leftByOrder.TryGetValue(order, out TrainingNode node) ? node : null;
+            return !string.IsNullOrEmpty(heroId) && leftByHero.TryGetValue(heroId, out Dictionary<int, TrainingNode> chain)
+                ? chain
+                : null;
         }
 
-        private void BuildLeftIndex()
+        private TrainingNode FindLeft(string heroId, int order)
         {
-            leftByOrder.Clear();
+            Dictionary<int, TrainingNode> chain = GetChain(heroId);
+            return chain != null && chain.TryGetValue(order, out TrainingNode node) ? node : null;
+        }
+
+        private void BuildIndexes()
+        {
+            leftByHero.Clear();
+            heroIds.Clear();
+            allNodeIds.Clear();
 
             if (tree == null)
             {
@@ -183,12 +313,31 @@ namespace IdleRPG.Progression
             }
 
             IReadOnlyList<TrainingNode> nodes = tree.Nodes;
+
             for (int i = 0; i < nodes.Count; i++)
             {
-                if (nodes[i].Branch == TrainingBranch.Left)
+                TrainingNode node = nodes[i];
+
+                if (node == null)
                 {
-                    leftByOrder[nodes[i].Order] = nodes[i];
+                    continue;
                 }
+
+                allNodeIds.Add(node.NodeID);
+
+                if (node.Branch != TrainingBranch.Left || node.IsPartyNode)
+                {
+                    continue;
+                }
+
+                if (!leftByHero.TryGetValue(node.HeroID, out Dictionary<int, TrainingNode> chain))
+                {
+                    chain = new Dictionary<int, TrainingNode>();
+                    leftByHero[node.HeroID] = chain;
+                    heroIds.Add(node.HeroID);
+                }
+
+                chain[node.Order] = node;
             }
         }
     }

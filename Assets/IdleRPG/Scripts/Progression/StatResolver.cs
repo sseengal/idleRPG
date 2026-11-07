@@ -42,9 +42,9 @@ namespace IdleRPG.Progression
         /// <summary>Training service (permanent gold tree) - flat stat bonuses are read from it.</summary>
         public TrainingService Training { get; set; }
 
-        private double TrainingBonus(TrainingEffect effect)
+        private double TrainingBonus(TrainingEffect effect, string heroId)
         {
-            return Training != null ? Training.TotalFor(effect) : 0d;
+            return Training != null ? Training.TotalFor(effect, heroId) : 0d;
         }
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace IdleRPG.Progression
                 GlobalHealthMultiplier,
                 GetEffectMode(HeroStatType.Health));
 
-            return value + TrainingBonus(TrainingEffect.HpFlat);
+            return value + TrainingBonus(TrainingEffect.HpFlat, hero.HeroID);
         }
 
         public double GetAttack(HeroData hero, int heroIndex)
@@ -285,7 +285,7 @@ namespace IdleRPG.Progression
                 GlobalDamageMultiplier,
                 GetEffectMode(HeroStatType.Attack));
 
-            return value + runAttackBonus + TrainingBonus(TrainingEffect.AttackFlat);
+            return value + runAttackBonus + TrainingBonus(TrainingEffect.AttackFlat, hero.HeroID);
         }
 
         public double GetDefense(HeroData hero, int heroIndex)
@@ -302,7 +302,7 @@ namespace IdleRPG.Progression
                 1d,
                 GetEffectMode(HeroStatType.Defense));
 
-            return value + runDefenseBonus + TrainingBonus(TrainingEffect.ArmorFlat);
+            return value + runDefenseBonus + TrainingBonus(TrainingEffect.ArmorFlat, hero.HeroID);
         }
 
         // ------------------------------------------------------------------

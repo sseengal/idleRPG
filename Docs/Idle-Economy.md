@@ -162,4 +162,10 @@ TelemetryFeed (ring buffer, ~200 entries, no allocation in the loop)
    predictable; keep a small random bonus roll on top.
 3. Should gem sinks be one-time purchases (cap extension) or repeatable (fast-forward)? Both: one-time for
    permanent slots, repeatable for consumables.
+4. **Training costs 3x gold** - three hero chains must all be fed before the party track's gate opens (it reads the
+   lowest hero). Measure gold per stage cleared against the 450-node curve; if the third chain feels like a tax,
+   lower the per-node gold or raise income, do not soften the gate.
+5. **Party track vs perks (same tokens).** Measure runs-per-node (tokens banked at depth 10 / 50 / 100 against the
+   2 / 4 / 6 / 8 / 12 / 18 / 30 prices). Target about 1-2 runs for the first node, 10+ for the last; if perks stop
+   being bought, the party prices are too low.
 

@@ -18,6 +18,8 @@
 | Axis | Earned from | Spent on | Reset by | Step |
 |---|---|---|---|---|
 | **Hero stat levels** (exists) | gold | gold | Ascension | 14 (generic keys) |
+| **Training - hero chains** (exists) | gold | gold | never | built |
+| **Training - party track** (exists) | perk tokens | tokens | never | built |
 | **Ability levels** | ability scrolls + gold | scrolls | Ascension | 13-14 |
 | **Roster / stars** | hero shards (dupes, bosses, bounties) | shards | never | 17 |
 | **Relics** | stage materials (+ dupes to upgrade) | materials | never | 18 |
@@ -36,7 +38,7 @@ stops feeling progress → churn.
 |---|---|---|---|
 | `gold` | every kill (primary) | hero stats, ability levels | 1 upgrade per 20-60s early, 3-10 min mid |
 | `gems` | **milestone stages** - first clear of every 5th stage (`gemsPerMilestone`, `milestoneStageInterval`) | **fast-forward, offline-cap extension, extra expedition slot, extra auto-buy slot, bounty reroll, small scroll bundles** | 1 meaningful buy per 30-60 min |
-| `tokens` | ascension (exists) | prestige tracks | 1-3 levels per ascension early |
+| `tokens` | ascension (exists) | prestige tracks + the party Training track (2-30 per node) | 1-3 levels per ascension early |
 | `shards.<heroId>` | dupes, boss chests, bounties | star-ups, unlocks | star-up per 10-30 min mid |
 | `materials` | zone-tier stage drops | relic levels | relic level per 5-15 min mid |
 | `essence` | transcendence | L2 tracks (global multipliers, ability tiers, slots) | 1 buy per transcendence |
