@@ -122,6 +122,7 @@ Assets/_Recovery/
 ## ArtLab artifacts
 Screenshots/
 Assets/Screenshots/
+Assets/Screenshots.meta
 
 # Art source packs (downloads, not project content - nothing under Assets/ references them)
 /TinyRPGAssets/

@@ -8,6 +8,9 @@ using IdleRPG.Utils;
 
 namespace IdleRPG.UI
 {
+    // RETIRED (2026-11-08): the lobby now builds its own PERKS page (StartScreenUI.Pages.cs);
+    // this baked panel is not used. Kept for reference.
+
     /// <summary>
     /// Panel B: the PERKS page. Shows the Perk Point yield and an "END RUN" button with a two-tap confirm,
     /// and the permanent upgrade tree.

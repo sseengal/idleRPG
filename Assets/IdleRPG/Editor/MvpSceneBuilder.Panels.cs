@@ -59,7 +59,6 @@ namespace IdleRPG.EditorTools
             GameObject panelsRoot = UiFactory.Node("Panels", shell.transform);
             UiFactory.Anchor(panelsRoot.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, UiSpace.Base, UiSpace.Base, UiSpace.Base, UiSpace.Base);
 
-            GameObject partyPanel = BuildPartyPanel(panelsRoot.transform);
             GameObject upgradePanel = BuildUpgradePanel(panelsRoot.transform, partyConfig);
             GameObject ascensionPanel = BuildAscensionPanel(panelsRoot.transform, prestigeUpgrades);
             GameObject shopPanel = BuildShopPanel(panelsRoot.transform);
@@ -68,7 +67,6 @@ namespace IdleRPG.EditorTools
             // ScreenController drives these panels through the TabController below.
             List<TabController.TabDefinition> definitions = new List<TabController.TabDefinition>
             {
-                CreatePanelTab(partyPanel),
                 CreatePanelTab(upgradePanel),
                 CreatePanelTab(ascensionPanel),
                 CreatePanelTab(shopPanel)
@@ -82,14 +80,6 @@ namespace IdleRPG.EditorTools
         /// The PARTY tab panel. The board, the roster and the hero card are built at runtime by
         /// <see cref="PartyPanelUI"/>, so adding a row (a stat, an equipment slot) never means re-authoring a scene.
         /// </summary>
-        private static GameObject BuildPartyPanel(Transform parent)
-        {
-            GameObject panel = UiFactory.Node("PartyPanel", parent);
-            UiFactory.Stretch(panel.GetComponent<RectTransform>());
-            panel.AddComponent<PartyPanelUI>();
-            return panel;
-        }
-
         /// <summary>Bottom nav: Battle + the four management tabs, with active highlighting.</summary>
         private static ScreenController BuildNavBar(RectTransform safeArea, GameObject battlePage,
             GameObject managementPage, TabController tabs, GameObject damageCanvas, GameObject battleStage,

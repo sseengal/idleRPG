@@ -114,13 +114,13 @@ namespace IdleRPG.UI
         // ------------------------------------------------------------------
         private void BuildGearRow(RectTransform root)
         {
-            TextMeshProUGUI caption = UiRuntime.CreateText(root, "GearCaption", "GEAR (equipped)", UiType.Role.Small,
+            TextMeshProUGUI caption = UiRuntime.CreateText(root, "GearCaption", "GEAR", UiType.Role.Small,
                 TextAlignmentOptions.MidlineLeft, dimText);
             // The caption's cell is about 249 units wide and the word is long, so it shrinks to fit.
             UiType.ApplyAuto(caption, UiType.Role.Small);
-            UiRuntime.Anchor(caption.rectTransform, new Vector2(0.48f, 0.415f), new Vector2(0.72f, 0.45f), UiSpace.Tight, UiSpace.None, UiSpace.None, UiSpace.None);
+            UiRuntime.Anchor(caption.rectTransform, new Vector2(0.48f, 0.415f), new Vector2(0.60f, 0.45f), UiSpace.Tight, UiSpace.None, UiSpace.None, UiSpace.None);
 
-            TextMeshProUGUI hint = UiRuntime.CreateText(root, "GearHint", "gear: coming soon", UiType.Role.Micro,
+            TextMeshProUGUI hint = UiRuntime.CreateText(root, "GearHint", "coming soon", UiType.Role.Micro,
                 TextAlignmentOptions.MidlineRight, dimText);
             UiRuntime.Anchor(hint.rectTransform, new Vector2(0.62f, 0.415f), new Vector2(0.97f, 0.45f), UiSpace.None, UiSpace.None, UiSpace.Tight, UiSpace.None);
 

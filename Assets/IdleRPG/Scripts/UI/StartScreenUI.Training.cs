@@ -74,7 +74,7 @@ namespace IdleRPG.UI
             pr.anchorMax = new Vector2(0.98f, 0.885f);
             pr.offsetMin = Vector2.zero;
             pr.offsetMax = Vector2.zero;
-            panel.GetComponent<Image>().color = new Color(0.10f, 0.11f, 0.13f, 0.98f);
+            panel.GetComponent<Image>().color = new Color(0.10f, 0.11f, 0.13f, 1f);
             trainingPanel = panel;
 
             BuildColumnHeaders(panel.transform);

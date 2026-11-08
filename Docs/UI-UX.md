@@ -103,10 +103,12 @@ The same idea as the type scale, applied to the space between things. Every gap 
 `Scripts/UI/UiSpace.cs` (the ladder: None 0, Hairline 2, Tight 4, Snug 6, Small 8, Base 10, Medium 12,
 Gutter 14, Large 24; plus roles such as `ScreenMargin` 14, `CardPadding` 12, `RowGap` 8).
 
-The structure underneath: three layers (main, damage, modal), every overlay on a **safe box**, two
-**fixed-height** chrome bars (header 115, nav 230) with the page stretched between them, and
-`matchWidthOrHeight = 0` (match width) on every canvas, so taps and text stay the same on every phone and a
-taller phone shows more content.
+The structure underneath: three layers (main, damage, modal), every overlay on a **safe box**, one
+**fixed-height** chrome band (the header, 115) with the page stretched under it. The old 230-unit bottom
+nav bar is retired, so a page now runs from just under the header to the bottom of the safe area (a
+`UiSpace.Large` gap keeps content off the screen edge). Every canvas also uses
+`matchWidthOrHeight = 0` (match width), so taps and text stay the same on every phone and a taller phone
+shows more content.
 
 **The guard:** `Tools > Idle RPG > UI > Check Spacing` fails on a hand-written gap (a non-zero inset, a
 hand-built `RectOffset`, a numeric scroll / stack spacing). It runs inside `Run All Checks (regression)` too.
@@ -120,6 +122,14 @@ exceptions - is in `UI-Layout.md`.** That file owns spacing; this one owns scree
 **Shell today (2026-11-08):** the lobby owns navigation - `SHOP / PARTY / BATTLE / ASCENSION / TRAINING` on its own
 canvas, with the shared header borrowed from the battle page. The old baked 5-tab shell (BATTLE / PARTY / UPGRADES /
 PERKS / SHOP) and its management page are **retired** and no longer built into the scene.
+
+| Tab | State | What it does today |
+| --- | --- | --- |
+| BATTLE | live | closes the lobby and runs the fight |
+| PARTY | live | read-only roster: hero cards, the selected hero's stats, gear and ability slots |
+| ASCENSION | live | the perk shop: four token tracks, one level per tap |
+| TRAINING | live | the gold tree (three heroes) plus the party track |
+| SHOP | placeholder | shows a "coming soon" line; no content behind it |
 Target shell adds depth without nav explosion:
 
 ```
@@ -146,7 +156,10 @@ close is always top-left, primary button reachable one-handed (1080x1920 referen
 - **Runtime menus use the type scale and the touch rule.** Every label picks a `UiType` role and every control clears
   `UiTouch.MinTarget` (144) - no hand-written sizes, and the fonts come from `UiTheme` (Silkscreen chrome, VT323
   sentences), not the TMP default. Glyphs are drawn as sprites when the font lacks one (arrows).
-- Pages that are not built yet show a one-line status note instead of an empty page.
+- **One page at a time.** Every tab closes the other lobby pages before it opens its own, so two pages can
+  never stack. All of them sit in the same box (`0.02-0.98` x `0.13-0.885`) and are opaque, so the lobby card
+  behind them cannot show through.
+- Pages that are not built yet (SHOP alone) show a one-line status note instead of an empty page.
 
 
 ## 3. Battle screen (multi-enemy + formation)

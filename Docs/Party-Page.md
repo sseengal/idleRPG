@@ -3,6 +3,12 @@
 > **RECORD, not current.** The page shipped its shell and three tabs. Current screens: `UI-UX.md`;
 > containers and spacing: `UI-Layout.md`.
 
+> **As built (2026-11-08).** The PARTY tab is a page in the lobby, not a baked scene panel: `StartScreenUI`
+> makes the panel on first open and adds `PartyPanelUI`, which builds the whole sheet at `OnEnable` (hero cards,
+> the selected hero's stats, gear slots, ability slots). It is **read-only** - no equip, no formation, no drag.
+> It refreshes on `Resolver.StatsChanged` and on gear change, so a training purchase shows up without reopening
+> the page. The scene builder method that used to bake this panel is deleted.
+
 > Design record (2026-09-30). Classic RPG/JRPG framing, adapted to an **idle** game. The MVP ships the
 > shell plus two tabs (Roster, Formation); everything else is recorded here so the layout never has to be
 > redesigned when it lands.

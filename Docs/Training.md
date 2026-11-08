@@ -36,9 +36,12 @@ Knight (Gold)   Mage (Gold)   Soldier (Gold)   PARTY (Perk Tokens)
 Party prices are **token-scale** (2 / 4 / 6 / 8 / 12 / 18 / 30), not gold-scale. Token income is
 `max(1, (depth / 10) ^ 1.5)` per run banked, so the first party node is about one or two runs and the last is many.
 
-> **The party track competes with the PERKS tab for the same tokens.** Balance wins: keep the party track few and
-> cheap, or nobody buys a perk. The measurement is **runs needed per party node** (tokens per run at depth 10 / 50 /
-> 100 against the price) - target about 1-2 runs for the first node and 10+ for the last.
+> **The party track competes with the ASCENSION page for the same tokens.** Since 2026-11-08 that page sells four
+> perk tracks (War / Gold / Vitality Mastery, Gold Hoarder) at 1 level per tap, so both sinks are live at once and
+> the purse is shared. Balance wins: keep the party track few and cheap, or nobody buys a perk. The measurement is
+> **runs needed per party node** (tokens per run at depth 10 / 50 / 100 against the price) - target about 1-2 runs
+> for the first node and 10+ for the last - checked against the cheapest perk (1 token) so the first tap is never
+> out of reach.
 
 > **Gold =/= Experience.** Separate resources. Any node whose effect is "experience" or "on level up" is deferred
 > (shown as `Coming soon.`, not purchasable) until those systems exist.

@@ -27,6 +27,7 @@ namespace IdleRPG.EditorTools
     public static partial class MvpSceneBuilder
     {
         public const string ScenePath = "Assets/IdleRPG/Scenes/Main.unity";
+        private const string BootScenePath = "Assets/IdleRPG/Scenes/Boot.unity";
 
         private const float ReferenceWidth = 1080f;
         private const float ReferenceHeight = 1920f;
@@ -38,7 +39,10 @@ namespace IdleRPG.EditorTools
         // numbers. One rule now: extra height belongs to the page, the bars never move.
         // The values reproduce the 1080x1920 design (header 6% and nav 12% of 1920), so nothing shifts on 9:16.
         private const float HeaderBandHeight = 115f;   // top bar: the currency chips + boost, pinned to the top
-        private const float NavBandHeight = 230f;      // bottom bar: the five nav buttons, pinned to the bottom
+
+        // Retired nav bar height. BuildNavBar is no longer called (the lobby owns navigation), but the method is
+        // kept for reference, so its constant stays.
+        private const float NavBandHeight = 230f;
 
         // Bands inside the battle page (page coords): log 0..LogTop, ability strip 0.28..0.39,
         // viewport 0.39..StageRowMinY, stage/wave row 0.93..0.99.
@@ -338,14 +342,14 @@ namespace IdleRPG.EditorTools
         }
 
         /// <summary>
-        /// A full-page container that sits BETWEEN the two fixed chrome bands: from the top of the nav bar to the
-        /// bottom of the header. Every extra unit of screen height lands here, which is the point of the fixed bars.
+        /// A full-page container under the fixed header. There is no bottom bar any more (the lobby owns navigation),
+        /// so the page runs to the bottom of the safe area and every extra unit of screen height lands in it.
         /// </summary>
         private static GameObject CreatePage(string name, RectTransform safeArea)
         {
             GameObject page = UiFactory.Node(name, safeArea);
             UiFactory.Anchor(page.GetComponent<RectTransform>(), Vector2.zero, Vector2.one,
-                0f, NavBandHeight, 0f, HeaderBandHeight);
+                0f, UiSpace.Large, 0f, HeaderBandHeight);
             return page;
         }
 
@@ -447,7 +451,6 @@ namespace IdleRPG.EditorTools
         {
             List<EditorBuildSettingsScene> scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
 
-            // Main scene first so it becomes the build entry point.
             for (int i = 0; i < scenes.Count; i++)
             {
                 if (scenes[i].path == scenePath)
@@ -457,7 +460,11 @@ namespace IdleRPG.EditorTools
                 }
             }
 
-            scenes.Insert(0, new EditorBuildSettingsScene(scenePath, true));
+            // Boot is the build entry point (it loads the main scene). This used to insert the main scene at
+            // index 0, so every MVP rebuild silently pushed the splash to second place and a build booted
+            // straight into the game. Only go first when there is no Boot scene to protect.
+            int index = scenes.Count > 0 && scenes[0].path == BootScenePath ? 1 : 0;
+            scenes.Insert(index, new EditorBuildSettingsScene(scenePath, true));
             EditorBuildSettings.scenes = scenes.ToArray();
         }
     }

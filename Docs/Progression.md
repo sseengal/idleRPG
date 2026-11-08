@@ -27,7 +27,7 @@
 | **Ability levels** | ability scrolls + gold | scrolls | Ascension | 13-14 |
 | **Roster / stars** | hero shards (dupes, bosses, bounties) | shards | never | 17 |
 | **Relics** | stage materials (+ dupes to upgrade) | materials | never | 18 |
-| **Prestige tracks (L1)** | prestige tokens | tokens | never | exists |
+| **Prestige tracks (L1)** | prestige tokens | tokens | never | **exists, buyable on the ASCENSION page** |
 | **Transcendence tracks (L2)** | essence | essence | never | 18 |
 | **Automation unlocks** | tokens / milestones | tokens | never | 16 |
 | **Formation slots + presets** | stage/zone milestones | - | never | 10 |

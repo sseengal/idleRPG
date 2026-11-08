@@ -129,7 +129,7 @@ namespace IdleRPG.UI
 
             Canvas menuCanvas = MakeCanvas("MiniMenuCanvas", 251, true);
             menuButton = menuCanvas.gameObject;
-            Btn(menuCanvas.transform, "MenuButton", new Vector2(0.78f, 0.90f), new Vector2(0.97f, 0.975f), "MENU", new Color(0.11f, 0.13f, 0.19f, 1f), UiType.Role.Small, ShowLobby);
+            Btn(menuCanvas.transform, "MenuButton", new Vector2(0.80f, 0.90f), new Vector2(0.97f, 0.975f), "MENU", new Color(0.11f, 0.13f, 0.19f, 1f), UiType.Role.Small, ShowLobby);
             menuButton.SetActive(false);
         }
 
@@ -179,13 +179,25 @@ namespace IdleRPG.UI
         {
             HighlightNav(tab);
 
-            if (tab == "TRAINING")
-            {
-                ShowTraining();
-                return;
-            }
-
+            // One page at a time: close every lobby page first, then open the chosen one.
             HideTraining();
+            HideParty();
+            HidePerks();
+
+            switch (tab)
+            {
+                case "TRAINING":
+                    ShowTraining();
+                    return;
+
+                case "PARTY":
+                    ShowParty();
+                    return;
+
+                case "ASCENSION":
+                    ShowPerks();
+                    return;
+            }
 
             if (statusLabel != null)
             {
