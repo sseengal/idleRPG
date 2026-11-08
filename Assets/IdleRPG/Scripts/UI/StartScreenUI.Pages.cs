@@ -11,7 +11,8 @@ namespace IdleRPG.UI
 {
     /// <summary>
     /// The lobby pages beside TRAINING: PARTY (the read-only roster, hosted as-is) and ASCENSION / PERKS
-    /// (three token tracks). Both build on first open and sit in the same panel band as the training page.
+    /// (one row per token track, from AscensionManager.TokenUpgrades). Both build on first open and sit in the
+    /// same panel band as the training page.
     /// </summary>
     public sealed partial class StartScreenUI
     {
