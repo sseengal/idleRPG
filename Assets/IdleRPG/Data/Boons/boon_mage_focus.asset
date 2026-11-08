@@ -22,4 +22,6 @@ MonoBehaviour:
   effects:
   - operation: 5
     amount: 0.12
+    trigger: 0
+    chance: 1
   maxStacks: 3

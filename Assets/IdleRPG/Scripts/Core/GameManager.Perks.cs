@@ -64,10 +64,18 @@ namespace IdleRPG.Core
             }
         }
 
-        /// <summary>A boon was taken: the stats changed, so tell everything that draws them.</summary>
+        /// <summary>A boon was taken: the stats changed, so tell everything that draws them - and rebuild the
+        /// fight-side snapshot, so a mechanic card is live in the next swing.</summary>
         private void OnBoonsChanged()
         {
             Resolver?.NotifyGearChanged();
+            RefreshBoonRuntime();
+        }
+
+        /// <summary>Compiles the hand into the fight's vocabulary and hands it over. Cheap: a few structs per pick.</summary>
+        private void RefreshBoonRuntime()
+        {
+            combatManager?.ApplyBoons(BoonRuntimeFactory.Build(Boons, partyConfig));
         }
 
         /// <summary>

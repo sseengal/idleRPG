@@ -22,7 +22,14 @@ namespace IdleRPG.Data
     [Serializable]
     public sealed class PerkEffectSpec
     {
-        /// <summary>Every effect a boon may carry. Each one maps onto a single stat the resolver already owns.</summary>
+        /// <summary>
+        /// Every effect a boon may carry.
+        ///
+        /// Layer A (a stat the resolver already owns): Attack ... CritDamage, the first seven. They need no fight
+        /// code at all.
+        /// Layer B (a mechanic the fight fires): from CleaveToOthers on. These are compiled into the sim's own
+        /// vocabulary by <see cref="IdleRPG.Progression.BoonRuntimeFactory"/> and need <see cref="Trigger"/>.
+        /// </summary>
         public enum Op
         {
             AttackPercent = 0,
@@ -31,15 +38,55 @@ namespace IdleRPG.Data
             GoldPercent = 3,
             AttackSpeedPercent = 4,
             CritChanceFlat = 5,
-            CritDamageFlat = 6
+            CritDamageFlat = 6,
+
+            // --- Layer B: mechanics ---
+            CleaveToOthers = 10,
+            ExtraStrike = 11,
+            ReflectDamage = 12,
+            Lifesteal = 13,
+            HealSelf = 14,
+            ShieldSelf = 15
+        }
+
+        /// <summary>True when this op is a mechanic the fight has to fire (layer B), not a stat.</summary>
+        public static bool IsMechanic(Op operation)
+        {
+            return (int)operation >= 10;
         }
 
         [SerializeField] private Op operation = Op.AttackPercent;
         [SerializeField] private float amount = 0.1f;
 
+        [Tooltip("When a mechanic fires. Ignored by stat ops.")]
+        [SerializeField] private PerkTriggerKind trigger = PerkTriggerKind.OnHit;
+
+        [Tooltip("Chance for a mechanic to fire, 1 = always. Ignored by stat ops.")]
+        [Range(0f, 1f)]
+        [SerializeField] private float chance = 1f;
+
         public Op Operation => operation;
 
         public double Amount => amount;
+
+        /// <summary>"On hit: ", "On kill: " - the trigger word a mechanic's description starts with.</summary>
+        private string When()
+        {
+            switch (trigger)
+            {
+                case PerkTriggerKind.OnKill: return "On kill: ";
+                case PerkTriggerKind.OnHurt: return "When hit: ";
+                case PerkTriggerKind.OnWaveStart: return "Each wave: ";
+                default: return "On hit: ";
+            }
+        }
+
+        public PerkTriggerKind Trigger => trigger;
+
+        public double Chance => chance;
+
+        /// <summary>True when this effect is a mechanic, so the fight needs it.</summary>
+        public bool IsTrigger => IsMechanic(operation);
 
         /// <summary>"+12% attack", "+5% crit chance" - the shape every boon description uses.</summary>
         public string ToDisplayString()
@@ -56,6 +103,14 @@ namespace IdleRPG.Data
                 case Op.AttackSpeedPercent: return value + " attack speed";
                 case Op.CritChanceFlat: return value + " crit chance";
                 case Op.CritDamageFlat: return value + " crit damage";
+
+                // Mechanics read as when-then, the way a card should: "On hit: 50% of the hit..." .
+                case Op.CleaveToOthers: return When() + value + " of the hit to the other enemies";
+                case Op.ExtraStrike: return When() + value + " attack strike again";
+                case Op.ReflectDamage: return When() + value + " of damage taken reflected";
+                case Op.Lifesteal: return When() + "heal " + value + " of damage dealt";
+                case Op.HealSelf: return When() + "heal " + value + " of max health";
+                case Op.ShieldSelf: return When() + "shield " + value + " of max health";
                 default: return value;
             }
         }

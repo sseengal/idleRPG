@@ -50,7 +50,7 @@ namespace IdleRPG.Combat
                 this.context = new SimContext(this.context.Rules, randomSeed, this.context.Mode);
             }
 
-            encounter = new Encounter(this.context) { EnemyTargetRule = MapTargeting(targetingMode) };
+            encounter = new Encounter(this.context) { EnemyTargetRule = MapTargeting(targetingMode), Perks = Perks };
             WireEncounterEvents();
         }
 
@@ -97,6 +97,24 @@ namespace IdleRPG.Combat
 
         public Encounter CurrentEncounter => encounter;
 
+        /// <summary>
+        /// The boons compiled for the fight (see <see cref="IdleRPG.Progression.BoonRuntimeFactory"/>). Handed to
+        /// every encounter this simulator builds, and pushed into the live one so a card taken between waves is
+        /// live in the next swing.
+        /// </summary>
+        public PerkRuntime Perks { get; private set; } = PerkRuntime.Empty;
+
+        /// <summary>Replaces the snapshot. The encounter swaps it atomically, so no half-applied hand is possible.</summary>
+        public void ApplyBoons(PerkRuntime perks)
+        {
+            Perks = perks ?? PerkRuntime.Empty;
+
+            if (encounter != null)
+            {
+                encounter.Perks = Perks;
+            }
+        }
+
         /// <summary>The enemy being fought (index 0). Multi-enemy waves expose <see cref="Enemies"/>.</summary>
         public EnemyCombatant Enemy => enemies.Length > 0 ? enemies[0] : null;
 
@@ -139,7 +157,7 @@ namespace IdleRPG.Combat
             }
 
             context = newContext;
-            encounter = new Encounter(context) { EnemyTargetRule = MapTargeting(targetingMode) };
+            encounter = new Encounter(context) { EnemyTargetRule = MapTargeting(targetingMode), Perks = Perks };
             WireEncounterEvents();
 
             if (heroes.Length > 0)

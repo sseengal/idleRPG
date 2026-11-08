@@ -79,9 +79,17 @@ namespace IdleRPG.Data
                     return "All heroes";
                 }
 
-                return string.IsNullOrEmpty(heroID)
+                if (string.IsNullOrEmpty(heroID))
+                {
+                    return "One hero";
+                }
+
+                // "hero_soldier" reads as "Soldier only": drop the internal prefix, then capitalise.
+                string name = heroID.StartsWith("hero_") ? heroID.Substring(5) : heroID;
+
+                return string.IsNullOrEmpty(name)
                     ? "One hero"
-                    : char.ToUpperInvariant(heroID[0]) + heroID.Substring(1) + " only";
+                    : char.ToUpperInvariant(name[0]) + name.Substring(1) + " only";
             }
         }
 

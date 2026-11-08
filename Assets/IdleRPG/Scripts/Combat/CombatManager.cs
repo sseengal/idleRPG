@@ -41,6 +41,12 @@ namespace IdleRPG.Combat
         // --- State ---
         public CombatSimulator Simulator => simulator;
 
+        /// <summary>Pushes the compiled boons into the fight (see <see cref="CombatSimulator.ApplyBoons"/>).</summary>
+        public void ApplyBoons(IdleRPG.Sim.PerkRuntime perks)
+        {
+            simulator?.ApplyBoons(perks);
+        }
+
         public CombatDirector Director => director;
 
         public int CurrentStage => director == null ? 1 : director.CurrentStage;

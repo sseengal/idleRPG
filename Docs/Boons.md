@@ -119,7 +119,7 @@ ladder memorable and contains the fight-side work to a known list.
 | **Epics - a mechanic, 2 stacks** | | | | | |
 | 13 | **Vampiric Edge** | Epic | all | heal 8% of damage dealt | hook |
 | 14 | **Thorned Mail** | Epic | knight | reflect 20% of damage taken | hook |
-| 15 | **Cleaving Blow** | Epic | soldier | on hit: 40% of the hit to the other enemies | hook |
+| 15 | **Cleaving Blow** | Epic | soldier | on hit: 50% of the hit to each other enemy | **built** |
 | 16 | **Battle Echo** | Epic | all | on hit: 25% chance to strike again for 50% | hook |
 | 17 | **Executioner** | Epic | all | +40% damage to enemies under 30% HP | hook |
 | 18 | **Overflow** | Epic | mage | a killing blow's excess carries to the next enemy | hook |
@@ -189,10 +189,21 @@ what keeps the common tier worth picking.
 | `Progression/BoonRuntimeFactory.cs` | new | loadout + hero ids -> `PerkRuntime`; the only place that knows both worlds |
 | `EncounterFactory` / `CombatDirector` | existing | pass the snapshot the way `SimRules` already travels |
 
-**Built 2026-11-09 (foundation only):** `Sim/PerkTrigger.cs`, `Sim/PerkEffect.cs`, `Sim/PerkRuntime.cs`, and the
+**Wired end to end 2026-11-09.** `Progression/BoonRuntimeFactory.cs` compiles the hand into the fight's
+vocabulary (stat cards are skipped - they belong to the resolver), `CombatSimulator.ApplyBoons` hands the snapshot
+to every encounter it builds and to the live one, and `GameManager.OnBoonsChanged` rebuilds it on every pick and on
+load. Proven live: taking *Cleaving Blow* filed one effect on the soldier slot and the log then showed
+`Soldier hits Bat A for 8` followed by `Bat B for 4`.
+
+**Built 2026-11-09 (foundation):** `Sim/PerkTrigger.cs`, `Sim/PerkEffect.cs`, `Sim/PerkRuntime.cs`, and the
 hooks inside `Encounter` (`RunTriggeredEffects`, `RunOwnEffects`, `ApplyPerkEffect`, `DamageOne`, `HealSelf`). The
 snapshot travels on `Encounter.Perks`; it is empty until the Unity side compiles a hand into it (next step). Seven
 headless tests in `Tests/PerkTriggerTests.cs` cover cleave, echo, thorns, lifesteal, on-kill and the no-boons control.
+
+**Content trap, found and fixed:** `SerializedProperty.enumValueIndex` is an ORDINAL into the displayed list, so
+a sparse enum (ops 0-6, then 10-15) writes the neighbouring value - *Cleaving Blow* first landed on `Lifesteal`.
+The generator now writes `intValue`, and `BoonRuntimeFactoryTests` reads the real assets so the mistake cannot
+come back silently.
 
 **Guardrails - these are what keep it debuggable (and they are in the code):**
 
@@ -236,7 +247,7 @@ and without boons:
 | Phase | Ships | Acceptance |
 |---|---|---|
 | **P0 (done)** | XP, levels, card, 10 stat cards, re-roll, save | a pick changes a stat in the next swing; reload keeps the hand |
-| **P1** | trigger foundation + 8 hook cards + log lines | cleave hits only the neighbours; echo cannot recurse; thorns can kill; same seed gives the same fight |
+| **P1** | trigger foundation (done) + 6 mechanic cards + log lines | cleave hits only the neighbours; echo cannot recurse; thorns can kill; same seed gives the same fight. **Cleaving Blow shipped**; the other five are now data plus a mapping line |
 | **P2** | level bands + soft pity + diversity rule | a 13+ run sees epics; four flat hands in a row cannot happen |
 | **P3** | cheap layer-A cards (XP, gold-on-boss, extra roll, camp heal) | no sim change; `Scholar` visibly speeds the bar |
 | **P4** | statuses (burn/poison/chill) | a burn card ticks damage and appears in the log per tick |

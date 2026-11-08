@@ -50,7 +50,11 @@ namespace IdleRPG.EditorTools
                 Boon("boon_brutal_strikes", "Brutal Strikes", PerkRarity.Rare, null, 3,
                     Effect(PerkEffectSpec.Op.CritDamageFlat, 0.22f)),
                 Boon("boon_titans_blood", "Titan's Blood", PerkRarity.Rare, null, 3,
-                    Effect(PerkEffectSpec.Op.HealthPercent, 0.22f))
+                    Effect(PerkEffectSpec.Op.HealthPercent, 0.22f)),
+
+                // First layer-B card: every landed blow splashes half its damage onto the other enemies.
+                Boon("boon_cleaving_blow", "Cleaving Blow", PerkRarity.Epic, Soldier, 2,
+                    Effect(PerkEffectSpec.Op.CleaveToOthers, 0.5f, PerkTriggerKind.OnHit))
             };
 
             WritePool(boons);
@@ -60,16 +64,17 @@ namespace IdleRPG.EditorTools
             Debug.Log($"[BoonAssetGenerator] Wrote {boons.Count} boons + the pool at {PoolPath}.");
         }
 
-        private static (PerkEffectSpec.Op op, float amount) Effect(PerkEffectSpec.Op op, float amount)
+        private static (PerkEffectSpec.Op op, float amount, PerkTriggerKind trigger, float chance) Effect(
+            PerkEffectSpec.Op op, float amount, PerkTriggerKind trigger = PerkTriggerKind.OnHit, float chance = 1f)
         {
-            return (op, amount);
+            return (op, amount, trigger, chance);
         }
 
         // ------------------------------------------------------------------
         // Cards
         // ------------------------------------------------------------------
         private static PerkData Boon(string id, string displayName, PerkRarity rarity, string heroId,
-            int maxStacks, params (PerkEffectSpec.Op op, float amount)[] effects)
+            int maxStacks, params (PerkEffectSpec.Op op, float amount, PerkTriggerKind trigger, float chance)[] effects)
         {
             string path = $"{Folder}/{id}.asset";
             PerkData boon = AssetDatabase.LoadAssetAtPath<PerkData>(path);
@@ -84,7 +89,7 @@ namespace IdleRPG.EditorTools
             serialized.FindProperty("boonID").stringValue = id;
             serialized.FindProperty("displayName").stringValue = displayName;
             serialized.FindProperty("description").stringValue = string.Empty;   // built from the effects
-            serialized.FindProperty("rarity").enumValueIndex = (int)rarity;
+            serialized.FindProperty("rarity").intValue = (int)rarity;
             serialized.FindProperty("allHeroes").boolValue = string.IsNullOrEmpty(heroId);
             serialized.FindProperty("heroID").stringValue = heroId ?? string.Empty;
             serialized.FindProperty("maxStacks").intValue = maxStacks;
@@ -95,8 +100,12 @@ namespace IdleRPG.EditorTools
             for (int i = 0; i < effects.Length; i++)
             {
                 SerializedProperty element = list.GetArrayElementAtIndex(i);
-                element.FindPropertyRelative("operation").enumValueIndex = (int)effects[i].op;
+                // intValue, never enumValueIndex: the op enum is sparse (0-6, then 10-15) and
+                // enumValueIndex is an ordinal into the displayed list, so it silently lands on a neighbour.
+                element.FindPropertyRelative("operation").intValue = (int)effects[i].op;
                 element.FindPropertyRelative("amount").floatValue = effects[i].amount;
+                element.FindPropertyRelative("trigger").intValue = (int)effects[i].trigger;
+                element.FindPropertyRelative("chance").floatValue = effects[i].chance;
             }
 
             serialized.ApplyModifiedPropertiesWithoutUndo();

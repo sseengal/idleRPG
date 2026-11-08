@@ -22,6 +22,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b3ee1717326474f55831d56d3d32731d, type: 2}
   - {fileID: 11400000, guid: b714b7a70109f4b2fb2d597ca315dcda, type: 2}
   - {fileID: 11400000, guid: fb141434a0260479583ebe4d3f808263, type: 2}
+  - {fileID: 11400000, guid: 5a48e7c1ac9474bb2b88172d2c2e5784, type: 2}
   rarityWeights: 41000000190000000800000002000000i
   offerSize: 3
   rerollsPerRun: 1
