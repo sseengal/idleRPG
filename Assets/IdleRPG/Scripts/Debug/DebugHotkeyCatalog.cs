@@ -32,6 +32,7 @@ namespace IdleRPG.Debugging
         public static readonly DebugHotkeyEntry[] All =
         {
             new DebugHotkeyEntry("G / T / C", "grant test gold / tokens / gems"),
+            new DebugHotkeyEntry("X / V", "party XP: +a quarter of the bar / a whole level"),
             new DebugHotkeyEntry("B", "watch ad for the gold boost"),
             new DebugHotkeyEntry("D", "force a party wipe (opens the defeat card)"),
             new DebugHotkeyEntry("A / R / S", "ascend / resume after defeat / skip a stage"),

@@ -25,7 +25,7 @@ namespace IdleRPG.UI
         private TextMeshProUGUI levelLabel;
         private TextMeshProUGUI valueLabel;
         private TextMeshProUGUI picksLabel;
-        private Image fill;
+        private RectTransform fillRect;
 
         private void Awake()
         {
@@ -86,11 +86,7 @@ namespace IdleRPG.UI
             }
 
             double progress = requiredXp > 0d ? xp / requiredXp : 1d;
-
-            if (fill != null)
-            {
-                fill.fillAmount = (float)(progress < 0d ? 0d : (progress > 1d ? 1d : progress));
-            }
+            SetFill(progress);
 
             if (valueLabel != null)
             {
@@ -100,6 +96,21 @@ namespace IdleRPG.UI
             }
 
             ApplyPicks(pendingPicks);
+        }
+
+        /// <summary>Draws the gold fill as the left-hand slice of the track (0 = empty, 1 = full).</summary>
+        private void SetFill(double progress)
+        {
+            if (fillRect == null)
+            {
+                return;
+            }
+
+            float clamped = (float)(progress < 0d ? 0d : (progress > 1d ? 1d : progress));
+            fillRect.anchorMin = Vector2.zero;
+            fillRect.anchorMax = new Vector2(clamped, 1f);
+            fillRect.offsetMin = Vector2.zero;
+            fillRect.offsetMax = Vector2.zero;
         }
 
         private void ApplyPicks(int pendingPicks)
@@ -151,8 +162,13 @@ namespace IdleRPG.UI
             track.raycastTarget = false;
             UiRuntime.Anchor(track.rectTransform, new Vector2(0.15f, 0.18f), new Vector2(0.82f, 0.82f));
 
-            fill = UiRuntime.CreateFilledImage("Fill", track.transform, fillColor);
-            fill.fillAmount = 0f;
+            // Fill by WIDTH, not by Image.type = Filled: a sprite-less filled image is the one case UGUI draws
+            // inconsistently, and a bar that never moves is worse than a plain rectangle.
+            Image fillImage = UiRuntime.CreatePanel(track.transform, null, fillColor);
+            fillImage.name = "Fill";
+            fillImage.raycastTarget = false;
+            fillRect = fillImage.rectTransform;
+            SetFill(0d);
 
             valueLabel = UiRuntime.CreateText(root, "Value", "0 / 0", UiType.Role.Micro,
                 TextAlignmentOptions.MidlineRight, UiTheme.TextDim);

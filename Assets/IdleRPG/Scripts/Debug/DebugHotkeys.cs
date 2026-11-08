@@ -90,6 +90,24 @@ namespace IdleRPG.Debugging
                 ToggleAllAbilities();
             }
 
+            // Party XP (boons): X moves the bar a quarter, V buys a whole level so the pick counter can be
+            // seen without grinding. Both go through the real kill path, so the HUD updates from its own events.
+            if (keyboard.xKey.wasPressedThisFrame)
+            {
+                double chunk = Mathf.Max(1f, (float)(gameManager.Progression != null ? gameManager.Progression.RequiredXp * 0.25d : 5d));
+                gameManager.DebugGrantPartyXp(chunk);
+                Log($"Party XP +{chunk:0.#} -> level {gameManager.Progression.Level}, " +
+                    $"{gameManager.Progression.Xp:0.#}/{gameManager.Progression.RequiredXp:0.#}, picks {gameManager.Progression.PendingPicks}.");
+            }
+
+            if (keyboard.vKey.wasPressedThisFrame)
+            {
+                double needed = gameManager.Progression != null ? gameManager.Progression.RequiredXp : 20d;
+                int levels = gameManager.DebugGrantPartyXp(needed);
+                Log($"Party level +{levels} -> level {gameManager.Progression.Level}, " +
+                    $"picks waiting {gameManager.Progression.PendingPicks}.");
+            }
+
             if (keyboard.gKey.wasPressedThisFrame)
             {
                 gameManager.Economy.AddGold(goldGrantAmount);

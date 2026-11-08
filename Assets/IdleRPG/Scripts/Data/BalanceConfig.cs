@@ -266,7 +266,7 @@ namespace IdleRPG.Data
         // ------------------------------------------------------------------
         [Header("Party XP")]
         [Tooltip("XP the party needs to go from level 1 to level 2. Run-Identity: levels are per run, like gold.")]
-        [SerializeField] private double partyXpBase = 100d;
+        [SerializeField] private double partyXpBase = 20d;
 
         [Tooltip("Multiplies the requirement every level (RequiredXP = base * growth^(level-1)).")]
         [SerializeField] private double partyXpGrowth = 1.18d;
@@ -417,7 +417,7 @@ namespace IdleRPG.Data
         /// <summary>True when the away window still pays gold (false since 2026-11-09).</summary>
         public bool OfflineRewardsEnabled => offlineRewardsEnabled;
 
-        public double PartyXpBase => partyXpBase > 0d ? partyXpBase : 100d;
+        public double PartyXpBase => partyXpBase > 0d ? partyXpBase : 20d;
         public double PartyXpGrowth => partyXpGrowth >= 1d ? partyXpGrowth : 1d;
         public double PartyXpPerKill => partyXpPerKill > 0d ? partyXpPerKill : 5d;
         public double PartyXpPerKillStageGrowth => partyXpPerKillStageGrowth >= 1d ? partyXpPerKillStageGrowth : 1d;

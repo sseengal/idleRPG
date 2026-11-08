@@ -30,7 +30,7 @@ namespace IdleRPG.Progression
         public PartyProgression(double xpBase, double xpGrowth, double xpPerKill,
             double xpPerKillStageGrowth, double xpBossMultiplier, int maxLevel)
         {
-            this.xpBase = xpBase > 0d ? xpBase : 100d;
+            this.xpBase = xpBase > 0d ? xpBase : 20d;
             this.xpGrowth = xpGrowth >= 1d ? xpGrowth : 1d;
             this.xpPerKill = xpPerKill > 0d ? xpPerKill : 5d;
             this.xpPerKillStageGrowth = xpPerKillStageGrowth >= 1d ? xpPerKillStageGrowth : 1d;
@@ -40,7 +40,7 @@ namespace IdleRPG.Progression
 
         /// <summary>Built from the balance asset at boot.</summary>
         public PartyProgression(BalanceConfig balance)
-            : this(balance != null ? balance.PartyXpBase : 100d,
+            : this(balance != null ? balance.PartyXpBase : 20d,
                    balance != null ? balance.PartyXpGrowth : 1.18d,
                    balance != null ? balance.PartyXpPerKill : 5d,
                    balance != null ? balance.PartyXpPerKillStageGrowth : 1.1d,

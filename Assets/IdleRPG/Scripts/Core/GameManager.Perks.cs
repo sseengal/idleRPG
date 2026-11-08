@@ -54,6 +54,28 @@ namespace IdleRPG.Core
             }
         }
 
+        /// <summary>
+        /// Dev/testing: banks party XP through the SAME path a kill uses, so the bar and the pick counter move
+        /// exactly as they would in play. Returns the number of levels gained.
+        /// </summary>
+        public int DebugGrantPartyXp(double amount)
+        {
+            if (Progression == null)
+            {
+                return 0;
+            }
+
+            int levels = Progression.AddXp(amount);
+            RaisePartyXpChanged();
+
+            if (levels > 0)
+            {
+                GameEvents.RaisePartyLevelGained(Progression.Level, Progression.PendingPicks);
+            }
+
+            return levels;
+        }
+
         /// <summary>Tells the HUD where the bar stands (level, XP, XP needed).</summary>
         private void RaisePartyXpChanged()
         {
