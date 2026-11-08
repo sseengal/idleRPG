@@ -124,6 +124,7 @@ namespace IdleRPG.EditorTools
                 .Set("prestigeExponent", 1.5f)
                 .Set("minStageToAscend", 10)
                 .Set("resetHeroLevelsOnAscension", true)
+                .Set("offlineRewardsEnabled", false)
                 .Set("offlineCapSeconds", 28800f)
                 .Set("offlineEfficiency", 0.7f)
                 .Set("minOfflineSecondsForPopup", 30f)

@@ -225,6 +225,11 @@ namespace IdleRPG.Data
         // Offline progress
         // ------------------------------------------------------------------
         [Header("Offline Progress")]
+        [Tooltip("Pay gold for the time the player was away. OFF by decision (2026-11-09): time away is not a " +
+                 "progression axis any more - it pays neither gold nor XP. Daily login bonuses take its place. " +
+                 "The code below stays so the window can come back without being rewritten.")]
+        [SerializeField] private bool offlineRewardsEnabled = false;
+
         [Tooltip("Offline earnings are capped at 8 hours per spec.")]
         [SerializeField] private float offlineCapSeconds = 28800f;
 
@@ -409,6 +414,9 @@ namespace IdleRPG.Data
         public int NormalWavesPerStage => Mathf.Max(1, normalWavesPerStage);
 
         // --- Party XP (see PartyProgression) ---
+        /// <summary>True when the away window still pays gold (false since 2026-11-09).</summary>
+        public bool OfflineRewardsEnabled => offlineRewardsEnabled;
+
         public double PartyXpBase => partyXpBase > 0d ? partyXpBase : 100d;
         public double PartyXpGrowth => partyXpGrowth >= 1d ? partyXpGrowth : 1d;
         public double PartyXpPerKill => partyXpPerKill > 0d ? partyXpPerKill : 5d;

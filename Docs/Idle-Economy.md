@@ -5,7 +5,7 @@
 > **Location:** `Docs/` (folder index: `README.md`). **Last verified:** 24 Oct 2026 (re-read against the code).
 > Specs Steps 9, 17, 19. Acceptance tests live in `Roadmap.md`.
 >
-> **Built today:** the measured ledger rate, the dual-capped offline payout, the ad boost, gem sinks and the daily
+> **Built today:** the measured ledger rate, the ad boost, gem sinks and the daily
 > streak. Expeditions, bounties and ability-scroll bundles below are **design targets**, not code.
 
 ---
@@ -33,7 +33,7 @@ ledger receipt; only `Source.Combat` income feeds the measured rate).
 
 | Payout | Trigger | Formula | Caps / guards |
 |---|---|---|---|
-| **Offline gold** (shipped) | app relaunch | `min(away, cap) x goldPerSecond x 0.7`, dual cap | wall 28800s + equivalent 7200s; negative delta pays 0; one claim per window |
+| **Offline gold** (**OFF** since 2026-11-09) | app relaunch | `min(away, cap) x goldPerSecond x 0.7`, dual cap | **switched off by `offlineRewardsEnabled = false`**: time away pays neither gold nor XP. The maths is kept intact for a future away reward / daily login bonus; no caller can pay it while the flag is false |
 | **Offline shards/essence** (Step 17+) | same claim | `paidSeconds x ledger.shardsPerSecond x 0.5` | same dual cap; only for currencies unlocked by then |
 | **Expedition reward** | timer ends while away or online | `definition.rewardTable x durationFactor` | per-slot, one expedition per hero, no stacking |
 | **Bounty** (return hub) | player picks 1 of 3 | `bountyTable x awayFactor` | one pick per return, rerollable with gems/ads |
@@ -46,6 +46,11 @@ absurd deltas (tamper) and is idempotent via a pending/claimed flag.
 **Wave size (Step 11c):** a stage's wave holds 1-3 enemies (recipe `1 x25 / 2 x50 / 3 x25`, boss always 1), so the
 formula estimate of income uses `BalanceConfig.MeanEnemiesPerWave` (the recipe's average, currently 2), **not** the
 maximum. Using the max would overpay away-time gold by ~50% the moment the recipe stops being "always 3".
+
+> **Away window is off (2026-11-09).** `IdleTimeService.Evaluate` returns "no reward" while
+> `BalanceConfig.offlineRewardsEnabled` is false, so no popup is raised and nothing is paid. **Instant income**
+> (gems -> an hour of income) is a purchase, not away time, and stays on. The shop's offline-cap extensions are
+> dormant while the window is off and should be re-priced or removed if daily login bonuses replace it.
 
 ## 3. `IdleTimeService` (one owner, replaces ad-hoc offline code)
 

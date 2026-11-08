@@ -219,6 +219,14 @@ namespace IdleRPG.Save
         {
             Pending = OfflineRewardResult.None;
 
+            // Time away pays nothing (decision 2026-11-09): no gold and no XP. gated HERE rather than in the popup,
+            // so no caller can accidentally pay it - the offer simply never exists. The maths below stays intact
+            // for the day daily login bonuses (or a different away reward) want to reuse the same window.
+            if (balanceConfig != null && !balanceConfig.OfflineRewardsEnabled)
+            {
+                return OfflineRewardResult.None;
+            }
+
             // SecondsBetween clamps at 0, so a rewound clock (tamper) pays nothing.
             double awaySeconds = GameClock.SecondsBetween(lastLogoutBinary, GameClock.NowBinary);
 
