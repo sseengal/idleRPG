@@ -153,7 +153,7 @@ namespace IdleRPG.EditorTools
         {
             GameObject viewport = UiFactory.Node("Viewport", pageRoot);
             viewportRect = viewport.GetComponent<RectTransform>();
-            UiFactory.Anchor(viewportRect, new Vector2(0f, BattleViewportBottom), new Vector2(1f, StageRowMinY), UiSpace.ScreenMargin, UiSpace.Snug, UiSpace.ScreenMargin, UiSpace.Snug);
+            UiFactory.Anchor(viewportRect, new Vector2(0f, XpBandTop), new Vector2(1f, StageRowMinY), UiSpace.ScreenMargin, UiSpace.Snug, UiSpace.ScreenMargin, UiSpace.Snug);
 
             // Clips the cover-fitted backdrop so its overflow never draws over the header or combat log.
             viewport.AddComponent<RectMask2D>();

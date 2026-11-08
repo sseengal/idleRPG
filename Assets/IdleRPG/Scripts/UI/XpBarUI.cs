@@ -137,6 +137,11 @@ namespace IdleRPG.UI
 
             RectTransform root = (RectTransform)transform;
 
+            // A dark backing, so the bar reads as a strip in the row of strips instead of floating text.
+            Image backing = UiRuntime.CreatePanel(root, null, UiTheme.PanelDeep, raycast: false);
+            UiRuntime.Stretch(backing.rectTransform);
+            backing.transform.SetAsFirstSibling();
+
             levelLabel = UiRuntime.CreateText(root, "Level", "LV 1", UiType.Role.Small,
                 TextAlignmentOptions.MidlineLeft, UiTheme.Text);
             UiType.ApplyAuto(levelLabel, UiType.Role.Small);
@@ -144,21 +149,19 @@ namespace IdleRPG.UI
 
             Image track = UiRuntime.CreatePanel(root, null, trackColor);
             track.raycastTarget = false;
-            // Everything stays left of 0.78: the MENU button owns the top-right corner (it covers the RANKS slot),
-            // and a bar that runs under it loses its own right-hand numbers.
-            UiRuntime.Anchor(track.rectTransform, new Vector2(0.15f, 0.22f), new Vector2(0.60f, 0.78f));
+            UiRuntime.Anchor(track.rectTransform, new Vector2(0.15f, 0.18f), new Vector2(0.82f, 0.82f));
 
             fill = UiRuntime.CreateFilledImage("Fill", track.transform, fillColor);
             fill.fillAmount = 0f;
 
             valueLabel = UiRuntime.CreateText(root, "Value", "0 / 0", UiType.Role.Micro,
                 TextAlignmentOptions.MidlineRight, UiTheme.TextDim);
-            UiRuntime.Anchor(valueLabel.rectTransform, new Vector2(0.61f, 0f), new Vector2(0.78f, 1f));
+            UiRuntime.Anchor(valueLabel.rectTransform, new Vector2(0.83f, 0f), new Vector2(1f, 1f));
 
             // Sits over the numbers when a choice is owed: the thing the player must act on wins the space.
             picksLabel = UiRuntime.CreateText(root, "Picks", "1 PICK", UiType.Role.Micro,
                 TextAlignmentOptions.MidlineRight, UiTheme.AccentLight);
-            UiRuntime.Anchor(picksLabel.rectTransform, new Vector2(0.61f, 0f), new Vector2(0.78f, 1f));
+            UiRuntime.Anchor(picksLabel.rectTransform, new Vector2(0.83f, 0f), new Vector2(1f, 1f));
             picksLabel.gameObject.SetActive(false);
         }
     }

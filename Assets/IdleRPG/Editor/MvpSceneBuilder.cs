@@ -40,16 +40,17 @@ namespace IdleRPG.EditorTools
         // The values reproduce the 1080x1920 design (header 6% and nav 12% of 1920), so nothing shifts on 9:16.
         private const float HeaderBandHeight = 115f;   // top bar: the currency chips + boost, pinned to the top
 
-        // Party XP bar band, directly under the header. The page starts below it, so the bar can never sit over
-        // the stage row (STAGE / WAVE) and the two never fight for the same units.
-        private const float XpBandHeight = 44f;
+        // Party XP bar band: a thin strip between the bottom of the arena and the top of the ability strip.
+        // The arena starts at XP band top, so the bar can never sit over the fight or hide the hero buttons.
+        private const float XpBandBottom = BattleViewportBottom;   // sits on top of the ability strip
+        private const float XpBandTop = 0.417f;                    // the arena starts here
 
         // Retired nav bar height. BuildNavBar is no longer called (the lobby owns navigation), but the method is
         // kept for reference, so its constant stays.
         private const float NavBandHeight = 230f;
 
-        // Bands inside the battle page (page coords): log 0..LogTop, ability strip 0.28..0.39,
-        // viewport 0.39..StageRowMinY, stage/wave row 0.93..0.99.
+        // Bands inside the battle page (page coords): log 0..LogTop, ability strip 0.28..0.39, party XP bar
+        // 0.39..0.417, viewport 0.417..StageRowMinY, stage/wave row 0.93..0.99.
         //
         // LogTop used to be 0.34, with a 79-unit tab bar above the log. The bar is gone and one hero button
         // lives in its place, so the band had to grow: 0.11 of the page is ~174 units, enough for a portrait and
@@ -131,9 +132,9 @@ namespace IdleRPG.EditorTools
 
             HudHeaderUI header = BuildHeader(safeArea);
 
-            BuildXpBar(safeArea);
-
             GameObject battlePage = CreatePage("BattlePage", safeArea);
+
+            BuildXpBar(battlePage.GetComponent<RectTransform>());
             BuildStageRow(battlePage.GetComponent<RectTransform>(), header);
 
             BuildViewport(battlePage.GetComponent<RectTransform>(), damageRoot,
@@ -355,7 +356,7 @@ namespace IdleRPG.EditorTools
         {
             GameObject page = UiFactory.Node(name, safeArea);
             UiFactory.Anchor(page.GetComponent<RectTransform>(), Vector2.zero, Vector2.one,
-                0f, UiSpace.Large, 0f, HeaderBandHeight + XpBandHeight);
+                0f, UiSpace.Large, 0f, HeaderBandHeight);
             return page;
         }
 
@@ -363,16 +364,13 @@ namespace IdleRPG.EditorTools
         /// The party XP bar: a thin band between the header and the page. Built here, not hand-placed, so a scene
         /// rebuild can never drop it; <see cref="IdleRPG.UI.XpBarUI"/> draws its own level / fill / numbers.
         /// </summary>
-        private static void BuildXpBar(RectTransform safeArea)
+        private static void BuildXpBar(RectTransform page)
         {
-            GameObject bar = UiFactory.Node("XpBar", safeArea);
-            RectTransform rect = bar.GetComponent<RectTransform>();
+            GameObject bar = UiFactory.Node("XpBar", page);
 
-            rect.anchorMin = new Vector2(0f, 1f);
-            rect.anchorMax = new Vector2(1f, 1f);
-            rect.pivot = new Vector2(0.5f, 1f);
-            rect.anchoredPosition = new Vector2(0f, -(HeaderBandHeight + UiSpace.Tight));
-            rect.sizeDelta = new Vector2(-2f * UiSpace.ScreenMargin, XpBandHeight - UiSpace.Tight * 2f);
+            UiFactory.Anchor(bar.GetComponent<RectTransform>(),
+                new Vector2(0f, XpBandBottom), new Vector2(1f, XpBandTop),
+                UiSpace.ScreenMargin, UiSpace.Hairline, UiSpace.ScreenMargin, UiSpace.Hairline);
 
             bar.AddComponent<IdleRPG.UI.XpBarUI>();
         }
