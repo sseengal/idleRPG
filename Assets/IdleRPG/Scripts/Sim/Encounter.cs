@@ -20,6 +20,21 @@ namespace IdleRPG.Sim
 
         // Single-action flow (ATB-style): exactly one swing may be in flight. `activeSwing` is that blow while
         // it is travelling, then `recoveryRemaining` is the blink-home window before the next attacker may start.
+        /// <summary>
+        /// The boons compiled into things the fight can do. Set by the runtime when an encounter starts; a card
+        /// taken mid-fight lands in the NEXT encounter, never in one already in flight.
+        /// </summary>
+        public PerkRuntime Perks { get; set; } = PerkRuntime.Empty;
+
+        /// <summary>Guardrail: how deep a chain of triggered damage may go (a cleave may not cleave).</summary>
+        private const int MaxTriggeredDepth = 2;
+
+        /// <summary>Guardrail: extra hits one swing may add, so one blow can never become a light show.</summary>
+        private const int MaxExtraHitsPerSwing = 2;
+
+        private int triggerDepth;
+        private int extraHitsThisAction;
+
         private bool hasActiveSwing;
         private PendingSwing activeSwing;
         private double recoveryRemaining;
@@ -400,7 +415,10 @@ namespace IdleRPG.Sim
             // The swing is over: the attacker's cooldown starts counting a full interval from this impact.
             attacker.EndSwing();
 
-            ResolveDeath(target);
+            // Boons see the blow AFTER it lands, so "40% of the hit" means 40% of what the target actually lost.
+            RunTriggeredEffects(attacker, target, applied, swing.AttackerSide, PerkTrigger.OnHit);
+
+            ResolveDeath(target, attacker);
         }
 
         /// <summary>One ability impact. Damage goes through the swing's own path, so numbers / HP / kills are free.</summary>
@@ -436,7 +454,8 @@ namespace IdleRPG.Sim
                     }
 
                     RaiseDamage(caster, target, swing.AttackerSide, applied, swing.IsCritical, ability.VfxId, ability.DisplayName, wasGuarded);
-                    ResolveDeath(target);
+                    RunTriggeredEffects(caster, target, applied, swing.AttackerSide, PerkTrigger.OnHit);
+                    ResolveDeath(target, caster);
                     continue;
                 }
 
@@ -530,8 +549,185 @@ namespace IdleRPG.Sim
             });
         }
 
+        /// <summary>
+        /// Fires the boons that answer a blow, for BOTH sides: a hero's OnHit, and the hurt hero's OnHurt (thorns).
+        ///
+        /// ELI5: after a hit lands, the fight asks "does anyone care about this?". The attacker's cards may answer
+        /// (lifesteal, cleave) and so may the victim's (thorns, last stand).
+        ///
+        /// Guardrail: triggered damage never comes back through here, so a chain cannot run away.
+        /// </summary>
+        private void RunTriggeredEffects(Combatant attacker, Combatant target, double applied, CombatantSide attackerSide,
+            PerkTrigger trigger)
+        {
+            if (Perks.IsEmpty || triggerDepth >= MaxTriggeredDepth)
+            {
+                return;
+            }
+
+            extraHitsThisAction = 0;
+
+            if (attackerSide == CombatantSide.Party)
+            {
+                if (attacker != null && attacker.IsAlive)
+                {
+                    RunOwnEffects(attacker, trigger, target, applied);
+                }
+
+                return;
+            }
+
+            // An enemy hit that landed on a hero: the hero's "when hurt" cards answer it.
+            if (target != null && target.Side == CombatantSide.Party && target.IsAlive)
+            {
+                RunOwnEffects(target, PerkTrigger.OnHurt, attacker, applied);
+            }
+        }
+
+        /// <summary>Walks one combatant's effects for one trigger.</summary>
+        private void RunOwnEffects(Combatant owner, PerkTrigger trigger, Combatant other, double applied)
+        {
+            if (owner == null || owner.Side != CombatantSide.Party)
+            {
+                return;
+            }
+
+            PerkEffect[] effects = Perks.For(owner.SlotIndex);
+
+            for (int i = 0; i < effects.Length; i++)
+            {
+                PerkEffect effect = effects[i];
+
+                if (effect.Trigger != trigger)
+                {
+                    continue;
+                }
+
+                if (effect.SafeChance < 1d && context.Rng.NextDouble() > effect.SafeChance)
+                {
+                    continue;
+                }
+
+                ApplyPerkEffect(owner, effect, other, applied);
+            }
+        }
+
+        /// <summary>One boon effect, applied through the normal damage / heal paths.</summary>
+        private void ApplyPerkEffect(Combatant owner, PerkEffect effect, Combatant other, double applied)
+        {
+            switch (effect.Op)
+            {
+                case PerkEffectOp.DamageOthers:
+                    DamageOtherEnemies(owner, other, applied * effect.SafeAmount);
+                    break;
+
+                case PerkEffectOp.ExtraHit:
+                    if (extraHitsThisAction >= MaxExtraHitsPerSwing)
+                    {
+                        break;
+                    }
+
+                    extraHitsThisAction++;
+                    DamageOne(owner, other, owner.Stats.Attack * effect.SafeAmount);
+                    break;
+
+                case PerkEffectOp.Reflect:
+                    DamageOne(owner, other, applied * effect.SafeAmount);
+                    break;
+
+                case PerkEffectOp.Lifesteal:
+                    HealSelf(owner, applied * effect.SafeAmount);
+                    break;
+
+                case PerkEffectOp.HealSelf:
+                    HealSelf(owner, owner.MaxHealth * effect.SafeAmount);
+                    break;
+
+                case PerkEffectOp.ShieldSelf:
+                    owner.Shield += owner.MaxHealth * effect.SafeAmount;
+                    break;
+            }
+        }
+
+        /// <summary>Cleave: the same hit, at a fraction, on every other living enemy.</summary>
+        private void DamageOtherEnemies(Combatant owner, Combatant struck, double amount)
+        {
+            if (amount <= 0d)
+            {
+                return;
+            }
+
+            for (int i = 0; i < enemies.Length; i++)
+            {
+                Combatant enemy = enemies[i];
+
+                if (enemy == null || !enemy.IsAlive || enemy == struck)
+                {
+                    continue;
+                }
+
+                DamageOne(owner, enemy, amount);
+            }
+        }
+
+        /// <summary>One triggered hit. The normal path, so shields, deaths and gold all still apply.</summary>
+        private void DamageOne(Combatant owner, Combatant target, double amount)
+        {
+            if (target == null || !target.IsAlive || amount <= 0d || triggerDepth >= MaxTriggeredDepth)
+            {
+                return;
+            }
+
+            bool wasGuarded = target.DamageTakenMultiplier < 0.999d;
+            double dealt = target.TakeDamage(amount);
+
+            if (target.Side == CombatantSide.Party && target.IsCoverGuardActive)
+            {
+                target.ConsumeCoverHit();
+            }
+
+            CombatantSide ownerSide = owner != null ? owner.Side : CombatantSide.Party;
+            RaiseDamage(owner, target, ownerSide, dealt, false, string.Empty, string.Empty, wasGuarded);
+
+            // Triggered damage must not trigger: no RunTriggeredEffects call here, on purpose.
+            triggerDepth++;
+            try
+            {
+                ResolveDeath(target, owner);
+            }
+            finally
+            {
+                triggerDepth--;
+            }
+        }
+
+        /// <summary>Heals the owner and raises the normal heal event, so the number is visible in the log.</summary>
+        private void HealSelf(Combatant owner, double amount)
+        {
+            if (owner == null || !owner.IsAlive || amount <= 0d)
+            {
+                return;
+            }
+
+            double healed = owner.Heal(amount);
+
+            if (healed <= 0d)
+            {
+                return;
+            }
+
+            Healed?.Invoke(new HealEvent
+            {
+                Side = owner.Side,
+                Index = owner.SlotIndex,
+                Amount = healed,
+                TargetHealth = owner.CurrentHealth,
+                TargetMaxHealth = owner.MaxHealth
+            });
+        }
+
         /// <summary>Every consequence of a unit reaching 0 health: its death, the kill reward, and a party wipe.</summary>
-        private void ResolveDeath(Combatant target)
+        private void ResolveDeath(Combatant target, Combatant killer = null)
         {
             if (target == null || target.IsAlive)
             {
@@ -551,6 +747,12 @@ namespace IdleRPG.Sim
             if (target.Side == CombatantSide.Enemy)
             {
                 EnemyKilled?.Invoke(target.SlotIndex, target.GoldReward);
+
+                // "On kill" fires after the kill is paid, so a boon can never change whether the kill counted.
+                if (killer != null && killer.Side == CombatantSide.Party && killer.IsAlive)
+                {
+                    RunOwnEffects(killer, PerkTrigger.OnKill, target, 0d);
+                }
             }
 
             if (AlivePartyCount == 0 && !partyWipeRaised)

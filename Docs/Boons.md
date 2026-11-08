@@ -189,9 +189,15 @@ what keeps the common tier worth picking.
 | `Progression/BoonRuntimeFactory.cs` | new | loadout + hero ids -> `PerkRuntime`; the only place that knows both worlds |
 | `EncounterFactory` / `CombatDirector` | existing | pass the snapshot the way `SimRules` already travels |
 
-**Guardrails - these are what keep it debuggable:**
+**Built 2026-11-09 (foundation only):** `Sim/PerkTrigger.cs`, `Sim/PerkEffect.cs`, `Sim/PerkRuntime.cs`, and the
+hooks inside `Encounter` (`RunTriggeredEffects`, `RunOwnEffects`, `ApplyPerkEffect`, `DamageOne`, `HealSelf`). The
+snapshot travels on `Encounter.Perks`; it is empty until the Unity side compiles a hand into it (next step). Seven
+headless tests in `Tests/PerkTriggerTests.cs` cover cleave, echo, thorns, lifesteal, on-kill and the no-boons control.
 
-- `MaxTriggerDepth = 2`: a cleave may not cleave, and triggered damage never re-fires `OnHit`.
+**Guardrails - these are what keep it debuggable (and they are in the code):**
+
+- **Triggered damage never triggers.** `DamageOne` deliberately does not call `RunTriggeredEffects`, so a cleave
+  cannot cleave and a chain cannot run away. `MaxTriggeredDepth = 2` is the second lock on that door.
 - `MaxExtraHitsPerSwing = 2`, so one swing cannot become a light show.
 - Randomness comes from the sim's own `DeterministicRng`, never `UnityEngine.Random`: replays and offline stay equal.
 - A triggered hit pays gold and XP exactly like a normal hit, because it goes through the same death path.
