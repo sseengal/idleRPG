@@ -70,7 +70,7 @@ namespace IdleRPG.UI
         private struct TreeColumn
         {
             public string HeroId;
-            public int FrontierRow;
+            public int FrontierOrder;
         }
 
         private GameObject treePopup;

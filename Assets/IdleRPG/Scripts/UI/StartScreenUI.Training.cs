@@ -17,8 +17,13 @@ namespace IdleRPG.UI
     /// </summary>
     public sealed partial class StartScreenUI
     {
+        private const int NodesPerLevel = 6;
+        private const float LevelGap = 96f;   // breathing room between levels, where the level bar sits
+
         private int treeHeroRows;
+        private int treeLevelCount;
         private int treeNodeLayer;
+        private GameObject scrollDownButton;
 
         private struct LevelBand
         {
@@ -137,7 +142,8 @@ namespace IdleRPG.UI
             }
 
             treeHeroRows = Mathf.Max(1, heroRows);
-            treeContentHeight = treeTopPad * 2f + treeHeroRows * treeRowH;
+            treeLevelCount = Mathf.Max(1, Mathf.CeilToInt(treeHeroRows / (float)NodesPerLevel));
+            treeContentHeight = treeTopPad * 2f + treeHeroRows * treeRowH + treeLevelCount * LevelGap;
 
             GameObject content = new GameObject("Content", typeof(RectTransform));
             treeContent = content.GetComponent<RectTransform>();
@@ -158,11 +164,11 @@ namespace IdleRPG.UI
                 treeColumns.Add(new TreeColumn
                 {
                     HeroId = hero != null ? hero.HeroID : string.Empty,
-                    FrontierRow = treeHeroRows - 1
+                    FrontierOrder = 0
                 });
             }
 
-            treeColumns.Add(new TreeColumn { HeroId = string.Empty, FrontierRow = treeHeroRows - 1 });   // party
+            treeColumns.Add(new TreeColumn { HeroId = string.Empty, FrontierOrder = 0 });   // party
 
             // One page-wide strip per level (6 nodes each). The strips stack without gaps, so together they are
             // the single background fill. A strip turns gold only when every hero finished that level AND the
@@ -170,9 +176,8 @@ namespace IdleRPG.UI
             levelBands.Clear();
             levelPartyGate.Clear();
 
-            const int nodesPerLevel = 6;
-            int levelCount = Mathf.Max(1, Mathf.CeilToInt(treeHeroRows / (float)nodesPerLevel));
-            float levelHeight = nodesPerLevel * treeRowH;
+            int levelCount = treeLevelCount;
+            float levelHeight = NodesPerLevel * treeRowH + LevelGap;
 
             for (int level = 0; level < levelCount; level++)
             {
@@ -187,18 +192,11 @@ namespace IdleRPG.UI
                 bandRect.offsetMin = Vector2.zero;
                 bandRect.offsetMax = Vector2.zero;
                 bandRect.sizeDelta = new Vector2(0f, levelHeight);
-                bandRect.anchoredPosition = new Vector2(0f, level * levelHeight);
+                bandRect.anchoredPosition = new Vector2(0f, treeTopPad + level * levelHeight);
 
                 Image band = bandGO.GetComponent<Image>();
                 band.color = new Color(0.13f, 0.14f, 0.16f, 1f);
                 band.raycastTarget = false;
-
-                TextMeshProUGUI levelLabel = Text(bandGO.transform, "Level", new Vector2(0f, 0f), new Vector2(0f, 0f),
-                    "Level " + (level + 1), UiType.Role.Micro, new Color(0.98f, 0.80f, 0.28f, 0.35f));
-                levelLabel.rectTransform.sizeDelta = new Vector2(240f, 34f);
-                levelLabel.rectTransform.anchoredPosition = new Vector2(130f, 26f);
-                levelLabel.alignment = TextAlignmentOptions.Left;
-                levelLabel.raycastTarget = false;
 
                 levelBands.Add(new LevelBand { Background = band, LevelIndex = level });
             }
@@ -216,7 +214,7 @@ namespace IdleRPG.UI
                         continue;
                     }
 
-                    int level = Mathf.Clamp(node.RequiresLeftNodes / nodesPerLevel, 0, levelCount - 1);
+                    int level = Mathf.Clamp(node.RequiresLeftNodes / NodesPerLevel, 0, levelCount - 1);
                     levelPartyGate[level].Add(node);
                 }
             }
@@ -262,8 +260,9 @@ namespace IdleRPG.UI
                             continue;
                         }
 
-                        int rowFromTop = treeHeroRows - 1 - node.Order;
-                        MakeNode(node, ColumnX[c], rowFromTop, c, rowFromTop > 0 ? 1 : 0);
+                        float centerY = NodeYFromTop(node.Order);
+                        float connector = node.Order < treeHeroRows - 1 ? ConnectorLength(node.Order, node.Order + 1) : 0f;
+                        MakeNode(node, ColumnX[c], centerY, c, connector);
                     }
                 }
 
@@ -276,15 +275,50 @@ namespace IdleRPG.UI
                         ? Mathf.Clamp(partyNodes[i + 1].RequiresLeftNodes, 0, Mathf.Max(0, treeHeroRows - 1))
                         : gate;
 
-                    MakeNode(partyNodes[i], ColumnX[partyColumn], treeHeroRows - 1 - gate, partyColumn, nextGate - gate);
+                    float partyY = NodeYFromTop(gate);
+                    float partyConnector = i + 1 < partyNodes.Count ? ConnectorLength(gate, nextGate) : 0f;
+                    MakeNode(partyNodes[i], ColumnX[partyColumn], partyY, partyColumn, partyConnector);
                 }
             }
 
-            IconBtn(panel.transform, "ScrollDown", new Vector2(0.845f, 0.005f), new Vector2(0.985f, 0.105f),
-                ArrowSprite(false), ScrollTreeToBottom);
+            // Level bars: a thin gold strip with blue text, centred in each level gap and drawn in front.
+            for (int level = 0; level < treeLevelCount; level++)
+            {
+                float barFromBottom = treeTopPad + (level + 1) * NodesPerLevel * treeRowH + level * LevelGap + LevelGap * 0.5f;
+                CreateLevelBar(treeContent, treeContentHeight - barFromBottom, level + 1);
+            }
+
+            scrollDownButton = IconBtn(panel.transform, "ScrollDown", new Vector2(0.845f, 0.005f),
+                new Vector2(0.985f, 0.105f), ArrowSprite(false), ScrollTreeToBottom);
+
+            if (treeScroll != null)
+            {
+                treeScroll.onValueChanged.AddListener(_ => RefreshScrollButton());
+            }
 
             BuildPopup(treeContent);
             trainingPanel.SetActive(false);
+        }
+
+        /// <summary>Distance from the content top to the centre of the node at <paramref name="order"/>.</summary>
+        private float NodeYFromTop(int order)
+        {
+            int level = Mathf.Clamp(order / NodesPerLevel, 0, Mathf.Max(0, treeLevelCount - 1));
+            float fromBottom = treeTopPad + order * treeRowH + level * LevelGap + treeRowH * 0.5f;
+            return treeContentHeight - fromBottom;
+        }
+
+        /// <summary>Centre-to-centre distance between two nodes, including the gaps of the levels between them.</summary>
+        private float ConnectorLength(int lowerOrder, int upperOrder)
+        {
+            int gaps = Mathf.Abs(upperOrder / NodesPerLevel - lowerOrder / NodesPerLevel);
+            return (upperOrder - lowerOrder) * treeRowH + gaps * LevelGap;
+        }
+
+        /// <summary>The chain position of a node: its order for a hero, its gate for the party.</summary>
+        private static int OrderOf(TrainingNode node)
+        {
+            return node.Branch == TrainingBranch.Right ? node.RequiresLeftNodes : node.Order;
         }
 
         private void ScrollTreeToBottom()
@@ -299,6 +333,7 @@ namespace IdleRPG.UI
             float viewH = treeScroll.viewport != null ? treeScroll.viewport.rect.height : 0f;
             treeContent.anchoredPosition = new Vector2(0f, Mathf.Max(0f, treeContentHeight - viewH));
             treeScroll.StopMovement();
+            RefreshScrollButton();
         }
 
         // ------------------------------------------------------------------
@@ -459,13 +494,11 @@ namespace IdleRPG.UI
         // ------------------------------------------------------------------
         // One node: diamond + icon + badge + connector
         // ------------------------------------------------------------------
-        private void MakeNode(TrainingNode node, float xPx, int rowFromTop, int column, int connectorRows)
+        private void MakeNode(TrainingNode node, float xPx, float centerY, int column, float connectorLength)
         {
-            float centerY = treeTopPad + rowFromTop * treeRowH + treeRowH * 0.5f;
-
             Image connector = null;
 
-            if (connectorRows > 0)
+            if (connectorLength > 0f)
             {
                 GameObject conGO = new GameObject("Con", typeof(RectTransform), typeof(Image));
                 RectTransform cr = conGO.GetComponent<RectTransform>();
@@ -473,8 +506,8 @@ namespace IdleRPG.UI
                 cr.anchorMin = new Vector2(0f, 1f);
                 cr.anchorMax = new Vector2(0f, 1f);
                 cr.pivot = new Vector2(0.5f, 0.5f);
-                cr.sizeDelta = new Vector2(12f, connectorRows * treeRowH);
-                cr.anchoredPosition = new Vector2(xPx, -(centerY - connectorRows * treeRowH * 0.5f));
+                cr.sizeDelta = new Vector2(12f, connectorLength);
+                cr.anchoredPosition = new Vector2(xPx, -(centerY - connectorLength * 0.5f));
                 cr.SetSiblingIndex(treeNodeLayer);   // behind the nodes, above the bands and level badges
                 connector = conGO.GetComponent<Image>();
                 connector.color = new Color(0.30f, 0.31f, 0.35f, 1f);
@@ -651,11 +684,11 @@ namespace IdleRPG.UI
         private void RefreshColumns(TrainingService training)
         {
             // Frontier row per column (money does not matter here - only the gate); used by the portrait jump.
-            int[] frontierRows = new int[treeColumns.Count];
+            int[] frontierOrders = new int[treeColumns.Count];
 
-            for (int i = 0; i < frontierRows.Length; i++)
+            for (int i = 0; i < frontierOrders.Length; i++)
             {
-                frontierRows[i] = -1;
+                frontierOrders[i] = -1;
             }
 
             for (int i = 0; i < treeViews.Count; i++)
@@ -668,18 +701,18 @@ namespace IdleRPG.UI
                 }
 
                 int c = Mathf.Clamp(view.Column, 0, treeColumns.Count - 1);
-                int row = RowOfNode(view.Node);
+                int order = OrderOf(view.Node);
 
-                if (row > frontierRows[c])
+                if (frontierOrders[c] < 0 || order < frontierOrders[c])
                 {
-                    frontierRows[c] = row;
+                    frontierOrders[c] = order;
                 }
             }
 
             for (int i = 0; i < treeColumns.Count; i++)
             {
                 TreeColumn column = treeColumns[i];
-                column.FrontierRow = frontierRows[i] >= 0 ? frontierRows[i] : treeHeroRows - 1;
+                column.FrontierOrder = frontierOrders[i] >= 0 ? frontierOrders[i] : 0;
                 treeColumns[i] = column;
             }
 
@@ -717,16 +750,6 @@ namespace IdleRPG.UI
             }
         }
 
-        private int RowOfNode(TrainingNode node)
-        {
-            if (node.Branch == TrainingBranch.Right)
-            {
-                return treeHeroRows - 1 - Mathf.Clamp(node.RequiresLeftNodes, 0, Mathf.Max(0, treeHeroRows - 1));
-            }
-
-            return treeHeroRows - 1 - node.Order;
-        }
-
         private void ScrollToColumn(int column)
         {
             if (treeScroll == null || treeContent == null || column < 0 || column >= treeColumns.Count)
@@ -738,10 +761,11 @@ namespace IdleRPG.UI
 
             float viewH = treeScroll.viewport != null ? treeScroll.viewport.rect.height : 0f;
             float limit = Mathf.Max(0f, treeContentHeight - viewH);
-            float center = treeTopPad + treeColumns[column].FrontierRow * treeRowH + treeRowH * 0.5f;
+            float center = NodeYFromTop(treeColumns[column].FrontierOrder);
 
             treeContent.anchoredPosition = new Vector2(0f, Mathf.Clamp(center - viewH * 0.5f, 0f, limit));
             treeScroll.StopMovement();
+            RefreshScrollButton();
         }
 
         // ------------------------------------------------------------------
@@ -1180,7 +1204,7 @@ namespace IdleRPG.UI
         }
 
         /// <summary>A square icon button (no label): used for the jump-to-bottom arrow.</summary>
-        private static void IconBtn(Transform parent, string name, Vector2 aMin, Vector2 aMax, Sprite icon,
+        private static GameObject IconBtn(Transform parent, string name, Vector2 aMin, Vector2 aMax, Sprite icon,
             UnityEngine.Events.UnityAction onClick)
         {
             Image bg = Panel(parent, name, aMin, aMax, new Color(0.18f, 0.19f, 0.22f, 1f));
@@ -1200,6 +1224,44 @@ namespace IdleRPG.UI
             image.sprite = icon;
             image.color = new Color(0.92f, 0.94f, 0.98f, 1f);
             image.raycastTarget = false;
+
+            return bg.gameObject;
+        }
+
+        /// <summary>Thin gold bar with blue text, centred in the gap between two levels and drawn in front.</summary>
+        private void CreateLevelBar(Transform parent, float centerY, int levelNumber)
+        {
+            GameObject barGO = new GameObject("LevelBar", typeof(RectTransform), typeof(Image));
+            RectTransform br = barGO.GetComponent<RectTransform>();
+            br.SetParent(parent, false);
+            br.anchorMin = new Vector2(0f, 1f);
+            br.anchorMax = new Vector2(1f, 1f);
+            br.pivot = new Vector2(0.5f, 0.5f);
+            br.sizeDelta = new Vector2(-24f, 56f);
+            br.anchoredPosition = new Vector2(0f, -centerY);
+
+            Image bar = barGO.GetComponent<Image>();
+            bar.color = new Color(0.98f, 0.80f, 0.28f, 1f);
+            bar.raycastTarget = false;
+
+            TextMeshProUGUI label = Text(barGO.transform, "Label", Vector2.zero, Vector2.one,
+                "LEVEL " + levelNumber, UiType.Role.Small, UiTheme.PanelDeep);
+            label.raycastTarget = false;
+        }
+
+        /// <summary>The jump-to-bottom button appears only after the player scrolls away from the end.</summary>
+        private void RefreshScrollButton()
+        {
+            if (scrollDownButton == null || treeContent == null)
+            {
+                return;
+            }
+
+            float viewH = treeScroll != null && treeScroll.viewport != null ? treeScroll.viewport.rect.height : 0f;
+            float limit = Mathf.Max(0f, treeContentHeight - viewH);
+            float remaining = limit - treeContent.anchoredPosition.y;
+
+            scrollDownButton.SetActive(remaining > treeRowH);
         }
 
     }

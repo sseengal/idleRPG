@@ -91,9 +91,9 @@ Training's flat bonuses are added **after** the perk multiplier chain, so perks 
   **jumps that column to its frontier**.
 - **States by colour**: unlocked = gold, next buyable = mid grey with a green up-arrow badge, locked = dark grey,
   deferred = near-black. A node's connector turns gold once that node is unlocked.
-- **One fill for the page, in level steps.** The background is **75 full-width level strips** (6 rows each) stacked
-  without gaps, `Level N` written at their left margin. A strip turns **gold** only when *all three heroes* finished
-  that level **and** the party node gated inside it has been bought:
+- **One fill for the page, in level steps.** The background is **75 full-width strips** (6 rows each) stacked
+  without gaps. A strip turns **gold** only when *all three heroes* finished that level **and** the party node gated
+  inside it has been bought:
 
 | Level | Party node inside it | Needs |
 |---|---|---|
@@ -124,10 +124,16 @@ Training's flat bonuses are added **after** the perk multiplier chain, so perks 
   wrong shop. The button always carries the real price (`Buy 300` + coin, `Buy 4` + star).
 - Card title names the owner: `Knight · Armor`, `Party · Battle gold`.
 - Cost icons are drawn in code (circle for gold, star for tokens) - the lobby cannot load editor sprites.
-- A level is **6 nodes** (two Attack/Armor/HP sets), so there are **75** strips - one per level, shared by the whole
-  page instead of repeated in every column.
+- A level is **6 nodes** (two Attack/Armor/HP sets), so there are **75** levels, shared by the whole page instead of
+  repeated in every column. **Levels are separated by a 96-unit gap** (`LevelGap`); a node's Y is
+  `topPad + order x rowH + (order / 6) x LevelGap`, so the hero columns and the party column stay aligned.
+- **Level bar:** a thin **gold strip (56 tall, full width)** with `LEVEL N` in **blue** (`UiTheme.PanelDeep`), drawn
+  **in front** and centred in that gap, so the number never sits under a diamond. The bar is always gold; the tall
+  strip behind it carries the progress tint.
 - **Arrows are drawn sprites.** The font has no arrow glyph, so `▼` renders as a box - that was the grey square.
   Both the jump-to-bottom button (145 square, `UiTouch.MinTarget`) and the node badge arrow are generated in code.
+- **The jump button appears only after you scroll away from the end** - hidden while you are within one row (220) of
+  the bottom, so it never covers the last level. It refreshes from `ScrollRect.onValueChanged` and after every jump.
 
 ### 5a. Type and touch (no hand-written sizes)
 
@@ -138,7 +144,7 @@ Every runtime label picks a role from `UiType`; every control clears `UiTouch.Mi
 | START | `Title` |
 | Node letter, card title, Buy label | `Section` |
 | Hero name, PARTY, nav tabs, status | `Small` |
-| `Level N` strip label | `Micro` |
+| `LEVEL N` bar label | `Small` |
 | Card body sentence | `Sentence` |
 
 Card **560 x 300** with a Buy button (144 tall), and **560 x 180** when there is nothing to buy (owned / coming
