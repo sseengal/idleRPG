@@ -13,6 +13,7 @@ namespace IdleRPG.EditorTools
     /// </summary>
     public static class MobileBuildSettingsUtility
     {
+        private const string BootScenePath = "Assets/IdleRPG/Scenes/Boot.unity";
         private const string MainScenePath = "Assets/IdleRPG/Scenes/Main.unity";
         private const string DebugScenePath = "Assets/IdleRPG/Scenes/CombatDebug.unity";
         private const string SampleScenePath = "Assets/Scenes/SampleScene.unity";
@@ -96,8 +97,8 @@ namespace IdleRPG.EditorTools
         {
             if (!EditorUtility.DisplayDialog(
                     "Apply mobile settings?",
-                    "Sets portrait lock, IL2CPP + ARM64 (Android), min API 26 / iOS 15, and keeps only " +
-                    "Main.unity enabled in the build list.\n\nBundle identifiers are NOT changed.",
+                    "Sets portrait lock, IL2CPP + ARM64 (Android), min API 26 / iOS 15, and rebuilds the build list " +
+                    "(Boot first, then Main; dev scenes disabled).\n\nBundle identifiers are NOT changed.",
                     "Apply",
                     "Cancel"))
             {
@@ -128,12 +129,21 @@ namespace IdleRPG.EditorTools
             PlayerSettings.gcIncremental = true;
             PlayerSettings.stripEngineCode = true;
 
-            EditorBuildSettings.scenes = new[]
+            // Boot (the splash) must be scene 0 - it loads Main. This list used to start at Main and drop Boot,
+            // which silently broke the splash whenever the settings were applied.
+            System.Collections.Generic.List<EditorBuildSettingsScene> scenes =
+                new System.Collections.Generic.List<EditorBuildSettingsScene>();
+
+            if (System.IO.File.Exists(BootScenePath))
             {
-                new EditorBuildSettingsScene(MainScenePath, true),
-                new EditorBuildSettingsScene(DebugScenePath, false),
-                new EditorBuildSettingsScene(SampleScenePath, false),
-            };
+                scenes.Add(new EditorBuildSettingsScene(BootScenePath, true));
+            }
+
+            scenes.Add(new EditorBuildSettingsScene(MainScenePath, true));
+            scenes.Add(new EditorBuildSettingsScene(DebugScenePath, false));
+            scenes.Add(new EditorBuildSettingsScene(SampleScenePath, false));
+
+            EditorBuildSettings.scenes = scenes.ToArray();
 
             AssetDatabase.SaveAssets();
             Debug.Log("[MobileBuildSettingsUtility] Applied recommended mobile settings.");

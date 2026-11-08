@@ -6,11 +6,11 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/IdleRPG/Scenes/Main.unity
-    guid: 35074fd76c4a44c2cb8481b1af3cf785
-  - enabled: 1
     path: Assets/IdleRPG/Scenes/Boot.unity
     guid: cfffae9011a134c8ab1d1e0368e4b11b
+  - enabled: 1
+    path: Assets/IdleRPG/Scenes/Main.unity
+    guid: 35074fd76c4a44c2cb8481b1af3cf785
   - enabled: 0
     path: Assets/IdleRPG/Scenes/CombatDebug.unity
     guid: cd993e56606ff487190430854f38ffe0
