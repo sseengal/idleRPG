@@ -682,7 +682,7 @@ namespace IdleRPG.UI
             int lowest = training.LowestLeftCount;
             int gateLimit = treeHeroRows;
 
-            if (manager.Training != null)
+            if (manager.Training != null && manager.Training.Tree != null)
             {
                 IReadOnlyList<TrainingNode> nodes = manager.Training.Tree.Nodes;
 

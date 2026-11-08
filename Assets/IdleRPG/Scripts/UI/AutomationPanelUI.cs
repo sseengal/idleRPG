@@ -7,6 +7,9 @@ using IdleRPG.Progression;
 
 namespace IdleRPG.UI
 {
+    // RETIRED (2026-11-08): the lobby owns the shell; this UI is no longer built into the scene.
+    // Kept for reference - see MvpSceneBuilder.Panels.cs (BuildManagementPage / BuildNavBar).
+
     /// <summary>
     /// The AUTO strip on the UPGRADES page (B6 Step 2): one card row per automation, built in code at Start.
     ///

@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 namespace IdleRPG.UI
 {
+    // RETIRED (2026-11-08): the lobby owns the shell; this UI is no longer built into the scene.
+    // Kept for reference - see MvpSceneBuilder.Panels.cs (BuildManagementPage / BuildNavBar).
+
     /// <summary>
     /// Control dock tabs (Upgrades / Ascension / Shop). Simple buttons + SetActive panels:
     /// no ToggleGroup overhead, and panels are only touched when the tab changes.

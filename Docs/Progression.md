@@ -17,9 +17,13 @@
 
 | Axis | Earned from | Spent on | Reset by | Step |
 |---|---|---|---|---|
-| **Hero stat levels** (exists) | gold | gold | Ascension | 14 (generic keys) |
+| **Hero stat levels** (RETIRED in UI, values kept) | gold | gold | Ascension | 14 (generic keys) |
 | **Training - hero chains** (exists) | gold | gold | never | built |
 | **Training - party track** (exists) | perk tokens | tokens | never | built |
+
+> **Retired 2026-11-08:** the per-hero gold stat track has no UI any more (its saved levels still apply). Crit chance
+> and crit damage - the two rows that only lived there - return later through the **experience-points** system, not
+> through the training tree.
 | **Ability levels** | ability scrolls + gold | scrolls | Ascension | 13-14 |
 | **Roster / stars** | hero shards (dupes, bosses, bounties) | shards | never | 17 |
 | **Relics** | stage materials (+ dupes to upgrade) | materials | never | 18 |

@@ -170,6 +170,8 @@ soon) so it never keeps dead space. Header cells **230** wide (party 252) and 15
    Balance Lab. The check for tokens is runs-per-node, not a feeling.
 5. **Node icons are letters** (A / D / H / C / F / $). Real art replaces them later; the layout does not change.
 6. **Cost of three chains** - filling all three hero chains costs 3x the gold of one. `Idle-Economy.md` needs a pass.
+7. **No crit nodes here on purpose.** The old UPGRADES page also sold crit chance and crit damage; those return with
+   the **experience-points** system, not in this tree (see `Progression.md`).
 
 ## 8. Build order
 

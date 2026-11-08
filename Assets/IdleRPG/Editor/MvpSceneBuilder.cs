@@ -103,6 +103,11 @@ namespace IdleRPG.EditorTools
             GameObject hudRoot = new GameObject("HUD");
             HudController hud = hudRoot.AddComponent<HudController>();
 
+            // The lobby (start screen + TRAINING tab). It builds its own canvas at Awake and borrows the shared
+            // header. It belongs here, in the builder, so a scene rebuild can never drop it again.
+            GameObject startScreen = new GameObject("StartScreen");
+            startScreen.AddComponent<StartScreenUI>();
+
             RectTransform canvasRoot = CreateCanvas(hudRoot);
             RectTransform damageRoot = CreateDamageCanvas(hudRoot);
             RectTransform modalCanvas = CreateModalCanvas(hudRoot);
@@ -120,7 +125,6 @@ namespace IdleRPG.EditorTools
 
             GameObject battlePage = CreatePage("BattlePage", safeArea);
             BuildStageRow(battlePage.GetComponent<RectTransform>(), header);
-            GameObject managementPage = CreatePage("ManagementPage", safeArea);
 
             BuildViewport(battlePage.GetComponent<RectTransform>(), damageRoot,
                 out FormationBoardView formationBoard, out EnemyStackView enemyStack,
@@ -141,10 +145,10 @@ namespace IdleRPG.EditorTools
             // The ability strip sits in the band between the viewport and the log. It used to be a second tab
             // beside the log, which meant the buttons were invisible during a fight - the one moment they matter.
             AbilityPanelUI abilityStrip = BuildAbilityStrip(battleRect, partyConfig.ValidHeroCount);
-            TabController tabs = BuildManagementPage(managementPage.GetComponent<RectTransform>(), partyConfig, prestigeUpgrades);
-            ScreenController screens = BuildNavBar(safeArea, battlePage, managementPage, tabs,
-                damageRoot.gameObject, battleStage.gameObject, stageCamera.gameObject);
-            BuildCampLayer(battleRect, abilityStrip, formationBoard, enemyStack, screens, hudRoot);
+            // The old management page (UPGRADES / PERKS / SHOP) and its nav bar are RETIRED - the lobby owns the
+            // shell now. Their builders stay in MvpSceneBuilder.Panels.cs for reference; nothing calls them, and the
+            // camp layer takes a null ScreenController (it only used it to return to the battle page).
+            BuildCampLayer(battleRect, abilityStrip, formationBoard, enemyStack, null, hudRoot);
             OfflineRewardsPopup offlinePopup = BuildOfflinePopup(modalRoot);
             DefeatModalUI defeatModal = BuildDefeatModal(modalRoot);
             ToastUI toast = BuildToast(safeArea);
@@ -161,9 +165,7 @@ namespace IdleRPG.EditorTools
 
             EditorUtility.SetDirty(hud);
             EditorUtility.SetDirty(combatLog);
-            EditorUtility.SetDirty(screens);
             EditorUtility.SetDirty(header);
-            EditorUtility.SetDirty(tabs);
             EditorUtility.SetDirty(offlinePopup);
             EditorUtility.SetDirty(defeatModal);
             EditorUtility.SetDirty(toast);

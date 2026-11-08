@@ -19,9 +19,6 @@ namespace IdleRPG.Debugging
     {
         [SerializeField] private GameManager gameManager;
 
-        [Tooltip("Screen controller used by the Tab key (page cycling). Found automatically when empty.")]
-        [SerializeField] private IdleRPG.UI.ScreenController screenController;
-
         [Tooltip("Gold granted by the G key.")]
         [SerializeField] private double goldGrantAmount = 100000d;
 
@@ -34,19 +31,6 @@ namespace IdleRPG.Debugging
         public void EditorInitialize(GameManager manager)
         {
             gameManager = manager;
-        }
-
-        private void Start()
-        {
-            if (screenController == null)
-            {
-                screenController = FindAnyObjectByType<IdleRPG.UI.ScreenController>();
-            }
-
-            if (screenController == null)
-            {
-                Debug.LogWarning("[DebugHotkeys] No ScreenController found; Tab page cycling is disabled.");
-            }
         }
 
         /// <summary>
@@ -99,32 +83,6 @@ namespace IdleRPG.Debugging
             if (keyboard == null || gameManager == null)
             {
                 return;
-            }
-
-            if (keyboard.tabKey.wasPressedThisFrame && screenController != null)
-            {
-                screenController.CyclePage();
-                Log("page -> " + (screenController.IsManagementOpen ? "management" : "battle"));
-            }
-
-            if (keyboard.digit1Key.wasPressedThisFrame)
-            {
-                BuyAll(HeroStatType.Attack, 1);
-            }
-
-            if (keyboard.digit2Key.wasPressedThisFrame)
-            {
-                BuyAll(HeroStatType.Attack, 10);
-            }
-
-            if (keyboard.digit3Key.wasPressedThisFrame)
-            {
-                BuyAll(HeroStatType.Health, 10);
-            }
-
-            if (keyboard.digit4Key.wasPressedThisFrame)
-            {
-                BuyAll(HeroStatType.Defense, 10);
             }
 
             if (keyboard.f4Key.wasPressedThisFrame)
@@ -297,14 +255,6 @@ namespace IdleRPG.Debugging
                     ? $"Offline (F10, 3h): paid {result.CappedSeconds:0}s -> {result.Gold:0.#} gold at {result.GoldPerSecond:0.##}/s"
                     : "Offline (F10): nothing to claim.");
             }
-        }
-
-        private void BuyAll(HeroStatType statType, int levels)
-        {
-            int purchased = gameManager.Upgrade.TryUpgradeAll(statType, levels);
-            double nextCost = gameManager.Upgrade.GetCost(0, statType, levels);
-            Log($"{statType.ToDisplayName()} +{levels}: {purchased} hero(es) upgraded | {gameManager.Economy} | " +
-                $"next x{levels} costs {NumberFormatter.Format(nextCost)}");
         }
 
         /// <summary>

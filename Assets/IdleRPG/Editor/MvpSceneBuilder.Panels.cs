@@ -46,6 +46,9 @@ namespace IdleRPG.EditorTools
         // ------------------------------------------------------------------
         // Control dock
         // ------------------------------------------------------------------
+        // RETIRED (2026-11-08): the lobby (StartScreenUI) owns the shell, so this page and its nav bar are no
+        // longer built into the scene. Kept for reference - restoring it is one call in MvpSceneBuilder.Build.
+
         private static TabController BuildManagementPage(RectTransform pageRoot, PartyConfig partyConfig,
             List<PrestigeUpgradeData> prestigeUpgrades)
         {

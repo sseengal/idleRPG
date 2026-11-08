@@ -260,6 +260,20 @@ namespace IdleRPG.EditorTools
         /// CombatManager (waves), GameManager (FSM + economy + progression), the console
         /// mirror and the debug hotkeys.
         /// </summary>
+        private const string TrainingTreePath = "Assets/IdleRPG/Data/Training/TrainingTree.asset";
+
+        private static TrainingTreeDef LoadTrainingTree()
+        {
+            TrainingTreeDef tree = AssetDatabase.LoadAssetAtPath<TrainingTreeDef>(TrainingTreePath);
+
+            if (tree == null)
+            {
+                Debug.LogWarning($"[SceneWiringUtility] No training tree at {TrainingTreePath}; the TRAINING tab will be empty.");
+            }
+
+            return tree;
+        }
+
         public static GameManager CreateGameManagerObject(BalanceConfig balance, WaveConfig waveConfig,
             PartyConfig partyConfig, List<StatUpgradeData> statTracks, List<PrestigeUpgradeData> prestigeUpgrades,
             bool enableDebugLogger, bool enableHotkeys, FormationData formationConfig = null)
@@ -274,6 +288,9 @@ namespace IdleRPG.EditorTools
             gameManager.EditorInitialize(balance, waveConfig, partyConfig, combatManager, formationConfig);
             gameManager.EditorInitializeProgression(statTracks, prestigeUpgrades, LoadAutomationDefs());
             hotkeys.EditorInitialize(gameManager);
+
+            // The training tree is data, not scene content: wire it here so a scene rebuild cannot drop it.
+            SetField(gameManager, "trainingTree", LoadTrainingTree());
 
             SetField(combatManager, "logCombatEvents", enableDebugLogger);
             logger.enabled = enableDebugLogger;

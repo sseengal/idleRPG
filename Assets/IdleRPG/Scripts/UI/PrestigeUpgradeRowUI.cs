@@ -7,6 +7,9 @@ using IdleRPG.Utils;
 
 namespace IdleRPG.UI
 {
+    // RETIRED (2026-11-08): the lobby owns the shell; this UI is no longer built into the scene.
+    // Kept for reference - see MvpSceneBuilder.Panels.cs (BuildManagementPage / BuildNavBar).
+
     /// <summary>
     /// One permanent upgrade row on the ascension panel: name, effect, level, token cost and
     /// a buy button. Button listeners are bound in code so the scene stays simple.

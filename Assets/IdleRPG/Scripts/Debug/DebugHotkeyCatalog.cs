@@ -31,9 +31,6 @@ namespace IdleRPG.Debugging
         /// <summary>Every dev hotkey, in the order the overlay prints them.</summary>
         public static readonly DebugHotkeyEntry[] All =
         {
-            new DebugHotkeyEntry("Tab", "cycle page (Battle / Party / Upgrades / Perks / Shop)"),
-            new DebugHotkeyEntry("1 / 2", "+1 ATK / +10 ATK for every hero"),
-            new DebugHotkeyEntry("3 / 4", "+10 HP / +10 DEF for every hero"),
             new DebugHotkeyEntry("G / T / C", "grant test gold / tokens / gems"),
             new DebugHotkeyEntry("B", "watch ad for the gold boost"),
             new DebugHotkeyEntry("D", "force a party wipe (opens the defeat card)"),

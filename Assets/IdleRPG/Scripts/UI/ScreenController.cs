@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 namespace IdleRPG.UI
 {
+    // RETIRED (2026-11-08): the lobby owns the shell; this UI is no longer built into the scene.
+    // Kept for reference - see MvpSceneBuilder.Panels.cs (BuildManagementPage / BuildNavBar).
+
     /// <summary>
     /// Two-page shell: the battle page (viewport + combat log) and the management page
     /// (upgrades / ascension / shop, each fully scrollable). Nav buttons swap pages and jump

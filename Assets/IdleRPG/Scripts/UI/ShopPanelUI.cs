@@ -12,6 +12,9 @@ using IdleRPG.Utils;
 
 namespace IdleRPG.UI
 {
+    // RETIRED (2026-11-08): the lobby owns the shell; this UI is no longer built into the scene.
+    // Kept for reference - see MvpSceneBuilder.Panels.cs (BuildManagementPage / BuildNavBar).
+
     /// <summary>
     /// Panel C: shop, styled to match the ASCEND page. A headline action button (watch an ad) sits in the same
     /// header band as the ASCEND button, and every offer is drawn as a card like a prestige upgrade row:

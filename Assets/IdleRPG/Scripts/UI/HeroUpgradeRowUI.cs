@@ -8,6 +8,9 @@ using IdleRPG.Utils;
 
 namespace IdleRPG.UI
 {
+    // RETIRED (2026-11-08): the lobby owns the shell; this UI is no longer built into the scene.
+    // Kept for reference - see MvpSceneBuilder.Panels.cs (BuildManagementPage / BuildNavBar).
+
     /// <summary>
     /// One hero's upgrade section: the hero's name, then ONE ROW PER STAT (ATK / HP / DEF / CRIT / CRIT DMG).
     ///

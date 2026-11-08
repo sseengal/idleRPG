@@ -1,6 +1,13 @@
 # Upgrades Page - design + mobile layout pass (Phase 1)
 
-> **RECORD, not current.** Phase 1 shipped. Current screens: `UI-UX.md`; upgrade maths: `Progression.md`.
+> **RETIRED (2026-11-08).** The page, its AUTO strip and the baked BATTLE/PARTY/UPGRADES/PERKS/SHOP nav bar are no
+> longer built into the scene - the lobby (`StartScreenUI`) plus the TRAINING tree replaced them. The scripts and their
+> data are kept for reference (`UpgradePanelUI`, `HeroUpgradeRowUI`, `AutomationPanelUI`, `PrestigeUpgradeRowUI`,
+> `ShopPanelUI`, `ScreenController`, `TabController`; builder methods in `MvpSceneBuilder.Panels.cs`).
+> **What still exists of it:** the per-hero stat levels, automation purchases and perk levels stay in saves and are
+> still applied by `StatResolver`, but nothing can buy them any more.
+>
+> **RECORD, not current.** Phase 1 shipped. Screens: `UI-UX.md`; upgrade maths: `Progression.md`.
 
 *Started 2026-10-10. This is the design record for the UPGRADES page, the same way `Party-Page.md` is the record
 for PARTY.*

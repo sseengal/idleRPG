@@ -117,7 +117,9 @@ exceptions - is in `UI-Layout.md`.** That file owns spacing; this one owns scree
 
 ## 2. Navigation model
 
-MVP shell today: header + Battle/Management pages + nav (BATTLE / UPGRADES / ASCEND / SHOP).
+**Shell today (2026-11-08):** the lobby owns navigation - `SHOP / PARTY / BATTLE / ASCENSION / TRAINING` on its own
+canvas, with the shared header borrowed from the battle page. The old baked 5-tab shell (BATTLE / PARTY / UPGRADES /
+PERKS / SHOP) and its management page are **retired** and no longer built into the scene.
 Target shell adds depth without nav explosion:
 
 ```
