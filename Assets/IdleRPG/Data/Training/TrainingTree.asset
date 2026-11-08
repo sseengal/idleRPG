@@ -14882,7 +14882,7 @@ MonoBehaviour:
     cost: 4
     costCurrency: 2
     order: 1
-    requiresLeftNodes: 13
+    requiresLeftNodes: 12
     title: Battle Gold +10%
     description: More gold from every battle.
   - nodeID: party:R2
@@ -14893,7 +14893,7 @@ MonoBehaviour:
     cost: 6
     costCurrency: 2
     order: 2
-    requiresLeftNodes: 26
+    requiresLeftNodes: 24
     title: Camp Healing +25
     description: Every camp heals the whole party for more.
   - nodeID: party:R3
@@ -14904,7 +14904,7 @@ MonoBehaviour:
     cost: 8
     costCurrency: 2
     order: 3
-    requiresLeftNodes: 38
+    requiresLeftNodes: 36
     title: Finish Gold +15%
     description: Bonus gold for finishing a level.
   - nodeID: party:R4
@@ -14915,7 +14915,7 @@ MonoBehaviour:
     cost: 12
     costCurrency: 2
     order: 4
-    requiresLeftNodes: 44
+    requiresLeftNodes: 42
     title: Camp Experience +5
     description: Placeholder - needs the experience system.
   - nodeID: party:R5
@@ -14926,7 +14926,7 @@ MonoBehaviour:
     cost: 18
     costCurrency: 2
     order: 5
-    requiresLeftNodes: 50
+    requiresLeftNodes: 48
     title: Level-Up Heal 15%
     description: Placeholder - needs the level system.
   - nodeID: party:R6
@@ -14937,6 +14937,6 @@ MonoBehaviour:
     cost: 30
     costCurrency: 2
     order: 6
-    requiresLeftNodes: 50
+    requiresLeftNodes: 54
     title: Survive Once + Shield
     description: Placeholder - survive a death once, gain shield stacks.

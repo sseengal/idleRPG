@@ -44,20 +44,21 @@ namespace IdleRPG.EditorTools
                 }
             }
 
-            // PARTY track: paid with Perk Tokens, gated by the LOWEST hero LEFT count.
+            // PARTY track: paid with Perk Tokens, gated by the LOWEST hero LEFT count. Gates are multiples of 6
+            // (one level = 6 nodes), so every party node lines up with the FIRST row of a level.
             AddParty(nodes, 0, 0, TrainingEffect.UnlockFirstAbility, 1d, 2d,
                 "Active Skill Slot", "Unlocks the first active ability for all heroes.");
-            AddParty(nodes, 1, 13, TrainingEffect.BattleGoldPercent, 0.10d, 4d,
+            AddParty(nodes, 1, 12, TrainingEffect.BattleGoldPercent, 0.10d, 4d,
                 "Battle Gold +10%", "More gold from every battle.");
-            AddParty(nodes, 2, 26, TrainingEffect.CampHealPercent, 25d, 6d,
+            AddParty(nodes, 2, 24, TrainingEffect.CampHealPercent, 25d, 6d,
                 "Camp Healing +25", "Every camp heals the whole party for more.");
-            AddParty(nodes, 3, 38, TrainingEffect.FinishGoldPercent, 0.15d, 8d,
+            AddParty(nodes, 3, 36, TrainingEffect.FinishGoldPercent, 0.15d, 8d,
                 "Finish Gold +15%", "Bonus gold for finishing a level.");
-            AddParty(nodes, 4, 44, TrainingEffect.CampExperience, 5d, 12d,
+            AddParty(nodes, 4, 42, TrainingEffect.CampExperience, 5d, 12d,
                 "Camp Experience +5", "Placeholder - needs the experience system.");
-            AddParty(nodes, 5, 50, TrainingEffect.LevelUpHealPercent, 0.15d, 18d,
+            AddParty(nodes, 5, 48, TrainingEffect.LevelUpHealPercent, 0.15d, 18d,
                 "Level-Up Heal 15%", "Placeholder - needs the level system.");
-            AddParty(nodes, 6, 50, TrainingEffect.SurviveDeathShield, 10d, 30d,
+            AddParty(nodes, 6, 54, TrainingEffect.SurviveDeathShield, 10d, 30d,
                 "Survive Once + Shield", "Placeholder - survive a death once, gain shield stacks.");
 
             Directory.CreateDirectory(Path.GetDirectoryName(TreePath));

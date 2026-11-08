@@ -9,16 +9,18 @@ Status: **built** - 8 Nov 2026. Training is the permanent upgrade page: **three 
 ```
 Knight (Gold)   Mage (Gold)   Soldier (Gold)   PARTY (Perk Tokens)
   Attack +N      Attack +N      Attack +N        R0 Active Skill Slot      gate 0    2 tokens
-  Armor  +N      Armor  +N      Armor  +N        R1 Battle Gold +10%       gate 13   4 tokens
-  Max HP +N      Max HP +N      Max HP +N        R2 Camp Healing +25       gate 26   6 tokens
-  ...            ...            ...              R3 Finish Gold +15%       gate 38   8 tokens
-                                                 R4 Camp XP +5             gate 44  12 tokens [deferred]
-                                                 R5 Level-Up Heal 15%      gate 50  18 tokens [deferred]
-                                                 R6 Survive Once + Shield  gate 50  30 tokens [deferred]
+  Armor  +N      Armor  +N      Armor  +N        R1 Battle Gold +10%       gate 12   4 tokens
+  Max HP +N      Max HP +N      Max HP +N        R2 Camp Healing +25       gate 24   6 tokens
+  ...            ...            ...              R3 Finish Gold +15%       gate 36   8 tokens
+                                                 R4 Camp XP +5             gate 42  12 tokens [deferred]
+                                                 R5 Level-Up Heal 15%      gate 48  18 tokens [deferred]
+                                                 R6 Survive Once + Shield  gate 54  30 tokens [deferred]
 ```
 
 - A hero chain is **450 single-unlock nodes**: 150 cycles of `Attack -> Armor -> Max HP`. Amounts step +1 on every
   appearance: Attack `3 -> 152`, Armor `20 -> 169`, Max HP `20 -> 169`. Linear - each node needs the one below it.
+- **Party gates are multiples of 6** (0 / 12 / 24 / 36 / 42 / 48 / 54), so every party node sits on the **first row
+  of a level** and lines up with the hero rows instead of floating mid-level.
 - The party chain is gated by the **LOWEST hero's count** - not the best hero, not the sum. Every party reward is a
   milestone the whole party reaches together, so dumping all gold into one hero cannot rush it.
 - The whole asset is **1,357 nodes** (450 x 3 heroes + 7 party).
@@ -100,10 +102,10 @@ Training's flat bonuses are added **after** the perk multiplier chain, so perks 
 | Party node | Gate | Fill stops here until... |
 |---|---|---|
 | R0 Active Skill Slot | 0 | it is bought (a fresh save shows no gold at all) |
-| R1 Battle Gold +10% | 13 | it is bought - the fill waits on tokens here |
-| R2 Camp Healing +25 | 26 | it is bought |
-| R3 Finish Gold +15% | 38 | it is bought |
-| R4 / R5 / R6 (deferred) | 44 / 50 | ignored - they cannot be bought yet |
+| R1 Battle Gold +10% | 12 | it is bought - the fill waits on tokens here |
+| R2 Camp Healing +25 | 24 | it is bought |
+| R3 Finish Gold +15% | 36 | it is bought |
+| R4 / R5 / R6 (deferred) | 42 / 48 / 54 | ignored - they cannot be bought yet |
 
   Owned nodes also get a **pale gold rim**, so a bought diamond reads as a gold fill plus a bright border.
 - **Tap a node -> a card opens beside it** (right of the node in the two left columns, left of it in the two right
