@@ -130,6 +130,10 @@ PERKS / SHOP) and its management page are **retired** and no longer built into t
 | ASCENSION | live | the perk shop: four token tracks, one level per tap |
 | TRAINING | live | the gold tree (three heroes) plus the party track |
 | SHOP | placeholder | shows a "coming soon" line; no content behind it |
+
+**The level-up card** is an overlay, not a page: it owns the screen while a pick is owed (fighter paused), shows the
+three boons, and closes itself when the last pick is spent. `LEVEL UP!` / `CHOOSE A BOON - N PICKS WAITING`, then one
+row per card (rarity tag, badge, name, who it helps, what it gives) and `REFRESH n/n` at the bottom.
 Target shell adds depth without nav explosion:
 
 ```

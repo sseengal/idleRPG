@@ -42,6 +42,30 @@ namespace IdleRPG.Progression
         /// <summary>Training service (permanent gold tree) - flat stat bonuses are read from it.</summary>
         public TrainingService Training { get; set; }
 
+        /// <summary>
+        /// The boons picked this run. Every getter below folds its percentages in, so a card taken on the
+        /// level-up screen is live in the very next fight - no second stat pipeline.
+        /// </summary>
+        public PerkLoadout Boons { get; set; }
+
+        /// <summary>1 + the boon bonus for one hero, floored at 1 so a bad spec can never turn into a penalty.</summary>
+        private double BoonMultiplier(PerkEffectSpec.Op operation, string heroId)
+        {
+            if (Boons == null)
+            {
+                return 1d;
+            }
+
+            double bonus = Boons.TotalFor(operation, heroId);
+            return 1d + (bonus < 0d ? 0d : bonus);
+        }
+
+        /// <summary>The flat (points) form, for crit chance and crit damage.</summary>
+        private double BoonFlat(PerkEffectSpec.Op operation, string heroId)
+        {
+            return Boons != null ? Boons.TotalFor(operation, heroId) : 0d;
+        }
+
         private double TrainingBonus(TrainingEffect effect, string heroId)
         {
             return Training != null ? Training.TotalFor(effect, heroId) : 0d;
@@ -268,7 +292,8 @@ namespace IdleRPG.Progression
                 GlobalHealthMultiplier,
                 GetEffectMode(HeroStatType.Health));
 
-            return value + TrainingBonus(TrainingEffect.HpFlat, hero.HeroID);
+            double total = value + TrainingBonus(TrainingEffect.HpFlat, hero.HeroID);
+            return total * BoonMultiplier(PerkEffectSpec.Op.HealthPercent, hero.HeroID);
         }
 
         public double GetAttack(HeroData hero, int heroIndex)
@@ -285,7 +310,8 @@ namespace IdleRPG.Progression
                 GlobalDamageMultiplier,
                 GetEffectMode(HeroStatType.Attack));
 
-            return value + runAttackBonus + TrainingBonus(TrainingEffect.AttackFlat, hero.HeroID);
+            double total = value + runAttackBonus + TrainingBonus(TrainingEffect.AttackFlat, hero.HeroID);
+            return total * BoonMultiplier(PerkEffectSpec.Op.AttackPercent, hero.HeroID);
         }
 
         public double GetDefense(HeroData hero, int heroIndex)
@@ -302,7 +328,8 @@ namespace IdleRPG.Progression
                 1d,
                 GetEffectMode(HeroStatType.Defense));
 
-            return value + runDefenseBonus + TrainingBonus(TrainingEffect.ArmorFlat, hero.HeroID);
+            double total = value + runDefenseBonus + TrainingBonus(TrainingEffect.ArmorFlat, hero.HeroID);
+            return total * BoonMultiplier(PerkEffectSpec.Op.DefensePercent, hero.HeroID);
         }
 
         // ------------------------------------------------------------------
@@ -360,7 +387,14 @@ namespace IdleRPG.Progression
 
         public double GetAttackInterval(HeroData hero, int heroIndex)
         {
-            return hero == null ? HeroData.MinAttackIntervalSec : hero.AttackIntervalSec;
+            if (hero == null)
+            {
+                return HeroData.MinAttackIntervalSec;
+            }
+
+            double interval = hero.AttackIntervalSec / BoonMultiplier(PerkEffectSpec.Op.AttackSpeedPercent, hero.HeroID);
+
+            return interval < HeroData.MinAttackIntervalSec ? HeroData.MinAttackIntervalSec : interval;
         }
 
         /// <summary>Crit caps: past these the maths stops being a "lucky hit" and becomes the baseline.</summary>
@@ -382,6 +416,8 @@ namespace IdleRPG.Progression
                 1d,
                 GetEffectMode(HeroStatType.CritRate));
 
+            value += BoonFlat(PerkEffectSpec.Op.CritChanceFlat, hero.HeroID);
+
             return value < 0d ? 0d : (value > MaxCritChance ? MaxCritChance : value);
         }
 
@@ -399,6 +435,8 @@ namespace IdleRPG.Progression
                 1d,
                 GetEffectMode(HeroStatType.CritDamage));
 
+            value += BoonFlat(PerkEffectSpec.Op.CritDamageFlat, hero.HeroID);
+
             return value < 1d ? 1d : (value > MaxCritDamage ? MaxCritDamage : value);
         }
 
@@ -406,7 +444,8 @@ namespace IdleRPG.Progression
 
         public double GlobalHealthMultiplier => GetEffectMultiplier(PrestigeEffectType.HealthPercent);
 
-        public double GlobalGoldMultiplier => GetEffectMultiplier(PrestigeEffectType.GoldPercent);
+        public double GlobalGoldMultiplier =>
+            GetEffectMultiplier(PrestigeEffectType.GoldPercent) * (Boons != null ? 1d + Math.Max(0d, Boons.GoldBonus) : 1d);
 
         private static string Key(HeroData hero, HeroStatType statType)
         {

@@ -249,6 +249,9 @@ namespace IdleRPG.Combat
             public const string Cutscene = "cutscene";
             public const string Story = "story";
             public const string Camp = "camp";
+
+            /// <summary>The level-up card: the fight waits while the player reads three cards.</summary>
+            public const string Boon = "boon";
         }
 
         private readonly System.Collections.Generic.HashSet<string> pauseReasons =

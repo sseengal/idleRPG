@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f72f534ec8e504447925347f0982be50, type: 3}
+  m_Name: boon_warlords_fury
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.PerkData
+  boonID: boon_warlords_fury
+  displayName: Warlord's Fury
+  description: 
+  rarity: 3
+  icon: {fileID: 0}
+  allHeroes: 1
+  heroID: 
+  effects:
+  - operation: 0
+    amount: 0.3
+  - operation: 5
+    amount: 0.1
+  maxStacks: 1

@@ -75,6 +75,11 @@ namespace IdleRPG.Core
             SafeInvoke(PartyLevelGained, level, pendingPicks, nameof(PartyLevelGained));
         }
 
+        internal static void RaiseBoonOfferChanged()
+        {
+            SafeInvoke(BoonOfferChanged, nameof(BoonOfferChanged));
+        }
+
         internal static void RaiseEnemySpawned(string enemyName, double maxHealth, bool isBoss, int enemyIndex)
         {
             SafeInvoke(EnemySpawned, enemyName, maxHealth, isBoss, enemyIndex, nameof(EnemySpawned));

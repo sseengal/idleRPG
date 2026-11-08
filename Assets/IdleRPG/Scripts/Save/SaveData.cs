@@ -65,6 +65,21 @@ namespace IdleRPG.Save
         /// <summary>Boon choices earned this run but not spent yet.</summary>
         public int runPartyPicks;
 
+        /// <summary>
+        /// Boons taken this run, as ids (schema v12, run-scoped). Ids, never numbers: a balance pass re-scores a
+        /// card for every existing save instead of leaving old runs on old totals.
+        /// </summary>
+        public List<string> runBoonIds = new List<string>();
+
+        /// <summary>Free re-rolls spent this run.</summary>
+        public int runBoonRerolls;
+
+        /// <summary>
+        /// The cards currently on screen, as ids. Saved so quitting on the level-up screen cannot re-deal a fresh
+        /// hand - that would be a free re-roll.
+        /// </summary>
+        public List<string> runBoonOffer = new List<string>();
+
         // --- Camp (run-scoped, additive). Tokens = -1 means "old save, fill to the run's capacity". ---
         public int runCampTokens = -1;
         public int runLastCampStage = 0;

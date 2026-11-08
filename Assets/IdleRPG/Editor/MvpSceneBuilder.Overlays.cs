@@ -97,6 +97,20 @@ namespace IdleRPG.EditorTools
         /// after a short beat - this card makes that beat legible and offers the two run endings: "continue" (skip the
         /// wait) or "ascend" (cash the run in now, right where the player is already thinking about it).
         /// </summary>
+        // ------------------------------------------------------------------
+        // The level-up card
+        // ------------------------------------------------------------------
+        /// <summary>
+        /// The level-up card's host on the modal canvas. <see cref="IdleRPG.UI.BoonCardUI"/> builds its own widgets,
+        /// so this is one empty node - a rebuild can never leave half a card behind.
+        /// </summary>
+        private static void BuildBoonCard(RectTransform modalRoot)
+        {
+            GameObject host = UiFactory.Node("BoonCard", modalRoot);
+            UiFactory.Stretch(host.GetComponent<RectTransform>());
+            host.AddComponent<IdleRPG.UI.BoonCardUI>();
+        }
+
         private static DefeatModalUI BuildDefeatModal(RectTransform modalRoot)
         {
             GameObject host = UiFactory.Node("DefeatModal", modalRoot);

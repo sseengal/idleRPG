@@ -85,6 +85,12 @@ namespace IdleRPG.Core
         /// </summary>
         public static event Action<int, int> PartyLevelGained;
 
+        /// <summary>
+        /// The level-up card's offer opened, changed (a pick or a re-roll) or closed. No payload on purpose: the
+        /// card reads <c>GameManager.BoonOffer</c>, so there is one copy of the truth.
+        /// </summary>
+        public static event Action BoonOfferChanged;
+
         // ------------------------------------------------------------------
         // Combat
         // ------------------------------------------------------------------
@@ -174,6 +180,7 @@ namespace IdleRPG.Core
             WaveCompleted = null;
             PartyXpChanged = null;
             PartyLevelGained = null;
+            BoonOfferChanged = null;
             EnemySpawned = null;
             EnemyDamaged = null;
             SwingStarted = null;

@@ -24,7 +24,9 @@ namespace IdleRPG.Core
         /// <summary>Builds the payload written to disk. Called by <see cref="SaveManager"/>.</summary>
         private SaveData CaptureSnapshot()
         {
-            return SaveSnapshotMapper.Capture(LiveServices(), RunStateNow());
+            SaveData data = SaveSnapshotMapper.Capture(LiveServices(), RunStateNow());
+            WriteBoonState(data);
+            return data;
         }
 
         /// <summary>Pushes a loaded payload into the live systems (before combat starts).</summary>
@@ -36,6 +38,9 @@ namespace IdleRPG.Core
             }
 
             ApplyRunState(SaveSnapshotMapper.Apply(data, LiveServices(), RunStateNow()));
+
+            // Boons ride their own fields: the hand, the re-rolls spent, and the cards that were on screen.
+            ReadBoonState(data);
 
             // Give the loaded values to combat (Initialize() would reset the stage to 1).
             combatManager.SetProgress(CurrentStage, RestoredWave, healParty: true);

@@ -262,6 +262,21 @@ namespace IdleRPG.EditorTools
         /// </summary>
         private const string TrainingTreePath = "Assets/IdleRPG/Data/Training/TrainingTree.asset";
 
+        private const string BoonPoolPath = "Assets/IdleRPG/Data/Boons/PerkPool.asset";
+
+        /// <summary>The level-up card's deck. Missing = no boons are dealt (the card never opens).</summary>
+        private static PerkPoolDef LoadBoonPool()
+        {
+            PerkPoolDef pool = AssetDatabase.LoadAssetAtPath<PerkPoolDef>(BoonPoolPath);
+
+            if (pool == null)
+            {
+                Debug.LogWarning($"[SceneWiringUtility] No boon pool at {BoonPoolPath}; run Tools/Idle RPG/Generate Boon Assets.");
+            }
+
+            return pool;
+        }
+
         private static TrainingTreeDef LoadTrainingTree()
         {
             TrainingTreeDef tree = AssetDatabase.LoadAssetAtPath<TrainingTreeDef>(TrainingTreePath);
@@ -291,6 +306,7 @@ namespace IdleRPG.EditorTools
 
             // The training tree is data, not scene content: wire it here so a scene rebuild cannot drop it.
             SetField(gameManager, "trainingTree", LoadTrainingTree());
+            SetField(gameManager, "boonPool", LoadBoonPool());
 
             SetField(combatManager, "logCombatEvents", enableDebugLogger);
             logger.enabled = enableDebugLogger;

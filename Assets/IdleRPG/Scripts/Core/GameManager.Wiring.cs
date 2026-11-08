@@ -77,6 +77,10 @@ namespace IdleRPG.Core
             Resolver = new StatResolver(balanceConfig, statUpgrades, prestigeUpgrades);
             Resolver.StatsChanged += OnStatsChanged;
             Resolver.Training = Training;
+
+            // The boon hand is built before the resolver exists (it must be, so the save can restore into it), so
+            // the hand is attached here, once the resolver is there to receive it.
+            Resolver.Boons = Boons;
             Training.Changed += Resolver.NotifyGearChanged;
 
             // Step M1.6: gear owns boss drops + the inventory. The resolver reads its summed bonuses.

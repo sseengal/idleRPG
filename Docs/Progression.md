@@ -49,14 +49,23 @@ choice** - a stay-for-this-run upgrade picked from three cards. This is the rogu
 | Levels per run | capped by `partyMaxLevelPerRun` (first pass 20); XP stops at the cap |
 | Picks | one per level; a kill that crosses two levels queues two picks, dealt back to back |
 | Lifetime | run-scoped - level, XP and queued picks clear with the run, next to run gold |
-| Code | `Progression/PartyProgression.cs` (pure C#, saved), wired in `GameManager.Perks.cs` |
+| Cards | **built 2026-11-09**: 3 dealt, rarity-weighted, never a maxed card, `REFRESH 1/1` per run |
+| Card content | `Data/Perks/*.asset` (ten starters), dealt by `Data/Boons/PerkPool.asset`; regenerate with **Tools > Idle RPG > Generate Boon Assets** |
+| Saved | level, XP, queued picks, the hand (ids), re-rolls spent, **and the cards on screen** - so quitting mid-card is not a free re-roll |
+| Code | `Progression/PartyProgression.cs`, `PerkLoadout.cs`, `PerkOfferService.cs` (pure C#), wired in `GameManager.Perks.cs` |
 
 **Boons target heroes, not just the party.** A boon carries a target (`AllHeroes` or one hero id), so "thorns for the
 Mage +5" is one data asset, not a special case. Tuning stays in data: same op, different target and number.
 
 **The fight pauses for the choice** (decision 2026-11-09): when a pick is owed the run stops and the card opens, so
 the player cannot lose health while reading. The hold is counted (`CombatManager.Pause(reason)`), because a cutscene,
-the camp and a boon card can all want the fight frozen at once.
+the camp and a boon card can all want the fight frozen at once. The card sits on its own canvas at sorting order 300,
+above the modal layer (100), the lobby (250) and the MENU button (251) - nothing of the fight may peek over a choice.
+
+**A boon is a stat bonus today, not a new mechanic.** The six ops (`AttackPercent`, `HealthPercent`, `DefensePercent`,
+`GoldPercent`, `AttackSpeedPercent`, `CritChanceFlat`, `CritDamageFlat`) all land on getters `StatResolver` already
+had, so a card is live in the next swing and there is no second stat pipeline. On-hit effects (cleave, extra strike)
+are the next slice and need a hook inside `Encounter`, which is why they are not in this one.
 
 **Away time pays neither gold nor XP** (decision 2026-11-09): the away window is being retired in favour of daily
 login bonuses, so time away is not a progression axis. There is no run-duration statistic to keep honest either.
