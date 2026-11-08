@@ -49,7 +49,8 @@ choice** - a stay-for-this-run upgrade picked from three cards. This is the rogu
 | Levels per run | capped by `partyMaxLevelPerRun` (first pass 20); XP stops at the cap |
 | Picks | one per level; a kill that crosses two levels queues two picks, dealt back to back |
 | Lifetime | run-scoped - level, XP and queued picks clear with the run, next to run gold |
-| Cards | **built 2026-11-09**: 3 dealt, rarity-weighted, never a maxed card, `REFRESH 1/1` per run |
+| Cards | **built 2026-11-09**: 3 dealt, rarity-weighted, never a maxed card, `REFRESH 1/1` per run; every pick writes a feed line (`Boon: Cleaving Blow`) |
+| Deck | 13 cards: 9 numbers + 4 mechanics (Cleaving Blow, Battle Echo, Vampiric Edge, Thorned Mail) |
 | Card content | `Data/Perks/*.asset` (ten starters), dealt by `Data/Boons/PerkPool.asset`; regenerate with **Tools > Idle RPG > Generate Boon Assets** |
 | Saved | level, XP, queued picks, the hand (ids), re-rolls spent, **and the cards on screen** - so quitting mid-card is not a free re-roll |
 | Code | `Progression/PartyProgression.cs`, `PerkLoadout.cs`, `PerkOfferService.cs` (pure C#), wired in `GameManager.Perks.cs` |

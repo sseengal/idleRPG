@@ -99,6 +99,57 @@ namespace IdleRPG.Tests
         }
 
         [Test]
+        public void EveryMechanicCard_InTheDeck_CompilesIntoTheFight()
+        {
+            // The deck guard: a mechanic card whose data is wrong (the wrong op, a target nobody can receive it)
+            // would otherwise ship silently and simply never fire.
+            PartyConfig party = LoadParty();
+            PerkPoolDef pool = AssetDatabase.LoadAssetAtPath<PerkPoolDef>(PoolPath);
+            PerkLoadout hand = new PerkLoadout();
+
+            int mechanics = 0;
+
+            for (int i = 0; i < pool.Count; i++)
+            {
+                PerkData boon = pool.At(i);
+
+                if (boon == null || !HasMechanic(boon))
+                {
+                    continue;
+                }
+
+                mechanics++;
+                Assert.IsTrue(hand.Add(boon), $"{boon.BoonID} must be addable");
+
+                PerkRuntime runtime = BoonRuntimeFactory.Build(hand, party);
+                int reachable = CountEffects(runtime, party.Heroes.Count);
+
+                Assert.Greater(reachable, 0, $"{boon.BoonID} is a mechanic but reaches nobody in the party");
+                hand.ResetForNewRun();
+            }
+
+            Assert.Greater(mechanics, 3, "the deck must actually contain mechanic cards");
+        }
+
+        private static bool HasMechanic(PerkData boon)
+        {
+            if (boon.Effects == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < boon.Effects.Count; i++)
+            {
+                if (boon.Effects[i] != null && boon.Effects[i].IsTrigger)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        [Test]
         public void StatCard_DoesNotReachTheFight_BecauseItBelongsToTheResolver()
         {
             PartyConfig party = LoadParty();

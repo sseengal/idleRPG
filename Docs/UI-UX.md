@@ -136,7 +136,8 @@ three boons, and closes itself when the last pick is spent. `LEVEL UP!` / `CHOOS
 row per card (rarity tag, badge, name, who it helps, what it gives) and `REFRESH n/n` at the bottom.
 
 **Deliberately no boons page** (decision 2026-11-09): boons are run-scoped, so there is nothing to browse between runs.
-The hand lives on the level-up card only.
+The hand lives on the level-up card only, and its written record is the battle feed: every pick appends
+`Boon: <name>` in the system colour.
 Target shell adds depth without nav explosion:
 
 ```

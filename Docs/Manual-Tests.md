@@ -547,6 +547,43 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 
 ---
 
+## 6b. Party XP and boons (added 2026-11-09)
+
+The run build. Everything here is dev-testable with the keys `X` (+a quarter of the bar) and `V` (+one whole level).
+
+### XP and levels
+- [ ] A kill moves the XP bar between the arena and the ability buttons (gold fill, `LV n` on the left).
+- [ ] A level lands in the first few waves and the bar reads `xp / needed`; once a pick is owed the right side reads
+      `1 PICK` (or `N PICKS`) in gold instead of the numbers.
+- [ ] `V` **opens the level-up card** and the fight stops dead: no hero and no enemy acts while it is up.
+- [ ] Quit and relaunch mid-run: level, XP and queued picks come back.
+- [ ] End the run (or ascend): level, XP and picks reset to `LV 1`.
+
+### The card
+- [ ] `LEVEL UP!`, `CHOOSE A BOON - N PICKS WAITING`, three different cards.
+- [ ] Each row shows a rarity tag, a lettered badge, the name, who it helps (`All heroes` / `Soldier only`) and the
+      effect line (`+12% attack`, `On hit: +50% of the hit to the other enemies`).
+- [ ] Tapping a card applies it, writes `Boon: <name>` into the feed, and either deals the next pick (more queued) or
+      resumes the fight.
+- [ ] `REFRESH 1/1` deals a new hand once, then reads `NO RE-ROLL LEFT`.
+- [ ] Quitting on the card and relaunching shows **the same** three cards (not a free re-roll).
+
+### Mechanics in the fight
+- [ ] **Cleaving Blow** (soldier): a soldier hit is followed by a smaller hit on the *other* enemies.
+- [ ] **Battle Echo**: the soldier's hit appears twice on the same enemy, the second smaller.
+- [ ] **Vampiric Edge**: heroes heal a little as they land hits (`Knight healed for 1`).
+- [ ] **Thorned Mail** (knight): an enemy that hits the knight loses health. Note: at stage 1 the reflected amount
+      rounds to nothing - check it at stage 5+.
+- [ ] A card taken mid-wave is live in the next swing; nothing about the fight breaks (no double damage numbers, no
+      stuck animating).
+
+### Guards
+- [ ] A fight with no mechanic cards behaves exactly as before this feature existed.
+- [ ] Camp, a story scene and the level-up card can each stop the fight; releasing one does not resume the fight
+      while another still holds it.
+
+---
+
 ## 7. Found a bug? Do this
 
 1. Note it in `Docs/REVIEW.md` (what you saw, when, what you expected).

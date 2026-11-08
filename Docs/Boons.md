@@ -2,8 +2,10 @@
 
 > Owns: the level-up cards (boons), their rarities, the offer rules and the fight-side effect work.
 > Parent: `Progression.md` (levels, XP, run lifetime). Fight internals: `Sim-Core.md`, `Combat-Sequencing.md`.
-> **Status 2026-11-09:** slice 1 and 2 are **built** (XP, levels, card, ten stat cards). Everything from §5 on is
-> **plan**, not code.
+> **Status 2026-11-09:** XP, levels, the card, save/load and the re-roll are **built**. The fight hooks are
+> **built** and wired end to end, and **four mechanic cards ship** (Cleaving Blow, Battle Echo, Vampiric Edge,
+> Thorned Mail). Rarity escalation (§6), the last two epic hooks and the legendaries (§5), statuses (§4 layer C)
+> and the art pass are **plan**, not code.
 
 ---
 
@@ -29,7 +31,7 @@
 | Wiring | `Core/GameManager.Perks.cs` | kill -> XP -> level -> card -> pick -> stats; save/restore/reset |
 | Stats | `Progression/StatResolver.cs` | seven ops folded into the getters it already had |
 | The card | `UI/BoonCardUI.cs` | three rows, rarity tag, letter badge, `REFRESH n/n`, own canvas at order 300 |
-| Content | `Data/Boons/*.asset` | nine starter cards, all Common/Rare numbers + `PerkPool.asset` (65/25/8/2, 3 per offer, 1 re-roll). Epics and Legendaries start shipping with the trigger pass (phase P1) |
+| Content | `Data/Boons/*.asset` | **13 cards**: 9 numbers (Common/Rare) + **4 mechanics** (Cleaving Blow, Battle Echo, Vampiric Edge, Thorned Mail), dealt by `PerkPool.asset` (65/25/8/2, 3 per offer, 1 re-roll) |
 
 ## 3. The shape of an effect: three layers, one source each
 
@@ -117,10 +119,10 @@ ladder memorable and contains the fight-side work to a known list.
 | 11 | Titan's Blood | Rare | all | +22% health | now |
 | 12 | Scholar | Rare | all | +15% party XP | now |
 | **Epics - a mechanic, 2 stacks** | | | | | |
-| 13 | **Vampiric Edge** | Epic | all | heal 8% of damage dealt | hook |
-| 14 | **Thorned Mail** | Epic | knight | reflect 20% of damage taken | hook |
+| 13 | **Vampiric Edge** | Epic | all | heal 8% of damage dealt | **built** |
+| 14 | **Thorned Mail** | Epic | knight | reflect 20% of damage taken | **built** |
 | 15 | **Cleaving Blow** | Epic | soldier | on hit: 50% of the hit to each other enemy | **built** |
-| 16 | **Battle Echo** | Epic | all | on hit: 25% chance to strike again for 50% | hook |
+| 16 | **Battle Echo** | Epic | all | on hit: 25% chance to strike again for 50% | **built** |
 | 17 | **Executioner** | Epic | all | +40% damage to enemies under 30% HP | hook |
 | 18 | **Overflow** | Epic | mage | a killing blow's excess carries to the next enemy | hook |
 | 19 | **Extra Roll** | Epic | all | +1 re-roll this run | now |
@@ -131,6 +133,10 @@ ladder memorable and contains the fight-side work to a known list.
 
 Twenty-two cards is enough for a run (a run sees 8-15 picks). The mix matters more than the count: **twelve numbers
 carry the early game**, seven epics define the build, three legendaries are the story you tell after.
+
+**Built so far: 9 numbers + 4 mechanics.** The three mechanics that reuse an existing hook (Battle Echo, Vampiric
+Edge, Thorned Mail) are data only. Overflow, Executioner and the three legendaries each need one small hook, and that
+is the rest of P1.
 
 
 ## 6. Rarity: what it means, and how it escalates
@@ -192,8 +198,13 @@ what keeps the common tier worth picking.
 **Wired end to end 2026-11-09.** `Progression/BoonRuntimeFactory.cs` compiles the hand into the fight's
 vocabulary (stat cards are skipped - they belong to the resolver), `CombatSimulator.ApplyBoons` hands the snapshot
 to every encounter it builds and to the live one, and `GameManager.OnBoonsChanged` rebuilds it on every pick and on
-load. Proven live: taking *Cleaving Blow* filed one effect on the soldier slot and the log then showed
-`Soldier hits Bat A for 8` followed by `Bat B for 4`.
+load. Proven live (2026-11-09), from the battle feed:
+
+- *Cleaving Blow* filed one effect on the soldier slot; the feed showed `Soldier hits Bat A for 8` then `Bat B for 4`.
+- *Battle Echo* showed `Soldier hits Bat B for 8` then `Bat B for 4` (the extra strike on the same target).
+- *Vampiric Edge* showed `Knight healed for 1` / `Mage healed for 1` as they hit.
+- *Thorned Mail* is wired (the knight's slot carries it) but is invisible at stage 1: a 1-damage hit reflected at
+  20% rounds to nothing. It will read once hits are bigger - a balance note, not a bug.
 
 **Built 2026-11-09 (foundation):** `Sim/PerkTrigger.cs`, `Sim/PerkEffect.cs`, `Sim/PerkRuntime.cs`, and the
 hooks inside `Encounter` (`RunTriggeredEffects`, `RunOwnEffects`, `ApplyPerkEffect`, `DamageOne`, `HealSelf`). The
@@ -238,7 +249,10 @@ and without boons:
 
 - Card row: rarity tag, badge (placeholder letter until art), name, `All heroes` / `Mage only`, and the effect line.
 - Trigger cards read `On hit:` in front of the effect, so the shape of the card tells the player when it fires.
-- Battle log gets one line per pick: `Boon: Cleaving Blow`.
+- Battle log gets one line per pick (**built**): `Boon: Cleaving Blow`. Since boons have no list page, the feed is
+  the only written record of the hand a run is building.
+- A boon heal reads `Knight healed for 1  (239/240)`: the feed drops the "by ..." part when no ability is behind the
+  heal, instead of printing an empty source.
 - No list page. If clarity suffers, add a count to the XP bar (`LV 4 - 6 boons`) before anything bigger.
 - Sound: `SfxCue.LevelUp` already exists; a card tap should reuse the purchase sound.
 
@@ -247,7 +261,7 @@ and without boons:
 | Phase | Ships | Acceptance |
 |---|---|---|
 | **P0 (done)** | XP, levels, card, 10 stat cards, re-roll, save | a pick changes a stat in the next swing; reload keeps the hand |
-| **P1** | trigger foundation (done) + 6 mechanic cards + log lines | cleave hits only the neighbours; echo cannot recurse; thorns can kill; same seed gives the same fight. **Cleaving Blow shipped**; the other five are now data plus a mapping line |
+| **P1** | trigger foundation (done) + 4 mechanic cards (done) + pick line (done); Overflow, Executioner + 3 legendaries left | cleave hits only the neighbours; echo cannot recurse; thorns can kill; same seed gives the same fight. **Next: two small hooks (overkill carry, low-HP multiplier), then the legendaries** |
 | **P2** | level bands + soft pity + diversity rule | a 13+ run sees epics; four flat hands in a row cannot happen |
 | **P3** | cheap layer-A cards (XP, gold-on-boss, extra roll, camp heal) | no sim change; `Scholar` visibly speeds the bar |
 | **P4** | statuses (burn/poison/chill) | a burn card ticks damage and appears in the log per tick |

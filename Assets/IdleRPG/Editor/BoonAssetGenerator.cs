@@ -52,9 +52,15 @@ namespace IdleRPG.EditorTools
                 Boon("boon_titans_blood", "Titan's Blood", PerkRarity.Rare, null, 3,
                     Effect(PerkEffectSpec.Op.HealthPercent, 0.22f)),
 
-                // First layer-B card: every landed blow splashes half its damage onto the other enemies.
+                // Layer-B cards (every Epic carries a mechanic, by rule).
                 Boon("boon_cleaving_blow", "Cleaving Blow", PerkRarity.Epic, Soldier, 2,
-                    Effect(PerkEffectSpec.Op.CleaveToOthers, 0.5f, PerkTriggerKind.OnHit))
+                    Effect(PerkEffectSpec.Op.CleaveToOthers, 0.5f, PerkTriggerKind.OnHit)),
+                Boon("boon_battle_echo", "Battle Echo", PerkRarity.Epic, null, 2,
+                    Effect(PerkEffectSpec.Op.ExtraStrike, 0.5f, PerkTriggerKind.OnHit, 0.25f)),
+                Boon("boon_vampiric_edge", "Vampiric Edge", PerkRarity.Epic, null, 2,
+                    Effect(PerkEffectSpec.Op.Lifesteal, 0.08f, PerkTriggerKind.OnHit)),
+                Boon("boon_thorned_mail", "Thorned Mail", PerkRarity.Epic, Knight, 2,
+                    Effect(PerkEffectSpec.Op.ReflectDamage, 0.2f, PerkTriggerKind.OnHurt))
             };
 
             WritePool(boons);

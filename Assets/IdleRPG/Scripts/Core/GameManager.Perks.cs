@@ -158,6 +158,10 @@ namespace IdleRPG.Core
             Save?.MarkDirty("boon");
             boonOffer.Clear();
 
+            // The player must see what they just took: the feed is the only place the hand is written down, since
+            // boons are run-only and have no list page.
+            BattleLog.Append($"Boon: {boon.DisplayName}", BattleLogKind.System);
+
             if (Progression.PendingPicks > 0)
             {
                 RollBoonOffer();   // the card stays open and deals the next pick

@@ -69,6 +69,12 @@ namespace IdleRPG.Data
 
         public double Amount => amount;
 
+        /// <summary>"25% chance for " when the mechanic is not guaranteed, otherwise nothing.</summary>
+        private string ChancePrefix()
+        {
+            return chance >= 0.999f ? string.Empty : (chance * 100f).ToString("0.#") + "% chance for ";
+        }
+
         /// <summary>"On hit: ", "On kill: " - the trigger word a mechanic's description starts with.</summary>
         private string When()
         {
@@ -93,6 +99,7 @@ namespace IdleRPG.Data
         {
             double percent = amount * 100d;
             string value = (percent > 0d ? "+" : string.Empty) + percent.ToString("0.#") + "%";
+            string plain = percent.ToString("0.#") + "%";
 
             switch (operation)
             {
@@ -106,11 +113,11 @@ namespace IdleRPG.Data
 
                 // Mechanics read as when-then, the way a card should: "On hit: 50% of the hit..." .
                 case Op.CleaveToOthers: return When() + value + " of the hit to the other enemies";
-                case Op.ExtraStrike: return When() + value + " attack strike again";
-                case Op.ReflectDamage: return When() + value + " of damage taken reflected";
-                case Op.Lifesteal: return When() + "heal " + value + " of damage dealt";
-                case Op.HealSelf: return When() + "heal " + value + " of max health";
-                case Op.ShieldSelf: return When() + "shield " + value + " of max health";
+                case Op.ExtraStrike: return When() + ChancePrefix() + value + " attack strike again";
+                case Op.ReflectDamage: return When() + plain + " of damage taken reflected";
+                case Op.Lifesteal: return When() + "heal " + plain + " of damage dealt";
+                case Op.HealSelf: return When() + "heal " + plain + " of max health";
+                case Op.ShieldSelf: return When() + "shield " + plain + " of max health";
                 default: return value;
             }
         }

@@ -334,9 +334,13 @@ namespace IdleRPG.Core
         {
             string target = heal.Side == CombatantSide.Enemy ? EnemyName(heal.Index) : HeroName(heal.Index);
 
-            Append(string.Format("{0} healed for {1} by {2}  ({3}/{4})", target,
+            // A boon heal has no ability name, so the line drops the "by ..." part instead of printing "by"
+            // and then nothing (which reads like a bug).
+            string by = string.IsNullOrEmpty(heal.AbilityName) ? string.Empty : " by " + heal.AbilityName;
+
+            Append(string.Format("{0} healed for {1}{2}  ({3}/{4})", target,
                 NumberFormatter.Format(heal.Amount),
-                heal.AbilityName,
+                by,
                 NumberFormatter.Format(heal.TargetHealth),
                 NumberFormatter.Format(heal.TargetMaxHealth)), BattleLogKind.Heal);
         }
