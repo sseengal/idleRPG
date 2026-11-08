@@ -53,6 +53,9 @@ namespace IdleRPG.Core
 
             /// <summary>The Training tree unlocks.</summary>
             public TrainingService Training;
+
+            /// <summary>Party run level, XP and queued boon picks.</summary>
+            public PartyProgression Progression;
         }
 
         /// <summary>The run and lifetime numbers the save needs that no service owns.</summary>
@@ -136,6 +139,7 @@ namespace IdleRPG.Core
             }
 
             services.Training?.WriteToSave(data);
+            services.Progression?.WriteToSave(data);
 
             return data;
         }
@@ -194,6 +198,7 @@ namespace IdleRPG.Core
             services.FirstRunTips?.Restore(data.GetLevel(SaveData.SaveKeys.TipMask()));
             services.Abilities?.LoadFromSave(data);
             services.Training?.LoadFromSave(data);
+            services.Progression?.LoadFromSave(data);
 
             return run;
         }

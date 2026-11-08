@@ -40,6 +40,10 @@ namespace IdleRPG.EditorTools
         // The values reproduce the 1080x1920 design (header 6% and nav 12% of 1920), so nothing shifts on 9:16.
         private const float HeaderBandHeight = 115f;   // top bar: the currency chips + boost, pinned to the top
 
+        // Party XP bar band, directly under the header. The page starts below it, so the bar can never sit over
+        // the stage row (STAGE / WAVE) and the two never fight for the same units.
+        private const float XpBandHeight = 44f;
+
         // Retired nav bar height. BuildNavBar is no longer called (the lobby owns navigation), but the method is
         // kept for reference, so its constant stays.
         private const float NavBandHeight = 230f;
@@ -126,6 +130,8 @@ namespace IdleRPG.EditorTools
             RectTransform modalRoot = CreateSafeArea(modalCanvas);
 
             HudHeaderUI header = BuildHeader(safeArea);
+
+            BuildXpBar(safeArea);
 
             GameObject battlePage = CreatePage("BattlePage", safeArea);
             BuildStageRow(battlePage.GetComponent<RectTransform>(), header);
@@ -349,13 +355,31 @@ namespace IdleRPG.EditorTools
         {
             GameObject page = UiFactory.Node(name, safeArea);
             UiFactory.Anchor(page.GetComponent<RectTransform>(), Vector2.zero, Vector2.one,
-                0f, UiSpace.Large, 0f, HeaderBandHeight);
+                0f, UiSpace.Large, 0f, HeaderBandHeight + XpBandHeight);
             return page;
         }
 
         /// <summary>
+        /// The party XP bar: a thin band between the header and the page. Built here, not hand-placed, so a scene
+        /// rebuild can never drop it; <see cref="IdleRPG.UI.XpBarUI"/> draws its own level / fill / numbers.
+        /// </summary>
+        private static void BuildXpBar(RectTransform safeArea)
+        {
+            GameObject bar = UiFactory.Node("XpBar", safeArea);
+            RectTransform rect = bar.GetComponent<RectTransform>();
+
+            rect.anchorMin = new Vector2(0f, 1f);
+            rect.anchorMax = new Vector2(1f, 1f);
+            rect.pivot = new Vector2(0.5f, 1f);
+            rect.anchoredPosition = new Vector2(0f, -(HeaderBandHeight + UiSpace.Tight));
+            rect.sizeDelta = new Vector2(-2f * UiSpace.ScreenMargin, XpBandHeight - UiSpace.Tight * 2f);
+
+            bar.AddComponent<IdleRPG.UI.XpBarUI>();
+        }
+
+        /// <summary>
         /// Pins a full-width bar of a FIXED height to the top or the bottom of its parent, with the shared side
-        /// margin and edge gap. The header and the nav bar use this so neither can change size with the screen.
+        /// margin and edge gap. The header uses this so it cannot change size with the screen.
         /// </summary>
         private static void PinBar(RectTransform rect, bool top, float height, float sideMargin, float edgeGap)
         {

@@ -195,9 +195,18 @@ namespace IdleRPG.UI
         {
             CombatManager combat = HudController.Instance?.GameManager?.Combat;
 
-            if (combat != null)
+            if (combat == null)
             {
-                combat.Paused = paused;
+                return;
+            }
+
+            if (paused)
+            {
+                combat.Pause(CombatManager.PauseReasons.Cutscene);
+            }
+            else
+            {
+                combat.Resume(CombatManager.PauseReasons.Cutscene);
             }
         }
     }

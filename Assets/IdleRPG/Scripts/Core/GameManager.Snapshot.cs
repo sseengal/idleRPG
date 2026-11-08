@@ -68,7 +68,8 @@ namespace IdleRPG.Core
                 AdCaps = AdCaps,
                 FirstRunTips = FirstRunTips,
                 Abilities = Abilities,
-                Training = Training
+                Training = Training,
+                Progression = Progression
             };
         }
 

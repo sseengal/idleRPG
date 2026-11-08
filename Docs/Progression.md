@@ -28,6 +28,7 @@
 | **Roster / stars** | hero shards (dupes, bosses, bounties) | shards | never | 17 |
 | **Relics** | stage materials (+ dupes to upgrade) | materials | never | 18 |
 | **Prestige tracks (L1)** | prestige tokens | tokens | never | **exists, buyable on the ASCENSION page** |
+| **Party levels → boons** | XP from kills (this run) | - | run end | **slice 1 built** |
 | **Transcendence tracks (L2)** | essence | essence | never | 18 |
 | **Automation unlocks** | tokens / milestones | tokens | never | 16 |
 | **Formation slots + presets** | stage/zone milestones | - | never | 10 |
@@ -35,6 +36,30 @@
 
 Rule: **every axis must have a live sink at every stage of the game.** A returning player with nothing to buy
 stops feeling progress → churn.
+
+### 1a. Party levels and boons (run-scoped, built 2026-11-09)
+
+The three heroes share **one** XP bar. Every kill pays XP, the bar fills, and each level pays the player **one boon
+choice** - a stay-for-this-run upgrade picked from three cards. This is the roguelite layer: it is rebuilt every run.
+
+| Rule | Value / behaviour |
+|---|---|
+| XP per kill | `partyXpPerKill x partyXpPerKillStageGrowth^(stage-1)`, bosses x `partyXpBossMultiplier` |
+| Level requirement | `partyXpBase x partyXpGrowth^(level-1)` (first pass 100 x 1.18) |
+| Levels per run | capped by `partyMaxLevelPerRun` (first pass 20); XP stops at the cap |
+| Picks | one per level; a kill that crosses two levels queues two picks, dealt back to back |
+| Lifetime | run-scoped - level, XP and queued picks clear with the run, next to run gold |
+| Code | `Progression/PartyProgression.cs` (pure C#, saved), wired in `GameManager.Perks.cs` |
+
+**Boons target heroes, not just the party.** A boon carries a target (`AllHeroes` or one hero id), so "thorns for the
+Mage +5" is one data asset, not a special case. Tuning stays in data: same op, different target and number.
+
+**The fight pauses for the choice** (decision 2026-11-09): when a pick is owed the run stops and the card opens, so
+the player cannot lose health while reading. The hold is counted (`CombatManager.Pause(reason)`), because a cutscene,
+the camp and a boon card can all want the fight frozen at once.
+
+**Away time pays neither gold nor XP** (decision 2026-11-09): the away window is being retired in favour of daily
+login bonuses, so time away is not a progression axis. There is no run-duration statistic to keep honest either.
 
 ## 2. Currencies (kills the "dead gems" problem)
 

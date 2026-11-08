@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using IdleRPG.Combat;
 using IdleRPG.Core;
 using IdleRPG.Data;
 
@@ -115,7 +116,7 @@ namespace IdleRPG.UI
 
             if (pausedByScene)
             {
-                manager.Combat.Paused = true;
+                manager.Combat.Pause(CombatManager.PauseReasons.Story);
             }
 
             if (transition != null && !transition.IsCovered)
@@ -491,7 +492,7 @@ namespace IdleRPG.UI
 
             if (pausedByScene && manager != null && manager.Combat != null)
             {
-                manager.Combat.Paused = false;
+                manager.Combat.Resume(CombatManager.PauseReasons.Story);
             }
 
             pausedByScene = false;
@@ -507,7 +508,7 @@ namespace IdleRPG.UI
         {
             if (pausedByScene && manager != null && manager.Combat != null)
             {
-                manager.Combat.Paused = false;
+                manager.Combat.Resume(CombatManager.PauseReasons.Story);
             }
 
             pausedByScene = false;
@@ -525,7 +526,7 @@ namespace IdleRPG.UI
 
             if (pausedByScene && manager != null && manager.Combat != null)
             {
-                manager.Combat.Paused = false;
+                manager.Combat.Resume(CombatManager.PauseReasons.Story);
             }
 
             pausedByScene = false;

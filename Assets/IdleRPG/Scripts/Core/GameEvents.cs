@@ -73,6 +73,18 @@ namespace IdleRPG.Core
         /// <summary>(stage, wave) after a wave is cleared.</summary>
         public static event Action<int, int> WaveCompleted;
 
+        /// <summary>
+        /// (level, xp, requiredXp) whenever the party's run XP moves. The bar draws from this; requiredXp is 0 at
+        /// the run's level ceiling.
+        /// </summary>
+        public static event Action<int, double, double> PartyXpChanged;
+
+        /// <summary>
+        /// (newLevel, pendingPicks) when the party goes up a level. pendingPicks counts the choices still waiting,
+        /// so a big kill that crosses two levels raises this twice and the card can deal both.
+        /// </summary>
+        public static event Action<int, int> PartyLevelGained;
+
         // ------------------------------------------------------------------
         // Combat
         // ------------------------------------------------------------------
@@ -160,6 +172,8 @@ namespace IdleRPG.Core
             PartyWiped = null;
             DefeatShown = null;
             WaveCompleted = null;
+            PartyXpChanged = null;
+            PartyLevelGained = null;
             EnemySpawned = null;
             EnemyDamaged = null;
             SwingStarted = null;

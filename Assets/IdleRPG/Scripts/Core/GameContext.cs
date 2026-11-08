@@ -34,6 +34,9 @@ namespace IdleRPG.Core
 
         public StatResolver Resolver { get; set; }
 
+        /// <summary>Party level, XP and queued boon picks for the current run.</summary>
+        public PartyProgression Progression { get; set; }
+
         public UpgradeManager Upgrade { get; set; }
 
         public AscensionManager Ascension { get; set; }

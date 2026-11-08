@@ -241,10 +241,53 @@ namespace IdleRPG.Combat
         }
 
         /// <summary>
-        /// True while a cutscene owns the screen. Combat does not advance, so no numbers move behind the picture.
-        /// Set by <see cref="IdleRPG.UI.CutsceneRunner"/> only; a cutscene can never change anything else.
+        /// Who is holding the fight frozen. Several things may want it at once - a cutscene, a story beat, the
+        /// camp, and a boon choice - so each owner holds its own reason instead of flipping one shared switch.
         /// </summary>
-        public bool Paused { get; set; }
+        public static class PauseReasons
+        {
+            public const string Cutscene = "cutscene";
+            public const string Story = "story";
+            public const string Camp = "camp";
+        }
+
+        private readonly System.Collections.Generic.HashSet<string> pauseReasons =
+            new System.Collections.Generic.HashSet<string>();
+
+        /// <summary>
+        /// True while anything is holding the fight. Combat does not advance, so no numbers move behind a picture
+        /// or under a card.
+        ///
+        /// ELI5: this used to be one on/off switch, so whoever finished last won. A story beat ending while the
+        /// camp was open quietly restarted the fight underneath it. Now every owner holds its own reason and the
+        /// fight runs only when nobody is holding it.
+        /// </summary>
+        public bool Paused => pauseReasons.Count > 0;
+
+        /// <summary>How many owners are holding the fight (diagnostics and tests).</summary>
+        public int HoldCount => pauseReasons.Count;
+
+        /// <summary>Freezes combat until the same reason is released. Calling it twice changes nothing.</summary>
+        public void Pause(string reason)
+        {
+            if (string.IsNullOrEmpty(reason))
+            {
+                return;
+            }
+
+            pauseReasons.Add(reason);
+        }
+
+        /// <summary>Releases one owner. The fight resumes only when no reason is left.</summary>
+        public void Resume(string reason)
+        {
+            if (string.IsNullOrEmpty(reason))
+            {
+                return;
+            }
+
+            pauseReasons.Remove(reason);
+        }
 
         /// <summary>Driven by <see cref="RunController"/> - the only place combat advances.</summary>
         public void Tick(double deltaTime)

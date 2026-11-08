@@ -29,7 +29,7 @@ namespace IdleRPG.Save
     public class SaveData
     {
         /// <summary>Bumped whenever the schema changes; drives migration (see SaveMigrations).</summary>
-        public const int CurrentVersion = 11;
+        public const int CurrentVersion = 12;
 
         public int schemaVersion = CurrentVersion;
 
@@ -52,6 +52,18 @@ namespace IdleRPG.Save
         public int runStagesCleared;
         /// <summary>GameClock binary of when the current run began; 0 = not started yet (seeded on load).</summary>
         public double runStartBinary;
+
+        // --- Party XP and boon picks (run-scoped, additive in schema v12). ---
+        //     An older file has no values here, so it simply reads level 1 with an empty bar, which is exactly the
+        //     state of a fresh run. Nothing to migrate.
+        /// <summary>Party level for the CURRENT run (starts at 1, cleared with the run).</summary>
+        public int runPartyLevel = 1;
+
+        /// <summary>XP banked towards the next party level.</summary>
+        public double runPartyXp;
+
+        /// <summary>Boon choices earned this run but not spent yet.</summary>
+        public int runPartyPicks;
 
         // --- Camp (run-scoped, additive). Tokens = -1 means "old save, fill to the run's capacity". ---
         public int runCampTokens = -1;

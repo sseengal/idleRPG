@@ -205,6 +205,7 @@ namespace IdleRPG.Core
             RunStagesCleared = 0;
             runStartBinary = GameClock.NowBinary;
             ResetRunCampState();
+            ResetPartyProgressionForNewRun();
             combatManager.SetStage(1, healParty: true);
 
             return tokens;
@@ -237,6 +238,7 @@ namespace IdleRPG.Core
             RunStagesCleared = 0;
             runStartBinary = GameClock.NowBinary;
             ResetRunCampState();
+            ResetPartyProgressionForNewRun();
 
             SetState(State, GameState.Combat);
             combatManager.SetStage(CurrentStage, healParty: true);
@@ -342,6 +344,9 @@ namespace IdleRPG.Core
                 : ResolveGoldReward(goldReward);
 
             Rewards?.RecordKill();
+
+            // Party XP rides the same event as gold: one kill pays both or neither.
+            AwardKillXp();
 
             TotalKills++;
             TotalGoldEarned += awarded;

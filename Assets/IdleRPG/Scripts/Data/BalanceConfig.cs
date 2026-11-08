@@ -257,6 +257,28 @@ namespace IdleRPG.Data
         [SerializeField] private double instantIncomeGemCost = 30d;
 
         // ------------------------------------------------------------------
+        // Party XP (run levels, each level pays one boon choice)
+        // ------------------------------------------------------------------
+        [Header("Party XP")]
+        [Tooltip("XP the party needs to go from level 1 to level 2. Run-Identity: levels are per run, like gold.")]
+        [SerializeField] private double partyXpBase = 100d;
+
+        [Tooltip("Multiplies the requirement every level (RequiredXP = base * growth^(level-1)).")]
+        [SerializeField] private double partyXpGrowth = 1.18d;
+
+        [Tooltip("XP paid for one normal kill at stage 1. Every enemy on the wave pays this, so a full wave pays more.")]
+        [SerializeField] private double partyXpPerKill = 5d;
+
+        [Tooltip("Multiplies kill XP per stage, so deep stages still move the bar.")]
+        [SerializeField] private double partyXpPerKillStageGrowth = 1.1d;
+
+        [Tooltip("Boss kills pay this multiple of a normal kill on the same stage.")]
+        [SerializeField] private double partyXpBossMultiplier = 5d;
+
+        [Tooltip("Levels a single run can reach. 0 = no cap. Each level is one boon choice, so this caps a run's build.")]
+        [SerializeField] private int partyMaxLevelPerRun = 20;
+
+        // ------------------------------------------------------------------
         // Economy & monetisation
         // ------------------------------------------------------------------
         [Header("Economy")]
@@ -385,6 +407,14 @@ namespace IdleRPG.Data
         public bool ResetHeroLevelsOnAscension => resetHeroLevelsOnAscension;
 
         public int NormalWavesPerStage => Mathf.Max(1, normalWavesPerStage);
+
+        // --- Party XP (see PartyProgression) ---
+        public double PartyXpBase => partyXpBase > 0d ? partyXpBase : 100d;
+        public double PartyXpGrowth => partyXpGrowth >= 1d ? partyXpGrowth : 1d;
+        public double PartyXpPerKill => partyXpPerKill > 0d ? partyXpPerKill : 5d;
+        public double PartyXpPerKillStageGrowth => partyXpPerKillStageGrowth >= 1d ? partyXpPerKillStageGrowth : 1d;
+        public double PartyXpBossMultiplier => partyXpBossMultiplier > 0d ? partyXpBossMultiplier : 1d;
+        public int PartyMaxLevelPerRun => Mathf.Max(0, partyMaxLevelPerRun);
 
         /// <summary>Hard ceiling on enemies in one wave: the battle page stacks three slots and the sim agrees.</summary>
         public const int HardEnemyCap = 3;

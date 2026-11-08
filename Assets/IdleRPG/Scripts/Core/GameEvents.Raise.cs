@@ -65,6 +65,16 @@ namespace IdleRPG.Core
             SafeInvoke(WaveCompleted, stage, wave, nameof(WaveCompleted));
         }
 
+        internal static void RaisePartyXpChanged(int level, double xp, double requiredXp)
+        {
+            SafeInvoke(PartyXpChanged, level, xp, requiredXp, nameof(PartyXpChanged));
+        }
+
+        internal static void RaisePartyLevelGained(int level, int pendingPicks)
+        {
+            SafeInvoke(PartyLevelGained, level, pendingPicks, nameof(PartyLevelGained));
+        }
+
         internal static void RaiseEnemySpawned(string enemyName, double maxHealth, bool isBoss, int enemyIndex)
         {
             SafeInvoke(EnemySpawned, enemyName, maxHealth, isBoss, enemyIndex, nameof(EnemySpawned));

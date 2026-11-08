@@ -1,4 +1,5 @@
 using System;
+using IdleRPG.Combat;
 using IdleRPG.Core;
 using IdleRPG.Data;
 
@@ -152,7 +153,7 @@ namespace IdleRPG.Progression
             pendingWave = manager.Combat.CurrentWave;
             IsOpen = true;
             pausedCombatForDebug = true;
-            manager.Combat.Paused = true;
+            manager.Combat.Pause(CombatManager.PauseReasons.Camp);
             Opened?.Invoke();
         }
 
@@ -191,7 +192,7 @@ namespace IdleRPG.Progression
             if (pausedCombatForDebug)
             {
                 pausedCombatForDebug = false;
-                manager.Combat.Paused = false;
+                manager.Combat.Resume(CombatManager.PauseReasons.Camp);
             }
 
             manager.Save?.SaveNow("camp");

@@ -156,6 +156,9 @@ close is always top-left, primary button reachable one-handed (1080x1920 referen
 - **Runtime menus use the type scale and the touch rule.** Every label picks a `UiType` role and every control clears
   `UiTouch.MinTarget` (144) - no hand-written sizes, and the fonts come from `UiTheme` (Silkscreen chrome, VT323
   sentences), not the TMP default. Glyphs are drawn as sprites when the font lacks one (arrows).
+- **The party XP bar sits between the header and the page**: one 44-unit band built by the scene builder showing
+  `LV n`, a gold fill, and either `xp / needed` or, when a choice is owed, `N PICK(S)` in gold. The page starts below
+  it, so the bar can never sit over STAGE / WAVE.
 - **One page at a time.** Every tab closes the other lobby pages before it opens its own, so two pages can
   never stack. All of them sit in the same box (`0.02-0.98` x `0.13-0.885`) and are opaque, so the lobby card
   behind them cannot show through.

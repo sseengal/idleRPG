@@ -71,6 +71,9 @@ namespace IdleRPG.Core
             // unlock ids restore with everything else.
             Training = new TrainingService(Economy, trainingTree);
 
+            // Party XP + boon picks (run-scoped). Built before the save load so a resumed run restores them.
+            BuildPartyProgression();
+
             Resolver = new StatResolver(balanceConfig, statUpgrades, prestigeUpgrades);
             Resolver.StatsChanged += OnStatsChanged;
             Resolver.Training = Training;
@@ -290,6 +293,7 @@ namespace IdleRPG.Core
                 Combat = combatManager,
                 Economy = Economy,
                 Resolver = Resolver,
+                Progression = Progression,
                 Upgrade = Upgrade,
                 Ascension = Ascension,
                 Automation = Automation,
