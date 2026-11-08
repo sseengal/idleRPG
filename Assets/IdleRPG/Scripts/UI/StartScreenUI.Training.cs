@@ -18,6 +18,7 @@ namespace IdleRPG.UI
     public sealed partial class StartScreenUI
     {
         private int treeHeroRows;
+        private int treeNodeLayer;
         private int popupColumn;
 
         private void ShowTraining()
@@ -172,6 +173,43 @@ namespace IdleRPG.UI
                 treeColumns[i] = column;
             }
 
+            // Level markers: one faint badge every 6 nodes (two Attack/Armor/HP sets = one level, 75 per hero).
+            const int nodesPerLevel = 6;
+
+            for (int c = 0; c < heroColumns; c++)
+            {
+                for (int level = 0; level * nodesPerLevel < treeHeroRows; level++)
+                {
+                    int rowFromTop = treeHeroRows - 1 - level * nodesPerLevel;
+
+                    TextMeshProUGUI levelBadge = Text(treeContent, "Level", new Vector2(0f, 1f), new Vector2(0f, 1f),
+                        "Lv " + (level + 1), UiType.Role.Micro, new Color(0.98f, 0.80f, 0.28f, 0.35f));
+                    levelBadge.rectTransform.sizeDelta = new Vector2(150f, 34f);
+                    levelBadge.rectTransform.anchoredPosition =
+                        new Vector2(ColumnX[c], -(treeTopPad + rowFromTop * treeRowH));
+                    levelBadge.raycastTarget = false;
+                }
+            }
+
+            treeNodeLayer = treeContent.childCount;   // bands + level badges sit behind everything added below
+
+            // Tap anywhere off a node to dismiss the card. It sits behind the nodes, so tapping a node still
+            // switches the card, and drags still bubble to the ScrollRect, so scrolling keeps working.
+            GameObject catcher = new GameObject("DismissCatcher", typeof(RectTransform), typeof(Image), typeof(Button));
+            RectTransform cap = catcher.GetComponent<RectTransform>();
+            cap.SetParent(treeContent, false);
+            cap.anchorMin = Vector2.zero;
+            cap.anchorMax = Vector2.one;
+            cap.offsetMin = Vector2.zero;
+            cap.offsetMax = Vector2.zero;
+            Image catcherImage = catcher.GetComponent<Image>();
+            catcherImage.color = new Color(0f, 0f, 0f, 0f);
+            Button catcherButton = catcher.GetComponent<Button>();
+            catcherButton.targetGraphic = catcherImage;
+            catcherButton.transition = Selectable.Transition.None;
+            catcherButton.onClick.AddListener(ClosePopup);
+            catcher.transform.SetSiblingIndex(treeNodeLayer);
+
             if (tree != null)
             {
                 IReadOnlyList<TrainingNode> nodes = tree.Nodes;
@@ -212,8 +250,8 @@ namespace IdleRPG.UI
                 }
             }
 
-            Btn(panel.transform, "ScrollDown", new Vector2(0.90f, 0.005f), new Vector2(0.99f, 0.075f), "\u25BC",
-                new Color(0.18f, 0.19f, 0.22f, 1f), 24f, ScrollTreeToBottom);
+            IconBtn(panel.transform, "ScrollDown", new Vector2(0.845f, 0.005f), new Vector2(0.985f, 0.105f),
+                ArrowSprite(false), ScrollTreeToBottom);
 
             BuildPopup(treeContent);
             trainingPanel.SetActive(false);
@@ -265,7 +303,7 @@ namespace IdleRPG.UI
             cr.anchorMin = new Vector2(0f, 0.5f);
             cr.anchorMax = new Vector2(0f, 0.5f);
             cr.pivot = new Vector2(0.5f, 0.5f);
-            cr.sizeDelta = new Vector2(196f, 128f);
+            cr.sizeDelta = new Vector2(230f, 150f);
             cr.anchoredPosition = new Vector2(ColumnX[column], 0f);
 
             Image bg = cell.GetComponent<Image>();
@@ -285,7 +323,7 @@ namespace IdleRPG.UI
                 prt.anchorMin = new Vector2(0f, 0.5f);
                 prt.anchorMax = new Vector2(0f, 0.5f);
                 prt.pivot = new Vector2(0f, 0.5f);
-                prt.sizeDelta = new Vector2(74f, 74f);
+                prt.sizeDelta = new Vector2(84f, 84f);
                 prt.anchoredPosition = new Vector2(10f, 0f);
 
                 Image portrait = portraitGO.GetComponent<Image>();
@@ -294,13 +332,15 @@ namespace IdleRPG.UI
                 portrait.raycastTarget = false;
                 portrait.color = hero.HeroIcon != null ? Color.white : new Color(1f, 1f, 1f, 0.15f);
 
-                Text(cell.transform, "Name", new Vector2(0.42f, 0.18f), new Vector2(0.98f, 0.82f),
-                    hero.HeroName, 24f, Color.white);
+                TextMeshProUGUI nameLabel = Text(cell.transform, "Name", new Vector2(0.40f, 0.20f),
+                    new Vector2(0.99f, 0.80f), hero.HeroName, UiType.Role.Small, Color.white);
+                nameLabel.textWrappingMode = TextWrappingModes.NoWrap;
+                UiType.ApplyAuto(nameLabel, UiType.Role.Small);
             }
             else
             {
                 Text(cell.transform, "Name", new Vector2(0.06f, 0.18f), new Vector2(0.94f, 0.82f),
-                    "Empty", 22f, new Color(0.6f, 0.63f, 0.72f, 1f));
+                    "Empty", UiType.Role.Small, new Color(0.6f, 0.63f, 0.72f, 1f));
             }
         }
 
@@ -312,7 +352,7 @@ namespace IdleRPG.UI
             cr.anchorMin = new Vector2(0f, 0.5f);
             cr.anchorMax = new Vector2(0f, 0.5f);
             cr.pivot = new Vector2(0.5f, 0.5f);
-            cr.sizeDelta = new Vector2(196f, 128f);
+            cr.sizeDelta = new Vector2(252f, 150f);
             cr.anchoredPosition = new Vector2(ColumnX[column], 0f);
 
             Image bg = cell.GetComponent<Image>();
@@ -323,8 +363,8 @@ namespace IdleRPG.UI
             button.transition = Selectable.Transition.None;
             button.onClick.AddListener(() => ScrollToColumn(column));
 
-            Text(cell.transform, "Title", new Vector2(0.04f, 0.62f), new Vector2(0.96f, 0.98f),
-                "PARTY", 20f, new Color(0.98f, 0.80f, 0.28f, 1f));
+            Text(cell.transform, "Title", new Vector2(0.04f, 0.76f), new Vector2(0.96f, 0.99f),
+                "PARTY", UiType.Role.Small, new Color(0.98f, 0.80f, 0.28f, 1f));
 
             // The three small portraits, so the party track reads as "everyone".
             int count = manager != null && manager.Party != null ? manager.Party.Heroes.Count : 0;
@@ -342,11 +382,11 @@ namespace IdleRPG.UI
                 GameObject miniGO = new GameObject("Mini" + i, typeof(RectTransform), typeof(Image));
                 RectTransform mr = miniGO.GetComponent<RectTransform>();
                 mr.SetParent(cell.transform, false);
-                mr.anchorMin = new Vector2(0.5f, 0.34f);
-                mr.anchorMax = new Vector2(0.5f, 0.34f);
+                mr.anchorMin = new Vector2(0.5f, 0.50f);
+                mr.anchorMax = new Vector2(0.5f, 0.50f);
                 mr.pivot = new Vector2(0.5f, 0.5f);
-                mr.sizeDelta = new Vector2(38f, 38f);
-                mr.anchoredPosition = new Vector2((i - (shown - 1) * 0.5f) * 44f, 0f);
+                mr.sizeDelta = new Vector2(34f, 34f);
+                mr.anchoredPosition = new Vector2((i - (shown - 1) * 0.5f) * 40f, 0f);
 
                 Image mini = miniGO.GetComponent<Image>();
                 mini.sprite = hero.HeroIcon;
@@ -355,8 +395,10 @@ namespace IdleRPG.UI
                 mini.color = hero.HeroIcon != null ? Color.white : new Color(1f, 1f, 1f, 0.15f);
             }
 
-            partyGateLabel = Text(cell.transform, "Gate", new Vector2(0.02f, 0.03f), new Vector2(0.98f, 0.24f),
-                string.Empty, 15f, new Color(0.75f, 0.78f, 0.86f, 1f));
+            partyGateLabel = Text(cell.transform, "Gate", new Vector2(0.03f, 0.03f), new Vector2(0.97f, 0.26f),
+                string.Empty, UiType.Role.Micro, new Color(0.75f, 0.78f, 0.86f, 1f));
+            partyGateLabel.textWrappingMode = TextWrappingModes.NoWrap;
+            UiType.ApplyAuto(partyGateLabel, UiType.Role.Micro);
         }
 
         private HeroData HeroForColumn(int column)
@@ -406,7 +448,7 @@ namespace IdleRPG.UI
                 cr.pivot = new Vector2(0.5f, 0.5f);
                 cr.sizeDelta = new Vector2(12f, connectorRows * treeRowH);
                 cr.anchoredPosition = new Vector2(xPx, -(centerY - connectorRows * treeRowH * 0.5f));
-                cr.SetSiblingIndex(treeColumns.Count);   // behind the nodes, above the bands
+                cr.SetSiblingIndex(treeNodeLayer);   // behind the nodes, above the bands and level badges
                 connector = conGO.GetComponent<Image>();
                 connector.color = new Color(0.30f, 0.31f, 0.35f, 1f);
             }
@@ -425,13 +467,13 @@ namespace IdleRPG.UI
             dr.SetParent(nodeGO.transform, false);
             dr.anchorMin = Vector2.zero;
             dr.anchorMax = Vector2.one;
-            dr.offsetMin = new Vector2(13f, 13f);
-            dr.offsetMax = new Vector2(-13f, -13f);
+            dr.offsetMin = new Vector2(16f, 16f);
+            dr.offsetMax = new Vector2(-16f, -16f);
             dr.localRotation = UnityEngine.Quaternion.Euler(0f, 0f, 45f);
             Image diamond = diaGO.GetComponent<Image>();
             diamond.color = new Color(0.35f, 0.36f, 0.4f, 1f);
 
-            TextMeshProUGUI icon = Text(nodeGO.transform, "Icon", Vector2.zero, Vector2.one, IconLetter(node.Effect), 44f, Color.white);
+            TextMeshProUGUI icon = Text(nodeGO.transform, "Icon", Vector2.zero, Vector2.one, IconLetter(node.Effect), UiType.Role.Section, Color.white);
             icon.raycastTarget = false;
 
             GameObject badgeGO = new GameObject("Badge", typeof(RectTransform), typeof(Image));
@@ -440,12 +482,24 @@ namespace IdleRPG.UI
             br.anchorMin = new Vector2(0.5f, 0.5f);
             br.anchorMax = new Vector2(0.5f, 0.5f);
             br.pivot = new Vector2(0.5f, 0.5f);
-            br.sizeDelta = new Vector2(32f, 32f);
-            br.anchoredPosition = new Vector2(40f, -40f);
+            br.sizeDelta = new Vector2(40f, 40f);
+            br.anchoredPosition = new Vector2(54f, -54f);
             Image badge = badgeGO.GetComponent<Image>();
+            badge.sprite = CircleSprite();
             badge.color = new Color(0.3f, 0.9f, 0.4f, 1f);
-            TextMeshProUGUI badgeText = Text(badgeGO.transform, "T", Vector2.zero, Vector2.one, "\u2191", 24f, new Color(0.05f, 0.2f, 0.05f, 1f));
-            badgeText.raycastTarget = false;
+
+            GameObject arrowGO = new GameObject("Arrow", typeof(RectTransform), typeof(Image));
+            RectTransform ar = arrowGO.GetComponent<RectTransform>();
+            ar.SetParent(badgeGO.transform, false);
+            ar.anchorMin = new Vector2(0.5f, 0.5f);
+            ar.anchorMax = new Vector2(0.5f, 0.5f);
+            ar.sizeDelta = new Vector2(22f, 22f);
+
+            Image arrow = arrowGO.GetComponent<Image>();
+            arrow.sprite = ArrowSprite(true);
+            arrow.color = new Color(0.05f, 0.2f, 0.05f, 1f);
+            arrow.raycastTarget = false;
+
             badgeGO.SetActive(false);
 
             Button button = nodeGO.AddComponent<Button>();
@@ -600,22 +654,11 @@ namespace IdleRPG.UI
 
             if (partyGateLabel != null)
             {
-                if (nextParty == null)
-                {
-                    partyGateLabel.SetText("all unlocked");
-                }
-                else if (nextParty.RequiresLeftNodes <= 0)
-                {
-                    partyGateLabel.SetText("open");
-                }
-                else if (lowest >= nextParty.RequiresLeftNodes)
-                {
-                    partyGateLabel.SetText("gate met");
-                }
-                else
-                {
-                    partyGateLabel.SetText(nextParty.RequiresLeftNodes + " each \u00b7 lowest " + lowest);
-                }
+                bool pending = nextParty != null && nextParty.RequiresLeftNodes > 0 && lowest < nextParty.RequiresLeftNodes;
+
+                partyGateLabel.SetText(pending
+                    ? "lowest " + lowest + "/" + nextParty.RequiresLeftNodes
+                    : string.Empty);
             }
         }
 
@@ -657,16 +700,16 @@ namespace IdleRPG.UI
             cr.anchorMin = new Vector2(0f, 1f);
             cr.anchorMax = new Vector2(0f, 1f);
             cr.pivot = new Vector2(0f, 0.5f);
-            cr.sizeDelta = new Vector2(470f, 214f);
+            cr.sizeDelta = new Vector2(560f, 300f);
             card.GetComponent<Image>().color = new Color(0.96f, 0.92f, 0.80f, 1f);
             treePopup = card;
 
-            popupTitle = Text(card.transform, "Title", new Vector2(0.05f, 0.60f), new Vector2(0.95f, 0.94f),
-                string.Empty, 30f, new Color(0.12f, 0.12f, 0.14f, 1f));
-            popupBody = Text(card.transform, "Body", new Vector2(0.05f, 0.36f), new Vector2(0.95f, 0.62f),
-                string.Empty, 23f, new Color(0.28f, 0.28f, 0.31f, 1f));
-            popupBuy = Btn(card.transform, "Buy", new Vector2(0.16f, 0.07f), new Vector2(0.80f, 0.33f), "Buy",
-                new Color(0.95f, 0.55f, 0.15f, 1f), 28f, BuyPopup);
+            popupTitle = Text(card.transform, "Title", new Vector2(0.05f, 0.76f), new Vector2(0.95f, 0.97f),
+                string.Empty, UiType.Role.Section, new Color(0.12f, 0.12f, 0.14f, 1f));
+            popupBody = Text(card.transform, "Body", new Vector2(0.05f, 0.52f), new Vector2(0.95f, 0.75f),
+                string.Empty, UiType.Role.Sentence, new Color(0.28f, 0.28f, 0.31f, 1f));
+            popupBuy = Btn(card.transform, "Buy", new Vector2(0.12f, 0.04f), new Vector2(0.88f, 0.52f), "Buy",
+                new Color(0.95f, 0.55f, 0.15f, 1f), UiType.Role.Section, BuyPopup);
 
             popupCoin = MakeCardIcon(popupBuy.transform, CircleSprite(), new Color(0.98f, 0.80f, 0.20f, 1f));
             popupStar = MakeCardIcon(popupBuy.transform, StarSprite(), new Color(0.80f, 0.55f, 0.98f, 1f));
@@ -683,8 +726,8 @@ namespace IdleRPG.UI
             rt.anchorMin = new Vector2(1f, 0.5f);
             rt.anchorMax = new Vector2(1f, 0.5f);
             rt.pivot = new Vector2(1f, 0.5f);
-            rt.sizeDelta = new Vector2(34f, 34f);
-            rt.anchoredPosition = new Vector2(-16f, 0f);
+            rt.sizeDelta = new Vector2(40f, 40f);
+            rt.anchoredPosition = new Vector2(-22f, 0f);
 
             Image image = go.GetComponent<Image>();
             image.sprite = sprite;
@@ -807,7 +850,6 @@ namespace IdleRPG.UI
                 popupStar.gameObject.SetActive(showButton && !goldCost);
             }
 
-            treePopup.GetComponent<RectTransform>().sizeDelta = new Vector2(470f, showButton ? 214f : 150f);
         }
 
         private void BuyPopup()
@@ -923,6 +965,8 @@ namespace IdleRPG.UI
         // ------------------------------------------------------------------
         private static Sprite coinSprite;
         private static Sprite starSprite;
+        private static Sprite arrowUpSprite;
+        private static Sprite arrowDownSprite;
 
         private static Sprite CircleSprite()
         {
@@ -996,5 +1040,74 @@ namespace IdleRPG.UI
             starSprite = Sprite.Create(texture, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f));
             return starSprite;
         }
+        /// <summary>A drawn triangle (the font has no arrow glyph, so a text arrow renders as a box).</summary>
+        private static Sprite ArrowSprite(bool up)
+        {
+            if (up && arrowUpSprite != null)
+            {
+                return arrowUpSprite;
+            }
+
+            if (!up && arrowDownSprite != null)
+            {
+                return arrowDownSprite;
+            }
+
+            const int size = 64;
+            float baseY = up ? size * 0.20f : size * 0.80f;
+            float apexY = up ? size * 0.84f : size * 0.16f;
+            Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            Color clear = new Color(1f, 1f, 1f, 0f);
+
+            for (int y = 0; y < size; y++)
+            {
+                float t = Mathf.InverseLerp(baseY, apexY, y);
+                float half = Mathf.Lerp(size * 0.34f, 0f, t);
+
+                for (int x = 0; x < size; x++)
+                {
+                    bool inside = t >= 0f && t <= 1f && half >= 0.75f && Mathf.Abs(x + 0.5f - size * 0.5f) <= half;
+                    texture.SetPixel(x, y, inside ? Color.white : clear);
+                }
+            }
+
+            texture.Apply();
+            Sprite sprite = Sprite.Create(texture, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f));
+
+            if (up)
+            {
+                arrowUpSprite = sprite;
+            }
+            else
+            {
+                arrowDownSprite = sprite;
+            }
+
+            return sprite;
+        }
+
+        /// <summary>A square icon button (no label): used for the jump-to-bottom arrow.</summary>
+        private static void IconBtn(Transform parent, string name, Vector2 aMin, Vector2 aMax, Sprite icon,
+            UnityEngine.Events.UnityAction onClick)
+        {
+            Image bg = Panel(parent, name, aMin, aMax, new Color(0.18f, 0.19f, 0.22f, 1f));
+            Button button = bg.gameObject.AddComponent<Button>();
+            button.targetGraphic = bg;
+            button.transition = Selectable.Transition.None;
+            button.onClick.AddListener(onClick);
+
+            GameObject iconGO = new GameObject("Arrow", typeof(RectTransform), typeof(Image));
+            RectTransform rt = iconGO.GetComponent<RectTransform>();
+            rt.SetParent(bg.transform, false);
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta = new Vector2(52f, 52f);
+
+            Image image = iconGO.GetComponent<Image>();
+            image.sprite = icon;
+            image.color = new Color(0.92f, 0.94f, 0.98f, 1f);
+            image.raycastTarget = false;
+        }
+
     }
 }

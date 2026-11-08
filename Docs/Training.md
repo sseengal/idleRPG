@@ -83,18 +83,20 @@ Training's flat bonuses are added **after** the perk multiplier chain, so perks 
      ◆            ◆           ◆             ◆
 ```
 
-- **Four columns** at x = 129 / 388 / 648 / 907 (canvas units). Nodes are **112 x 112** diamonds on **220** unit
-  rows, laid out **bottom-up**: `order 0` sits at the very bottom, so the page opens scrolled to the bottom and the
+- **Four columns** at x = 129 / 388 / 648 / 907 (canvas units). Nodes are **144 x 144** diamonds (`UiTouch.MinTarget`,
+  the touch floor) on **220** unit rows, laid out **bottom-up**: `order 0` sits at the very bottom, so the page opens scrolled to the bottom and the
   player climbs by scrolling up.
 - **Pinned headers** (they never scroll away) name the owner: hero portrait + name for the three chains, and a
-  PARTY cell with the three mini portraits plus a gate line (`13 each · lowest 2`, `gate met`, `open`,
-  `all unlocked`). Tapping a header **jumps that column to its frontier**.
+  PARTY cell with the three mini portraits plus the only line the gate needs: `lowest N/M` while a gate is pending,
+  blank otherwise (no `open` / `gate met` words - the cell is a header, not a button). Tapping a header **jumps that
+  column to its frontier**.
 - **States by colour**: unlocked = gold, next buyable = mid grey with a green up-arrow badge, locked = dark grey,
   deferred = near-black. A node's connector turns gold once that node is unlocked.
 - **A soft gold band per column** grows from the bottom to that column's frontier. The party band follows the
   lowest hero count (the gate), not party purchases.
 - **Tap a node -> a card opens beside it** (right of the node in the two left columns, left of it in the two right
-  ones). Not a modal: no backdrop, no dimming, and it scrolls with the node. Tapping the same node closes it.
+  ones). Not a modal: no backdrop, no dimming, and it scrolls with the node. Tapping the same node closes it, and a
+  tap anywhere off the nodes closes it too - a transparent catcher sits behind the nodes, so drags still scroll.
 - **Card rules, in this order** - the first match wins:
 
 | State | Body line | Button |
@@ -109,8 +111,26 @@ Training's flat bonuses are added **after** the perk multiplier chain, so perks 
   wrong shop. The button always carries the real price (`Buy 300` + coin, `Buy 4` + star).
 - Card title names the owner: `Knight · Armor`, `Party · Battle gold`.
 - Cost icons are drawn in code (circle for gold, star for tokens) - the lobby cannot load editor sprites.
-- Level markers were dropped: four columns of `LEVEL n` labels collide, and the pinned header already anchors the
-  reader.
+- **Level badges**: one faint `Lv N` per level (a level = **6 nodes** = two Attack/Armor/HP sets, so **75** per hero
+  column, 225 in total), drawn **behind** the nodes at the row boundary so no diamond covers them. The party column
+  has none.
+- **Arrows are drawn sprites.** The font has no arrow glyph, so `▼` renders as a box - that was the grey square.
+  Both the jump-to-bottom button (145 square, `UiTouch.MinTarget`) and the node badge arrow are generated in code.
+
+### 5a. Type and touch (no hand-written sizes)
+
+Every runtime label picks a role from `UiType`; every control clears `UiTouch.MinTarget` (144).
+
+| Element | Role |
+|---|---|
+| START | `Title` |
+| Node letter, card title, Buy label | `Section` |
+| Hero name, PARTY, nav tabs, status | `Small` |
+| Level badge, party gate line | `Micro` |
+| Card body sentence | `Sentence` |
+
+Card **560 x 300** (Buy button 144 tall), header cells **230** wide (party 252) and 150 tall. Fonts come from
+`UiTheme` - Silkscreen for chrome, VT323 for sentences - not the TMP default the lobby used before.
 
 ## 6. Save
 

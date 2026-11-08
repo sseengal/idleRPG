@@ -141,6 +141,9 @@ close is always top-left, primary button reachable one-handed (1080x1920 referen
   back before a run starts (`DetachSharedHeader`). No second currency bar is drawn anywhere.
 - **The bottom nav shows the open tab**: the selected page is gold, the rest are dark. Opening TRAINING highlights
   TRAINING; going back to BATTLE highlights BATTLE.
+- **Runtime menus use the type scale and the touch rule.** Every label picks a `UiType` role and every control clears
+  `UiTouch.MinTarget` (144) - no hand-written sizes, and the fonts come from `UiTheme` (Silkscreen chrome, VT323
+  sentences), not the TMP default. Glyphs are drawn as sprites when the font lacks one (arrows).
 - Pages that are not built yet show a one-line status note instead of an empty page.
 
 

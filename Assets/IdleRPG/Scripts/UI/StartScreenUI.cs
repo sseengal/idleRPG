@@ -47,7 +47,7 @@ namespace IdleRPG.UI
         private float treeContentHeight;
         private float treeRowH = 220f;
         private float treeTopPad = 80f;
-        private const float NodeSize = 112f;
+        private const float NodeSize = 144f;
         private const float TreeHeaderFraction = 0.896f;   // scroll sits under the pinned column headers
         private static readonly float[] ColumnX = { 129f, 388f, 648f, 907f };
 
@@ -111,18 +111,18 @@ namespace IdleRPG.UI
             Panel(lobby.transform, "BG", Vector2.zero, Vector2.one, new Color(0.05f, 0.06f, 0.10f, 1f));
 
             Image card = Panel(lobby.transform, "ChapterCard", new Vector2(0.10f, 0.50f), new Vector2(0.90f, 0.78f), new Color(0.12f, 0.16f, 0.24f, 1f));
-            Text(card.transform, "ChapterLabel", new Vector2(0.05f, 0.15f), new Vector2(0.95f, 0.85f), "Chapter 1: Greenwake", 40f, Color.white);
-            Text(card.transform, "Hint", new Vector2(0.05f, 0.02f), new Vector2(0.95f, 0.16f), "(chapters coming)", 24f, new Color(0.6f, 0.63f, 0.72f, 1f));
+            Text(card.transform, "ChapterLabel", new Vector2(0.05f, 0.15f), new Vector2(0.95f, 0.85f), "Chapter 1: Greenwake", UiType.Role.Section, Color.white);
+            Text(card.transform, "Hint", new Vector2(0.05f, 0.02f), new Vector2(0.95f, 0.16f), "(chapters coming)", UiType.Role.Micro, new Color(0.6f, 0.63f, 0.72f, 1f));
 
-            Btn(lobby.transform, "StartButton", new Vector2(0.20f, 0.38f), new Vector2(0.80f, 0.46f), "START", new Color(0.96f, 0.80f, 0.28f, 1f), 46f, StartGame);
-            statusLabel = Text(lobby.transform, "Status", new Vector2(0.05f, 0.32f), new Vector2(0.95f, 0.38f), string.Empty, 28f, new Color(0.75f, 0.78f, 0.86f, 1f));
+            Btn(lobby.transform, "StartButton", new Vector2(0.20f, 0.38f), new Vector2(0.80f, 0.46f), "START", new Color(0.96f, 0.80f, 0.28f, 1f), UiType.Role.Title, StartGame);
+            statusLabel = Text(lobby.transform, "Status", new Vector2(0.05f, 0.32f), new Vector2(0.95f, 0.38f), string.Empty, UiType.Role.Small, new Color(0.75f, 0.78f, 0.86f, 1f));
 
             for (int i = 0; i < Tabs.Length; i++)
             {
                 float width = 1f / Tabs.Length;
                 float xMin = i * width;
                 string tab = Tabs[i];
-                Button navButton = Btn(lobby.transform, "Nav" + tab, new Vector2(xMin, 0.03f), new Vector2(xMin + width, 0.11f), tab, NavIdle, 26f, () => OnTab(tab));
+                Button navButton = Btn(lobby.transform, "Nav" + tab, new Vector2(xMin, 0.03f), new Vector2(xMin + width, 0.11f), tab, NavIdle, UiType.Role.Small, () => OnTab(tab));
                 navButtons[tab] = navButton.targetGraphic as Image;
             }
 
@@ -130,7 +130,7 @@ namespace IdleRPG.UI
 
             Canvas menuCanvas = MakeCanvas("MiniMenuCanvas", 251, true);
             menuButton = menuCanvas.gameObject;
-            Btn(menuCanvas.transform, "MenuButton", new Vector2(0.78f, 0.90f), new Vector2(0.97f, 0.97f), "MENU", new Color(0.11f, 0.13f, 0.19f, 1f), 26f, ShowLobby);
+            Btn(menuCanvas.transform, "MenuButton", new Vector2(0.78f, 0.90f), new Vector2(0.97f, 0.975f), "MENU", new Color(0.11f, 0.13f, 0.19f, 1f), UiType.Role.Small, ShowLobby);
             menuButton.SetActive(false);
         }
 
@@ -327,30 +327,28 @@ namespace IdleRPG.UI
             return img;
         }
 
-        private static TextMeshProUGUI Text(Transform parent, string name, Vector2 aMin, Vector2 aMax, string text, float size, Color color)
+        private static TextMeshProUGUI Text(Transform parent, string name, Vector2 aMin, Vector2 aMax, string text,
+            UiType.Role role, Color color)
         {
             RectTransform rt = Rect(name, parent, aMin, aMax);
             TextMeshProUGUI t = rt.gameObject.AddComponent<TextMeshProUGUI>();
 
-            if (TMP_Settings.defaultFontAsset != null)
-            {
-                t.font = TMP_Settings.defaultFontAsset;
-            }
-
+            UiType.Apply(t, role);
             t.text = text;
-            t.fontSize = size;
             t.color = color;
             t.alignment = TextAlignmentOptions.Center;
             return t;
         }
 
-        private static Button Btn(Transform parent, string name, Vector2 aMin, Vector2 aMax, string label, Color bg, float size, UnityEngine.Events.UnityAction onClick)
+        private static Button Btn(Transform parent, string name, Vector2 aMin, Vector2 aMax, string label, Color bg,
+            UiType.Role role, UnityEngine.Events.UnityAction onClick)
         {
             Image img = Panel(parent, name, aMin, aMax, bg);
             Button b = img.gameObject.AddComponent<Button>();
             b.targetGraphic = img;
 
-            TextMeshProUGUI t = Text(img.transform, "Label", Vector2.zero, Vector2.one, label, size, Color.white);
+            TextMeshProUGUI t = Text(img.transform, "Label", Vector2.zero, Vector2.one, label, role, Color.white);
+            UiType.ApplyAuto(t, role);
             t.raycastTarget = false;
 
             b.onClick.AddListener(onClick);
