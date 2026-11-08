@@ -44,13 +44,13 @@ namespace IdleRPG.EditorTools
                     Effect(PerkEffectSpec.Op.CritChanceFlat, 0.12f)),
                 Boon("boon_soldier_tempo", "Soldier's Tempo", PerkRarity.Rare, Soldier, 3,
                     Effect(PerkEffectSpec.Op.AttackSpeedPercent, 0.15f)),
-                Boon("boon_brutal_strikes", "Brutal Strikes", PerkRarity.Epic, null, 2,
-                    Effect(PerkEffectSpec.Op.CritDamageFlat, 0.30f)),
-                Boon("boon_titans_blood", "Titan's Blood", PerkRarity.Epic, null, 2,
-                    Effect(PerkEffectSpec.Op.HealthPercent, 0.30f)),
-                Boon("boon_warlords_fury", "Warlord's Fury", PerkRarity.Legendary, null, 1,
-                    Effect(PerkEffectSpec.Op.AttackPercent, 0.30f),
-                    Effect(PerkEffectSpec.Op.CritChanceFlat, 0.10f))
+                // Rarity rule (Docs/Boons.md 5): Common and Rare are numbers, Epic and Legendary add a mechanic.
+                // So the big stat cards are RARE, and no Legendary ships until the trigger pass lands - a
+                // numbers-only legendary would break the rule the game is played by.
+                Boon("boon_brutal_strikes", "Brutal Strikes", PerkRarity.Rare, null, 3,
+                    Effect(PerkEffectSpec.Op.CritDamageFlat, 0.22f)),
+                Boon("boon_titans_blood", "Titan's Blood", PerkRarity.Rare, null, 3,
+                    Effect(PerkEffectSpec.Op.HealthPercent, 0.22f))
             };
 
             WritePool(boons);

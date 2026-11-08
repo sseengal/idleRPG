@@ -15,11 +15,11 @@ MonoBehaviour:
   boonID: boon_titans_blood
   displayName: Titan's Blood
   description: 
-  rarity: 2
+  rarity: 1
   icon: {fileID: 0}
   allHeroes: 1
   heroID: 
   effects:
   - operation: 1
-    amount: 0.3
-  maxStacks: 2
+    amount: 0.22
+  maxStacks: 3

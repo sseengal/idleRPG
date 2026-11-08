@@ -29,7 +29,7 @@
 | Wiring | `Core/GameManager.Perks.cs` | kill -> XP -> level -> card -> pick -> stats; save/restore/reset |
 | Stats | `Progression/StatResolver.cs` | seven ops folded into the getters it already had |
 | The card | `UI/BoonCardUI.cs` | three rows, rarity tag, letter badge, `REFRESH n/n`, own canvas at order 300 |
-| Content | `Data/Boons/*.asset` | ten starter cards + `PerkPool.asset` (65/25/8/2, 3 per offer, 1 re-roll) |
+| Content | `Data/Boons/*.asset` | nine starter cards, all Common/Rare numbers + `PerkPool.asset` (65/25/8/2, 3 per offer, 1 re-roll). Epics and Legendaries start shipping with the trigger pass (phase P1) |
 
 ## 3. The shape of an effect: three layers, one source each
 
@@ -94,36 +94,44 @@ last.
 
 ## 5. The catalogue (what a player can actually draft)
 
-Ordered by cost to build. "now" = data only, "hook" = needs layer B, "later" = needs layer C.
+**Rarity rule (decision 2026-11-09):** Common and Rare are **numbers**. **Every Epic and every Legendary adds a
+mechanic** - one that changes when or how something happens, not just how big it is. That keeps the top of the
+ladder memorable and contains the fight-side work to a known list.
+
+"now" = data only, "hook" = needs layer B (the trigger pass), "later" = needs layer C (statuses).
 
 | # | Card | Rarity | Target | Effect | Cost |
 |---|---|---|---|---|---|
+| **Commons - numbers, 10-15%, 5 stacks** | | | | | |
 | 1 | Sharpened Blades | Common | all | +12% attack | now |
 | 2 | Iron Skin | Common | all | +12% health | now |
 | 3 | Greedy Hands | Common | all | +10% gold | now |
 | 4 | Steady Hands | Common | all | +4% crit chance | now |
-| 5 | Knight's Wall | Rare | knight | +25% defense | now |
-| 6 | Mage's Focus | Rare | mage | +12% crit chance | now |
-| 7 | Soldier's Tempo | Rare | soldier | +15% attack speed | now |
-| 8 | Brutal Strikes | Epic | all | +30% crit damage | now |
-| 9 | Titan's Blood | Epic | all | +30% health | now |
-| 10 | Warlord's Fury | Legendary | all | +30% attack, +10% crit | now |
-| 11 | **Vampiric Edge** | Rare | all | heal 8% of damage dealt | hook |
-| 12 | **Thorned Mail** | Rare | knight | reflect 20% of damage taken | hook |
-| 13 | **Cleaving Blow** | Epic | soldier | on hit: 40% of the hit to the others | hook |
-| 14 | **Battle Echo** | Epic | all | on hit: 25% chance to strike again for 50% | hook |
-| 15 | **Executioner** | Epic | all | +40% damage under 30% enemy HP | hook |
-| 16 | **Overflow** | Rare | mage | a killing blow's excess carries to the next enemy | hook |
-| 17 | **Last Stand** | Legendary | all | once a wave, under 25% HP heal 30% | hook |
-| 18 | **Soul Ward** | Legendary | all | on kill: shield worth 10% max HP | hook |
-| 19 | **Prospector** | Common | all | +15% gold from bosses | now |
-| 20 | **Scholar** | Rare | all | +15% party XP | now |
-| 21 | **Extra Roll** | Epic | all | +1 re-roll this run | now |
-| 22 | **Warm Fire** | Common | all | camp rests heal 20% more | now |
+| 5 | Prospector | Common | all | +15% gold from bosses | now |
+| 6 | Warm Fire | Common | all | camp rests heal 20% more | now |
+| **Rares - numbers, 20-25%, 3 stacks, often one hero** | | | | | |
+| 7 | Knight's Wall | Rare | knight | +25% defense | now |
+| 8 | Mage's Focus | Rare | mage | +12% crit chance | now |
+| 9 | Soldier's Tempo | Rare | soldier | +15% attack speed | now |
+| 10 | Brutal Strikes | Rare | all | +22% crit damage | now |
+| 11 | Titan's Blood | Rare | all | +22% health | now |
+| 12 | Scholar | Rare | all | +15% party XP | now |
+| **Epics - a mechanic, 2 stacks** | | | | | |
+| 13 | **Vampiric Edge** | Epic | all | heal 8% of damage dealt | hook |
+| 14 | **Thorned Mail** | Epic | knight | reflect 20% of damage taken | hook |
+| 15 | **Cleaving Blow** | Epic | soldier | on hit: 40% of the hit to the other enemies | hook |
+| 16 | **Battle Echo** | Epic | all | on hit: 25% chance to strike again for 50% | hook |
+| 17 | **Executioner** | Epic | all | +40% damage to enemies under 30% HP | hook |
+| 18 | **Overflow** | Epic | mage | a killing blow's excess carries to the next enemy | hook |
+| 19 | **Extra Roll** | Epic | all | +1 re-roll this run | now |
+| **Legendaries - a rule, 1 stack** | | | | | |
+| 20 | **Last Stand** | Legendary | all | once a wave, under 25% HP heal 30% | hook |
+| 21 | **Undying** | Legendary | all | survive one killing blow per run at 1 HP | hook |
+| 22 | **Berserker** | Legendary | all | +1% attack for every 2% health the party is missing | hook |
 
-Twenty-two cards is enough for a run (a run sees 8-15 picks). The mix matters more than the count: **about half must
-be stat cards**, because they are cheap and always useful, and the other half must **change the fight** or every run
-feels the same.
+Twenty-two cards is enough for a run (a run sees 8-15 picks). The mix matters more than the count: **twelve numbers
+carry the early game**, seven epics define the build, three legendaries are the story you tell after.
+
 
 ## 6. Rarity: what it means, and how it escalates
 
@@ -134,7 +142,7 @@ Rarity means power and scarcity at the same time - that is the whole point of a 
 | Common | +10-15% | 5 | 65 | the bread: always useful, never exciting |
 | Rare | +20-25% | 3 | 25 | the hero cards, one mechanic each |
 | Epic | +30-40% | 2 | 8 | the build-defining effect cards |
-| Legendary | +50-60% or a unique rule | 1 | 2 | one per run at most; the story you tell after |
+| Legendary | a run-shaping rule | 1 | 2 | one per run at most; the story you tell after |
 
 **How the odds escalate** - the model I recommend, in three parts:
 
@@ -241,8 +249,8 @@ Each phase is a separate commit with its own tests; P1 is the only one that touc
 
 ## 13. Open decisions
 
-1. **Epic/legendary shape**: pure numbers with a higher ceiling (simple) or always a mechanic (memorable, more sim
-   work)? My recommendation: mechanic for every Epic and Legendary, number for Rare and below.
+1. **Epic/legendary shape - LOCKED (2026-11-09):** every Epic and every Legendary adds a mechanic; Common and Rare
+   are numbers. The sim work is therefore a known list (section 5), not an open-ended one.
 2. **Pity tuning**: 4 and 9 offers (above) or none until play says otherwise?
 3. **Card count per offer**: stays 3 (reference) or grows to 4 at high level as a "reward" moment?
 4. **Re-roll economy**: 1 per run forever, or +1 at level 8 to reward the deep run?

@@ -60,6 +60,7 @@ the code wins and the page is fixed the same day.
 | Rates, offline payouts, currencies, time-based monetisation | `Idle-Economy.md` |
 | Monetisation plan: sources, sinks, IAP mock, guards | `Monetisation.md` |
 | Levelling, prestige, tracks, roster | `Progression.md` |
+| Boons - the run build, rarities, fight hooks | `Boons.md` |
 | Screens, navigation, type scale, accessibility | `UI-UX.md` (log contract: `Battle-Log.md`) |
 | Containers, the spacing ladder, mobile scaling | **`UI-Layout.md`** |
 | Art pipeline: HD-2D look, asset volume, tooling, perf budgets (G11/G12) | `Art-Pipeline.md` |
