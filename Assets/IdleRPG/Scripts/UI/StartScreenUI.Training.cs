@@ -19,6 +19,15 @@ namespace IdleRPG.UI
     {
         private int treeHeroRows;
         private int treeNodeLayer;
+
+        private struct LevelBand
+        {
+            public Image Background;
+            public int LevelIndex;
+        }
+
+        private readonly List<LevelBand> levelBands = new List<LevelBand>();
+        private readonly List<List<TrainingNode>> levelPartyGate = new List<List<TrainingNode>>();
         private int popupColumn;
 
         private void ShowTraining()
@@ -155,39 +164,60 @@ namespace IdleRPG.UI
 
             treeColumns.Add(new TreeColumn { HeroId = string.Empty, FrontierRow = treeHeroRows - 1 });   // party
 
-            for (int i = 0; i < treeColumns.Count; i++)
-            {
-                GameObject bandGO = new GameObject("Band", typeof(RectTransform), typeof(Image));
-                RectTransform br = bandGO.GetComponent<RectTransform>();
-                br.SetParent(treeContent, false);
-                br.anchorMin = new Vector2(0f, 0f);
-                br.anchorMax = new Vector2(0f, 0f);
-                br.pivot = new Vector2(0.5f, 0f);
-                br.sizeDelta = new Vector2(196f, 0f);
-                br.anchoredPosition = new Vector2(ColumnX[i], 0f);
-                Image band = bandGO.GetComponent<Image>();
-                band.color = new Color(0.98f, 0.78f, 0.2f, 0.07f);
+            // One page-wide strip per level (6 nodes each). The strips stack without gaps, so together they are
+            // the single background fill. A strip turns gold only when every hero finished that level AND the
+            // party node gated inside it has been bought.
+            levelBands.Clear();
+            levelPartyGate.Clear();
 
-                TreeColumn column = treeColumns[i];
-                column.Band = band;
-                treeColumns[i] = column;
+            const int nodesPerLevel = 6;
+            int levelCount = Mathf.Max(1, Mathf.CeilToInt(treeHeroRows / (float)nodesPerLevel));
+            float levelHeight = nodesPerLevel * treeRowH;
+
+            for (int level = 0; level < levelCount; level++)
+            {
+                levelPartyGate.Add(new List<TrainingNode>());
+
+                GameObject bandGO = new GameObject("LevelBand", typeof(RectTransform), typeof(Image));
+                RectTransform bandRect = bandGO.GetComponent<RectTransform>();
+                bandRect.SetParent(treeContent, false);
+                bandRect.anchorMin = new Vector2(0f, 0f);
+                bandRect.anchorMax = new Vector2(1f, 0f);
+                bandRect.pivot = new Vector2(0.5f, 0f);
+                bandRect.offsetMin = Vector2.zero;
+                bandRect.offsetMax = Vector2.zero;
+                bandRect.sizeDelta = new Vector2(0f, levelHeight);
+                bandRect.anchoredPosition = new Vector2(0f, level * levelHeight);
+
+                Image band = bandGO.GetComponent<Image>();
+                band.color = new Color(0.13f, 0.14f, 0.16f, 1f);
+                band.raycastTarget = false;
+
+                TextMeshProUGUI levelLabel = Text(bandGO.transform, "Level", new Vector2(0f, 0f), new Vector2(0f, 0f),
+                    "Level " + (level + 1), UiType.Role.Micro, new Color(0.98f, 0.80f, 0.28f, 0.35f));
+                levelLabel.rectTransform.sizeDelta = new Vector2(240f, 34f);
+                levelLabel.rectTransform.anchoredPosition = new Vector2(130f, 26f);
+                levelLabel.alignment = TextAlignmentOptions.Left;
+                levelLabel.raycastTarget = false;
+
+                levelBands.Add(new LevelBand { Background = band, LevelIndex = level });
             }
 
-            // Level markers: one faint badge every 6 nodes (two Attack/Armor/HP sets = one level, 75 per hero).
-            const int nodesPerLevel = 6;
-
-            for (int c = 0; c < heroColumns; c++)
+            if (tree != null)
             {
-                for (int level = 0; level * nodesPerLevel < treeHeroRows; level++)
-                {
-                    int rowFromTop = treeHeroRows - 1 - level * nodesPerLevel;
+                IReadOnlyList<TrainingNode> allNodes = tree.Nodes;
 
-                    TextMeshProUGUI levelBadge = Text(treeContent, "Level", new Vector2(0f, 1f), new Vector2(0f, 1f),
-                        "Lv " + (level + 1), UiType.Role.Micro, new Color(0.98f, 0.80f, 0.28f, 0.35f));
-                    levelBadge.rectTransform.sizeDelta = new Vector2(150f, 34f);
-                    levelBadge.rectTransform.anchoredPosition =
-                        new Vector2(ColumnX[c], -(treeTopPad + rowFromTop * treeRowH));
-                    levelBadge.raycastTarget = false;
+                for (int i = 0; i < allNodes.Count; i++)
+                {
+                    TrainingNode node = allNodes[i];
+
+                    if (node == null || node.Branch != TrainingBranch.Right || !node.IsPartyNode || node.IsDeferred)
+                    {
+                        continue;
+                    }
+
+                    int level = Mathf.Clamp(node.RequiresLeftNodes / nodesPerLevel, 0, levelCount - 1);
+                    levelPartyGate[level].Add(node);
                 }
             }
 
@@ -395,10 +425,7 @@ namespace IdleRPG.UI
                 mini.color = hero.HeroIcon != null ? Color.white : new Color(1f, 1f, 1f, 0.15f);
             }
 
-            partyGateLabel = Text(cell.transform, "Gate", new Vector2(0.03f, 0.03f), new Vector2(0.97f, 0.26f),
-                string.Empty, UiType.Role.Micro, new Color(0.75f, 0.78f, 0.86f, 1f));
-            partyGateLabel.textWrappingMode = TextWrappingModes.NoWrap;
-            UiType.ApplyAuto(partyGateLabel, UiType.Role.Micro);
+
         }
 
         private HeroData HeroForColumn(int column)
@@ -462,6 +489,19 @@ namespace IdleRPG.UI
             nr.sizeDelta = new Vector2(NodeSize, NodeSize);
             nr.anchoredPosition = new Vector2(xPx, -centerY);
 
+            GameObject ringGO = new GameObject("Ring", typeof(RectTransform), typeof(Image));
+            RectTransform rr = ringGO.GetComponent<RectTransform>();
+            rr.SetParent(nodeGO.transform, false);
+            rr.anchorMin = Vector2.zero;
+            rr.anchorMax = Vector2.one;
+            rr.offsetMin = new Vector2(5f, 5f);
+            rr.offsetMax = new Vector2(-5f, -5f);
+            rr.localRotation = UnityEngine.Quaternion.Euler(0f, 0f, 45f);
+            Image ring = ringGO.GetComponent<Image>();
+            ring.color = new Color(1f, 0.95f, 0.66f, 1f);   // pale gold rim, brighter than the fill
+            ring.raycastTarget = false;
+            ringGO.SetActive(false);
+
             GameObject diaGO = new GameObject("Diamond", typeof(RectTransform), typeof(Image));
             RectTransform dr = diaGO.GetComponent<RectTransform>();
             dr.SetParent(nodeGO.transform, false);
@@ -515,6 +555,7 @@ namespace IdleRPG.UI
                 Diamond = diamond,
                 Connector = connector,
                 Badge = badge,
+                Ring = ring,
                 Rect = nr,
                 Column = column
             });
@@ -586,6 +627,11 @@ namespace IdleRPG.UI
                     view.Badge.gameObject.SetActive(isNext);
                 }
 
+                if (view.Ring != null)
+                {
+                    view.Ring.gameObject.SetActive(unlocked);
+                }
+
                 if (view.Connector != null)
                 {
                     view.Connector.color = unlocked
@@ -604,11 +650,7 @@ namespace IdleRPG.UI
 
         private void RefreshColumns(TrainingService training)
         {
-            int partyColumn = treeColumns.Count - 1;
-            int lowest = training.LowestLeftCount;
-
-            // The node the player would buy next in each column (money does not matter here - only the gate).
-            TrainingNode[] frontier = new TrainingNode[treeColumns.Count];
+            // Frontier row per column (money does not matter here - only the gate); used by the portrait jump.
             int[] frontierRows = new int[treeColumns.Count];
 
             for (int i = 0; i < frontierRows.Length; i++)
@@ -631,34 +673,47 @@ namespace IdleRPG.UI
                 if (row > frontierRows[c])
                 {
                     frontierRows[c] = row;
-                    frontier[c] = view.Node;
                 }
             }
 
             for (int i = 0; i < treeColumns.Count; i++)
             {
                 TreeColumn column = treeColumns[i];
-                int progress = i == partyColumn ? lowest : training.LeftUnlockedCount(column.HeroId);
-
-                if (column.Band != null)
-                {
-                    float height = treeTopPad + progress * treeRowH - treeRowH * 0.5f;
-                    column.Band.rectTransform.sizeDelta = new Vector2(196f, Mathf.Max(0f, height));
-                }
-
                 column.FrontierRow = frontierRows[i] >= 0 ? frontierRows[i] : treeHeroRows - 1;
                 treeColumns[i] = column;
             }
 
-            TrainingNode nextParty = partyColumn >= 0 ? frontier[partyColumn] : null;
+            // One fill for the whole page: a level strip is gold when every hero finished the level AND the
+            // party node gated inside that level has been bought.
+            const int nodesPerLevel = 6;
+            int lowest = training.LowestLeftCount;
+            Color gold = new Color(0.98f, 0.78f, 0.2f, 0.10f);
+            Color plain = new Color(0.13f, 0.14f, 0.16f, 1f);
 
-            if (partyGateLabel != null)
+            for (int i = 0; i < levelBands.Count; i++)
             {
-                bool pending = nextParty != null && nextParty.RequiresLeftNodes > 0 && lowest < nextParty.RequiresLeftNodes;
+                LevelBand band = levelBands[i];
+                bool heroesDone = lowest >= (band.LevelIndex + 1) * nodesPerLevel;
+                bool partyDone = true;
 
-                partyGateLabel.SetText(pending
-                    ? "lowest " + lowest + "/" + nextParty.RequiresLeftNodes
-                    : string.Empty);
+                if (band.LevelIndex < levelPartyGate.Count)
+                {
+                    List<TrainingNode> gates = levelPartyGate[band.LevelIndex];
+
+                    for (int g = 0; g < gates.Count; g++)
+                    {
+                        if (!training.IsUnlocked(gates[g]))
+                        {
+                            partyDone = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (band.Background != null)
+                {
+                    band.Background.color = heroesDone && partyDone ? gold : plain;
+                }
             }
         }
 
@@ -809,7 +864,9 @@ namespace IdleRPG.UI
             }
             else if (!gateMet)
             {
-                body = GateMessage(popupNode);
+                body = popupNode.Branch == TrainingBranch.Right
+                    ? GateMessage(popupNode)
+                    : LinearGateMessage(popupNode);
             }
             else if (!affordable)
             {
@@ -850,6 +907,23 @@ namespace IdleRPG.UI
                 popupStar.gameObject.SetActive(showButton && !goldCost);
             }
 
+            // Short card when there is nothing to buy - no dead space where the button used to be.
+            if (treePopup != null)
+            {
+                treePopup.GetComponent<RectTransform>().sizeDelta = new Vector2(560f, showButton ? 300f : 180f);
+
+                if (popupTitle != null)
+                {
+                    popupTitle.rectTransform.anchorMin = new Vector2(0.05f, showButton ? 0.76f : 0.58f);
+                    popupTitle.rectTransform.anchorMax = new Vector2(0.95f, showButton ? 0.97f : 0.94f);
+                }
+
+                if (popupBody != null)
+                {
+                    popupBody.rectTransform.anchorMin = new Vector2(0.05f, showButton ? 0.52f : 0.10f);
+                    popupBody.rectTransform.anchorMax = new Vector2(0.95f, showButton ? 0.75f : 0.54f);
+                }
+            }
         }
 
         private void BuyPopup()
@@ -948,6 +1022,25 @@ namespace IdleRPG.UI
             }
 
             return "All three heroes need " + required + " training nodes.";
+        }
+
+        /// <summary>A hero chain is linear: name the node directly below this one.</summary>
+        private string LinearGateMessage(TrainingNode node)
+        {
+            IReadOnlyList<TrainingNode> nodes = manager.Training.Tree.Nodes;
+
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                TrainingNode other = nodes[i];
+
+                if (other != null && other.Branch == TrainingBranch.Left &&
+                    other.HeroID == node.HeroID && other.Order == node.Order - 1)
+                {
+                    return "Unlock " + other.Title + " first.";
+                }
+            }
+
+            return "Unlock the node below first.";
         }
 
         /// <summary>Why the Buy is dead: what the node costs against what the purse holds.</summary>

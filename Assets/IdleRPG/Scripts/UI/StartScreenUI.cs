@@ -62,6 +62,7 @@ namespace IdleRPG.UI
             public Image Diamond;
             public Image Connector;   // line ABOVE this node (to the one above it)
             public Image Badge;
+            public Image Ring;        // gold rim, shown once the node is owned
             public RectTransform Rect;
             public int Column;
         }
@@ -70,7 +71,6 @@ namespace IdleRPG.UI
         {
             public string HeroId;
             public int FrontierRow;
-            public Image Band;
         }
 
         private GameObject treePopup;
@@ -80,7 +80,6 @@ namespace IdleRPG.UI
         private Image popupCoin;
         private Image popupStar;
         private IdleRPG.Data.TrainingNode popupNode;
-        private TextMeshProUGUI partyGateLabel;
 
         private void Awake()
         {

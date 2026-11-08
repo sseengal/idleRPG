@@ -87,13 +87,26 @@ Training's flat bonuses are added **after** the perk multiplier chain, so perks 
   the touch floor) on **220** unit rows, laid out **bottom-up**: `order 0` sits at the very bottom, so the page opens scrolled to the bottom and the
   player climbs by scrolling up.
 - **Pinned headers** (they never scroll away) name the owner: hero portrait + name for the three chains, and a
-  PARTY cell with the three mini portraits plus the only line the gate needs: `lowest N/M` while a gate is pending,
-  blank otherwise (no `open` / `gate met` words - the cell is a header, not a button). Tapping a header **jumps that
-  column to its frontier**.
+  PARTY cell with the three mini portraits only (no status words - it is a header, not a button). Tapping a header
+  **jumps that column to its frontier**.
 - **States by colour**: unlocked = gold, next buyable = mid grey with a green up-arrow badge, locked = dark grey,
   deferred = near-black. A node's connector turns gold once that node is unlocked.
-- **A soft gold band per column** grows from the bottom to that column's frontier. The party band follows the
-  lowest hero count (the gate), not party purchases.
+- **One fill for the page, in level steps.** The background is **75 full-width level strips** (6 rows each) stacked
+  without gaps, `Level N` written at their left margin. A strip turns **gold** only when *all three heroes* finished
+  that level **and** the party node gated inside it has been bought:
+
+| Level | Party node inside it | Needs |
+|---|---|---|
+| 1 | R0 Active Skill Slot (gate 0) | R0 bought |
+| 3 | R1 Battle Gold +10% (13) | R1 bought |
+| 5 | R2 Camp Healing +25 (26) | R2 bought |
+| 7 | R3 Finish Gold +15% (38) | R3 bought |
+| 8, 9 | R4/R5/R6 (deferred) | ignored - cannot be bought |
+| everything else | - | heroes only |
+
+  So the fill moves in step with the party track: a fresh save shows no gold until R0 is bought, and the edge can
+  wait on tokens below levels 3 / 5 / 7. Owned nodes also get a **pale gold rim**, so a bought diamond reads as a
+  gold fill plus a bright border.
 - **Tap a node -> a card opens beside it** (right of the node in the two left columns, left of it in the two right
   ones). Not a modal: no backdrop, no dimming, and it scrolls with the node. Tapping the same node closes it, and a
   tap anywhere off the nodes closes it too - a transparent catcher sits behind the nodes, so drags still scroll.
@@ -111,9 +124,8 @@ Training's flat bonuses are added **after** the perk multiplier chain, so perks 
   wrong shop. The button always carries the real price (`Buy 300` + coin, `Buy 4` + star).
 - Card title names the owner: `Knight · Armor`, `Party · Battle gold`.
 - Cost icons are drawn in code (circle for gold, star for tokens) - the lobby cannot load editor sprites.
-- **Level badges**: one faint `Lv N` per level (a level = **6 nodes** = two Attack/Armor/HP sets, so **75** per hero
-  column, 225 in total), drawn **behind** the nodes at the row boundary so no diamond covers them. The party column
-  has none.
+- A level is **6 nodes** (two Attack/Armor/HP sets), so there are **75** strips - one per level, shared by the whole
+  page instead of repeated in every column.
 - **Arrows are drawn sprites.** The font has no arrow glyph, so `▼` renders as a box - that was the grey square.
   Both the jump-to-bottom button (145 square, `UiTouch.MinTarget`) and the node badge arrow are generated in code.
 
@@ -126,10 +138,11 @@ Every runtime label picks a role from `UiType`; every control clears `UiTouch.Mi
 | START | `Title` |
 | Node letter, card title, Buy label | `Section` |
 | Hero name, PARTY, nav tabs, status | `Small` |
-| Level badge, party gate line | `Micro` |
+| `Level N` strip label | `Micro` |
 | Card body sentence | `Sentence` |
 
-Card **560 x 300** (Buy button 144 tall), header cells **230** wide (party 252) and 150 tall. Fonts come from
+Card **560 x 300** with a Buy button (144 tall), and **560 x 180** when there is nothing to buy (owned / coming
+soon) so it never keeps dead space. Header cells **230** wide (party 252) and 150 tall. Fonts come from
 `UiTheme` - Silkscreen for chrome, VT323 for sentences - not the TMP default the lobby used before.
 
 ## 6. Save
