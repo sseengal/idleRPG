@@ -91,22 +91,21 @@ Training's flat bonuses are added **after** the perk multiplier chain, so perks 
   **jumps that column to its frontier**.
 - **States by colour**: unlocked = gold, next buyable = mid grey with a green up-arrow badge, locked = dark grey,
   deferred = near-black. A node's connector turns gold once that node is unlocked.
-- **One fill for the page, in level steps.** The background is **75 full-width strips** (6 rows each) stacked
-  without gaps. A strip turns **gold** only when *all three heroes* finished that level **and** the party node gated
-  inside it has been bought:
+- **One fill for the page, and it rises a row at a time.** The gold background grows with the **weakest hero**
+  (`lowest`), not in level steps: buy rows inside level 2 and the fill climbs inside level 2. Height =
+  `topPad + lowest x rowH + (lowest / 6) x LevelGap`.
+- **The party track holds it back.** The fill never passes the next party node that is still unbought - that node is
+  the party track's hand on the bar:
 
-| Level | Party node inside it | Needs |
+| Party node | Gate | Fill stops here until... |
 |---|---|---|
-| 1 | R0 Active Skill Slot (gate 0) | R0 bought |
-| 3 | R1 Battle Gold +10% (13) | R1 bought |
-| 5 | R2 Camp Healing +25 (26) | R2 bought |
-| 7 | R3 Finish Gold +15% (38) | R3 bought |
-| 8, 9 | R4/R5/R6 (deferred) | ignored - cannot be bought |
-| everything else | - | heroes only |
+| R0 Active Skill Slot | 0 | it is bought (a fresh save shows no gold at all) |
+| R1 Battle Gold +10% | 13 | it is bought - the fill waits on tokens here |
+| R2 Camp Healing +25 | 26 | it is bought |
+| R3 Finish Gold +15% | 38 | it is bought |
+| R4 / R5 / R6 (deferred) | 44 / 50 | ignored - they cannot be bought yet |
 
-  So the fill moves in step with the party track: a fresh save shows no gold until R0 is bought, and the edge can
-  wait on tokens below levels 3 / 5 / 7. Owned nodes also get a **pale gold rim**, so a bought diamond reads as a
-  gold fill plus a bright border.
+  Owned nodes also get a **pale gold rim**, so a bought diamond reads as a gold fill plus a bright border.
 - **Tap a node -> a card opens beside it** (right of the node in the two left columns, left of it in the two right
   ones). Not a modal: no backdrop, no dimming, and it scrolls with the node. Tapping the same node closes it, and a
   tap anywhere off the nodes closes it too - a transparent catcher sits behind the nodes, so drags still scroll.
@@ -132,8 +131,9 @@ Training's flat bonuses are added **after** the perk multiplier chain, so perks 
   strip behind it carries the progress tint.
 - **Arrows are drawn sprites.** The font has no arrow glyph, so `▼` renders as a box - that was the grey square.
   Both the jump-to-bottom button (145 square, `UiTouch.MinTarget`) and the node badge arrow are generated in code.
-- **The jump button appears only after you scroll away from the end** - hidden while you are within one row (220) of
-  the bottom, so it never covers the last level. It refreshes from `ScrollRect.onValueChanged` and after every jump.
+- **The jump button appears only after you scroll away from the end** - hidden until you are more than **one level
+  (~1,416 units)** above the bottom, so a small flick never pops it up. It refreshes from
+  `ScrollRect.onValueChanged` and after every jump.
 
 ### 5a. Type and touch (no hand-written sizes)
 

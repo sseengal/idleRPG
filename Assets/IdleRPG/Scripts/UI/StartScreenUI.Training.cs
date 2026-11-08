@@ -19,20 +19,14 @@ namespace IdleRPG.UI
     {
         private const int NodesPerLevel = 6;
         private const float LevelGap = 96f;   // breathing room between levels, where the level bar sits
+        private const float ScrollButtonThreshold = NodesPerLevel * 220f + LevelGap;   // ~one level of scrolling
 
         private int treeHeroRows;
         private int treeLevelCount;
         private int treeNodeLayer;
         private GameObject scrollDownButton;
 
-        private struct LevelBand
-        {
-            public Image Background;
-            public int LevelIndex;
-        }
-
-        private readonly List<LevelBand> levelBands = new List<LevelBand>();
-        private readonly List<List<TrainingNode>> levelPartyGate = new List<List<TrainingNode>>();
+        private Image treeFill;
         private int popupColumn;
 
         private void ShowTraining()
@@ -170,56 +164,23 @@ namespace IdleRPG.UI
 
             treeColumns.Add(new TreeColumn { HeroId = string.Empty, FrontierOrder = 0 });   // party
 
-            // One page-wide strip per level (6 nodes each). The strips stack without gaps, so together they are
-            // the single background fill. A strip turns gold only when every hero finished that level AND the
-            // party node gated inside it has been bought.
-            levelBands.Clear();
-            levelPartyGate.Clear();
+            // One continuous fill: it rises row by row with the weakest hero, and stops at the next party gate
+            // that has not been bought yet. Drawn behind the connectors, nodes and level bars.
+            GameObject fillGO = new GameObject("LevelFill", typeof(RectTransform), typeof(Image));
+            RectTransform fillRect = fillGO.GetComponent<RectTransform>();
+            fillRect.SetParent(treeContent, false);
+            fillRect.anchorMin = new Vector2(0f, 0f);
+            fillRect.anchorMax = new Vector2(1f, 0f);
+            fillRect.pivot = new Vector2(0.5f, 0f);
+            fillRect.offsetMin = Vector2.zero;
+            fillRect.offsetMax = Vector2.zero;
+            fillRect.sizeDelta = new Vector2(0f, 0f);
+            fillRect.anchoredPosition = Vector2.zero;
+            treeFill = fillGO.GetComponent<Image>();
+            treeFill.color = new Color(0.98f, 0.78f, 0.2f, 0.10f);
+            treeFill.raycastTarget = false;
 
-            int levelCount = treeLevelCount;
-            float levelHeight = NodesPerLevel * treeRowH + LevelGap;
-
-            for (int level = 0; level < levelCount; level++)
-            {
-                levelPartyGate.Add(new List<TrainingNode>());
-
-                GameObject bandGO = new GameObject("LevelBand", typeof(RectTransform), typeof(Image));
-                RectTransform bandRect = bandGO.GetComponent<RectTransform>();
-                bandRect.SetParent(treeContent, false);
-                bandRect.anchorMin = new Vector2(0f, 0f);
-                bandRect.anchorMax = new Vector2(1f, 0f);
-                bandRect.pivot = new Vector2(0.5f, 0f);
-                bandRect.offsetMin = Vector2.zero;
-                bandRect.offsetMax = Vector2.zero;
-                bandRect.sizeDelta = new Vector2(0f, levelHeight);
-                bandRect.anchoredPosition = new Vector2(0f, treeTopPad + level * levelHeight);
-
-                Image band = bandGO.GetComponent<Image>();
-                band.color = new Color(0.13f, 0.14f, 0.16f, 1f);
-                band.raycastTarget = false;
-
-                levelBands.Add(new LevelBand { Background = band, LevelIndex = level });
-            }
-
-            if (tree != null)
-            {
-                IReadOnlyList<TrainingNode> allNodes = tree.Nodes;
-
-                for (int i = 0; i < allNodes.Count; i++)
-                {
-                    TrainingNode node = allNodes[i];
-
-                    if (node == null || node.Branch != TrainingBranch.Right || !node.IsPartyNode || node.IsDeferred)
-                    {
-                        continue;
-                    }
-
-                    int level = Mathf.Clamp(node.RequiresLeftNodes / NodesPerLevel, 0, levelCount - 1);
-                    levelPartyGate[level].Add(node);
-                }
-            }
-
-            treeNodeLayer = treeContent.childCount;   // bands + level badges sit behind everything added below
+            treeNodeLayer = treeContent.childCount;   // the fill sits behind everything added below
 
             // Tap anywhere off a node to dismiss the card. It sits behind the nodes, so tapping a node still
             // switches the card, and drags still bubble to the ScrollRect, so scrolling keeps working.
@@ -716,37 +677,40 @@ namespace IdleRPG.UI
                 treeColumns[i] = column;
             }
 
-            // One fill for the whole page: a level strip is gold when every hero finished the level AND the
-            // party node gated inside that level has been bought.
-            const int nodesPerLevel = 6;
+            // The fill rises one ROW at a time: as far as the weakest hero has climbed, but never past a party
+            // node that is still unbought (that node is the party track's hand on the bar).
             int lowest = training.LowestLeftCount;
-            Color gold = new Color(0.98f, 0.78f, 0.2f, 0.10f);
-            Color plain = new Color(0.13f, 0.14f, 0.16f, 1f);
+            int gateLimit = treeHeroRows;
 
-            for (int i = 0; i < levelBands.Count; i++)
+            if (manager.Training != null)
             {
-                LevelBand band = levelBands[i];
-                bool heroesDone = lowest >= (band.LevelIndex + 1) * nodesPerLevel;
-                bool partyDone = true;
+                IReadOnlyList<TrainingNode> nodes = manager.Training.Tree.Nodes;
 
-                if (band.LevelIndex < levelPartyGate.Count)
+                for (int i = 0; i < nodes.Count; i++)
                 {
-                    List<TrainingNode> gates = levelPartyGate[band.LevelIndex];
+                    TrainingNode node = nodes[i];
 
-                    for (int g = 0; g < gates.Count; g++)
+                    if (node == null || node.Branch != TrainingBranch.Right || !node.IsPartyNode || node.IsDeferred)
                     {
-                        if (!training.IsUnlocked(gates[g]))
-                        {
-                            partyDone = false;
-                            break;
-                        }
+                        continue;
+                    }
+
+                    if (!training.IsUnlocked(node))
+                    {
+                        gateLimit = Mathf.Clamp(node.RequiresLeftNodes, 0, treeHeroRows);
+                        break;
                     }
                 }
+            }
 
-                if (band.Background != null)
-                {
-                    band.Background.color = heroesDone && partyDone ? gold : plain;
-                }
+            int fillRows = Mathf.Clamp(Mathf.Min(lowest, gateLimit), 0, treeHeroRows);
+            float fillHeight = fillRows <= 0
+                ? 0f
+                : treeTopPad + fillRows * treeRowH + (fillRows / NodesPerLevel) * LevelGap;
+
+            if (treeFill != null)
+            {
+                treeFill.rectTransform.sizeDelta = new Vector2(0f, fillHeight);
             }
         }
 
@@ -1261,7 +1225,7 @@ namespace IdleRPG.UI
             float limit = Mathf.Max(0f, treeContentHeight - viewH);
             float remaining = limit - treeContent.anchoredPosition.y;
 
-            scrollDownButton.SetActive(remaining > treeRowH);
+            scrollDownButton.SetActive(remaining > ScrollButtonThreshold);
         }
 
     }
