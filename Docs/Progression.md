@@ -62,10 +62,18 @@ the player cannot lose health while reading. The hold is counted (`CombatManager
 the camp and a boon card can all want the fight frozen at once. The card sits on its own canvas at sorting order 300,
 above the modal layer (100), the lobby (250) and the MENU button (251) - nothing of the fight may peek over a choice.
 
-**A boon is a stat bonus today, not a new mechanic.** The six ops (`AttackPercent`, `HealthPercent`, `DefensePercent`,
+**Boons are temporary by design (decision 2026-11-09).** They last for the current run and die with it, exactly like
+run gold: no unlocks, no carry-over, no permanent power. That is what lets a card be strong without breaking the
+permanent ladder, and what makes each run a different build.
+
+**There is no boon list page (decision 2026-11-09).** The hand is shown only on the level-up card - what you hold is
+felt in the fight, not read off a screen. The trade-off is real: a player cannot look up "what did I take in wave 2".
+If playtesting shows confusion, the cheap fix is a one-line count on the XP bar (`LV 4 - 6 boons`) before any list.
+
+**A boon is a stat bonus today, not a new mechanic.** The seven ops (`AttackPercent`, `HealthPercent`, `DefensePercent`,
 `GoldPercent`, `AttackSpeedPercent`, `CritChanceFlat`, `CritDamageFlat`) all land on getters `StatResolver` already
 had, so a card is live in the next swing and there is no second stat pipeline. On-hit effects (cleave, extra strike)
-are the next slice and need a hook inside `Encounter`, which is why they are not in this one.
+are the next slice and need a hook inside `Encounter` - see `Boons.md` for that plan.
 
 **Away time pays neither gold nor XP** (decision 2026-11-09): the away window is being retired in favour of daily
 login bonuses, so time away is not a progression axis. There is no run-duration statistic to keep honest either.
