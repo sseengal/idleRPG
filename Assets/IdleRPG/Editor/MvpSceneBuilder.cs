@@ -115,7 +115,39 @@ namespace IdleRPG.EditorTools
             // The lobby (start screen + TRAINING tab). It builds its own canvas at Awake and borrows the shared
             // header. It belongs here, in the builder, so a scene rebuild can never drop it again.
             GameObject startScreen = new GameObject("StartScreen");
-            startScreen.AddComponent<StartScreenUI>();
+            StartScreenUI startScreenUi = startScreen.AddComponent<StartScreenUI>();
+
+            // Chapter art for the lobby centre panel. Referenced directly: it lives in the Art root, not
+            // the Placeholder folder, so UiFactory.LoadSprite cannot find it.
+            Sprite chapterArt = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/IdleRPG/Art/Greenwake1-clean 1.png");
+            if (chapterArt != null)
+            {
+                SceneWiringUtility.SetField(startScreenUi, "chapterArt", chapterArt, required: false);
+            }
+
+            Sprite chapterTitleArt = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/IdleRPG/Art/Greenwake title 1.png");
+            if (chapterTitleArt != null)
+            {
+                SceneWiringUtility.SetField(startScreenUi, "chapterTitleArt", chapterTitleArt, required: false);
+            }
+
+            // Bottom-tab icons, sliced from one sheet. Order in the sheet (reading order): battle, ascend,
+            // train, shop, party; each field below takes the matching sub-sprite by name.
+            System.Func<string, Sprite> tabIcon = (spriteName) =>
+            {
+                UnityEngine.Object[] sheet = AssetDatabase.LoadAllAssetsAtPath("Assets/IdleRPG/Art/Button Icons.png");
+                for (int i = 0; i < sheet.Length; i++)
+                {
+                    Sprite candidate = sheet[i] as Sprite;
+                    if (candidate != null && candidate.name == spriteName) { return candidate; }
+                }
+                return null;
+            };
+            SceneWiringUtility.SetField(startScreenUi, "tabBattleIcon", tabIcon("icon_battle"), required: false);
+            SceneWiringUtility.SetField(startScreenUi, "tabAscendIcon", tabIcon("icon_ascend"), required: false);
+            SceneWiringUtility.SetField(startScreenUi, "tabTrainIcon", tabIcon("icon_train"), required: false);
+            SceneWiringUtility.SetField(startScreenUi, "tabShopIcon", tabIcon("icon_shop"), required: false);
+            SceneWiringUtility.SetField(startScreenUi, "tabPartyIcon", tabIcon("icon_party"), required: false);
 
             RectTransform canvasRoot = CreateCanvas(hudRoot);
             RectTransform damageRoot = CreateDamageCanvas(hudRoot);
@@ -135,7 +167,7 @@ namespace IdleRPG.EditorTools
             GameObject battlePage = CreatePage("BattlePage", safeArea);
 
             BuildXpBar(battlePage.GetComponent<RectTransform>());
-            BuildStageRow(battlePage.GetComponent<RectTransform>(), header);
+            BuildStageRow(battlePage.GetComponent<RectTransform>());
 
             BuildViewport(battlePage.GetComponent<RectTransform>(), damageRoot,
                 out FormationBoardView formationBoard, out EnemyStackView enemyStack,

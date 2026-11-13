@@ -64,19 +64,28 @@ Source: `LogTop = 0.28f`, `BattleViewportBottom = 0.39f` in `MvpSceneBuilder.cs`
 
 ### 2c. The header is a row, not hand-placed chips (2026-10-14)
 
-The currency chips and the RANKS button live in one `ChipRow` under the header, driven by a
-`HorizontalLayoutGroup`. The three chips carry `LayoutElement.flexibleWidth = 1` and divide the width; the RANKS
-button takes a fixed 110-unit slice at the end.
+The currency chips and a three-bar (hamburger) menu button live in one `ChipRow` under the header, driven by a
+`HorizontalLayoutGroup`. The three chips carry `LayoutElement.flexibleWidth = 1` and divide the width; the menu
+button takes a fixed 110-unit slice at the end. **2026-11-12:** RANKS (the leaderboard button) is switched off;
+the hamburger replaces it, and its tap action is intentionally not wired yet. The header bar now wears the
+chunky `ui_frame` plate (the same riveted look as the lobby panels).
 
-Why: they used to be placed by hand — the chips at 0.03 / 0.35 / 0.65 of the header, and the runtime RANKS button
+Why: they used to be placed by hand — the chips at 0.03 / 0.35 / 0.65 of the header, and the runtime button
 at 0.88 — and the token chip and the button **overlapped by about 95 units**. That is how a long currency value
 ended up sliding under the button. Two numbers, tuned separately, never compared.
 
-Measured in Play (row width 1004): Gold 38–328, Gems 336–626, Tokens 634–924, RANKS 932–1042 — all 8 units
+Measured in Play (row width 1004): Gold 38–328, Gems 336–626, Tokens 634–924, menu 932–1042 — all 8 units
 apart, 77 tall, no overlap.
 
 The boost chip stays on the **header**, not in the row: it is an overlay badge, not a fourth currency, so the
 layout group must not size it.
+
+**Lobby centre (2026-11-12).** The centre panel is the chapter illustration (`Art/Greenwake1-clean 1.png`),
+sized to its own 1400x764 aspect so there is no letterbox. The chapter name is a pixel wordmark image
+(`Art/Greenwake title 1.png`) with a small "CHAPTER 1" text kicker above it; both hug the panel top. Behind the
+content sits a subtle atmosphere pass — a vertical gradient, a corner vignette, and two low-alpha soft halos
+(green behind the art, gold behind START). No new assets: all three sprites are generated in code and cached; the
+halo alpha is held at 0.10 so it reads as rim light, not a blob.
 
 ### 2d. Page bands have names (2026-10-14)
 
@@ -183,7 +192,7 @@ Sans) that do not exist in the saved scene.
 |---|---|
 | `InventoryTabUI.Grid.cs` | allow-listed: 56 and 18 are layout offsets, −5 is the selection ring's overhang. Not gaps |
 | `UiLabSceneBuilder.cs`, `DevOverlay.cs` | allow-listed: the lab compares looks; the overlay is developer UI |
-| Header row | **fixed 2026-10-14** — the chips and RANKS share one layout-group row (§2c), so they divide the width and cannot overlap |
+| Header row | **fixed 2026-10-14** — the chips and the menu button share one layout-group row (§2c), so they divide the width and cannot overlap |
 | Page bands | named (§2d): ASCEND + SHOP share one set; UPGRADES has its own. Change one constant, not four screens |
 | Tablets | bands compress on a short, wide screen (see §3). Fix = cap the canvas width, if tablets matter |
 | Inventory 56 / 18 / −5 | should become named constants (or new roles) if the inventory tab is un-parked |
@@ -194,7 +203,7 @@ Sans) that do not exist in the saved scene.
 1. **Game View at 1080 × 1920** — the battle page, party, upgrades, ascend and shop look as designed.
 2. **Game View at a tall aspect (e.g. 1080 × 2400)** — the two bars stay the same size and the **page grows**.
    That is the whole point of §2a.
-3. **Device Simulator, notched phone** — open RANKS and trigger the offline / defeat popup; cards and the
+3. **Device Simulator, notched phone** — open the hamburger menu and trigger the offline / defeat popup; cards and the
    toast must clear the notch and the home bar.
 4. Run both guards (§6).
 

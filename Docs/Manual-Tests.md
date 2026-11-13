@@ -553,11 +553,16 @@ The run build. Everything here is dev-testable with the keys `X` (+a quarter of 
 
 ### XP and levels
 - [ ] A kill moves the XP bar between the arena and the ability buttons (gold fill, `LV n` on the left).
-- [ ] A level lands in the first few waves and the bar reads `xp / needed`; once a pick is owed the right side reads
-      `1 PICK` (or `N PICKS`) in gold instead of the numbers.
+- [ ] The **first** pick lands around wave 2, not after four kills: the feature should arrive as a surprise, not
+      instantly.
+- [ ] After that, picks keep coming but stretch: a run should land roughly **10-12** of them, with the last ones close
+      to where the party dies. If picks stop dead while the run continues, the curve (not a cap) needs re-fitting.
+- [ ] The bar reads `xp / needed`; once a pick is owed the right side reads `1 PICK` (or `N PICKS`) in gold instead of
+      the numbers.
 - [ ] `V` **opens the level-up card** and the fight stops dead: no hero and no enemy acts while it is up.
 - [ ] Quit and relaunch mid-run: level, XP and queued picks come back.
 - [ ] End the run (or ascend): level, XP and picks reset to `LV 1`.
+- [ ] The bar **never** freezes on `MAX` mid-run (there is no level cap; see Docs/Boons.md section 9).
 
 ### The card
 - [ ] `LEVEL UP!`, `CHOOSE A BOON - N PICKS WAITING`, three different cards.

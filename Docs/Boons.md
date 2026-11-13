@@ -167,6 +167,11 @@ Rarity means power and scarcity at the same time - that is the whole point of a 
 3. **Diversity rule**: one offer may not contain two cards of the same op family (two attack cards), so a hand is
    always three different decisions. If the pool cannot fill it, fall back to any card.
 
+**Build the odds for ~12 offers, not 20 (decision 2026-11-09).** With a 10-12 pick run, a "Rare+ every 5 offers"
+pity would eat a quarter of the run, so the bands must deliver the excitement on their own. Order of work: **diversity
+first (cheap, no save counters), pity second**, and only if measured runs show flat streaks. If pity ships, start at
+Rare+ every 5 offers and Epic+ every 11.
+
 Rarity must not be the only lever on power. A common card taken five times beats a legendary taken once - that is
 what keeps the common tier worth picking.
 
@@ -227,23 +232,48 @@ come back silently.
 
 ## 9. Balance and how we prove it
 
-| Knob | First pass | Where |
+**Run shape (locked 2026-11-09).** The target is a *budget*, not a cap:
+
+| Target | Value | Why |
 |---|---|---|
-| XP per kill | 5 at stage 1, x1.1 a stage, boss x5 | `BalanceConfig` |
-| XP for the first level | 20, x1.18 each | `BalanceConfig` |
-| Levels a run | 20 cap | `BalanceConfig` |
-| Cards per offer / re-rolls | 3 / 1 | `PerkPool.asset` |
-| Rarity weights | by level band (see 6.1) | `PerkPool.asset` |
-| Card power | 12 / 25 / 35 / 55 % | the cards themselves |
+| Picks per run | **10-12** | a card is an interruption: ~20 stops in a run is an arcade game, 10-12 is a build |
+| First pick | **by wave 2** (~10 kills) | the player must meet the feature while it is still a surprise |
+| Last pick | **near where runs actually end** | the build should complete on the way down, not halfway up |
+| Hard level cap | **none** | a cap that runs out is a dead bar. The curve is the limiter, not a wall |
+
+**No hard cap was a deliberate reversal (2026-11-09).** The first pass capped a run at 20 levels, then at 12. Both
+were wrong for the same reason: a run that outlives the cap shows a full `MAX` bar for the rest of its life, and an
+idle game cannot promise that a run will not outlive a number. So `partyMaxLevelPerRun = 0` (unlimited) is the
+intent, and **the requirement curve is the limiter**: each level costs more than the last, so the picks stretch out
+naturally and the run ends when the party dies, not when a counter runs out. If a later balance pass wants a ceiling,
+it should be a curve that becomes unreachable, never a switch that turns progression off.
+
+**Knobs (first pass, to be FITTED by measurement, not trusted):**
+
+| Knob | Today | Starting point for the fit | Effect |
+|---|---|---|---|
+| XP per kill | 5 at stage 1, x1.1 a stage, boss x5 | keep | kill XP grows slower than the requirement, so deep levels take longer |
+| XP for the first level | 20 | **~50** | first pick at ~10 kills (wave 2) instead of 4 |
+| XP growth per level | 1.18 | **~1.35** | the tail alone costs the last 3-4 stages |
+| Levels a run | cap 20 | **no cap (0)** | the curve decides |
+
+The current curve reaches **level 12 by stage 5** and would hit 20 by stage 10: front-loaded, then flat. That is the
+shape the fit has to fix.
 
 **The measurement is the point.** `ClimbSimulation` (Balance Lab) already plays the loop headless. Add a boon policy
-that drafts like a reasonable player (prefer an op family it lacks) and compare stage reached at a fixed time with
-and without boons:
+that drafts like a reasonable player (prefer an op family it lacks) and record:
 
-- Target: boons add **15-25% depth** at equal time. Under 10% they are decoration; over 40% the permanent layer stops
-  mattering.
-- Second number: **picks per run** (target 8-15). More than that and the card interrupts the fight too often.
-- Third number: **share of offers taken** (target 70%+). If players re-roll or hesitate, the pool is too flat.
+1. **seconds and stages per run** - this is what the XP fit is solved against. Without it, every number above is a
+   guess wearing a lab coat.
+2. **picks per run** (target 10-12) and **kills per pick** (target rising, never flat).
+3. **depth with and without boons**: target **15-25% deeper** at equal time. Under 10% they are decoration; over 40%
+   the permanent layer stops mattering.
+4. **share of offers taken** (target 70%+). If players re-roll or hesitate, the pool is too flat.
+
+**Code drift to close in the next code pass (not changed here - docs only):** `BalanceConfig` still holds
+`partyMaxLevelPerRun = 20`, `partyXpBase = 20` and `partyXpGrowth = 1.18`. The intent above (no cap, ~50 base,
+~1.35 growth) is **not in the code yet**; it is recorded so the next pass sets the knobs deliberately instead of
+inheriting them. Until then a run still caps at level 20 and the first pick still lands after 4 kills.
 
 ## 10. UX
 
@@ -262,7 +292,7 @@ and without boons:
 |---|---|---|
 | **P0 (done)** | XP, levels, card, 10 stat cards, re-roll, save | a pick changes a stat in the next swing; reload keeps the hand |
 | **P1** | trigger foundation (done) + 4 mechanic cards (done) + pick line (done); Overflow, Executioner + 3 legendaries left | cleave hits only the neighbours; echo cannot recurse; thorns can kill; same seed gives the same fight. **Next: two small hooks (overkill carry, low-HP multiplier), then the legendaries** |
-| **P2** | level bands + soft pity + diversity rule | a 13+ run sees epics; four flat hands in a row cannot happen |
+| **P2** | diversity rule + level bands (pity only if the data asks) | a 10-12 pick run sees at least one epic; three cards of the same family in one hand cannot happen |
 | **P3** | cheap layer-A cards (XP, gold-on-boss, extra roll, camp heal) | no sim change; `Scholar` visibly speeds the bar |
 | **P4** | statuses (burn/poison/chill) | a burn card ticks damage and appears in the log per tick |
 
@@ -282,7 +312,12 @@ Each phase is a separate commit with its own tests; P1 is the only one that touc
 
 1. **Epic/legendary shape - LOCKED (2026-11-09):** every Epic and every Legendary adds a mechanic; Common and Rare
    are numbers. The sim work is therefore a known list (section 5), not an open-ended one.
-2. **Pity tuning**: 4 and 9 offers (above) or none until play says otherwise?
-3. **Card count per offer**: stays 3 (reference) or grows to 4 at high level as a "reward" moment?
-4. **Re-roll economy**: 1 per run forever, or +1 at level 8 to reward the deep run?
-5. **Hero-specific share**: 1 of 3 cards per offer (above) or more, to push build identity?
+2. **Run shape - LOCKED (2026-11-09):** 10-12 picks, first by wave 2, last near where runs end, **and no hard level
+   cap** - the curve limits the picks, never a counter. The constants are fitted by the Balance Lab, not guessed.
+3. **Picks and interruptions - LOCKED:** the card stops the fight, so picks are budgeted like ad breaks.
+4. **Pity tuning**: none until measured, then Rare+ every 5 / Epic+ every 11.
+5. **Card count per offer**: stays 3 (reference) or grows to 4 late in a run as a "reward" moment?
+6. **Re-roll economy**: 1 per run forever, or +1 at level 8 to reward the deep run?
+7. **Hero-specific share**: 1 of 3 cards per offer (above) or more, to push build identity?
+8. **Art timing (recommendation):** frames, card background and icon style **now** (they do not depend on content);
+   the 22 card icons **after** P2 freezes the deck. Letter badges stay until then.

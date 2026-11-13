@@ -248,6 +248,8 @@ Open issues carried from the spike:
   HD-2D wants roughly 2-4x upscale. Decision: accept a chunky style, or source higher-resolution art for the real game.
 - `TextureImporter.spritesheet` is removed in Unity 6 (only a warning so far); the import tool must migrate to
   `ISpriteEditorDataProvider` before it can be relied on.
+  **2026-11-12:** the bottom-tab icon sheet (`Art/Button Icons.png`) was sliced with this deprecated API (5 rects,
+  one-shot) - migrate it along with the rest.
 - The ArtLab scene keeps the working rig: ground, one 3D prop, `Hero_Soldier` + `Enemy_Orc` on `HD2D/SpriteLit` with
   Animator controllers, a PostFX volume, and a portrait fixed camera.
 

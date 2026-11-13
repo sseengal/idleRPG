@@ -62,6 +62,9 @@ namespace IdleRPG.EditorTools
             public float NumberSize;
             public float TitleSize;
 
+            /// <summary>Optional placeholder frame file (e.g. "ui_chunky_a"). Null = the pack's grey slice.</summary>
+            public string Frame;
+
             public Color Panel;
             public Color PanelLight;
             public Color Accent;
@@ -115,6 +118,37 @@ namespace IdleRPG.EditorTools
                 InkOnAccent = new Color32(10, 24, 32, 255),
                 Hp = new Color32(110, 210, 180, 255),
                 HpEnemy = new Color32(230, 90, 80, 255)
+            },
+            // D/E: same slate + gold palette as A, only the frame changes, so the bevel is the single variable.
+            new Look
+            {
+                Caption = "D  ·  CHUNKY  ·  single bevel", Font = "Silkscreen Pixel",
+                LogSize = 24f, ChunkySize = 32f, LabelSize = 24f, NumberSize = 40f, TitleSize = 16f,
+                Frame = "ui_chunky_a",
+
+                Panel = new Color32(37, 43, 62, 255),
+                PanelLight = new Color32(48, 56, 80, 255),
+                Accent = new Color32(214, 158, 66, 255),
+                Text = new Color32(236, 240, 248, 255),
+                Dim = new Color32(146, 156, 180, 255),
+                InkOnAccent = new Color32(38, 30, 12, 255),
+                Hp = new Color32(224, 178, 74, 255),
+                HpEnemy = new Color32(190, 74, 58, 255)
+            },
+            new Look
+            {
+                Caption = "E  ·  CHUNKY  ·  double bevel", Font = "Silkscreen Pixel",
+                LogSize = 24f, ChunkySize = 32f, LabelSize = 24f, NumberSize = 40f, TitleSize = 16f,
+                Frame = "ui_chunky_b",
+
+                Panel = new Color32(37, 43, 62, 255),
+                PanelLight = new Color32(48, 56, 80, 255),
+                Accent = new Color32(214, 158, 66, 255),
+                Text = new Color32(236, 240, 248, 255),
+                Dim = new Color32(146, 156, 180, 255),
+                InkOnAccent = new Color32(38, 30, 12, 255),
+                Hp = new Color32(224, 178, 74, 255),
+                HpEnemy = new Color32(190, 74, 58, 255)
             }
         };
 
@@ -219,7 +253,7 @@ namespace IdleRPG.EditorTools
         private static void BuildTopBar(RectTransform root, Look look, TMP_FontAsset font)
         {
             RectTransform bar = Band(root, "TopBar", 64f, 150f, 28f, 28f);
-            Image9(bar, "Frame", "Colored/grey", look.Panel);
+            Panel9(bar, "Frame", look, look.Panel);
 
             string[] names = { "Gold", "Gems", "Tokens" };
             string[] icons = { "ui_icon_gold.png", "ui_icon_gem.png", "ui_icon_token.png" };
@@ -234,7 +268,7 @@ namespace IdleRPG.EditorTools
 
                 // The token chip is the accent face (Colored/grey is white, so the tint is exact).
                 bool accent = i == 2;
-                Image9(chip, "Frame", "Colored/grey", accent ? look.Accent : look.PanelLight);
+                Panel9(chip, "Frame", look, accent ? look.Accent : look.PanelLight);
                 IconImage(chip, "Icon", icons[i], 60f);
 
                 PixelText(Place(chip, "Value", 96f, 12f, 190f, 72f), "ValueText", values[i], look.NumberSize,
@@ -296,7 +330,7 @@ namespace IdleRPG.EditorTools
         private static void BuildLog(RectTransform root, Look look, TMP_FontAsset font)
         {
             RectTransform log = Band(root, "Log", 1118f, 460f, 28f, 28f);
-            Image9(log, "Frame", "Colored/grey", look.Panel);
+            Panel9(log, "Frame", look, look.Panel);
 
             PixelText(Place(log, "Caption", 20f, 18f, 600f, 30f), "CaptionText",
                 "COMBAT LOG  ·  " + look.LogSize + "px", look.LabelSize * 0.6f,
@@ -316,7 +350,7 @@ namespace IdleRPG.EditorTools
         private static void BuildNav(RectTransform root, Look look, TMP_FontAsset font)
         {
             RectTransform nav = Band(root, "Nav", 1604f, 150f, 28f, 28f);
-            Image9(nav, "Frame", "Colored/grey", look.Panel);
+            Panel9(nav, "Frame", look, look.Panel);
 
             float gap = 8f;
             float slotWidth = (1024f - (4f * gap)) / 5f;
@@ -325,7 +359,7 @@ namespace IdleRPG.EditorTools
             {
                 bool active = i == 0;
                 RectTransform slot = Place(nav, "Nav" + NavLabels[i], i * (slotWidth + gap), 10f, slotWidth, 130f);
-                Image9(slot, "Frame", "Colored/grey", active ? look.Accent : look.PanelLight);
+                Panel9(slot, "Frame", look, active ? look.Accent : look.PanelLight);
 
                 PixelText(Place(slot, "Label", 4f, 8f, slotWidth - 8f, 114f), "Text", NavLabels[i],
                     look.LabelSize, TextAlignmentOptions.Center, active ? look.InkOnAccent : look.Text, font);
@@ -456,6 +490,25 @@ namespace IdleRPG.EditorTools
             string path = slicePath.EndsWith(".png", System.StringComparison.Ordinal)
                 ? ArtRoot + slicePath
                 : ArtRoot + slicePath + ".png";
+
+            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            Image image = UiFactory.Icon(name, parent, tint, false);
+            image.sprite = sprite;
+            image.type = Image.Type.Sliced;
+            UiFactory.Stretch(image.rectTransform);
+            return image;
+        }
+
+        /// <summary>
+        /// A 9-sliced panel using the look's frame: a placeholder frame when the look names one, otherwise
+        /// the pack's neutral grey slice. Tinted, so one neutral sprite serves every palette.
+        /// </summary>
+        private static Image Panel9(Transform parent, string name, Look look, Color tint)
+        {
+            string file = string.IsNullOrEmpty(look.Frame) ? "Colored/grey" : look.Frame;
+            string path = file.Contains("/")
+                ? ArtRoot + file + ".png"
+                : PlaceholderArt + file + ".png";
 
             Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
             Image image = UiFactory.Icon(name, parent, tint, false);

@@ -15,6 +15,9 @@ namespace IdleRPG.EditorTools
     {
         public const string ArtFolder = "Assets/IdleRPG/Art/Placeholder";
 
+        /// <summary>Runtime-loadable folder. The tintable UI frame lives here so StartScreenUI can fetch it.</summary>
+        public const string ResourcesFolder = "Assets/IdleRPG/Resources";
+
         private const int UnitSize = 128;
         private const int PanelSize = 64;
         private const int IconSize = 64;
@@ -59,6 +62,13 @@ namespace IdleRPG.EditorTools
         {
             int count = 0;
 
+            // Tintable neutral frame: one sprite that every lobby panel and button can colour.
+            count += WriteFrame("ui_frame");
+
+            // Chunky 16-bit candidates for the UI Lab comparison (single vs double bevel).
+            count += WriteChunkyFrame("ui_chunky_a", innerLine: false);
+            count += WriteChunkyFrame("ui_chunky_b", innerLine: true);
+
             count += WritePanel("ui_panel", new Color(0.11f, 0.13f, 0.20f, 1f), new Color(0.00f, 0.00f, 0.00f, 0f), 12);
             count += WritePanel("ui_panel_light", new Color(0.18f, 0.21f, 0.30f, 1f), new Color(0.00f, 0.00f, 0.00f, 0f), 12);
             count += WritePanel("ui_panel_bordered", new Color(0.11f, 0.13f, 0.20f, 1f), new Color(0.30f, 0.45f, 0.70f, 1f), 12);
@@ -84,6 +94,15 @@ namespace IdleRPG.EditorTools
             count += WriteIcon("ui_icon_material", new Color(0.72f, 0.60f, 0.42f), IconShape.Ingot);
             count += WriteIcon("ui_icon_essence", new Color(0.55f, 0.95f, 0.85f), IconShape.Flask);
             count += WriteIcon("ui_icon_scroll", new Color(0.92f, 0.86f, 0.66f), IconShape.Scroll);
+
+            // Journey trail marks. White, so the band tints them; point filtered, because they are pixel art.
+            count += WriteIcon("ui_mark_dot", Color.white, IconShape.Circle, pointFilter: true);
+            count += WriteIcon("ui_mark_ring", Color.white, IconShape.Ring, pointFilter: true);
+
+            // Glow halos. White with baked alpha, so one tint drives every glow.
+            count += WriteIcon("ui_glow_soft", Color.white, IconShape.SoftGlow);
+            count += WriteIcon("ui_glow_steps", Color.white, IconShape.StepsGlow, pointFilter: true);
+            count += WriteIcon("ui_glow_burst", Color.white, IconShape.BurstGlow, pointFilter: true);
 
             return count;
         }
@@ -133,7 +152,12 @@ namespace IdleRPG.EditorTools
             Shard,
             Ingot,
             Flask,
-            Scroll
+            Scroll,
+            Circle,
+            Ring,
+            SoftGlow,
+            StepsGlow,
+            BurstGlow
         }
 
         // ------------------------------------------------------------------
@@ -167,25 +191,206 @@ namespace IdleRPG.EditorTools
             Fill(texture, new Color(0f, 0f, 0f, 0f));
 
             bool hasBorder = border.a > 0f;
-            int borderThickness = hasBorder ? 2 : 0;
+            int borderThickness = hasBorder ? 3 : 0;
 
-            FillRoundedRect(texture, borderThickness, borderThickness,
-                PanelSize - borderThickness * 2, PanelSize - borderThickness * 2, cornerRadius, fill);
+            // The face sits inset by the border, so the border stroke owns the outer 2 px.
+            int left = borderThickness;
+            int top = borderThickness;
+            int right = PanelSize - borderThickness;   // exclusive
+            int bottom = PanelSize - borderThickness;  // exclusive
+
+            FillRoundedRect(texture, left, top, right - left, bottom - top, cornerRadius, fill);
+
+            // Retro bevel: a light band on the top + left edges and a dark band on the bottom + right
+            // edges, drawn only on the straight spans so the rounded corners stay clean. This is what
+            // turns a flat rectangle into a raised "3D" frame.
+            // 4 px so the rim still reads after a 9-slice stretch (a 2 px band vanished on big buttons).
+            const int bevel = 4;
+            Color highlight = Lighten(fill, 0.22f);
+            Color shadow = Darken(fill, 0.45f);
+
+            FillRect(texture, left + cornerRadius, top, right - left - cornerRadius * 2, bevel, highlight);
+            FillRect(texture, left, top + cornerRadius, bevel, bottom - top - cornerRadius * 2, highlight);
+            FillRect(texture, left + cornerRadius, bottom - bevel, right - left - cornerRadius * 2, bevel, shadow);
+            FillRect(texture, right - bevel, top + cornerRadius, bevel, bottom - top - cornerRadius * 2, shadow);
 
             if (hasBorder)
             {
                 StrokeRoundedRect(texture, 0, 0, PanelSize, PanelSize, cornerRadius, borderThickness, border);
             }
 
-            // 9-slice border: cover radius + thickness so corners never stretch.
-            int slice = cornerRadius + borderThickness + 2;
+            // 9-slice border: cover radius + border + bevel so the corners never stretch.
+            int slice = cornerRadius + borderThickness + bevel + 2;
             return WriteTexture(texture, fileName, new Vector4(slice, slice, slice, slice));
         }
 
-        private static int WriteIcon(string fileName, Color tint, IconShape shape)
+        /// <summary>
+        /// A neutral, tintable 9-slice frame: white face, light top + left, dark bottom + right, black
+        /// outline. Tint it with any colour and it reads as a raised button, so one sprite serves the whole
+        /// lobby. Lives in Resources so StartScreenUI can load it at runtime.
+        /// </summary>
+        private static int WriteFrame(string fileName)
+        {
+            const int size = 96;
+            Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            Fill(texture, new Color(0f, 0f, 0f, 0f));
+
+            const int cornerRadius = 1;
+            const int outline = 5;
+            const int bevel = 10;
+
+            int left = outline;
+            int top = outline;
+            int right = size - outline;   // exclusive
+            int bottom = size - outline;  // exclusive
+            int spanX = right - left - cornerRadius * 2;
+            int spanY = bottom - top - cornerRadius * 2;
+
+            // Face is mid grey, so the bright ridge still reads after the whole plate is tinted.
+            Color face = new Color(0.90f, 0.90f, 0.90f, 1f);
+            FillRoundedRect(texture, left, top, right - left, bottom - top, cornerRadius, face);
+
+            // Chunky fantasy metal band: bright ridge + dark groove on the lit edges, dark band + light
+            // lip on the shaded edges.
+            // Sun from the top-left (texture y=0 is the bottom, so the visual top is the high-y side).
+            // Stepped gradients on the lit and shaded bands give the gold a polished-metal sheen.
+            Color hi = Color.white;
+            Color lo = new Color(0.05f, 0.05f, 0.07f, 1f);
+
+            // Visual top: bright glint fading into the face (10 px).
+            FillRect(texture, left + cornerRadius, bottom - 10, spanX, 3, hi);
+            FillRect(texture, left + cornerRadius, bottom - 7, spanX, 3, new Color(0.96f, 0.96f, 0.96f, 1f));
+            FillRect(texture, left + cornerRadius, bottom - 4, spanX, 4, new Color(0.92f, 0.92f, 0.92f, 1f));
+
+            // Visual bottom: black fading up into the face (10 px).
+            FillRect(texture, left + cornerRadius, top, spanX, 4, lo);
+            FillRect(texture, left + cornerRadius, top + 4, spanX, 3, new Color(0.30f, 0.30f, 0.30f, 1f));
+            FillRect(texture, left + cornerRadius, top + 7, spanX, 3, new Color(0.60f, 0.60f, 0.60f, 1f));
+
+            // Visual left: thin bright edge (5 px).
+            FillRect(texture, left, top + cornerRadius, 2, spanY, hi);
+            FillRect(texture, left + 2, top + cornerRadius, 3, spanY, new Color(0.92f, 0.92f, 0.92f, 1f));
+
+            // Visual right: thin dark edge (5 px).
+            FillRect(texture, right - 2, top + cornerRadius, 2, spanY, lo);
+            FillRect(texture, right - 5, top + cornerRadius, 3, spanY, new Color(0.30f, 0.30f, 0.30f, 1f));
+
+            // Near-black plate edge.
+            // Inner border at the bevel's inner edge, with the same clipped (stair) corners.
+            DrawInnerBorder(texture, left + 5, top + 10, right - 5, bottom - 10, 4, new Color(0.20f, 0.20f, 0.24f, 1f));
+
+            StrokeRoundedRect(texture, 0, 0, size, size, cornerRadius, outline, new Color(0.05f, 0.05f, 0.08f, 1f));
+
+            // Clip the OUTER corner at the TEXTURE edge (not the inner face) with a big pixel stair.
+            const int clipSteps = 5;
+            Color plateEdge = new Color(0.05f, 0.05f, 0.08f, 1f);
+            ClipOuterCorner(texture, 0, size - 1, 1, -1, clipSteps, plateEdge);
+            ClipOuterCorner(texture, size - 1, size - 1, -1, -1, clipSteps, plateEdge);
+            ClipOuterCorner(texture, 0, 0, 1, 1, clipSteps, plateEdge);
+            ClipOuterCorner(texture, size - 1, 0, -1, 1, clipSteps, plateEdge);
+
+            int slice = cornerRadius + outline + bevel + 2;
+            return WriteTexture(texture, fileName, new Vector4(slice, slice, slice, slice), false, ResourcesFolder);
+        }
+
+        /// <summary>A 1 px border with clipped (stair) corners, so the inner edge is chamfered like the outer one.</summary>
+        private static void DrawInnerBorder(Texture2D texture, int x0, int y0, int x1, int y1, int chamfer, Color color)
+        {
+            for (int x = x0 + chamfer; x <= x1 - chamfer; x++)
+            {
+                texture.SetPixel(x, y0, color);
+                texture.SetPixel(x, y1, color);
+            }
+
+            for (int y = y0 + chamfer; y <= y1 - chamfer; y++)
+            {
+                texture.SetPixel(x0, y, color);
+                texture.SetPixel(x1, y, color);
+            }
+
+            for (int i = 0; i < chamfer; i++)
+            {
+                int j = chamfer - i;
+                texture.SetPixel(x0 + i, y0 + j, color);
+                texture.SetPixel(x1 - i, y0 + j, color);
+                texture.SetPixel(x0 + i, y1 - j, color);
+                texture.SetPixel(x1 - i, y1 - j, color);
+            }
+        }
+
+        /// <summary>Clips the OUTER corner in a pixel stair and strokes the new edge, so the silhouette is chamfered and bordered.</summary>
+        private static void ClipOuterCorner(Texture2D texture, int x, int y, int dx, int dy, int steps, Color outline)
+        {
+            Color clear = new Color(0f, 0f, 0f, 0f);
+
+            for (int i = 0; i < steps; i++)
+            {
+                for (int j = 0; j < steps - i; j++)
+                {
+                    texture.SetPixel(x + dx * i, y + dy * j, clear);
+                }
+
+                // The first kept pixel along this column becomes the new outer edge: stroke it dark.
+                texture.SetPixel(x + dx * i, y + dy * (steps - i), outline);
+            }
+        }
+
+        /// <summary>
+        /// Chunky 16-bit (GBA) frame: near-square corners, a thick high-contrast bevel and a near-black
+        /// outline. <paramref name="innerLine"/> adds the second ridge (double bevel). Tintable like
+        /// <see cref="WriteFrame"/>: white = full tint, grey = darker.
+        /// </summary>
+        private static int WriteChunkyFrame(string fileName, bool innerLine)
+        {
+            Texture2D texture = new Texture2D(PanelSize, PanelSize, TextureFormat.RGBA32, false);
+            Fill(texture, new Color(0f, 0f, 0f, 0f));
+
+            const int cornerRadius = 4;
+            const int outline = 2;
+            const int bevel = 3;
+
+            int left = outline;
+            int top = outline;
+            int right = PanelSize - outline;   // exclusive
+            int bottom = PanelSize - outline;  // exclusive
+            int spanX = right - left - cornerRadius * 2;
+            int spanY = bottom - top - cornerRadius * 2;
+
+            // Face sits below white so the highlight still reads once tinted.
+            Color face = new Color(0.85f, 0.85f, 0.85f, 1f);
+            FillRoundedRect(texture, left, top, right - left, bottom - top, cornerRadius, face);
+
+            // High-contrast bevel: white = full tint, dark grey = deep shadow.
+            Color hi = Color.white;
+            Color lo = new Color(0.35f, 0.35f, 0.35f, 1f);
+            FillRect(texture, left + cornerRadius, top, spanX, bevel, hi);
+            FillRect(texture, left, top + cornerRadius, bevel, spanY, hi);
+            FillRect(texture, left + cornerRadius, bottom - bevel, spanX, bevel, lo);
+            FillRect(texture, right - bevel, top + cornerRadius, bevel, spanY, lo);
+
+            if (innerLine)
+            {
+                // Second ridge: a dark line inside the light edge, a light line inside the dark edge.
+                Color ridge = new Color(0.55f, 0.55f, 0.55f, 1f);
+                Color lip = new Color(0.97f, 0.97f, 0.97f, 1f);
+                FillRect(texture, left + cornerRadius, top + bevel, spanX, 1, ridge);
+                FillRect(texture, left + bevel, top + cornerRadius, 1, spanY, ridge);
+                FillRect(texture, left + cornerRadius, bottom - bevel - 1, spanX, 1, lip);
+                FillRect(texture, right - bevel - 1, top + cornerRadius, 1, spanY, lip);
+            }
+
+            // Near-black outline stays dark under any tint.
+            StrokeRoundedRect(texture, 0, 0, PanelSize, PanelSize, cornerRadius, outline,
+                new Color(0.06f, 0.06f, 0.10f, 1f));
+
+            int slice = cornerRadius + outline + bevel + (innerLine ? 1 : 0) + 2;
+            return WriteTexture(texture, fileName, new Vector4(slice, slice, slice, slice));
+        }
+
+        private static int WriteIcon(string fileName, Color tint, IconShape shape, bool pointFilter = false)
         {
             Texture2D texture = new Texture2D(IconSize, IconSize, TextureFormat.RGBA32, false);
-            Fill(texture, new Color(0f, 0f, 0f, 0f));
+            Clear(texture);
 
             float cx = IconSize * 0.5f;
             float cy = IconSize * 0.5f;
@@ -253,6 +458,28 @@ namespace IdleRPG.EditorTools
                     FillCircle(texture, cx + radius * 0.7f, cy, radius * 0.22f, dark);
                     break;
 
+                case IconShape.Circle:
+                    FillCircle(texture, cx, cy, radius, tint);
+                    break;
+
+                case IconShape.Ring:
+                    DrawRing(texture, cx, cy, radius, radius * 0.62f, tint);
+                    break;
+
+                case IconShape.SoftGlow:
+                    DrawRadialAlpha(texture, cx, cy, radius, d => Mathf.Pow(1f - d, 3f) * 0.85f);
+                    break;
+
+                case IconShape.StepsGlow:
+                    DrawRadialAlpha(texture, cx, cy, radius,
+                        d => d < 0.34f ? 0.30f : (d < 0.58f ? 0.18f : (d < 0.82f ? 0.09f : 0f)));
+                    break;
+
+                case IconShape.BurstGlow:
+                    DrawRadialAlpha(texture, cx, cy, radius,
+                        d => d < 0.62f ? 0.10f : (d < 0.74f ? 0.55f : (d < 0.86f ? 0.22f : 0f)));
+                    break;
+
                 default:
                     FillRoundedRect(texture, Mathf.RoundToInt(IconSize * 0.12f), Mathf.RoundToInt(IconSize * 0.22f),
                         Mathf.RoundToInt(IconSize * 0.76f), Mathf.RoundToInt(IconSize * 0.56f), 8, tint);
@@ -265,15 +492,16 @@ namespace IdleRPG.EditorTools
                     break;
             }
 
-            return WriteTexture(texture, fileName, new Vector4(0, 0, 0, 0));
+            return WriteTexture(texture, fileName, new Vector4(0, 0, 0, 0), pointFilter);
         }
 
         // ------------------------------------------------------------------
         // Asset IO
         // ------------------------------------------------------------------
-        private static int WriteTexture(Texture2D texture, string fileName, Vector4 border)
+        private static int WriteTexture(Texture2D texture, string fileName, Vector4 border, bool pointFilter = false,
+            string folder = null)
         {
-            string path = ArtFolder + "/" + fileName + ".png";
+            string path = (folder ?? ArtFolder) + "/" + fileName + ".png";
             File.WriteAllBytes(path, texture.EncodeToPNG());
             Object.DestroyImmediate(texture);
 
@@ -289,7 +517,7 @@ namespace IdleRPG.EditorTools
             importer.textureType = TextureImporterType.Sprite;
             importer.spriteImportMode = SpriteImportMode.Single;
             importer.spritePixelsPerUnit = 100f;
-            importer.filterMode = FilterMode.Bilinear;
+            importer.filterMode = pointFilter ? FilterMode.Point : FilterMode.Bilinear;
             importer.mipmapEnabled = false;
             importer.alphaIsTransparency = true;
             importer.textureCompression = TextureImporterCompression.Uncompressed;

@@ -242,17 +242,52 @@ namespace IdleRPG.EditorTools
         }
 
         /// <summary>Stage/wave row between the header and the battle screen, centered.</summary>
-        private static void BuildStageRow(RectTransform pageRoot, HudHeaderUI header)
+        /// <summary>
+        /// The journey band: the land name over a trail of marks (Docs/Journey.md).
+        ///
+        /// ELI5: the signpost above the fight. "GREENWAKE", then dots for the steps ahead, a ring for a
+        /// rest stop, a diamond for the boss. It replaces the old "Stage 3  wave 2" label.
+        /// </summary>
+        private static void BuildStageRow(RectTransform pageRoot)
         {
             Image row = KitPanel("StageRow", pageRoot, UiTheme.Panel);
             UiFactory.Anchor(row.rectTransform, new Vector2(0f, StageRowMinY), new Vector2(1f, StageRowMaxY));
 
-            TextMeshProUGUI label = UiFactory.Text("StageLabel", row.transform, "Stage 1", UiType.Role.Section,
-                TextAlignmentOptions.Center, UiTheme.Text);
-            UiFactory.Stretch(label.rectTransform, UiSpace.Large, UiSpace.None, UiSpace.Large, UiSpace.None);
+            JourneyBandUI band = row.gameObject.AddComponent<JourneyBandUI>();
 
-            // Same field HudHeaderUI already drives on StageChanged - just relocated out of the header.
-            SceneWiringUtility.SetField(header, "stageText", label);
+            TextMeshProUGUI land = UiFactory.Text("LandLabel", row.transform, "GREENWAKE", UiType.Role.Section,
+                TextAlignmentOptions.Center, UiTheme.Text);
+            UiFactory.Anchor(land.rectTransform, new Vector2(0f, 0.5f), new Vector2(1f, 1f));
+
+            GameObject trail = UiFactory.Node("Trail", row.transform);
+            RectTransform trailRect = trail.GetComponent<RectTransform>();
+            UiFactory.Anchor(trailRect, new Vector2(0f, 0f), new Vector2(1f, 0.5f));
+
+            const string catalogPath = "Assets/IdleRPG/Data/Config/JourneyCatalog.asset";
+            JourneyCatalog catalog = AssetDatabase.LoadAssetAtPath<JourneyCatalog>(catalogPath);
+            Sprite dot = AssetDatabase.LoadAssetAtPath<Sprite>(UiFactory.ArtFolder + "/ui_mark_dot.png");
+            Sprite ring = AssetDatabase.LoadAssetAtPath<Sprite>(UiFactory.ArtFolder + "/ui_mark_ring.png");
+            Sprite halo = AssetDatabase.LoadAssetAtPath<Sprite>(UiFactory.ArtFolder + "/ui_glow_steps.png");
+            GlowStyle glowStyle = AssetDatabase.LoadAssetAtPath<GlowStyle>(
+                "Assets/IdleRPG/Data/Config/GlowStyle_Dot.asset");
+
+            if (catalog == null)
+            {
+                Debug.LogWarning($"[MvpSceneBuilder] Missing journey catalog at {catalogPath}; the band falls back to its land name.");
+            }
+
+            if (glowStyle == null)
+            {
+                Debug.LogWarning("[MvpSceneBuilder] Missing GlowStyle_Dot; the band will not glow.");
+            }
+
+            SceneWiringUtility.SetField(band, "landLabel", land);
+            SceneWiringUtility.SetField(band, "trailRoot", trailRect);
+            SceneWiringUtility.SetField(band, "catalog", catalog);
+            SceneWiringUtility.SetField(band, "dotSprite", dot);
+            SceneWiringUtility.SetField(band, "ringSprite", ring);
+            SceneWiringUtility.SetField(band, "haloSprite", halo);
+            SceneWiringUtility.SetField(band, "glowStyle", glowStyle);
         }
 
         /// <summary>

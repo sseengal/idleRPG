@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69f48fff0fc4040edb03960093108594, type: 3}
+  m_Name: GlowStyle_Dot
+  m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.UI.GlowStyle
+  tint: {r: 0.84, g: 0.62, b: 0.26, a: 1}
+  haloScale: 2.6
+  steadyAlpha: 0.3
+  peakAlpha: 0.55
+  troughAlpha: 0.12
+  pulseSeconds: 1.6
+  flashSeconds: 0.18

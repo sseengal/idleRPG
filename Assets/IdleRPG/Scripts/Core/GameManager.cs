@@ -82,6 +82,9 @@ namespace IdleRPG.Core
 
         public int CurrentStage { get; private set; } = 1;
 
+        /// <summary>Step (engine "wave") inside the current stage. 1-based; read-only view for the UI.</summary>
+        public int CurrentWave => combatManager != null ? Mathf.Max(1, combatManager.CurrentWave) : 1;
+
         public int HighestStageReached { get; private set; } = 1;
 
         /// <summary>

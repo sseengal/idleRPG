@@ -114,6 +114,78 @@ namespace IdleRPG.EditorTools
             }
         }
 
+        /// <summary>
+        /// Makes every pixel fully transparent. `Blend` refuses a zero-alpha colour, which is correct for
+        /// drawing, so a texture cannot be cleared by filling it - it has to be written directly.
+        /// </summary>
+        private static void Clear(Texture2D texture)
+        {
+            Color32[] empty = new Color32[texture.width * texture.height];
+            texture.SetPixels32(empty);
+            texture.Apply();
+        }
+
+        /// <summary>Draws a white radial sprite whose alpha comes from a distance curve (0 centre, 1 edge).</summary>
+        private static void DrawRadialAlpha(Texture2D texture, float cx, float cy, float radius,
+            System.Func<float, float> alphaAt)
+        {
+            int minX = Mathf.Max(0, Mathf.FloorToInt(cx - radius));
+            int maxX = Mathf.Min(texture.width - 1, Mathf.CeilToInt(cx + radius));
+            int minY = Mathf.Max(0, Mathf.FloorToInt(cy - radius));
+            int maxY = Mathf.Min(texture.height - 1, Mathf.CeilToInt(cy + radius));
+
+            for (int y = minY; y <= maxY; y++)
+            {
+                for (int x = minX; x <= maxX; x++)
+                {
+                    float dx = x + 0.5f - cx;
+                    float dy = y + 0.5f - cy;
+                    float d = Mathf.Sqrt((dx * dx) + (dy * dy)) / radius;
+
+                    if (d > 1f)
+                    {
+                        continue;
+                    }
+
+                    float alpha = Mathf.Clamp01(alphaAt(d));
+
+                    if (alpha <= 0f)
+                    {
+                        continue;
+                    }
+
+                    texture.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                }
+            }
+        }
+
+        /// <summary>A hollow circle: pixels between the inner and outer radius, written straight (no blending).</summary>
+        private static void DrawRing(Texture2D texture, float cx, float cy, float outer, float inner, Color color)
+        {
+            int minX = Mathf.Max(0, Mathf.FloorToInt(cx - outer));
+            int maxX = Mathf.Min(texture.width - 1, Mathf.CeilToInt(cx + outer));
+            int minY = Mathf.Max(0, Mathf.FloorToInt(cy - outer));
+            int maxY = Mathf.Min(texture.height - 1, Mathf.CeilToInt(cy + outer));
+
+            float outerSq = outer * outer;
+            float innerSq = inner * inner;
+
+            for (int y = minY; y <= maxY; y++)
+            {
+                for (int x = minX; x <= maxX; x++)
+                {
+                    float dx = x + 0.5f - cx;
+                    float dy = y + 0.5f - cy;
+                    float d2 = (dx * dx) + (dy * dy);
+
+                    if (d2 <= outerSq && d2 >= innerSq)
+                    {
+                        texture.SetPixel(x, y, color);
+                    }
+                }
+            }
+        }
+
         private static void FillCircle(Texture2D texture, float cx, float cy, float radius, Color color)
         {
             int minX = Mathf.Max(0, Mathf.FloorToInt(cx - radius));

@@ -30,8 +30,6 @@ namespace IdleRPG.UI
         [SerializeField] private TextMeshProUGUI boostText;
 
         private EconomyManager economy;
-        private GameManager manager;
-        private LeaderboardSheetUI leaderboardSheet;
 
         /// <summary>Current header, or null when the scene has no HUD header (debug scenes).</summary>
         public static HudHeaderUI Instance { get; private set; }
@@ -64,7 +62,6 @@ namespace IdleRPG.UI
             HudController hud = HudController.Instance;
             GameManager manager = hud != null ? hud.GameManager : null;
 
-            this.manager = manager;
             economy = manager != null ? manager.Economy : null;
 
             if (economy == null)
@@ -73,7 +70,8 @@ namespace IdleRPG.UI
                 return;
             }
 
-            BuildLeaderboardButton();
+            RestyleChunky();
+            BuildMenuButton();
             RefreshAll();
         }
 
@@ -91,73 +89,55 @@ namespace IdleRPG.UI
             GameEvents.GoldBoostChanged -= OnGoldBoostChanged;
         }
 
-        /// <summary>Width of the RANKS button, in canvas units. A size, not a gap, so it is not on the UiSpace ladder.</summary>
-        private const float RanksButtonWidth = 110f;
+        /// <summary>Width of the menu button, in canvas units. A size, not a gap, so it is not on the UiSpace ladder.</summary>
+        private const float MenuButtonWidth = 110f;
 
         /// <summary>
-        /// Runtime trophy button (right end of the chip row) - opens the global ranks sheet. As the row's last child
-        /// with a fixed width, it takes its own slice and the chips keep the rest, so the two can never overlap.
+        /// Three-bar (hamburger) button at the right end of the chip row. Icon only for now - the tap action is
+        /// wired later. A fixed width joins the layout row so the currency chips keep the rest of the space.
         /// </summary>
-        private void BuildLeaderboardButton()
+        private void BuildMenuButton()
         {
-            // The row is the right parent when the scene provides one; the header is the fallback for a scene built
-            // before the row existed.
             Transform parent = chipRow != null ? chipRow : transform;
 
-            Button trophy = UiRuntime.CreateButton(parent, "LeaderboardButton", "RANKS",
-                new Vector2(0.88f, 0.10f), new Vector2(0.985f, 0.90f), OpenLeaderboard,
-                new Color(0.30f, 0.36f, 0.50f, 1f), null, UiType.Role.Micro);
+            Image background = UiRuntime.CreatePanel(parent, null, new Color(0.20f, 0.26f, 0.40f, 1f), raycast: true);
+            background.gameObject.name = "MenuButton";
+            UiRuntime.Anchor(background.rectTransform, new Vector2(0.88f, 0.10f), new Vector2(0.985f, 0.90f));
+
+            Button button = background.gameObject.AddComponent<Button>();
+            button.targetGraphic = background;
+            // Tap action: wire later.
 
             if (chipRow != null)
             {
-                // In the row: a fixed width and no flex, so the three chips share whatever is left.
-                LayoutElement element = trophy.gameObject.AddComponent<LayoutElement>();
-                element.preferredWidth = RanksButtonWidth;
+                LayoutElement element = background.gameObject.AddComponent<LayoutElement>();
+                element.preferredWidth = MenuButtonWidth;
                 element.flexibleWidth = 0f;
             }
 
-            TextMeshProUGUI label = trophy.GetComponentInChildren<TextMeshProUGUI>();
-            if (label != null)
+            float[] centres = { 0.70f, 0.50f, 0.30f };
+            for (int i = 0; i < centres.Length; i++)
             {
-                // The button is only 89 units wide, so the caption takes the caption role, shrinks to fit, and uses
-                // the full button width (the default 8-unit side padding costs more than the word has to spare).
-                // NoWrap on purpose: the shared button builder allows wrapping, and "RANKS" would break in half.
-                label.textWrappingMode = TextWrappingModes.NoWrap;
-                UiType.ApplyAuto(label, UiType.Role.Micro);
-                UiRuntime.Stretch(label.rectTransform, UiSpace.Hairline, UiSpace.None, UiSpace.Hairline, UiSpace.None);
+                Image bar = UiRuntime.CreateIcon("Bar" + i, background.transform);
+                bar.color = UiTheme.Text;
+                UiRuntime.Anchor(bar.rectTransform, new Vector2(0.28f, centres[i] - 0.055f), new Vector2(0.72f, centres[i] + 0.055f));
             }
         }
 
-        private void OpenLeaderboard()
+        /// <summary>Gives the header bar the chunky riveted plate used by the lobby, so both pages match.</summary>
+        private void RestyleChunky()
         {
-            if (manager == null || manager.Leaderboard == null)
+            Sprite frame = Resources.Load<Sprite>("ui_frame");
+            Image plate = GetComponent<Image>();
+
+            if (frame == null || plate == null)
             {
                 return;
             }
 
-            Canvas canvas = GetComponentInParent<Canvas>();
-            if (canvas == null)
-            {
-                return;
-            }
-
-            if (leaderboardSheet == null)
-            {
-                GameObject node = new GameObject("LeaderboardSheet", typeof(RectTransform));
-                node.transform.SetParent(canvas.transform, false);
-
-                // The host is only a home for the component - the card itself is parented to the overlay canvas by
-                // UiCard, so the host's rect does not matter. Stretched anyway: a default 100x100 node here is the
-                // kind of thing that quietly shrinks a whole screen.
-                UiRuntime.Stretch((RectTransform)node.transform);
-
-                leaderboardSheet = node.AddComponent<LeaderboardSheetUI>();
-                leaderboardSheet.Build(manager);
-            }
-            else
-            {
-                leaderboardSheet.Show();
-            }
+            plate.sprite = frame;
+            plate.type = Image.Type.Sliced;
+            plate.color = new Color(0.12f, 0.16f, 0.24f, 1f);
         }
 
         private void OnCurrencyChanged(CurrencyType currencyType, double amount)

@@ -45,8 +45,8 @@ choice** - a stay-for-this-run upgrade picked from three cards. This is the rogu
 | Rule | Value / behaviour |
 |---|---|
 | XP per kill | `partyXpPerKill x partyXpPerKillStageGrowth^(stage-1)`, bosses x `partyXpBossMultiplier` |
-| Level requirement | `partyXpBase x partyXpGrowth^(level-1)` (first pass 100 x 1.18) |
-| Levels per run | capped by `partyMaxLevelPerRun` (first pass 20); XP stops at the cap |
+| Level requirement | `partyXpBase x partyXpGrowth^(level-1)`; today 20 x 1.18 (front-loaded - level 12 by stage 5). The fit targets ~50 x 1.35 and is measured, not guessed |
+| Levels per run | **no hard cap** (decision 2026-11-09): the requirement curve limits the picks, not a counter. Target shape is **10-12 picks**, first by wave 2, last near where the run ends |
 | Picks | one per level; a kill that crosses two levels queues two picks, dealt back to back |
 | Lifetime | run-scoped - level, XP and queued picks clear with the run, next to run gold |
 | Cards | **built 2026-11-09**: 3 dealt, rarity-weighted, never a maxed card, `REFRESH 1/1` per run; every pick writes a feed line (`Boon: Cleaving Blow`) |

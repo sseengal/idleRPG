@@ -127,8 +127,8 @@ PERKS / SHOP) and its management page are **retired** and no longer built into t
 | --- | --- | --- |
 | BATTLE | live | closes the lobby and runs the fight |
 | PARTY | live | read-only roster: hero cards, the selected hero's stats, gear and ability slots |
-| ASCENSION | live | the perk shop: four token tracks, one level per tap |
-| TRAINING | live | the gold tree (three heroes) plus the party track |
+| ASCEND | live | the perk shop: four token tracks, one level per tap |
+| TRAIN | live | the gold tree (three heroes) plus the party track |
 | SHOP | placeholder | shows a "coming soon" line; no content behind it |
 
 **The level-up card** is an overlay, not a page: it owns the screen while a pick is owed (fighter paused), shows the
@@ -159,8 +159,9 @@ close is always top-left, primary button reachable one-handed (1080x1920 referen
 - The lobby is a full-screen page on its own canvas above the battle HUD. It **reuses the real header**
   (`HudHeaderUI`): `StartScreenUI` re-parents that object into the lobby canvas while the lobby is open and puts it
   back before a run starts (`DetachSharedHeader`). No second currency bar is drawn anywhere.
-- **The bottom nav shows the open tab**: the selected page is gold, the rest are dark. Opening TRAINING highlights
-  TRAINING; going back to BATTLE highlights BATTLE.
+- **The bottom nav shows the open tab**: each tab carries an icon; only the selected tab shows its word. The selected
+  tab lifts, wears the brighter blue face and shows icon + label centred (see §2b). Opening TRAIN highlights TRAIN;
+  going back to BATTLE highlights BATTLE.
 - **Runtime menus use the type scale and the touch rule.** Every label picks a `UiType` role and every control clears
   `UiTouch.MinTarget` (144) - no hand-written sizes, and the fonts come from `UiTheme` (Silkscreen chrome, VT323
   sentences), not the TMP default. Glyphs are drawn as sprites when the font lacks one (arrows).
@@ -171,6 +172,25 @@ close is always top-left, primary button reachable one-handed (1080x1920 referen
   never stack. All of them sit in the same box (`0.02-0.98` x `0.13-0.885`) and are opaque, so the lobby card
   behind them cannot show through.
 - Pages that are not built yet (SHOP alone) show a one-line status note instead of an empty page.
+
+### 2b. Bottom tabs: icons, text only on the selected tab (2026-11-12)
+
+- The five bottom tabs are drawn by `FantasyTabButton` on the chunky `ui_frame` plate.
+- **Icons** come from one sheet, `Art/Button Icons.png`, imported as **Multiple** sprites: `icon_shop` (bag),
+  `icon_party` (three adventurers), `icon_battle` (crossed swords), `icon_ascend` (arrow + star), `icon_train`
+  (dummy). Reading order on the sheet is battle, ascend, train, shop, party.
+- **Idle tab:** icon only, large, centred. **Selected tab:** the icon lifts/shrinks and the word appears centred
+  beneath it. The word is hidden by fading its alpha, so switching tabs eases instead of snapping.
+- **Tuning** (plain numbers; the button holds no magic):
+  - `StartScreenUI.TabIconScale(tab)` - idle size (`1` = normal; `PARTY 0.97`, `ASCEND/TRAIN 0.94`).
+  - `StartScreenUI.TabIconSelectedScale(tab)` - selected size (`PARTY 1.03`, `BATTLE 1.10`).
+  - `StartScreenUI.TabIconVertical(tab)` - idle upward nudge as a fraction of icon height (`BATTLE 0.07`,
+    `ASCEND/TRAIN 0.03`). Positive = up.
+  - `StartScreenUI.TabIconSelectedVertical(tab)` - selected nudge (`TRAIN 0.07`).
+  - `FantasyTabButton.Update` holds the base shape: `0.66` idle height, `0.50` selected height, `0.19` idle bottom,
+    `0.35` selected bottom (fractions of the tab height).
+- The five sprites are wired on `StartScreenUI` (`tabShopIcon` ... `tabTrainIcon`); the scene builder sets them too,
+  so a rebuild keeps them.
 
 
 ## 3. Battle screen (multi-enemy + formation)
@@ -298,7 +318,8 @@ condition ("2 stars", "zone 3").
 
 ## 10. Open questions
 
-1. Bottom nav: 5 items at 1080 wide is tight - mock it before Step 10 (icon-only, label only on the active item).
+1. ~~Bottom nav: 5 items at 1080 wide is tight~~ **Done 2026-11-12:** each tab shows its icon only; the selected tab
+   adds its label beneath the icon (see §2b).
 2. Formation board: 2x3 is comfortable; a 5-hero (2+3) pattern needs design - Step 10.
 3. Combat log: keep the scrolling strip, or a collapsible drawer once abilities add lines? Decide in Step 13.
 

@@ -43,11 +43,6 @@ namespace IdleRPG.UI
                 trainingPanel.SetActive(true);
             }
 
-            if (statusLabel != null)
-            {
-                statusLabel.SetText(string.Empty);
-            }
-
             RefreshTree();
             ScrollTreeToBottom();
         }

@@ -6,7 +6,8 @@
         "IdleRPG.Utils",
         "UnityEngine.UI",
         "Unity.TextMeshPro",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "Coffee.UIEffect"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
