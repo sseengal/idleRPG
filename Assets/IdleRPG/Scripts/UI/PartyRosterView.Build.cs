@@ -68,8 +68,8 @@ namespace IdleRPG.UI
                 TextAlignmentOptions.Center, Color.white);
             UiRuntime.Anchor(bigNameLabel.rectTransform, new Vector2(0.02f, 0.28f), new Vector2(0.46f, 0.36f), UiSpace.Snug, UiSpace.None, UiSpace.Snug, UiSpace.None);
 
-            Image statsPanel = UiRuntime.CreatePanel(root, null, cardColor);
-            UiRuntime.Anchor(statsPanel.rectTransform, new Vector2(0.48f, 0.44f), new Vector2(0.97f, 0.795f));
+            Image statsPanel = UiRuntime.Plate(root, "Stats",
+                new Vector2(0.48f, 0.44f), new Vector2(0.97f, 0.795f), cardColor);
 
             roleLabel = UiRuntime.CreateText(root, "Role", string.Empty, UiType.Role.Small,
                 TextAlignmentOptions.MidlineLeft, accentColor);

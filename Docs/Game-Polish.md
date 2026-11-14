@@ -194,3 +194,28 @@ code. Nothing here is speculative.*
   UiPlateButton, so those buttons gained the press squash and the grayscale disable for free.
 - Level-up card: plate shell + plate rows (rows carry the same press/disabled behaviour) + a plate REFRESH
   button that truly grayscales when no re-roll is left. Tabs keep FantasyTabButton (lift/halo/pose).
+
+
+---
+
+## UI consistency programme - Phase 4: Training page (2026-11-14)
+
+- Surfaces: the Training page panel, the column header strip and the node popup card now wear the chunky
+  ui_frame plate (UiRuntime.PlateSprite, 9-sliced). Inner scroll face and the small diamond nodes stay flat
+  on purpose - rivets on tiny elements read as noise.
+- Buttons: hero header cells, tree diamonds and the scroll buttons now carry the shared UiPlateButton
+  behaviour (press squash + disabled grayscale). Nodes keep their diamond art; SetFaces() keeps their
+  state colour (owned / next / locked) easing correctly instead of fighting the button lerp.
+- No layout or gameplay change: colours, anchors and the tree math are untouched.
+
+
+---
+
+## UI consistency programme - Phase 5: Party and Perks pages (2026-11-14)
+
+- The shared lobby page shell (CreateLobbyPanel) now wears the ui_frame plate, so BOTH the Party and the
+  Perks pages gained the chunky frame with one change.
+- Perk rows are plated cards; the Party hero stats panel is plated. Small chips stay flat by design:
+  gear slots, roster cards, formation pads and tab faces remain the flat theme fills.
+- Buy buttons on the Perks page were already UiPlateButtons from Phase 2, so they squash and grayscale
+  when unaffordable.

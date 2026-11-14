@@ -92,7 +92,10 @@ namespace IdleRPG.UI
             rect.anchorMax = new Vector2(0.98f, 0.885f);
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
-            panel.GetComponent<Image>().color = UiTheme.PageSunken;
+            Image pageImage = panel.GetComponent<Image>();
+            pageImage.color = UiTheme.PageSunken;
+            pageImage.sprite = UiRuntime.PlateSprite;
+            pageImage.type = Image.Type.Sliced;
             return panel;
         }
 
@@ -133,7 +136,7 @@ namespace IdleRPG.UI
         private void BuildPerkRow(Transform parent, PrestigeUpgradeData data, float top, float rowHeight)
         {
             float bottom = top - rowHeight;
-            Panel(parent, "PerkRow", new Vector2(0.02f, bottom), new Vector2(0.98f, top), UiTheme.Row);
+            Panel(parent, "PerkRow", new Vector2(0.02f, bottom), new Vector2(0.98f, top), UiTheme.Row, UiRuntime.PlateSprite);
 
             TextMeshProUGUI name = Text(parent, "Name", new Vector2(0.04f, top - 0.062f), new Vector2(0.52f, top - 0.008f),
                 data.DisplayName, UiType.Role.Section, Color.white);
