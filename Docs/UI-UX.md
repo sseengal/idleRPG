@@ -334,3 +334,12 @@ All Checks) fails the run on any new hand-written constant colour; colours with 
 (procedural glow/vignette textures) are exempt because they are generated art, not design decisions.
 Consolidating near-identical tokens further (the gold family) is a design decision to make with
 screenshots, not a refactor.
+
+
+## 12. One button, one plate (2026-11-14)
+
+New buttons use UiPlateButton.Create - chunky ui_frame face, idle/selected colour hand-off, press squash
+and a true grayscale disable. The bottom tabs keep FantasyTabButton because they add the lift, the
+breathing halo and the icon/word pose. Panels come from UiRuntime.Plate; small chips stay flat on purpose.
+Known remaining migration work: the battle-page chrome (ability strip, camp strip, viewport) and the
+management pages still use the old kit faces - Phases 4-7 of the consistency programme.

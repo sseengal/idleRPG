@@ -179,3 +179,18 @@ code. Nothing here is speculative.*
 - Zero visual change intended: values are the exact ones the screens already used, except the
   documented merges above. Consolidating the remaining near-twins (the golds) is a later, screenshot-led
   design decision, not a refactor.
+
+
+---
+
+## UI consistency programme - Phases 2-3: one button, one plate (2026-11-14)
+
+- UiPlateButton (Common/UiPlateButton.cs): the shared button - chunky ui_frame face, smooth idle/selected
+  colour hand-off, press squash (95.5%), and a true grayscale when disabled via UIEffect. Creates itself with
+  UiPlateButton.Create(parent, name, anchors, text, role, idle, active, onClick).
+- UiRuntime.Plate + UiRuntime.PlateSprite: one runtime plate factory (9-sliced ui_frame). Rule: big surfaces
+  wear the plate; small chips stay flat so the rivets do not turn tiny things into noise.
+- Migrated: the lobby Btn helper (START, MENU, Perks Buy, Training popup Buy) now builds through
+  UiPlateButton, so those buttons gained the press squash and the grayscale disable for free.
+- Level-up card: plate shell + plate rows (rows carry the same press/disabled behaviour) + a plate REFRESH
+  button that truly grayscales when no re-roll is left. Tabs keep FantasyTabButton (lift/halo/pose).
