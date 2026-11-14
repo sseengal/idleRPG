@@ -506,14 +506,22 @@ namespace IdleRPG.UI
             // and the letter both step aside, so the icon is the button (no frame behind it).
             Sprite nodeArt = trainingIcons != null ? trainingIcons.IconFor(node.Effect) : null;
             Image art = null;
+            Image nodeGlow = null;
 
             if (nodeArt != null)
             {
+                nodeGlow = UiRuntime.CreateIcon("Glow", nodeGO.transform);
+                nodeGlow.sprite = UiRuntime.SoftGlowSprite;
+                UiRuntime.Anchor(nodeGlow.rectTransform, new Vector2(-0.08f, -0.08f), new Vector2(1.08f, 1.08f));
+                Color glowTint = UiTheme.GoldSoft;
+                glowTint.a = 0f;
+                nodeGlow.color = glowTint;
+
                 GameObject artGO = new GameObject("Art", typeof(RectTransform), typeof(Image));
                 RectTransform artRect = artGO.GetComponent<RectTransform>();
                 artRect.SetParent(nodeGO.transform, false);
-                artRect.anchorMin = new Vector2(0.10f, 0.10f);
-                artRect.anchorMax = new Vector2(0.90f, 0.90f);
+                artRect.anchorMin = new Vector2(0.06f, 0.06f);
+                artRect.anchorMax = new Vector2(0.94f, 0.94f);
                 artRect.offsetMin = Vector2.zero;
                 artRect.offsetMax = Vector2.zero;
 
@@ -571,6 +579,7 @@ namespace IdleRPG.UI
                 Plate = nodePlate,
                 Connector = connector,
                 Badge = badge,
+                Glow = nodeGlow,
                 Rect = nr,
                 Column = column
             });
@@ -650,6 +659,15 @@ namespace IdleRPG.UI
                 if (view.Badge != null)
                 {
                     view.Badge.gameObject.SetActive(isNext);
+                }
+
+                if (view.Glow != null)
+                {
+                    // A soft gold halo only when this node is the next one AND the player can pay for it now.
+                    bool canBuy = isNext && training.CanAffordNode(view.Node);
+                    Color glowColor = view.Glow.color;
+                    glowColor.a = canBuy ? 0.45f : 0f;
+                    view.Glow.color = glowColor;
                 }
 
                 if (view.Connector != null)

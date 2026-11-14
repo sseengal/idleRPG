@@ -285,3 +285,23 @@ code. Nothing here is speculative.*
   so it is wired but not visible until the battle strip is present.
 - Fix: AbilityPanelUI.RestylePlates now runs from OnEnable - it was only reachable from ConfigureRuntime,
   which nothing calls at runtime, so the plate face and the badge never applied before.
+
+
+---
+
+## Icon system pass: one skin, shared glow, medallion polish (2026-11-14)
+
+- UiSkin is now the SINGLE reskin home for icon art too: goldIcon, gemIcon, tokenIcon, weaponIcon,
+  armorIcon, trinketIcon (Resources asset, so runtime UI can read it). A reskin is still one asset.
+- Header: HudHeaderUI.RestyleCurrencyIcons swaps the three chip icons from the skin at start (the scene keeps
+  its placeholder icons, so a scene rebuild cannot undo it).
+- Items: ItemVisuals.SlotIcon(slot) resolves the skin icon; the roster gear slots and the inventory tiles
+  draw it and hide the letter, which stays as the fallback.
+- Glow: UiRuntime.SoftGlowSprite is one shared, cached radial texture; StartScreenUI atmosphere now reuses
+  it instead of building a second copy.
+- Training: medallions at 127px (0.06-0.94). A soft gold halo shows only when the node is NEXT and
+  CanAffordNode() is true - refresh-driven, no per-frame polling. Connectors stay behind the nodes.
+- Ability strip: real scene object confirmed; its OnEnable now restyles the plate and creates the icon badge
+  (3 badges at runtime), so ability icons appear once a hero has an ability equipped.
+- Verified in Play: chips = pxi_coin/pxi_gem_ruby/pxi_key; 1357 nodes all 127px with glow objects, 4 glowing
+  (one affordable next-node per column); UiColourCheck PASS, UiSpacingCheck PASS.

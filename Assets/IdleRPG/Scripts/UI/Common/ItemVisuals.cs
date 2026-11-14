@@ -32,6 +32,22 @@ namespace IdleRPG.UI
             }
         }
 
+        /// <summary>Gear-slot icon from the skin; null falls back to the slot letter.</summary>
+        public static Sprite SlotIcon(ItemSlotType slot)
+        {
+            UiSkin skin = UiSkin.Current;
+
+            switch (slot)
+            {
+                case ItemSlotType.Weapon:
+                    return skin.weaponIcon;
+                case ItemSlotType.Armor:
+                    return skin.armorIcon;
+                default:
+                    return skin.trinketIcon;
+            }
+        }
+
         /// <summary>Compact placeholder tile letter.</summary>
         public static string SlotLetter(ItemSlotType slot)
         {

@@ -71,6 +71,7 @@ namespace IdleRPG.UI
             }
 
             RestyleChunky();
+            RestyleCurrencyIcons();
             BuildMenuButton();
             RefreshAll();
         }
@@ -121,6 +122,39 @@ namespace IdleRPG.UI
                 Image bar = UiRuntime.CreateIcon("Bar" + i, background.transform);
                 bar.color = UiTheme.Text;
                 UiRuntime.Anchor(bar.rectTransform, new Vector2(0.28f, centres[i] - 0.055f), new Vector2(0.72f, centres[i] + 0.055f));
+            }
+        }
+
+        /// <summary>Swaps the currency chip icons for the skin's art (the scene keeps placeholder icons).</summary>
+        private void RestyleCurrencyIcons()
+        {
+            UiSkin skin = UiSkin.Current;
+            SetChipIcon("GoldChip", skin.goldIcon);
+            SetChipIcon("GemChip", skin.gemIcon);
+            SetChipIcon("TokenChip", skin.tokenIcon);
+        }
+
+        private void SetChipIcon(string chipName, Sprite sprite)
+        {
+            if (sprite == null)
+            {
+                return;
+            }
+
+            foreach (Image image in GetComponentsInChildren<Image>(true))
+            {
+                if (image.name != "Icon" || image.transform.parent == null)
+                {
+                    continue;
+                }
+
+                if (image.transform.parent.name != chipName)
+                {
+                    continue;
+                }
+
+                image.sprite = sprite;
+                image.preserveAspect = true;
             }
         }
 

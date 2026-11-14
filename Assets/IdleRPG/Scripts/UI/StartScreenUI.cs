@@ -71,6 +71,7 @@ namespace IdleRPG.UI
         {
             public IdleRPG.Data.TrainingNode Node;
             public Image Diamond;
+            public Image Glow;        // affordability halo behind the medallion
             public UiPlateButton Plate;   // shared press/disabled behaviour on the diamond node
             public Image Connector;   // line ABOVE this node (to the one above it)
             public Image Badge;
@@ -481,7 +482,6 @@ namespace IdleRPG.UI
         // Atmosphere sprites are built in code and cached: no new art, one tiny gradient + two small radial
         // textures. They add depth (light + shadow) without touching the chapter art or the START button.
         private static Sprite gradientSprite;
-        private static Sprite glowSprite;
         private static Sprite vignetteSprite;
 
         private static Sprite VerticalGradient
@@ -515,36 +515,8 @@ namespace IdleRPG.UI
             }
         }
 
-        private static Sprite SoftGlow
-        {
-            get
-            {
-                if (glowSprite != null) { return glowSprite; }
-
-                const int size = 128;
-                Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
-                tex.wrapMode = TextureWrapMode.Clamp;
-                tex.filterMode = FilterMode.Bilinear;
-                Vector2 centre = new Vector2((size - 1) * 0.5f, (size - 1) * 0.5f);
-                float maxR = size * 0.5f;
-
-                for (int y = 0; y < size; y++)
-                {
-                    for (int x = 0; x < size; x++)
-                    {
-                        float d = Vector2.Distance(new Vector2(x, y), centre) / maxR;
-                        float a = Mathf.Clamp01(1f - d);
-                        a *= a;
-                        tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
-                    }
-                }
-
-                tex.Apply();
-                glowSprite = Sprite.Create(tex, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f), 100f);
-                glowSprite.name = "UiSoftGlow";
-                return glowSprite;
-            }
-        }
+        /// <summary>The shared soft glow from UiRuntime - one texture for every halo.</summary>
+        private static Sprite SoftGlow => UiRuntime.SoftGlowSprite;
 
         private static Sprite Vignette
         {

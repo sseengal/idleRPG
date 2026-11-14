@@ -140,9 +140,16 @@ namespace IdleRPG.UI
                 UiRuntime.Anchor(slot.rectTransform, new Vector2(x0, 0.335f), new Vector2(x0 + width, 0.412f));
                 gearSlotBackgrounds[i] = slot;
 
+                Sprite slotIcon = ItemVisuals.SlotIcon((ItemSlotType)i);
+                Image slotArt = UiRuntime.CreateIcon("Icon", slot.transform);
+                UiRuntime.Anchor(slotArt.rectTransform, new Vector2(0.14f, 0.34f), new Vector2(0.86f, 0.94f));
+                slotArt.sprite = slotIcon;
+                slotArt.enabled = slotIcon != null;
+
                 TextMeshProUGUI letter = UiRuntime.CreateText(slot.transform, "Letter", ItemVisuals.SlotLetter((ItemSlotType)i), UiType.Role.Section,
                     TextAlignmentOptions.Center, Color.white);
                 UiRuntime.Anchor(letter.rectTransform, new Vector2(0.02f, 0.38f), new Vector2(0.98f, 0.95f), 0f, 0f, 0f, 0f);
+                letter.enabled = slotIcon == null;
 
                 TextMeshProUGUI stat = UiRuntime.CreateText(slot.transform, "Stat", "empty", UiType.Role.Micro,
                     TextAlignmentOptions.Center, dimText);

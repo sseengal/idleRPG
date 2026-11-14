@@ -20,6 +20,9 @@ MonoBehaviour:
   body: {r: 1, g: 1, b: 1, a: 0.75}
   button: {r: 0.3, g: 0.36, b: 0.5, a: 1}
   accent: {r: 0.84, g: 0.62, b: 0.26, a: 1}
-  titleSize: 30
-  bodySize: 20
-  buttonSize: 22
+  goldIcon: {fileID: 21300000, guid: 91e0ede5f8a774e2e98c426214816c86, type: 3}
+  gemIcon: {fileID: 21300000, guid: a2b5d2ebc9cf949f6ac89847d31cf493, type: 3}
+  tokenIcon: {fileID: 21300000, guid: 5ddd791210c1b4cdabf79b032dc5d27f, type: 3}
+  weaponIcon: {fileID: 21300000, guid: ce2b78db960ee41d396e578ef3cc4cf4, type: 3}
+  armorIcon: {fileID: 21300000, guid: b920e8f2f860b4e1aa5209771d036365, type: 3}
+  trinketIcon: {fileID: 21300000, guid: a2b5d2ebc9cf949f6ac89847d31cf493, type: 3}

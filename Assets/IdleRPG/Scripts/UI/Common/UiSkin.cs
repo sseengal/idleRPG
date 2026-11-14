@@ -40,6 +40,17 @@ namespace IdleRPG.UI
         public Color button = UiTheme.SheetFace;
         public Color accent = UiTheme.GoldDark;
 
+        [Header("Icons (Tavmir + Fantasy RPG icon packs)")]
+        [Tooltip("Currency chip icons. Empty keeps the scene's placeholder icon.")]
+        public Sprite goldIcon;
+        public Sprite gemIcon;
+        public Sprite tokenIcon;
+
+        [Tooltip("Gear slot icons: 0 Weapon, 1 Armor, 2 Trinket. Empty falls back to the slot letter.")]
+        public Sprite weaponIcon;
+        public Sprite armorIcon;
+        public Sprite trinketIcon;
+
         private static UiSkin current;
 
         /// <summary>The project's skin, or a default instance when the asset is missing (never null).</summary>

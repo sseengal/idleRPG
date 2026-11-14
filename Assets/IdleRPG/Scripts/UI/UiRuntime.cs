@@ -119,6 +119,40 @@ namespace IdleRPG.UI
             return image;
         }
 
+        private static Sprite softGlowSprite;
+
+        /// <summary>A soft radial glow (white, baked alpha) shared by halos, highlights and the training tree.</summary>
+        public static Sprite SoftGlowSprite
+        {
+            get
+            {
+                if (softGlowSprite != null) { return softGlowSprite; }
+
+                const int size = 128;
+                Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+                tex.wrapMode = TextureWrapMode.Clamp;
+                tex.filterMode = FilterMode.Bilinear;
+                Vector2 centre = new Vector2((size - 1) * 0.5f, (size - 1) * 0.5f);
+                float maxR = size * 0.5f;
+
+                for (int y = 0; y < size; y++)
+                {
+                    for (int x = 0; x < size; x++)
+                    {
+                        float d = Vector2.Distance(new Vector2(x, y), centre) / maxR;
+                        float a = Mathf.Clamp01(1f - d);
+                        a *= a;
+                        tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
+                    }
+                }
+
+                tex.Apply();
+                softGlowSprite = Sprite.Create(tex, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f), 100f);
+                softGlowSprite.name = "UiSoftGlow";
+                return softGlowSprite;
+            }
+        }
+
         /// <summary>Centres a rect on a normalised point with a fixed size.</summary>
         public static void CenterOn(RectTransform rect, Vector2 normalizedCenter, Vector2 size)
         {

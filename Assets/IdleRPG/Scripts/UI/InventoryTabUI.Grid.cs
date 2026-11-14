@@ -136,6 +136,13 @@ namespace IdleRPG.UI
                 TextAlignmentOptions.Center, Color.white);
             UiRuntime.Stretch(letter.rectTransform, 0f, 18f, 0f, 8f);
 
+            Sprite slotIcon = ItemVisuals.SlotIcon(item.SlotType);
+            Image slotArt = UiRuntime.CreateIcon("Icon", tile.transform);
+            UiRuntime.Anchor(slotArt.rectTransform, new Vector2(0.14f, 0.34f), new Vector2(0.86f, 0.94f));
+            slotArt.sprite = slotIcon;
+            slotArt.enabled = slotIcon != null;
+            letter.enabled = slotIcon == null;
+
             TextMeshProUGUI stat = UiRuntime.CreateText(tile.transform, "Stat",
                 "+" + item.PercentText + " " + ItemVisuals.StatLabel(item.SlotType), UiType.Role.Micro,
                 TextAlignmentOptions.Center, bodyText);
