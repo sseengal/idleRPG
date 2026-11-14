@@ -85,7 +85,7 @@ namespace IdleRPG.UI
         private GameObject treePopup;
         private TextMeshProUGUI popupTitle;
         private TextMeshProUGUI popupBody;
-        private Button popupBuy;
+        private UiPlateButton popupBuy;
         private Image popupCoin;
         private Image popupStar;
         private IdleRPG.Data.TrainingNode popupNode;
@@ -638,19 +638,12 @@ namespace IdleRPG.UI
             return t;
         }
 
-        private static Button Btn(Transform parent, string name, Vector2 aMin, Vector2 aMax, string label, Color bg,
+        private static UiPlateButton Btn(Transform parent, string name, Vector2 aMin, Vector2 aMax, string label, Color bg,
             UiType.Role role, UnityEngine.Events.UnityAction onClick)
         {
-            Image img = Panel(parent, name, aMin, aMax, bg, Frame);
-            Button b = img.gameObject.AddComponent<Button>();
-            b.targetGraphic = img;
-
-            TextMeshProUGUI t = Text(img.transform, "Label", Vector2.zero, Vector2.one, label, role, Color.white);
-            UiType.ApplyAuto(t, role);
-            t.raycastTarget = false;
-
-            b.onClick.AddListener(onClick);
-            return b;
+            // One shared button: plate face, press squash, grayscale disable. idle == active keeps the face
+            // steady for plain action buttons; the tabs are the ones that change colour when chosen.
+            return UiPlateButton.Create(parent, name, aMin, aMax, label, role, bg, bg, onClick);
         }
     }
 }

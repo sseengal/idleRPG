@@ -868,7 +868,7 @@ namespace IdleRPG.UI
             if (popupBuy != null)
             {
                 popupBuy.gameObject.SetActive(showButton);
-                popupBuy.interactable = showButton && gateMet && affordable;
+                popupBuy.SetInteractable(showButton && gateMet && affordable);
 
                 TextMeshProUGUI label = popupBuy.GetComponentInChildren<TextMeshProUGUI>(true);
 

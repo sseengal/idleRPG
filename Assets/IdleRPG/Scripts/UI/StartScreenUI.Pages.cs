@@ -29,7 +29,7 @@ namespace IdleRPG.UI
             public PrestigeUpgradeData Data;
             public TextMeshProUGUI EffectLabel;
             public TextMeshProUGUI LevelLabel;
-            public Button BuyButton;
+            public UiPlateButton BuyButton;
             public TextMeshProUGUI BuyLabel;
         }
 
@@ -151,7 +151,7 @@ namespace IdleRPG.UI
             level.textWrappingMode = TextWrappingModes.NoWrap;
             UiType.ApplyAuto(level, UiType.Role.Small);
 
-            Button buy = Btn(parent, "Buy", new Vector2(0.73f, bottom + 0.008f), new Vector2(0.98f, top - 0.008f),
+            UiPlateButton buy = Btn(parent, "Buy", new Vector2(0.73f, bottom + 0.008f), new Vector2(0.98f, top - 0.008f),
                 "Buy", UiTheme.Orange, UiType.Role.Small, () => BuyPerk(data));
 
             MakeCardIcon(buy.transform, StarSprite(), UiTheme.Purple);
@@ -214,7 +214,7 @@ namespace IdleRPG.UI
 
                 if (row.BuyButton != null)
                 {
-                    row.BuyButton.interactable = !maxed && affordable;
+                    row.BuyButton.SetInteractable(!maxed && affordable);
                 }
 
                 if (row.BuyLabel != null)

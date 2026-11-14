@@ -164,3 +164,18 @@ code. Nothing here is speculative.*
   selected tab shows icon + label centred beneath it, easing in. Per-tab size and vertical nudges live in
   `StartScreenUI` (`TabIconScale`, `TabIconSelectedScale`, `TabIconVertical`, `TabIconSelectedVertical`); the base
   fractions live in `FantasyTabButton.Update`.
+
+
+---
+
+## UI consistency programme - Phase 1: the named palette (2026-11-14)
+
+- Every colour the UI draws is now a name in UiTheme (80 new tokens: nav blues, golds, rarity,
+  Ready/Cooling/Queued/Locked ability states, HP states, log colours, item tints, atmosphere stops).
+  158 hand-written colours across 35 files were replaced; near-duplicates (within 0.05 in one channel)
+  were merged so one job has one name.
+- New guard UiColourCheck (Tools > Idle RPG > UI > Check Colours), registered in Run All Checks, fails
+  the run on any new hand-written constant colour. Procedural textures (computed channel) are exempt.
+- Zero visual change intended: values are the exact ones the screens already used, except the
+  documented merges above. Consolidating the remaining near-twins (the golds) is a later, screenshot-led
+  design decision, not a refactor.

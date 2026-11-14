@@ -103,6 +103,22 @@ namespace IdleRPG.UI
             rect.offsetMax = new Vector2(-right, -top);
         }
 
+        private static Sprite plateSprite;
+
+        /// <summary>The chunky riveted plate (ui_frame) - the one face for panels and buttons. Runtime-loadable.</summary>
+        public static Sprite PlateSprite =>
+            plateSprite != null ? plateSprite : (plateSprite = Resources.Load<Sprite>("ui_frame"));
+
+        /// <summary>A 9-sliced chunky plate. Big surfaces wear this; small chips stay flat by design.</summary>
+        public static Image Plate(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax,
+            Color color, bool raycast = false)
+        {
+            Image image = CreatePanel(parent, PlateSprite, color, raycast);
+            image.gameObject.name = name;
+            Anchor(image.rectTransform, anchorMin, anchorMax);
+            return image;
+        }
+
         /// <summary>Centres a rect on a normalised point with a fixed size.</summary>
         public static void CenterOn(RectTransform rect, Vector2 normalizedCenter, Vector2 size)
         {

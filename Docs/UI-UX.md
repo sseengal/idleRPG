@@ -323,3 +323,14 @@ condition ("2 stars", "zone 3").
 2. Formation board: 2x3 is comfortable; a 5-hero (2+3) pattern needs design - Step 10.
 3. Combat log: keep the scrolling strip, or a collapsible drawer once abilities add lines? Decide in Step 13.
 
+
+
+## 11. The named palette (2026-11-14)
+
+Every constant colour in the UI code comes from UiTheme - 80 named tokens covering the nav blues,
+golds, rarity (Rare/Epic/Legendary), ability states (Ready/Cooling/Queued/Locked), HP states, log line
+colours, item tints, ink opacities, scrims and the atmosphere stops. UiColourCheck (registered in Run
+All Checks) fails the run on any new hand-written constant colour; colours with a computed channel
+(procedural glow/vignette textures) are exempt because they are generated art, not design decisions.
+Consolidating near-identical tokens further (the gold family) is a design decision to make with
+screenshots, not a refactor.
