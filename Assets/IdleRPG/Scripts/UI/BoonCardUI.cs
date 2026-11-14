@@ -33,6 +33,7 @@ namespace IdleRPG.UI
             public Image Background;
             public TextMeshProUGUI Rarity;
             public Image Icon;
+            public Image IconArt;
             public TextMeshProUGUI IconLetter;
             public TextMeshProUGUI Name;
             public TextMeshProUGUI Target;
@@ -187,12 +188,21 @@ namespace IdleRPG.UI
                 row.Icon.color = new Color(tint.r * 0.45f, tint.g * 0.45f, tint.b * 0.45f, 1f);
             }
 
+            Sprite art = card.Icon;
+
+            if (row.IconArt != null)
+            {
+                row.IconArt.sprite = art;
+                row.IconArt.enabled = art != null;
+            }
+
             if (row.IconLetter != null)
             {
-                // Placeholder art: the card's first letter on a rarity-tinted badge. Swap for a real icon later.
+                // Fallback art: the card's first letter on a rarity-tinted badge, until a real icon is wired.
                 string name = card.DisplayName;
                 row.IconLetter.SetText(string.IsNullOrEmpty(name) ? "?" : name.Substring(0, 1));
                 row.IconLetter.color = tint;
+                row.IconLetter.enabled = art == null;
             }
 
             if (row.Name != null)
@@ -316,6 +326,10 @@ namespace IdleRPG.UI
 
             row.Icon = UiRuntime.CreatePanel(background.transform, null, UiTheme.IconWell);
             UiRuntime.Anchor(row.Icon.rectTransform, new Vector2(0.04f, 0.12f), new Vector2(0.26f, 0.78f));
+
+            row.IconArt = UiRuntime.CreateIcon("Art", row.Icon.transform);
+            UiRuntime.Stretch(row.IconArt.rectTransform);
+            row.IconArt.enabled = false;
 
             row.IconLetter = UiRuntime.CreateText(row.Icon.transform, "Letter", "?",
                 UiType.Role.Section, TextAlignmentOptions.Center, UiTheme.Text);

@@ -18,6 +18,7 @@ MonoBehaviour:
   kind: 2
   target: 3
   artSlot: Attack03
+  icon: {fileID: 21300000, guid: 857e87728d2a94ead81db0cc20921c95, type: 3}
   impactVfx: 
   impactDelaySec: 0
   impactVfxScale: 1

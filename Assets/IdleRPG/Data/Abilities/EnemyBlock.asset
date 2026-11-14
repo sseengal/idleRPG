@@ -18,6 +18,7 @@ MonoBehaviour:
   kind: 0
   target: 0
   artSlot: Ability
+  icon: {fileID: 21300000, guid: b3af0d9d9ad0c403497ffaf7e3abc426, type: 3}
   impactVfx: 
   impactDelaySec: 0
   impactVfxScale: 1

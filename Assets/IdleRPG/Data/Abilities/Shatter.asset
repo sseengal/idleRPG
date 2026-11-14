@@ -18,6 +18,7 @@ MonoBehaviour:
   kind: 2
   target: 3
   artSlot: Attack02
+  icon: {fileID: 21300000, guid: b1e3b185353ad4b1bb4a793ec6b938c4, type: 3}
   impactVfx: ice_shatter
   impactDelaySec: 0.35
   impactVfxScale: 1

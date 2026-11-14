@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: Thorned Mail
   description: 
   rarity: 2
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: fb7a80b1d6e6d4e30bb9bf22ccfb1d66, type: 3}
   allHeroes: 0
   heroID: hero_knight
   effects:

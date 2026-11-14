@@ -267,3 +267,21 @@ code. Nothing here is speculative.*
 - Verified in Play: all 10 effects resolve to distinct sprites; UiColourCheck 0 offenders; UiSpacingCheck PASS.
 - Note: this pack draws each icon as a medallion (stone disc + gold rim), so the diamond reads as a frame
   around a badge. Judged acceptable; if it feels heavy, the fix is to hide the diamond face when art exists.
+
+
+---
+
+## Training medallions + boon/ability art (2026-11-14)
+
+- Training nodes: the diamond and the pale-gold ring are gone. When a node has art the MEDALLION is the
+  node - it is the click target; the diamond and letter survive only as the fallback for a missing sprite.
+  Art at 0.10-0.90 of the 144 node (115px). State: full colour when owned or next; dimmed (InkGreyMid)
+  when locked, LineSoft when deferred; the green arrow badge still marks the next purchase.
+- Boons: all 13 PerkData assets now carry a Tavmir icon (sword_long sword, chest, coin, aimed_shot, axe,
+  potion_red, shield_wood, staff, berserk, multi_shot, war_slash, poison, life_drain). The level-up card
+  draws the icon over the rarity-tinted well and keeps the letter as the fallback.
+- Abilities: AbilityDef gained an icon field; 11 assets assigned (6 player + 5 enemy). The strip draws a
+  small badge in the cell top-right, created at runtime. The current scene has no AbilityPanelUI instance,
+  so it is wired but not visible until the battle strip is present.
+- Fix: AbilityPanelUI.RestylePlates now runs from OnEnable - it was only reachable from ConfigureRuntime,
+  which nothing calls at runtime, so the plate face and the badge never applied before.

@@ -488,19 +488,6 @@ namespace IdleRPG.UI
             nr.sizeDelta = new Vector2(NodeSize, NodeSize);
             nr.anchoredPosition = new Vector2(xPx, -centerY);
 
-            GameObject ringGO = new GameObject("Ring", typeof(RectTransform), typeof(Image));
-            RectTransform rr = ringGO.GetComponent<RectTransform>();
-            rr.SetParent(nodeGO.transform, false);
-            rr.anchorMin = Vector2.zero;
-            rr.anchorMax = Vector2.one;
-            rr.offsetMin = new Vector2(5f, 5f);
-            rr.offsetMax = new Vector2(-5f, -5f);
-            rr.localRotation = UnityEngine.Quaternion.Euler(0f, 0f, 45f);
-            Image ring = ringGO.GetComponent<Image>();
-            ring.color = UiTheme.GoldRim;   // pale gold rim, brighter than the fill
-            ring.raycastTarget = false;
-            ringGO.SetActive(false);
-
             GameObject diaGO = new GameObject("Diamond", typeof(RectTransform), typeof(Image));
             RectTransform dr = diaGO.GetComponent<RectTransform>();
             dr.SetParent(nodeGO.transform, false);
@@ -515,25 +502,28 @@ namespace IdleRPG.UI
             TextMeshProUGUI icon = Text(nodeGO.transform, "Icon", Vector2.zero, Vector2.one, IconLetter(node.Effect), UiType.Role.Section, Color.white);
             icon.raycastTarget = false;
 
-            // Real art when the icon set has one for this effect; the letter above stays as the fallback.
+            // Real art when the icon set has one for this effect. The medallion IS the node then: the diamond
+            // and the letter both step aside, so the icon is the button (no frame behind it).
             Sprite nodeArt = trainingIcons != null ? trainingIcons.IconFor(node.Effect) : null;
+            Image art = null;
 
             if (nodeArt != null)
             {
                 GameObject artGO = new GameObject("Art", typeof(RectTransform), typeof(Image));
                 RectTransform artRect = artGO.GetComponent<RectTransform>();
                 artRect.SetParent(nodeGO.transform, false);
-                artRect.anchorMin = new Vector2(0.17f, 0.17f);
-                artRect.anchorMax = new Vector2(0.83f, 0.83f);
+                artRect.anchorMin = new Vector2(0.10f, 0.10f);
+                artRect.anchorMax = new Vector2(0.90f, 0.90f);
                 artRect.offsetMin = Vector2.zero;
                 artRect.offsetMax = Vector2.zero;
 
-                Image art = artGO.GetComponent<Image>();
+                art = artGO.GetComponent<Image>();
                 art.sprite = nodeArt;
                 art.preserveAspect = true;
-                art.raycastTarget = false;
+                art.raycastTarget = true;    // the medallion is the click target now
 
                 icon.enabled = false;
+                diaGO.SetActive(false);
             }
 
             GameObject badgeGO = new GameObject("Badge", typeof(RectTransform), typeof(Image));
@@ -543,7 +533,7 @@ namespace IdleRPG.UI
             br.anchorMax = new Vector2(0.5f, 0.5f);
             br.pivot = new Vector2(0.5f, 0.5f);
             br.sizeDelta = new Vector2(40f, 40f);
-            br.anchoredPosition = new Vector2(54f, -54f);
+            br.anchoredPosition = new Vector2(40f, -40f);
             Image badge = badgeGO.GetComponent<Image>();
             badge.sprite = CircleSprite();
             badge.color = UiTheme.GreenBadge;
@@ -563,7 +553,7 @@ namespace IdleRPG.UI
             badgeGO.SetActive(false);
 
             Button button = nodeGO.AddComponent<Button>();
-            button.targetGraphic = diamond;
+            button.targetGraphic = art != null ? art : diamond;
             button.transition = Selectable.Transition.None;
             TrainingNode captured = node;
             int capturedColumn = column;
@@ -572,7 +562,7 @@ namespace IdleRPG.UI
             // The node keeps its diamond art but gains the shared press squash and disabled grayscale.
             Coffee.UIEffects.UIEffect nodeEffect = nodeGO.AddComponent<Coffee.UIEffects.UIEffect>();
             UiPlateButton nodePlate = nodeGO.AddComponent<UiPlateButton>();
-            nodePlate.Bind(nodeGO.GetComponent<RectTransform>(), diamond, null, nodeEffect, button, UiTheme.LineGrey, UiTheme.LineGrey);
+            nodePlate.Bind(nodeGO.GetComponent<RectTransform>(), art != null ? art : diamond, null, nodeEffect, button, Color.white, Color.white);
 
             treeViews.Add(new TreeView
             {
@@ -581,7 +571,6 @@ namespace IdleRPG.UI
                 Plate = nodePlate,
                 Connector = connector,
                 Badge = badge,
-                Ring = ring,
                 Rect = nr,
                 Column = column
             });
@@ -648,19 +637,19 @@ namespace IdleRPG.UI
                     view.Diamond.color = color;
                 }
 
+                // Full-colour art while owned or next; dimmed when locked or deferred (there is no frame now).
+                Color iconTint = unlocked || isNext
+                    ? Color.white
+                    : (view.Node.IsDeferred ? UiTheme.LineSoft : UiTheme.InkGreyMid);
+
                 if (view.Plate != null)
                 {
-                    view.Plate.SetFaces(color, color);
+                    view.Plate.SetFaces(iconTint, iconTint);
                 }
 
                 if (view.Badge != null)
                 {
                     view.Badge.gameObject.SetActive(isNext);
-                }
-
-                if (view.Ring != null)
-                {
-                    view.Ring.gameObject.SetActive(unlocked);
                 }
 
                 if (view.Connector != null)

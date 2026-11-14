@@ -32,6 +32,7 @@ namespace IdleRPG.UI
             public TextMeshProUGUI clockLabel;
             public Image clockFill;
             public Button castButton;
+            public Image abilityIcon;
         }
 
         [SerializeField] private Row[] rows = new Row[0];
@@ -80,6 +81,15 @@ namespace IdleRPG.UI
                     face.sprite = UiRuntime.PlateSprite;
                     face.type = Image.Type.Sliced;
                 }
+
+                // A small ability icon in the cell's top-right corner; hidden until the hero has an ability.
+                if (rows[i].castButton != null && rows[i].abilityIcon == null)
+                {
+                    Image badge = UiRuntime.CreateIcon("AbilityIcon", rows[i].castButton.transform);
+                    UiRuntime.Anchor(badge.rectTransform, new Vector2(0.66f, 0.60f), new Vector2(0.96f, 0.96f));
+                    badge.enabled = false;
+                    rows[i].abilityIcon = badge;
+                }
             }
         }
 
@@ -119,6 +129,7 @@ namespace IdleRPG.UI
         private void OnEnable()
         {
             Bind();
+            RestylePlates();
             WireButtons();
             portraitsBound = RefreshPortraits();
         }
@@ -168,6 +179,17 @@ namespace IdleRPG.UI
             if (row.abilityLabel != null)
             {
                 row.abilityLabel.SetText(hasAbility ? hero.AbilityName : "No ability");
+            }
+
+            if (row.abilityIcon != null)
+            {
+                AbilityDef equipped = card != null && manager != null && manager.Abilities != null
+                    ? manager.Abilities.EquippedFor(card)
+                    : null;
+
+                Sprite icon = equipped != null ? equipped.Icon : null;
+                row.abilityIcon.sprite = icon;
+                row.abilityIcon.enabled = icon != null;
             }
 
             if (row.clockLabel != null)

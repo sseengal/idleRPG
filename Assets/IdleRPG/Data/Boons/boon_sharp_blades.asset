@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: Sharpened Blades
   description: 
   rarity: 0
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: ce2b78db960ee41d396e578ef3cc4cf4, type: 3}
   allHeroes: 1
   heroID: 
   effects:

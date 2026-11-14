@@ -31,6 +31,11 @@ namespace IdleRPG.Data
         [Tooltip("Which art slot plays it: \"Ability\" (the character's own special strip) or a numbered attack strip such as \"Attack02\". A character without that strip simply does not play one.")]
         [SerializeField] private string artSlot = "Ability";
 
+        [Tooltip("Icon shown as a badge on the ability button. Empty hides the badge.")]
+        [SerializeField] private Sprite icon;
+
+        public Sprite Icon => icon;
+
         [Header("Impact effect")]
         [Tooltip("Sprite sheet id under Resources/Vfx (e.g. \"ice_shatter\"). Played on the target when the move lands. Empty = none.")]
         [SerializeField] private string impactVfx = "";

@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: Greedy Hands
   description: 
   rarity: 0
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 91e0ede5f8a774e2e98c426214816c86, type: 3}
   allHeroes: 1
   heroID: 
   effects:
