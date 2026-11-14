@@ -605,3 +605,17 @@ stage-1 = Demon). Slime/Bat/Goblin placeholders are untouched.
   damage numbers all look frozen even though `eval` still answers - `Time.frameCount` stuck near 1 is the tell).
   Call `unity-mcp editor_focus` (plus set_autotick if you prefer headless ticking) before any live observation.
 
+
+
+---
+
+## 30. Two free icon packs adopted (2026-11-14)
+
+| Pack | Path | Licence | Use |
+|---|---|---|---|
+| Tavmir Pixel Fantasy - Free Starter (52 sprites, 1x/2x/4x) | Assets/IdleRPG/Art/PixelFantasy_FreeStarter/ | Free commercial + personal; credit appreciated; do not redistribute as a pack | Boons + abilities (planned), 1x imported Point |
+| Fantasy RPG Icons FREE 24 (24 icons, 128/256/512) | Assets/IdleRPG/Art/FantasyRPGIcons_Free24/ | Free commercial; no attribution; no redistribution as a pack; no AI-dataset use | Training nodes (live), 128 imported Bilinear |
+
+Import rules: only ONE resolution per pack is imported (Tavmir 1x, Fantasy 128); the upscales are kept out
+of the build. Sprites are uncompressed, no mips, alpha-transparent; filter differs on purpose - Point keeps
+the 34px Tavmir art chunky, Bilinear keeps the 128px Fantasy art clean when downscaled to ~95px.

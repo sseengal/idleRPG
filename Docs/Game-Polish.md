@@ -250,3 +250,20 @@ code. Nothing here is speculative.*
 - Deliberately NOT changed: the combat log Dialogue size (a visual decision that needs a screenshot
   session), and the ability cells keep their state tints (they repaint by design, so the shared colour
   lerp would fight them).
+
+
+---
+
+## Training node icons - first real art (2026-11-14)
+
+- Source: FantasyRPGIcons_Free24 (free for commercial use). Only the 128px set is imported: Sprite,
+  Bilinear, no mips, uncompressed. 256/512 are not in the build.
+- Data: new TrainingIconSet asset (Assets/IdleRPG/Data/Training/TrainingIconSet.asset), one sprite per
+  TrainingEffect: 0 sword_long, 1 shield_round, 2 meat_leg, 3 potion_health, 4 coin_gold, 5 chest_treasure,
+  6 spellbook_red, 7 scroll_sealed, 8 spell_heal, 9 wand_crystal.
+- UI: each diamond draws the icon at 0.17-0.83 of the node (95px of 144); the old letter stays as the
+  fallback so a missing sprite never leaves a blank node. Icons are full colour; the diamond still carries
+  the owned/next/locked state colour.
+- Verified in Play: all 10 effects resolve to distinct sprites; UiColourCheck 0 offenders; UiSpacingCheck PASS.
+- Note: this pack draws each icon as a medallion (stone disc + gold rim), so the diamond reads as a frame
+  around a badge. Judged acceptable; if it feels heavy, the fix is to hide the diamond face when art exists.
