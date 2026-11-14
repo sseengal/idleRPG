@@ -8,9 +8,9 @@ namespace IdleRPG.UI
     /// <summary>
     /// One hero's ability cell, built in code so the layout has ONE owner.
     ///
-    /// ELI5: a small button. Top line: the hero's name on the left, the state word (READY / QUEUED / 12s) on the
-    /// right. Below it: the move's picture on the left, the move's name beside it, and a thin bar along the bottom
-    /// that fills while the move rests.
+    /// ELI5: one big button per hero. The move's picture sits in the button, the move's name sits under it in one
+    /// small line, and a thin line along the bottom edge says the state. Green line = press me now. A gold bar
+    /// growing left to right = the move is resting, and its length IS the countdown. Dark line = nothing to press.
     ///
     /// Why it builds itself instead of using a prefab: the prefab's bands were placed by hand and could not be
     /// reviewed, so a badge added in code landed on top of the text. Now the scene builder AND the running game call
@@ -19,26 +19,27 @@ namespace IdleRPG.UI
     /// </summary>
     public sealed class AbilityCellView : MonoBehaviour
     {
-        /// <summary>The ability picture size, in canvas units at the 1080x1920 reference.</summary>
-        public const float IconSize = 72f;
+        /// <summary>The picture's source size. All 11 move icons are 34x34 pixels.</summary>
+        private const float ArtPixels = 34f;
 
-        /// <summary>Height of the name/state band. One Micro line plus room for the pixel font's cap.</summary>
-        private const float NameBand = 28f;
+        /// <summary>Zoom applied to that art. A whole number, so no pixel column ends up half a pixel wide.</summary>
+        private const float IconZoom = 3f;
 
-        /// <summary>Room kept on the right of the name for the longest state word (GUARD 3).</summary>
-        private const float StateWidth = 84f;
+        /// <summary>The picture size in canvas units: 34 x 3 = 102. One zoom down from 4, so the move's name fits.</summary>
+        public const float IconSize = ArtPixels * IconZoom;
 
-        /// <summary>The cooldown line under the content: thin, so it reads as an underline, not a second button.</summary>
-        private const float BarHeight = UiSpace.Tight;
+        /// <summary>The state line: thin enough to read as an underline, not as a second button.</summary>
+        private const float BarHeight = UiSpace.Snug;
+
+        /// <summary>One line of the move's name: the floor size, because the name is a caption, not a control.</summary>
+        private static readonly float NameHeight = UiType.LineHeight(UiType.Role.Micro);
 
         [SerializeField] private Button castButton;
         [SerializeField] private UiPlateButton plate;
         [SerializeField] private Image abilityIcon;
-        [SerializeField] private TextMeshProUGUI nameLabel;
-        [SerializeField] private TextMeshProUGUI abilityLabel;
-        [SerializeField] private TextMeshProUGUI clockLabel;
-        [SerializeField] private Image clockTrack;
-        [SerializeField] private Image clockFill;
+        [SerializeField] private TextMeshProUGUI abilityName;
+        [SerializeField] private Image stateRail;
+        [SerializeField] private Image stateFill;
 
         /// <summary>Builds the runtime row the ability panel drives for this cell.</summary>
         public AbilityPanelUI.Row ToRow(int heroIndex)
@@ -48,12 +49,14 @@ namespace IdleRPG.UI
                 heroIndex = heroIndex,
                 plate = plate,
                 abilityIcon = abilityIcon,
-                nameLabel = nameLabel,
-                abilityLabel = abilityLabel,
-                clockLabel = clockLabel,
-                clockTrack = clockTrack,
-                clockFill = clockFill,
-                castButton = castButton
+                abilityName = abilityName,
+                stateRail = stateRail,
+                stateFill = stateFill,
+                castButton = castButton,
+
+                // The line is built full and dark, so the first frame shows the state it was built in, not a
+                // half-drawn bar rising out of nowhere.
+                shownFill = 1f
             };
         }
 
@@ -77,64 +80,56 @@ namespace IdleRPG.UI
             cell.castButton = button;
             cell.plate = plateView;
 
-            // Top band: hero name on the left, state word on the right. Same baseline, same inset.
-            cell.nameLabel = UiRuntime.CreateText(face.transform, "Name", string.Empty, UiType.Role.Micro,
-                TextAlignmentOptions.TopLeft, UiTheme.TextDim);
-            TopBand(cell.nameLabel.rectTransform, UiSpace.Medium, UiSpace.Medium + StateWidth + UiSpace.Small);
-
-            cell.clockLabel = UiRuntime.CreateText(face.transform, "State", string.Empty, UiType.Role.Micro,
-                TextAlignmentOptions.TopRight, UiTheme.Ready);
-            RectTransform stateRect = cell.clockLabel.rectTransform;
-            stateRect.anchorMin = new Vector2(1f, 1f);
-            stateRect.anchorMax = new Vector2(1f, 1f);
-            stateRect.pivot = new Vector2(1f, 1f);
-            stateRect.sizeDelta = new Vector2(StateWidth, NameBand);
-            stateRect.anchoredPosition = new Vector2(-UiSpace.Medium, -UiSpace.Small);
-
-            // Left: the picture. A hair below the optical centre so the name band never crowds it.
+            // The picture sits above the name. Both are pinned to the bottom edge, so the name and the state line
+            // stay welded together whatever height the strip hands the cell.
             cell.abilityIcon = UiRuntime.CreateIcon("Icon", face.transform);
             RectTransform iconRect = cell.abilityIcon.rectTransform;
-            iconRect.anchorMin = new Vector2(0f, 0.5f);
-            iconRect.anchorMax = new Vector2(0f, 0.5f);
-            iconRect.pivot = new Vector2(0f, 0.5f);
+            iconRect.anchorMin = new Vector2(0.5f, 0f);
+            iconRect.anchorMax = new Vector2(0.5f, 0f);
+            iconRect.pivot = new Vector2(0.5f, 0f);
             iconRect.sizeDelta = new Vector2(IconSize, IconSize);
-            iconRect.anchoredPosition = new Vector2(UiSpace.Medium, -UiSpace.Tight);
+            iconRect.anchoredPosition = new Vector2(0f, IconBottom);
             cell.abilityIcon.enabled = false;
 
-            // Middle: the move's name, on the icon's centre line and starting after it.
-            cell.abilityLabel = UiRuntime.CreateText(face.transform, "Ability", string.Empty, UiType.Role.Small,
-                TextAlignmentOptions.Left, UiTheme.Text);
-            RectTransform abilityRect = cell.abilityLabel.rectTransform;
-            abilityRect.anchorMin = new Vector2(0f, 0.5f);
-            abilityRect.anchorMax = new Vector2(1f, 0.5f);
-            abilityRect.pivot = new Vector2(0f, 0.5f);
-            abilityRect.offsetMin = new Vector2(UiSpace.Medium + IconSize + UiSpace.Small, -NameBand * 0.5f - UiSpace.Tight);
-            abilityRect.offsetMax = new Vector2(-UiSpace.Medium, NameBand * 0.5f - UiSpace.Tight);
-            UiType.ApplyAuto(cell.abilityLabel, UiType.Role.Small);
+            // The move's name. A picture alone cannot say WHICH move this is, so the cell says it once, small and
+            // dim, in the same words the party page uses.
+            cell.abilityName = UiRuntime.CreateText(face.transform, "Name", string.Empty, UiType.Role.Micro,
+                TextAlignmentOptions.Center, UiTheme.TextDim);
+            RectTransform nameRect = cell.abilityName.rectTransform;
+            nameRect.anchorMin = new Vector2(0f, 0f);
+            nameRect.anchorMax = new Vector2(1f, 0f);
+            nameRect.pivot = new Vector2(0.5f, 0f);
+            nameRect.sizeDelta = new Vector2(-2f * UiSpace.Medium, NameHeight);
+            nameRect.anchoredPosition = new Vector2(0f, NameBottom);
 
-            // Bottom: the cooldown line. Track first, fill on top, both hidden until the move is resting.
-            cell.clockTrack = UiRuntime.CreatePanel(face.transform, null, UiTheme.PanelLight);
-            cell.clockTrack.gameObject.name = "CooldownTrack";
-            PlaceBar(cell.clockTrack.rectTransform);
-            cell.clockTrack.raycastTarget = false;
-            cell.clockTrack.enabled = false;
+            // The state line. The rail is laid first and never moves; the fill sits inside it and covers it
+            // completely whenever the fill is full, so the panel drives ONE graphic instead of two on a normal cell.
+            cell.stateRail = UiRuntime.CreatePanel(face.transform, null, UiTheme.PanelLight);
+            cell.stateRail.gameObject.name = "StateRail";
+            PlaceBar(cell.stateRail.rectTransform);
+            cell.stateRail.raycastTarget = false;
 
-            cell.clockFill = UiRuntime.CreateFilledImage("Cooldown", face.transform, UiTheme.GoldSoft);
-            PlaceBar(cell.clockFill.rectTransform);
-            cell.clockFill.enabled = false;
+            // Starts full and dark, so an empty cell reads "off" instead of flashing a half-drained bar before the
+            // fight data arrives.
+            //
+            // The fill's LENGTH comes from its right anchor, not from Image.fillAmount: a Filled image without a
+            // sprite ignores fillAmount and always draws the whole rect - which is why the line used to sit full and
+            // unmoving through the whole cooldown. Anchors clip by geometry, so no sprite is needed.
+            cell.stateFill = UiRuntime.CreatePanel(cell.stateRail.transform, null, UiTheme.Locked);
+            cell.stateFill.gameObject.name = "State";
+            PlaceFill(cell.stateFill.rectTransform);
 
             return cell;
         }
 
-        /// <summary>A top-anchored band with its own left and right insets, so two labels share one baseline.</summary>
-        private static void TopBand(RectTransform rect, float left, float right)
-        {
-            rect.anchorMin = new Vector2(0f, 1f);
-            rect.anchorMax = new Vector2(1f, 1f);
-            rect.pivot = new Vector2(0.5f, 1f);
-            rect.sizeDelta = new Vector2(-(left + right), NameBand);
-            rect.anchoredPosition = new Vector2((left - right) * 0.5f, -UiSpace.Small);
-        }
+        /// <summary>
+        /// The name's bottom edge, in canvas units from the cell's bottom: the plate inset, the state line, and one
+        /// hairline between the two, so the line never touches the letters.
+        /// </summary>
+        private static float NameBottom => UiSpace.Small + BarHeight + UiSpace.Hairline;
+
+        /// <summary>The picture's bottom edge: the name's top plus one tight gap.</summary>
+        private static float IconBottom => NameBottom + NameHeight + UiSpace.Tight;
 
         /// <summary>A thin line along the bottom edge, inset like the text above it.</summary>
         private static void PlaceBar(RectTransform rect)
@@ -144,6 +139,16 @@ namespace IdleRPG.UI
             rect.pivot = new Vector2(0.5f, 0f);
             rect.sizeDelta = new Vector2(-2f * UiSpace.Medium, BarHeight);
             rect.anchoredPosition = new Vector2(0f, UiSpace.Small);
+        }
+
+        /// <summary>The fill covers its whole rail to begin with; the panel moves only its right edge.</summary>
+        private static void PlaceFill(RectTransform rect)
+        {
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.pivot = new Vector2(0f, 0.5f);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
         }
     }
 }

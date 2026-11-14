@@ -333,3 +333,76 @@ Assets/Screenshots/ability-cells-v2.png.
 
 Follow-up: AbilityCell.prefab is no longer used by the build path. The scene still carries its instances
 until the next rebuild; delete the asset after a rebuild confirms the code-built cells.
+
+
+---
+
+## Ability strip: the picture IS the cell (2026-11-14)
+
+Why: the cells still carried four pieces of text (hero name, ability name, state word, and later a GUARD count)
+around a 72px picture. Three cells of small text under a fight asked the player to read instead of look, and the
+state word duplicated what the line under it could say on its own.
+
+Now: each cell is one picture and one line, nothing else.
+- Ability picture at 136 = the art's own 34px x 4. A whole-number zoom, so no pixel column lands half a pixel
+  wide. It is centred in the room between the plate's top inset and the bar, which puts it BarHeight/2 above
+  the true centre.
+- State line along the bottom: 316 x 6, inset 12 at the sides and 8 off the bottom. One graphic is driven; the
+  rail behind it is a fixed slate line that a full fill covers completely.
+  - ready = full green (UiTheme.Ready)
+  - resting = gold fill growing left to right (UiTheme.GoldSoft); its LENGTH is the countdown
+  - press waiting = full amber (UiTheme.Queued), which is the only "your tap landed" cue
+  - no ability, or dead = no line, no picture, greyed plate
+- Removed: both text labels, the state word, the GUARD count, the three serialized tint fields, and the old
+  4px/`Tight` bar. Bar colours now come from UiTheme at the point of use, so no saved scene value can repaint
+  the line (the stale `coolingTint` was why the sliver once looked gold while the code claimed dark slate).
+- The icon sprite is only re-assigned when it changes; assigning the same sprite every frame rebuilt the
+  canvas every frame.
+
+Losses, stated plainly: no names means the three cells are told apart by picture and left-to-right party order
+(the same order as the fighters above); GUARD is no longer visible in the strip (the fight still floats
+"GUARD UP" over the knight); and there are no seconds, only a proportion.
+
+Verified in Play: cells 340 x 168, icon 136 with identical Y, rail and fill both 316 x 6 at y 8, green full when
+ready, gold partial while resting; UiColourCheck PASS, UiSpacingCheck PASS. Screenshots:
+Assets/Screenshots/ability-icons-hero.png and Assets/Screenshots/ability-bar-cooling.png.
+
+---
+
+## Ability strip: the move's name back, and a line that really fills (2026-11-15)
+
+Supersedes the section above.
+
+Why two changes in one pass:
+1. With no text, the three cells could only be told apart by picture and party order. The player asked for the
+   move's name back, so he can see WHICH move he is pressing.
+2. The gold line never grew. `Image.fillAmount` is ignored by Unity when the image carries no sprite, and every
+   state line in the game is a sprite-less colour quad - so the line sat full for the whole cooldown, then flipped
+   to green. The fight also moves its clock in 0.05 s steps, so even a working bar would arrive as small jumps.
+
+Now:
+- The move's name sits under the picture: `UiType.Micro` (26), centred, one line, `UiTheme.TextDim` when ready and
+  `UiTheme.TextMuted` while resting - the same dimming rule as the picture. Text = `AbilityDef.DisplayName`, with
+  `Combatant.AbilityName` as the fallback. It is written only when the string changes, so no canvas rebuild per
+  frame. Hidden together with the picture and the line (no ability, or hero down).
+- The picture is 34 x 3 = 102, anchored to the cell's bottom edge. Numbers: line 8..14, name 16..49, picture
+  53..155, plate top inset at 160 - four units spare. A whole-number zoom, so it stays crisp; the old 136 no longer
+  fits beside a name.
+- The line's length now comes from the fill's right ANCHOR, not from `fillAmount`: geometry always clips, and it
+  needs no sprite. The fill is a child of the rail, so one rect still owns the bar's place on the cell.
+- The drawn length eases toward the fight's value (`1 - exp(-16 * dt)`, about 60 ms): each 0.05 s step of the fight
+  becomes a short glide, and the value always lands on the fight's own number, so the line cannot drift or claim
+  "ready" early. Amber when a press waits for its turn, gold while resting, green at full.
+
+Losses, stated plainly: the picture is a quarter smaller than before; the name needs a move whose name fits one
+316-wide line (the longest today is "Holy Slash", 10 characters); and the drawn line trails the fight by about
+60 ms, which is invisible at rest but real.
+
+Found while doing this, NOT fixed here: the hero and enemy health bars use the same sprite-less Filled images, so
+they also ignore fillAmount and always draw full length. Same root cause, different owner (`HpBarView`). It needs
+its own small change.
+
+Verified in Play: cells 340 x 168, picture 102 at y 53.3, name at y 16 (h 33.3), rail 316 x 6 at y 8, fill 40 % gold
+at y 8 measured from the capture (126 of 316 px), full green when ready; UiColourCheck PASS, UiSpacingCheck PASS,
+UiTypeScaleCheck reports only its three old Boot-splash errors and no ability-strip issue. Screenshots:
+Assets/Screenshots/ability-name-cooling.png and Assets/Screenshots/ability-name-ready.png.

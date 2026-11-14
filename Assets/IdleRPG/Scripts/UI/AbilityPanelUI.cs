@@ -11,12 +11,12 @@ namespace IdleRPG.UI
     /// <summary>
     /// The battle page's ability strip, one cell per hero (Ability-Plan).
     ///
-    /// ELI5: three buttons under the fight. Each shows the hero's name, the special move that hero wears as a
-    /// picture, and whether the move is ready, waiting or resting. Press one and that hero uses the move.
+    /// ELI5: three buttons under the fight. Each one is that hero's special move: a picture, the move's name under
+    /// it, and a thin line along the bottom edge that says the state. Press one and that hero uses the move.
     ///
     /// The cell's LOOK lives in <see cref="AbilityCellView.Build"/> - one owner for the layout. This class only
-    /// drives the STATE: the picture, the name, the state word and the cooldown line. A press queues that hero's
-    /// cast; everything shown comes from the fight itself, so the strip cannot drift from the sim.
+    /// drives the STATE: the picture and the state line. A press queues that hero's cast; everything shown comes
+    /// from the fight itself, so the strip cannot drift from the sim.
     /// </summary>
     public sealed class AbilityPanelUI : MonoBehaviour
     {
@@ -27,20 +27,27 @@ namespace IdleRPG.UI
             public int heroIndex;
             public UiPlateButton plate;
             public Image abilityIcon;
-            public TextMeshProUGUI nameLabel;
-            public TextMeshProUGUI abilityLabel;
-            public TextMeshProUGUI clockLabel;
-            public Image clockTrack;
-            public Image clockFill;
+            public TextMeshProUGUI abilityName;
+            public Image stateRail;
+            public Image stateFill;
             public Button castButton;
+
+            /// <summary>
+            /// The line length actually on screen, which eases toward the fight's real value instead of copying it.
+            /// The fight moves its clock in 0.05 s steps, so a copied value arrives as small jumps; an eased one
+            /// glides, and it still ends on the fight's own number.
+            /// </summary>
+            public float shownFill;
         }
 
         [SerializeField] private Row[] rows = new Row[0];
-        [SerializeField] private Color readyTint = UiTheme.Ready;
-        [SerializeField] private Color coolingTint = UiTheme.Cooling;
 
-        /// <summary>Amber state word while a press waits for the action lane. The wait is real, so it is shown.</summary>
-        [SerializeField] private Color queuedTint = UiTheme.Queued;
+        /// <summary>
+        /// How fast the drawn line eases toward the fight's value. The fight ticks its clock 20 times a second, so
+        /// its number arrives in steps of about 1 px; 16 spreads each step over roughly 60 ms, which the eye reads
+        /// as a glide. The value always converges on the fight's own number, so the line cannot drift.
+        /// </summary>
+        private const float FillEasePerSecond = 16f;
 
         private GameManager manager;
 
@@ -183,9 +190,12 @@ namespace IdleRPG.UI
         }
 
         /// <summary>
-        /// Drives one cell. Each band has ONE owner: the icon shows the move (and dims while resting), the state word
-        /// says ready/queued/seconds, the line fills while resting, and the plate only greys for a true lock. The
-        /// cell face itself stays steady, so a cooling cell does not flash a different colour every frame.
+        /// Drives one cell. Each part has ONE owner: the picture shows the move (and dims while resting or dead),
+        /// the line carries the state, and the plate greys only for a true lock. The cell face itself stays steady,
+        /// so a cooling cell does not flash a different colour every frame.
+        ///
+        /// The line is the only clock: it is full green when the move is ready, drains to nothing at the moment the
+        /// move is cast, and grows back as the wait runs out. Nothing has to be read.
         /// </summary>
         private void RefreshRow(Row row, Encounter encounter)
         {
@@ -201,57 +211,73 @@ namespace IdleRPG.UI
             bool cooling = hasAbility && alive && hero.AbilityCooldownRemaining > 0d;
             bool queued = hasAbility && alive && hero.HasCastRequest;
 
-            if (row.nameLabel != null && card != null)
-            {
-                row.nameLabel.SetText(card.HeroName);
-            }
-
-            if (row.abilityLabel != null)
-            {
-                row.abilityLabel.SetText(hasAbility ? hero.AbilityName : "—");
-            }
-
             AbilityDef equipped = card != null && manager != null && manager.Abilities != null
                 ? manager.Abilities.EquippedFor(card)
                 : null;
 
+            // A hero with nothing to cast, or a hero on the floor, shows NO picture, name or line at all: a greyed
+            // plate already says "nothing here", and an empty rail would read as "nearly ready".
+            bool showState = hasAbility && alive;
+
             if (row.abilityIcon != null)
             {
                 Sprite icon = equipped != null ? equipped.Icon : null;
-                row.abilityIcon.sprite = icon;
-                row.abilityIcon.enabled = icon != null;
-                row.abilityIcon.color = cooling ? UiTheme.TextMuted : Color.white;
-            }
 
-            if (row.clockLabel != null)
-            {
-                row.clockLabel.SetText(!hasAbility
-                    ? "—"
-                    : hero.IsCoverGuardActive
-                        ? "GUARD " + hero.CoverGuardHitsRemaining
-                        : queued
-                            ? "QUEUED"
-                            : cooling ? Mathf.CeilToInt((float)hero.AbilityCooldownRemaining) + "s" : "READY");
-                row.clockLabel.color = queued
-                    ? queuedTint
-                    : !hasAbility
-                        ? UiTheme.InkDisabled
-                        : cooling ? UiTheme.TextDim : readyTint;
-            }
-
-            if (row.clockFill != null && row.clockTrack != null)
-            {
-                double total = hero != null ? hero.AbilityCooldownSec : 0d;
-                double left = hero != null ? hero.AbilityCooldownRemaining : 0d;
-                bool showBar = cooling && total > 0d;
-
-                row.clockTrack.enabled = showBar;
-                row.clockFill.enabled = showBar;
-
-                if (showBar)
+                // Only on a change. Re-assigning the same sprite every frame would rebuild the canvas every frame.
+                if (row.abilityIcon.sprite != icon)
                 {
-                    row.clockFill.fillAmount = Mathf.Clamp01(1f - (float)(left / total));
-                    row.clockFill.color = coolingTint;
+                    row.abilityIcon.sprite = icon;
+                }
+
+                row.abilityIcon.enabled = icon != null;
+                row.abilityIcon.color = cooling || !alive ? UiTheme.TextMuted : Color.white;
+            }
+
+            if (row.abilityName != null)
+            {
+                // Same words as the party page, so one move is never called two things.
+                string label = equipped != null
+                    ? equipped.DisplayName
+                    : (hasAbility ? hero.AbilityName : string.Empty);
+
+                // Only on a change. Writing the same string every frame would rebuild the canvas every frame.
+                if (row.abilityName.text != label)
+                {
+                    row.abilityName.text = label;
+                }
+
+                // The name follows the picture: shown while the hero can cast, dimmed while the move rests.
+                row.abilityName.enabled = showState;
+                row.abilityName.color = cooling ? UiTheme.TextMuted : UiTheme.TextDim;
+            }
+
+            if (row.stateRail != null)
+            {
+                row.stateRail.enabled = showState;
+            }
+
+            if (row.stateFill != null)
+            {
+                row.stateFill.enabled = showState;
+
+                if (showState)
+                {
+                    double total = hero != null ? hero.AbilityCooldownSec : 0d;
+                    double left = hero != null ? hero.AbilityCooldownRemaining : 0d;
+                    bool resting = cooling && total > 0d;
+
+                    // The length IS the countdown: nothing at the cast, full when the move comes back.
+                    float target = resting ? Mathf.Clamp01(1f - (float)(left / total)) : 1f;
+
+                    // The fight ticks its clock 20 times a second, so its truth arrives in small steps. Ease the
+                    // drawn value toward it instead of copying it: each step becomes a short glide, and the value
+                    // still lands on the fight's own number, so the line can never lie about readiness.
+                    float ease = 1f - Mathf.Exp(-FillEasePerSecond * Time.deltaTime);
+                    row.shownFill = Mathf.Lerp(row.shownFill, target, ease);
+                    SetBarFill(row.stateFill, row.shownFill);
+
+                    // Amber while the press waits for its turn, gold while the move rests, green when it is ready.
+                    row.stateFill.color = queued ? UiTheme.Queued : (resting ? UiTheme.GoldSoft : UiTheme.Ready);
                 }
             }
 
@@ -266,6 +292,20 @@ namespace IdleRPG.UI
             {
                 row.castButton.interactable = canCast;
             }
+        }
+
+        /// <summary>
+        /// Draws <paramref name="amount"/> of the state line by moving the fill's right edge. Unity's
+        /// Image.fillAmount only works when the image carries a sprite; these lines have none, so length is done with
+        /// anchors instead - geometry always clips.
+        /// </summary>
+        private static void SetBarFill(Image bar, float amount)
+        {
+            RectTransform rect = bar.rectTransform;
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = new Vector2(Mathf.Clamp01(amount), 1f);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
         }
 
         /// <summary>Asks the fight to cast. The fight refuses when it cannot, so a press can never force one.</summary>

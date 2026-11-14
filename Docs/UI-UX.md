@@ -343,3 +343,28 @@ and a true grayscale disable. The bottom tabs keep FantasyTabButton because they
 breathing halo and the icon/word pose. Panels come from UiRuntime.Plate; small chips stay flat on purpose.
 Known remaining migration work: the battle-page chrome (ability strip, camp strip, viewport) and the
 management pages still use the old kit faces - Phases 4-7 of the consistency programme.
+
+
+## 13. Ability strip cells: picture, name, one line (2026-11-14, revised 2026-11-15)
+
+Each cell under the fight is one hero's ability button. It holds a 102px picture (the 34px art x 3), the move's
+name in one `Micro` line under it, and a 6px line along its bottom edge.
+
+| State | Line | Picture and name |
+|---|---|---|
+| Ready | full green | full colour |
+| Resting | gold, growing left to right (length = time left) | dimmed |
+| Press waiting | full amber | full colour |
+| No ability / dead | no line | both hidden, plate greyed |
+
+Rules that keep it honest:
+- The plate never changes colour for a cooldown; only a true lock greys it.
+- Colour is a second cue, never the only one: a resting cell also loses length and dims its picture and name, so
+  the state survives a colour weakness or a bright screen.
+- The line is the only clock; there are no seconds to read.
+- The name is a caption, not a control: `Micro` is the floor, one line, and the same words the party page uses.
+- Bar length is done with anchors, never `Image.fillAmount`: these bars carry no sprite, and Unity ignores
+  fillAmount without a sprite (this is why the line once sat full through every cooldown).
+- The drawn length eases toward the fight's value over about 60 ms, so the fight's 0.05 s ticks read as a glide
+  instead of a stutter.
+
