@@ -385,9 +385,15 @@ Now:
   `UiTheme.TextMuted` while resting - the same dimming rule as the picture. Text = `AbilityDef.DisplayName`, with
   `Combatant.AbilityName` as the fallback. It is written only when the string changes, so no canvas rebuild per
   frame. Hidden together with the picture and the line (no ability, or hero down).
-- The picture is 34 x 3 = 102, anchored to the cell's bottom edge. Numbers: line 8..14, name 16..49, picture
-  53..155, plate top inset at 160 - four units spare. A whole-number zoom, so it stays crisp; the old 136 no longer
-  fits beside a name.
+- The picture is 34 x 3 = 102, anchored to the cell's bottom edge. Numbers: line 8..14, group gap 8, name
+  22..55.3, caption gap 2, picture 57.3..159.3, with 8.6 units of air above the picture - the same air as below
+  the line, so the picture does not crowd the plate's top rim. A whole-number zoom, so it stays crisp; the old 136
+  no longer fits beside a name.
+- The cell has a two-step gap hierarchy, not two equal gaps: 8 between the picture-and-name group and the state
+  line (different things: what the move is, versus when it is free), and 2 between the picture and its own name
+  (a caption belongs to the picture). Both come from the `UiSpace` ladder (`Small`, `Hairline`); no number is
+  written in the layout. Stated plainly: 8 is as large as this cell can give - the gap can only grow by eating the
+  air above the picture, and the picture is already as big as the 34px art allows without a blurry zoom.
 - The line's length now comes from the fill's right ANCHOR, not from `fillAmount`: geometry always clips, and it
   needs no sprite. The fill is a child of the rail, so one rect still owns the bar's place on the cell.
 - The drawn length eases toward the fight's value (`1 - exp(-16 * dt)`, about 60 ms): each 0.05 s step of the fight
@@ -402,7 +408,10 @@ Found while doing this, NOT fixed here: the hero and enemy health bars use the s
 they also ignore fillAmount and always draw full length. Same root cause, different owner (`HpBarView`). It needs
 its own small change.
 
-Verified in Play: cells 340 x 168, picture 102 at y 53.3, name at y 16 (h 33.3), rail 316 x 6 at y 8, fill 40 % gold
-at y 8 measured from the capture (126 of 316 px), full green when ready; UiColourCheck PASS, UiSpacingCheck PASS,
-UiTypeScaleCheck reports only its three old Boot-splash errors and no ability-strip issue. Screenshots:
-Assets/Screenshots/ability-name-cooling.png and Assets/Screenshots/ability-name-ready.png.
+Verified in Play: cells 340 x 168, picture 102 at y 57.3, name 316 x 33.3 at y 22, rail 316 x 6 at y 8, gap to the
+name 8, gap to the picture 2, 8.6 air above the picture (measured from the live rects, not by eye; the drawn gap
+reads a few pixels larger because the text line box has padding). Bars: full green when ready, full amber while a
+press waits, gold and partial while resting; UiColourCheck PASS, UiSpacingCheck PASS, UiTypeScaleCheck reports only
+its three old Boot-splash errors and no ability-strip issue. Screenshots:
+Assets/Screenshots/ability-name-cooling.png, Assets/Screenshots/ability-name-ready.png and
+Assets/Screenshots/ability-gap.png (the wider gap).

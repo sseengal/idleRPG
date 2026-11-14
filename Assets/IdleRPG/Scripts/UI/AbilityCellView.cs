@@ -123,13 +123,26 @@ namespace IdleRPG.UI
         }
 
         /// <summary>
-        /// The name's bottom edge, in canvas units from the cell's bottom: the plate inset, the state line, and one
-        /// hairline between the two, so the line never touches the letters.
+        /// The gap between the picture-and-name group and the state line. It is the BIGGEST gap in the cell, because
+        /// the line is a different thing from the picture: one says what the move is, the other says when it is free.
         /// </summary>
-        private static float NameBottom => UiSpace.Small + BarHeight + UiSpace.Hairline;
+        private const float GroupGap = UiSpace.Small;
 
-        /// <summary>The picture's bottom edge: the name's top plus one tight gap.</summary>
-        private static float IconBottom => NameBottom + NameHeight + UiSpace.Tight;
+        /// <summary>
+        /// The gap between the picture and the name that belongs to it. Small on purpose: a name is a caption for
+        /// the picture above it, so the two must read as one group - and it is one step DOWN the ladder from
+        /// <see cref="GroupGap"/>, so the cell has a hierarchy instead of two equal gaps.
+        /// </summary>
+        private const float CaptionGap = UiSpace.Hairline;
+
+        /// <summary>
+        /// The name's bottom edge, in canvas units from the cell's bottom: the plate inset, the state line, then the
+        /// group gap, so the line never crowds the letters.
+        /// </summary>
+        private static float NameBottom => UiSpace.Small + BarHeight + GroupGap;
+
+        /// <summary>The picture's bottom edge: the name's top plus the caption gap.</summary>
+        private static float IconBottom => NameBottom + NameHeight + CaptionGap;
 
         /// <summary>A thin line along the bottom edge, inset like the text above it.</summary>
         private static void PlaceBar(RectTransform rect)

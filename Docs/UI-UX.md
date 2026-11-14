@@ -363,6 +363,9 @@ Rules that keep it honest:
   the state survives a colour weakness or a bright screen.
 - The line is the only clock; there are no seconds to read.
 - The name is a caption, not a control: `Micro` is the floor, one line, and the same words the party page uses.
+- Gaps follow one hierarchy, not one number: a bigger gap (8) separates the picture-and-name group from the state
+  line, and a smaller gap (2) joins the name to the picture it captions. Both are `UiSpace` ladder steps. 8 is as
+  wide as this cell can give without shrinking the 102px picture.
 - Bar length is done with anchors, never `Image.fillAmount`: these bars carry no sprite, and Unity ignores
   fillAmount without a sprite (this is why the line once sat full through every cooldown).
 - The drawn length eases toward the fight's value over about 60 ms, so the fight's 0.05 s ticks read as a glide
