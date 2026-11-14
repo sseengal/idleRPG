@@ -19,7 +19,6 @@ namespace IdleRPG.UI
         private GameManager manager;
         private ScreenController screens;
         private GameObject lobby;
-        private GameObject menuButton;
 
         [Tooltip("Chapter art for the lobby centre panel. Null falls back to the plain plate.")]
         [SerializeField] private Sprite chapterArt;
@@ -151,10 +150,8 @@ namespace IdleRPG.UI
 
             HighlightNav("BATTLE");
 
-            Canvas menuCanvas = MakeCanvas("MiniMenuCanvas", 251, true);
-            menuButton = menuCanvas.gameObject;
-            Btn(menuCanvas.transform, "MenuButton", new Vector2(0.80f, 0.90f), new Vector2(0.97f, 0.975f), "MENU", UiTheme.FaceDim, UiType.Role.Small, ShowLobby);
-            menuButton.SetActive(false);
+            // The old top-right MENU button is retired (2026-11-14): the header's three-bar menu returns to the
+            // lobby now, so there is one menu affordance instead of two overlapping ones.
         }
 
         /// <summary>Open the lobby and pause the run (used by the MENU button and the F1 debug key).</summary>
@@ -163,11 +160,6 @@ namespace IdleRPG.UI
             if (lobby != null)
             {
                 lobby.SetActive(true);
-            }
-
-            if (menuButton != null)
-            {
-                menuButton.SetActive(false);
             }
 
             AttachSharedHeader();
@@ -183,11 +175,6 @@ namespace IdleRPG.UI
             if (lobby != null)
             {
                 lobby.SetActive(false);
-            }
-
-            if (menuButton != null)
-            {
-                menuButton.SetActive(true);
             }
 
             HideRunNav();

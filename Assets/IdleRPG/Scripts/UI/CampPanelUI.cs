@@ -184,9 +184,30 @@ namespace IdleRPG.UI
             }
         }
 
+        /// <summary>Gives the camp choice buttons the chunky plate face.</summary>
+        private void RestylePlates()
+        {
+            RestylePlate(shortFreeButton);
+            RestylePlate(shortAdButton);
+            RestylePlate(longRestButton);
+            RestylePlate(trainButton);
+        }
+
+        private static void RestylePlate(Button target)
+        {
+            Image face = target != null ? target.targetGraphic as Image : null;
+
+            if (face != null && face.sprite != UiRuntime.PlateSprite)
+            {
+                face.sprite = UiRuntime.PlateSprite;
+                face.type = Image.Type.Sliced;
+            }
+        }
+
         private void WireButtons()
         {
             RemoveButtonListeners();
+            RestylePlates();
 
             if (shortFreeButton != null)
             {

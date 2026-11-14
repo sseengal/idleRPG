@@ -106,7 +106,7 @@ namespace IdleRPG.UI
 
             Button button = background.gameObject.AddComponent<Button>();
             button.targetGraphic = background;
-            // Tap action: wire later.
+            button.onClick.AddListener(OpenLobby);
 
             if (chipRow != null)
             {
@@ -121,6 +121,15 @@ namespace IdleRPG.UI
                 Image bar = UiRuntime.CreateIcon("Bar" + i, background.transform);
                 bar.color = UiTheme.Text;
                 UiRuntime.Anchor(bar.rectTransform, new Vector2(0.28f, centres[i] - 0.055f), new Vector2(0.72f, centres[i] + 0.055f));
+            }
+        }
+
+        /// <summary>The menu button returns to the lobby (the run pauses there).</summary>
+        private void OpenLobby()
+        {
+            if (StartScreenUI.Instance != null)
+            {
+                StartScreenUI.Instance.ShowLobby();
             }
         }
 

@@ -57,7 +57,30 @@ namespace IdleRPG.UI
         {
             rows = rowViews ?? new Row[0];
             wired = false;
+            RestylePlates();
             WireButtons();
+        }
+
+        /// <summary>Gives the scene-built ability cells the chunky plate face, so the battle chrome matches.</summary>
+        private void RestylePlates()
+        {
+            if (rows == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < rows.Length; i++)
+            {
+                Image face = rows[i] != null && rows[i].castButton != null
+                    ? rows[i].castButton.targetGraphic as Image
+                    : null;
+
+                if (face != null && face.sprite != UiRuntime.PlateSprite)
+                {
+                    face.sprite = UiRuntime.PlateSprite;
+                    face.type = Image.Type.Sliced;
+                }
+            }
         }
 
         /// <summary>

@@ -96,6 +96,10 @@ namespace IdleRPG.UI
                 return;
             }
 
+            // One face everywhere (2026-11-14): shop rows and BUY buttons wear the chunky plate.
+            rowSprite = UiRuntime.PlateSprite;
+            buttonSprite = UiRuntime.PlateSprite;
+
             HudController hud = HudController.Instance;
             manager = hud != null ? hud.GameManager : null;
 

@@ -117,7 +117,7 @@ namespace IdleRPG.UI
             Image background = buttonObject.AddComponent<Image>();
             background.sprite = buttonSprite;
             background.type = Image.Type.Sliced;
-            background.color = Color.white;
+            background.color = UiTheme.Orange;
 
             Button button = buttonObject.AddComponent<Button>();
             button.targetGraphic = background;

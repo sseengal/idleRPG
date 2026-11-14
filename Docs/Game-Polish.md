@@ -219,3 +219,19 @@ code. Nothing here is speculative.*
   gear slots, roster cards, formation pads and tab faces remain the flat theme fills.
 - Buy buttons on the Perks page were already UiPlateButtons from Phase 2, so they squash and grayscale
   when unaffordable.
+
+
+---
+
+## UI consistency programme - Phases 6-7: battle chrome and one menu (2026-11-14)
+
+- Shop rows and BUY buttons use the chunky plate at runtime (row/button sprites overridden to
+  UiRuntime.PlateSprite in ShopPanelUI.EnsureBound); the BUY face is the Orange token, not white.
+- Ability strip cells and camp choice buttons are re-skinned to the plate at runtime (RestylePlates), so
+  the battle chrome matches the lobby without a scene rebuild. The old kit sprite stays only as a fallback
+  until the scene is rebuilt.
+- One menu affordance: the header three-bar button now returns to the lobby (StartScreenUI.ShowLobby), and
+  the old overlapping top-right MENU button (MiniMenuCanvas) is retired. It was runtime-built, so no scene
+  rebuild is needed.
+- Phase 8 (boon/ability icon sheets) is BLOCKED on icon art: the letter badges remain placeholders until a
+  sheet exists, then it takes the same Multiple-sprite pipeline as Button Icons.png.
