@@ -21,14 +21,14 @@ namespace IdleRPG.UI
 
         [Header("Colours")]
         [SerializeField] private Color normalColor = Color.white;
-        [SerializeField] private Color criticalColor = new Color(1f, 0.85f, 0.25f, 1f);
-        [SerializeField] private Color incomingColor = new Color(1f, 0.35f, 0.35f, 1f);
+        [SerializeField] private Color criticalColor = UiTheme.GoldCrit;
+        [SerializeField] private Color incomingColor = UiTheme.DangerBright;
         [Tooltip("Colour of health restored by an ability.")]
-        [SerializeField] private Color healColor = new Color(0.4f, 0.95f, 0.5f, 1f);
+        [SerializeField] private Color healColor = UiTheme.GreenSoft;
         [Tooltip("Colour of a guard raised by an ability (no number, just the word).")]
-        [SerializeField] private Color guardColor = new Color(0.55f, 0.8f, 1f, 1f);
+        [SerializeField] private Color guardColor = UiTheme.InfoBlue;
         [Tooltip("Colour of damage from an enemy ability: heavier than a plain hit.")]
-        [SerializeField] private Color abilityColor = new Color(1f, 0.55f, 0.15f, 1f);
+        [SerializeField] private Color abilityColor = UiTheme.OrangeBright;
         [SerializeField] private float baseFontSize = UiType.Damage;
         [SerializeField] private float criticalScale = UiType.CritScale;
         [SerializeField] private float abilityScale = 1.5f;

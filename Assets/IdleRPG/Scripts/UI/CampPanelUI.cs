@@ -256,7 +256,7 @@ namespace IdleRPG.UI
                     if (actorImages != null && i < actorImages.Length && actorImages[i] != null)
                     {
                         actorImages[i].color = hero == null || !hero.IsAlive
-                            ? new Color(0.55f, 0.55f, 0.55f, 1f)
+                            ? UiTheme.InkDisabled
                             : Color.white;
                     }
                 }

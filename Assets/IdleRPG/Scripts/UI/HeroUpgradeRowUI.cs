@@ -45,9 +45,9 @@ namespace IdleRPG.UI
         [SerializeField] private TextMeshProUGUI heroNameLabel;
         [SerializeField] private StatRow[] rows = new StatRow[5];
         [SerializeField] private Color affordableColor = Color.white;
-        [SerializeField] private Color unaffordableColor = new Color(1f, 1f, 1f, 0.45f);
-        [SerializeField] private Color rowReadyColor = new Color(0.20f, 0.30f, 0.46f, 0.95f);
-        [SerializeField] private Color rowDimColor = new Color(0.15f, 0.17f, 0.23f, 0.9f);
+        [SerializeField] private Color unaffordableColor = UiTheme.InkFaint;
+        [SerializeField] private Color rowReadyColor = UiTheme.SelectedBlue;
+        [SerializeField] private Color rowDimColor = UiTheme.SlotBlue;
 
         private UpgradeManager upgrades;
         private StatResolver resolver;

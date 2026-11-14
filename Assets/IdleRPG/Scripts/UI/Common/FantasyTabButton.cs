@@ -119,7 +119,7 @@ namespace IdleRPG.UI
             if (frame != null) { frame.color = Color.Lerp(frame.color, selected ? activeFill : idleFill, smooth); }
             if (label != null)
             {
-                Color ink = !interactable ? new Color(0.55f, 0.55f, 0.60f, 1f) : (selected ? activeInk : idleInk);
+                Color ink = !interactable ? UiTheme.InkDisabled : (selected ? activeInk : idleInk);
                 ink.a = selected && interactable ? 1f : 0f;   // the word only speaks for the chosen tab
                 label.color = Color.Lerp(label.color, ink, smooth);
             }

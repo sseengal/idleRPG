@@ -35,14 +35,14 @@ namespace IdleRPG.UI
         }
 
         [SerializeField] private Row[] rows = new Row[0];
-        [SerializeField] private Color readyTint = new Color(0.30f, 0.68f, 0.42f, 1f);
-        [SerializeField] private Color coolingTint = new Color(0.30f, 0.33f, 0.40f, 1f);
+        [SerializeField] private Color readyTint = UiTheme.Ready;
+        [SerializeField] private Color coolingTint = UiTheme.Cooling;
 
         /// <summary>Amber wash while a press waits for the action lane. The wait is real, so it is shown.</summary>
-        [SerializeField] private Color queuedTint = new Color(0.72f, 0.62f, 0.28f, 1f);
+        [SerializeField] private Color queuedTint = UiTheme.Queued;
 
         /// <summary>Grey wash for a hero with nothing to cast. Nothing is hidden, so the row keeps its width.</summary>
-        [SerializeField] private Color lockedTint = new Color(0.22f, 0.24f, 0.29f, 1f);
+        [SerializeField] private Color lockedTint = UiTheme.Locked;
 
         private GameManager manager;
 

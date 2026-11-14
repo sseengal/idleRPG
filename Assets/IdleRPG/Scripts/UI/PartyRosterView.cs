@@ -22,13 +22,13 @@ namespace IdleRPG.UI
     {
         [SerializeField] private int abilitySlotPlaceholders = 3;
 
-        private readonly Color cardColor = new Color(0.16f, 0.19f, 0.28f, 0.95f);
-        private readonly Color cardSelectedColor = new Color(0.30f, 0.42f, 0.62f, 1f);
-        private readonly Color slotColor = new Color(0.14f, 0.16f, 0.23f, 0.95f);
-        private readonly Color bodyText = new Color(1f, 1f, 1f, 0.92f);
-        private readonly Color dimText = new Color(1f, 1f, 1f, 0.55f);
-        private readonly Color bonusColor = new Color(0.55f, 0.9f, 0.6f, 1f);
-        private readonly Color accentColor = new Color(1f, 0.82f, 0.3f, 1f);
+        private readonly Color cardColor = UiTheme.CardBlue;
+        private readonly Color cardSelectedColor = UiTheme.CardSelected;
+        private readonly Color slotColor = UiTheme.SlotBlue;
+        private readonly Color bodyText = UiTheme.InkBody;
+        private readonly Color dimText = UiTheme.InkDim;
+        private readonly Color bonusColor = UiTheme.GreenSoft;
+        private readonly Color accentColor = UiTheme.GoldSoft;
 
         /// <summary>One stat line on the roster sheet. Adding a stat = adding one row here (layout follows).</summary>
         private struct StatRow

@@ -13,7 +13,7 @@ namespace IdleRPG.UI
     public sealed class GlowStyle : ScriptableObject
     {
         [Header("Colour")]
-        [SerializeField] private Color tint = new Color(0.84f, 0.62f, 0.26f, 1f);
+        [SerializeField] private Color tint = UiTheme.GoldDark;
 
         [Header("Shape")]
         [Tooltip("Halo size as a multiple of the mark it sits behind. 2.6 turns a 20 px dot into a 52 px halo.")]

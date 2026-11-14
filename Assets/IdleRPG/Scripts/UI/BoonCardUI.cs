@@ -184,7 +184,7 @@ namespace IdleRPG.UI
 
             if (row.Background != null)
             {
-                row.Background.color = new Color(0.13f, 0.15f, 0.21f, 1f);
+                row.Background.color = UiTheme.CardDark;
             }
 
             if (row.Rarity != null)
@@ -238,10 +238,10 @@ namespace IdleRPG.UI
         {
             switch (rarity)
             {
-                case PerkRarity.Rare: return new Color(0.45f, 0.72f, 1f, 1f);
-                case PerkRarity.Epic: return new Color(0.78f, 0.55f, 1f, 1f);
-                case PerkRarity.Legendary: return new Color(1f, 0.78f, 0.30f, 1f);
-                default: return new Color(0.72f, 0.76f, 0.84f, 1f);
+                case PerkRarity.Rare: return UiTheme.RarityRare;
+                case PerkRarity.Epic: return UiTheme.RarityEpic;
+                case PerkRarity.Legendary: return UiTheme.RarityLegendary;
+                default: return UiTheme.TextMuted;
             }
         }
 
@@ -271,7 +271,7 @@ namespace IdleRPG.UI
             UiRuntime.Stretch(rootRect);
 
             // Scrim: also the raycast catcher, so a tap can never reach the fight behind the card.
-            Image scrim = UiRuntime.CreatePanel(root.transform, null, new Color(0f, 0f, 0f, 0.88f), raycast: true);
+            Image scrim = UiRuntime.CreatePanel(root.transform, null, UiTheme.Scrim, raycast: true);
             UiRuntime.Stretch(scrim.rectTransform);
 
             Image panel = UiRuntime.CreatePanel(scrim.transform, null, UiTheme.PanelDeep);
@@ -306,7 +306,7 @@ namespace IdleRPG.UI
         {
             Row row = new Row();
 
-            Image background = UiRuntime.CreatePanel(parent, null, new Color(0.13f, 0.15f, 0.21f, 1f), raycast: true);
+            Image background = UiRuntime.CreatePanel(parent, null, UiTheme.CardDark, raycast: true);
             UiRuntime.Anchor(background.rectTransform, new Vector2(0.05f, bottom), new Vector2(0.95f, top));
             background.gameObject.name = "Boon" + index;
             row.Background = background;
@@ -321,7 +321,7 @@ namespace IdleRPG.UI
                 UiType.Role.Micro, TextAlignmentOptions.MidlineLeft, UiTheme.TextDim);
             UiRuntime.Anchor(row.Rarity.rectTransform, new Vector2(0.04f, 0.84f), new Vector2(0.32f, 0.96f));
 
-            row.Icon = UiRuntime.CreatePanel(background.transform, null, new Color(0.3f, 0.3f, 0.4f, 1f));
+            row.Icon = UiRuntime.CreatePanel(background.transform, null, UiTheme.IconWell);
             UiRuntime.Anchor(row.Icon.rectTransform, new Vector2(0.04f, 0.12f), new Vector2(0.26f, 0.78f));
 
             row.IconLetter = UiRuntime.CreateText(row.Icon.transform, "Letter", "?",

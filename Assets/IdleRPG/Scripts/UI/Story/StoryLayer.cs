@@ -581,7 +581,7 @@ namespace IdleRPG.UI
             UiRuntime.Stretch(rect);
             skipRoot.transform.SetAsLastSibling();
 
-            Image hit = UiRuntime.CreatePanel(skipRoot.transform, null, new Color(0f, 0f, 0f, 0.003f), raycast: true);
+            Image hit = UiRuntime.CreatePanel(skipRoot.transform, null, UiTheme.ScrimTrace, raycast: true);
             UiRuntime.Stretch(hit.rectTransform);
 
             Button button = hit.gameObject.AddComponent<Button>();

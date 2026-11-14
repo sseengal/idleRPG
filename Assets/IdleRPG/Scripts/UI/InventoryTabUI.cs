@@ -26,14 +26,14 @@ namespace IdleRPG.UI
         private const float TileGap = 10f;
         private const float EdgePad = 12f;
 
-        private readonly Color dropdownColor = new Color(0.11f, 0.13f, 0.19f, 1f);
-        private readonly Color optionActiveColor = new Color(0.24f, 0.34f, 0.55f, 1f);
-        private readonly Color cardColor = new Color(0.16f, 0.19f, 0.28f, 0.95f);
-        private readonly Color dimText = new Color(1f, 1f, 1f, 0.55f);
-        private readonly Color bodyText = new Color(1f, 1f, 1f, 0.92f);
-        private readonly Color fullBagColor = new Color(1f, 0.82f, 0.3f, 1f);
-        private readonly Color equippedRingColor = new Color(1f, 0.9f, 0.5f, 1f);
-        private readonly Color armedColor = new Color(0.52f, 0.16f, 0.16f, 0.95f);
+        private readonly Color dropdownColor = UiTheme.FaceDim;
+        private readonly Color optionActiveColor = UiTheme.SelectedBlue;
+        private readonly Color cardColor = UiTheme.CardBlue;
+        private readonly Color dimText = UiTheme.InkDim;
+        private readonly Color bodyText = UiTheme.InkBody;
+        private readonly Color fullBagColor = UiTheme.GoldSoft;
+        private readonly Color equippedRingColor = UiTheme.GoldRing;
+        private readonly Color armedColor = UiTheme.ArmedRed;
 
         private const int SlotFilterAll = -1;
         private const int SortNewest = 0;

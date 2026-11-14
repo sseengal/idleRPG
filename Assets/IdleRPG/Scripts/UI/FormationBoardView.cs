@@ -33,9 +33,9 @@ namespace IdleRPG.UI
 
         [Header("Art (optional)")]
         [SerializeField] private Sprite slotSprite;
-        [SerializeField] private Color slotColor = new Color(1f, 1f, 1f, 0.16f);
+        [SerializeField] private Color slotColor = UiTheme.InkGhost;
         [Tooltip("A free pad while a hero is held: this is the cue that says \"tap a free pad\".")]
-        [SerializeField] private Color emptyPadColor = new Color(1f, 0.93f, 0.72f, 0.42f);
+        [SerializeField] private Color emptyPadColor = UiTheme.GhostSlot;
 
         private GameManager manager;
         private Formation formation;
@@ -94,7 +94,7 @@ namespace IdleRPG.UI
 
             // A catcher behind the pads: a tap that is not a hero and not a pad only drops the selection.
             GameObject catcher = UiRuntime.CreateNode("BoardBackground", transform);
-            Image catcherImage = UiRuntime.CreatePanel(catcher.transform, null, new Color(0f, 0f, 0f, 0f), true);
+            Image catcherImage = UiRuntime.CreatePanel(catcher.transform, null, Color.clear, true);
             UiRuntime.Stretch(catcherImage.rectTransform);
             Button catcherButton = catcher.AddComponent<Button>();
             catcherButton.targetGraphic = catcherImage;

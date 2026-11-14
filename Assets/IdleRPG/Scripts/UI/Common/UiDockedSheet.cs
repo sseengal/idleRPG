@@ -41,7 +41,7 @@ namespace IdleRPG.UI
             // The close button's caption takes the builder's default role (section) - no per-sheet size.
             UiRuntime.CreateButton(frame.transform, "CloseButton", "X",
                 new Vector2(0.88f, 0.90f), new Vector2(0.96f, 0.97f),
-                () => UiTransient.Close(ui.Root), new Color(0.30f, 0.36f, 0.50f, 1f));
+                () => UiTransient.Close(ui.Root), UiTheme.SheetFace);
 
             return ui;
         }

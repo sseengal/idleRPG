@@ -41,18 +41,18 @@ namespace IdleRPG.UI
         [SerializeField] private float contentPadding = 12f;
 
         [Header("Colours")]
-        [SerializeField] private Color heroHitColor = new Color(0.95f, 0.95f, 1f, 1f);
-        [SerializeField] private Color criticalColor = new Color(1f, 0.85f, 0.3f, 1f);
-        [SerializeField] private Color incomingColor = new Color(1f, 0.45f, 0.45f, 1f);
-        [SerializeField] private Color killColor = new Color(0.55f, 0.95f, 0.6f, 1f);
-        [SerializeField] private Color eventColor = new Color(0.70f, 0.80f, 1f, 1f);
-        [SerializeField] private Color goldColor = new Color(1f, 0.85f, 0.45f, 1f);
+        [SerializeField] private Color heroHitColor = UiTheme.Text;
+        [SerializeField] private Color criticalColor = UiTheme.GoldBright;
+        [SerializeField] private Color incomingColor = UiTheme.Danger;
+        [SerializeField] private Color killColor = UiTheme.GreenSoft;
+        [SerializeField] private Color eventColor = UiTheme.EventBlue;
+        [SerializeField] private Color goldColor = UiTheme.GoldLight;
         [Tooltip("Colour of a heal line.")]
-        [SerializeField] private Color healColor = new Color(0.5f, 0.95f, 0.6f, 1f);
+        [SerializeField] private Color healColor = UiTheme.GreenSoft;
         [Tooltip("Colour of a guard (shield) line.")]
-        [SerializeField] private Color guardColor = new Color(0.6f, 0.82f, 1f, 1f);
+        [SerializeField] private Color guardColor = UiTheme.GuardBlue;
         [Tooltip("Colour of an enemy ability line. Loud on purpose: the player must spot it in the scroll.")]
-        [SerializeField] private Color enemyAbilityColor = new Color(1f, 0.55f, 0.15f, 1f);
+        [SerializeField] private Color enemyAbilityColor = UiTheme.OrangeBright;
 
         [Header("Typewriter")]
         [Tooltip("Reveal story dialogue one character at a time, classic JRPG style. Combat lines stay whole.")]

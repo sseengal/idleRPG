@@ -11,10 +11,10 @@ namespace IdleRPG.UI
     /// </summary>
     public static class ItemVisuals
     {
-        private static readonly Color RarityCommonColor = new Color(0.60f, 0.63f, 0.68f, 1f);
-        private static readonly Color RarityRareColor = new Color(0.35f, 0.68f, 0.95f, 1f);
-        private static readonly Color RarityEpicColor = new Color(0.72f, 0.52f, 0.92f, 1f);
-        private static readonly Color RarityLegendaryColor = new Color(0.95f, 0.72f, 0.30f, 1f);
+        private static readonly Color RarityCommonColor = UiTheme.TextDim;
+        private static readonly Color RarityRareColor = UiTheme.ItemBlue;
+        private static readonly Color RarityEpicColor = UiTheme.ItemPurple;
+        private static readonly Color RarityLegendaryColor = UiTheme.ItemGold;
 
         /// <summary>Rarity tint used for tiles, rings and preview slots.</summary>
         public static Color RarityColor(ItemRarity rarity)

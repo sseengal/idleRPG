@@ -25,8 +25,8 @@ namespace IdleRPG.UI
         /// </summary>
         private const bool InventoryEnabled = false;
 
-        private readonly Color activeTabColor = new Color(0.24f, 0.34f, 0.55f, 1f);
-        private readonly Color inactiveTabColor = new Color(0.11f, 0.13f, 0.19f, 1f);
+        private readonly Color activeTabColor = UiTheme.SelectedBlue;
+        private readonly Color inactiveTabColor = UiTheme.FaceDim;
 
         private GameManager manager;
         private InventoryTabUI inventoryTab;
@@ -209,8 +209,8 @@ namespace IdleRPG.UI
         // ------------------------------------------------------------------
         // Shared row builder (the Roster uses the locked-slot look)
         // ------------------------------------------------------------------
-        internal static readonly Color SlotRowTextColor = new Color(1f, 1f, 1f, 0.55f);
-        internal static readonly Color SlotRowCellColor = new Color(0.14f, 0.16f, 0.23f, 0.95f);
+        internal static readonly Color SlotRowTextColor = UiTheme.InkDim;
+        internal static readonly Color SlotRowCellColor = UiTheme.SlotBlue;
 
         /// <summary>A caption plus a row of empty, locked slots (abilities, filled by a later step).</summary>
         internal static void BuildSlotRow(RectTransform root, string caption, int count, float yMin, float yMax)

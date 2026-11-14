@@ -100,7 +100,7 @@ namespace IdleRPG.UI
         {
             Transform parent = chipRow != null ? chipRow : transform;
 
-            Image background = UiRuntime.CreatePanel(parent, null, new Color(0.20f, 0.26f, 0.40f, 1f), raycast: true);
+            Image background = UiRuntime.CreatePanel(parent, null, UiTheme.MenuFace, raycast: true);
             background.gameObject.name = "MenuButton";
             UiRuntime.Anchor(background.rectTransform, new Vector2(0.88f, 0.10f), new Vector2(0.985f, 0.90f));
 
@@ -137,7 +137,7 @@ namespace IdleRPG.UI
 
             plate.sprite = frame;
             plate.type = Image.Type.Sliced;
-            plate.color = new Color(0.12f, 0.16f, 0.24f, 1f);
+            plate.color = UiTheme.NavIdle;
         }
 
         private void OnCurrencyChanged(CurrencyType currencyType, double amount)

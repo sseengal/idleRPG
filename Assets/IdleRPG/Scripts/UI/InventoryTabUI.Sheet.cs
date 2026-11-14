@@ -62,7 +62,7 @@ namespace IdleRPG.UI
         private static TextMeshProUGUI BuildSheetButton(Transform parent, string name, Vector2 min, Vector2 max,
             UnityEngine.Events.UnityAction onClick)
         {
-            Button button = UiRuntime.CreateButton(parent, name, string.Empty, min, max, onClick, new Color(0.24f, 0.34f, 0.55f, 1f));
+            Button button = UiRuntime.CreateButton(parent, name, string.Empty, min, max, onClick, UiTheme.SelectedBlue);
             TextMeshProUGUI label = button.GetComponentInChildren<TextMeshProUGUI>();
             if (label != null)
             {
@@ -108,7 +108,7 @@ namespace IdleRPG.UI
             Button discard = FindSheetButton("DiscardButton");
             if (discard != null)
             {
-                discard.GetComponent<Image>().color = armed ? new Color(0.75f, 0.18f, 0.18f, 1f) : armedColor;
+                discard.GetComponent<Image>().color = armed ? UiTheme.DangerDeep : armedColor;
             }
         }
 

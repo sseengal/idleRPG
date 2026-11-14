@@ -28,8 +28,8 @@ namespace IdleRPG.UI
         [SerializeField] private List<TabDefinition> tabs = new List<TabDefinition>();
         [SerializeField] private Sprite activeTabSprite;
         [SerializeField] private Sprite inactiveTabSprite;
-        [SerializeField] private Color activeTabColor = new Color(0.20f, 0.28f, 0.44f, 1f);
-        [SerializeField] private Color inactiveTabColor = new Color(0.10f, 0.12f, 0.18f, 1f);
+        [SerializeField] private Color activeTabColor = UiTheme.SelectedBlueDeep;
+        [SerializeField] private Color inactiveTabColor = UiTheme.TabDim;
         [SerializeField] private int defaultTabIndex;
 
         public int ActiveIndex { get; private set; } = -1;
@@ -93,7 +93,7 @@ namespace IdleRPG.UI
 
                 if (tab.buttonLabel != null)
                 {
-                    tab.buttonLabel.color = isActive ? Color.white : new Color(1f, 1f, 1f, 0.65f);
+                    tab.buttonLabel.color = isActive ? Color.white : UiTheme.InkDim;
                 }
             }
         }

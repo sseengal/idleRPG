@@ -19,8 +19,8 @@ namespace IdleRPG.UI
     public sealed class XpBarUI : MonoBehaviour
     {
         [Header("Colours")]
-        [SerializeField] private Color trackColor = new Color(0.13f, 0.15f, 0.21f, 1f);
-        [SerializeField] private Color fillColor = new Color(0.84f, 0.62f, 0.26f, 1f);
+        [SerializeField] private Color trackColor = UiTheme.CardDark;
+        [SerializeField] private Color fillColor = UiTheme.GoldDark;
 
         private TextMeshProUGUI levelLabel;
         private TextMeshProUGUI valueLabel;

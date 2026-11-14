@@ -114,17 +114,17 @@ namespace IdleRPG.UI
             {
                 // Empty slot: closes the sheet if one is open (bag stays non-modal).
                 Button emptySlot = UiRuntime.CreateButton(tileNode.transform, "EmptySlot", string.Empty,
-                    Vector2.zero, Vector2.one, () => CloseItemSheet(), new Color(0.10f, 0.12f, 0.17f, 0.9f));
+                    Vector2.zero, Vector2.one, () => CloseItemSheet(), UiTheme.GridDim);
                 emptySlot.transform.localPosition = Vector3.zero;
                 TextMeshProUGUI empty = UiRuntime.CreateText(tileNode.transform, "Empty", "empty", UiType.Role.Micro,
-                    TextAlignmentOptions.Center, new Color(1f, 1f, 1f, 0.22f));
+                    TextAlignmentOptions.Center, UiTheme.InkGhost);
                 UiRuntime.Stretch(empty.rectTransform, 0f, 56f, 0f, 8f);
                 return;
             }
 
             bool equipped = manager.Gear.IsEquipped(item.InstanceId, out _, out _);
 
-            Image ring = UiRuntime.CreatePanel(tileNode.transform, null, equipped ? equippedRingColor : new Color(0f, 0f, 0f, 0f));
+            Image ring = UiRuntime.CreatePanel(tileNode.transform, null, equipped ? equippedRingColor : Color.clear);
             UiRuntime.Stretch(ring.rectTransform, -5f, -5f, -5f, -5f);
             ring.raycastTarget = false;
 
@@ -148,7 +148,7 @@ namespace IdleRPG.UI
 
             if (equipped)
             {
-                Image badge = UiRuntime.CreatePanel(tile.transform, null, new Color(0.24f, 0.34f, 0.55f, 1f));
+                Image badge = UiRuntime.CreatePanel(tile.transform, null, UiTheme.SelectedBlue);
                 UiRuntime.Anchor(badge.rectTransform, new Vector2(0.02f, 0.78f), new Vector2(0.14f, 0.95f), 0f, 0f, 0f, 0f);
                 TextMeshProUGUI e = UiRuntime.CreateText(tile.transform, "EBadge", "E", UiType.Role.Micro, TextAlignmentOptions.Center, Color.white);
                 UiRuntime.Anchor(e.rectTransform, new Vector2(0.02f, 0.78f), new Vector2(0.14f, 0.95f), 0f, 0f, 0f, 0f);

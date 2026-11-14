@@ -29,6 +29,173 @@ namespace IdleRPG.UI
         public static readonly Color InkOnAccent = new Color32(38, 30, 12, 255);
 
         // ------------------------------------------------------------------
+        // The named palette (2026-11-14). Every colour the UI draws comes from here; UiColourCheck keeps it
+        // that way. Values are the exact ones the screens used to write by hand - near-duplicates were merged
+        // (<= 0.05 in one channel) so one job has one name. Consolidating further is a design decision, made
+        // with screenshots, not a refactor.
+        // ------------------------------------------------------------------
+        /// <summary></summary>
+        public static readonly Color InkBody = new Color(1f, 1f, 1f, 0.92f);
+        /// <summary></summary>
+        public static readonly Color InkSoft = new Color(1f, 1f, 1f, 0.75f);
+        /// <summary></summary>
+        public static readonly Color InkDim = new Color(1f, 1f, 1f, 0.60f);
+        /// <summary></summary>
+        public static readonly Color InkFaint = new Color(1f, 1f, 1f, 0.45f);
+        /// <summary></summary>
+        public static readonly Color InkHint = new Color(1f, 1f, 1f, 0.30f);
+        /// <summary></summary>
+        public static readonly Color InkGhost = new Color(1f, 1f, 1f, 0.18f);
+        /// <summary></summary>
+        public static readonly Color Scrim = new Color(0f, 0f, 0f, 0.88f);
+        /// <summary></summary>
+        public static readonly Color ScrimSoft = new Color(0f, 0f, 0f, 0.65f);
+        /// <summary></summary>
+        public static readonly Color ScrimTrace = new Color(0f, 0f, 0f, 0.003f);
+        /// <summary></summary>
+        public static readonly Color InkDark = new Color(0.12f, 0.12f, 0.14f, 1f);
+        /// <summary></summary>
+        public static readonly Color InkGreyMid = new Color(0.45f, 0.46f, 0.50f, 1f);
+        /// <summary></summary>
+        public static readonly Color InkSoftDark = new Color(0.28f, 0.28f, 0.31f, 1f);
+        /// <summary></summary>
+        public static readonly Color InkDisabled = new Color(0.55f, 0.55f, 0.60f, 1f);
+        /// <summary></summary>
+        public static readonly Color TextMuted = new Color(0.72f, 0.76f, 0.84f, 1f);
+        /// <summary></summary>
+        public static readonly Color NavIdle = new Color(0.12f, 0.16f, 0.24f, 1f);
+        /// <summary></summary>
+        public static readonly Color NavSelected = new Color(0.28f, 0.38f, 0.56f, 1f);
+        /// <summary></summary>
+        public static readonly Color SelectedBlue = new Color(0.24f, 0.34f, 0.55f, 1f);
+        /// <summary></summary>
+        public static readonly Color SelectedBlueDeep = new Color(0.20f, 0.28f, 0.44f, 1f);
+        /// <summary></summary>
+        public static readonly Color FaceDim = new Color(0.11f, 0.13f, 0.19f, 1f);
+        /// <summary></summary>
+        public static readonly Color ButtonBlue = new Color(0.22f, 0.32f, 0.50f, 1f);
+        /// <summary></summary>
+        public static readonly Color MenuFace = new Color(0.20f, 0.26f, 0.40f, 1f);
+        /// <summary></summary>
+        public static readonly Color TabDim = new Color(0.10f, 0.12f, 0.18f, 1f);
+        /// <summary></summary>
+        public static readonly Color GridDim = new Color(0.10f, 0.12f, 0.17f, 0.90f);
+        /// <summary></summary>
+        public static readonly Color InfoBlue = new Color(0.55f, 0.80f, 1f, 1f);
+        /// <summary></summary>
+        public static readonly Color EventBlue = new Color(0.70f, 0.80f, 1f, 1f);
+        /// <summary></summary>
+        public static readonly Color GuardBlue = new Color(0.60f, 0.82f, 1f, 1f);
+        /// <summary></summary>
+        public static readonly Color RarityRare = new Color(0.45f, 0.72f, 1f, 1f);
+        /// <summary></summary>
+        public static readonly Color CardSelected = new Color(0.30f, 0.42f, 0.62f, 1f);
+        /// <summary></summary>
+        public static readonly Color CardBlue = new Color(0.16f, 0.19f, 0.28f, 0.95f);
+        /// <summary></summary>
+        public static readonly Color SlotBlue = new Color(0.14f, 0.16f, 0.23f, 0.95f);
+        /// <summary></summary>
+        public static readonly Color SheetFace = new Color(0.30f, 0.36f, 0.50f, 1f);
+        /// <summary></summary>
+        public static readonly Color PageSunken = new Color(0.10f, 0.11f, 0.13f, 1f);
+        /// <summary></summary>
+        public static readonly Color Row = new Color(0.13f, 0.14f, 0.16f, 1f);
+        /// <summary></summary>
+        public static readonly Color RowLight = new Color(0.18f, 0.19f, 0.22f, 1f);
+        /// <summary></summary>
+        public static readonly Color RowWarm = new Color(0.20f, 0.17f, 0.12f, 1f);
+        /// <summary></summary>
+        public static readonly Color CardDark = new Color(0.13f, 0.15f, 0.21f, 1f);
+        /// <summary></summary>
+        public static readonly Color LineGrey = new Color(0.30f, 0.31f, 0.35f, 1f);
+        /// <summary></summary>
+        public static readonly Color LineSoft = new Color(0.35f, 0.36f, 0.40f, 1f);
+        /// <summary></summary>
+        public static readonly Color IconWell = new Color(0.30f, 0.30f, 0.40f, 1f);
+        /// <summary></summary>
+        public static readonly Color Parchment = new Color(0.96f, 0.92f, 0.80f, 1f);
+        /// <summary></summary>
+        public static readonly Color GhostSlot = new Color(1f, 0.93f, 0.72f, 0.42f);
+        /// <summary></summary>
+        public static readonly Color Gold = new Color(0.98f, 0.80f, 0.28f, 1f);
+        /// <summary></summary>
+        public static readonly Color GoldDeep = new Color(0.98f, 0.80f, 0.22f, 1f);
+        /// <summary></summary>
+        public static readonly Color GoldDim = new Color(0.90f, 0.72f, 0.15f, 1f);
+        /// <summary></summary>
+        public static readonly Color GoldSoft = new Color(1f, 0.82f, 0.30f, 1f);
+        /// <summary></summary>
+        public static readonly Color GoldBright = new Color(1f, 0.85f, 0.30f, 1f);
+        /// <summary></summary>
+        public static readonly Color GoldLight = new Color(1f, 0.85f, 0.45f, 1f);
+        /// <summary></summary>
+        public static readonly Color GoldCrit = new Color(1f, 0.85f, 0.25f, 1f);
+        /// <summary></summary>
+        public static readonly Color GoldRim = new Color(1f, 0.95f, 0.66f, 1f);
+        /// <summary></summary>
+        public static readonly Color GoldRing = new Color(1f, 0.90f, 0.50f, 1f);
+        /// <summary></summary>
+        public static readonly Color GoldDark = new Color(0.84f, 0.62f, 0.26f, 1f);
+        /// <summary></summary>
+        public static readonly Color GoldGlow = new Color(0.98f, 0.78f, 0.20f, 0.10f);
+        /// <summary></summary>
+        public static readonly Color HaloGold = new Color(1f, 0.82f, 0.35f, 0.10f);
+        /// <summary></summary>
+        public static readonly Color Orange = new Color(0.95f, 0.55f, 0.15f, 1f);
+        /// <summary></summary>
+        public static readonly Color OrangeBright = new Color(1f, 0.55f, 0.15f, 1f);
+        /// <summary></summary>
+        public static readonly Color OrangeSoft = new Color(1f, 0.80f, 0.50f, 1f);
+        /// <summary></summary>
+        public static readonly Color Purple = new Color(0.80f, 0.55f, 0.98f, 1f);
+        /// <summary></summary>
+        public static readonly Color RarityEpic = new Color(0.78f, 0.55f, 1f, 1f);
+        /// <summary></summary>
+        public static readonly Color RarityLegendary = new Color(1f, 0.78f, 0.30f, 1f);
+        /// <summary></summary>
+        public static readonly Color Ready = new Color(0.30f, 0.68f, 0.42f, 1f);
+        /// <summary></summary>
+        public static readonly Color Cooling = new Color(0.30f, 0.33f, 0.40f, 1f);
+        /// <summary></summary>
+        public static readonly Color Queued = new Color(0.72f, 0.62f, 0.28f, 1f);
+        /// <summary></summary>
+        public static readonly Color Locked = new Color(0.22f, 0.24f, 0.29f, 1f);
+        /// <summary></summary>
+        public static readonly Color HpHealthy = new Color(0.35f, 0.85f, 0.45f, 1f);
+        /// <summary></summary>
+        public static readonly Color HpWounded = new Color(0.95f, 0.75f, 0.20f, 1f);
+        /// <summary></summary>
+        public static readonly Color HpCritical = new Color(0.90f, 0.25f, 0.20f, 1f);
+        /// <summary></summary>
+        public static readonly Color GreenSoft = new Color(0.55f, 0.95f, 0.60f, 1f);
+        /// <summary></summary>
+        public static readonly Color GreenBadge = new Color(0.30f, 0.90f, 0.40f, 1f);
+        /// <summary></summary>
+        public static readonly Color GreenDeep = new Color(0.05f, 0.20f, 0.05f, 1f);
+        /// <summary></summary>
+        public static readonly Color Danger = new Color(1f, 0.45f, 0.45f, 1f);
+        /// <summary></summary>
+        public static readonly Color DangerBright = new Color(1f, 0.35f, 0.35f, 1f);
+        /// <summary></summary>
+        public static readonly Color DangerDeep = new Color(0.75f, 0.18f, 0.18f, 1f);
+        /// <summary></summary>
+        public static readonly Color ArmedRed = new Color(0.52f, 0.16f, 0.16f, 0.95f);
+        /// <summary></summary>
+        public static readonly Color HaloGreen = new Color(0.35f, 0.75f, 0.45f, 0.10f);
+        /// <summary></summary>
+        public static readonly Color ItemBlue = new Color(0.35f, 0.68f, 0.95f, 1f);
+        /// <summary></summary>
+        public static readonly Color ItemPurple = new Color(0.72f, 0.52f, 0.92f, 1f);
+        /// <summary></summary>
+        public static readonly Color ItemGold = new Color(0.95f, 0.72f, 0.30f, 1f);
+        /// <summary></summary>
+        public static readonly Color AtmosphereBottom = new Color(0.025f, 0.035f, 0.06f, 1f);
+        /// <summary></summary>
+        public static readonly Color AtmosphereMid = new Color(0.075f, 0.11f, 0.15f, 1f);
+        /// <summary></summary>
+        public static readonly Color AtmosphereTop = new Color(0.045f, 0.06f, 0.10f, 1f);
+
+        // ------------------------------------------------------------------
         // Fonts (in a Resources folder; paths relative to it)
         // ------------------------------------------------------------------
         private static TMP_FontAsset cachedDisplay;

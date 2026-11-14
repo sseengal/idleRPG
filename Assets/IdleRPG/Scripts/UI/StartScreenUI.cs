@@ -34,9 +34,6 @@ namespace IdleRPG.UI
         [SerializeField] private Sprite tabAscendIcon;
         [SerializeField] private Sprite tabTrainIcon;
 
-        private static readonly Color NavSelected = new Color(0.28f, 0.38f, 0.56f, 1f);
-        private static readonly Color NavIdle = new Color(0.12f, 0.16f, 0.24f, 1f);
-
         // Bottom nav: one rich tab per section so the open page can be highlighted + effects driven.
         private readonly System.Collections.Generic.Dictionary<string, FantasyTabButton> navTabs =
             new System.Collections.Generic.Dictionary<string, FantasyTabButton>();
@@ -121,11 +118,11 @@ namespace IdleRPG.UI
 
             Atmosphere(lobby.transform, "BG", Vector2.zero, Vector2.one, VerticalGradient, Color.white);
             Atmosphere(lobby.transform, "Vignette", Vector2.zero, Vector2.one, Vignette, Color.white);
-            Atmosphere(lobby.transform, "ChapterGlow", new Vector2(0.06f, 0.38f), new Vector2(0.94f, 0.70f), SoftGlow, new Color(0.35f, 0.75f, 0.45f, 0.10f));
+            Atmosphere(lobby.transform, "ChapterGlow", new Vector2(0.06f, 0.38f), new Vector2(0.94f, 0.70f), SoftGlow, UiTheme.HaloGreen);
 
             Image card = chapterArt != null
                 ? ArtPanel(lobby.transform, "ChapterCard", new Vector2(0.10f, 0.4144f), new Vector2(0.90f, 0.66f), chapterArt)
-                : Panel(lobby.transform, "ChapterCard", new Vector2(0.10f, 0.38f), new Vector2(0.90f, 0.66f), new Color(0.12f, 0.16f, 0.24f, 1f), Frame);
+                : Panel(lobby.transform, "ChapterCard", new Vector2(0.10f, 0.38f), new Vector2(0.90f, 0.66f), UiTheme.NavIdle, Frame);
 
             // Chapter title: small faded "Chapter 1" over a big "Greenwake". Rect centres sit ~0.02 apart
             // so the two read as ONE tight kicker, and hug the panel top (proximity grouping).
@@ -140,8 +137,8 @@ namespace IdleRPG.UI
                 Text(lobby.transform, "ChapterTitle", new Vector2(0.05f, 0.669f), new Vector2(0.95f, 0.701f), "Greenwake", UiType.Role.Title, UiTheme.Text);
             }
 
-            Atmosphere(lobby.transform, "StartGlow", new Vector2(0.14f, 0.21f), new Vector2(0.86f, 0.39f), SoftGlow, new Color(1f, 0.82f, 0.35f, 0.10f));
-            Btn(lobby.transform, "StartButton", new Vector2(0.20f, 0.26f), new Vector2(0.80f, 0.34f), "START", new Color(0.96f, 0.80f, 0.28f, 1f), UiType.Role.Title, StartGame);
+            Atmosphere(lobby.transform, "StartGlow", new Vector2(0.14f, 0.21f), new Vector2(0.86f, 0.39f), SoftGlow, UiTheme.HaloGold);
+            Btn(lobby.transform, "StartButton", new Vector2(0.20f, 0.26f), new Vector2(0.80f, 0.34f), "START", UiTheme.Gold, UiType.Role.Title, StartGame);
 
             for (int i = 0; i < Tabs.Length; i++)
             {
@@ -155,7 +152,7 @@ namespace IdleRPG.UI
 
             Canvas menuCanvas = MakeCanvas("MiniMenuCanvas", 251, true);
             menuButton = menuCanvas.gameObject;
-            Btn(menuCanvas.transform, "MenuButton", new Vector2(0.80f, 0.90f), new Vector2(0.97f, 0.975f), "MENU", new Color(0.11f, 0.13f, 0.19f, 1f), UiType.Role.Small, ShowLobby);
+            Btn(menuCanvas.transform, "MenuButton", new Vector2(0.80f, 0.90f), new Vector2(0.97f, 0.975f), "MENU", UiTheme.FaceDim, UiType.Role.Small, ShowLobby);
             menuButton.SetActive(false);
         }
 
@@ -270,7 +267,7 @@ namespace IdleRPG.UI
             Image frame = frameRect.gameObject.AddComponent<Image>();
             frame.sprite = Frame;
             frame.type = Image.Type.Sliced;
-            frame.color = NavIdle;
+            frame.color = UiTheme.NavIdle;
             frame.raycastTarget = true;
 
             Button button = frameRect.gameObject.AddComponent<Button>();
@@ -298,7 +295,7 @@ namespace IdleRPG.UI
 
             FantasyTabButton view = frameRect.gameObject.AddComponent<FantasyTabButton>();
             view.Bind(tabRoot, frame, glow, text, effect, button,
-                NavIdle, NavSelected, new Color(0.72f, 0.76f, 0.84f, 1f), Color.white, icon, TabIconScale(tab),
+                UiTheme.NavIdle, UiTheme.NavSelected, UiTheme.TextMuted, Color.white, icon, TabIconScale(tab),
                 TabIconSelectedScale(tab), TabIconVertical(tab), TabIconSelectedVertical(tab));
             return view;
         }
@@ -507,9 +504,9 @@ namespace IdleRPG.UI
                 tex.wrapMode = TextureWrapMode.Clamp;
                 tex.filterMode = FilterMode.Bilinear;
 
-                Color bottom = new Color(0.025f, 0.035f, 0.060f, 1f);
-                Color mid = new Color(0.075f, 0.110f, 0.150f, 1f);
-                Color top = new Color(0.045f, 0.060f, 0.100f, 1f);
+                Color bottom = UiTheme.AtmosphereBottom;
+                Color mid = UiTheme.AtmosphereMid;
+                Color top = UiTheme.AtmosphereTop;
 
                 for (int y = 0; y < height; y++)
                 {

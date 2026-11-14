@@ -31,7 +31,7 @@ namespace IdleRPG.UI
         /// </summary>
         public static Image CreateTapCatcher(Transform parent, UnityAction onClick)
         {
-            Image catcher = UiRuntime.CreatePanel(parent, null, new Color(0f, 0f, 0f, 0f), raycast: true);
+            Image catcher = UiRuntime.CreatePanel(parent, null, Color.clear, raycast: true);
             RectTransform rect = catcher.rectTransform;
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;

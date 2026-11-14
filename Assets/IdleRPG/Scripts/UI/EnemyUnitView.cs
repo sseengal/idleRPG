@@ -39,14 +39,14 @@ namespace IdleRPG.UI
         [SerializeField] private float spawnPopDurationSec = 0.18f;
 
         [Header("Hit juice (subtle)")]
-        [SerializeField] private Color hitFlashColor = new Color(1f, 1f, 1f, 1f);
+        [SerializeField] private Color hitFlashColor = Color.white;
         [SerializeField] private float hitFlashDurationSec = 0.14f;
         [SerializeField] private float critFlashDurationSec = 0.24f;
         [SerializeField] private float hitPunchScale = 0.94f;
         [SerializeField] private float critPunchScale = 0.88f;
         [SerializeField] private float punchDurationSec = 0.12f;
         [Tooltip("Flash colour when an ability raises a guard on this enemy (no health moved, so the bar is untouched).")]
-        [SerializeField] private Color shieldFlashColor = new Color(0.55f, 0.8f, 1f, 1f);
+        [SerializeField] private Color shieldFlashColor = UiTheme.InfoBlue;
         [SerializeField] private float shieldFlashDurationSec = 0.2f;
 
         private int enemyIndex;

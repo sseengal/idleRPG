@@ -48,7 +48,7 @@ namespace IdleRPG.UI
         [SerializeField] private float coinSize = 18f;
 
         [Tooltip("Gold tint (soft warm yellow).")]
-        [SerializeField] private Color coinColor = new Color(1f, 0.82f, 0.28f, 1f);
+        [SerializeField] private Color coinColor = UiTheme.GoldSoft;
 
         [Header("Trail (ghost dots)")]
         [Tooltip("How many fading ghost dots follow a coin. A long comet tail, not one smear.")]

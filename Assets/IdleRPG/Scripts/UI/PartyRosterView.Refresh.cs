@@ -57,7 +57,7 @@ namespace IdleRPG.UI
             {
                 if (cardNameLabels[i] != null)
                 {
-                    cardNameLabels[i].color = i == selectedHeroIndex ? new Color(1f, 0.9f, 0.5f) : Color.white;
+                    cardNameLabels[i].color = i == selectedHeroIndex ? UiTheme.GoldRing : Color.white;
                 }
 
                 if (cardBackgrounds[i] != null)

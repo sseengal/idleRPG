@@ -121,7 +121,7 @@ namespace IdleRPG.UI
             Vector2 anchorMax, UnityEngine.Events.UnityAction onClick, Color? background = null, Sprite sprite = null,
             UiType.Role role = UiType.Role.Section)
         {
-            Image image = CreatePanel(parent, sprite, background ?? new Color(0.22f, 0.32f, 0.5f, 1f), raycast: true);
+            Image image = CreatePanel(parent, sprite, background ?? UiTheme.ButtonBlue, raycast: true);
             image.gameObject.name = name;
             Anchor(image.rectTransform, anchorMin, anchorMax);
 

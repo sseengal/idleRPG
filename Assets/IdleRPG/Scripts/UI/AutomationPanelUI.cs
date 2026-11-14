@@ -20,8 +20,8 @@ namespace IdleRPG.UI
     public sealed class AutomationPanelUI : MonoBehaviour
     {
         [SerializeField] private Color textColor = Color.white;
-        [SerializeField] private Color dimColor = new Color(1f, 1f, 1f, 0.6f);
-        [SerializeField] private Color lockedColor = new Color(1f, 0.8f, 0.5f, 1f);
+        [SerializeField] private Color dimColor = UiTheme.InkDim;
+        [SerializeField] private Color lockedColor = UiTheme.OrangeSoft;
 
         private GameManager manager;
         private bool built;

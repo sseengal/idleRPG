@@ -92,7 +92,7 @@ namespace IdleRPG.UI
             rect.anchorMax = new Vector2(0.98f, 0.885f);
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
-            panel.GetComponent<Image>().color = new Color(0.10f, 0.11f, 0.13f, 1f);
+            panel.GetComponent<Image>().color = UiTheme.PageSunken;
             return panel;
         }
 
@@ -103,10 +103,10 @@ namespace IdleRPG.UI
             perksPanel = CreateLobbyPanel("PerksPanel");
 
             perksTitle = Text(perksPanel.transform, "Title", new Vector2(0.03f, 0.90f), new Vector2(0.97f, 0.98f),
-                "PERK POINTS 0", UiType.Role.Section, new Color(0.98f, 0.80f, 0.28f, 1f));
+                "PERK POINTS 0", UiType.Role.Section, UiTheme.Gold);
 
             Text(perksPanel.transform, "Sub", new Vector2(0.03f, 0.845f), new Vector2(0.97f, 0.90f),
-                "Permanent multipliers - never reset", UiType.Role.Micro, new Color(0.6f, 0.63f, 0.72f, 1f));
+                "Permanent multipliers - never reset", UiType.Role.Micro, UiTheme.TextDim);
 
             if (manager == null || manager.Ascension == null)
             {
@@ -133,28 +133,28 @@ namespace IdleRPG.UI
         private void BuildPerkRow(Transform parent, PrestigeUpgradeData data, float top, float rowHeight)
         {
             float bottom = top - rowHeight;
-            Panel(parent, "PerkRow", new Vector2(0.02f, bottom), new Vector2(0.98f, top), new Color(0.13f, 0.14f, 0.16f, 1f));
+            Panel(parent, "PerkRow", new Vector2(0.02f, bottom), new Vector2(0.98f, top), UiTheme.Row);
 
             TextMeshProUGUI name = Text(parent, "Name", new Vector2(0.04f, top - 0.062f), new Vector2(0.52f, top - 0.008f),
                 data.DisplayName, UiType.Role.Section, Color.white);
             name.alignment = TextAlignmentOptions.MidlineLeft;
 
             TextMeshProUGUI effect = Text(parent, "Effect", new Vector2(0.04f, bottom + 0.012f), new Vector2(0.66f, top - 0.066f),
-                string.Empty, UiType.Role.Small, new Color(0.75f, 0.78f, 0.86f, 1f));
+                string.Empty, UiType.Role.Small, UiTheme.TextMuted);
             effect.alignment = TextAlignmentOptions.MidlineLeft;
             effect.textWrappingMode = TextWrappingModes.NoWrap;
             UiType.ApplyAuto(effect, UiType.Role.Small);
 
             TextMeshProUGUI level = Text(parent, "Level", new Vector2(0.56f, top - 0.062f), new Vector2(0.71f, top - 0.008f),
-                string.Empty, UiType.Role.Small, new Color(0.98f, 0.80f, 0.28f, 1f));
+                string.Empty, UiType.Role.Small, UiTheme.Gold);
             level.alignment = TextAlignmentOptions.MidlineRight;
             level.textWrappingMode = TextWrappingModes.NoWrap;
             UiType.ApplyAuto(level, UiType.Role.Small);
 
             Button buy = Btn(parent, "Buy", new Vector2(0.73f, bottom + 0.008f), new Vector2(0.98f, top - 0.008f),
-                "Buy", new Color(0.95f, 0.55f, 0.15f, 1f), UiType.Role.Small, () => BuyPerk(data));
+                "Buy", UiTheme.Orange, UiType.Role.Small, () => BuyPerk(data));
 
-            MakeCardIcon(buy.transform, StarSprite(), new Color(0.80f, 0.55f, 0.98f, 1f));
+            MakeCardIcon(buy.transform, StarSprite(), UiTheme.Purple);
 
             perkRows.Add(new PerkRow
             {

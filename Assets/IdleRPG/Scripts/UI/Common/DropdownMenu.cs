@@ -101,7 +101,7 @@ namespace IdleRPG.UI
             UiRuntime.Anchor(panel.GetComponent<RectTransform>(), new Vector2(xMin, 0.85f - panelHeight), new Vector2(xMax, 0.85f));
 
             Image panelBg = panel.AddComponent<Image>();
-            panelBg.color = new Color(0.08f, 0.10f, 0.15f, 0.98f);
+            panelBg.color = UiTheme.TabDim;
             panelBg.raycastTarget = true; // eats taps on the menu's own frame
 
             for (int i = 0; i < labels.Length; i++)
@@ -129,7 +129,7 @@ namespace IdleRPG.UI
             return selectedChecker != null && selectedChecker(index);
         }
 
-        private static readonly Color optionRowColor = new Color(0.14f, 0.16f, 0.23f, 0.95f);
+        private static readonly Color optionRowColor = UiTheme.SlotBlue;
 
         private void Select(int index)
         {

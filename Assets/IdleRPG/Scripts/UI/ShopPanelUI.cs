@@ -44,9 +44,9 @@ namespace IdleRPG.UI
         private const float OfferRowHeight = 150f;
 
         // Palette shared with the scene builder (MvpSceneBuilder.TextColor / DimTextColor).
-        private static readonly Color TextColor = new Color(0.94f, 0.96f, 1f, 1f);
-        private static readonly Color DimTextColor = new Color(0.75f, 0.78f, 0.86f, 1f);
-        private static readonly Color CardColor = new Color(1f, 1f, 1f, 0.30f);
+        private static readonly Color TextColor = UiTheme.Text;
+        private static readonly Color DimTextColor = UiTheme.TextMuted;
+        private static readonly Color CardColor = UiTheme.InkHint;
 
         private enum RowKind
         {

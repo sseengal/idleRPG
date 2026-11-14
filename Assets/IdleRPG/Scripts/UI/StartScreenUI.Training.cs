@@ -69,7 +69,7 @@ namespace IdleRPG.UI
             pr.anchorMax = new Vector2(0.98f, 0.885f);
             pr.offsetMin = Vector2.zero;
             pr.offsetMax = Vector2.zero;
-            panel.GetComponent<Image>().color = new Color(0.10f, 0.11f, 0.13f, 1f);
+            panel.GetComponent<Image>().color = UiTheme.PageSunken;
             trainingPanel = panel;
 
             BuildColumnHeaders(panel.transform);
@@ -81,7 +81,7 @@ namespace IdleRPG.UI
             sr.anchorMax = new Vector2(1f, TreeHeaderFraction);
             sr.offsetMin = Vector2.zero;
             sr.offsetMax = Vector2.zero;
-            scrollGO.GetComponent<Image>().color = new Color(0.13f, 0.14f, 0.16f, 1f);
+            scrollGO.GetComponent<Image>().color = UiTheme.Row;
             treeScroll = scrollGO.GetComponent<ScrollRect>();
             treeScroll.horizontal = false;
             treeScroll.vertical = true;
@@ -95,7 +95,7 @@ namespace IdleRPG.UI
             vr.anchorMax = Vector2.one;
             vr.offsetMin = Vector2.zero;
             vr.offsetMax = Vector2.zero;
-            viewport.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0f);
+            viewport.GetComponent<Image>().color = Color.clear;
             treeScroll.viewport = vr;
 
             TrainingTreeDef tree = manager != null && manager.Training != null ? manager.Training.Tree : null;
@@ -172,7 +172,7 @@ namespace IdleRPG.UI
             fillRect.sizeDelta = new Vector2(0f, 0f);
             fillRect.anchoredPosition = Vector2.zero;
             treeFill = fillGO.GetComponent<Image>();
-            treeFill.color = new Color(0.98f, 0.78f, 0.2f, 0.10f);
+            treeFill.color = UiTheme.GoldGlow;
             treeFill.raycastTarget = false;
 
             treeNodeLayer = treeContent.childCount;   // the fill sits behind everything added below
@@ -187,7 +187,7 @@ namespace IdleRPG.UI
             cap.offsetMin = Vector2.zero;
             cap.offsetMax = Vector2.zero;
             Image catcherImage = catcher.GetComponent<Image>();
-            catcherImage.color = new Color(0f, 0f, 0f, 0f);
+            catcherImage.color = Color.clear;
             Button catcherButton = catcher.GetComponent<Button>();
             catcherButton.targetGraphic = catcherImage;
             catcherButton.transition = Selectable.Transition.None;
@@ -304,7 +304,7 @@ namespace IdleRPG.UI
             sr.anchorMax = new Vector2(1f, 1f);
             sr.offsetMin = Vector2.zero;
             sr.offsetMax = Vector2.zero;
-            strip.GetComponent<Image>().color = new Color(0.13f, 0.14f, 0.17f, 1f);
+            strip.GetComponent<Image>().color = UiTheme.Row;
 
             int heroColumns = Mathf.Min(3, ColumnX.Length - 1);
 
@@ -328,7 +328,7 @@ namespace IdleRPG.UI
             cr.anchoredPosition = new Vector2(ColumnX[column], 0f);
 
             Image bg = cell.GetComponent<Image>();
-            bg.color = new Color(0.17f, 0.18f, 0.22f, 1f);
+            bg.color = UiTheme.RowLight;
 
             Button button = cell.GetComponent<Button>();
             button.targetGraphic = bg;
@@ -351,7 +351,7 @@ namespace IdleRPG.UI
                 portrait.sprite = hero.HeroIcon;
                 portrait.preserveAspect = true;
                 portrait.raycastTarget = false;
-                portrait.color = hero.HeroIcon != null ? Color.white : new Color(1f, 1f, 1f, 0.15f);
+                portrait.color = hero.HeroIcon != null ? Color.white : UiTheme.InkGhost;
 
                 TextMeshProUGUI nameLabel = Text(cell.transform, "Name", new Vector2(0.40f, 0.20f),
                     new Vector2(0.99f, 0.80f), hero.HeroName, UiType.Role.Small, Color.white);
@@ -361,7 +361,7 @@ namespace IdleRPG.UI
             else
             {
                 Text(cell.transform, "Name", new Vector2(0.06f, 0.18f), new Vector2(0.94f, 0.82f),
-                    "Empty", UiType.Role.Small, new Color(0.6f, 0.63f, 0.72f, 1f));
+                    "Empty", UiType.Role.Small, UiTheme.TextDim);
             }
         }
 
@@ -377,7 +377,7 @@ namespace IdleRPG.UI
             cr.anchoredPosition = new Vector2(ColumnX[column], 0f);
 
             Image bg = cell.GetComponent<Image>();
-            bg.color = new Color(0.20f, 0.17f, 0.12f, 1f);
+            bg.color = UiTheme.RowWarm;
 
             Button button = cell.GetComponent<Button>();
             button.targetGraphic = bg;
@@ -385,7 +385,7 @@ namespace IdleRPG.UI
             button.onClick.AddListener(() => ScrollToColumn(column));
 
             Text(cell.transform, "Title", new Vector2(0.04f, 0.76f), new Vector2(0.96f, 0.99f),
-                "PARTY", UiType.Role.Small, new Color(0.98f, 0.80f, 0.28f, 1f));
+                "PARTY", UiType.Role.Small, UiTheme.Gold);
 
             // The three small portraits, so the party track reads as "everyone".
             int count = manager != null && manager.Party != null ? manager.Party.Heroes.Count : 0;
@@ -413,7 +413,7 @@ namespace IdleRPG.UI
                 mini.sprite = hero.HeroIcon;
                 mini.preserveAspect = true;
                 mini.raycastTarget = false;
-                mini.color = hero.HeroIcon != null ? Color.white : new Color(1f, 1f, 1f, 0.15f);
+                mini.color = hero.HeroIcon != null ? Color.white : UiTheme.InkGhost;
             }
 
 
@@ -466,7 +466,7 @@ namespace IdleRPG.UI
                 cr.anchoredPosition = new Vector2(xPx, -(centerY - connectorLength * 0.5f));
                 cr.SetSiblingIndex(treeNodeLayer);   // behind the nodes, above the bands and level badges
                 connector = conGO.GetComponent<Image>();
-                connector.color = new Color(0.30f, 0.31f, 0.35f, 1f);
+                connector.color = UiTheme.LineGrey;
             }
 
             GameObject nodeGO = new GameObject("Node_" + node.NodeID, typeof(RectTransform));
@@ -487,7 +487,7 @@ namespace IdleRPG.UI
             rr.offsetMax = new Vector2(-5f, -5f);
             rr.localRotation = UnityEngine.Quaternion.Euler(0f, 0f, 45f);
             Image ring = ringGO.GetComponent<Image>();
-            ring.color = new Color(1f, 0.95f, 0.66f, 1f);   // pale gold rim, brighter than the fill
+            ring.color = UiTheme.GoldRim;   // pale gold rim, brighter than the fill
             ring.raycastTarget = false;
             ringGO.SetActive(false);
 
@@ -500,7 +500,7 @@ namespace IdleRPG.UI
             dr.offsetMax = new Vector2(-16f, -16f);
             dr.localRotation = UnityEngine.Quaternion.Euler(0f, 0f, 45f);
             Image diamond = diaGO.GetComponent<Image>();
-            diamond.color = new Color(0.35f, 0.36f, 0.4f, 1f);
+            diamond.color = UiTheme.LineSoft;
 
             TextMeshProUGUI icon = Text(nodeGO.transform, "Icon", Vector2.zero, Vector2.one, IconLetter(node.Effect), UiType.Role.Section, Color.white);
             icon.raycastTarget = false;
@@ -515,7 +515,7 @@ namespace IdleRPG.UI
             br.anchoredPosition = new Vector2(54f, -54f);
             Image badge = badgeGO.GetComponent<Image>();
             badge.sprite = CircleSprite();
-            badge.color = new Color(0.3f, 0.9f, 0.4f, 1f);
+            badge.color = UiTheme.GreenBadge;
 
             GameObject arrowGO = new GameObject("Arrow", typeof(RectTransform), typeof(Image));
             RectTransform ar = arrowGO.GetComponent<RectTransform>();
@@ -526,7 +526,7 @@ namespace IdleRPG.UI
 
             Image arrow = arrowGO.GetComponent<Image>();
             arrow.sprite = ArrowSprite(true);
-            arrow.color = new Color(0.05f, 0.2f, 0.05f, 1f);
+            arrow.color = UiTheme.GreenDeep;
             arrow.raycastTarget = false;
 
             badgeGO.SetActive(false);
@@ -591,19 +591,19 @@ namespace IdleRPG.UI
 
                 if (unlocked)
                 {
-                    color = new Color(0.98f, 0.80f, 0.22f, 1f);
+                    color = UiTheme.GoldDeep;
                 }
                 else if (view.Node.IsDeferred)
                 {
-                    color = new Color(0.12f, 0.12f, 0.14f, 1f);
+                    color = UiTheme.InkDark;
                 }
                 else if (isNext)
                 {
-                    color = new Color(0.45f, 0.46f, 0.5f, 1f);
+                    color = UiTheme.InkGreyMid;
                 }
                 else
                 {
-                    color = new Color(0.30f, 0.31f, 0.35f, 1f);
+                    color = UiTheme.LineGrey;
                 }
 
                 if (view.Diamond != null)
@@ -624,8 +624,8 @@ namespace IdleRPG.UI
                 if (view.Connector != null)
                 {
                     view.Connector.color = unlocked
-                        ? new Color(0.9f, 0.72f, 0.15f, 1f)
-                        : new Color(0.30f, 0.31f, 0.35f, 1f);
+                        ? UiTheme.GoldDim
+                        : UiTheme.LineGrey;
                 }
             }
 
@@ -739,18 +739,18 @@ namespace IdleRPG.UI
             cr.anchorMax = new Vector2(0f, 1f);
             cr.pivot = new Vector2(0f, 0.5f);
             cr.sizeDelta = new Vector2(560f, 300f);
-            card.GetComponent<Image>().color = new Color(0.96f, 0.92f, 0.80f, 1f);
+            card.GetComponent<Image>().color = UiTheme.Parchment;
             treePopup = card;
 
             popupTitle = Text(card.transform, "Title", new Vector2(0.05f, 0.76f), new Vector2(0.95f, 0.97f),
-                string.Empty, UiType.Role.Section, new Color(0.12f, 0.12f, 0.14f, 1f));
+                string.Empty, UiType.Role.Section, UiTheme.InkDark);
             popupBody = Text(card.transform, "Body", new Vector2(0.05f, 0.52f), new Vector2(0.95f, 0.75f),
-                string.Empty, UiType.Role.Sentence, new Color(0.28f, 0.28f, 0.31f, 1f));
+                string.Empty, UiType.Role.Sentence, UiTheme.InkSoftDark);
             popupBuy = Btn(card.transform, "Buy", new Vector2(0.12f, 0.04f), new Vector2(0.88f, 0.52f), "Buy",
-                new Color(0.95f, 0.55f, 0.15f, 1f), UiType.Role.Section, BuyPopup);
+                UiTheme.Orange, UiType.Role.Section, BuyPopup);
 
-            popupCoin = MakeCardIcon(popupBuy.transform, CircleSprite(), new Color(0.98f, 0.80f, 0.20f, 1f));
-            popupStar = MakeCardIcon(popupBuy.transform, StarSprite(), new Color(0.80f, 0.55f, 0.98f, 1f));
+            popupCoin = MakeCardIcon(popupBuy.transform, CircleSprite(), UiTheme.GoldDeep);
+            popupStar = MakeCardIcon(popupBuy.transform, StarSprite(), UiTheme.Purple);
             popupStar.gameObject.SetActive(false);
 
             treePopup.SetActive(false);
@@ -1054,7 +1054,7 @@ namespace IdleRPG.UI
             const int size = 64;
             Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
             float radius = size * 0.5f;
-            Color clear = new Color(1f, 1f, 1f, 0f);
+            Color clear = Color.clear;
 
             for (int y = 0; y < size; y++)
             {
@@ -1091,7 +1091,7 @@ namespace IdleRPG.UI
             }
 
             Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
-            Color clear = new Color(1f, 1f, 1f, 0f);
+            Color clear = Color.clear;
 
             for (int y = 0; y < size; y++)
             {
@@ -1133,7 +1133,7 @@ namespace IdleRPG.UI
             float baseY = up ? size * 0.20f : size * 0.80f;
             float apexY = up ? size * 0.84f : size * 0.16f;
             Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
-            Color clear = new Color(1f, 1f, 1f, 0f);
+            Color clear = Color.clear;
 
             for (int y = 0; y < size; y++)
             {
@@ -1166,7 +1166,7 @@ namespace IdleRPG.UI
         private static GameObject IconBtn(Transform parent, string name, Vector2 aMin, Vector2 aMax, Sprite icon,
             UnityEngine.Events.UnityAction onClick)
         {
-            Image bg = Panel(parent, name, aMin, aMax, new Color(0.18f, 0.19f, 0.22f, 1f));
+            Image bg = Panel(parent, name, aMin, aMax, UiTheme.RowLight);
             Button button = bg.gameObject.AddComponent<Button>();
             button.targetGraphic = bg;
             button.transition = Selectable.Transition.None;
@@ -1181,7 +1181,7 @@ namespace IdleRPG.UI
 
             Image image = iconGO.GetComponent<Image>();
             image.sprite = icon;
-            image.color = new Color(0.92f, 0.94f, 0.98f, 1f);
+            image.color = UiTheme.Text;
             image.raycastTarget = false;
 
             return bg.gameObject;
@@ -1200,7 +1200,7 @@ namespace IdleRPG.UI
             br.anchoredPosition = new Vector2(0f, -centerY);
 
             Image bar = barGO.GetComponent<Image>();
-            bar.color = new Color(0.98f, 0.80f, 0.28f, 1f);
+            bar.color = UiTheme.Gold;
             bar.raycastTarget = false;
 
             TextMeshProUGUI label = Text(barGO.transform, "Label", Vector2.zero, Vector2.one,

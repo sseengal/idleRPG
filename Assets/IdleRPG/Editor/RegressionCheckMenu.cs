@@ -67,8 +67,12 @@ namespace IdleRPG.EditorTools
             //    eight-numbers-in-60-places problem can come back one call site at a time.
             ok &= UiSpacingCheck.RunCheckWithResult();
 
+            // 6) UI colours: every constant colour in the UI code must come from UiTheme. Without this, the
+            //    114-colours-in-35-files problem can come back one line at a time.
+            ok &= UiColourCheck.RunCheckWithResult();
+
             Debug.Log(ok
-                ? "[Regression] REGRESSION: PASS - save drift, content validation (incl. loop health) and the UI checks passed. Golden numbers are printed as a reading only (baseline void, Docs/Content.md §10)."
+                ? "[Regression] REGRESSION: PASS - save drift, content validation (incl. loop health) and the UI checks (type, spacing, colours) passed. Golden numbers are printed as a reading only (baseline void, Docs/Content.md §10)."
                 : "[Regression] REGRESSION: FAIL - see the errors above.");
 
             return ok;

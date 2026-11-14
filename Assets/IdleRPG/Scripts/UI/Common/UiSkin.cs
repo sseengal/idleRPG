@@ -33,12 +33,12 @@ namespace IdleRPG.UI
         public Sprite buttonSprite;
 
         [Header("Colours")]
-        public Color scrim = new Color(0f, 0f, 0f, 0.65f);
-        public Color card = new Color(0.10f, 0.12f, 0.18f, 0.98f);
-        public Color title = new Color(0.94f, 0.96f, 1f, 1f);
-        public Color body = new Color(1f, 1f, 1f, 0.75f);
-        public Color button = new Color(0.30f, 0.36f, 0.50f, 1f);
-        public Color accent = new Color(0.84f, 0.62f, 0.26f, 1f);
+        public Color scrim = UiTheme.ScrimSoft;
+        public Color card = UiTheme.TabDim;
+        public Color title = UiTheme.Text;
+        public Color body = UiTheme.InkSoft;
+        public Color button = UiTheme.SheetFace;
+        public Color accent = UiTheme.GoldDark;
 
         private static UiSkin current;
 

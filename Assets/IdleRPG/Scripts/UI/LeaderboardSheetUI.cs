@@ -17,8 +17,8 @@ namespace IdleRPG.UI
     {
         private const int TopRows = 12;
 
-        private readonly Color dimText = new Color(1f, 1f, 1f, 0.55f);
-        private readonly Color youHighlight = new Color(1f, 0.82f, 0.3f, 1f);
+        private readonly Color dimText = UiTheme.InkDim;
+        private readonly Color youHighlight = UiTheme.GoldSoft;
 
         private GameManager manager;
         private RectTransform rowsRoot;

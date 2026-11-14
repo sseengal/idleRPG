@@ -24,13 +24,13 @@ namespace IdleRPG.UI
         [SerializeField] private CanvasGroup canvasGroup;
 
         [Header("Feedback")]
-        [SerializeField] private Color hitFlashColor = new Color(1f, 0.45f, 0.45f, 1f);
+        [SerializeField] private Color hitFlashColor = UiTheme.Danger;
         [SerializeField] private float hitFlashDurationSec = 0.12f;
         [Tooltip("Squash-to value on a hit (1.0 = no punch). Subtle: whole seat dips, icon and bar together.")]
         [SerializeField] private float hitPunchScale = 0.94f;
         [SerializeField] private float hitPunchDurationSec = 0.12f;
         [Tooltip("Flash colour when an ability raises a guard on this hero (no health moved, so the bar is untouched).")]
-        [SerializeField] private Color shieldFlashColor = new Color(0.55f, 0.8f, 1f, 1f);
+        [SerializeField] private Color shieldFlashColor = UiTheme.InfoBlue;
         [SerializeField] private float shieldFlashDurationSec = 0.2f;
 
         [Header("Board move")]
@@ -160,7 +160,7 @@ namespace IdleRPG.UI
             hitJuice.Clear();
             transform.localScale = Vector3.one;
             slideT = -1f;
-            baseColor = new Color(1f, 1f, 1f, 0f);   // empty seats rest invisible (Update() honours this)
+            baseColor = Color.clear;   // empty seats rest invisible (Update() honours this)
 
             if (lunge != null)
             {

@@ -24,9 +24,9 @@ namespace IdleRPG.UI
         [Tooltip("Seconds before the ghost bar starts draining after a hit.")]
         [SerializeField] private float ghostDelaySec = 0.25f;
 
-        [SerializeField] private Color healthyColor = new Color(0.35f, 0.85f, 0.45f, 1f);
-        [SerializeField] private Color woundedColor = new Color(0.95f, 0.75f, 0.2f, 1f);
-        [SerializeField] private Color criticalColor = new Color(0.9f, 0.25f, 0.2f, 1f);
+        [SerializeField] private Color healthyColor = UiTheme.HpHealthy;
+        [SerializeField] private Color woundedColor = UiTheme.HpWounded;
+        [SerializeField] private Color criticalColor = UiTheme.HpCritical;
 
         private float displayedFill = 1f;
         private float ghostFill = 1f;
