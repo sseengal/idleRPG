@@ -76,6 +76,13 @@ namespace IdleRPG.UI
             selected = value;
         }
 
+        /// <summary>Change the face colours (a node that changes state). The colour eases to the new idle.</summary>
+        public void SetFaces(Color idle, Color active)
+        {
+            idleFill = idle;
+            activeFill = active;
+        }
+
         /// <summary>Disabling is a true grayscale drain (UIEffect), not just a dead raycast.</summary>
         public void SetInteractable(bool value)
         {

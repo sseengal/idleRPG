@@ -69,6 +69,7 @@ namespace IdleRPG.UI
         {
             public IdleRPG.Data.TrainingNode Node;
             public Image Diamond;
+            public UiPlateButton Plate;   // shared press/disabled behaviour on the diamond node
             public Image Connector;   // line ABOVE this node (to the one above it)
             public Image Badge;
             public Image Ring;        // gold rim, shown once the node is owned

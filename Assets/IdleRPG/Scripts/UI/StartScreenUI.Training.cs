@@ -69,7 +69,10 @@ namespace IdleRPG.UI
             pr.anchorMax = new Vector2(0.98f, 0.885f);
             pr.offsetMin = Vector2.zero;
             pr.offsetMax = Vector2.zero;
-            panel.GetComponent<Image>().color = UiTheme.PageSunken;
+            Image panelImage = panel.GetComponent<Image>();
+            panelImage.color = UiTheme.PageSunken;
+            panelImage.sprite = UiRuntime.PlateSprite;
+            panelImage.type = Image.Type.Sliced;
             trainingPanel = panel;
 
             BuildColumnHeaders(panel.transform);
@@ -304,7 +307,10 @@ namespace IdleRPG.UI
             sr.anchorMax = new Vector2(1f, 1f);
             sr.offsetMin = Vector2.zero;
             sr.offsetMax = Vector2.zero;
-            strip.GetComponent<Image>().color = UiTheme.Row;
+            Image stripImage = strip.GetComponent<Image>();
+            stripImage.color = UiTheme.Row;
+            stripImage.sprite = UiRuntime.PlateSprite;
+            stripImage.type = Image.Type.Sliced;
 
             int heroColumns = Mathf.Min(3, ColumnX.Length - 1);
 
@@ -335,6 +341,10 @@ namespace IdleRPG.UI
             button.transition = Selectable.Transition.None;
             int captured = column;
             button.onClick.AddListener(() => ScrollToColumn(captured));
+
+            Coffee.UIEffects.UIEffect cellEffect = cell.AddComponent<Coffee.UIEffects.UIEffect>();
+            UiPlateButton cellPlate = cell.AddComponent<UiPlateButton>();
+            cellPlate.Bind(cell.GetComponent<RectTransform>(), bg, null, cellEffect, button, UiTheme.RowLight, UiTheme.RowLight);
 
             if (hero != null)
             {
@@ -538,10 +548,16 @@ namespace IdleRPG.UI
             int capturedColumn = column;
             button.onClick.AddListener(() => OnNodeTap(captured, capturedColumn));
 
+            // The node keeps its diamond art but gains the shared press squash and disabled grayscale.
+            Coffee.UIEffects.UIEffect nodeEffect = nodeGO.AddComponent<Coffee.UIEffects.UIEffect>();
+            UiPlateButton nodePlate = nodeGO.AddComponent<UiPlateButton>();
+            nodePlate.Bind(nodeGO.GetComponent<RectTransform>(), diamond, null, nodeEffect, button, UiTheme.LineGrey, UiTheme.LineGrey);
+
             treeViews.Add(new TreeView
             {
                 Node = node,
                 Diamond = diamond,
+                Plate = nodePlate,
                 Connector = connector,
                 Badge = badge,
                 Ring = ring,
@@ -609,6 +625,11 @@ namespace IdleRPG.UI
                 if (view.Diamond != null)
                 {
                     view.Diamond.color = color;
+                }
+
+                if (view.Plate != null)
+                {
+                    view.Plate.SetFaces(color, color);
                 }
 
                 if (view.Badge != null)
@@ -740,6 +761,8 @@ namespace IdleRPG.UI
             cr.pivot = new Vector2(0f, 0.5f);
             cr.sizeDelta = new Vector2(560f, 300f);
             card.GetComponent<Image>().color = UiTheme.Parchment;
+            card.GetComponent<Image>().sprite = UiRuntime.PlateSprite;
+            card.GetComponent<Image>().type = Image.Type.Sliced;
             treePopup = card;
 
             popupTitle = Text(card.transform, "Title", new Vector2(0.05f, 0.76f), new Vector2(0.95f, 0.97f),
@@ -1166,11 +1189,15 @@ namespace IdleRPG.UI
         private static GameObject IconBtn(Transform parent, string name, Vector2 aMin, Vector2 aMax, Sprite icon,
             UnityEngine.Events.UnityAction onClick)
         {
-            Image bg = Panel(parent, name, aMin, aMax, UiTheme.RowLight);
+            Image bg = Panel(parent, name, aMin, aMax, UiTheme.RowLight, UiRuntime.PlateSprite);
             Button button = bg.gameObject.AddComponent<Button>();
             button.targetGraphic = bg;
             button.transition = Selectable.Transition.None;
             button.onClick.AddListener(onClick);
+
+            Coffee.UIEffects.UIEffect btnEffect = bg.gameObject.AddComponent<Coffee.UIEffects.UIEffect>();
+            UiPlateButton btnPlate = bg.gameObject.AddComponent<UiPlateButton>();
+            btnPlate.Bind(bg.rectTransform, bg, null, btnEffect, button, UiTheme.RowLight, UiTheme.RowLight);
 
             GameObject iconGO = new GameObject("Arrow", typeof(RectTransform), typeof(Image));
             RectTransform rt = iconGO.GetComponent<RectTransform>();
