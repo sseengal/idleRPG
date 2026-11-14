@@ -9,88 +9,115 @@ using IdleRPG.Sim;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// The battle page's ability strip, one button per hero (Ability-Plan).
+    /// The battle page's ability strip, one cell per hero (Ability-Plan).
     ///
-    /// ELI5: three buttons under the fight. Each one shows a hero's face, the special move that hero is wearing,
-    /// whether it is ready or still resting, and pressing it makes that hero use that move.
+    /// ELI5: three buttons under the fight. Each shows the hero's name, the special move that hero wears as a
+    /// picture, and whether the move is ready, waiting or resting. Press one and that hero uses the move.
     ///
-    /// A press queues that hero's cast. The cast is announced when the action lane is free - one actor, one target,
-    /// one travel window - and the button says so: "QUEUED" (amber) while it waits, then the cooldown clock. Everything
-    /// a button shows comes from the fight itself (whose clock pauses with the game), so the strip cannot drift from
-    /// the sim.
+    /// The cell's LOOK lives in <see cref="AbilityCellView.Build"/> - one owner for the layout. This class only
+    /// drives the STATE: the picture, the name, the state word and the cooldown line. A press queues that hero's
+    /// cast; everything shown comes from the fight itself, so the strip cannot drift from the sim.
     /// </summary>
     public sealed class AbilityPanelUI : MonoBehaviour
     {
-        /// <summary>One hero's button. Built by the scene builder and wired once. The whole cell is the button.</summary>
+        /// <summary>One hero's cell. Built in code by the panel (or by the scene builder, same method).</summary>
         [System.Serializable]
         public sealed class Row
         {
             public int heroIndex;
-            public Image portrait;
+            public UiPlateButton plate;
+            public Image abilityIcon;
             public TextMeshProUGUI nameLabel;
             public TextMeshProUGUI abilityLabel;
             public TextMeshProUGUI clockLabel;
+            public Image clockTrack;
             public Image clockFill;
             public Button castButton;
-            public Image abilityIcon;
         }
 
         [SerializeField] private Row[] rows = new Row[0];
         [SerializeField] private Color readyTint = UiTheme.Ready;
         [SerializeField] private Color coolingTint = UiTheme.Cooling;
 
-        /// <summary>Amber wash while a press waits for the action lane. The wait is real, so it is shown.</summary>
+        /// <summary>Amber state word while a press waits for the action lane. The wait is real, so it is shown.</summary>
         [SerializeField] private Color queuedTint = UiTheme.Queued;
-
-        /// <summary>Grey wash for a hero with nothing to cast. Nothing is hidden, so the row keeps its width.</summary>
-        [SerializeField] private Color lockedTint = UiTheme.Locked;
 
         private GameManager manager;
 
-        /// <summary>True once the pictures have a sprite. The party data is not readable on the first enable.</summary>
-        private bool portraitsBound;
-
         /// <summary>True once each button has its press listener. Those listeners do not survive the editor.</summary>
         private bool wired;
+
+        /// <summary>True once this panel has built its own cells, so a page toggle does not rebuild them.</summary>
+        private bool cellsBuilt;
 
         /// <summary>Wires the panel from the scene builder, the same way the unit views are wired.</summary>
         public void ConfigureRuntime(Row[] rowViews)
         {
             rows = rowViews ?? new Row[0];
             wired = false;
-            RestylePlates();
             WireButtons();
         }
 
-        /// <summary>Gives the scene-built ability cells the chunky plate face, so the battle chrome matches.</summary>
-        private void RestylePlates()
+        /// <summary>
+        /// Builds the strip's cells from the party, once. The scene still carries the old prefab cells, so they are
+        /// cleared here: one layout survives, the one in <see cref="AbilityCellView.Build"/>.
+        ///
+        /// The party data is not readable on the first frame, so callers retry until it is.
+        /// </summary>
+        private void EnsureCells()
         {
-            if (rows == null)
+            if (cellsBuilt)
             {
                 return;
             }
 
-            for (int i = 0; i < rows.Length; i++)
+            Bind();
+
+            PartyConfig party = manager != null && manager.Context != null ? manager.Context.Party : null;
+            if (party == null)
             {
-                Image face = rows[i] != null && rows[i].castButton != null
-                    ? rows[i].castButton.targetGraphic as Image
-                    : null;
+                return;
+            }
 
-                if (face != null && face.sprite != UiRuntime.PlateSprite)
-                {
-                    face.sprite = UiRuntime.PlateSprite;
-                    face.type = Image.Type.Sliced;
-                }
+            cellsBuilt = true;
 
-                // A small ability icon in the cell's top-right corner; hidden until the hero has an ability.
-                if (rows[i].castButton != null && rows[i].abilityIcon == null)
+            HorizontalLayoutGroup strip = GetComponent<HorizontalLayoutGroup>();
+            if (strip == null)
+            {
+                strip = gameObject.AddComponent<HorizontalLayoutGroup>();
+            }
+
+            // Equal cells, one gap size: 1, 2 or 3 heroes can never drift apart.
+            strip.spacing = UiSpace.Small;
+            strip.padding = UiSpace.Padding(UiSpace.Small);
+            strip.childAlignment = TextAnchor.MiddleCenter;
+            strip.childControlWidth = true;
+            strip.childControlHeight = true;
+            strip.childForceExpandWidth = true;
+            strip.childForceExpandHeight = true;
+            strip.childScaleWidth = false;
+            strip.childScaleHeight = false;
+
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+                Transform child = transform.GetChild(i);
+                if (child.name.StartsWith("Hero"))
                 {
-                    Image badge = UiRuntime.CreateIcon("AbilityIcon", rows[i].castButton.transform);
-                    UiRuntime.Anchor(badge.rectTransform, new Vector2(0.66f, 0.60f), new Vector2(0.96f, 0.96f));
-                    badge.enabled = false;
-                    rows[i].abilityIcon = badge;
+                    child.gameObject.SetActive(false);
+                    Destroy(child.gameObject);
                 }
             }
+
+            int count = Mathf.Max(1, party.ValidHeroCount);
+            rows = new Row[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                rows[i] = AbilityCellView.Build(transform, i).ToRow(i);
+            }
+
+            wired = false;
+            WireButtons();
         }
 
         /// <summary>
@@ -124,25 +151,23 @@ namespace IdleRPG.UI
 
         /// <summary>
         /// The strip lives on the battle page, which is active at scene start, but the HUD's manager may not be
-        /// assigned yet, so binding is deferred to first enable and re-checked every frame.
+        /// assigned yet, so building and binding are deferred and retried every frame until they succeed.
         /// </summary>
         private void OnEnable()
         {
             Bind();
-            RestylePlates();
+            EnsureCells();
             WireButtons();
-            portraitsBound = RefreshPortraits();
         }
 
         private void Update()
         {
             Bind();
 
-            // A frame or two after scene start the HUD finally hands over the manager. Until then there is no card
-            // data to read, so the pictures stay empty - keep asking instead of giving up on the first enable.
-            if (!portraitsBound)
+            if (!cellsBuilt)
             {
-                portraitsBound = RefreshPortraits();
+                EnsureCells();
+                return;
             }
 
             Encounter encounter = ActiveEncounter();
@@ -157,6 +182,11 @@ namespace IdleRPG.UI
             }
         }
 
+        /// <summary>
+        /// Drives one cell. Each band has ONE owner: the icon shows the move (and dims while resting), the state word
+        /// says ready/queued/seconds, the line fills while resting, and the plate only greys for a true lock. The
+        /// cell face itself stays steady, so a cooling cell does not flash a different colour every frame.
+        /// </summary>
         private void RefreshRow(Row row, Encounter encounter)
         {
             if (row == null)
@@ -178,87 +208,64 @@ namespace IdleRPG.UI
 
             if (row.abilityLabel != null)
             {
-                row.abilityLabel.SetText(hasAbility ? hero.AbilityName : "No ability");
+                row.abilityLabel.SetText(hasAbility ? hero.AbilityName : "—");
             }
+
+            AbilityDef equipped = card != null && manager != null && manager.Abilities != null
+                ? manager.Abilities.EquippedFor(card)
+                : null;
 
             if (row.abilityIcon != null)
             {
-                AbilityDef equipped = card != null && manager != null && manager.Abilities != null
-                    ? manager.Abilities.EquippedFor(card)
-                    : null;
-
                 Sprite icon = equipped != null ? equipped.Icon : null;
                 row.abilityIcon.sprite = icon;
                 row.abilityIcon.enabled = icon != null;
+                row.abilityIcon.color = cooling ? UiTheme.TextMuted : Color.white;
             }
 
             if (row.clockLabel != null)
             {
                 row.clockLabel.SetText(!hasAbility
-                    ? "LOCKED"
+                    ? "—"
                     : hero.IsCoverGuardActive
                         ? "GUARD " + hero.CoverGuardHitsRemaining
                         : queued
                             ? "QUEUED"
                             : cooling ? Mathf.CeilToInt((float)hero.AbilityCooldownRemaining) + "s" : "READY");
-                row.clockLabel.color = queued ? queuedTint : hasAbility && !cooling && alive ? readyTint : coolingTint;
+                row.clockLabel.color = queued
+                    ? queuedTint
+                    : !hasAbility
+                        ? UiTheme.InkDisabled
+                        : cooling ? UiTheme.TextDim : readyTint;
             }
 
-            if (row.clockFill != null)
+            if (row.clockFill != null && row.clockTrack != null)
             {
                 double total = hero != null ? hero.AbilityCooldownSec : 0d;
                 double left = hero != null ? hero.AbilityCooldownRemaining : 0d;
+                bool showBar = cooling && total > 0d;
 
-                row.clockFill.fillAmount = hasAbility && total > 0d
-                    ? Mathf.Clamp01(1f - (float)(left / total))
-                    : 0f;
-                row.clockFill.color = cooling ? coolingTint : readyTint;
-            }
+                row.clockTrack.enabled = showBar;
+                row.clockFill.enabled = showBar;
 
-            if (row.castButton != null)
-            {
-                row.castButton.interactable = hasAbility && alive && !cooling && !queued;
-
-                // The cell never disappears: a missing button would make the strip jump and leave a dead gap.
-                Image face = row.castButton.targetGraphic as Image;
-                if (face != null)
+                if (showBar)
                 {
-                    face.color = hasAbility ? (queued ? queuedTint : Color.white) : lockedTint;
+                    row.clockFill.fillAmount = Mathf.Clamp01(1f - (float)(left / total));
+                    row.clockFill.color = coolingTint;
                 }
             }
-        }
 
-        /// <summary>
-        /// Points each button's picture at the art it shows. Returns false when the party data is not readable yet,
-        /// so the caller can try again on the next frame.
-        /// </summary>
-        private bool RefreshPortraits()
-        {
-            if (rows == null || HeroCard(0) == null)
+            // The plate is the one owner of the cell face: steady colour, grayscale only when nothing can be cast.
+            bool canCast = hasAbility && alive;
+
+            if (row.plate != null)
             {
-                return false;
+                row.plate.SetInteractable(canCast);
             }
-
-            for (int i = 0; i < rows.Length; i++)
+            else if (row.castButton != null)
             {
-                Row row = rows[i];
-                if (row == null || row.portrait == null)
-                {
-                    continue;
-                }
-
-                HeroData card = HeroCard(row.heroIndex);
-                if (card == null)
-                {
-                    continue;
-                }
-
-                row.portrait.sprite = card.ArtSet != null && card.ArtSet.Poster != null
-                    ? card.ArtSet.Poster
-                    : card.HeroIcon;
+                row.castButton.interactable = canCast;
             }
-
-            return true;
         }
 
         /// <summary>Asks the fight to cast. The fight refuses when it cannot, so a press can never force one.</summary>

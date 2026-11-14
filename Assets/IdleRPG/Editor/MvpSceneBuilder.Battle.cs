@@ -23,8 +23,6 @@ namespace IdleRPG.EditorTools
             "Assets/IdleRPG/Prefabs/UI/Battle/EnemyUnitSlot.prefab";
         private const string HeroUnitSlotPrefabPath =
             "Assets/IdleRPG/Prefabs/UI/Battle/HeroUnitSlot.prefab";
-        private const string AbilityCellPrefabPath =
-            "Assets/IdleRPG/Prefabs/UI/Battle/AbilityCell.prefab";
 
         // ------------------------------------------------------------------
         // Header
@@ -307,9 +305,21 @@ namespace IdleRPG.EditorTools
             int buttons = heroCount < 1 ? 1 : heroCount;
             AbilityPanelUI.Row[] rows = new AbilityPanelUI.Row[buttons];
 
+            // Equal cells and one gap size: the same layout the running game applies, so a rebuild cannot differ.
+            HorizontalLayoutGroup layout = strip.gameObject.AddComponent<HorizontalLayoutGroup>();
+            layout.spacing = UiSpace.Small;
+            layout.padding = UiSpace.Padding(UiSpace.Small);
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = true;
+            layout.childScaleWidth = false;
+            layout.childScaleHeight = false;
+
             for (int i = 0; i < buttons; i++)
             {
-                rows[i] = BuildAbilityButton(strip.transform, i, buttons);
+                rows[i] = BuildAbilityButton(strip.transform, i);
             }
 
             panel.ConfigureRuntime(rows);
@@ -317,36 +327,20 @@ namespace IdleRPG.EditorTools
         }
 
         /// <summary>
-        /// One hero's ability cell: the prefab owns the portrait, name, ability, clock and cooldown bar. This
-        /// method only places the cell and returns the runtime row the ability panel drives.
+        /// One hero's ability cell. The cell builds itself (<see cref="AbilityCellView.Build"/>), so the scene
+        /// builder and the running game share ONE layout instead of two copies that can drift apart.
         ///
         /// The cell is the button, so the tap target is the full width instead of a small CAPTION-sized box.
-        /// Every band is a FRACTION of the cell, so the strip's height cannot make the contents overflow.
         /// </summary>
-        private static AbilityPanelUI.Row BuildAbilityButton(Transform parent, int index, int total)
+        private static AbilityPanelUI.Row BuildAbilityButton(Transform parent, int index)
         {
-            AbilityCellView prefab = AssetDatabase.LoadAssetAtPath<AbilityCellView>(AbilityCellPrefabPath);
-
-            if (prefab == null)
-            {
-                Debug.LogError($"[MvpSceneBuilder] Missing ability cell prefab at {AbilityCellPrefabPath}.");
-                return null;
-            }
-
-            AbilityCellView cell = PrefabUtility.InstantiatePrefab(prefab, parent) as AbilityCellView;
+            AbilityCellView cell = AbilityCellView.Build(parent, index);
 
             if (cell == null)
             {
-                Debug.LogError("[MvpSceneBuilder] Could not instantiate the ability cell prefab.");
+                Debug.LogError("[MvpSceneBuilder] Could not build the ability cell.");
                 return null;
             }
-
-            GameObject instance = cell.gameObject;
-            instance.name = "Hero" + index;
-
-            UiFactory.Anchor((RectTransform)instance.transform,
-                new Vector2(index / (float)total, 0f), new Vector2((index + 1) / (float)total, 1f),
-                UiSpace.Small, UiSpace.Tight, UiSpace.Small, UiSpace.Tight);
 
             return cell.ToRow(index);
         }

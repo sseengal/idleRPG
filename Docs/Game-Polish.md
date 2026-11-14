@@ -305,3 +305,31 @@ code. Nothing here is speculative.*
   (3 badges at runtime), so ability icons appear once a hero has an ability equipped.
 - Verified in Play: chips = pxi_coin/pxi_gem_ruby/pxi_key; 1357 nodes all 127px with glow objects, 4 glowing
   (one affordable next-node per column); UiColourCheck PASS, UiSpacingCheck PASS.
+
+
+---
+
+## Ability strip: one layout owner, icon-led cells (2026-11-14)
+
+Why: the cells came from AbilityCell.prefab, so the layout could not be reviewed - a runtime badge landed
+on top of the name and ability text (x 0.66-0.96, y 0.60-0.96 vs name at 0.70-0.94). Two owners also fought
+over the cell colour: the panel washed the whole face while UiPlateButton lerped the same Image.
+
+Now: AbilityCellView.Build(parent) owns the layout, and both the scene builder and the running game call it.
+- Three bands: hero name (Micro, dim) top-left; state word top-right; ability icon (72) left, vertically
+  centred; ability name (Small) beside it; 4px cooldown line along the bottom, visible only while cooling.
+- Portrait removed: the hero faces are already in the formation row, so repeating them was noise.
+- Equal cells: HorizontalLayoutGroup on the strip (spacing Small, padding Small) and flexibleWidth = 1,
+  replacing fractional anchors + per-cell negative sizeDelta.
+- One owner per concern: the plate stays steady; state lives in icon tint + state word + line. The plate
+  only greys for a true lock (no ability / dead), so a cooling cell never flashes another colour.
+- State word ink: cooling uses TextDim (readable), not Cooling (a bar-fill token, near-invisible as text).
+- Runtime: AbilityPanelUI.EnsureCells builds from the party once, clears the old Hero* cells, then drives
+  state every frame. A scene rebuild follows the same Build path.
+
+Verified in Play: 3 cells at 340x168, identical icon Y (580.6-652.6), name baseline 668.6, insets 12/8 on
+every cell; READY green, 12s in TextDim with the gold line filling; guards PASS. Screenshot:
+Assets/Screenshots/ability-cells-v2.png.
+
+Follow-up: AbilityCell.prefab is no longer used by the build path. The scene still carries its instances
+until the next rebuild; delete the asset after a rebuild confirms the code-built cells.
