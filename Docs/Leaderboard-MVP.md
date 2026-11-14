@@ -1,5 +1,8 @@
 # Leaderboard MVP — design + build record
 
+> **STATUS 2026-11-14: RETIRED.** The RANKS button was switched off in favour of the header's three-bar menu,
+> and `LeaderboardSheetUI` was deleted in the UI cleanup pass. This document is kept as the design record only.
+
 > (2026-10-04). Minimal global ranks: mock field, no accounts/backend. Entry point is a trophy button on
 > the Battle HUD top bar; the board opens as a docked sheet over the battle page.
 
