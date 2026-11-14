@@ -69,7 +69,7 @@ namespace IdleRPG.UI
             layout.preferredHeight = OfferRowHeight;
 
             Image card = row.AddComponent<Image>();
-            card.sprite = rowSprite;
+            card.sprite = UiRuntime.PlateSprite;
             card.type = Image.Type.Sliced;
             card.color = CardColor;
 
@@ -115,7 +115,7 @@ namespace IdleRPG.UI
             rect.offsetMax = Vector2.zero;
 
             Image background = buttonObject.AddComponent<Image>();
-            background.sprite = buttonSprite;
+            background.sprite = UiRuntime.PlateSprite;
             background.type = Image.Type.Sliced;
             background.color = UiTheme.Orange;
 

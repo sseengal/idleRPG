@@ -30,10 +30,6 @@ namespace IdleRPG.UI
         [SerializeField] private TextMeshProUGUI watchAdLabel;
         [Tooltip("Scroll content the offer rows are built into (provided by Build MVP Scene).")]
         [SerializeField] private RectTransform offerRoot;
-        [Tooltip("Card sprite for offer rows (ui_panel), set by the scene builder.")]
-        [SerializeField] private Sprite rowSprite;
-        [Tooltip("Button sprite for offer rows (ui_button), set by the scene builder.")]
-        [SerializeField] private Sprite buttonSprite;
 
         private GameManager manager;
         private bool bound;
@@ -97,8 +93,6 @@ namespace IdleRPG.UI
             }
 
             // One face everywhere (2026-11-14): shop rows and BUY buttons wear the chunky plate.
-            rowSprite = UiRuntime.PlateSprite;
-            buttonSprite = UiRuntime.PlateSprite;
 
             HudController hud = HudController.Instance;
             manager = hud != null ? hud.GameManager : null;

@@ -202,6 +202,14 @@ namespace IdleRPG.UI
                 face.sprite = UiRuntime.PlateSprite;
                 face.type = Image.Type.Sliced;
             }
+
+            if (target != null && target.GetComponent<UiPlateButton>() == null)
+            {
+                Color fill = face != null ? face.color : UiTheme.RowLight;
+                Coffee.UIEffects.UIEffect fx = target.gameObject.AddComponent<Coffee.UIEffects.UIEffect>();
+                UiPlateButton plate = target.gameObject.AddComponent<UiPlateButton>();
+                plate.Bind((RectTransform)target.transform, face, null, fx, target, fill, fill);
+            }
         }
 
         private void WireButtons()
@@ -297,7 +305,16 @@ namespace IdleRPG.UI
 
             if (longRestButton != null && camp != null)
             {
-                longRestButton.interactable = camp.CanLongRest;
+                UiPlateButton longRestPlate = longRestButton.GetComponent<UiPlateButton>();
+
+                if (longRestPlate != null)
+                {
+                    longRestPlate.SetInteractable(camp.CanLongRest);
+                }
+                else
+                {
+                    longRestButton.interactable = camp.CanLongRest;
+                }
 
                 if (longRestLabel != null)
                 {

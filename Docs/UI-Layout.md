@@ -217,6 +217,6 @@ Sans) that do not exist in the saved scene.
 | 4 | the battle page, the management panels, the shared builders, the header, party and shop onto roles — each sweep verified **pixel-lossless** (`Main.unity` byte-identical) |
 | 5 | `UiSpacingCheck`, registered in `Run All Checks` |
 | 6 | this document |
-| 7 | the header row (`ChipRow`) — fixes the chip / RANKS overlap (§2c) |
+| 7 | the header row (`ChipRow`) — fixes the chip / RANKS overlap (§2c); RANKS itself was later replaced by the three-bar menu (2026-11-12) |
 | 8 | named management page bands — a pure rename (§2d) |
 

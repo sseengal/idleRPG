@@ -32,7 +32,6 @@ namespace IdleRPG.UI
         [SerializeField] private float rowGap = 12f;
 
         [Header("Art (optional)")]
-        [SerializeField] private Sprite slotSprite;
         [SerializeField] private Color slotColor = UiTheme.InkGhost;
         [Tooltip("A free pad while a hero is held: this is the cue that says \"tap a free pad\".")]
         [SerializeField] private Color emptyPadColor = UiTheme.GhostSlot;
@@ -114,7 +113,7 @@ namespace IdleRPG.UI
                 rect.sizeDelta = slotSize;
                 rect.anchoredPosition = FormationBoardLayout.PositionOfSlot(data, slot, slotSize, columnGap, rowGap);
 
-                Image background = UiRuntime.CreatePanel(pad.transform, slotSprite, slotColor, true);
+                Image background = UiRuntime.CreatePanel(pad.transform, UiRuntime.PlateSprite, slotColor, true);
                 UiRuntime.Stretch(background.rectTransform);
 
                 int captured = slot;

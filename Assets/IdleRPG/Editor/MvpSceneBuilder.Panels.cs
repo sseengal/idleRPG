@@ -422,8 +422,6 @@ namespace IdleRPG.EditorTools
             SceneWiringUtility.SetField(ui, "watchAdButton", watchAdButton);
             SceneWiringUtility.SetField(ui, "watchAdLabel", watchAdLabel);
             SceneWiringUtility.SetField(ui, "offerRoot", offerRoot);
-            SceneWiringUtility.SetField(ui, "rowSprite", UiFactory.LoadSprite("ui_panel"));
-            SceneWiringUtility.SetField(ui, "buttonSprite", UiFactory.LoadSprite("ui_button"));
             return panel;
         }
     }

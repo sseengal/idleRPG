@@ -235,3 +235,18 @@ code. Nothing here is speculative.*
   rebuild is needed.
 - Phase 8 (boon/ability icon sheets) is BLOCKED on icon art: the letter badges remain placeholders until a
   sheet exists, then it takes the same Multiple-sprite pipeline as Button Icons.png.
+
+
+---
+
+## UI consistency programme - clean-up pass (2026-11-14)
+
+- Dead code: LeaderboardSheetUI removed (RANKS was retired and nothing referenced it). Legacy
+  ui_panel/ui_button sprite fields removed from ShopPanelUI and slotSprite from FormationBoardView; the scene
+  builder no longer wires them. Every surface now resolves UiRuntime.PlateSprite.
+- Plated: party hero cards and formation pads (they were still flat kit faces).
+- Behaviour: camp choice buttons now carry UiPlateButton - press squash + true grayscale. LONG REST greys
+  out when it cannot be afforded instead of only refusing the tap.
+- Deliberately NOT changed: the combat log Dialogue size (a visual decision that needs a screenshot
+  session), and the ability cells keep their state tints (they repaint by design, so the shared colour
+  lerp would fight them).

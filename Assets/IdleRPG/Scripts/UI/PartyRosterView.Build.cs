@@ -36,7 +36,8 @@ namespace IdleRPG.UI
                 int captured = i;
 
                 Button card = UiRuntime.CreateButton(root, "Card" + i, string.Empty,
-                    new Vector2(xMin, 0.79f), new Vector2(xMax, 0.99f), () => SelectHero(captured), cardColor);
+                    new Vector2(xMin, 0.79f), new Vector2(xMax, 0.99f), () => SelectHero(captured), cardColor,
+                    UiRuntime.PlateSprite);
                 cardBackgrounds[i] = card != null ? card.GetComponent<Image>() : null;
                 Transform cardRoot = card != null ? card.transform : root;
 
