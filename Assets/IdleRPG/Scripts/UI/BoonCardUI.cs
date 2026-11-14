@@ -43,7 +43,7 @@ namespace IdleRPG.UI
 
         private GameObject root;
         private TextMeshProUGUI subtitle;
-        private Button refreshButton;
+        private UiPlateButton refreshButton;
         private TextMeshProUGUI refreshLabel;
         private readonly List<Row> rows = new List<Row>();
 
@@ -140,20 +140,14 @@ namespace IdleRPG.UI
             int left = manager != null ? manager.BoonRerollsLeft : 0;
             bool canReroll = left > 0;
 
-            refreshButton.interactable = canReroll;
+            refreshButton.SetInteractable(canReroll);
 
             if (refreshLabel != null)
             {
                 refreshLabel.SetText(canReroll ? "REFRESH  " + left + "/" + Mathf.Max(left, 1) : "NO RE-ROLL LEFT");
             }
 
-            // The image the button shades is the text's parent slab.
-            Image slab = refreshButton.targetGraphic as Image;
-
-            if (slab != null)
-            {
-                slab.color = canReroll ? UiTheme.Accent : UiTheme.PanelLight;
-            }
+            // The plate owns the face colour and the disabled look (a true grayscale) - no hand-shading here.
         }
 
         private void OnRerollClicked()
@@ -181,11 +175,6 @@ namespace IdleRPG.UI
             row.Root.SetActive(true);
 
             Color tint = RarityColor(card.Rarity);
-
-            if (row.Background != null)
-            {
-                row.Background.color = UiTheme.CardDark;
-            }
 
             if (row.Rarity != null)
             {
@@ -274,8 +263,8 @@ namespace IdleRPG.UI
             Image scrim = UiRuntime.CreatePanel(root.transform, null, UiTheme.Scrim, raycast: true);
             UiRuntime.Stretch(scrim.rectTransform);
 
-            Image panel = UiRuntime.CreatePanel(scrim.transform, null, UiTheme.PanelDeep);
-            UiRuntime.Anchor(panel.rectTransform, new Vector2(0.04f, 0.06f), new Vector2(0.96f, 0.94f));
+            Image panel = UiRuntime.Plate(scrim.transform, "Panel",
+                new Vector2(0.04f, 0.06f), new Vector2(0.96f, 0.94f), UiTheme.FaceDim);
 
             TextMeshProUGUI title = UiRuntime.CreateText(panel.transform, "Title", "LEVEL UP!",
                 UiType.Role.Section, TextAlignmentOptions.Center, UiTheme.AccentLight);
@@ -294,9 +283,9 @@ namespace IdleRPG.UI
                 rows.Add(BuildRow(panel.transform, top, top - (rowHeight - 0.02f), i));
             }
 
-            refreshButton = UiRuntime.CreateButton(panel.transform, "Refresh", "REFRESH  1/1",
-                new Vector2(0.20f, 0.02f), new Vector2(0.80f, 0.10f), OnRerollClicked,
-                UiTheme.Accent, null, UiType.Role.Small);
+            refreshButton = UiPlateButton.Create(panel.transform, "Refresh",
+                new Vector2(0.20f, 0.02f), new Vector2(0.80f, 0.10f), "REFRESH  1/1",
+                UiType.Role.Small, UiTheme.Accent, UiTheme.Accent, OnRerollClicked);
 
             refreshLabel = refreshButton.GetComponentInChildren<TextMeshProUGUI>();
         }
@@ -306,9 +295,8 @@ namespace IdleRPG.UI
         {
             Row row = new Row();
 
-            Image background = UiRuntime.CreatePanel(parent, null, UiTheme.CardDark, raycast: true);
-            UiRuntime.Anchor(background.rectTransform, new Vector2(0.05f, bottom), new Vector2(0.95f, top));
-            background.gameObject.name = "Boon" + index;
+            Image background = UiRuntime.Plate(parent, "Boon" + index,
+                new Vector2(0.05f, bottom), new Vector2(0.95f, top), UiTheme.CardDark, raycast: true);
             row.Background = background;
             row.Root = background.gameObject;
 
@@ -316,6 +304,11 @@ namespace IdleRPG.UI
             button.targetGraphic = background;
             button.onClick.AddListener(() => OnCardClicked(row));
             row.Button = button;
+
+            // The row is a plate button too: the same press squash and disabled grayscale as every other button.
+            Coffee.UIEffects.UIEffect effect = background.gameObject.AddComponent<Coffee.UIEffects.UIEffect>();
+            UiPlateButton plate = background.gameObject.AddComponent<UiPlateButton>();
+            plate.Bind(background.rectTransform, background, null, effect, button, UiTheme.CardDark, UiTheme.CardDark);
 
             row.Rarity = UiRuntime.CreateText(background.transform, "Rarity", "COMMON",
                 UiType.Role.Micro, TextAlignmentOptions.MidlineLeft, UiTheme.TextDim);
