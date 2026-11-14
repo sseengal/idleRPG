@@ -33,6 +33,9 @@ namespace IdleRPG.UI
         [SerializeField] private Sprite tabAscendIcon;
         [SerializeField] private Sprite tabTrainIcon;
 
+        [Tooltip("Icons for the training tree nodes. Null falls back to the letter badges.")]
+        [SerializeField] private IdleRPG.Data.TrainingIconSet trainingIcons;
+
         // Bottom nav: one rich tab per section so the open page can be highlighted + effects driven.
         private readonly System.Collections.Generic.Dictionary<string, FantasyTabButton> navTabs =
             new System.Collections.Generic.Dictionary<string, FantasyTabButton>();

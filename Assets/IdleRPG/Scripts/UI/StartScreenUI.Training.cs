@@ -515,6 +515,27 @@ namespace IdleRPG.UI
             TextMeshProUGUI icon = Text(nodeGO.transform, "Icon", Vector2.zero, Vector2.one, IconLetter(node.Effect), UiType.Role.Section, Color.white);
             icon.raycastTarget = false;
 
+            // Real art when the icon set has one for this effect; the letter above stays as the fallback.
+            Sprite nodeArt = trainingIcons != null ? trainingIcons.IconFor(node.Effect) : null;
+
+            if (nodeArt != null)
+            {
+                GameObject artGO = new GameObject("Art", typeof(RectTransform), typeof(Image));
+                RectTransform artRect = artGO.GetComponent<RectTransform>();
+                artRect.SetParent(nodeGO.transform, false);
+                artRect.anchorMin = new Vector2(0.17f, 0.17f);
+                artRect.anchorMax = new Vector2(0.83f, 0.83f);
+                artRect.offsetMin = Vector2.zero;
+                artRect.offsetMax = Vector2.zero;
+
+                Image art = artGO.GetComponent<Image>();
+                art.sprite = nodeArt;
+                art.preserveAspect = true;
+                art.raycastTarget = false;
+
+                icon.enabled = false;
+            }
+
             GameObject badgeGO = new GameObject("Badge", typeof(RectTransform), typeof(Image));
             RectTransform br = badgeGO.GetComponent<RectTransform>();
             br.SetParent(nodeGO.transform, false);

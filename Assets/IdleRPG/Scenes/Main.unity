@@ -6928,6 +6928,7 @@ MonoBehaviour:
   tabBattleIcon: {fileID: 1501245306437486003, guid: 7d9130c2ff48c417abb3fd214cc1853e, type: 3}
   tabAscendIcon: {fileID: 1050886469721413443, guid: 7d9130c2ff48c417abb3fd214cc1853e, type: 3}
   tabTrainIcon: {fileID: 3662339529517711919, guid: 7d9130c2ff48c417abb3fd214cc1853e, type: 3}
+  trainingIcons: {fileID: 11400000, guid: b72afde319fbb4dfe862325f15e8d03f, type: 2}
 --- !u!4 &1307579651
 Transform:
   m_ObjectHideFlags: 0
@@ -8896,7 +8897,6 @@ MonoBehaviour:
   slotSize: {x: 160, y: 176}
   columnGap: 26
   rowGap: 12
-  slotSprite: {fileID: 0}
   slotColor: {r: 1, g: 1, b: 1, a: 0}
   emptyPadColor: {r: 1, g: 0.93, b: 0.72, a: 0.42}
 --- !u!1 &1881806230

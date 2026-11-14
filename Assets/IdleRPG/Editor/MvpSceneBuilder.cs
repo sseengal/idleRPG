@@ -131,6 +131,13 @@ namespace IdleRPG.EditorTools
                 SceneWiringUtility.SetField(startScreenUi, "chapterTitleArt", chapterTitleArt, required: false);
             }
 
+            TrainingIconSet trainingIcons = AssetDatabase.LoadAssetAtPath<TrainingIconSet>(
+                "Assets/IdleRPG/Data/Training/TrainingIconSet.asset");
+            if (trainingIcons != null)
+            {
+                SceneWiringUtility.SetField(startScreenUi, "trainingIcons", trainingIcons, required: false);
+            }
+
             // Bottom-tab icons, sliced from one sheet. Order in the sheet (reading order): battle, ascend,
             // train, shop, party; each field below takes the matching sub-sprite by name.
             System.Func<string, Sprite> tabIcon = (spriteName) =>

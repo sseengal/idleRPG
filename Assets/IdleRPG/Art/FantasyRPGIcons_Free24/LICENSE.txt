@@ -1,0 +1,27 @@
+LICENSE — Fantasy RPG Icons FREE 24 Sampler
+======================================================
+
+Copyright (c) 2026. All rights reserved.
+
+By downloading or using this asset pack, you agree to the following terms.
+
+YOU MAY (Royalty-Free):
+  - Use the icons in unlimited personal and commercial projects
+    (games, apps, websites, prototypes, videos, UI, marketing).
+  - Modify, recolor, resize, and adapt the icons for your project.
+  - Publish and sell products (games/apps) that include these icons.
+  No attribution is required (but it is always appreciated).
+
+YOU MAY NOT:
+  - Resell, redistribute, sublicense, or give away the icons themselves,
+    on their own or as part of another asset pack / template / icon library.
+  - Register the icons (or trivial edits of them) as your own trademark or logo
+    in a way that prevents others from using them.
+  - Include the icons in NFTs, blockchain assets, or "AI training" datasets.
+
+NO WARRANTY:
+  The assets are provided "as is", without warranty of any kind. The author is
+  not liable for any damages arising from their use.
+
+Short version: build anything you want with them; just don't resell the raw
+icons as an asset pack.
