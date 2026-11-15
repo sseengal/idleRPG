@@ -127,7 +127,7 @@ namespace IdleRPG.EditorTools
 
             if (!themeFont)
             {
-                Add(Severity.Error, area, path + ": font is '" + fontName + "', not a theme font (Silkscreen or VT323).");
+                Add(Severity.Error, area, path + ": font is '" + fontName + "', not a theme font (Abaddon Bold or Abaddon Light).");
             }
 
             if (!IsOnScale(roleSize))

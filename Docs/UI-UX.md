@@ -165,9 +165,12 @@ close is always top-left, primary button reachable one-handed (1080x1920 referen
 - **Runtime menus use the type scale and the touch rule.** Every label picks a `UiType` role and every control clears
   `UiTouch.MinTarget` (144) - no hand-written sizes, and the fonts come from `UiTheme` (Silkscreen chrome, VT323
   sentences), not the TMP default. Glyphs are drawn as sprites when the font lacks one (arrows).
-- **The party XP bar sits between the header and the page**: one 44-unit band built by the scene builder showing
-  `LV n`, a gold fill, and either `xp / needed` or, when a choice is owed, `N PICK(S)` in gold. The page starts below
-  it, so the bar can never sit over STAGE / WAVE.
+- **The party XP bar sits between the arena and the ability strip**: one 44-unit band built by the scene builder.
+  `LV n` and `xp/needed` are packed together on the left (`UiSpace.Small` between them, `UiSpace.Medium` before
+  the bar), and the blue bar takes every unit that is left, up to the shared right margin. The numbers always show;
+  the level-up card owns the pick count. The fill glides, steps up as blue motes land from the enemy that paid (3-5
+  per kill, coin-sized), and flashes once when a level lands. The arena starts above the band, so the bar can never
+  sit over the fight.
 - **One page at a time.** Every tab closes the other lobby pages before it opens its own, so two pages can
   never stack. All of them sit in the same box (`0.02-0.98` x `0.13-0.885`) and are opaque, so the lobby card
   behind them cannot show through.
@@ -297,6 +300,7 @@ condition ("2 stars", "zone 3").
 | Concern | Budget |
 |---|---|
 | Canvas rebuilds | no layout churn during combat except pooled rows/text |
+| Shared button / tab tween | a settled widget writes nothing (compare first, write last). Measured 2026-11-15, TRAIN page, 1,374 buttons: **1.43 ms -> 0.32 ms** per full pass (Editor, Mac). 1,364 of 1,364 end exactly on target |
 | Damage numbers | <= 12 live views, aggregated per target, pooled |
 | Combat log | Ring buffer, budgeted lines (5/s), pool of 36 labels, merge window 0.5s, auto-follow with scroll-back |
 | Log contract | **One line per wave** (`-- Wave 5: Bat, Goblin --`, dupes as `Goblin x2`); every line names the *real* attacker (indices come from the events, never guessed); names are captured when the line is written so nothing renames itself; enemy suffixes A/B/C when a wave holds duplicates |
@@ -325,49 +329,82 @@ condition ("2 stars", "zone 3").
 
 
 
-## 11. The named palette (2026-11-14)
+## 11. The palette: three layers (2026-11-15)
 
-Every constant colour in the UI code comes from UiTheme - 80 named tokens covering the nav blues,
-golds, rarity (Rare/Epic/Legendary), ability states (Ready/Cooling/Queued/Locked), HP states, log line
-colours, item tints, ink opacities, scrims and the atmosphere stops. UiColourCheck (registered in Run
-All Checks) fails the run on any new hand-written constant colour; colours with a computed channel
-(procedural glow/vignette textures) are exempt because they are generated art, not design decisions.
-Consolidating near-identical tokens further (the gold family) is a design decision to make with
-screenshots, not a refactor.
+The old palette had 94 tokens and about 40 distinct colours, with 19 near-identical blues and 19 golds
+doing the same jobs; most had no doc, so nobody knew which to pick. It is now three layers:
+
+1. **Primitives** - the raw ramp, 10 values. Screens never use them. Slate 950/900/800/700/600/500/400
+   (`#0B0F15` -> `#41506F`) and Gold 600/500/300.
+2. **Semantic tokens** - 40 names, the only ones a screen may use: `SurfaceBase/Raised/Card/Sunken`,
+   `BorderSubtle/Strong`, `ActionFace/Selected/Pressed/Ink`, `InkHigh/Medium/Low/Off/OnGold`,
+   `AccentBase/Bright/Glow`, `StatusOk/Warn/Bad/Info` (+ Soft/Deep/Text/Epic), `XpFill/FillLight/Trail/Flash`,
+   `ShadeBar`, `VeilSoft/Strong/Trace`, `StageTop/Mid/Bottom`.
+3. **Legacy aliases** - every old name (`Panel`, `ButtonBlue`, `GoldSoft`, `Danger`, `HpHealthy`, ...) still
+   exists, each pointing at one semantic token. Nothing broke when the values changed, and the whole app
+   shifted in one pass.
+
+Rules:
+- A screen says what a colour is FOR, never a hex value.
+- Do not add a new use of a legacy name; the alias sweep deletes them screen by screen.
+- One meaning, one tone: gold = value, green = healthy/ready, amber = waiting/wounded, red = danger,
+  blue = information. If a new thing needs a colour, it borrows one of those meanings.
+- UiColourCheck (registered in Run All Checks) fails the run on a hand-written constant colour in UI code.
+  **Known gap:** it scans code only - the scene and the three UI prefabs are swept by hand, so authored
+  Image colours can still drift. Extending the check to assets is the next step.
 
 
-## 12. One button, one plate (2026-11-14)
+## 12. One button, one plate (2026-11-15)
 
-New buttons use UiPlateButton.Create - chunky ui_frame face, idle/selected colour hand-off, press squash
-and a true grayscale disable. The bottom tabs keep FantasyTabButton because they add the lift, the
-breathing halo and the icon/word pose. Panels come from UiRuntime.Plate; small chips stay flat on purpose.
-Known remaining migration work: the battle-page chrome (ability strip, camp strip, viewport) and the
-management pages still use the old kit faces - Phases 4-7 of the consistency programme.
+New buttons use `UiPlateButton.Create`: the shared `ui_frame` 9-slice face, an idle/selected colour
+hand-off, a press squash and a true grayscale disable. The face is `ActionFace` (`#2A3A57`) - deliberately
+darker than the old `#385280`, so a button sits with the panels instead of on top of them.
+
+Two changes make the plate read as a button rather than a slab:
+- **`pixelsPerUnitMultiplier = 2.5`** on the face: the sprite's 18-pixel border draws as ~7 units.
+- **Pressed darkens the face it already has** (`Color.Lerp(face, black, 0.18)`), so a gold button darkens
+  when pressed instead of flashing navy.
+
+`FantasyTabButton` keeps its lift and halo for the bottom tabs. Panels come from `UiRuntime.Plate`; small
+chips stay flat on purpose.
 
 
-## 13. Ability strip cells: picture, name, one line (2026-11-14, revised 2026-11-15)
+## 13. Ability strip cells: a card, picture left, words right (2026-11-15)
 
-Each cell under the fight is one hero's ability button. It holds a 102px picture (the 34px art x 3), the move's
-name in one `Micro` line under it, and a 6px line along its bottom edge.
+Each cell under the fight is one hero's special move, drawn as a small card. A 170px picture of the move fills the
+card's whole height on the left (the 34px art x 5 - a whole-number zoom, so no pixel column lands half a pixel
+wide). To its right is a column of words: the hero's name in one `UiType.Small` line, the move's name in
+`UiType.Micro` under it, and the 6px state line under both. The line spans the words column only, so it reads as
+an underline for the move rather than as a second widget.
 
-| State | Line | Picture and name |
+| State | Line | Picture and words |
 |---|---|---|
-| Ready | full green | full colour |
-| Resting | gold, growing left to right (length = time left) | dimmed |
+| Ready | full green | full colour; move's name `TextDim` |
+| Resting | gold, growing left to right (length = time left) | grey art with colour returning from the left; move's name `TextMuted` |
 | Press waiting | full amber | full colour |
-| No ability / dead | no line | both hidden, plate greyed |
+| No ability / dead | no line | picture and move's name hidden, plate greyed |
 
 Rules that keep it honest:
 - The plate never changes colour for a cooldown; only a true lock greys it.
-- Colour is a second cue, never the only one: a resting cell also loses length and dims its picture and name, so
-  the state survives a colour weakness or a bright screen.
+- Colour is a second cue, never the only one: a resting cell also loses length and dims its picture and its move
+  name, so the state survives a colour weakness or a bright screen.
+- The hero's name is identity, not state: it stays at `UiTheme.Text` through a whole cooldown, because it is the
+  only thing that tells three cards apart at a glance. It goes away with the rest of the card when the hero is down.
+- The move's name box is always two lines tall and top-aligned. A name that wraps ("Holy Slash" on a three-hero
+  strip) must not push the state line, or the three state lines would stop lining up across the row.
 - The line is the only clock; there are no seconds to read.
-- The name is a caption, not a control: `Micro` is the floor, one line, and the same words the party page uses.
-- Gaps follow one hierarchy, not one number: a bigger gap (8) separates the picture-and-name group from the state
-  line, and a smaller gap (2) joins the name to the picture it captions. Both are `UiSpace` ladder steps. 8 is as
-  wide as this cell can give without shrinking the 102px picture.
+- Gaps follow one hierarchy, not one number: 2 (`Hairline`) joins the hero's name to the move's name - one block of
+  words; 8 (`Small`) separates the words from the state line, and the same 8 separates the picture from the words
+  and the card's edge from its content. Every number is a `UiSpace` ladder step.
 - Bar length is done with anchors, never `Image.fillAmount`: these bars carry no sprite, and Unity ignores
   fillAmount without a sprite (this is why the line once sat full through every cooldown).
 - The drawn length eases toward the fight's value over about 60 ms, so the fight's 0.05 s ticks read as a glide
   instead of a stutter.
+- The picture's colour never fades in. It is a second, full-colour copy of the same art, pinned at the picture's
+  left edge under a `RectMask2D` curtain whose width IS the countdown. Colour is therefore revealed left to right,
+  and the art is cropped rather than squashed - `fillAmount` cannot do this for a sprite it must keep in proportion.
+
+Costs, stated plainly: the card is 340 x 186 instead of 340 x 168, so the strip band grew from 0.28 to 0.27 of the
+page and the battle log gives up 18 units (about one line - it scrolls). On a three-hero strip the words column is
+only 146 wide, so "Holy Slash" wraps to two lines; with two or one hero the cards are wider and it does not.
 

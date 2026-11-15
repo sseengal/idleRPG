@@ -110,6 +110,7 @@ Only one tier-3 cue may run at once. The band owns at most one loop.
 | Rule | Why |
 |---|---|
 | Animate **alpha and scale**, never width/height | A size change forces a canvas layout rebuild during a fight |
+| Compare before writing; a tween that has arrived writes nothing | One page can hold 1,300+ buttons and every write crosses into native code (measured in `Ui-UX.md` §8) |
 | One halo image per glowed mark | One live glow = one extra image |
 | Cancel before starting | Two pulses on one mark read as a bug |
 | Filter mode per sprite: point for stepped, bilinear for soft | Wrong filter turns a pixel halo to mush |

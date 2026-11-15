@@ -1266,7 +1266,8 @@ Owner decision 2026-09-29: the look is **pixel/retro** (matches the locked pixel
 Built and verified in the editor:
 
 - One **CC0** UI pack imported (`Assets/ThirdParty/Kenney_PixelUI/`, 35 PNGs) behind a single import policy:
-  `Tools > Idle RPG > Art > Apply UI-Art Presets` - Point, no mips, **uncompressed**, PPU 100, **12px** 9-slice
+  `Tools > Idle RPG > Art > Apply UI-Art Presets` - Point, no mips, lossless Default slot (ASTC 4x4 on
+  phones via `MobileTexturePolicy`), PPU 100, **12px** 9-slice
   border. The border was **measured from the pack's pixels** (1-2px outlines, square corners, inlay lines at y=16/32),
   not guessed. The character tool (`Apply Pixel-Art Presets`) now skips UI art.
 - Three **OFL** pixel fonts (Silkscreen / VT323 / Jersey 10) become TMP **SDF** font assets sampled at 64px:

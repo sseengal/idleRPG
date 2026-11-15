@@ -58,6 +58,12 @@ namespace IdleRPG.Progression
         /// <summary>Boon choices earned but not spent yet. The card deals them one at a time.</summary>
         public int PendingPicks { get; private set; }
 
+        /// <summary>
+        /// The receipt for the last payment that moved the bar, or a default record when the last call paid nothing.
+        /// The HUD raises one event from it, so every view animates the same numbers the save holds.
+        /// </summary>
+        public XpGain LastGain { get; private set; }
+
         /// <summary>Levels gained this run (one level always pays exactly one pick).</summary>
         public int LevelsGained { get; private set; }
 
@@ -66,6 +72,16 @@ namespace IdleRPG.Progression
 
         /// <summary>XP needed for the next level. 0 at the ceiling.</summary>
         public double RequiredXp => AtMaxLevel ? 0d : xpBase * Math.Pow(xpGrowth, Level - 1);
+
+        /// <summary>
+        /// XP a level costs, as a pure curve. Never 0, so a view that walks several levels can ask for each one.
+        /// This is the only place the curve is written; the bar reads it instead of guessing from stage data.
+        /// </summary>
+        public double RequiredXpFor(int level)
+        {
+            int safeLevel = level < 1 ? 1 : level;
+            return xpBase * Math.Pow(xpGrowth, safeLevel - 1);
+        }
 
         /// <summary>0..1 fill for the XP bar (1 at the ceiling).</summary>
         public double Progress
@@ -108,8 +124,14 @@ namespace IdleRPG.Progression
         {
             if (amount <= 0d || AtMaxLevel)
             {
+                LastGain = default;
                 return 0;
             }
+
+            // Snapshot the start BEFORE the money lands: the receipt is the whole difference between a bar that
+            // jumps and a bar that shows what just happened.
+            int startLevel = Level;
+            double startXp = Xp;
 
             Xp += amount;
 
@@ -137,6 +159,7 @@ namespace IdleRPG.Progression
                 Xp = 0d;
             }
 
+            LastGain = new XpGain(amount, startLevel, startXp, Level, Xp, gained, AtMaxLevel);
             return gained;
         }
 
@@ -159,6 +182,7 @@ namespace IdleRPG.Progression
             Xp = 0d;
             PendingPicks = 0;
             LevelsGained = 0;
+            LastGain = default;
         }
 
         // ------------------------------------------------------------------
@@ -198,6 +222,8 @@ namespace IdleRPG.Progression
             {
                 Xp = 0d;
             }
+
+            LastGain = default;
         }
     }
 }

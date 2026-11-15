@@ -408,7 +408,8 @@ exists and works (`MvpSceneBuilder`), so this is a **reskin, not a rebuild**.
 |---|---|---|
 | UI art pack | `Assets/ThirdParty/Kenney_PixelUI/` | Kenney Pixel UI Pack, **CC0**. **24 Oct 2026:** only the live 9-slice `grey.png` (used by `UiSkin` and both scenes) and `License.txt` stay under `Assets/`; the other 34 PNGs moved to `ThirdPartyAssets/Kenney_PixelUI/` |
 | Pixel fonts | `Assets/ThirdParty/PixelFonts/` + `Assets/IdleRPG/Resources/Fonts/*.asset` | Silkscreen, VT323, Jersey 10 - all OFL 1.1. Fonts live in a **Resources** folder so runtime-created text (log lines, hero HP bars, damage numbers) can load them too |
-| Import policy tool | `Tools > Idle RPG > Art > Apply UI-Art Presets` (`UiArtPresetApplier`) | Point filter, no mips, **uncompressed**, PPU 100, centre pivot, FullRect, 12px 9-slice border |
+| Import policy tool | `Tools > Idle RPG > Art > Apply UI-Art Presets` (`UiArtPresetApplier`) | Point filter, no mips, lossless **Default** slot, PPU 100, centre pivot, FullRect, 12px 9-slice border |
+| Mobile texture policy | `Tools > Idle RPG > Art > Apply Mobile Texture Compression (ASTC 4x4)` (`MobileTexturePolicy`) | Rewrites the **Android + iPhone** slot of every art texture to ASTC 4x4 (1 byte/pixel instead of 4). The Default slot stays lossless so the Editor shows the true art. One click back: `Revert Mobile Textures To Uncompressed` |
 | Font asset tool | `Tools > Idle RPG > Art > Generate Pixel Fonts` (`PixelFontAssetGenerator`) | SDF render mode, sampled at 64px - see the font policy below for why raster was rejected |
 | Comparison scene | `Tools > Idle RPG > Build UI Lab Scene` → `Scenes/UiLab.unity` | Three complete looks stacked in one portrait screen. **Not in build settings** |
 | Pixel-exact snapshot | `Tools > Idle RPG > Capture UI Lab Snapshot` | Renders 1080x1920 at 1:1 and writes `Screenshots/ui-lab/uilab-{A,B,C}.png` - one full-screen PNG per look |
@@ -566,8 +567,10 @@ error: the code defaults draw flat-coloured cards.
       pages (Shop/Upgrades/Ascend) and their runtime views are the mechanical remainder. **2026-10-11:** overlay cards
       now take their faces, colours and text sizes from `Resources/UiSkin.asset` (`UiSkin`), so a new card cannot
       introduce a new literal - it picks up the skin or adds one field to it.
-- [ ] **Mobile import check.** Uncompressed UI textures and the 2-3 heavy post effects need a texture-memory
-      measurement on device before the reskin is called done (§6 budgets).
+- [x] **Mobile import check (2026-11-15).** Every art texture now carries an ASTC 4x4 Android slot
+      (`MobileTexturePolicy`): the set used by scenes/assets measured 104 MB of pixels, 80 MB of it uncompressed;
+      ASTC 4x4 brings the whole set to about 26 MB. Still needs one device run for the numbers in §6 (PSS, 15 min
+      soak) and an artist's eye on the hero strips, because ASTC is lossy even at 4x4.
 
 ## 18. Tiny RPG character pass - animated units (2026-09-30)
 
@@ -578,7 +581,8 @@ stage-1 = Demon). Slime/Bat/Goblin placeholders are untouched.
 - **Folder**: canonical shadowed strips at `Assets/IdleRPG/Art/Characters/TinyRPG/<Char>/<Char>_<Action>.png`;
   the raw drop + aseprite sources live under `TinyRPG/_Source/` for traceability. `.DS_Store` files removed.
 - **Import**: `Tools > Idle RPG > Art > Import TinyRPG Characters` slices every `N x 100px` strip on the
-  100px grid (Point/NoMips/Uncompressed/PPU100) and (re)generates `Data/Characters/<Char>_Art.asset`
+  100px grid (Point/NoMips/PPU100, lossless Default slot, ASTC 4x4 on Android + iPhone) and (re)generates
+  `Data/Characters/<Char>_Art.asset`
   (`CharacterArtSet`: Idle/Walk/Attack01-03/Hurt/Death + fps). Width is read from the PNG header so the
   frame count can never depend on a stale imported-texture cache.
 - **Runtime**: `CharacterAnimator` swaps frames on the unit icon `Image` (no AnimatorController). Idle loops,
@@ -617,5 +621,6 @@ stage-1 = Demon). Slime/Bat/Goblin placeholders are untouched.
 | Fantasy RPG Icons FREE 24 (24 icons, 128/256/512) | Assets/IdleRPG/Art/FantasyRPGIcons_Free24/ | Free commercial; no attribution; no redistribution as a pack; no AI-dataset use | Training nodes (live), 128 imported Bilinear |
 
 Import rules: only ONE resolution per pack is imported (Tavmir 1x, Fantasy 128); the upscales are kept out
-of the build. Sprites are uncompressed, no mips, alpha-transparent; filter differs on purpose - Point keeps
-the 34px Tavmir art chunky, Bilinear keeps the 128px Fantasy art clean when downscaled to ~95px.
+of the build. Sprites carry no mips and keep transparency; filter differs on purpose - Point keeps
+the 34px Tavmir art chunky, Bilinear keeps the 128px Fantasy art clean when downscaled to ~95px. The phone
+format is ASTC 4x4 (see `MobileTexturePolicy`); the Editor keeps the lossless Default slot.

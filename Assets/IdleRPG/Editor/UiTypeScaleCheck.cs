@@ -49,7 +49,7 @@ namespace IdleRPG.EditorTools
         private static readonly UiType.Role[] Roles =
         {
             UiType.Role.Display, UiType.Role.Title, UiType.Role.Section, UiType.Role.Sentence,
-            UiType.Role.Small, UiType.Role.Micro, UiType.Role.Damage
+            UiType.Role.Small, UiType.Role.Micro, UiType.Role.Damage, UiType.Role.Dialogue
         };
 
         /// <summary>Files allowed to touch fontSize directly, each with the reason - so the list stays honest.</summary>
@@ -61,6 +61,7 @@ namespace IdleRPG.EditorTools
             { "EnemyUnitView.cs", "a boss name = the small role x a boss scale (intended)" },
             { "DevOverlay.cs", "the F3 debug overlay - developer UI, not player UI" },
             { "UiFactory.cs", "RawText, the design labs' escape hatch (labs are out of scope)" },
+            { "ThemeFontMigration.cs", "the one-shot migration that writes each saved label's role size down" },
         };
 
         private static readonly Regex FontSizeAssignment = new Regex(@"fontSize(Min|Max)?\s*=[^=]");

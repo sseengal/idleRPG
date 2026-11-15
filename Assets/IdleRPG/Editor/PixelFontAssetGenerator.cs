@@ -25,36 +25,76 @@ namespace IdleRPG.EditorTools
     /// </summary>
     public static class PixelFontAssetGenerator
     {
-        private const string SourceFolder = "Assets/ThirdParty/PixelFonts";
+        private const string ThirdPartyFolder = "Assets/ThirdParty";
         private const string OutputFolder = "Assets/IdleRPG/Resources/Fonts";
 
         private const int AtlasSize = 1024;
         private const int SamplingPointSize = 64;
 
-        private static readonly string[] Fonts = { "Silkscreen", "VT323", "Jersey10" };
+        /// <summary>
+        /// One download to convert. The source file name and the TMP asset name no longer have to match: the
+        /// Abaddon pack ships "Abaddon Bold.ttf" / "Abaddon Light.ttf", where the file name carries the weight.
+        /// </summary>
+        private struct FontSource
+        {
+            public string Path;
+            public string OutputName;
+        }
+
+        private static readonly FontSource[] Fonts =
+        {
+            new FontSource { Path = ThirdPartyFolder + "/PixelFonts/Silkscreen-Regular.ttf", OutputName = "Silkscreen Pixel" },
+            new FontSource { Path = ThirdPartyFolder + "/PixelFonts/VT323-Regular.ttf", OutputName = "VT323 Pixel" },
+            new FontSource { Path = ThirdPartyFolder + "/PixelFonts/Jersey10-Regular.ttf", OutputName = "Jersey10 Pixel" },
+            new FontSource { Path = ThirdPartyFolder + "/Abaddon_Fonts_v1.2/Abaddon Bold.ttf", OutputName = "Abaddon Bold Pixel" },
+            new FontSource { Path = ThirdPartyFolder + "/Abaddon_Fonts_v1.2/Abaddon Light.ttf", OutputName = "Abaddon Light Pixel" },
+        };
 
         [MenuItem("Tools/Idle RPG/Art/Generate Pixel Fonts", priority = 22)]
         public static void GenerateAll()
+        {
+            Generate(force: false);
+        }
+
+        /// <summary>
+        /// Rebuilds every font asset from its TTF, DELETING the existing ones first. A deleted asset gets a new
+        /// GUID, so every scene and prefab that pointed at it loses the font. Only use this when the font assets
+        /// themselves are broken or the sampling settings changed.
+        /// </summary>
+        [MenuItem("Tools/Idle RPG/Art/Generate Pixel Fonts (force rebuild)", priority = 24)]
+        public static void GenerateAllForced()
+        {
+            Generate(force: true);
+        }
+
+        private static void Generate(bool force)
         {
             EnsureFolder(OutputFolder);
 
             int built = 0;
 
-            foreach (string name in Fonts)
+            foreach (FontSource entry in Fonts)
             {
-                string sourcePath = SourceFolder + "/" + name + "-Regular.ttf";
-                Font source = AssetDatabase.LoadAssetAtPath<Font>(sourcePath);
+                Font source = AssetDatabase.LoadAssetAtPath<Font>(entry.Path);
 
                 if (source == null)
                 {
-                    Debug.LogWarning($"[PixelFontAssetGenerator] Missing font source '{sourcePath}'.");
+                    Debug.LogWarning($"[PixelFontAssetGenerator] Missing font source '{entry.Path}'.");
                     continue;
                 }
 
-                string assetPath = $"{OutputFolder}/{name} Pixel.asset";
+                string assetPath = $"{OutputFolder}/{entry.OutputName}.asset";
 
                 if (AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(assetPath) != null)
                 {
+                    if (!force)
+                    {
+                        // Keep the existing asset, and with it its GUID: every scene and prefab that points at it
+                        // stays wired. Recreating it would silently leave those references empty.
+                        Debug.Log($"[PixelFontAssetGenerator] '{entry.OutputName}' already exists - kept as it is.");
+                        continue;
+                    }
+
                     AssetDatabase.DeleteAsset(assetPath);
                 }
 
@@ -70,11 +110,11 @@ namespace IdleRPG.EditorTools
 
                 if (fontAsset == null)
                 {
-                    Debug.LogError($"[PixelFontAssetGenerator] TMP refused to build '{sourcePath}'.");
+                    Debug.LogError($"[PixelFontAssetGenerator] TMP refused to build '{entry.Path}'.");
                     continue;
                 }
 
-                fontAsset.name = name + " Pixel";
+                fontAsset.name = entry.OutputName;
                 fontAsset.isMultiAtlasTexturesEnabled = true;
 
                 // Textures and the material are separate objects; they must be added to the same asset

@@ -187,9 +187,14 @@ namespace IdleRPG.EditorTools
                     problems.Add("preset drift: " + path + " has mipmaps on");
                 }
 
-                if (importer.textureCompression != TextureImporterCompression.Uncompressed)
+                // The Default slot stays lossless so the Editor preview is the true art. The mobile slots must be
+                // ASTC 4x4: that is the memory budget (4 bytes per pixel became 1), and a strip that quietly falls
+                // back to RGBA32 is exactly the drift this check exists to catch.
+                TextureImporterPlatformSettings android = importer.GetPlatformTextureSettings("Android");
+
+                if (!android.overridden || android.format != TextureImporterFormat.ASTC_4x4)
                 {
-                    problems.Add("preset drift: " + path + " is compressed (pixel art smears)");
+                    problems.Add("preset drift: " + path + " has no ASTC 4x4 Android slot (phone memory doubles)");
                 }
 
                 if (Mathf.Abs(importer.spritePixelsPerUnit - ExpectedPpu) > 0.01f)

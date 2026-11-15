@@ -189,12 +189,12 @@ namespace IdleRPG.UI
                     if (day > 0)
                     {
                         int cap = manager.Balance.DailyStreakCap;
-                        streak = string.Format("  ·  Day-{0} streak (next +{1})",
+                        streak = string.Format("  |  Day-{0} streak (next +{1})",
                             day, manager.Balance.DailyStreakGemsForDay(day == cap ? cap : day + 1));
                     }
                     else
                     {
-                        streak = string.Format("  ·  today +{0} gems", manager.Balance.DailyStreakGemsForDay(1));
+                        streak = string.Format("  |  today +{0} gems", manager.Balance.DailyStreakGemsForDay(1));
                     }
                 }
 

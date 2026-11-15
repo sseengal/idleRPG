@@ -87,7 +87,7 @@ MonoBehaviour:
   partyXpPerKill: 5
   partyXpPerKillStageGrowth: 1.1
   partyXpBossMultiplier: 5
-  partyMaxLevelPerRun: 20
+  partyMaxLevelPerRun: 0
   startingGold: 0
   startingGems: 0
   goldPerSecondSampleWindowSec: 60

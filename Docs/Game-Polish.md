@@ -38,7 +38,7 @@ Seen in play, or read straight out of the code. These come first because they ar
 | D1 | The level-up card is **silent** | high | code: `SfxCue.LevelUp` fires on the *retired* hero-stat level event, never on a party level | a screen that stops the fight arrives with no sound at all |
 | D2 | Camp shows a **dark empty box** mid-field | medium | seen in the Play editor | an unexplained rectangle sits in the middle of the camp view |
 | D3 | **Duplicate wave line** in the feed after a resume | low | seen in the Play editor | the feed repeats itself when a run is restored |
-| D4 | XP bar **does not react** when a level lands | medium | by design today: the fill jumps | the reward moment is the quietest thing on screen |
+| D4 | XP bar **does not react** when a level lands | **fixed 2026-11-15** | was by design: the fill jumped | the reward moment was the quietest thing on screen |
 | D5 | **Thorned Mail reads as broken** at low stages | medium | measured: a 1-damage hit reflected at 20% rounds to nothing | the player takes a card, sees nothing, and concludes it is broken |
 | D6 | `MENU` sits exactly over the `RANKS` slot | low | seen in play | two buttons pretend to be the same button |
 | D7 | Card **letter badges** instead of icons | medium | by design (placeholder) | the most important new screen looks unfinished |
@@ -56,7 +56,7 @@ D1, D4 and D5 hurt most: all three sit on the **reward moment**, the one the pla
 |---|---|---|
 | Card opens with motion | the card scales in from 92% and fades, ~0.18 s, fight already stopped | no jarring pop; the fight stays frozen while it animates |
 | Rarity reveal | the tag and frame flash their rarity colour once as the card lands | a legendary reads as different before you read a word |
-| XP bar pulses on level (D4) | the bar flashes gold and the level label scales once | a level-up is visible without reading a number |
+| XP bar pulses on level (D4) | the bar flashes blue and the level label scales once | a level-up is visible without reading a number |
 | Card tap feedback | the tapped card lifts and brightens, then the next hand deals | no tap feels ignored, even when the next deal is instant |
 | Sound on open / pick / reveal (D1) | open plays the level chime, a pick plays the purchase sound, a legendary adds one extra note | three distinct cues, checked with sound on |
 
@@ -415,3 +415,47 @@ press waits, gold and partial while resting; UiColourCheck PASS, UiSpacingCheck 
 its three old Boot-splash errors and no ability-strip issue. Screenshots:
 Assets/Screenshots/ability-name-cooling.png, Assets/Screenshots/ability-name-ready.png and
 Assets/Screenshots/ability-gap.png (the wider gap).
+
+
+## Ability strip: picture-left cards, hero name + move name, line under the words (2026-11-15)
+
+Supersedes the section above.
+
+Why: the picture was using about 61% of the cell, with the name and the state line stacked above and below it, so
+the art read as a stamp in a box rather than as the button itself. The player asked for the picture to fill the
+cell's height and for the card to say WHOSE move it is, not just which move.
+
+Now (one owner: `AbilityCellView.Build`, called by both the scene builder and the running game):
+- Picture 34 x 5 = 170 square, pinned to the left inset and centred, so it fills the card's content height. Five is
+  the largest whole-number zoom that still leaves a usable words column: 34 x 6 would be 204 and would push the
+  words to 112 units.
+- Words column to the right, 146 wide on a three-hero strip: hero's name `UiType.Small` in `UiTheme.Text`, move's
+  name `UiType.Micro` in `TextDim` (→ `TextMuted` while resting). The hero name comes from
+  `Combatant.DisplayName`, with `HeroData.HeroName` as the fallback, and it is identity, not state: it stays bright
+  through a cooldown and disappears only when the hero is down.
+- State line 6 tall under the words, spanning the column, never the card: it reads as an underline for the move.
+  Same anchors-not-fillAmount trick, same 60 ms eased value, same green/gold/amber.
+- Move's name box is always two lines tall and top-aligned, so a wrapped name cannot move the state line and the
+  three lines stay level across cards.
+- Card geometry: 340 x 186 (was 340 x 168). Strip band `LogTop` 0.28 → 0.27, which is 202 units of strip, so the
+  battle log loses 18 units (one line - it scrolls). The camp strip shares the constant and follows automatically.
+- Gaps: 8 inset on every edge (`Small`), 8 between picture and words (`Small`), 2 between the two names
+  (`Hairline`), 8 between the words and the line (`Small`). No number is written in the layout.
+
+Measured in Play (live rects, not by eye): strip 1052 x 201.7, card 340 x 185.7, picture 170 x 170 at x = 8,
+words column 146 wide, hero name 146 x 38.4 at +41.3 from the card's middle, move name 146 x 66.6 at -13.2, rail
+146 x 6 at -57.5. Names: "Knight" 124 wide, "Soldier" 139, "Mage" 90 - all one line; "Holy Slash" needs 185 and
+wraps to two lines, as designed.
+
+Verified at last: the left-to-right colour wipe. Previous attempts read a frozen bar because the editor was
+unfocused and no frame ticked (`Time.frameCount` stuck at 2). With the editor focused, all three rows report
+`wipeW / 170 == fillW / 146 == shownFill` exactly (e.g. 57.1/170 = 49.0/146 = 0.336), and the colour copy keeps its
+true width 170 at x = 0, so a narrow curtain crops the art instead of squashing it. Screenshots:
+Assets/Screenshots/ability-card-ready.png, ability-card-midcool.png, ability-card-wipe-half.png (frozen at 34% /
+20% / 100%) and ability-card-cooling.png.
+
+Checks: UiColourCheck PASS, UiSpacingCheck PASS, UiTypeScaleCheck reports only its three old Boot-splash errors and
+nothing from the strip.
+
+Still open, NOT fixed here: `HpBarView` draws its bar with the same sprite-less `fillAmount`, so hero and enemy
+health bars always show full length. Separate change.

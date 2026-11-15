@@ -77,6 +77,14 @@ namespace IdleRPG.EditorTools
         /// <summary>
         /// Declares a texture's settings for one mobile platform explicitly, instead of leaving the inert
         /// "inherit the default" stub that Unity writes on its own when a mobile target is active.
+        ///
+        /// The format is ASTC 4x4, not RGBA32: 4 bytes per pixel of RAM became 1. The same strip set measured
+        /// 80 MB uncompressed and 26 MB as ASTC 4x4. Point filtering and no mips are unchanged, so the art stays
+        /// crisp and only the stored format is smaller. ASTC 4x4 is the highest-quality ASTC block, and every
+        /// device this project targets (Android min SDK 26, GLES 3.1 / Vulkan) supports it.
+        ///
+        /// Never lower maxTextureSize here: the 100 px slicing grid is measured in source pixels, so a resize
+        /// would shift every frame rect. Format changes are safe; resizes are not.
         /// </summary>
         private static void ApplyMobilePolicy(TextureImporter importer, string platform)
         {
@@ -85,8 +93,8 @@ namespace IdleRPG.EditorTools
                 name = platform,
                 overridden = true,
                 maxTextureSize = MaxMobileTextureSize,
-                format = TextureImporterFormat.RGBA32,
-                textureCompression = TextureImporterCompression.Uncompressed,
+                format = TextureImporterFormat.ASTC_4x4,
+                textureCompression = TextureImporterCompression.Compressed,
                 compressionQuality = 100,
                 crunchedCompression = false,
                 allowsAlphaSplitting = false,
@@ -218,10 +226,10 @@ namespace IdleRPG.EditorTools
             importer.alphaIsTransparency = true;
             importer.wrapMode = TextureWrapMode.Clamp;
 
-            // The per-platform policy is DECLARED here, not hand-edited into 344 .meta files. Pixel art with 1 px
-            // black outlines turns to mush under block compression (Art-Pipeline 17), so both mobile platforms
-            // start uncompressed. If the device pass says the memory is too high, THIS is the one place to switch
-            // them to ASTC 4x4 - both stores support ASTC, with ETC2 as the Android fallback.
+            // The per-platform policy is DECLARED here, not hand-edited into 344 .meta files. The Default slot stays
+            // RGBA32 so the Editor preview is the true, lossless art. The mobile slots are ASTC 4x4 (see
+            // ApplyMobilePolicy): 1 byte per pixel instead of 4, with Point filtering and no mips unchanged.
+            // Both stores support ASTC, with ETC2 as the Android fallback.
             ApplyMobilePolicy(importer, "Android");
             ApplyMobilePolicy(importer, "iPhone");
 

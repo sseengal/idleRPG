@@ -50,7 +50,7 @@ namespace IdleRPG.EditorTools
             Image bg = CreateImage("Background", canvasGO.transform, new Color(0.05f, 0.06f, 0.09f, 1f));
             Stretch(bg.rectTransform);
 
-            TextMeshProUGUI title = CreateText("Title", canvasGO.transform, "Kingsguard: Tiny RPG", 72f, Color.white);
+            TextMeshProUGUI title = CreateText("Title", canvasGO.transform, "Kingsguard: Tiny RPG", UiType.Role.Display, Color.white);
             RectTransform tr = title.rectTransform;
             tr.anchorMin = new Vector2(0.08f, 0.54f);
             tr.anchorMax = new Vector2(0.92f, 0.74f);
@@ -113,19 +113,16 @@ namespace IdleRPG.EditorTools
             return img;
         }
 
-        private static TextMeshProUGUI CreateText(string name, Transform parent, string text, float size, Color color)
+        private static TextMeshProUGUI CreateText(string name, Transform parent, string text, UiType.Role role, Color color)
         {
             GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
             go.transform.SetParent(parent, false);
             TextMeshProUGUI t = go.GetComponent<TextMeshProUGUI>();
 
-            if (TMP_Settings.defaultFontAsset != null)
-            {
-                t.font = TMP_Settings.defaultFontAsset;
-            }
+            // The role supplies the font AND the size together - the splash says what the title IS, never how big.
+            UiType.Apply(t, role);
 
             t.text = text;
-            t.fontSize = size;
             t.color = color;
             t.alignment = TextAlignmentOptions.Center;
             return t;

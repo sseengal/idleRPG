@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using IdleRPG.Data;
 using IdleRPG.Economy;
+using IdleRPG.Progression;
 using IdleRPG.Save;
 using IdleRPG.Sim;
 
@@ -68,6 +69,11 @@ namespace IdleRPG.Core
         internal static void RaisePartyXpChanged(int level, double xp, double requiredXp)
         {
             SafeInvoke(PartyXpChanged, level, xp, requiredXp, nameof(PartyXpChanged));
+        }
+
+        internal static void RaisePartyXpGained(XpGain gain)
+        {
+            SafeInvoke(PartyXpGained, gain, nameof(PartyXpGained));
         }
 
         internal static void RaisePartyLevelGained(int level, int pendingPicks)

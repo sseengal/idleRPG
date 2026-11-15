@@ -300,7 +300,7 @@ namespace IdleRPG.UI
 
             if (trainingLabel != null && manager != null)
             {
-                trainingLabel.SetText($"TRAINED +{manager.RunTrainAttackBonus} ATK · +{manager.RunTrainDefenseBonus} DEF");
+                trainingLabel.SetText($"TRAINED +{manager.RunTrainAttackBonus} ATK | +{manager.RunTrainDefenseBonus} DEF");
             }
 
             if (longRestButton != null && camp != null)

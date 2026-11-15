@@ -64,6 +64,12 @@ namespace IdleRPG.UI
         /// <summary>The top/bottom inset for a label inside a small chip (currency, boost).</summary>
         public const float ChipPadY = Hairline;
 
+        /// <summary>
+        /// The height of a health bar: tall enough to hold one line of Micro numbers INSIDE it, so the bar says
+        /// what it is without a separate caption. Used by the ability cells and by the arena nameplates.
+        /// </summary>
+        public const float HealthBarHeight = Gutter + Snug;
+
         // ------------------------------------------------------------------
         // Helpers - build the padding an editor scroll view wants out of the ladder.
         // ------------------------------------------------------------------

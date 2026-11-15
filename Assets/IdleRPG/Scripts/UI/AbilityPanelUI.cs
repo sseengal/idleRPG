@@ -11,12 +11,12 @@ namespace IdleRPG.UI
     /// <summary>
     /// The battle page's ability strip, one cell per hero (Ability-Plan).
     ///
-    /// ELI5: three buttons under the fight. Each one is that hero's special move: a picture, the move's name under
-    /// it, and a thin line along the bottom edge that says the state. Press one and that hero uses the move.
+    /// ELI5: three buttons under the fight. Each one is that hero's special move: a big picture on the left, and on
+    /// the right the hero's name, the hero's health numbers and health bar. Press one and that hero uses the move.
     ///
     /// The cell's LOOK lives in <see cref="AbilityCellView.Build"/> - one owner for the layout. This class only
-    /// drives the STATE: the picture and the state line. A press queues that hero's cast; everything shown comes
-    /// from the fight itself, so the strip cannot drift from the sim.
+    /// drives the STATE: the picture, the health bar and the words. A press queues that hero's cast; everything
+    /// shown comes from the fight itself, so the strip cannot drift from the sim.
     /// </summary>
     public sealed class AbilityPanelUI : MonoBehaviour
     {
@@ -25,17 +25,30 @@ namespace IdleRPG.UI
         public sealed class Row
         {
             public int heroIndex;
+
+            /// <summary>The press owner: transparent face, so it squashes on touch and locks without drawing a box.</summary>
             public UiPlateButton plate;
+
+            /// <summary>The grey base copy of the picture. Always drawn; the colour copy covers it as it opens.</summary>
             public Image abilityIcon;
-            public TextMeshProUGUI abilityName;
-            public Image stateRail;
-            public Image stateFill;
+
+            /// <summary>The full-colour copy of the same art, revealed from the left by <see cref="abilityIconWipe"/>.</summary>
+            public Image abilityIconColour;
+
+            /// <summary>The curtain: width IS the countdown, so the picture fills with colour left to right.</summary>
+            public RectTransform abilityIconWipe;
+
+            /// <summary>The hero's own name. Identity, not state: it stays bright through a cooldown.</summary>
+            public TextMeshProUGUI heroName;
+
+            /// <summary>The hero's health, numbers included: the same widget the arena units wear.</summary>
+            public HpBarView hpBar;
+
             public Button castButton;
 
             /// <summary>
-            /// The line length actually on screen, which eases toward the fight's real value instead of copying it.
-            /// The fight moves its clock in 0.05 s steps, so a copied value arrives as small jumps; an eased one
-            /// glides, and it still ends on the fight's own number.
+            /// The countdown length actually on screen, eased so the colour creeping back over the picture is a glide
+            /// rather than twenty small jumps a second. A cast takes it to zero at once - see <see cref="DrawCooldown"/>.
             /// </summary>
             public float shownFill;
         }
@@ -43,9 +56,10 @@ namespace IdleRPG.UI
         [SerializeField] private Row[] rows = new Row[0];
 
         /// <summary>
-        /// How fast the drawn line eases toward the fight's value. The fight ticks its clock 20 times a second, so
-        /// its number arrives in steps of about 1 px; 16 spreads each step over roughly 60 ms, which the eye reads
-        /// as a glide. The value always converges on the fight's own number, so the line cannot drift.
+        /// How fast the picture's colour curtain eases back over the art as the move comes back. A cooldown tick
+        /// arrives as one step, so copying it would snap; 16 spreads each step over roughly 60 ms, which the eye reads
+        /// as a sweep. The value always converges on the fight's own number, so the picture cannot lie about readiness.
+        /// (The health bar in each cell owns its own ease - see <see cref="HpBarView"/>.)
         /// </summary>
         private const float FillEasePerSecond = 16f;
 
@@ -190,12 +204,12 @@ namespace IdleRPG.UI
         }
 
         /// <summary>
-        /// Drives one cell. Each part has ONE owner: the picture shows the move (and dims while resting or dead),
-        /// the line carries the state, and the plate greys only for a true lock. The cell face itself stays steady,
-        /// so a cooling cell does not flash a different colour every frame.
+        /// Drives one cell. Each part has ONE owner: the picture shows the move (and dims while resting or dead), the
+        /// bar and its numbers show the hero's life, and the name says whose button it is. The plate greys only when
+        /// nothing can be cast, so a cooling cell cannot flash a different colour every frame.
         ///
-        /// The line is the only clock: it is full green when the move is ready, drains to nothing at the moment the
-        /// move is cast, and grows back as the wait runs out. Nothing has to be read.
+        /// The picture is the only clock: it is whole and bright when the move is ready, turns grey in the same frame
+        /// the move is cast, and fills back in as the wait runs out.
         /// </summary>
         private void RefreshRow(Row row, Encounter encounter)
         {
@@ -209,14 +223,17 @@ namespace IdleRPG.UI
             bool alive = hero != null && hero.IsAlive;
             bool hasAbility = hero != null && hero.HasAbility;
             bool cooling = hasAbility && alive && hero.AbilityCooldownRemaining > 0d;
+
+            // The press is in the lane, waiting for its turn. Amber says "waiting": it cannot be confused with gold
+            // (value), green (ready) or the grey of a resting move.
             bool queued = hasAbility && alive && hero.HasCastRequest;
 
             AbilityDef equipped = card != null && manager != null && manager.Abilities != null
                 ? manager.Abilities.EquippedFor(card)
                 : null;
 
-            // A hero with nothing to cast, or a hero on the floor, shows NO picture, name or line at all: a greyed
-            // plate already says "nothing here", and an empty rail would read as "nearly ready".
+            // A hero with nothing to cast, or a hero on the floor, shows NO picture, words or bar at all: a bare
+            // cell already says "nothing here", and an empty bar would read as "nearly dead".
             bool showState = hasAbility && alive;
 
             if (row.abilityIcon != null)
@@ -227,61 +244,77 @@ namespace IdleRPG.UI
                 if (row.abilityIcon.sprite != icon)
                 {
                     row.abilityIcon.sprite = icon;
+
+                    if (row.abilityIconColour != null)
+                    {
+                        row.abilityIconColour.sprite = icon;
+                    }
                 }
 
+                // The base keeps the old rule: dim while the move rests, dimmer still when the hero is down. It reads
+                // grey in every state, because its UIEffect drained it at build. While the press waits for its turn
+                // it turns amber instead: the queue is a state of the MOVE, and the art is where the player looks.
                 row.abilityIcon.enabled = icon != null;
-                row.abilityIcon.color = cooling || !alive ? UiTheme.TextMuted : Color.white;
+                row.abilityIcon.color = queued
+                    ? UiTheme.StatusWarn
+                    : (cooling || !alive ? UiTheme.TextMuted : Color.white);
+
+                // The colour copy takes the same amber, so a queued move cannot end up half-tinted: while queued the
+                // curtain is still open, so this is the copy the player actually sees.
+                if (row.abilityIconColour != null)
+                {
+                    row.abilityIconColour.enabled = icon != null && showState;
+                    row.abilityIconColour.color = queued ? UiTheme.StatusWarn : Color.white;
+                }
             }
 
-            if (row.abilityName != null)
+            if (row.heroName != null)
             {
-                // Same words as the party page, so one move is never called two things.
-                string label = equipped != null
-                    ? equipped.DisplayName
-                    : (hasAbility ? hero.AbilityName : string.Empty);
+                // Whose card this is: the hero's own name, the same one the party page shows. Identity, not state, so
+                // it neither dims on a cooldown nor waits for the move to be ready - the player must be able to tell
+                // three cards apart at any moment. It goes away only with the rest of the card, when the hero is down.
+                string owner = hero != null && !string.IsNullOrEmpty(hero.DisplayName)
+                    ? hero.DisplayName
+                    : (card != null ? card.HeroName : string.Empty);
 
                 // Only on a change. Writing the same string every frame would rebuild the canvas every frame.
-                if (row.abilityName.text != label)
+                if (row.heroName.text != owner)
                 {
-                    row.abilityName.text = label;
+                    row.heroName.text = owner;
                 }
 
-                // The name follows the picture: shown while the hero can cast, dimmed while the move rests.
-                row.abilityName.enabled = showState;
-                row.abilityName.color = cooling ? UiTheme.TextMuted : UiTheme.TextDim;
+                row.heroName.enabled = alive && !string.IsNullOrEmpty(owner);
             }
 
-            if (row.stateRail != null)
+            if (row.hpBar != null)
             {
-                row.stateRail.enabled = showState;
+                row.hpBar.SetVisible(showState);
             }
 
-            if (row.stateFill != null)
+            if (showState)
             {
-                row.stateFill.enabled = showState;
+                double total = hero.AbilityCooldownSec;
+                double left = hero.AbilityCooldownRemaining;
+                bool resting = cooling && total > 0d;
 
-                if (showState)
-                {
-                    double total = hero != null ? hero.AbilityCooldownSec : 0d;
-                    double left = hero != null ? hero.AbilityCooldownRemaining : 0d;
-                    bool resting = cooling && total > 0d;
+                // The length IS the countdown: nothing at the cast, whole when the move comes back.
+                float target = resting ? Mathf.Clamp01(1f - (float)(left / total)) : 1f;
 
-                    // The length IS the countdown: nothing at the cast, full when the move comes back.
-                    float target = resting ? Mathf.Clamp01(1f - (float)(left / total)) : 1f;
+                // A CAST takes the colour away in the same frame: snapping down is what makes the art read grey at
+                // once. Only the way BACK is eased, so the colour sweeps in as the wait runs out. Copying the target
+                // both ways made the cast look like the colour sliding off the picture over a third of a second.
+                row.shownFill = target < row.shownFill
+                    ? target
+                    : Mathf.Lerp(row.shownFill, target, 1f - Mathf.Exp(-FillEasePerSecond * Time.deltaTime));
 
-                    // The fight ticks its clock 20 times a second, so its truth arrives in small steps. Ease the
-                    // drawn value toward it instead of copying it: each step becomes a short glide, and the value
-                    // still lands on the fight's own number, so the line can never lie about readiness.
-                    float ease = 1f - Mathf.Exp(-FillEasePerSecond * Time.deltaTime);
-                    row.shownFill = Mathf.Lerp(row.shownFill, target, ease);
-                    SetBarFill(row.stateFill, row.shownFill);
+                DrawCooldown(row);
 
-                    // Amber while the press waits for its turn, gold while the move rests, green when it is ready.
-                    row.stateFill.color = queued ? UiTheme.Queued : (resting ? UiTheme.GoldSoft : UiTheme.Ready);
-                }
+                // Health goes to the shared bar widget, which eases its own fill and guards its own label.
+                row.hpBar.SetFill((float)hero.HealthPercent);
+                row.hpBar.SetValueLabel(hero.CurrentHealth, hero.MaxHealth);
             }
 
-            // The plate is the one owner of the cell face: steady colour, grayscale only when nothing can be cast.
+            // The transparent face is the one owner of the press: it squashes on touch, and only its lock changes.
             bool canCast = hasAbility && alive;
 
             if (row.plate != null)
@@ -295,13 +328,28 @@ namespace IdleRPG.UI
         }
 
         /// <summary>
-        /// Draws <paramref name="amount"/> of the state line by moving the fill's right edge. Unity's
-        /// Image.fillAmount only works when the image carries a sprite; these lines have none, so length is done with
-        /// anchors instead - geometry always clips.
+        /// Draws the countdown onto the picture: the colour copy is revealed from the left as the move comes back, so
+        /// the art itself is the clock. A cast drops the drawn value to zero in the SAME frame - snapping down is what
+        /// makes the art read grey at once - and only the climb back is eased, so the colour sweeps in as the wait
+        /// runs out. (Easing both ways made a cast look like the colour sliding off the picture.)
         /// </summary>
-        private static void SetBarFill(Image bar, float amount)
+        private static void DrawCooldown(Row row)
         {
-            RectTransform rect = bar.rectTransform;
+            if (row.abilityIconWipe != null)
+            {
+                // The curtain opens from the picture's LEFT edge, so the colour copy is cropped, never squashed.
+                SetWidthFraction(row.abilityIconWipe, row.shownFill);
+            }
+        }
+
+        /// <summary>
+        /// Draws <paramref name="amount"/> of a rect by moving its right edge, from the left edge. Anchors, not
+        /// <see cref="Image.fillAmount"/>: a Filled image with no sprite ignores fillAmount and draws the whole rect.
+        /// The picture's curtain uses the same trick for the opposite reason: its child DOES carry a sprite, and a
+        /// mask the width of the countdown crops that art rather than stretching it.
+        /// </summary>
+        private static void SetWidthFraction(RectTransform rect, float amount)
+        {
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = new Vector2(Mathf.Clamp01(amount), 1f);
             rect.offsetMin = Vector2.zero;

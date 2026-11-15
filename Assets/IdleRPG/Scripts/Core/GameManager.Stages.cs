@@ -85,7 +85,7 @@ namespace IdleRPG.Core
 
             ResetProgressForAscension(HighestStageReached);
 
-            GameEvents.RaiseToast(string.Format("Run ended - stage {0}  ·  +{1:0} tokens  ·  {2} gold",
+            GameEvents.RaiseToast(string.Format("Run ended - stage {0}  |  +{1:0} tokens  |  {2} gold",
                 endedStage, tokens, NumberFormatter.Format(endedGold)));
             return true;
         }
@@ -133,8 +133,8 @@ namespace IdleRPG.Core
             LogFlow($"Run ended at stage {endedStage} -> +{tokens:0} Perk Points | {Ascension.DescribeMultipliers()} | {Economy}");
 
             GameEvents.RaiseToast(tokens > 0d
-                ? string.Format("Run ended - stage {0}  ·  +{1:0} Perk Points  ·  {2} gold", endedStage, tokens, NumberFormatter.Format(endedGold))
-                : string.Format("Run ended - stage {0}  ·  {1} gold", endedStage, NumberFormatter.Format(endedGold)));
+                ? string.Format("Run ended - stage {0}  |  +{1:0} Perk Points  |  {2} gold", endedStage, tokens, NumberFormatter.Format(endedGold))
+                : string.Format("Run ended - stage {0}  |  {1} gold", endedStage, NumberFormatter.Format(endedGold)));
 
             reviveUsedThisRun = false;
             StartRun(1);

@@ -43,20 +43,26 @@ namespace IdleRPG.EditorTools
         // Party XP bar band: a thin strip between the bottom of the arena and the top of the ability strip.
         // The arena starts at XP band top, so the bar can never sit over the fight or hide the hero buttons.
         private const float XpBandBottom = BattleViewportBottom;   // sits on top of the ability strip
-        private const float XpBandTop = 0.417f;                    // the arena starts here
+        private const float XpBandTop = 0.373f;                    // the arena starts here
 
         // Retired nav bar height. BuildNavBar is no longer called (the lobby owns navigation), but the method is
         // kept for reference, so its constant stays.
         private const float NavBandHeight = 230f;
 
-        // Bands inside the battle page (page coords): log 0..LogTop, ability strip 0.28..0.39, party XP bar
-        // 0.39..0.417, viewport 0.417..StageRowMinY, stage/wave row 0.93..0.99.
+        // Bands inside the battle page (page coords): log 0..LogTop, ability strip 0.226..0.346, party XP bar
+        // 0.346..0.373, viewport 0.373..StageRowMinY, stage/wave row 0.93..0.99.
         //
-        // LogTop used to be 0.34, with a 79-unit tab bar above the log. The bar is gone and one hero button
-        // lives in its place, so the band had to grow: 0.11 of the page is ~174 units, enough for a portrait and
-        // three short labels without them touching. The log gives up ~90 units it did not need - it scrolls.
-        private const float LogTop = 0.28f;
-        private const float BattleViewportBottom = 0.39f;
+        // LogTop used to be 0.34, with a 79-unit tab bar above the log. The bar is gone and the hero cards live in
+        // its place, so the band had to grow. It grew again when the cards became picture-left cards: the move's
+        // picture is now 170 units tall (34-pixel art zoomed 5x), the tallest whole-number zoom that still leaves
+        // room for two lines of words beside it, and the card must be that plus one inset above and below. The log
+        // gives up the 18 units it did not need - it scrolls.
+        //
+        // 15 Nov 2026: the log gives up 78 more units (0.27 -> 0.226) so each arena slot can hold a nameplate band
+        // (name, health numbers, bar) BELOW the sprite. The sprite is never shrunk to make room for UI; the
+        // scrollback keeps every line, the feed just shows about one and a half fewer at a time.
+        private const float LogTop = 0.226f;
+        private const float BattleViewportBottom = 0.346f;
         private const float StageRowMinY = 0.93f;
         private const float StageRowMaxY = 0.99f;
 

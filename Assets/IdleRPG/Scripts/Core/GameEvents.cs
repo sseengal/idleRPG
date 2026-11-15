@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using IdleRPG.Data;
 using IdleRPG.Economy;
+using IdleRPG.Progression;
 using IdleRPG.Save;
 using IdleRPG.Sim;
 
@@ -78,6 +79,13 @@ namespace IdleRPG.Core
         /// the run's level ceiling.
         /// </summary>
         public static event Action<int, double, double> PartyXpChanged;
+
+        /// <summary>
+        /// (receipt) one XP payment, raised right after <see cref="PartyXpChanged"/> when the payment moved the bar.
+        /// Carries the start and end points, so a view can show the movement instead of copying a new total. Any
+        /// future source that pays through <c>PartyProgression.AddXp</c> gets this for free.
+        /// </summary>
+        public static event Action<XpGain> PartyXpGained;
 
         /// <summary>
         /// (newLevel, pendingPicks) when the party goes up a level. pendingPicks counts the choices still waiting,
@@ -179,6 +187,7 @@ namespace IdleRPG.Core
             DefeatShown = null;
             WaveCompleted = null;
             PartyXpChanged = null;
+            PartyXpGained = null;
             PartyLevelGained = null;
             BoonOfferChanged = null;
             EnemySpawned = null;

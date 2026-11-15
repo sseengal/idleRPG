@@ -27,7 +27,13 @@ namespace IdleRPG.UI
         /// <summary>Slot geometry mirrors the hero board (FormationBoardView): 160px wide, 176 tall with a
         /// 12px row gap, so enemy slots are grouped exactly like the heroes' instead of spread over the column.</summary>
         private const float SlotWidth = 160f;
-        private const float SlotHeight = 176f;
+
+        /// <summary>
+        /// Slot height: the art (about 160 with its animation frames) plus the nameplate band (95) plus a small top
+        /// margin. The nameplate is a fixed band, so the numbers never share pixels with the sprite.
+        /// </summary>
+        private const float SlotHeight = 260f;
+
         private const float SlotGap = 12f;
 
         [SerializeField] private RectTransform container;

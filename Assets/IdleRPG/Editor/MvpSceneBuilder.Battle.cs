@@ -194,7 +194,9 @@ namespace IdleRPG.EditorTools
             }
 
             // Test pass 2026-09-30: bigger hero slots so placeholder art + HP bars read clearly.
-            SceneWiringUtility.SetField(formationBoard, "slotSize", new Vector2(160f, 176f));
+            // 15 Nov 2026: height 176 -> 260. The art keeps its size; the extra units are the nameplate band (name,
+            // health numbers, bar) below the sprite, paid for by the log band, not by the art.
+            SceneWiringUtility.SetField(formationBoard, "slotSize", new Vector2(160f, 260f));
             // Cleanup pass 2026-09-30: no translucent tiles / row indicators behind heroes on the battle view.
             SceneWiringUtility.SetField(formationBoard, "slotColor", new Color(1f, 1f, 1f, 0f));
 
@@ -294,19 +296,25 @@ namespace IdleRPG.EditorTools
         /// the player forgets mid-fight.
         ///
         /// ELI5: three buttons under the fight. Press one and that hero does its special move.
+        ///
+        /// The band itself draws NOTHING: it used to be a grey plate holding three darker plates, which read as a
+        /// table of boxes. The band is now a bare layout node and each cell wears the app's own button face (the
+        /// shared ui_frame plate in ButtonBlue), so three buttons sit straight on the battle page - the same family
+        /// as every other button in the game.
         /// </summary>
         private static AbilityPanelUI BuildAbilityStrip(RectTransform pageRoot, int heroCount)
         {
-            Image strip = KitPanel("AbilityStrip", pageRoot, UiTheme.Panel, raycast: true);
-            UiFactory.Anchor(strip.rectTransform, new Vector2(0f, LogTop), new Vector2(1f, BattleViewportBottom),
+            GameObject stripObject = UiFactory.Node("AbilityStrip", pageRoot);
+            RectTransform stripRect = stripObject.GetComponent<RectTransform>();
+            UiFactory.Anchor(stripRect, new Vector2(0f, LogTop), new Vector2(1f, BattleViewportBottom),
                 UiSpace.ScreenMargin, UiSpace.Snug, UiSpace.ScreenMargin, UiSpace.Snug);
 
-            AbilityPanelUI panel = strip.gameObject.AddComponent<AbilityPanelUI>();
+            AbilityPanelUI panel = stripObject.AddComponent<AbilityPanelUI>();
             int buttons = heroCount < 1 ? 1 : heroCount;
             AbilityPanelUI.Row[] rows = new AbilityPanelUI.Row[buttons];
 
             // Equal cells and one gap size: the same layout the running game applies, so a rebuild cannot differ.
-            HorizontalLayoutGroup layout = strip.gameObject.AddComponent<HorizontalLayoutGroup>();
+            HorizontalLayoutGroup layout = stripObject.AddComponent<HorizontalLayoutGroup>();
             layout.spacing = UiSpace.Small;
             layout.padding = UiSpace.Padding(UiSpace.Small);
             layout.childAlignment = TextAnchor.MiddleCenter;
@@ -319,7 +327,7 @@ namespace IdleRPG.EditorTools
 
             for (int i = 0; i < buttons; i++)
             {
-                rows[i] = BuildAbilityButton(strip.transform, i);
+                rows[i] = BuildAbilityButton(stripRect, i);
             }
 
             panel.ConfigureRuntime(rows);

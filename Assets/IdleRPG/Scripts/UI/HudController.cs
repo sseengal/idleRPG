@@ -107,17 +107,27 @@ namespace IdleRPG.UI
                 enemyStack.Refresh();
             }
 
-            // Gold-fly effect: coins launch from a dead enemy into the top-bar counter. The node stays on
-            // the HUD damage canvas so it can leave the battle stage and reach the header; the stage start
-            // point is converted to screen space by BattleStageSurface.
+            // Flight effects live on the HUD damage canvas, so they can leave the battle stage and reach their
+            // targets. The XP motes are created FIRST so they draw under the gold coins: money outranks XP.
             if (damageTextPool != null)
             {
                 Transform hostParent = vfxRoot != null
                     ? vfxRoot
                     : damageTextPool.transform.parent != null ? damageTextPool.transform.parent : transform;
+
+                GameObject xpHost = UiRuntime.CreateNode("XpFlyVfx", hostParent);
+
+                // Mote positions are resolved as local points of this rect, so give it the full parent size.
+                if (xpHost.transform is RectTransform xpRect)
+                {
+                    UiRuntime.Stretch(xpRect);
+                }
+
+                XpFlyVfx xpVfx = xpHost.AddComponent<XpFlyVfx>();
+                xpVfx.Initialize(damageTextPool);
+
                 GameObject host = UiRuntime.CreateNode("GoldFlyVfx", hostParent);
 
-                // Coin positions are resolved as local points of this rect, so give it the full parent size.
                 if (host.transform is RectTransform hostRect)
                 {
                     UiRuntime.Stretch(hostRect);

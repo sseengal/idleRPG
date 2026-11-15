@@ -73,12 +73,12 @@ namespace IdleRPG.UI
 
             if (titleLabel != null)
             {
-                titleLabel.SetText(string.Format("RUN OVER — stage {0}", defeatedStage));
+                titleLabel.SetText(string.Format("RUN OVER - stage {0}", defeatedStage));
             }
 
             if (summaryLabel != null)
             {
-                summaryLabel.SetText(string.Format("Best this run: stage {0}   ·   {1} gold",
+                summaryLabel.SetText(string.Format("Best this run: stage {0}   |   {1} gold",
                     manager.RunBestStage, NumberFormatter.Format(manager.RunGoldEarned)));
             }
 

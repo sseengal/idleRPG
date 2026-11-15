@@ -58,9 +58,14 @@ builds both, so neither can change size with the screen.
 
 ### 2b. Bands inside the battle page
 
-Fractions of the page (so they follow whatever height the page gets): stage/wave row **0.93–0.99**, viewport
-**0.39–0.93**, log/abilities tab strip **0.28–0.39**, log or abilities panel **0–0.28**.
-Source: `LogTop = 0.28f`, `BattleViewportBottom = 0.39f` in `MvpSceneBuilder.cs`.
+Fractions of the page (so they follow whatever height the page gets): stage/wave row **0.93–0.99**, arena
+**0.373–0.93**, party XP strip **0.346–0.373**, ability strip **0.226–0.346**, log **0–0.226**.
+Source: `LogTop = 0.226f`, `BattleViewportBottom = 0.346f`, `XpBandTop = 0.373f` in `MvpSceneBuilder.cs`.
+
+**The log pays for the arena nameplates (2026-11-15).** Each arena slot is 160 × 260: a 95-unit nameplate band at
+the bottom (name, health numbers, health bar), the sprite above it, and a 5-unit top margin. The sprite keeps the
+size it had at 176; the extra height came from the log band (0.27 → 0.226), not from the art. The feed shows about
+one and a half fewer lines at once; the 100-line scrollback is unchanged.
 
 ### 2c. The header is a row, not hand-placed chips (2026-10-14)
 

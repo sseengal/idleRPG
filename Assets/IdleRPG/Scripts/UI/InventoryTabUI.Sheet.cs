@@ -82,7 +82,7 @@ namespace IdleRPG.UI
             sheetName.SetText(activeItem.ShortLabel);
             sheetInfo.SetText(
                 activeItem.Role.ToString().ToUpperInvariant() + " ONLY\n" +
-                activeItem.SlotType.DisplayName() + "  ·  +" + activeItem.PercentText + " " + ItemVisuals.StatLabel(activeItem.SlotType) + "\n" +
+                activeItem.SlotType.DisplayName() + "  |  +" + activeItem.PercentText + " " + ItemVisuals.StatLabel(activeItem.SlotType) + "\n" +
                 "stage " + activeItem.Level + " drop      " + (activeItem.Price > 0d ? NumberFormatter.Format(activeItem.Price) + " gold" : string.Empty));
 
             // Equip is only offered when it can genuinely succeed (bag item + its class exists).

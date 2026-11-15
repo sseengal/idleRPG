@@ -7,14 +7,33 @@ using UnityEngine.UI;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// The chunky plate button every screen shares: the ui_frame face, a smooth idle/selected colour hand-off,
-    /// a press squash, and a true grayscale when disabled (UIEffect).
+    /// The plate button every screen shares: the ui_frame face, a smooth idle/selected colour hand-off, a press
+    /// squash, and a true grayscale when disabled (UIEffect).
+    ///
+    /// ELI5: the one button recipe. It wears the same 9-slice plate as everything else, but the plate's border is
+    /// drawn thinner so the button reads as a crisp edge instead of a thick slab, and a press darkens the face
+    /// anyway (a gold button darkens too, without turning navy).
     ///
     /// The bottom tabs use <see cref="FantasyTabButton"/>, which adds the lift, the breathing halo and the
     /// icon/word pose; everything else uses this one so a button feels the same on every page.
     /// </summary>
     public sealed class UiPlateButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
     {
+        /// <summary>How much a pressed button darkens its own face. Works on any face colour, so gold darkens too.</summary>
+        private const float PressDarken = 0.18f;
+
+        /// <summary>A scale this close to its target counts as arrived, so the tween stops writing.</summary>
+        private const float ScaleEpsilon = 0.0005f;
+
+        /// <summary>A colour channel this close to its target counts as arrived (about half a 1/255 step).</summary>
+        private const float ColorEpsilon = 0.002f;
+
+        /// <summary>
+        /// Divides the plate sprite's 18-pixel border, so a 186-unit-tall button shows a ~7-unit edge instead of a
+        /// 10%-of-the-button slab. One number, every button in the game.
+        /// </summary>
+        private const float BorderSlim = 2.5f;
+
         private RectTransform root;
         private Image frame;
         private TextMeshProUGUI label;
@@ -67,6 +86,13 @@ namespace IdleRPG.UI
             button = buttonRef;
             idleFill = idle;
             activeFill = active;
+
+            // A slimmer bevel than the raw sprite: 18 px on a 186-unit button reads as a slab, 7 reads as an edge.
+            if (frame != null)
+            {
+                frame.pixelsPerUnitMultiplier = BorderSlim;
+            }
+
             Refresh();
         }
 
@@ -106,21 +132,50 @@ namespace IdleRPG.UI
                 float target = Mathf.Lerp(1f, 0.955f, press);
                 Vector3 scale = root.localScale;
                 float k = 1f - Mathf.Exp(-20f * dt);
-                scale.x = Mathf.Lerp(scale.x, target, k);
-                scale.y = Mathf.Lerp(scale.y, target, k);
-                root.localScale = scale;
+                float x = Mathf.Lerp(scale.x, target, k);
+                float y = Mathf.Lerp(scale.y, target, k);
+
+                // A settled button must stop writing. One page can hold over a thousand buttons, and every
+                // write reaches the native transform and graphic. Compare first, write last.
+                if (Mathf.Abs(x - target) < ScaleEpsilon) { x = target; }
+                if (Mathf.Abs(y - target) < ScaleEpsilon) { y = target; }
+
+                if (x != scale.x || y != scale.y)
+                {
+                    scale.x = x;
+                    scale.y = y;
+                    root.localScale = scale;
+                }
             }
 
             if (frame != null)
             {
-                frame.color = Color.Lerp(frame.color, selected ? activeFill : idleFill, smooth);
+                // Pressed darkens whatever face this button has, so a gold button does not flash navy.
+                Color face = selected ? activeFill : idleFill;
+                Color want = press > 0f ? Color.Lerp(face, Color.black, PressDarken) : face;
+                Color now = frame.color;
+                Color next = Color.Lerp(now, want, smooth);
+
+                if (Near(next, want)) { next = want; }
+                if (!Near(next, now)) { frame.color = next; }
             }
 
             if (label != null)
             {
-                Color ink = interactable ? UiTheme.Text : UiTheme.InkDisabled;
-                label.color = Color.Lerp(label.color, ink, smooth);
+                Color ink = interactable ? UiTheme.ActionInk : UiTheme.InkOff;
+                Color now = label.color;
+                Color next = Color.Lerp(now, ink, smooth);
+
+                if (Near(next, ink)) { next = ink; }
+                if (!Near(next, now)) { label.color = next; }
             }
+        }
+
+        /// <summary>True when two colours are within one visible step. Used to end a tween exactly on target.</summary>
+        private static bool Near(Color a, Color b)
+        {
+            return Mathf.Abs(a.r - b.r) < ColorEpsilon && Mathf.Abs(a.g - b.g) < ColorEpsilon &&
+                   Mathf.Abs(a.b - b.b) < ColorEpsilon && Mathf.Abs(a.a - b.a) < ColorEpsilon;
         }
 
         private void Refresh()

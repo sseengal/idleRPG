@@ -137,7 +137,7 @@ namespace IdleRPG.UI
                 {
                     row.costLabel.SetText(maxed
                         ? string.Empty
-                        : string.Format("{0}  ·  x10 {1}",
+                        : string.Format("{0}  |  x10 {1}",
                             NumberFormatter.Format(upgrades.GetCost(heroIndex, statType, 1)),
                             NumberFormatter.Format(upgrades.GetCost(heroIndex, statType, 10))));
                     row.costLabel.color = canAffordOne ? affordableColor : unaffordableColor;

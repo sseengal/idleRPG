@@ -351,7 +351,7 @@ namespace IdleRPG.UI
             switch (kind)
             {
                 case BubbleKind.Dots:
-                    content = "…";
+                    content = "...";
                     role = UiType.Role.Display;
                     break;
 

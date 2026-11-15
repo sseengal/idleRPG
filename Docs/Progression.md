@@ -55,6 +55,14 @@ choice** - a stay-for-this-run upgrade picked from three cards. This is the rogu
 | Saved | level, XP, queued picks, the hand (ids), re-rolls spent, **and the cards on screen** - so quitting mid-card is not a free re-roll |
 | Code | `Progression/PartyProgression.cs`, `PerkLoadout.cs`, `PerkOfferService.cs` (pure C#), wired in `GameManager.Perks.cs` |
 
+**The cap is off in data** (2026-11-15): `BalanceConfig.partyMaxLevelPerRun = 0`, and 0 means no ceiling. The curve
+decides when picks stop. A non-zero value would stop all XP at that level and pin the bar on `MAX`.
+
+**XP depends on the stage and the boss flag, not the enemy type.** Every enemy on a wave pays the stage's rate, so a
+three-enemy wave pays three times a one-enemy wave, and a boss pays five times a normal kill on the same stage. A
+stronger enemy in the same stage pays the same. Adding a per-enemy multiplier is a balance change, made in
+`PartyProgression`; the bar does not need to know (it reads the payment receipt, `XpGain`).
+
 **Boons target heroes, not just the party.** A boon carries a target (`AllHeroes` or one hero id), so "thorns for the
 Mage +5" is one data asset, not a special case. Tuning stays in data: same op, different target and number.
 

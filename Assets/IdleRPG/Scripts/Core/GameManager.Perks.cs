@@ -91,8 +91,15 @@ namespace IdleRPG.Core
 
             bool isBoss = combatManager != null && combatManager.IsBossWave;
             int levels = Progression.AddXp(Progression.XpForKill(CurrentStage, isBoss));
+            XpGain gain = Progression.LastGain;
 
             RaisePartyXpChanged();
+
+            // The receipt tells the bar what just landed, so it can show the movement instead of copying a total.
+            if (gain.HasXp)
+            {
+                GameEvents.RaisePartyXpGained(gain);
+            }
 
             if (levels > 0)
             {
@@ -267,6 +274,11 @@ namespace IdleRPG.Core
 
             int levels = Progression.AddXp(amount);
             RaisePartyXpChanged();
+
+            if (Progression.LastGain.HasXp)
+            {
+                GameEvents.RaisePartyXpGained(Progression.LastGain);
+            }
 
             if (levels > 0)
             {

@@ -552,13 +552,19 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 The run build. Everything here is dev-testable with the keys `X` (+a quarter of the bar) and `V` (+one whole level).
 
 ### XP and levels
-- [ ] A kill moves the XP bar between the arena and the ability buttons (gold fill, `LV n` on the left).
+- [ ] A kill moves the XP bar between the arena and the ability buttons (blue fill; `LV n` and `xp/needed` together
+      on the left).
+- [ ] The kill's blue motes are coin-sized, 3-5 of them, and fly from the dead enemy into the bar. The blue part
+      moves forward as each mote lands, not all at once.
+- [ ] A level-up makes the bar flash blue and the level label beat once; the new level starts from empty.
+- [ ] XP paid with no enemy (the `X` and `V` keys) still fills, in a few visible steps, without motes.
+- [ ] The bar always reads `xp/needed`; no pick text appears on it. The level-up card carries the pick count.
+- [ ] The gap between the numbers and the blue bar stays the same as the numbers grow, and the bar reaches the
+      right margin.
 - [ ] The **first** pick lands around wave 2, not after four kills: the feature should arrive as a surprise, not
       instantly.
 - [ ] After that, picks keep coming but stretch: a run should land roughly **10-12** of them, with the last ones close
       to where the party dies. If picks stop dead while the run continues, the curve (not a cap) needs re-fitting.
-- [ ] The bar reads `xp / needed`; once a pick is owed the right side reads `1 PICK` (or `N PICKS`) in gold instead of
-      the numbers.
 - [ ] `V` **opens the level-up card** and the fight stops dead: no hero and no enemy acts while it is up.
 - [ ] Quit and relaunch mid-run: level, XP and queued picks come back.
 - [ ] End the run (or ascend): level, XP and picks reset to `LV 1`.
