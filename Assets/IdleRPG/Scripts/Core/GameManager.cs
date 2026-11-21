@@ -305,8 +305,7 @@ namespace IdleRPG.Core
             // the code for the debug tools, but it must not open a card over a story scene at boot.
             TryClaimDailyStreak();
 
-            // Tip 1 of the first-run hints: "tap UPGRADE to hit harder" (once per install).
-            Context?.FirstRunTips?.OnSessionStart();
+            // First-run tips are OFF (owner decision 2026-11-21). The lobby itself teaches START; no toast tutorials.
         }
 
         private void OnApplicationPause(bool paused)

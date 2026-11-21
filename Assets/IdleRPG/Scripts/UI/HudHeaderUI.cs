@@ -31,12 +31,7 @@ namespace IdleRPG.UI
 
         private EconomyManager economy;
         private GameManager gameManager;
-
-        // In-run quit control (the three-bar button). Hidden while the lobby is open.
-        private RectTransform menuRect;
-        private bool menuVisible = true;
-        private bool quitArmed;
-        private float quitArmedAt;
+        private GearMenuUI gearMenu;
 
         /// <summary>Current header, or null when the scene has no HUD header (debug scenes).</summary>
         public static HudHeaderUI Instance { get; private set; }
@@ -81,6 +76,18 @@ namespace IdleRPG.UI
             RestyleChunky();
             RestyleCurrencyIcons();
             BuildMenuButton();
+
+            if (gameManager != null)
+            {
+                gearMenu = gameObject.AddComponent<GearMenuUI>();
+                gearMenu.Initialize(gameManager);
+            }
+
+            if (stageText != null)
+            {
+                stageText.gameObject.SetActive(gameManager == null || gameManager.State != GameState.Lobby);
+            }
+
             RefreshAll();
         }
 
@@ -104,8 +111,8 @@ namespace IdleRPG.UI
         private const float MenuButtonWidth = 110f;
 
         /// <summary>
-        /// Three-bar (hamburger) button at the right end of the chip row. It quits the run: two taps, because a
-        /// run cannot be rejoined. It is hidden while the lobby is open.
+        /// The gear button at the right end of the chip row. It opens SETTINGS between runs and the PAUSE menu in a
+        /// fight. One button, one meaning per state; it never opens an upgrade screen during a fight.
         /// </summary>
         private void BuildMenuButton()
         {
@@ -114,12 +121,10 @@ namespace IdleRPG.UI
             Image background = UiRuntime.CreatePanel(parent, null, UiTheme.MenuFace, raycast: true);
             background.gameObject.name = "MenuButton";
             UiRuntime.Anchor(background.rectTransform, new Vector2(0.88f, 0.10f), new Vector2(0.985f, 0.90f));
-            menuRect = background.rectTransform;
-            background.gameObject.SetActive(menuVisible);
 
             Button button = background.gameObject.AddComponent<Button>();
             button.targetGraphic = background;
-            button.onClick.AddListener(OnQuitClicked);
+            button.onClick.AddListener(OnGearClicked);
 
             if (chipRow != null)
             {
@@ -128,13 +133,11 @@ namespace IdleRPG.UI
                 element.flexibleWidth = 0f;
             }
 
-            float[] centres = { 0.70f, 0.50f, 0.30f };
-            for (int i = 0; i < centres.Length; i++)
-            {
-                Image bar = UiRuntime.CreateIcon("Bar" + i, background.transform);
-                bar.color = UiTheme.Text;
-                UiRuntime.Anchor(bar.rectTransform, new Vector2(0.28f, centres[i] - 0.055f), new Vector2(0.72f, centres[i] + 0.055f));
-            }
+            Image icon = UiRuntime.CreateIcon("Gear", background.transform);
+            icon.sprite = UiRuntime.GearSprite;
+            icon.preserveAspect = true;
+            icon.color = UiTheme.Text;
+            UiRuntime.Anchor(icon.rectTransform, new Vector2(0.20f, 0.16f), new Vector2(0.80f, 0.84f));
         }
 
         /// <summary>Swaps the currency chip icons for the skin's art (the scene keeps placeholder icons).</summary>
@@ -170,46 +173,38 @@ namespace IdleRPG.UI
             }
         }
 
-        /// <summary>Show or hide the in-run quit control (hidden while the lobby is the screen).</summary>
-        public void SetQuitVisible(bool visible)
-        {
-            menuVisible = visible;
-
-            if (menuRect != null)
-            {
-                menuRect.gameObject.SetActive(visible);
-            }
-        }
-
         /// <summary>
-        /// QUIT RUN. The first tap arms it and says what will happen; the second tap ends the run. A run cannot
-        /// be rejoined, so this is a deliberate two-tap action, never a pause menu.
+        /// The gear opens SETTINGS between runs and the PAUSE menu in a fight. It never opens an upgrade screen,
+        /// so there is no way to shop mid-fight. A story scene owns the screen, so the gear waits for it.
         /// </summary>
-        private void OnQuitClicked()
+        private void OnGearClicked()
         {
-            if (gameManager == null || gameManager.State == GameState.Lobby)
+            if (gameManager == null)
             {
                 return;
             }
 
-            if (quitArmed && Time.unscaledTime - quitArmedAt <= 3f)
+            if (gameManager.Story != null && gameManager.Story.IsPlaying)
             {
-                quitArmed = false;
-                gameManager.EndRun();
+                GameEvents.RaiseToast("Wait for the scene to finish.");
                 return;
             }
 
-            quitArmed = true;
-            quitArmedAt = Time.unscaledTime;
-            GameEvents.RaiseToast("Tap the menu again to quit the run.");
+            if (gearMenu == null)
+            {
+                gearMenu = gameObject.AddComponent<GearMenuUI>();
+                gearMenu.Initialize(gameManager);
+            }
+
+            gearMenu.Toggle();
         }
 
-        /// <summary>A new fight disarms any half-finished quit, so the next run starts clean.</summary>
+        /// <summary>The stage chip belongs to a run; the lobby has none, so it is hidden there.</summary>
         private void OnGameStateChanged(GameState previous, GameState next)
         {
-            if (next == GameState.Combat || next == GameState.Boss)
+            if (stageText != null)
             {
-                quitArmed = false;
+                stageText.gameObject.SetActive(next != GameState.Lobby);
             }
         }
 

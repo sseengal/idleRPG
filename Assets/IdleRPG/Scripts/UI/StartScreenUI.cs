@@ -18,7 +18,6 @@ namespace IdleRPG.UI
 
         private GameManager manager;
         private ScreenController screens;
-        private HudHeaderUI headerUi;
         private GameObject lobby;
 
         [Tooltip("Chapter art for the lobby centre panel. Null falls back to the plain plate.")]
@@ -204,7 +203,6 @@ namespace IdleRPG.UI
             }
 
             AttachSharedHeader();
-            SetHeaderQuitVisible(false);
             HighlightNav("BATTLE");
             RaiseNav();
             Time.timeScale = 1f;
@@ -216,26 +214,11 @@ namespace IdleRPG.UI
             if (lobby != null && lobby.activeSelf)
             {
                 HideRunNav();
-                SetHeaderQuitVisible(true);
                 DetachSharedHeader();
                 lobby.SetActive(false);
             }
 
             Time.timeScale = 1f;
-        }
-
-        /// <summary>The three-bar button is QUIT RUN while fighting, and hidden while the lobby is open.</summary>
-        private void SetHeaderQuitVisible(bool visible)
-        {
-            if (headerUi == null)
-            {
-                headerUi = FindAnyObjectByType<HudHeaderUI>();
-            }
-
-            if (headerUi != null)
-            {
-                headerUi.SetQuitVisible(visible);
-            }
         }
 
         /// <summary>
@@ -479,11 +462,6 @@ namespace IdleRPG.UI
             if (screens == null)
             {
                 screens = FindAnyObjectByType<ScreenController>();
-            }
-
-            if (headerUi == null)
-            {
-                headerUi = FindAnyObjectByType<HudHeaderUI>();
             }
         }
 

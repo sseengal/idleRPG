@@ -61,10 +61,11 @@ live run reopens into the same fight; it never opens the menu.
 | **BATTLE** tab | `OnTab("BATTLE")` | same as START: closes the lobby and begins the run | live |
 | **ASCEND** tab | `ShowPerks` | opens the PERKS page | live |
 | **TRAIN** tab | `ShowTraining` | opens the gold tree | live |
-| Header three-bar menu | `HudHeaderUI.OnQuitClicked` | **QUIT RUN**: first tap arms, second ends the run and banks. Hidden while the lobby is open. | live |
+| Header gear | `HudHeaderUI.OnGearClicked` → `GearMenuUI` | **Between runs: SETTINGS** (sound, restore, privacy, version). **In a fight: PAUSE** (resume, sound, quit → confirm). Never an upgrade screen. | live |
 
-**Rule: no menu over a live fight.** The lobby exists only in the `Lobby` state (no run). The quit control can
-only end a run; it can never pause one. That removes the "upgrade mid-fight" exploit by construction.
+**Rule: no upgrade screen during a fight.** The lobby exists only in the `Lobby` state (no run). The battle
+gear opens a minimal pause with resume, sound and quit — it cannot shop, train or ascend. That keeps the
+"upgrade mid-fight" exploit closed while still allowing a real pause.
 
 ---
 
@@ -138,7 +139,8 @@ only end a run; it can never pause one. That removes the "upgrade mid-fight" exp
 | Overlay | Opens on | Choices |
 |---|---|---|
 | `BoonCardUI` | `PartyLevelGained` with picks owed | pick 1 of 3, reroll |
-| `DefeatModalUI` | `GameEvents.DefeatShown` | **REVIVE** (rewarded ad, once per run) or **NEXT RUN** (bank + stage 1) |
+| `DefeatModalUI` | `GameEvents.DefeatShown` | **REVIVE** (rewarded ad, once per run) or **END RUN** (bank + lobby) |
+| `GearMenuUI` (pause) | header gear during a fight | **RESUME**, **SOUND: ON/OFF**, **QUIT RUN** → second confirm (**END RUN** / **KEEP FIGHTING**) |
 | `OfflineRewardsPopup` | `GameEvents.OfflineRewardsReady` | **unreachable today**: only the debug key / editor menu calls `EvaluateOffline` (defect R9) |
 | `ToastUI` | most events | one line, no input |
 | `DevOverlay` | F3 | dev text only; must not ship visible |
@@ -159,7 +161,7 @@ only end a run; it can never pause one. That removes the "upgrade mid-fight" exp
 | Combat/Boss | party wipe | `OnPartyWiped` → `EndRunOnWipe` | Defeat | run stops; card shows; `runActive = false` |
 | Defeat | REVIVE | `WatchAdForRunRevive` | Combat | same stage; `runActive = true` |
 | Defeat | NEXT RUN | `ConfirmEndRun` → `EndRun` | **Lobby** | bank tokens, reset run |
-| Combat/Boss | three-bar **QUIT RUN** (2 taps) | `OnQuitClicked` → `EndRun` | **Lobby** | bank tokens, reset run, no rejoin |
+| Combat/Boss | header gear → **PAUSE** → QUIT RUN → confirm | `GearMenuUI` → `EndRun` | **Lobby** | banks, resets, no rejoin |
 | any | F1 debug | `EndRun` | Lobby | same as QUIT RUN |
 | any | F8 | full reset | Boot | save, backups and prefs wiped |
 
@@ -227,7 +229,7 @@ without touching the game rules. The **surface** is what is missing.
 | R4 | P1 | No settings sheet: mute, Restore, privacy link | no settings UI; mute keys exist only in code | M |
 | R5 | P1 | No ads or billing package | `Packages/manifest.json` | L |
 | R6 | P1 | First-run hint says "Tap UPGRADE" | `FirstRunTips.cs:62`; no UPGRADES page | S |
-| R7 | ~~P1~~ | ~~No mid-run END RUN~~ **FIXED 2026-11-21**: the three-bar button is QUIT RUN (two taps) | `HudHeaderUI.OnQuitClicked` | done |
+| R7 | ~~P1~~ | ~~No mid-run END RUN~~ **FIXED 2026-11-21**: pause menu → QUIT RUN → confirm | `GearMenuUI` | done |
 | R8 | P1 | Level-up card is silent | `AudioDirector.cs:106` listens to `HeroLevelChanged` | S |
 | R9 | P2 | Offline popup unreachable | `EvaluateOffline` called only by debug code | S (wire or cut) |
 | R10 | P2 | Dead UI code still compiled | `AscensionPanelUI`, `ShopPanelUI`, `UpgradePanelUI`, `AutomationPanelUI`, `ScreenController` | S-M |
@@ -267,15 +269,16 @@ The builder re-applies the tab icons, training icons, boons and prestige assets,
 2. Tap **PARTY**, **ASCEND**, **TRAIN**. One page at a time; no page stacks; no console error.
 3. Tap **SHOP**. Today: nothing opens (defect R3). The tab must be removed or built.
 4. Tap **START**. A run begins at stage 1; the lobby closes.
-5. Tap the **three bars once**. A toast says the run will end. The fight keeps running.
-6. Tap the **three bars again**. The run ends, Perk Points are banked, and the lobby opens.
-7. Tap **START** again. A fresh stage-1 run begins. The old run is not rejoined.
-8. Kill the app mid-fight, reopen. You are back in the **same fight**, no lobby, no upgrade window.
-9. Press **D** (debug wipe). The RUN OVER card shows. Tap REVIVE; the same stage resumes.
-10. Press **D** again. REVIVE is used. Tap NEXT RUN; the lobby opens; Perk Points increased.
-11. Open TRAIN for the first time. Record the freeze (defect R12).
+5. Tap the **gear once**. A pause menu opens: RESUME, SOUND, QUIT RUN. Time stops.
+6. Tap **QUIT RUN**. A second confirm shows the Perk Points you keep. Tap **KEEP FIGHTING** to return.
+7. Tap **QUIT RUN** → **END RUN**. The run ends, Perk Points are banked, and the lobby opens.
+8. Tap **START** again. A fresh stage-1 run begins. The old run is not rejoined.
+9. Kill the app mid-fight, reopen. You are back in the **same fight**, no lobby, no upgrade window.
+10. Press **D** (debug wipe). The RUN OVER card shows. Tap REVIVE; the same stage resumes.
+11. Press **D** again. REVIVE is used. Tap **END RUN**; the lobby opens; Perk Points increased.
+12. Open TRAIN for the first time. Record the freeze (defect R12).
 
-Pass = no menu is ever reachable during a fight, START always begins a run, and a quit always ends one.
+Pass = no upgrade screen is reachable during a fight, START always begins a run, and a quit always ends one.
 
 > **If a script was recompiled while Play was running, stop and start Play before testing.** Unity reloads the
 > code but not the game. The static handles (`StartScreenUI.Instance`, `HudController.Instance`) go null, so the

@@ -130,11 +130,12 @@ UPGRADES / PERKS / SHOP) and its management page are **retired** and no longer b
 | ASCEND | live | the perk shop: token tracks, one level per tap |
 | TRAIN | live | the gold tree (three heroes) plus the party track |
 | SHOP | **missing** | no page and no handler (defect R3). Gems have no sink and IAP has no surface. |
-| Header three bars | live (in a fight) | **QUIT RUN**: two taps. It ends the run and opens the lobby. Hidden while the lobby is open. |
+| Header gear | live (both) | **Lobby:** SETTINGS (sound, restore, privacy, version). **In a fight:** PAUSE (resume, sound, quit → confirm). Never an upgrade screen. |
+| No first-run hints | by design | The lobby teaches START; no toast tutorials. |
 
 > **As-built correction, 2026-11-21.** The lobby never covers a live fight; it is the between-runs screen. A run
-> is active only in `Combat`/`Boss`. Closing the app mid-run reopens into the same fight. Upgrade screens are
-> therefore impossible to reach during a fight. Full route map and evidence: `Routes-and-Flows.md`.
+> is active only in `Combat`/`Boss`. Closing the app mid-run reopens into the same fight. A minimal pause is
+> allowed, but it offers no upgrades: no shop, no training, no ascend. Full map: `Routes-and-Flows.md`.
 
 **The level-up card** is an overlay, not a page: it owns the screen while a pick is owed (fighter paused), shows the
 three boons, and closes itself when the last pick is spent. `LEVEL UP!` / `CHOOSE A BOON - N PICKS WAITING`, then one

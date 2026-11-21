@@ -55,8 +55,8 @@ existing `IIapService` / `IAdService` / `AdCapsService` seams, so real SDKs swap
 |---|---|---|---|
 | Shop page | **SHOP tab in the lobby** | **missing** (defect R3) | build it |
 | IAP | No Ads (non-consumable, **Restore required**) | mock, no UI | ship |
-| IAP | Gem packs S / M / L (5 / 30 / 110) | mock, no UI | ship |
-| IAP | Starter Pack (50 gems + 60 min offline cap) | mock, no UI | ship (retune the bonus: offline is out of the loop) |
+| IAP | **30-gem pack** (one bundle only) | mock, no UI | ship |
+| IAP | Starter Pack (**50 gems + a 30-minute gold boost**) | mock, no UI | ship (offline bonus retuned out) |
 | Gem sink | **Golden Foundry** (+5% gold per level, cap +50%) | data track exists (`Track_GemGold`) | ship as a shop row |
 | Ad | **Revive** (defeat card, once per run, 3/day) | live with mock | ship with a real seller |
 | Ad | **Camp SHORT REST+** | live with mock | ship with a real seller |

@@ -41,7 +41,7 @@
 | [~] | v1.1 cut list written | B | recommended list in §11; owner to confirm |
 | [x] | Story scope decided: **intro film + four flavour lines**, no scene gates | O | `Intro-Sequence.md` |
 | [x] | Gold rule recorded: **permanent**, Training is the only gold sink | B | `Run-Loop.md` §3 correction, 2026-11-21 |
-| [~] | App name, company, bundle id, version final | O | brand **Kingsguard** chosen; exact store title, id and version still open |
+| [~] | App name, company, bundle id, version final | O | title **Kingsguard: Tiny RPG**; company `sseengal`; bundle id `com.sseengal.idlerpg` (confirm before records); version `0.9.0` |
 | [x] | **Monetisation is required at v1.0** | O | decision 2026-11-21; minimal shop + IAP + ads are in scope, not optional |
 | [x] | Current art may be used commercially without attribution | O | decision 2026-11-21; record the licence files anyway (§7) |
 | [!] | Device work deferred to the end | O | decision 2026-11-21; §4 stays blocked until a phone + Mac/Xcode exist. **Risk:** the Play closed-test clock (12 testers × 14 days) cannot be compressed — start the account and the track as early as possible, even while device work waits. |
@@ -75,12 +75,14 @@
 |---|---|---|---|
 | [ ] | Boot with an active run resumes the **same fight**, never the lobby | B | kill app mid-fight, reopen, fight continues (no upgrade window) |
 | [ ] | START begins a run from the lobby; no fight runs behind the lobby | B | boot between runs → START → stage 1 |
-| [ ] | **No menu is reachable during a fight** | B | there is no pause menu at all |
-| [ ] | QUIT RUN (three bars, two taps) ends the run and banks | B | first tap toasts, second tap opens the lobby |
+| [ ] | **No upgrade screen is reachable during a fight** | B | the pause menu offers resume/sound/quit only |
+| [ ] | **Gear in the lobby opens SETTINGS** (sound, restore, privacy, version) | B | all four rows work; privacy URL may be a stub |
+| [ ] | **Gear in a fight opens PAUSE**; resume restores time | B | time stops, resumes at the same wave |
+| [ ] | QUIT RUN asks a second confirm, then ends and banks | B | KEEP FIGHTING returns; END RUN opens the lobby |
 | [ ] | **BATTLE tab** begins the run from the lobby | B | same result as START |
 | [ ] | Party wipe → RUN OVER card → REVIVE once → same stage | B | mock ad, second wipe offers no revive |
 | [ ] | Party wipe → NEXT RUN banks Perk Points → stage 1 | B | token count grows by the preview value |
-| [ ] | Mid-run QUIT ends the run and banks (no rejoin) | B | no rejoin path exists |
+| [ ] | Run-over card reads **END RUN** and returns to the lobby | B | label matches what happens |
 | [ ] | Party wipe on the run-over card + app close boots to the lobby, not a free revive | B | `runActive` is cleared on the wipe |
 | [ ] | Perk Points, gold and training nodes persist; boons and camp reset | B | two runs in a row |
 | [ ] | Level-up card pauses the fight; a pick applies; reroll works | B | pick changes the numbers |

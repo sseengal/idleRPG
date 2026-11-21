@@ -153,6 +153,54 @@ namespace IdleRPG.UI
             }
         }
 
+        private static Sprite gearSprite;
+
+        /// <summary>
+        /// A simple eight-tooth gear silhouette, drawn once and cached. It is the settings / pause button until real
+        /// art lands. White, so it tints like every other icon.
+        /// </summary>
+        public static Sprite GearSprite
+        {
+            get
+            {
+                if (gearSprite != null) { return gearSprite; }
+
+                const int size = 64;
+                Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+                tex.wrapMode = TextureWrapMode.Clamp;
+                tex.filterMode = FilterMode.Bilinear;
+
+                Vector2 centre = new Vector2((size - 1) * 0.5f, (size - 1) * 0.5f);
+                const float bodyRadius = 20f;
+                const float toothRadius = 28f;
+                const float holeRadius = 7f;
+                const float sector = Mathf.PI * 2f / 8f;
+
+                for (int y = 0; y < size; y++)
+                {
+                    for (int x = 0; x < size; x++)
+                    {
+                        Vector2 delta = new Vector2(x, y) - centre;
+                        float distance = delta.magnitude;
+                        float angle = Mathf.Atan2(delta.y, delta.x);
+                        float local = Mathf.Repeat(angle, sector) - sector * 0.5f;
+
+                        bool tooth = Mathf.Abs(local) <= sector * 0.24f && distance <= toothRadius;
+                        bool body = distance <= bodyRadius;
+                        bool hole = distance <= holeRadius;
+                        float alpha = (body || tooth) && !hole ? 1f : 0f;
+
+                        tex.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                    }
+                }
+
+                tex.Apply();
+                gearSprite = Sprite.Create(tex, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f), 100f);
+                gearSprite.name = "UiGear";
+                return gearSprite;
+            }
+        }
+
         /// <summary>Centres a rect on a normalised point with a fixed size.</summary>
         public static void CenterOn(RectTransform rect, Vector2 normalizedCenter, Vector2 size)
         {

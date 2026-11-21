@@ -149,7 +149,7 @@ namespace IdleRPG.EditorTools
             Button ascendButton = UiFactory.Button("AscendButton", dialog.transform, "REVIVE (AD)", "ui_button_gold", UiType.Role.Section, TextColor, null);
             UiFactory.Anchor(ascendButton.GetComponent<RectTransform>(), new Vector2(0.06f, 0.05f), new Vector2(0.47f, 0.23f));
 
-            Button continueButton = UiFactory.Button("ContinueButton", dialog.transform, "NEXT RUN", "ui_button", UiType.Role.Section, TextColor, null);
+            Button continueButton = UiFactory.Button("ContinueButton", dialog.transform, "END RUN", "ui_button", UiType.Role.Section, TextColor, null);
             UiFactory.Anchor(continueButton.GetComponent<RectTransform>(), new Vector2(0.53f, 0.05f), new Vector2(0.94f, 0.23f));
 
             summary.overflowMode = TextOverflowModes.Ellipsis;

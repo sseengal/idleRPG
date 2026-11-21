@@ -43,6 +43,13 @@ namespace IdleRPG.UI
             if (continueButton != null)
             {
                 continueButton.onClick.AddListener(OnContinueClicked);
+
+                // The run cannot be rejoined; the card returns to the hall, where START begins the next run.
+                TextMeshProUGUI label = continueButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (label != null)
+                {
+                    label.SetText("END RUN");
+                }
             }
 
             if (ascendButton != null)
@@ -84,7 +91,7 @@ namespace IdleRPG.UI
 
             if (ascendLabel != null)
             {
-                ascendLabel.SetText(string.Format("+{0} Perk Points on the next run", NumberFormatter.Format(manager.RunEndPreviewTokens)));
+                ascendLabel.SetText(string.Format("+{0} Perk Points if you end the run now", NumberFormatter.Format(manager.RunEndPreviewTokens)));
             }
 
             // Two choices: REVIVE (rewarded ad, once per run) or NEXT RUN (bank + restart). Neither auto-fires.
@@ -98,7 +105,7 @@ namespace IdleRPG.UI
             {
                 countdownLabel.SetText(manager.CanRevive
                     ? "Watch an ad to revive this run once."
-                    : "Revive used this run - NEXT RUN to go again.");
+                    : "Revive used this run - END RUN to go again.");
             }
 
             if (root != null)
