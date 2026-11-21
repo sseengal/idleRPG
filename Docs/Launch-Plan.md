@@ -53,7 +53,7 @@ unblocks B10.
 | 0.5 | Create **both ad accounts**: AdMob (app ids) + Unity Ads (game ids, rewarded placements) | B10 cannot start without the ids | ids written into `B10-owner-inputs.md` §6 |
 | 0.6 | **Commission the app icon (1024) + launch screen** | standalone art, longest lead, and the store packet needs it — `Checklist.md` decision 5 says "now" | the artist is booked and dated |
 | 0.7 | Host the **privacy policy + support URL** | both stores require the URLs; the closed test needs them | both URLs resolve |
-| 0.8 | Create the **5 product records** (no-ads, 3 gem packs, starter pack) with prices | must match `IapCatalog`; sandbox tests need them | records exist in both consoles |
+| 0.8 | Create the **3 product records** (No Ads, 30 Gems, Starter Pack) with prices | must match `IapCatalog`; sandbox tests need them | records exist in both consoles |
 
 **Gate:** every clock is running and B10 has every id it needs.
 

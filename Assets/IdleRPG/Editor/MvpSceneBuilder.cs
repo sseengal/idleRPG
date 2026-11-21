@@ -201,10 +201,9 @@ namespace IdleRPG.EditorTools
             // The ability strip sits in the band between the viewport and the log. It used to be a second tab
             // beside the log, which meant the buttons were invisible during a fight - the one moment they matter.
             AbilityPanelUI abilityStrip = BuildAbilityStrip(battleRect, partyConfig.ValidHeroCount);
-            // The old management page (UPGRADES / PERKS / SHOP) and its nav bar are RETIRED - the lobby owns the
-            // shell now. Their builders stay in MvpSceneBuilder.Panels.cs for reference; nothing calls them, and the
-            // camp layer takes a null ScreenController (it only used it to return to the battle page).
-            BuildCampLayer(battleRect, abilityStrip, formationBoard, enemyStack, null, hudRoot);
+            // The old management page (UPGRADES / PERKS / SHOP) and its nav bar are retired; the lobby owns the
+            // shell now.
+            BuildCampLayer(battleRect, abilityStrip, formationBoard, enemyStack, hudRoot);
             OfflineRewardsPopup offlinePopup = BuildOfflinePopup(modalRoot);
             DefeatModalUI defeatModal = BuildDefeatModal(modalRoot);
             BuildBoonCard(modalRoot);

@@ -24,7 +24,6 @@ namespace IdleRPG.UI
         [SerializeField] private GameObject abilityStrip;
         [SerializeField] private GameObject formationBoard;
         [SerializeField] private GameObject enemyStack;
-        [SerializeField] private ScreenController screens;
         [SerializeField] private CanvasGroup campStripGroup;
 
         [Header("Camp view")]
@@ -111,13 +110,6 @@ namespace IdleRPG.UI
 
         private void ApplyState(bool open)
         {
-            if (open && screens != null)
-            {
-                // The camp lives under the battle page, so bring that page forward. A forced choice must never
-                // wait unseen behind the party or upgrade tabs.
-                screens.ShowBattle();
-            }
-
             if (campView != null)
             {
                 campView.SetActive(open);

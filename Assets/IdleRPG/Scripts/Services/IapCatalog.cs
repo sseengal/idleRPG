@@ -52,19 +52,15 @@ namespace IdleRPG.Services
     public static class IapCatalog
     {
         public const string SkuNoAds = "kingsguard.no_ads";
-        public const string SkuGemsSmall = "kingsguard.gems_small";
         public const string SkuGemsMedium = "kingsguard.gems_30";
-        public const string SkuGemsLarge = "kingsguard.gems_large";
         public const string SkuStarterPack = "kingsguard.starter_pack";
 
-        // v1.0 sells only three products: No Ads, the 30-gem pack and the Starter Pack. The small/large packs stay
-        // in the catalog for the retired shop code and debug menus; they are NOT offered in the lobby shop.
+        // v1.0 sells exactly three products: No Ads, the 30-gem pack and the Starter Pack. The catalog is the
+        // store shelf, so it stays lean: a product that is not sold does not exist here.
         private static readonly IapProduct[] Products =
         {
             new IapProduct(SkuNoAds, "No Ads", IapProductType.NonConsumable, removesAds: true),
-            new IapProduct(SkuGemsSmall, "5 Gems", IapProductType.Consumable, gemsGranted: 5d),
             new IapProduct(SkuGemsMedium, "30 Gems", IapProductType.Consumable, gemsGranted: 30d),
-            new IapProduct(SkuGemsLarge, "110 Gems", IapProductType.Consumable, gemsGranted: 110d),
             new IapProduct(SkuStarterPack, "Starter Pack", IapProductType.Consumable,
                 gemsGranted: 50d, goldBoostMinutes: 30d)
         };

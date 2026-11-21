@@ -86,7 +86,7 @@ reaches Lv 1; Restore returns success. Real prices and receipts need the store S
 
 ### Owner prerequisites (no phone needed)
 
-- 5 product records in both consoles with prices
+- 3 product records in both consoles with prices
 - AdMob app ids + Unity Ads game ids
 - Privacy + support URLs
 - Play account type recorded; closed test started if personal

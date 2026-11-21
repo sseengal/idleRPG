@@ -1073,7 +1073,7 @@ submission; and a mismatched Data Safety / privacy manifest, which is worse than
 - [ ] Apple + Play developer accounts; **Play account type recorded** (personal => the 12x14 test gate applies)
 - [ ] App names reserved; bundle id / package id chosen
 - [ ] **Ad accounts created and ids written down:** AdMob (app id per platform, a test rewarded unit) + Unity Ads (game ids, rewarded placements) - both sellers go live in B10; the Google Mobile Ads Unity plugin needs the AdMob app id in the Android manifest / iOS plist
-- [ ] Product records created in both consoles with the `IapCatalog` SKUs (no-ads, 3 gem packs, starter pack) + prices
+- [ ] Product records created in both consoles with the `IapCatalog` SKUs (No Ads, 30 Gems, Starter Pack) + prices
 - [ ] Play **closed test track started** (this is the wall-clock floor)
 - [ ] Privacy policy + support URL hosted (both stores require the URLs)
 - [ ] Art/audio pass commissioned + dated (it sets the submission date)

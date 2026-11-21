@@ -235,7 +235,7 @@ without touching the game rules. **The surface is live; only the real SDK is mis
 | R7 | ~~P1~~ | ~~No mid-run END RUN~~ **FIXED 2026-11-21**: pause menu → QUIT RUN → confirm | `GearMenuUI` | done |
 | R8 | P1 | Level-up card is silent | `AudioDirector.cs:106` listens to `HeroLevelChanged` | S |
 | R9 | P2 | Offline popup unreachable | `EvaluateOffline` called only by debug code | S (wire or cut) |
-| R10 | P2 | Dead UI code still compiled | `AscensionPanelUI`, `ShopPanelUI`, `UpgradePanelUI`, `AutomationPanelUI`, `ScreenController` | S-M |
+| R10 | ~~P2~~ | ~~Dead UI code still compiled~~ **REMOVED 2026-11-21**: retired panels, rows, nav, the old builder file and two unused SKUs | 13 files deleted | done |
 | R11 | P2 | Docs disagree with code | `Run-Loop.md` §3 vs `Stages.cs:190`; `UI-UX.md` SHOP row | S |
 | R12 | P2 | TRAIN first-open freeze (reverted fix) | `Training.md` §5b; one-pass build at `ba4a4cf` | S (re-apply) |
 | R13 | P2 | No app icon or launch screen | `ProjectSettings.asset` icon lists empty | M |
@@ -244,6 +244,9 @@ without touching the game rules. **The surface is live; only the real SDK is mis
 | R16 | P3 | Balance baseline void | `Checklist.md` §0, `Content.md` §10 | M |
 | R17 | P3 | Speed / auto-buy unreachable | `AutomationPanelUI` not in scene | S (cut or home) |
 | R18 | P3 | Gear parked (consistent) | drop chance `0`, bag off | none |
+
+**Still dead, deliberately not removed:** `FirstRunTips` (hints are off), `LeaderboardService` (no UI),
+`OfflineRewardsPopup` (unreachable). They are inert, not risky. Remove them when the scene is rebuilt.
 
 ---
 

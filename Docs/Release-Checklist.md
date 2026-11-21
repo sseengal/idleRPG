@@ -125,7 +125,7 @@
 | [ ] | Play account type recorded (personal vs organisation) | O | written in `Checklist.md` §1p |
 | [ ] | Play closed-test track running (12 testers × 14 days if personal) | O | track live, testers invited |
 | [ ] | Store records created; bundle id reserved | O | id matches `ProjectSettings` |
-| [ ] | 5 product records match `IapCatalog`; prices set | O | no-ads, starter, 3 gem packs |
+| [ ] | 3 product records match `IapCatalog`; prices set | O | No Ads, 30 Gems, Starter Pack |
 | [ ] | AdMob app ids + Unity Ads game ids recorded | O | written in `B10-owner-inputs.md` §6 |
 | [ ] | Privacy policy + support URLs resolve | O | both open in a browser |
 | [ ] | Play signing key + Apple provisioning ready | O | a signed build installs |

@@ -21,7 +21,7 @@ namespace IdleRPG.EditorTools
             "Assets/IdleRPG/Prefabs/UI/Battle/CampChoiceCard.prefab";
 
         private static void BuildCampLayer(RectTransform battlePage, AbilityPanelUI abilityStrip,
-            FormationBoardView board, EnemyStackView stack, ScreenController screens, GameObject hudRoot)
+            FormationBoardView board, EnemyStackView stack, GameObject hudRoot)
         {
             RectTransform viewport = battlePage.Find("Viewport") as RectTransform;
 
@@ -97,7 +97,6 @@ namespace IdleRPG.EditorTools
             SceneWiringUtility.SetField(camp, "abilityStrip", abilityStrip != null ? abilityStrip.gameObject : null);
             SceneWiringUtility.SetField(camp, "formationBoard", board != null ? board.gameObject : null);
             SceneWiringUtility.SetField(camp, "enemyStack", stack != null ? stack.gameObject : null);
-            SceneWiringUtility.SetField(camp, "screens", screens);
             SceneWiringUtility.SetField(camp, "campStripGroup", stripGroup);
             SceneWiringUtility.SetField(camp, "actorImages", actors);
             SceneWiringUtility.SetField(camp, "hpLabels", hpLabels);

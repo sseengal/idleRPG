@@ -17,7 +17,6 @@ namespace IdleRPG.UI
         private static readonly string[] Tabs = { "SHOP", "PARTY", "BATTLE", "ASCEND", "TRAIN" };
 
         private GameManager manager;
-        private ScreenController screens;
         private GameObject lobby;
 
         [Tooltip("Chapter art for the lobby centre panel. Null falls back to the plain plate.")]
@@ -221,7 +220,6 @@ namespace IdleRPG.UI
         {
             if (lobby != null && lobby.activeSelf)
             {
-                HideRunNav();
                 DetachSharedHeader();
                 lobby.SetActive(false);
             }
@@ -471,19 +469,6 @@ namespace IdleRPG.UI
             {
                 HudController hud = HudController.Instance;
                 manager = hud != null ? hud.GameManager : null;
-            }
-
-            if (screens == null)
-            {
-                screens = FindAnyObjectByType<ScreenController>();
-            }
-        }
-
-        private void HideRunNav()
-        {
-            if (screens != null)
-            {
-                screens.gameObject.SetActive(false);
             }
         }
 
