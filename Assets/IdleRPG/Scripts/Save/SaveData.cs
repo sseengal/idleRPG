@@ -53,6 +53,12 @@ namespace IdleRPG.Save
         /// <summary>GameClock binary of when the current run began; 0 = not started yet (seeded on load).</summary>
         public double runStartBinary;
 
+        /// <summary>
+        /// True while a run is in progress (additive; an older save reads false). Boot resumes the fight only
+        /// when this is true, so the lobby can never open over a live run. Set on StartRun, cleared on run end.
+        /// </summary>
+        public bool runActive;
+
         // --- Party XP and boon picks (run-scoped, additive in schema v12). ---
         //     An older file has no values here, so it simply reads level 1 with an empty bar, which is exactly the
         //     state of a fresh run. Nothing to migrate.

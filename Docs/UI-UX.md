@@ -119,17 +119,22 @@ exceptions - is in `UI-Layout.md`.** That file owns spacing; this one owns scree
 
 ## 2. Navigation model
 
-**Shell today (2026-11-08):** the lobby owns navigation - `SHOP / PARTY / BATTLE / ASCENSION / TRAINING` on its own
-canvas, with the shared header borrowed from the battle page. The old baked 5-tab shell (BATTLE / PARTY / UPGRADES /
-PERKS / SHOP) and its management page are **retired** and no longer built into the scene.
+**Shell today (2026-11-21):** the lobby is the **between-runs** screen - `SHOP / PARTY / BATTLE / ASCEND / TRAINING`
+on its own canvas, with the shared header borrowed from the battle page. The old baked 5-tab shell (BATTLE / PARTY /
+UPGRADES / PERKS / SHOP) and its management page are **retired** and no longer built into the scene.
 
 | Tab | State | What it does today |
 | --- | --- | --- |
-| BATTLE | live | closes the lobby and runs the fight |
+| BATTLE | live | begins the run; same path as START. |
 | PARTY | live | read-only roster: hero cards, the selected hero's stats, gear and ability slots |
-| ASCEND | live | the perk shop: four token tracks, one level per tap |
+| ASCEND | live | the perk shop: token tracks, one level per tap |
 | TRAIN | live | the gold tree (three heroes) plus the party track |
-| SHOP | placeholder | shows a "coming soon" line; no content behind it |
+| SHOP | **missing** | no page and no handler (defect R3). Gems have no sink and IAP has no surface. |
+| Header three bars | live (in a fight) | **QUIT RUN**: two taps. It ends the run and opens the lobby. Hidden while the lobby is open. |
+
+> **As-built correction, 2026-11-21.** The lobby never covers a live fight; it is the between-runs screen. A run
+> is active only in `Combat`/`Boss`. Closing the app mid-run reopens into the same fight. Upgrade screens are
+> therefore impossible to reach during a fight. Full route map and evidence: `Routes-and-Flows.md`.
 
 **The level-up card** is an overlay, not a page: it owns the screen while a pick is owed (fighter paused), shows the
 three boons, and closes itself when the last pick is spent. `LEVEL UP!` / `CHOOSE A BOON - N PICKS WAITING`, then one

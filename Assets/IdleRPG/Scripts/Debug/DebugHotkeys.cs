@@ -250,16 +250,16 @@ namespace IdleRPG.Debugging
 
             if (keyboard.f1Key.wasPressedThisFrame)
             {
-                IdleRPG.UI.StartScreenUI start = IdleRPG.UI.StartScreenUI.Instance;
-
-                if (start != null)
+                // The lobby is the between-runs screen. There is no "open it mid-fight": F1 ends the run, exactly
+                // like the in-run quit control, so debug play cannot upgrade during a fight either.
+                if (gameManager != null && gameManager.State != IdleRPG.Core.GameState.Lobby)
                 {
-                    start.ShowLobby();
-                    Log("Start Screen (F1): opened (game paused).");
+                    gameManager.EndRun();
+                    Log("Start Screen (F1): run ended; lobby open.");
                 }
                 else
                 {
-                    Log("Start Screen (F1): not present in this scene.");
+                    Log("Start Screen (F1): already in the lobby.");
                 }
             }
 

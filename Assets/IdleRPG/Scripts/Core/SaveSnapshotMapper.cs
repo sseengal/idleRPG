@@ -71,6 +71,7 @@ namespace IdleRPG.Core
             public double RunGoldEarned;
             public int RunKills;
             public int RunStagesCleared;
+            public bool RunActive;
             public double RunStartBinary;
             public int TotalKills;
             public double TotalGoldEarned;
@@ -94,6 +95,7 @@ namespace IdleRPG.Core
             data.runGoldEarned = run.RunGoldEarned;
             data.runKills = run.RunKills;
             data.runStagesCleared = run.RunStagesCleared;
+            data.runActive = run.RunActive;
             data.runStartBinary = run.RunStartBinary;
 
             data.gold = services.Economy != null ? services.Economy.Gold : 0d;
@@ -173,6 +175,7 @@ namespace IdleRPG.Core
             run.RunGoldEarned = data.runGoldEarned < 0d ? 0d : data.runGoldEarned;
             run.RunKills = Mathf.Max(0, data.runKills);
             run.RunStagesCleared = Mathf.Max(0, data.runStagesCleared);
+            run.RunActive = data.runActive;
             run.RunStartBinary = data.runStartBinary > 0d ? data.runStartBinary : GameClock.NowBinary;
 
             run.TotalKills = data.totalKills;

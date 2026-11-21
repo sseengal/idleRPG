@@ -115,6 +115,7 @@ InitTestScene*.unity*
 
 # Unity crash-recovery scenes (editor scratch data)
 Assets/_Recovery/
+Assets/_Recovery.meta
 
 # Local player builds
 /Builds/

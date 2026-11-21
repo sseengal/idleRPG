@@ -42,7 +42,7 @@ namespace IdleRPG.Debugging
             new DebugHotkeyEntry("F", "buy instant income (gem sink)"),
             new DebugHotkeyEntry("M", "mute / unmute placeholder SFX"),
             new DebugHotkeyEntry("L", "log live state to the console"),
-            new DebugHotkeyEntry("F1", "open the start screen (lobby)"),
+            new DebugHotkeyEntry("F1", "end the run and open the lobby"),
             new DebugHotkeyEntry("F3", "toggle this overlay"),
             new DebugHotkeyEntry("F4", "unlock / lock every ability (test)"),
             new DebugHotkeyEntry("F5", "save now"),

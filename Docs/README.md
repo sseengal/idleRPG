@@ -34,7 +34,10 @@ the code wins and the page is fixed the same day.
 
 | Question | Document |
 |---|---|
-| What is this game now — what is the core loop? | **`Run-Loop.md`** (canon: automated battler, spend run gold, die, bank meta, restart stage 1) |
+| What is this game now — what is the core loop? | **`Run-Loop.md`** (canon: automated battler; gold is **permanent**, die, bank Perk Points, restart stage 1) |
+| What does every screen and button do, as built? | **`Routes-and-Flows.md`** (routes, states, economy, known defects R1–R18) |
+| What sets up the repeating battle premise? | **`Intro-Sequence.md`** (one skippable film, then four flavour lines, no scene gates) |
+| What must be true before the stores accept the build? | **`Release-Checklist.md`** (gated boxes: code, gameplay, device, store, legal, launch) |
 | What was the story-campaign vision? | `Game-Vision.md` (record: story-led mini campaign; now the flavor wrapper) |
 | What is the story premise, cast and artifact rules? | **`Story-Canon.md`** (canon: the Second Dawn, Greenwake, video vs in-game split) |
 | What actually happens in Greenwake, and why does the shard matter? | **`Story-Greenwake.md`** (locked chapter story: time leak, living bloom, Slime King, theft) |
@@ -103,6 +106,9 @@ Docs/
   Battle-Log.md        <- log store, view, colours, typewriter, wrapping
   Camp.md              <- the wave interlude: Short/Long Rest, Train, token, save, risks
   Checklist.md         <- master status: what is done, what is left
+  Release-Checklist.md <- gate list: every check before the stores accept the build
+  Routes-and-Flows.md  <- as-built: every screen, button, state and known defect
+  Intro-Sequence.md    <- the premise film + the four flavour lines (plan)
   Cleanup-Checks.md    <- the before/after gate for consolidation (no behaviour change)
   Combat-Sequencing.md <- how a blow reaches the screen: lane, timings, enemy casts, the one beat planner
   Cutscene-Plan.md     <- fixed plays (structure only today): steps, rules, QA

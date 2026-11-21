@@ -211,7 +211,7 @@ namespace IdleRPG.Core
 
             SubscribeCombat();
             SubscribeProgression();
-            SetState(GameState.Boot, GameState.Combat);
+            SetState(GameState.Boot, LoadedFromSave && RunIsActive ? GameState.Combat : GameState.Lobby);
 
             Debug.Log($"[GameManager] Save load: {Save.LastLoadSource} | stage {CurrentStage} wave {RestoredWave} | {Economy}");
 

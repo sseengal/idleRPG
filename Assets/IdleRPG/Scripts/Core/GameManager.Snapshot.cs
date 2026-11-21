@@ -90,6 +90,7 @@ namespace IdleRPG.Core
                 RunGoldEarned = RunGoldEarned,
                 RunKills = RunKills,
                 RunStagesCleared = RunStagesCleared,
+                RunActive = RunIsActive,
                 RunStartBinary = runStartBinary,
                 TotalKills = TotalKills,
                 TotalGoldEarned = TotalGoldEarned,
@@ -113,6 +114,7 @@ namespace IdleRPG.Core
             RunGoldEarned = run.RunGoldEarned;
             RunKills = run.RunKills;
             RunStagesCleared = run.RunStagesCleared;
+            RunIsActive = run.RunActive;
             runStartBinary = run.RunStartBinary;
             TotalKills = run.TotalKills;
             TotalGoldEarned = run.TotalGoldEarned;

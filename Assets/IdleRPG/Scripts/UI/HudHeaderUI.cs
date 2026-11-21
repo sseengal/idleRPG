@@ -30,6 +30,13 @@ namespace IdleRPG.UI
         [SerializeField] private TextMeshProUGUI boostText;
 
         private EconomyManager economy;
+        private GameManager gameManager;
+
+        // In-run quit control (the three-bar button). Hidden while the lobby is open.
+        private RectTransform menuRect;
+        private bool menuVisible = true;
+        private bool quitArmed;
+        private float quitArmedAt;
 
         /// <summary>Current header, or null when the scene has no HUD header (debug scenes).</summary>
         public static HudHeaderUI Instance { get; private set; }
@@ -63,6 +70,7 @@ namespace IdleRPG.UI
             GameManager manager = hud != null ? hud.GameManager : null;
 
             economy = manager != null ? manager.Economy : null;
+            gameManager = manager;
 
             if (economy == null)
             {
@@ -81,6 +89,7 @@ namespace IdleRPG.UI
             GameEvents.CurrencyChanged += OnCurrencyChanged;
             GameEvents.StageChanged += OnStageChanged;
             GameEvents.GoldBoostChanged += OnGoldBoostChanged;
+            GameEvents.GameStateChanged += OnGameStateChanged;
         }
 
         private void OnDisable()
@@ -88,14 +97,15 @@ namespace IdleRPG.UI
             GameEvents.CurrencyChanged -= OnCurrencyChanged;
             GameEvents.StageChanged -= OnStageChanged;
             GameEvents.GoldBoostChanged -= OnGoldBoostChanged;
+            GameEvents.GameStateChanged -= OnGameStateChanged;
         }
 
         /// <summary>Width of the menu button, in canvas units. A size, not a gap, so it is not on the UiSpace ladder.</summary>
         private const float MenuButtonWidth = 110f;
 
         /// <summary>
-        /// Three-bar (hamburger) button at the right end of the chip row. Icon only for now - the tap action is
-        /// wired later. A fixed width joins the layout row so the currency chips keep the rest of the space.
+        /// Three-bar (hamburger) button at the right end of the chip row. It quits the run: two taps, because a
+        /// run cannot be rejoined. It is hidden while the lobby is open.
         /// </summary>
         private void BuildMenuButton()
         {
@@ -104,10 +114,12 @@ namespace IdleRPG.UI
             Image background = UiRuntime.CreatePanel(parent, null, UiTheme.MenuFace, raycast: true);
             background.gameObject.name = "MenuButton";
             UiRuntime.Anchor(background.rectTransform, new Vector2(0.88f, 0.10f), new Vector2(0.985f, 0.90f));
+            menuRect = background.rectTransform;
+            background.gameObject.SetActive(menuVisible);
 
             Button button = background.gameObject.AddComponent<Button>();
             button.targetGraphic = background;
-            button.onClick.AddListener(OpenLobby);
+            button.onClick.AddListener(OnQuitClicked);
 
             if (chipRow != null)
             {
@@ -158,12 +170,46 @@ namespace IdleRPG.UI
             }
         }
 
-        /// <summary>The menu button returns to the lobby (the run pauses there).</summary>
-        private void OpenLobby()
+        /// <summary>Show or hide the in-run quit control (hidden while the lobby is the screen).</summary>
+        public void SetQuitVisible(bool visible)
         {
-            if (StartScreenUI.Instance != null)
+            menuVisible = visible;
+
+            if (menuRect != null)
             {
-                StartScreenUI.Instance.ShowLobby();
+                menuRect.gameObject.SetActive(visible);
+            }
+        }
+
+        /// <summary>
+        /// QUIT RUN. The first tap arms it and says what will happen; the second tap ends the run. A run cannot
+        /// be rejoined, so this is a deliberate two-tap action, never a pause menu.
+        /// </summary>
+        private void OnQuitClicked()
+        {
+            if (gameManager == null || gameManager.State == GameState.Lobby)
+            {
+                return;
+            }
+
+            if (quitArmed && Time.unscaledTime - quitArmedAt <= 3f)
+            {
+                quitArmed = false;
+                gameManager.EndRun();
+                return;
+            }
+
+            quitArmed = true;
+            quitArmedAt = Time.unscaledTime;
+            GameEvents.RaiseToast("Tap the menu again to quit the run.");
+        }
+
+        /// <summary>A new fight disarms any half-finished quit, so the next run starts clean.</summary>
+        private void OnGameStateChanged(GameState previous, GameState next)
+        {
+            if (next == GameState.Combat || next == GameState.Boss)
+            {
+                quitArmed = false;
             }
         }
 

@@ -46,6 +46,50 @@ farm them (a re-clear is not a new best). Tuning the amounts is part of B7.
 | Sink | **Automation unlock** | auto-buy tier 1 for gems, tier 2 for more | monetises the churn fix (B6) - best kind of sink |
 | IAP | `IIapService` + `MockIapService` | products: no-ads (one-time), starter pack, gem bundle S/M/L, offline pack | mock now, real store is one implementation swap |
 
+## 3a. v1.0 shipping surface — Kingsguard (owner decision 2026-11-21)
+
+**Monetisation is required at v1.0.** Ship the smallest honest surface. Everything below sits behind the
+existing `IIapService` / `IAdService` / `AdCapsService` seams, so real SDKs swap in without game-rule changes.
+
+| Type | Item | State today | v1.0 |
+|---|---|---|---|
+| Shop page | **SHOP tab in the lobby** | **missing** (defect R3) | build it |
+| IAP | No Ads (non-consumable, **Restore required**) | mock, no UI | ship |
+| IAP | Gem packs S / M / L (5 / 30 / 110) | mock, no UI | ship |
+| IAP | Starter Pack (50 gems + 60 min offline cap) | mock, no UI | ship (retune the bonus: offline is out of the loop) |
+| Gem sink | **Golden Foundry** (+5% gold per level, cap +50%) | data track exists (`Track_GemGold`) | ship as a shop row |
+| Ad | **Revive** (defeat card, once per run, 3/day) | live with mock | ship with a real seller |
+| Ad | **Camp SHORT REST+** | live with mock | ship with a real seller |
+| Ad | **Gold boost** x2 for 30 min | code exists; only inside the dead shop page | ship as a shop row |
+| Ad | Double offline | code exists; popup unreachable | **cut** with the offline UI |
+| Gem income | Daily streak + first clear of every 5th stage | live | keep |
+| Gem sinks | Offline cap +1h, Fast-Forward (+1h income) | code exists in the dead shop | **cut** (idle-era, out of the loop) |
+
+### Rules that do not bend
+
+1. **No product sells raw power.** Gems buy time, convenience or a permanent gold %. Never a stage skip, never a
+   stat that beats the ledger.
+2. **Ledger-only payouts.** Every ad and gem payout converts time through the measured rate (AD6/AD7).
+3. **Restore Purchases ships with No Ads.** Apple rejects a non-consumable without it.
+4. **A failed or skipped ad burns no cap and no reward.** True for either seller.
+5. **No Ads owners never see consent or an ad button.**
+
+### SKU rename — do this BEFORE any store record exists
+
+The live SKUs are `idlerpg.no_ads`, `idlerpg.gems_small`, `idlerpg.gems_medium`, `idlerpg.gems_large`,
+`idlerpg.starter_pack` (`IapCatalog.cs:51-55`). The game is now **Kingsguard**. Rename to `kingsguard.*`
+**before** the first product record is created — a SKU is permanent once the store knows it.
+No real players exist, so the mock ownership flag can be reset with the rename.
+
+### Owner prerequisites (no phone needed)
+
+- 5 product records in both consoles with prices
+- AdMob app ids + Unity Ads game ids
+- Privacy + support URLs
+- Play account type recorded; closed test started if personal
+
+---
+
 ## 4. Guards (non-negotiable)
 
 1. **Ledger-only payouts** - everything routes through the measured rate (see §1).

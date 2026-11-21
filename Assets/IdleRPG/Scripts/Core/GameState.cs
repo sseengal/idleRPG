@@ -18,6 +18,9 @@ namespace IdleRPG.Core
         Defeat = 3,
 
         /// <summary>Combat paused, rewards calculated, world reset, prestige tokens granted.</summary>
-        Ascension = 4
+        Ascension = 4,
+
+        /// <summary>Between runs: no fight is running. The lobby is the screen; START begins a new run.</summary>
+        Lobby = 5
     }
 }

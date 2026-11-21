@@ -54,13 +54,18 @@ A run is measured in **stages reached**, not story nodes.
 
 | Currency | Earned | Spent on | Survives death? | Internal type today |
 |---|---|---|---|---|
-| **Run Gold** | every kill, this run | **run upgrades** (this run only) | **No** — wiped on run end | `CurrencyType.Gold` (already reset by ascension) |
+| **Run Gold** | every kill, this run | **TRAIN** permanent hero nodes | **Yes** — permanent since 2026-11-08 | `CurrencyType.Gold` |
 | **META (Shards)** | at run end, scaled by depth | **permanent upgrades** | **Yes** — always kept | `CurrencyType.PrestigeTokens` (keep the enum; display name "Shards") |
 | Gems | milestones, IAP, streak | shortcuts, cosmetics, revive-adjacent | Yes | `CurrencyType.Gems` |
 
-- Run Gold is already a run currency: the current ascension reset (**`GameManager.ResetProgressForAscension`**) wipes
-  gold and hero levels. The pivot does not change that — it only changes *when* the reset fires (on death, not on a
-  manual button).
+> **Status correction, 2026-11-21 (code wins):** the built game keeps **gold across a run end**. The run reset wipes
+> hero stat levels, party XP, boons and camp tokens, but **not** gold. The only gold sink is the **TRAIN** page
+> (`TrainingService`, 1,357 permanent nodes). `GameManager.Stages.cs:190` says so in one line: *"Gold is PERMANENT
+> now (spent on Training) - a run end no longer wipes it."* The "run upgrades, wiped on death" layer in §5.1 is
+> **design, not built**.
+
+- The old ascension reset (**`GameManager.ResetProgressForAscension`**) still exists for debug, but the live run-end
+  path is **`EndRun` → `BankRunReward`**, and it keeps gold.
 - META reuses the existing prestige token layer (**`AscensionManager`**, **`PrestigeUpgradeData`**). No new save
   currency, no schema fork. Only the *trigger* and the *tree size* change.
 
@@ -68,7 +73,8 @@ A run is measured in **stages reached**, not story nodes.
 
 ## 4. Run end — the exact flow
 
-The run ends on a **party wipe** or when the player taps **END RUN**. Both go through one path, `EndRun(reason)`.
+The run ends on a **party wipe** or when the player taps **QUIT RUN** (the three-bar button, two taps). Both go
+through one path, `EndRun(reason)`.
 
 ```
 WIPE  (the run ends)
@@ -76,19 +82,31 @@ WIPE  (the run ends)
   2. META = max(1, f(depth)) if >=1 stage cleared, else 0    (banked on NEXT RUN)
   3. RUN OVER card (FREE, stays put - NO auto-resume):
         stage reached · gold earned · kills · Perk Points banked
-        [NEXT RUN] -> fresh run from stage 1
+        [NEXT RUN] -> bank -> LOBBY (between runs)
   4. [REVIVE] rewarded ad, ONCE per run -> resume the same stage
+
+QUIT RUN  (three bars, two taps)
+  1. combat stops
+  2. META banked now
+  3. run reset -> LOBBY. There is no rejoin.
+
+LOBBY
+  START -> new run at stage 1.
 ```
 
 Rules to lock:
 
+- **A live fight has no menu.** The lobby is the between-runs screen. It is never drawn over a running fight, so
+  upgrades can never be bought mid-fight.
+- **Quitting ends the run.** No rejoin, no pause menu. Two taps, so a mis-tap cannot throw a run away.
+- **Closing the app does not end the run.** A live run reopens into the same fight, with no lobby and no upgrade
+  window. Between runs, the app reopens into the lobby.
 - **Summary is always free.** It never costs anything to see the run.
 - **Revive is a rewarded ad, once per run.** Uses the existing ad stack: a new
   `AdPlacementId.RunRevive` row in `BalanceConfig.adPlacements`, enforced by `AdCapsService` (per-day cap + min gap).
 - **Banking happens on death; there is no auto-resume.** The reward is granted when the run ends and the card then
   WAITS for **NEXT RUN**. No countdown, no automatic restart (the old idle "never waits for input" rule is retired).
-- **End early is allowed.** A mid-run END RUN button banks the same way. It is the player's lever to stop at a good
-  depth.
+- **End early is allowed.** QUIT RUN banks the same way. It is the player's lever to stop at a good depth.
 - The revive is the only interrupt. It is aspirational (a second chance), not pity gold, so it fits `Monetisation.md`
   (never sell raw power; limited; earnable-free elsewhere).
 
@@ -101,6 +119,11 @@ becomes the RUN OVER summary (add the REVIVE-ad button). **`GameManager.Stages.c
 ## 5. The two upgrade layers (the core product)
 
 The upgrade mechanism is the game. Everything else is support. Two layers, two currencies.
+
+> **Built state, 2026-11-21:** only the **permanent** layer is live, and its currency is **gold** (TRAIN) plus
+> **Perk Points** (ASCEND and the TRAIN party column). The "run upgrades / gold wiped on death" table in §5.1 is a
+> frozen design that was never built; the run-gold hero upgrade page was retired with the old management page.
+> Do not plan work that assumes §5.1 exists. Read `Routes-and-Flows.md` §7 for the live economy.
 
 > **Frozen v1, 7 Nov 2026.** Numbers are starting points; Phase D retunes on the Balance Lab robot. Costs use the
 > code's own curve: `cost(level) = base * growth^level`.
@@ -212,9 +235,14 @@ death is the shard pulling you home, and permanent upgrades are what the shard r
 
 ## 9. Naming
 
-The theme already fits a resurrection loop. Candidates: **Dawnbound**, The Ascent, Wardens' Ascent,
-Second Dawn: Descent, Eternal Watch. Recommendation: **Dawnbound** (short, ties to the dawn-shard hook,
-store-friendly). Internal code, save keys and `CurrencyType` stay unchanged regardless of the display name.
+**Decided 2026-11-21: the game is *Kingsguard*.** The owner's words: "Kingsguard tiny rpg is the name of the
+game." The story already fits: the King sends only his Guard, and the Guard is who the player controls.
+
+- Working title for code, docs and the title card: **Kingsguard** (all caps on the title plate).
+- Exact store title (for example `Kingsguard` or `Kingsguard: Tiny RPG`) is still open; do not create store
+  records until it is fixed.
+- Internal code, save keys and `CurrencyType` stay unchanged. **SKUs must be renamed `idlerpg.*` → `kingsguard.*`
+  before the first product record** (`Monetisation.md` §3a).
 
 ---
 

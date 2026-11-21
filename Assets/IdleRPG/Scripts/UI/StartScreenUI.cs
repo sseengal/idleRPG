@@ -18,6 +18,7 @@ namespace IdleRPG.UI
 
         private GameManager manager;
         private ScreenController screens;
+        private HudHeaderUI headerUi;
         private GameObject lobby;
 
         [Tooltip("Chapter art for the lobby centre panel. Null falls back to the plain plate.")]
@@ -100,11 +101,44 @@ namespace IdleRPG.UI
             Build();
         }
 
+        private void OnEnable()
+        {
+            GameEvents.GameStateChanged += OnGameStateChanged;
+        }
+
+        private void OnDisable()
+        {
+            GameEvents.GameStateChanged -= OnGameStateChanged;
+        }
+
+        /// <summary>
+        /// The lobby is tied to the run state, not to a button. Lobby = between runs, so it shows. Any live
+        /// fight hides it. That is what makes "no upgrades during a fight" a rule instead of a promise.
+        /// </summary>
+        private void OnGameStateChanged(GameState previous, GameState next)
+        {
+            if (next == GameState.Lobby)
+            {
+                ShowLobby();
+            }
+            else if (next == GameState.Combat || next == GameState.Boss)
+            {
+                HideLobby();
+            }
+        }
+
         private void Start()
         {
             EnsureManager();
-            AttachSharedHeader();
-            SetGamePaused(true);
+
+            // A run in progress goes straight back to the fight. The lobby only exists between runs.
+            if (manager != null && manager.LoadedFromSave && manager.RunIsActive)
+            {
+                HideLobby();
+                return;
+            }
+
+            ShowLobby();
         }
 
         private void OnDestroy()
@@ -158,7 +192,10 @@ namespace IdleRPG.UI
             // lobby now, so there is one menu affordance instead of two overlapping ones.
         }
 
-        /// <summary>Open the lobby and pause the run (used by the MENU button and the F1 debug key).</summary>
+        /// <summary>
+        /// Shows the between-runs screen. There is no fight to pause: the manager only enters this state when no
+        /// run is active. Also hides the in-run quit control, so the header holds one meaning at a time.
+        /// </summary>
         public void ShowLobby()
         {
             if (lobby != null)
@@ -167,28 +204,53 @@ namespace IdleRPG.UI
             }
 
             AttachSharedHeader();
+            SetHeaderQuitVisible(false);
             HighlightNav("BATTLE");
             RaiseNav();
-            SetGamePaused(true);
+            Time.timeScale = 1f;
         }
 
+        /// <summary>Leaves the lobby for a live fight. Idempotent: both START and the BATTLE tab call it.</summary>
+        private void HideLobby()
+        {
+            if (lobby != null && lobby.activeSelf)
+            {
+                HideRunNav();
+                SetHeaderQuitVisible(true);
+                DetachSharedHeader();
+                lobby.SetActive(false);
+            }
+
+            Time.timeScale = 1f;
+        }
+
+        /// <summary>The three-bar button is QUIT RUN while fighting, and hidden while the lobby is open.</summary>
+        private void SetHeaderQuitVisible(bool visible)
+        {
+            if (headerUi == null)
+            {
+                headerUi = FindAnyObjectByType<HudHeaderUI>();
+            }
+
+            if (headerUi != null)
+            {
+                headerUi.SetQuitVisible(visible);
+            }
+        }
+
+        /// <summary>
+        /// START begins a new run. The lobby only exists between runs, so there is no live run to reset here.
+        /// </summary>
         private void StartGame()
         {
             EnsureManager();
 
-            if (lobby != null)
-            {
-                lobby.SetActive(false);
-            }
-
-            HideRunNav();
-            DetachSharedHeader();
-            SetGamePaused(false);
-
-            if (manager != null)
+            if (manager != null && !manager.RunIsActive)
             {
                 manager.StartRun(1);
             }
+
+            HideLobby();
         }
 
         private void OnTab(string tab)
@@ -202,6 +264,12 @@ namespace IdleRPG.UI
 
             switch (tab)
             {
+                case "BATTLE":
+                    // The fight tab means "leave the lobby and play". Same path as START, so the page closes,
+                    // the borrowed header goes home and the run resumes exactly where it was.
+                    StartGame();
+                    return;
+
                 case "TRAIN":
                     ShowTraining();
                     RaiseNav();
@@ -412,6 +480,11 @@ namespace IdleRPG.UI
             {
                 screens = FindAnyObjectByType<ScreenController>();
             }
+
+            if (headerUi == null)
+            {
+                headerUi = FindAnyObjectByType<HudHeaderUI>();
+            }
         }
 
         private void HideRunNav()
@@ -420,11 +493,6 @@ namespace IdleRPG.UI
             {
                 screens.gameObject.SetActive(false);
             }
-        }
-
-        private void SetGamePaused(bool paused)
-        {
-            Time.timeScale = paused ? 0f : 1f;
         }
 
         // ------------------------------------------------------------------

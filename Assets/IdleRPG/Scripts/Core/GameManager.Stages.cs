@@ -45,6 +45,12 @@ namespace IdleRPG.Core
 
             combatManager.SetStage(CurrentStage, healParty: true);
             combatManager.StartRun();
+
+            // A run now exists. Persist that fact immediately: if the app dies before the next autosave, boot
+            // must resume this fight rather than open the lobby over it.
+            RunIsActive = true;
+            Save?.SaveNow("run-start");
+
             SetState(State == GameState.Boot ? GameState.Boot : State, combatManager.IsBossWave ? GameState.Boss : GameState.Combat);
             RaiseStageChanged();
         }
@@ -137,7 +143,11 @@ namespace IdleRPG.Core
                 : string.Format("Run ended - stage {0}  |  {1} gold", endedStage, NumberFormatter.Format(endedGold)));
 
             reviveUsedThisRun = false;
-            StartRun(1);
+
+            // The run is over. No new run starts here: the lobby is the screen between runs, and START begins
+            // the next run. Saving now means a quit from the lobby boots back into the lobby.
+            SetState(State, GameState.Lobby);
+            Save?.SaveNow("run-end");
             return true;
         }
 
@@ -150,6 +160,12 @@ namespace IdleRPG.Core
             defeatBeatActive = false;
 
             combatManager.StopRun();
+
+            // The party is down. Persist "no run" now, so killing the app on the run-over card cannot restore a
+            // healed party for free. REVIVE (if chosen) calls StartRun and sets the flag again.
+            RunIsActive = false;
+            Save?.SaveNow("run-over");
+
             SetState(State, GameState.Defeat);
             RaiseStageChanged();
 
@@ -203,6 +219,7 @@ namespace IdleRPG.Core
             RunGoldEarned = 0d;
             RunKills = 0;
             RunStagesCleared = 0;
+            RunIsActive = false;
             runStartBinary = GameClock.NowBinary;
             ResetRunCampState();
             ResetPartyProgressionForNewRun();

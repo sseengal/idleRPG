@@ -53,13 +53,6 @@ namespace IdleRPG.Core
         [Tooltip("Wave/encounter driver living on the same GameObject.")]
         [SerializeField] private CombatManager combatManager;
 
-        [Header("Run Settings")]
-        [Tooltip("Start the auto-battle automatically when the scene starts.")]
-        [SerializeField] private bool autoStartRun = true;
-
-        [Tooltip("Stage a brand new game begins at.")]
-        [SerializeField] private int startingStage = 1;
-
         [Tooltip("Print stage/state changes to the console.")]
         [SerializeField] private bool logFlowToConsole = true;
 
@@ -246,6 +239,13 @@ namespace IdleRPG.Core
         /// <summary>True when the current run was restored from disk.</summary>
         public bool LoadedFromSave { get; private set; }
 
+        /// <summary>
+        /// True while a run is in progress. False means "between runs": the lobby is the screen and no fight is
+        /// ticking. Set by <see cref="StartRun"/>, cleared when the run ends. Boot resumes only when the save says
+        /// a run was active, so the menu can never open over a live fight.
+        /// </summary>
+        public bool RunIsActive { get; private set; }
+
         /// <summary>Wave restored from the save (used to resume mid-stage).</summary>
         public int RestoredWave { get; private set; } = 1;
 
@@ -284,18 +284,21 @@ namespace IdleRPG.Core
 
             EnsureRunStarted();
 
-            if (LoadedFromSave)
+            if (LoadedFromSave && RunIsActive)
             {
-                // Resume: the stage/wave were restored in WireUp, so just start the ticker.
+                // Resume the fight the player left. Closing the app never opens the lobby over a live run, so
+                // there is no way to buy an upgrade "mid-fight" by quitting and reopening.
                 combatManager.StartRun();
                 SetState(State, combatManager.IsBossWave ? GameState.Boss : GameState.Combat);
                 RaiseStageChanged();
                 LogFlow($"Resumed save: stage {CurrentStage} wave {RestoredWave}.");
             }
-            else if (autoStartRun)
+            else
             {
-                StartRun(startingStage);
-                Save?.SaveNow("first-run");
+                // Between runs, or a fresh install: no fight ticks. The lobby is the screen; START begins a run.
+                RunIsActive = false;
+                SetState(State, GameState.Lobby);
+                LogFlow("No run in progress; lobby open.");
             }
 
             // Offline earnings are out of the JRPG loop (Game-Vision, Story-Canon). The payout service stays in
