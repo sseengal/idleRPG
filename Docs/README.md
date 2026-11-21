@@ -36,7 +36,7 @@ the code wins and the page is fixed the same day.
 |---|---|
 | What is this game now — what is the core loop? | **`Run-Loop.md`** (canon: automated battler; gold is **permanent**, die, bank Perk Points, restart stage 1) |
 | What does every screen and button do, as built? | **`Routes-and-Flows.md`** (routes, states, economy, known defects R1–R18) |
-| What sets up the repeating battle premise? | **`Intro-Sequence.md`** (one skippable film, then four flavour lines, no scene gates) |
+| What sets up the repeating battle premise? | `Intro-Sequence.md` (**deferred**: the intro film is skipped for v1.0; the two opening scenes still play) |
 | What must be true before the stores accept the build? | **`Release-Checklist.md`** (gated boxes: code, gameplay, device, store, legal, launch) |
 | What was the story-campaign vision? | `Game-Vision.md` (record: story-led mini campaign; now the flavor wrapper) |
 | What is the story premise, cast and artifact rules? | **`Story-Canon.md`** (canon: the Second Dawn, Greenwake, video vs in-game split) |

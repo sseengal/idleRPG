@@ -129,7 +129,7 @@ UPGRADES / PERKS / SHOP) and its management page are **retired** and no longer b
 | PARTY | live | read-only roster: hero cards, the selected hero's stats, gear and ability slots |
 | ASCEND | live | the perk shop: token tracks, one level per tap |
 | TRAIN | live | the gold tree (three heroes) plus the party track |
-| SHOP | **missing** | no page and no handler (defect R3). Gems have no sink and IAP has no surface. |
+| SHOP | live | lean shelf: No Ads, 30 Gems, Starter, Golden Foundry. Restore lives in the gear settings. |
 | Header gear | live (both) | **Lobby:** SETTINGS (sound, restore, privacy, version). **In a fight:** PAUSE (resume, sound, quit → confirm). Never an upgrade screen. |
 | No first-run hints | by design | The lobby teaches START; no toast tutorials. |
 

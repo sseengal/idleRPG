@@ -53,14 +53,14 @@ existing `IIapService` / `IAdService` / `AdCapsService` seams, so real SDKs swap
 
 | Type | Item | State today | v1.0 |
 |---|---|---|---|
-| Shop page | **SHOP tab in the lobby** | **missing** (defect R3) | build it |
-| IAP | No Ads (non-consumable, **Restore required**) | mock, no UI | ship |
-| IAP | **30-gem pack** (one bundle only) | mock, no UI | ship |
-| IAP | Starter Pack (**50 gems + a 30-minute gold boost**) | mock, no UI | ship (offline bonus retuned out) |
-| Gem sink | **Golden Foundry** (+5% gold per level, cap +50%) | data track exists (`Track_GemGold`) | ship as a shop row |
+| Shop page | **SHOP tab in the lobby** | **built 2026-11-21** | live |
+| IAP | No Ads (non-consumable, **Restore required**) | mock + shop UI | ship |
+| IAP | **30-gem pack** (one bundle only) | mock + shop UI | ship |
+| IAP | Starter Pack (**50 gems + a 30-minute gold boost**) | mock + shop UI | ship (offline bonus retuned out) |
+| Gem sink | **Golden Foundry** (+5% gold per level, cap +50%) | live in SHOP (`Track_GemGold`) | ship |
 | Ad | **Revive** (defeat card, once per run, 3/day) | live with mock | ship with a real seller |
 | Ad | **Camp SHORT REST+** | live with mock | ship with a real seller |
-| Ad | **Gold boost** x2 for 30 min | code exists; only inside the dead shop page | ship as a shop row |
+| Ad | **Gold boost** x2 for 30 min | code exists; **not sold in v1.0** | cut (revive + camp cover ads) |
 | Ad | Double offline | code exists; popup unreachable | **cut** with the offline UI |
 | Gem income | Daily streak + first clear of every 5th stage | live | keep |
 | Gem sinks | Offline cap +1h, Fast-Forward (+1h income) | code exists in the dead shop | **cut** (idle-era, out of the loop) |
@@ -76,10 +76,13 @@ existing `IIapService` / `IAdService` / `AdCapsService` seams, so real SDKs swap
 
 ### SKU rename — do this BEFORE any store record exists
 
-The live SKUs are `idlerpg.no_ads`, `idlerpg.gems_small`, `idlerpg.gems_medium`, `idlerpg.gems_large`,
-`idlerpg.starter_pack` (`IapCatalog.cs:51-55`). The game is now **Kingsguard**. Rename to `kingsguard.*`
-**before** the first product record is created — a SKU is permanent once the store knows it.
-No real players exist, so the mock ownership flag can be reset with the rename.
+The live SKUs are `kingsguard.no_ads`, `kingsguard.gems_30`, `kingsguard.starter_pack` (plus the two debug-only
+packs). They were renamed from `idlerpg.*` on **2026-11-21**, before any store record existed. A SKU is permanent
+once the store knows it, so this is the last chance to rename.
+
+**Verified 2026-11-21 (mock):** the 30-gem pack grants 30 (5 → 35); No Ads flips the card to **OWNED** and
+disables the ad flows; the Starter grants 50 gems + a 30-minute boost; the Golden Foundry costs 25 gems and
+reaches Lv 1; Restore returns success. Real prices and receipts need the store SDK (B10).
 
 ### Owner prerequisites (no phone needed)
 

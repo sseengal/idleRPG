@@ -230,8 +230,14 @@ namespace IdleRPG.Core
                     shop?.TryGrantOfflineCapBonus(product.OfflineCapBonusMinutes);
                 }
 
+                if (product.GoldBoostMinutes > 0d && boost != null)
+                {
+                    boost.ActivateForSeconds(product.GoldBoostMinutes * 60d);
+                }
+
                 save?.MarkDirty("iap");
-                log?.Invoke($"IAP bought: {product.DisplayName} (+{product.GemsGranted:0} gems, +{product.OfflineCapBonusMinutes:0} min offline cap).");
+                log?.Invoke($"IAP bought: {product.DisplayName} (+{product.GemsGranted:0} gems, " +
+                            $"+{product.OfflineCapBonusMinutes:0} min offline cap, +{product.GoldBoostMinutes:0} min boost).");
                 GameEvents.RaiseToast($"{product.DisplayName} purchased!");
             });
         }

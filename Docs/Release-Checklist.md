@@ -39,7 +39,7 @@
 |---|---|---|---|
 | [~] | v1.0 feature list frozen in `Checklist.md` | B | decisions taken 2026-11-21; the ordered list is in `Routes-and-Flows.md` + this page |
 | [~] | v1.1 cut list written | B | recommended list in §11; owner to confirm |
-| [x] | Story scope decided: **intro film + four flavour lines**, no scene gates | O | `Intro-Sequence.md` |
+| [x] | Story scope decided: **opening scenes + four flavour lines**; intro film **skipped** for v1.0 | O | `Intro-Sequence.md` (deferred) |
 | [x] | Gold rule recorded: **permanent**, Training is the only gold sink | B | `Run-Loop.md` §3 correction, 2026-11-21 |
 | [~] | App name, company, bundle id, version final | O | title **Kingsguard: Tiny RPG**; company `sseengal`; bundle id `com.sseengal.idlerpg` (confirm before records); version `0.9.0` |
 | [x] | **Monetisation is required at v1.0** | O | decision 2026-11-21; minimal shop + IAP + ads are in scope, not optional |
@@ -89,7 +89,7 @@
 | [ ] | Ability tap + cooldown + Guard + camp choices | B | each does what its label says |
 | [ ] | TRAIN: 1,357 nodes scroll; affordable-only halo; purchase applies | B | first node and last unlock |
 | [ ] | PARTY roster reads correct stats; gear slots inert (bag parked) | B | stats match the fight |
-| [ ] | SHOP: ad boost, gem packs, no-ads, restore | B | missing today (defect R3) |
+| [~] | SHOP: No Ads, 30-gem pack, Starter (50 gems + 30-min boost), Golden Foundry | B | page built; mock purchase verified; real prices with the store SDK |
 | [ ] | No-Ads owner sees no ad buttons and no consent prompt | B | purchase no-ads, restart, confirm silence |
 | [ ] | Daily streak pays once per local day | B | change the device date, no double pay |
 | [ ] | Offline popup: shipped **or** removed, never hidden | B | no unreachable screen (defect R9) |
@@ -238,7 +238,7 @@ Full detail and evidence: `Routes-and-Flows.md` §8.
 |---|---|---|
 | R1 | ~~START resets the run to stage 1~~ **fixed** (lobby has no live run) | — |
 | R2 | ~~BATTLE tab does nothing~~ **fixed** (same path as START) | — |
-| R3 | SHOP tab is a dead end | §3 shop checks, §8 sandbox |
+| R3 | ~~SHOP tab is a dead end~~ **fixed**: lean shelf built | — |
 | R4 | No settings sheet (mute / Restore / privacy) | §3, §6, §8 |
 | R5 | No ads or billing SDK | §8, money path |
 | R6 | First-run hint says "Tap UPGRADE" (page removed) | §3 first run |

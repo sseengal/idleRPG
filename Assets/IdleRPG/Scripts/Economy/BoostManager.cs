@@ -68,13 +68,22 @@ namespace IdleRPG.Economy
         /// </summary>
         public bool Activate()
         {
-            if (balanceConfig == null)
+            return balanceConfig != null && ActivateForSeconds(balanceConfig.AdGoldBoostDurationSec);
+        }
+
+        /// <summary>
+        /// Starts or extends the boost by an explicit duration. Used by the Starter Pack (30 minutes) and any other
+        /// gift that is not an ad. Returns false only when the BalanceConfig is missing or the duration is zero.
+        /// </summary>
+        public bool ActivateForSeconds(double seconds)
+        {
+            if (balanceConfig == null || seconds <= 0d)
             {
                 return false;
             }
 
             double now = GameClock.NowBinary;
-            double durationTicks = balanceConfig.AdGoldBoostDurationSec * System.TimeSpan.TicksPerSecond;
+            double durationTicks = seconds * System.TimeSpan.TicksPerSecond;
 
             // Extend rather than overwrite so back-to-back boosts are never wasted.
             double baseTicks = isActive && expiresAtBinary > now ? expiresAtBinary : now;

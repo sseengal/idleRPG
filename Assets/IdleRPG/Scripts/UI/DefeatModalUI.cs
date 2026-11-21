@@ -99,6 +99,13 @@ namespace IdleRPG.UI
             {
                 ascendButton.gameObject.SetActive(true);
                 ascendButton.interactable = manager.CanRevive;
+
+                // No Ads owners never watch an ad; the revive is simply free for them.
+                TextMeshProUGUI reviveLabel = ascendButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (reviveLabel != null)
+                {
+                    reviveLabel.SetText(manager.AdsDisabledByNoAds ? "REVIVE" : "REVIVE (AD)");
+                }
             }
 
             if (countdownLabel != null)

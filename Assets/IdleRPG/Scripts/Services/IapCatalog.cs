@@ -24,9 +24,11 @@ namespace IdleRPG.Services
         public readonly double GemsGranted;
         public readonly double OfflineCapBonusMinutes;
         public readonly bool RemovesAds;
+        public readonly double GoldBoostMinutes;
 
         public IapProduct(string sku, string displayName, IapProductType productType,
-            double gemsGranted = 0d, double offlineCapBonusMinutes = 0d, bool removesAds = false)
+            double gemsGranted = 0d, double offlineCapBonusMinutes = 0d, bool removesAds = false,
+            double goldBoostMinutes = 0d)
         {
             Sku = sku;
             DisplayName = displayName;
@@ -34,6 +36,7 @@ namespace IdleRPG.Services
             GemsGranted = gemsGranted;
             OfflineCapBonusMinutes = offlineCapBonusMinutes;
             RemovesAds = removesAds;
+            GoldBoostMinutes = goldBoostMinutes;
         }
 
         public bool IsNoAds => RemovesAds;
@@ -48,19 +51,22 @@ namespace IdleRPG.Services
     /// </summary>
     public static class IapCatalog
     {
-        public const string SkuNoAds = "idlerpg.no_ads";
-        public const string SkuGemsSmall = "idlerpg.gems_small";
-        public const string SkuGemsMedium = "idlerpg.gems_medium";
-        public const string SkuGemsLarge = "idlerpg.gems_large";
-        public const string SkuStarterPack = "idlerpg.starter_pack";
+        public const string SkuNoAds = "kingsguard.no_ads";
+        public const string SkuGemsSmall = "kingsguard.gems_small";
+        public const string SkuGemsMedium = "kingsguard.gems_30";
+        public const string SkuGemsLarge = "kingsguard.gems_large";
+        public const string SkuStarterPack = "kingsguard.starter_pack";
 
+        // v1.0 sells only three products: No Ads, the 30-gem pack and the Starter Pack. The small/large packs stay
+        // in the catalog for the retired shop code and debug menus; they are NOT offered in the lobby shop.
         private static readonly IapProduct[] Products =
         {
             new IapProduct(SkuNoAds, "No Ads", IapProductType.NonConsumable, removesAds: true),
             new IapProduct(SkuGemsSmall, "5 Gems", IapProductType.Consumable, gemsGranted: 5d),
             new IapProduct(SkuGemsMedium, "30 Gems", IapProductType.Consumable, gemsGranted: 30d),
             new IapProduct(SkuGemsLarge, "110 Gems", IapProductType.Consumable, gemsGranted: 110d),
-            new IapProduct(SkuStarterPack, "Starter Pack", IapProductType.Consumable, gemsGranted: 50d, offlineCapBonusMinutes: 60d)
+            new IapProduct(SkuStarterPack, "Starter Pack", IapProductType.Consumable,
+                gemsGranted: 50d, goldBoostMinutes: 30d)
         };
 
         public static IReadOnlyList<IapProduct> All => Products;

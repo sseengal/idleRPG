@@ -97,10 +97,14 @@ gear opens a minimal pause with resume, sound and quit — it cannot shop, train
 - First open builds the whole tree. At `ba4a4cf` this is **one pass** and froze the Editor for ~1.25 s
   (`Training.md` §5b). The measured fix (4 ms per frame) was reverted today with the rest.
 
-### 4.4 SHOP — none
+### 4.4 SHOP — live (lean shelf)  ·  built 2026-11-21
 
-- No page and no handler. `ShopPanelUI` still compiles but is **not in the scene**.
-- This is why gems have **no sink** and IAP has **no surface**. It is the first money-path item of B10.
+- `StartScreenUI.Shop.cs` builds the page on first open.
+- Rows: **No Ads**, **30 Gems**, **Starter Pack** (50 gems + a 30-minute gold boost), **Golden Foundry**
+  (gem track: 25 gems per level, +5% gold, 10 levels).
+- Buttons say **BUY**; no invented prices. The real localized price comes from the store SDK (mock today).
+- The Golden Foundry is the gem sink. No Ads owners see **OWNED** and no ad buttons.
+- **Restore** lives in the gear SETTINGS sheet.
 
 ---
 
@@ -199,7 +203,7 @@ lost. The card says NEXT RUN banks them. Banking a pending wipe on boot is the f
 |---|---|---|---|---|
 | **Gold** | every kill, stage clear bonus | **TRAIN** hero columns (Attack / Armor / Max HP) | **Yes** (permanent) | TRAIN page |
 | **Perk Points** (tokens) | `EndRun`, scaled by depth | **ASCEND** tracks, TRAIN **party** column | **Yes** | ASCEND + TRAIN |
-| **Gems** | daily streak, first clear every 5th stage | **nothing** | **Yes** | none (dead) |
+| **Gems** | daily streak, first clear every 5th stage | **Golden Foundry** (+5% gold per level) | **Yes** | SHOP |
 | **Party XP** | kills | party levels → boon picks | **No** | XP bar |
 | **Camp tokens** | one per run | Long Rest, camp training | **No** | camp strip |
 | **Highest stage / lifetime totals** | play | — | **Yes** | header / debug |
@@ -209,13 +213,12 @@ lost. The card says NEXT RUN banks them. Banking a pending wipe on boot is the f
 ```
 rewarded ad (mock)  ->  REVIVE (defeat card)          live
                     ->  camp SHORT REST+              live
-                    ->  gold boost, double offline    dead: no page / unreachable popup
-IAP (mock)          ->  no-ads, gem packs, starter    dead: no shop page
-gems                ->  (no sink)                     dead
+IAP (mock)          ->  No Ads, 30 gems, Starter      live (SHOP page)
+gems                ->  Golden Foundry (+5% gold)     live (SHOP page)
 ```
 
 The reward maths still go through the ledger and `AdCapsService`, so a real SDK can be swapped in later
-without touching the game rules. The **surface** is what is missing.
+without touching the game rules. **The surface is live; only the real SDK is missing.**
 
 ---
 
@@ -225,7 +228,7 @@ without touching the game rules. The **surface** is what is missing.
 |---|---|---|---|---|
 | R1 | ~~P0~~ | ~~START resets the run~~ **FIXED 2026-11-21**: the lobby has no live run; START begins one | verified by code test | done |
 | R2 | ~~P0~~ | ~~BATTLE tab does nothing~~ **FIXED 2026-11-21**: same path as START | verified by code test | done |
-| R3 | P1 | SHOP tab has no page | `OnTab` has no `SHOP` case; `ShopPanelUI` not in scene | M (build the page) |
+| R3 | ~~P1~~ | ~~SHOP tab has no page~~ **FIXED 2026-11-21**: lean SHOP page (No Ads, 30 gems, Starter, Foundry) | `StartScreenUI.Shop.cs` | done |
 | R4 | P1 | No settings sheet: mute, Restore, privacy link | no settings UI; mute keys exist only in code | M |
 | R5 | P1 | No ads or billing package | `Packages/manifest.json` | L |
 | R6 | P1 | First-run hint says "Tap UPGRADE" | `FirstRunTips.cs:62`; no UPGRADES page | S |
@@ -267,7 +270,7 @@ The builder re-applies the tab icons, training icons, boons and prestige assets,
 
 1. Boot with no active run. The lobby shows; **no fight runs behind it**; time is not frozen.
 2. Tap **PARTY**, **ASCEND**, **TRAIN**. One page at a time; no page stacks; no console error.
-3. Tap **SHOP**. Today: nothing opens (defect R3). The tab must be removed or built.
+3. Tap **SHOP**. The lean shelf opens: No Ads, 30 Gems, Starter, Golden Foundry. Buy 30 gems with the mock.
 4. Tap **START**. A run begins at stage 1; the lobby closes.
 5. Tap the **gear once**. A pause menu opens: RESUME, SOUND, QUIT RUN. Time stops.
 6. Tap **QUIT RUN**. A second confirm shows the Perk Points you keep. Tap **KEEP FIGHTING** to return.

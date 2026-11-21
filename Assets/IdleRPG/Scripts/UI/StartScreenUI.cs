@@ -142,6 +142,8 @@ namespace IdleRPG.UI
 
         private void OnDestroy()
         {
+            DetachShopEvents();
+
             if (Instance == this)
             {
                 Instance = null;
@@ -202,6 +204,12 @@ namespace IdleRPG.UI
                 lobby.SetActive(true);
             }
 
+            // The lobby opens on its card, never on the page that was last open before a run. One page at a time.
+            HideTraining();
+            HideParty();
+            HidePerks();
+            HideShop();
+
             AttachSharedHeader();
             HighlightNav("BATTLE");
             RaiseNav();
@@ -244,9 +252,15 @@ namespace IdleRPG.UI
             HideTraining();
             HideParty();
             HidePerks();
+            HideShop();
 
             switch (tab)
             {
+                case "SHOP":
+                    ShowShop();
+                    RaiseNav();
+                    return;
+
                 case "BATTLE":
                     // The fight tab means "leave the lobby and play". Same path as START, so the page closes,
                     // the borrowed header goes home and the run resumes exactly where it was.

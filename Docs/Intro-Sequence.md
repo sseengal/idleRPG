@@ -2,8 +2,8 @@
 
 > Owns: the first-play intro that explains why the fight repeats, and the short lines that keep the loop in fiction.
 > Parents: `Story-Canon.md` (facts and rules), `Story-Scenes.md` (how a scene plays), `Run-Loop.md` (the loop).
-> Status: **plan, 2026-11-21.** Nothing built. The two opening scenes (`S01_Intro`, `S02_Rupture`) already play at
-> stage 1 wave 1; this page adds the **premise film** in front of them.
+> Status: **SKIPPED for v1.0 (owner decision 2026-11-21).** Kept as the storyboard for a later film. The two
+> opening scenes (`S01_Intro`, `S02_Rupture`) still play at stage 1 wave 1; this page's premise film is not built.
 >
 > **Word note:** in this page a "card" means a **full-screen slide** — one picture and one sentence. It is **not**
 > a boon card and not anything the player picks.
