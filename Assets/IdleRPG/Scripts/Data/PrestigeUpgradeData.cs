@@ -14,7 +14,10 @@ namespace IdleRPG.Data
         AutoEquipGear = 3,
 
         /// <summary>Utility unlock (level >= 1 = owned): overflowing gear becomes gold. No multiplier.</summary>
-        AutoSalvageGear = 4
+        AutoSalvageGear = 4,
+
+        /// <summary>Utility unlock (level >= 1 = owned): one free revive per run. No multiplier.</summary>
+        Revive = 5
     }
 
     public static class PrestigeEffectTypeExtensions
@@ -33,6 +36,8 @@ namespace IdleRPG.Data
                     return "Auto-Equip";
                 case PrestigeEffectType.AutoSalvageGear:
                     return "Auto-Salvage";
+                case PrestigeEffectType.Revive:
+                    return "Revive";
                 default:
                     return effectType.ToString();
             }

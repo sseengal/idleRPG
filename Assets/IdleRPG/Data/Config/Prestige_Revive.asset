@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fdc72964ecc1048f3bed6cb00e7852f4, type: 3}
-  m_Name: Track_GoldHoarder
+  m_Name: Prestige_Revive
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.PrestigeUpgradeData
-  upgradeID: Track_GoldHoarder
-  displayName: Gold Hoarder
-  description: +2% Gold per level.
-  effectType: 0
+  upgradeID: Prestige_Revive
+  displayName: Dawn Ward
+  description: One revive per run. Refills every new run.
+  effectType: 5
   costCurrency: 2
-  baseCostTokens: 2
-  costGrowth: 1.5
-  maxLevel: 20
-  effectPerLevel: 0.02
+  baseCostTokens: 20
+  costGrowth: 1
+  maxLevel: 1
+  effectPerLevel: 0

@@ -56,7 +56,7 @@ A run is measured in **stages reached**, not story nodes.
 |---|---|---|---|---|
 | **Run Gold** | every kill, this run | **TRAIN** permanent hero nodes | **Yes** — permanent since 2026-11-08 | `CurrencyType.Gold` |
 | **META (Shards)** | at run end, scaled by depth | **permanent upgrades** | **Yes** — always kept | `CurrencyType.PrestigeTokens` (keep the enum; display name "Shards") |
-| Gems | milestones, IAP, streak | shortcuts, cosmetics, revive-adjacent | Yes | `CurrencyType.Gems` |
+| Gems | milestones, IAP, streak | shortcuts, cosmetics | Yes | `CurrencyType.Gems` |
 
 > **Status correction, 2026-11-21 (code wins):** the built game keeps **gold across a run end**. The run reset wipes
 > hero stat levels, party XP, boons and camp tokens, but **not** gold. The only gold sink is the **TRAIN** page
@@ -79,10 +79,10 @@ through one path, `EndRun(reason)`.
 ```
 WIPE  (the run ends)
   1. combat stops
-  2. META = max(1, f(depth)) if >=1 stage cleared, else 0    (banked on NEXT RUN)
+  2. META = max(1, f(depth)) if >=1 stage cleared, else 0    (banked on END RUN)
   3. RUN OVER card (FREE, stays put - NO auto-resume):
         stage reached · gold earned · kills · Perk Points banked
-        [NEXT RUN] -> bank -> LOBBY (between runs)
+        [END RUN] -> bank -> LOBBY (between runs)
   4. [REVIVE] rewarded ad, ONCE per run -> resume the same stage
 
 QUIT RUN  (three bars, two taps)
@@ -98,17 +98,18 @@ Rules to lock:
 
 - **A live fight has no menu.** The lobby is the between-runs screen. It is never drawn over a running fight, so
   upgrades can never be bought mid-fight.
-- **Quitting ends the run.** No rejoin, no pause menu. Two taps, so a mis-tap cannot throw a run away.
+- **Quitting ends the run.** No rejoin. The gear opens a pause, and QUIT RUN asks a second confirm before it ends
+  the run.
 - **Closing the app does not end the run.** A live run reopens into the same fight, with no lobby and no upgrade
   window. Between runs, the app reopens into the lobby.
 - **Summary is always free.** It never costs anything to see the run.
-- **Revive is a rewarded ad, once per run.** Uses the existing ad stack: a new
-  `AdPlacementId.RunRevive` row in `BalanceConfig.adPlacements`, enforced by `AdCapsService` (per-day cap + min gap).
+- **Revive is the Dawn Ward perk, once per run.** Bought once in ASCEND for Perk Points (20, max 1). It is not an
+  ad, not an IAP, and it refills on every new run. The used flag is saved, so relaunching cannot grant a second one.
 - **Banking happens on death; there is no auto-resume.** The reward is granted when the run ends and the card then
-  WAITS for **NEXT RUN**. No countdown, no automatic restart (the old idle "never waits for input" rule is retired).
+  WAITS for **END RUN**. No countdown, no automatic restart.
 - **End early is allowed.** QUIT RUN banks the same way. It is the player's lever to stop at a good depth.
-- The revive is the only interrupt. It is aspirational (a second chance), not pity gold, so it fits `Monetisation.md`
-  (never sell raw power; limited; earnable-free elsewhere).
+- The revive is a second chance the player planned for, not pity gold. It never sells raw power; it buys one more
+  attempt at the same depth (`Monetisation.md`).
 
 What changes in code (Phase B): **`GameManager.OnPartyWiped`** rolls back one stage today and resumes — it must call
 `EndRun(RunOver)` instead. **`RequestAscension`**'s grant+reset body becomes the shared `EndRun`. **`DefeatModalUI`**
@@ -167,17 +168,18 @@ build step** (do not batch).
 After each stage clear, show 3 cards drawn from the run-buff pool; picking one applies it free for this run. Pool =
 Attack Speed, Lifesteal, Gold Find, +ATK %, +HP %, heal-now, and later ability tiers. One skip/reroll allowed.
 
-### 5.4 Revive-ad placement (`RunRevive`)
+### 5.4 Revive perk (`Dawn Ward`)
 
 | Field | v1 value |
 |---|---|
-| Placement id | `AdPlacementId.RunRevive` (new) |
-| Reward | resume the current run (heal party, same stage) |
-| Once per run | yes (a save flag) |
-| Per-day cap | 3 |
-| Min gap | 300 s |
+| Source | ASCEND row, `Prestige_Revive` |
+| Price | **20 Perk Points**, max level 1 (one purchase) |
+| Reward | resume the current run (full heal, same stage) |
+| Once per run | yes; the used flag is saved with the run |
+| Ads | none. No rewarded-ad revive exists. |
 
-Enforced by `AdCapsService`; served by `MockAdService` / `IAdService`. No new ad code.
+Utility unlock (`PrestigeEffectType.Revive`), not a multiplier. `GameManager.CanRevive` = owned **and** not used
+this run. Defeat card shows **REVIVE** only while `CanRevive`; otherwise it shows END RUN and a one-line reason.
 
 **Decision to make before coding C:** auto-buy. Because the game is "automated", decide whether leftover run gold
 auto-buys a policy the player sets, or the player always taps. Recommendation: manual by default, with an auto-buy
@@ -225,7 +227,7 @@ death is the shard pulling you home, and permanent upgrades are what the shard r
 | `GameManager.OnPartyWiped` | the modal, the wipe event | **rollback -> EndRun** |
 | `GameManager.RequestAscension` | grant + reset body | becomes shared `EndRun`; no manual min-stage gate |
 | `DefeatModalUI` | the card | becomes RUN OVER summary + REVIVE ad |
-| `BalanceConfig` | all knobs | add `runEndsOnDeath`, `RunRevive` ad placement; retune |
+| `BalanceConfig` | all knobs | add `runEndsOnDeath`; retune |
 | `StoryLayer` + story docs | the binder | campaign structure demoted |
 | Idle / offline / camp / ledger | the code works | **out of the core loop**; optional side, Phase F |
 | Gear / abilities / camp | work | **keep but not required** for the loop to be fun (off the critical path) |
@@ -252,7 +254,7 @@ game." The story already fits: the King sends only his Guard, and the Guard is w
 |---|---|
 | **Design** | Wins. The two upgrade catalogs and the death curve are the product. Define before code. |
 | **Balance** | Wins early. The whole game is tuned for bounce + idle and must be retuned on the run-end model. |
-| **Monetisation** | Bends. Revive-ad + meta sinks replace endless-idle sinks. Never sell raw power. |
+| **Monetisation** | Bends. Revive perk + meta sinks replace endless-idle sinks. Never sell raw power. |
 | **Compliance** | No change. Reward-ad consent + caps are already in the B10 plan. |
 | **QA** | Wins early. Dying, reviving, banking and reloading must be tested from a real save. |
 | **Pipeline (art)** | Bends. New upgrade icons, a rival face and the store rename are lead-time items — start by Phase C. |

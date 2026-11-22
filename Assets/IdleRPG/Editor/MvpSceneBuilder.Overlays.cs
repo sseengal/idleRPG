@@ -146,7 +146,7 @@ namespace IdleRPG.EditorTools
                 TextAlignmentOptions.Center, DimTextColor);
             UiFactory.Anchor(countdown.rectTransform, new Vector2(0.06f, 0.22f), new Vector2(0.94f, 0.38f));
 
-            Button ascendButton = UiFactory.Button("AscendButton", dialog.transform, "REVIVE (AD)", "ui_button_gold", UiType.Role.Section, TextColor, null);
+            Button ascendButton = UiFactory.Button("AscendButton", dialog.transform, "REVIVE", "ui_button_gold", UiType.Role.Section, TextColor, null);
             UiFactory.Anchor(ascendButton.GetComponent<RectTransform>(), new Vector2(0.06f, 0.05f), new Vector2(0.47f, 0.23f));
 
             Button continueButton = UiFactory.Button("ContinueButton", dialog.transform, "END RUN", "ui_button", UiType.Role.Section, TextColor, null);

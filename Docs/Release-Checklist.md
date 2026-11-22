@@ -80,9 +80,11 @@
 | [ ] | **Gear in a fight opens PAUSE**; resume restores time | B | time stops, resumes at the same wave |
 | [ ] | QUIT RUN asks a second confirm, then ends and banks | B | KEEP FIGHTING returns; END RUN opens the lobby |
 | [ ] | **BATTLE tab** begins the run from the lobby | B | same result as START |
-| [ ] | Party wipe → RUN OVER card → REVIVE once → same stage | B | mock ad, second wipe offers no revive |
-| [ ] | Party wipe → NEXT RUN banks Perk Points → stage 1 | B | token count grows by the preview value |
+| [ ] | Party wipe → RUN OVER card → REVIVE once (**Dawn Ward**) → same stage | B | no ad; second wipe hides the button |
+| [ ] | Dawn Ward bought in **ASCEND** (20 tokens, max 1) | B | fourth row; revive available next run |
+| [ ] | Party wipe → **END RUN** banks Perk Points → lobby | B | token count grows by the preview value |
 | [ ] | Run-over card reads **END RUN** and returns to the lobby | B | label matches what happens |
+| [ ] | Revive used, app killed mid-fight, reopen → revive still used | B | flag saved; no free second revive |
 | [ ] | Party wipe on the run-over card + app close boots to the lobby, not a free revive | B | `runActive` is cleared on the wipe |
 | [ ] | Perk Points, gold and training nodes persist; boons and camp reset | B | two runs in a row |
 | [ ] | Level-up card pauses the fight; a pick applies; reroll works | B | pick changes the numbers |

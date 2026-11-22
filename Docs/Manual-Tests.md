@@ -491,6 +491,21 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 
 ---
 
+## 2p. Dawn Ward revive — one per run (added 2026-11-22)
+
+Setup: ASCEND shows four rows: War Mastery, Gold Mastery, Vitality Mastery, **Dawn Ward**. Grant 20 tokens if needed.
+
+- [ ] Dawn Ward costs **20**, shows `0/1`, and becomes `MAX` after one purchase.
+- [ ] Start a run and die. The card shows **REVIVE** and "One revive left this run."; **END RUN** is always there.
+- [ ] Tap REVIVE. The party is healed and the **same stage** resumes.
+- [ ] Die again in the same run. The REVIVE button is **gone**; the card says "Revive used this run - END RUN to go again."
+- [ ] Revive, then stop/reopen the app mid-fight. The run resumes and REVIVE is still used (the flag is saved).
+- [ ] END RUN, then START a new run. REVIVE is available again.
+- [ ] With no Dawn Ward, the card shows no REVIVE button and the line "Revive is an ASCEND perk."
+- [ ] No ad appears anywhere in this flow. Buying No Ads changes nothing about the revive.
+
+---
+
 ## 3. B9' part 2 — phone checklist (needs the first real phone build)
 
 - [ ] **Portrait lock** — turn the phone while playing; game stays one way up; nothing clipped at the notch /

@@ -226,9 +226,8 @@ close is always top-left, primary button reachable one-handed (1080x1920 referen
 - Swing timing: the sim announces a swing and lands the damage `SwingDurationSec` later (0.35 s). The unit starts its
   **attack clip on the announcement** and runs in at the same time, so the strike frame lands on the hit instead of
   the hit starting the animation. The clip finishes during the pose, then the unit blinks home.
-- Defeat feedback: the party falls back one stage and resumes by itself after `defeatPauseSeconds`. A defeat card
-  shows the run so far with a countdown plus optional CONTINUE / ASCEND buttons (Run-Identity pass) - the run still
-  never waits for the player.
+- Defeat feedback: a party wipe **ends the run**. The run-over card shows the depth and the Perk Points, with
+  **REVIVE** only when Dawn Ward is owned and unused, and **END RUN** always. No countdown, no auto-resume, no ad.
 
 ## 4. Return hub & offline claim (B1)
 

@@ -55,6 +55,12 @@ namespace IdleRPG.UI
             if (ascendButton != null)
             {
                 ascendButton.onClick.AddListener(OnAscendClicked);
+
+                TextMeshProUGUI reviveLabel = ascendButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (reviveLabel != null)
+                {
+                    reviveLabel.SetText("REVIVE");
+                }
             }
         }
 
@@ -94,25 +100,22 @@ namespace IdleRPG.UI
                 ascendLabel.SetText(string.Format("+{0} Perk Points if you end the run now", NumberFormatter.Format(manager.RunEndPreviewTokens)));
             }
 
-            // Two choices: REVIVE (rewarded ad, once per run) or NEXT RUN (bank + restart). Neither auto-fires.
+            // Two choices: REVIVE (Dawn Ward perk, one per run) or END RUN. A revive button that cannot be used is
+            // hidden, not greyed - a dim button on a defeat card reads as a nag.
             if (ascendButton != null)
             {
-                ascendButton.gameObject.SetActive(true);
-                ascendButton.interactable = manager.CanRevive;
-
-                // No Ads owners never watch an ad; the revive is simply free for them.
-                TextMeshProUGUI reviveLabel = ascendButton.GetComponentInChildren<TextMeshProUGUI>();
-                if (reviveLabel != null)
-                {
-                    reviveLabel.SetText(manager.AdsDisabledByNoAds ? "REVIVE" : "REVIVE (AD)");
-                }
+                bool canRevive = manager.CanRevive;
+                ascendButton.gameObject.SetActive(canRevive);
+                ascendButton.interactable = canRevive;
             }
 
             if (countdownLabel != null)
             {
                 countdownLabel.SetText(manager.CanRevive
-                    ? "Watch an ad to revive this run once."
-                    : "Revive used this run - END RUN to go again.");
+                    ? "One revive left this run."
+                    : manager.HasRevivePerk
+                        ? "Revive used this run - END RUN to go again."
+                        : "Revive is an ASCEND perk.");
             }
 
             if (root != null)
@@ -144,7 +147,7 @@ namespace IdleRPG.UI
             EnsureManager();
             if (manager != null)
             {
-                manager.WatchAdForRunRevive();
+                manager.ReviveFromDefeat();
             }
         }
 

@@ -100,15 +100,15 @@
       "costCurrency": "tokens"
     },
     {
-      "id": "Track_GoldHoarder",
-      "asset": "Track_GoldHoarder",
-      "effectType": "goldpercent",
-      "displayName": "Gold Hoarder",
-      "description": "+2% Gold per level.",
-      "baseCostTokens": 2.0,
-      "costGrowth": 1.5,
-      "effectPerLevel": 0.019999999552965164,
-      "maxLevel": 20,
+      "id": "Prestige_Revive",
+      "asset": "Prestige_Revive",
+      "effectType": "revive",
+      "displayName": "Dawn Ward",
+      "description": "One revive per run. Refills every new run.",
+      "baseCostTokens": 20.0,
+      "costGrowth": 1.0,
+      "effectPerLevel": 0.0,
+      "maxLevel": 1,
       "costCurrency": "tokens"
     },
     {

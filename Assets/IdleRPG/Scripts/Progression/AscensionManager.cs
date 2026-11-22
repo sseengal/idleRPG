@@ -71,6 +71,10 @@ namespace IdleRPG.Progression
         /// <summary>The ASCEND page's rows: token-priced upgrades only (B7 S4 - gems tracks list in the shop).</summary>
         public IReadOnlyList<PrestigeUpgradeData> TokenUpgrades => tokenUpgrades;
 
+        /// <summary>True when Dawn Ward (one revive per run) is owned. A utility unlock, not a multiplier.</summary>
+        public bool HasPermanentRevive =>
+            resolver != null && resolver.GetUtilityLevel(PrestigeEffectType.Revive) >= 1;
+
         /// <summary>
         /// Grants tokens and resets hero levels (gold is PERMANENT now). Returns false when the
         /// player has not reached the minimum stage. Gems and prestige levels always persist.

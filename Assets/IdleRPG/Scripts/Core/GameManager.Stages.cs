@@ -96,8 +96,11 @@ namespace IdleRPG.Core
             return true;
         }
 
-        /// <summary>True while this run still has its one rewarded-ad revive available.</summary>
-        public bool CanRevive => !reviveUsedThisRun;
+        /// <summary>True when the Dawn Ward perk (one revive per run) is owned.</summary>
+        public bool HasRevivePerk => Ascension != null && Ascension.HasPermanentRevive;
+
+        /// <summary>True while Dawn Ward is owned and this run has not used its one revive.</summary>
+        public bool CanRevive => !reviveUsedThisRun && HasRevivePerk;
 
         private bool reviveUsedThisRun;
 
@@ -169,24 +172,39 @@ namespace IdleRPG.Core
             SetState(State, GameState.Defeat);
             RaiseStageChanged();
 
-            // Do NOT bank yet: the card offers REVIVE (ad) or NEXT RUN (which banks + restarts). Banking only when
-            // the run truly ends keeps the revive from ever double-paying.
+            // Do NOT bank yet: the card offers REVIVE (Dawn Ward perk) or END RUN (which banks + returns to the
+            // lobby). Banking only when the run truly ends keeps the revive from ever double-paying.
             GameEvents.RaiseDefeatShown(CurrentStage, CurrentStage);
-            LogFlow($"RUN OVER on stage {CurrentStage} (REVIVE or NEXT RUN).");
+            LogFlow($"RUN OVER on stage {CurrentStage} (REVIVE or END RUN).");
         }
 
-        /// <summary>NEXT RUN on the run-over card: bank the reward, then start a fresh run from stage 1.</summary>
+        /// <summary>END RUN on the run-over card: bank the reward, then return to the lobby.</summary>
         public void ConfirmEndRun()
         {
             EndRun();
         }
 
-        /// <summary>Run-over card REVIVE (rewarded ad): resume the SAME stage and mark the revive used for this run.</summary>
+        /// <summary>Run-over card REVIVE: Dawn Ward only. Resumes the SAME stage and spends this run's revive.</summary>
+        public bool ReviveFromDefeat()
+        {
+            if (!CanRevive)
+            {
+                GameEvents.RaiseToast(HasRevivePerk
+                    ? "You already revived this run."
+                    : "Revive is an ASCEND perk.");
+                return false;
+            }
+
+            ReviveRun();
+            return true;
+        }
+
+        /// <summary>Resume the same stage and mark the revive used for this run.</summary>
         private void ReviveRun()
         {
             reviveUsedThisRun = true;
             StartRun(CurrentStage);
-            LogFlow($"REVIVED on stage {CurrentStage} (ad).");
+            LogFlow($"REVIVED on stage {CurrentStage} (Dawn Ward).");
         }
 
         /// <summary>

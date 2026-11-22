@@ -58,12 +58,14 @@ existing `IIapService` / `IAdService` / `AdCapsService` seams, so real SDKs swap
 | IAP | **30-gem pack** (one bundle only) | mock + shop UI | ship |
 | IAP | Starter Pack (**50 gems + a 30-minute gold boost**) | mock + shop UI | ship (offline bonus retuned out) |
 | Gem sink | **Golden Foundry** (+5% gold per level, cap +50%) | live in SHOP (`Track_GemGold`) | ship |
-| Ad | **Revive** (defeat card, once per run, 3/day) | live with mock | ship with a real seller |
-| Ad | **Camp SHORT REST+** | live with mock | ship with a real seller |
-| Ad | **Gold boost** x2 for 30 min | code exists; **not sold in v1.0** | cut (revive + camp cover ads) |
+| Ad | **Camp SHORT REST+** (20% heal) | live with mock; free for No Ads owners | ship with a real seller |
+| Ad | **Gold boost** x2 for 30 min | code exists; **not sold in v1.0** | cut (camp covers ads) |
 | Ad | Double offline | code exists; popup unreachable | **cut** with the offline UI |
 | Gem income | Daily streak + first clear of every 5th stage | live | keep |
 | Gem sinks | Offline cap +1h, Fast-Forward (+1h income) | code exists in the dead shop | **cut** (idle-era, out of the loop) |
+
+**Revive is not monetised.** The one revive per run is **Dawn Ward**, an ASCEND perk bought with 20 Perk Points
+(max 1). There is no rewarded-ad revive, no revive IAP, and No Ads does not affect it.
 
 ### Rules that do not bend
 

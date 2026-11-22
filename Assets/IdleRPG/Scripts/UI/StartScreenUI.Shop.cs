@@ -71,7 +71,7 @@ namespace IdleRPG.UI
             shopGemsLabel = Text(shopPanel.transform, "Gems", new Vector2(0.04f, 0.80f), new Vector2(0.96f, 0.87f),
                 "GEMS 0", UiType.Role.Sentence, UiTheme.TextMuted);
 
-            BuildShopCard("NO ADS", "Remove every ad. Revive and camp rest stay free.", "1-TIME",
+            BuildShopCard("NO ADS", "Remove every ad. Camp rest stays free.", "1-TIME",
                 IapCatalog.SkuNoAds, 0.60f, 0.76f);
 
             BuildShopCard("30 GEMS", "Adds 30 gems to the purse.", "+30",

@@ -85,8 +85,7 @@ namespace IdleRPG.Data
         [SerializeField] private List<AdPlacementDef> adPlacements = new List<AdPlacementDef>
         {
             new AdPlacementDef(AdPlacementId.GoldBoost, 5, 300f),
-            new AdPlacementDef(AdPlacementId.DoubleOffline, 3, 30f),
-            new AdPlacementDef(AdPlacementId.RunRevive, 3, 300f)
+            new AdPlacementDef(AdPlacementId.DoubleOffline, 3, 30f)
         };
 
         [Tooltip("Delay between clearing a wave and spawning the next, in seconds.")]

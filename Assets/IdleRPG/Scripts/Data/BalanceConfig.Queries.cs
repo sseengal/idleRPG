@@ -53,11 +53,6 @@ namespace IdleRPG.Data
                 }
             }
 
-            if (placementId == AdPlacementId.RunRevive)
-            {
-                return new AdPlacementDef(AdPlacementId.RunRevive, 3, 300f);
-            }
-
             return placementId == AdPlacementId.GoldBoost
                 ? new AdPlacementDef(AdPlacementId.GoldBoost, 5, 300f)
                 : new AdPlacementDef(AdPlacementId.DoubleOffline, 3, 30f);

@@ -147,6 +147,8 @@ namespace IdleRPG.EditorTools.Content
                 case "health":
                 case "healthpercent":
                     return PrestigeEffectType.HealthPercent;
+                case "revive":
+                    return PrestigeEffectType.Revive;
                 default:
                     return PrestigeEffectType.GoldPercent;
             }

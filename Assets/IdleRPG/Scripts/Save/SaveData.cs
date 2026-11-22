@@ -59,6 +59,12 @@ namespace IdleRPG.Save
         /// </summary>
         public bool runActive;
 
+        /// <summary>
+        /// True when this run's one Dawn Ward revive has been used (additive; older saves read false). Persisted so
+        /// closing the app after a revive cannot restore a second free revive.
+        /// </summary>
+        public bool runReviveUsed;
+
         // --- Party XP and boon picks (run-scoped, additive in schema v12). ---
         //     An older file has no values here, so it simply reads level 1 with an empty bar, which is exactly the
         //     state of a fresh run. Nothing to migrate.

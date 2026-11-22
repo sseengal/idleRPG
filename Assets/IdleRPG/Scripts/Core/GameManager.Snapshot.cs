@@ -91,6 +91,7 @@ namespace IdleRPG.Core
                 RunKills = RunKills,
                 RunStagesCleared = RunStagesCleared,
                 RunActive = RunIsActive,
+                ReviveUsed = reviveUsedThisRun,
                 RunStartBinary = runStartBinary,
                 TotalKills = TotalKills,
                 TotalGoldEarned = TotalGoldEarned,
@@ -115,6 +116,7 @@ namespace IdleRPG.Core
             RunKills = run.RunKills;
             RunStagesCleared = run.RunStagesCleared;
             RunIsActive = run.RunActive;
+            reviveUsedThisRun = run.ReviveUsed;
             runStartBinary = run.RunStartBinary;
             TotalKills = run.TotalKills;
             TotalGoldEarned = run.TotalGoldEarned;

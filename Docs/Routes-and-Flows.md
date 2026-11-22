@@ -9,7 +9,7 @@
 ## 1. The game in one line
 
 Boot → lobby (paused) → START → automatic battle → camp / level-up card when they fire → party wipe →
-RUN OVER card → NEXT RUN banks Perk Points → stage 1. Gold and Training upgrades never reset.
+RUN OVER card → END RUN banks Perk Points → lobby. Gold and Training upgrades never reset.
 
 The player never steers the fight. The player chooses **what to buy** (Training, perks) and **when to stop**
 (a wipe or, later, END RUN).
@@ -83,7 +83,8 @@ gear opens a minimal pause with resume, sound and quit — it cannot shop, train
 ### 4.2 ASCEND — the PERKS page — `StartScreenUI.Pages.cs`
 
 - One row per token track from `AscensionManager.TokenUpgrades`.
-- Live tracks: **Damage**, **Gold**, **Health** (`Data/Config/Prestige_*.asset`). One level per tap.
+- **Live tracks:** **War Mastery** (+20% damage/level), **Gold Mastery** (+20% gold/level), **Vitality Mastery**
+  (+20% HP/level), and **Dawn Ward** (one revive per run; 20 tokens, max 1). One level per tap.
 - Header reads `PERK POINTS <n>`.
 - Button states: `Buy <cost>`, `MAX`, or disabled with `Need <cost> tokens - you have <n>`.
 - There is **no** END RUN button here (the old `AscensionPanelUI` is retired and not in the scene).
@@ -143,7 +144,7 @@ gear opens a minimal pause with resume, sound and quit — it cannot shop, train
 | Overlay | Opens on | Choices |
 |---|---|---|
 | `BoonCardUI` | `PartyLevelGained` with picks owed | pick 1 of 3, reroll |
-| `DefeatModalUI` | `GameEvents.DefeatShown` | **REVIVE** (rewarded ad, once per run) or **END RUN** (bank + lobby) |
+| `DefeatModalUI` | `GameEvents.DefeatShown` | **REVIVE** (Dawn Ward perk, once per run) or **END RUN** (bank + lobby) |
 | `GearMenuUI` (pause) | header gear during a fight | **RESUME**, **SOUND: ON/OFF**, **QUIT RUN** → second confirm (**END RUN** / **KEEP FIGHTING**) |
 | `OfflineRewardsPopup` | `GameEvents.OfflineRewardsReady` | **unreachable today**: only the debug key / editor menu calls `EvaluateOffline` (defect R9) |
 | `ToastUI` | most events | one line, no input |
@@ -163,8 +164,8 @@ gear opens a minimal pause with resume, sound and quit — it cannot shop, train
 | Combat | boss wave starts | `OnWaveStarted` | Boss | state reflects the boss |
 | Boss | boss cleared | stage advance | Combat | next stage |
 | Combat/Boss | party wipe | `OnPartyWiped` → `EndRunOnWipe` | Defeat | run stops; card shows; `runActive = false` |
-| Defeat | REVIVE | `WatchAdForRunRevive` | Combat | same stage; `runActive = true` |
-| Defeat | NEXT RUN | `ConfirmEndRun` → `EndRun` | **Lobby** | bank tokens, reset run |
+| Defeat | REVIVE | `ReviveFromDefeat` (Dawn Ward) | Combat | same stage; `runActive = true`; revive flag saved |
+| Defeat | END RUN | `ConfirmEndRun` → `EndRun` | **Lobby** | bank tokens, reset run |
 | Combat/Boss | header gear → **PAUSE** → QUIT RUN → confirm | `GearMenuUI` → `EndRun` | **Lobby** | banks, resets, no rejoin |
 | any | F1 debug | `EndRun` | Lobby | same as QUIT RUN |
 | any | F8 | full reset | Boot | save, backups and prefs wiped |
@@ -185,7 +186,7 @@ gear opens a minimal pause with resume, sound and quit — it cannot shop, train
 | Perk Points, perk levels | Boons taken this run |
 | Gems, daily streak day | Camp tokens and camp checkpoint |
 | Highest stage, lifetime totals | Hero stat levels bought with gold |
-| Ability assignments | Revive-used flag |
+| Ability assignments | Revive-used flag (saved with the run) |
 | Save schema **v12** (`runActive` is additive) | — |
 
 **The exit today:** the three-bar button is QUIT RUN (two taps), and it ends the run. There is no "rejoin the
@@ -193,7 +194,7 @@ same fight" path. Closing the app on a live run resumes the fight; closing it on
 lobby (the wipe already cleared `runActive`).
 
 **Known edge (not fixed yet):** force-quitting on the RUN OVER card skips the bank, so that run's Perk Points are
-lost. The card says NEXT RUN banks them. Banking a pending wipe on boot is the follow-up if we want to protect it.
+lost. The card says END RUN banks them. Banking a pending wipe on boot is the follow-up if we want to protect it.
 
 ---
 

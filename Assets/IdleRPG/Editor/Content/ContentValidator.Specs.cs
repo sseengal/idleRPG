@@ -299,7 +299,21 @@ namespace IdleRPG.EditorTools.Content
                     Add(Severity.Error, "upgrades", $"{upgrade.id}: baseCostTokens must be > 0.");
                 }
 
-                if (upgrade.effectPerLevel <= 0f)
+                // A utility unlock is a one-time purchase with no per-level gain (Dawn Ward). Everything else is a
+                // multiplier and must actually multiply.
+                if (IsUtilityEffect(upgrade.effectType))
+                {
+                    if (upgrade.maxLevel != 1)
+                    {
+                        Add(Severity.Error, "upgrades", $"{upgrade.id}: a utility unlock must have maxLevel 1.");
+                    }
+
+                    if (System.Math.Abs(upgrade.effectPerLevel) > 0.0001f)
+                    {
+                        Add(Severity.Error, "upgrades", $"{upgrade.id}: a utility unlock must have effectPerLevel 0.");
+                    }
+                }
+                else if (upgrade.effectPerLevel <= 0f)
                 {
                     Add(Severity.Error, "upgrades", $"{upgrade.id}: effectPerLevel must be > 0.");
                 }
@@ -323,6 +337,22 @@ namespace IdleRPG.EditorTools.Content
             Add(Severity.Info, "upgrades",
                 $"{file.statUpgrades.Count} stat + {file.prestigeUpgrades.Count} prestige tracks checked " +
                 $"({compoundingTracks} compounding).");
+        }
+
+        /// <summary>Effects that unlock a capability once (maxLevel 1, no per-level gain).</summary>
+        private static bool IsUtilityEffect(string value)
+        {
+            switch ((value ?? string.Empty).Trim().ToLowerInvariant())
+            {
+                case "revive":
+                case "autoequip":
+                case "autoequipgear":
+                case "autosalvage":
+                case "autosalvagegear":
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }
