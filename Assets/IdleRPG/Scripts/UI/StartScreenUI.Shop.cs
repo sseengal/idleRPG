@@ -126,7 +126,7 @@ namespace IdleRPG.UI
 
             UiPlateButton buy = UiPlateButton.Create(card.transform, "Buy",
                 new Vector2(0.79f, 0.16f), new Vector2(0.97f, 0.84f),
-                "BUY", UiType.Role.Section, UiTheme.Orange, UiTheme.Orange, onClick);
+                "BUY", UiType.Role.Section, UiTheme.Orange, UiTheme.Orange, onClick, ButtonFace.Primary);
 
             shopCards.Add(new ShopCard
             {

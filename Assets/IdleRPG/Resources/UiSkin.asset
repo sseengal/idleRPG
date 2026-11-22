@@ -14,6 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.UI.UiSkin
   panelSprite: {fileID: 21300000, guid: 9b21d483ff4704037b8fcd64eddb31e2, type: 3}
   buttonSprite: {fileID: 21300000, guid: 9b21d483ff4704037b8fcd64eddb31e2, type: 3}
+  primaryButtonSprite: {fileID: 21300000, guid: 09edb7b5d091a41f4a4dfea44f461753, type: 3}
+  dangerButtonSprite: {fileID: 21300000, guid: a338b3ce9f8eb4615b9dcbaa3466d002, type: 3}
+  neutralButtonSprite: {fileID: 21300000, guid: e1623fac113cf4bcbb02c4d32516491b, type: 3}
+  sheetSprite: {fileID: 21300000, guid: 12fb6d836c3054ea69731fa207d70fed, type: 3}
+  sheetBorderScale: 0.14285715
+  bannerSprite: {fileID: 21300000, guid: a30e8246a4d0d49868e808bbfede21e1, type: 3}
+  bannerScale: 7
+  bannerInk: {r: 0.9254902, g: 0.9411765, b: 0.972549, a: 1}
+  buttonBorderScale: 0.14285715
+  primaryButtonInk: {r: 0.22745098, g: 0.14117648, b: 0.0627451, a: 1}
+  dangerButtonInk: {r: 0.9254902, g: 0.9411765, b: 0.972549, a: 1}
+  neutralButtonInk: {r: 0.9254902, g: 0.9411765, b: 0.972549, a: 1}
   scrim: {r: 0, g: 0, b: 0, a: 0.65}
   card: {r: 0.1, g: 0.12, b: 0.18, a: 0.98}
   title: {r: 0.94, g: 0.96, b: 1, a: 1}

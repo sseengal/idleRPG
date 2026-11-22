@@ -3,6 +3,19 @@ using UnityEngine;
 
 namespace IdleRPG.UI
 {
+    /// <summary>What an action button means. The skin owns the art and the ink for each one.</summary>
+    public enum ButtonFace
+    {
+        /// <summary>The old tintable plate. Used where the skin has no art (fallback, lab screens).</summary>
+        Plate,
+        /// <summary>Gold bar: the main action on a screen (START, REVIVE).</summary>
+        Primary,
+        /// <summary>Red bar: an action that costs something or ends something (QUIT RUN, END RUN).</summary>
+        Danger,
+        /// <summary>Slate bar: a secondary action (CANCEL, CLOSE, SOUND).</summary>
+        Neutral
+    }
+
     /// <summary>
     /// The look of every shared card, in one asset: the 9-slice faces from the pixel kit and the colours. Nothing
     /// else may hard-code a card's sprite or colour - swapping the UI art is meant to be THIS file.
@@ -31,6 +44,42 @@ namespace IdleRPG.UI
 
         [Tooltip("Button face. Leave empty to reuse the panel face.")]
         public Sprite buttonSprite;
+
+        [Header("Action buttons (89x19 bar art, 1/3/1/1 border)")]
+        [Tooltip("Gold. The main action on a screen: START, REVIVE.")]
+        public Sprite primaryButtonSprite;
+
+        [Tooltip("Red. An action that costs or ends something: QUIT RUN, END RUN.")]
+        public Sprite dangerButtonSprite;
+
+        [Tooltip("Slate. A secondary action: CANCEL, CLOSE, SOUND.")]
+        public Sprite neutralButtonSprite;
+
+        [Header("Panels (75x75 frame, 5/5/5/5 border, baked colour)")]
+        [Tooltip("The sheet/modal face: settings, pause. Drawn white-tinted because the art carries its own colour.")]
+        public Sprite sheetSprite;
+
+        [Tooltip("Image.pixelsPerUnitMultiplier DIVIDES the border. 1/7 shows the 5 px rim as 35 units.")]
+        public float sheetBorderScale = 1f / 7f;
+
+        [Header("Banner (95x23 ribbon, 8/0/8/0 border, baked colour)")]
+        [Tooltip("The ribbon that sits across a sheet's top edge. Drawn white-tinted at bannerScale.")]
+        public Sprite bannerSprite;
+
+        [Tooltip("Screen units per art pixel. Sets the ribbon height AND the slice scale (border = 1/bannerScale).")]
+        public float bannerScale = 7f;
+
+        [Tooltip("Ribbon text ink. White reads on the red face.")]
+        public Color bannerInk = new Color32(236, 240, 248, 255);
+
+        [Tooltip("Image.pixelsPerUnitMultiplier DIVIDES the slice border, so 1/7 shows a 1 px art line as 7 units.")]
+        public float buttonBorderScale = 1f / 7f;
+
+        [Header("Action button ink")]
+        public Color primaryButtonInk = new Color32(58, 36, 16, 255);
+        public Color dangerButtonInk = new Color32(236, 240, 248, 255);
+        public Color neutralButtonInk = new Color32(236, 240, 248, 255);
+
 
         [Header("Colours")]
         public Color scrim = UiTheme.ScrimSoft;
@@ -78,6 +127,36 @@ namespace IdleRPG.UI
         public Sprite ResolveButtonSprite()
         {
             return buttonSprite != null ? buttonSprite : panelSprite;
+        }
+
+        /// <summary>
+        /// The art and ink for one action face. False when the skin has no sprite for it, so the caller can fall
+        /// back to the tintable plate instead of drawing nothing.
+        /// </summary>
+        public bool TryResolveButtonFace(ButtonFace face, out Sprite sprite, out Color ink)
+        {
+            sprite = null;
+            ink = Color.white;
+
+            switch (face)
+            {
+                case ButtonFace.Primary:
+                    sprite = primaryButtonSprite;
+                    ink = primaryButtonInk;
+                    break;
+                case ButtonFace.Danger:
+                    sprite = dangerButtonSprite;
+                    ink = dangerButtonInk;
+                    break;
+                case ButtonFace.Neutral:
+                    sprite = neutralButtonSprite;
+                    ink = neutralButtonInk;
+                    break;
+                default:
+                    return false;
+            }
+
+            return sprite != null;
         }
     }
 }

@@ -1,11 +1,12 @@
 # Idle RPG
 
-A **2D mobile RPG** with a JRPG shape: a short story campaign, automatic one-at-a-time combat, a
-three-hero party, abilities, gear and permanent upgrades. Idle earnings stay in the code but are out of
-the core loop.
+A **2D mobile auto-battler** with a JRPG shape: short runs, a three-hero party, automatic one-at-a-time
+combat, and story locations on top. Die, bank Perk Points, come back stronger. Idle earnings stay in the
+code but are out of the core loop.
 
-Target: **Unity 6000.6.0f1**, URP 2D, portrait, iOS + Android. Story canon: `Docs/Story-Canon.md`;
-chapter 1 story: `Docs/Story-Greenwake.md`.
+Target: **Unity 6000.6.0f1**, URP 2D, portrait, Android first then iOS. Product definition:
+`Docs/Game-Design-Document.md`; story canon: `Docs/Story-Canon.md`; location 1 story:
+`Docs/Story-Greenwake.md`.
 
 ---
 
@@ -201,8 +202,9 @@ debug menus, the console log and the Unity MCP bridge. A manual pass takes ~5 mi
 
 | File | Covers |
 |---|---|
+| `Docs/Game-Design-Document.md` | **TOP PAGE**: what the game is, v1.0 scope, money, done gates, decision log |
 | `Docs/README.md` | index: where to look, standing rules, folder layout |
-| `Docs/Game-Vision.md` | **CANON**: story-led campaign, automatic combat, the core loop |
+| `Docs/Game-Vision.md` | **CANON (record)**: story-led campaign shape; product scope now in the GDD |
 | `Docs/Story-Canon.md` | **CANON**: the Second Dawn, cast, Greenwake, video vs in-game split |
 | `Docs/Story-Greenwake.md` | **CANON**: chapter 1 story: living bloom, Slime King, cost, ending |
 | `Docs/Story-Nodes.md` | node scripts: beats, words, text budget |

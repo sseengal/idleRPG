@@ -20,11 +20,23 @@ namespace IdleRPG.UI
         /// <summary>TODO: owner supplies the hosted privacy-policy URL. Empty shows a status line, never a dead tap.</summary>
         private const string PrivacyUrl = "";
 
+        /// <summary>
+        /// Owner nudge on top of the measured drop. The drop itself comes from the font's cap line, so it stays
+        /// correct when the font or its size changes. This 2.5 is the measured remainder: with the computed drop
+        /// the capitals landed 2.5 px above the red band's centre (1080x1920 capture, 2026-11-22).
+        /// </summary>
+        private const float BannerTextNudge = 2.5f;
+
+        /// <summary>Drop shadow for the sheet's buttons: a close, stronger step and a faint lower one.</summary>
+        private const float ButtonShadowNear = -5f;
+        private const float ButtonShadowFar = -12f;
+
         private GameManager manager;
         private GameObject canvasRoot;
         private GameObject normalGroup;
         private GameObject confirmGroup;
         private TextMeshProUGUI title;
+        private TextMeshProUGUI bannerLabel;
         private TextMeshProUGUI status;
         private TextMeshProUGUI soundLabel;
         private TextMeshProUGUI confirmBody;
@@ -76,7 +88,6 @@ namespace IdleRPG.UI
             canvasRoot.SetActive(true);
 
             bool lobby = manager.State == GameState.Lobby;
-            title.SetText(lobby ? "SETTINGS" : "PAUSED");
             normalGroup.SetActive(true);
             confirmGroup.SetActive(false);
 
@@ -86,10 +97,13 @@ namespace IdleRPG.UI
             privacyButton.gameObject.SetActive(lobby);
             closeButton.gameObject.SetActive(lobby);
 
+            LayoutButtons(lobby);
+            SetHeading(lobby ? "SETTINGS" : "GAME PAUSED");
+
             UpdateSoundLabel();
-            SetStatus(lobby
-                ? "v" + Application.version
-                : "The fight is paused.");
+
+            // No body line in a run: the ribbon says it. The lobby keeps its version, and both keep feedback.
+            SetStatus(lobby ? "v" + Application.version : string.Empty);
 
             if (!lobby && !pausedByMenu)
             {
@@ -130,44 +144,158 @@ namespace IdleRPG.UI
             UiRuntime.Anchor(scrim.rectTransform, Vector2.zero, Vector2.one);
 
             Image panel = UiRuntime.Plate(canvasRoot.transform, "Panel",
-                new Vector2(0.08f, 0.14f), new Vector2(0.92f, 0.86f), UiTheme.SheetFace, raycast: true);
+                new Vector2(0.10f, 0.20f), new Vector2(0.90f, 0.80f), UiTheme.SheetFace, raycast: true);
+
+            // The sheet art carries its own colour, so it is drawn white (no tint) at its own border scale.
+            UiSkin skin = UiSkin.Current;
+            if (skin.sheetSprite != null)
+            {
+                panel.sprite = skin.sheetSprite;
+                panel.type = Image.Type.Sliced;
+                panel.color = Color.white;
+                panel.pixelsPerUnitMultiplier = skin.sheetBorderScale;
+            }
+
+            BuildBanner(panel.transform, skin);
 
             normalGroup = new GameObject("Normal", typeof(RectTransform));
             normalGroup.transform.SetParent(panel.transform, false);
             UiRuntime.Anchor((RectTransform)normalGroup.transform, Vector2.zero, Vector2.one);
 
+            // Fallback only: when the skin has a ribbon, the ribbon carries the heading instead of this label.
             title = UiRuntime.CreateText(normalGroup.transform, "Title", "SETTINGS", UiType.Role.Title,
                 TextAlignmentOptions.Center, UiTheme.Text);
-            UiRuntime.Anchor(title.rectTransform, new Vector2(0.05f, 0.86f), new Vector2(0.95f, 0.96f));
+            UiRuntime.Anchor(title.rectTransform, new Vector2(0.05f, 0.80f), new Vector2(0.95f, 0.90f));
+            title.gameObject.SetActive(bannerLabel == null);
 
             status = UiRuntime.CreateText(normalGroup.transform, "Status", string.Empty, UiType.Role.Sentence,
                 TextAlignmentOptions.Center, UiTheme.TextMuted);
-            UiRuntime.Anchor(status.rectTransform, new Vector2(0.06f, 0.77f), new Vector2(0.94f, 0.85f));
+            UiRuntime.Anchor(status.rectTransform, new Vector2(0.06f, 0.02f), new Vector2(0.94f, 0.08f));
+            status.gameObject.SetActive(false);
 
             BuildButtons();
             BuildConfirm(panel.transform);
             canvasRoot.SetActive(false);
         }
 
+        /// <summary>
+        /// The ribbon across the panel's top edge: half above the edge, half on it, drawn after the panel so it
+        /// covers the rim. Its height comes from the art (23 px x bannerScale), so the slice never stretches.
+        /// </summary>
+        private void BuildBanner(Transform panel, UiSkin skin)
+        {
+            if (skin.bannerSprite == null)
+            {
+                return;
+            }
+
+            GameObject node = new GameObject("Banner", typeof(RectTransform), typeof(Image));
+            node.transform.SetParent(panel, false);
+
+            RectTransform rect = (RectTransform)node.transform;
+            rect.anchorMin = new Vector2(0.125f, 1f);
+            rect.anchorMax = new Vector2(0.875f, 1f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = new Vector2(0f, skin.bannerSprite.rect.height * skin.bannerScale);
+            rect.anchoredPosition = Vector2.zero;
+
+            Image image = node.GetComponent<Image>();
+            image.sprite = skin.bannerSprite;
+            image.type = Image.Type.Sliced;
+            image.color = Color.white;
+            image.pixelsPerUnitMultiplier = 1f / Mathf.Max(0.0001f, skin.bannerScale);
+            image.raycastTarget = false;
+
+            // Two offset copies fake a soft falloff: a close, stronger step and a lower, faint one. One hard
+            // copy read as a second ribbon, not a shadow.
+            Shadow near = node.AddComponent<Shadow>();
+            near.effectColor = new Color(0f, 0f, 0f, 0.45f);
+            near.effectDistance = new Vector2(0f, -10f);
+            near.useGraphicAlpha = true;
+
+            Shadow far = node.AddComponent<Shadow>();
+            far.effectColor = new Color(0f, 0f, 0f, 0.22f);
+            far.effectDistance = new Vector2(0f, -24f);
+            far.useGraphicAlpha = true;
+
+            bannerLabel = UiRuntime.CreateText(node.transform, "Label", "GAME PAUSED", UiType.Role.Section,
+                TextAlignmentOptions.Center, skin.bannerInk);
+            UiRuntime.Anchor(bannerLabel.rectTransform, new Vector2(0f, 0.30f), new Vector2(1f, 0.96f));
+
+            // The label box now covers the ribbon's RED FACE (art rows 1-16 of 23), not the whole sprite, so its
+            // centre matches the band. TMP centres the full line box (ascender to descender), which sits a
+            // capital letter above the visual centre, so the text is dropped by the measured cap-to-line gap.
+            // Both parts scale with the font, so a font or size change cannot silently break the centring.
+            bannerLabel.rectTransform.anchoredPosition =
+                new Vector2(0f, -(BannerTextDrop(bannerLabel.font, bannerLabel.fontSize) + BannerTextNudge));
+            bannerLabel.raycastTarget = false;
+        }
+
         private void BuildButtons()
         {
+            // Anchors here are placeholders: LayoutButtons() stacks the visible rows at Open time.
             resumeButton = MakeButton(normalGroup.transform, "Resume", "RESUME",
-                new Vector2(0.12f, 0.61f), new Vector2(0.88f, 0.71f), UiTheme.ButtonBlue, Close);
+                Vector2.zero, Vector2.one, ButtonFace.Primary, Close);
 
             soundButton = MakeButton(normalGroup.transform, "Sound", "SOUND: ON",
-                new Vector2(0.12f, 0.48f), new Vector2(0.88f, 0.58f), UiTheme.ButtonBlue, OnSound);
+                Vector2.zero, Vector2.one, ButtonFace.Neutral, OnSound);
             soundLabel = soundButton.GetComponentInChildren<TextMeshProUGUI>();
 
             quitButton = MakeButton(normalGroup.transform, "QuitRun", "QUIT RUN",
-                new Vector2(0.12f, 0.35f), new Vector2(0.88f, 0.45f), UiTheme.Orange, OnQuit);
+                Vector2.zero, Vector2.one, ButtonFace.Danger, OnQuit);
 
-            // Lobby mode reuses the same three slots: sound, restore, close. The pause rows are hidden then.
+            // Lobby mode reuses the same stack: sound, restore, privacy, close. The pause rows are hidden then.
             restoreButton = MakeButton(normalGroup.transform, "Restore", "RESTORE PURCHASES",
-                new Vector2(0.12f, 0.61f), new Vector2(0.88f, 0.71f), UiTheme.ButtonBlue, OnRestore);
+                Vector2.zero, Vector2.one, ButtonFace.Neutral, OnRestore);
             privacyButton = MakeButton(normalGroup.transform, "Privacy", "PRIVACY",
-                new Vector2(0.12f, 0.48f), new Vector2(0.88f, 0.58f), UiTheme.ButtonBlue, OnPrivacy);
+                Vector2.zero, Vector2.one, ButtonFace.Neutral, OnPrivacy);
             closeButton = MakeButton(normalGroup.transform, "Close", "CLOSE",
-                new Vector2(0.12f, 0.35f), new Vector2(0.88f, 0.45f), UiTheme.Gold, Close);
+                Vector2.zero, Vector2.one, ButtonFace.Primary, Close);
+        }
+
+        /// <summary>
+        /// Stacks the rows that are visible in this mode. Run = 3 rows (resume, sound, quit), lobby = 4 rows
+        /// (sound, restore, privacy, close). The count is passed in, so no two buttons can share a slot.
+        /// </summary>
+        private void LayoutButtons(bool lobby)
+        {
+            if (lobby)
+            {
+                Place(soundButton, 0, 4);
+                Place(restoreButton, 1, 4);
+                Place(privacyButton, 2, 4);
+                Place(closeButton, 3, 4);
+            }
+            else
+            {
+                Place(resumeButton, 0, 3);
+                Place(soundButton, 1, 3);
+                Place(quitButton, 2, 3);
+            }
+        }
+
+        /// <summary>One row of the stack, in panel space. Top below the ribbon, bottom above the rim.</summary>
+        private static void Place(UiPlateButton button, int index, int count)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            const float Top = 0.85f;
+            const float Bottom = 0.11f;
+            const float Fill = 0.71f;
+
+            float slot = (Top - Bottom) / Mathf.Max(1, count);
+            float height = slot * Fill;
+            float yMax = Top - index * slot;
+            float yMin = yMax - height;
+
+            RectTransform rect = (RectTransform)button.transform;
+            rect.anchorMin = new Vector2(0.12f, yMin);
+            rect.anchorMax = new Vector2(0.88f, yMax);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
         }
 
         private void BuildConfirm(Transform panel)
@@ -178,25 +306,63 @@ namespace IdleRPG.UI
 
             TextMeshProUGUI confirmTitle = UiRuntime.CreateText(confirmGroup.transform, "Title", "END THIS RUN?",
                 UiType.Role.Title, TextAlignmentOptions.Center, UiTheme.Text);
-            UiRuntime.Anchor(confirmTitle.rectTransform, new Vector2(0.05f, 0.84f), new Vector2(0.95f, 0.95f));
+            UiRuntime.Anchor(confirmTitle.rectTransform, new Vector2(0.05f, 0.80f), new Vector2(0.95f, 0.92f));
 
             confirmBody = UiRuntime.CreateText(confirmGroup.transform, "Body", string.Empty, UiType.Role.Sentence,
                 TextAlignmentOptions.Center, UiTheme.TextMuted);
-            UiRuntime.Anchor(confirmBody.rectTransform, new Vector2(0.08f, 0.62f), new Vector2(0.92f, 0.80f));
+            UiRuntime.Anchor(confirmBody.rectTransform, new Vector2(0.08f, 0.56f), new Vector2(0.92f, 0.76f));
 
             MakeButton(confirmGroup.transform, "EndRun", "END RUN",
-                new Vector2(0.12f, 0.42f), new Vector2(0.88f, 0.54f), UiTheme.Orange, OnConfirmEnd);
+                new Vector2(0.12f, 0.30f), new Vector2(0.88f, 0.44f), ButtonFace.Danger, OnConfirmEnd);
             MakeButton(confirmGroup.transform, "KeepFighting", "KEEP FIGHTING",
-                new Vector2(0.12f, 0.26f), new Vector2(0.88f, 0.38f), UiTheme.ButtonBlue, OnConfirmKeep);
+                new Vector2(0.12f, 0.12f), new Vector2(0.88f, 0.26f), ButtonFace.Neutral, OnConfirmKeep);
 
             confirmGroup.SetActive(false);
         }
 
         private static UiPlateButton MakeButton(Transform parent, string name, string label,
-            Vector2 anchorMin, Vector2 anchorMax, Color face, UnityEngine.Events.UnityAction onClick)
+            Vector2 anchorMin, Vector2 anchorMax, ButtonFace face, UnityEngine.Events.UnityAction onClick)
         {
-            return UiPlateButton.Create(parent, name, anchorMin, anchorMax, label, UiType.Role.Section,
-                face, face, onClick);
+            UiPlateButton view = UiPlateButton.Create(parent, name, anchorMin, anchorMax, label, UiType.Role.Section,
+                Color.white, Color.white, onClick, face);
+
+            // Two offset copies fake a soft drop shadow under the button, same trick as the ribbon. One hard
+            // copy reads as a second button; two steps read as depth on the sheet.
+            Shadow near = view.gameObject.AddComponent<Shadow>();
+            near.effectColor = new Color(0f, 0f, 0f, 0.38f);
+            near.effectDistance = new Vector2(0f, ButtonShadowNear);
+            near.useGraphicAlpha = true;
+
+            Shadow far = view.gameObject.AddComponent<Shadow>();
+            far.effectColor = new Color(0f, 0f, 0f, 0.18f);
+            far.effectDistance = new Vector2(0f, ButtonShadowFar);
+            far.useGraphicAlpha = true;
+
+            return view;
+        }
+
+        /// <summary>
+        /// How far a line of CAPITALS must move down to look centred in its box. TMP centres the full line box
+        /// (ascender to descender); capitals sit higher inside that box. The gap is measured from the font
+        /// itself and scaled to the current size, so no magic number can drift.
+        /// </summary>
+        private static float BannerTextDrop(TMP_FontAsset font, float size)
+        {
+            if (font == null || size <= 0f)
+            {
+                return 0f;
+            }
+
+            UnityEngine.TextCore.FaceInfo info = font.faceInfo;
+
+            if (info.pointSize <= 0f)
+            {
+                return 0f;
+            }
+
+            float capCentre = (info.capLine + info.baseline) * 0.5f;
+            float lineCentre = (info.ascentLine + info.descentLine) * 0.5f;
+            return (capCentre - lineCentre) * (size / info.pointSize);
         }
 
         private void UpdateSoundLabel()
@@ -212,9 +378,26 @@ namespace IdleRPG.UI
 
         private void SetStatus(string text)
         {
-            if (status != null)
+            if (status == null)
             {
-                status.SetText(text);
+                return;
+            }
+
+            bool show = !string.IsNullOrEmpty(text);
+            status.SetText(text);
+            status.gameObject.SetActive(show);
+        }
+
+        /// <summary>The ribbon carries the heading when the skin has one; the label is the fallback.</summary>
+        private void SetHeading(string text)
+        {
+            if (bannerLabel != null)
+            {
+                bannerLabel.SetText(text);
+            }
+            else if (title != null)
+            {
+                title.SetText(text);
             }
         }
 
@@ -225,9 +408,9 @@ namespace IdleRPG.UI
                 return;
             }
 
-            bool muted = manager.Audio.ToggleMuted();
+            manager.Audio.ToggleMuted();
             UpdateSoundLabel();
-            SetStatus(muted ? "Sound off." : "Sound on.");
+            // No status line: the button label already says SOUND: ON / OFF (owner request 2026-11-22).
         }
 
         private void OnRestore()

@@ -3,6 +3,7 @@
 Status: **CANON** — this replaces the old "endless idle run" goal. Where another doc assumes an endless
 run, this document wins. **The premise now lives in `Story-Canon.md`** (the Second Dawn, Greenwake, the
 king's order). This page owns the campaign shape and the loop.
+Product-level summary and v1.0 scope: **`Game-Design-Document.md`**.
 
 ---
 

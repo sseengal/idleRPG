@@ -160,7 +160,11 @@ namespace IdleRPG.EditorTools
             SceneWiringUtility.SetField(startScreenUi, "tabAscendIcon", tabIcon("icon_ascend"), required: false);
             SceneWiringUtility.SetField(startScreenUi, "tabTrainIcon", tabIcon("icon_train"), required: false);
             SceneWiringUtility.SetField(startScreenUi, "tabShopIcon", tabIcon("icon_shop"), required: false);
-            SceneWiringUtility.SetField(startScreenUi, "tabPartyIcon", tabIcon("icon_party"), required: false);
+
+            // The party icon is its own file now (the owner's wide 3-figure strip); the sheet stays as fallback.
+            Sprite partyIcon = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/IdleRPG/Art/UI/Icons/icon_party.png");
+            SceneWiringUtility.SetField(startScreenUi, "tabPartyIcon",
+                partyIcon != null ? partyIcon : tabIcon("icon_party"), required: false);
 
             RectTransform canvasRoot = CreateCanvas(hudRoot);
             RectTransform damageRoot = CreateDamageCanvas(hudRoot);

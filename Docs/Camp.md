@@ -32,7 +32,7 @@ wave 10    BOSS
 | **Short Rest** | Free | 10% max HP, living only | None |
 | **Short Rest+** | Ad (free for No Ads) | 20% max HP, living only | None |
 | **Long Rest** | **1 camp token** | 30% max HP + revive fallen at 20% | 1 per run |
-| **Train** | Free | **Alternates** +1 ATK, then +1 DEF, party-wide, run-only | None |
+| **Train** | Free (planned: **gold**) | **Alternates** +1 ATK, then +1 DEF, party-wide, run-only | None |
 
 - Short Rest is always available and never blocked.
 - Short Rest+ replaces the 10% heal with 20%; it does not add to it.
@@ -40,6 +40,8 @@ wave 10    BOSS
 - Long Rest is the scarce decision. The token refreshes on a new run.
 - Train alternates automatically: even total trains = ATK, odd = DEF. No toggle.
 - No Press On. Every camp has a free, positive action.
+- **Planned change (not built):** Train costs **gold**. Owner decision 2026-11-22 (`Game-Design-Document.md` §6).
+  Gold stays permanent, so this is the mid-run gold sink. The price must grow with each Train in the same run.
 
 ---
 

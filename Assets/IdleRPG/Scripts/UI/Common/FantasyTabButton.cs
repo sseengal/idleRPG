@@ -27,12 +27,22 @@ namespace IdleRPG.UI
         private UIEffect effect;
         private Button button;
 
-        private Color idleFill, activeFill, idleInk, activeInk;
+        private Color idleFill, activeFill, activeInk;
+        private Color iconBaseColor = Color.white;
+        private Sprite idleFace, selectedFace;
+        private float faceBorderScale = 1f;
         private bool selected, interactable = true;
         private float press, glowClock;
 
         /// <summary>How far the selected tab rises above its neighbours, in canvas units.</summary>
         private const float LiftPixels = 30f;
+
+        /// <summary>
+        /// A common optical lift for every idle icon (fraction of its height). A box centre reads low on a bar
+        /// with a shaded bottom edge, so all idle icons rise together and stay aligned with each other.
+        /// Owner tuning knob: raise this to lift the whole row, lower it to drop the row.
+        /// </summary>
+        private const float IdleIconLift = 0.09f;
 
         /// <summary>A lift this close to its target counts as arrived, so the tween stops writing (canvas units).</summary>
         private const float LiftEpsilon = 0.01f;
@@ -54,7 +64,8 @@ namespace IdleRPG.UI
         public void Bind(RectTransform rootRect, Image frameImage, Image glowImage, TextMeshProUGUI labelText,
             UIEffect uiEffect, Button buttonRef, Color idle, Color active, Color idleText, Color activeText,
             Image iconImage = null, float iconScale = 1f, float selectedScale = 1f, float verticalOffset = 0f,
-            float selectedVerticalOffset = 0f)
+            float selectedVerticalOffset = 0f, Sprite idleButtonFace = null, Sprite selectedButtonFace = null,
+            float buttonFaceScale = 1f)
         {
             root = rootRect;
             frame = frameImage;
@@ -69,10 +80,13 @@ namespace IdleRPG.UI
             iconVerticalOffset = verticalOffset;
             iconSelectedVerticalOffset = selectedVerticalOffset;
             iconAspect = icon != null && icon.sprite != null ? icon.sprite.rect.width / icon.sprite.rect.height : 1f;
+            iconBaseColor = icon != null ? icon.color : Color.white;
             idleFill = idle;
             activeFill = active;
-            idleInk = idleText;
             activeInk = activeText;
+            idleFace = idleButtonFace;
+            selectedFace = selectedButtonFace;
+            faceBorderScale = buttonFaceScale > 0f ? buttonFaceScale : 1f;
 
             if (glow != null)
             {
@@ -83,7 +97,22 @@ namespace IdleRPG.UI
                 glow.color = c;
             }
 
+            // Draw the right face now, so the first frame never flashes the tintable plate.
+            if (frame != null && idleFace != null && selectedFace != null)
+            {
+                frame.sprite = selected ? selectedFace : idleFace;
+                frame.type = Image.Type.Sliced;
+                frame.pixelsPerUnitMultiplier = faceBorderScale;
+                frame.color = Color.white;
+            }
+
             Refresh();
+
+            // Idle tabs start with no word: hide it here so it cannot flash for one frame before Update runs.
+            if (label != null)
+            {
+                label.gameObject.SetActive(selected);
+            }
         }
 
         public void SetSelected(bool value)
@@ -156,27 +185,61 @@ namespace IdleRPG.UI
             // Smooth colour hand-off between idle and selected.
             if (frame != null)
             {
-                Color want = selected ? activeFill : idleFill;
-                Color now = frame.color;
-                Color next = Color.Lerp(now, want, smooth);
+                if (idleFace != null && selectedFace != null)
+                {
+                    // Art with its own colour: swap the sprite by state and keep the tint white.
+                    Sprite wantSprite = selected ? selectedFace : idleFace;
 
-                if (Near(next, want)) { next = want; }
-                if (!Near(next, now)) { frame.color = next; }
+                    if (frame.sprite != wantSprite)
+                    {
+                        frame.sprite = wantSprite;
+                        frame.type = Image.Type.Sliced;
+                        frame.pixelsPerUnitMultiplier = faceBorderScale;
+                        frame.color = Color.white;
+                    }
+                }
+                else
+                {
+                    Color want = selected ? activeFill : idleFill;
+                    Color now = frame.color;
+                    Color next = Color.Lerp(now, want, smooth);
+
+                    if (Near(next, want)) { next = want; }
+                    if (!Near(next, now)) { frame.color = next; }
+                }
             }
 
             if (label != null)
             {
-                Color ink = !interactable ? UiTheme.InkDisabled : (selected ? activeInk : idleInk);
-                ink.a = selected && interactable ? 1f : 0f;   // the word only speaks for the chosen tab
-                Color now = label.color;
-                Color next = Color.Lerp(now, ink, smooth);
+                // The word belongs to the chosen tab ONLY. It used to fade to alpha 0, which left a faint ghost
+                // of text on idle tabs (owner report 2026-11-22). It is now shown or hidden outright.
+                bool show = selected;
 
-                if (Near(next, ink)) { next = ink; }
-                if (!Near(next, now)) { label.color = next; }
+                if (label.gameObject.activeSelf != show)
+                {
+                    label.gameObject.SetActive(show);
+                }
+
+                if (show)
+                {
+                    Color ink = interactable ? activeInk : UiTheme.InkDisabled;
+
+                    if (!Near(label.color, ink))
+                    {
+                        label.color = ink;
+                    }
+                }
             }
 
             if (iconRect != null)
             {
+                // The icon keeps its own colours in BOTH states. Tinting it dark on the gold face turned it
+                // into a silhouette (owner report 2026-11-22), so a slate chip behind it does the contrast job.
+                if (icon != null && !Near(icon.color, iconBaseColor))
+                {
+                    icon.color = Color.Lerp(icon.color, iconBaseColor, smooth);
+                }
+
                 // One shared visual HEIGHT for every icon (width follows each sprite's aspect), so a tall icon
                 // and a wide one read as one set. Idle: centred. Selected: slightly smaller and dropped so the
                 // word tucks straight under it.
@@ -187,11 +250,26 @@ namespace IdleRPG.UI
                     float frac = selected ? 0.50f * iconSelectedScale : 0.66f * iconHeightFactor;
                     float height = tabH * frac;
                     float width = height * iconAspect;
+
+                    // A wide icon (the party strip is 90x50) must not spill outside its tab: cap the width and
+                    // shrink the height with it, so the aspect is kept and the neighbours stay clean.
+                    float maxWidth = (root != null ? root.rect.width : 0f) * 0.96f;
+
+                    if (maxWidth > 1f && width > maxWidth)
+                    {
+                        height *= maxWidth / width;
+                        width = maxWidth;
+                    }
                     // Grow from a fixed bottom: idle sits low; selected keeps its bottom (above the word), so a
                     // bigger icon grows upward instead of crowding the text. Per-icon vertical nudge centres an
                     // off-balance silhouette (idle) or lifts one above its word (selected).
                     float vertical = selected ? iconSelectedVerticalOffset : iconVerticalOffset;
-                    float bottom = tabH * (selected ? 0.35f : 0.19f) + height * vertical;
+
+                    // Idle has no word, so the icon is centred in the tab (plus a small common optical lift);
+                    // only the selected tab reserves the lower band for its label.
+                    float bottom = selected
+                        ? tabH * 0.35f + height * vertical
+                        : (tabH - height) * 0.5f + height * (vertical + IdleIconLift);
                     float centreFromBottom = bottom + height * 0.5f;
 
                     Vector2 size = iconRect.sizeDelta;
@@ -245,6 +323,14 @@ namespace IdleRPG.UI
                 {
                     c.a = nextA;
                     glow.color = c;
+                }
+
+                // A fully dark halo is still a draw call. Switch the image off once it has faded out.
+                bool showGlow = nextA > 0.001f;
+
+                if (glow.enabled != showGlow)
+                {
+                    glow.enabled = showGlow;
                 }
             }
         }

@@ -176,7 +176,10 @@ namespace IdleRPG.UI
             }
 
             Atmosphere(lobby.transform, "StartGlow", new Vector2(0.14f, 0.21f), new Vector2(0.86f, 0.39f), SoftGlow, UiTheme.HaloGold);
-            Btn(lobby.transform, "StartButton", new Vector2(0.20f, 0.26f), new Vector2(0.80f, 0.34f), "START", UiTheme.Gold, UiType.Role.Title, StartGame);
+
+            // The gold bar art carries its own colour, so it is drawn white (no tint) at its own border scale.
+            UiPlateButton.Create(lobby.transform, "StartButton", new Vector2(0.20f, 0.26f), new Vector2(0.80f, 0.34f),
+                "START", UiType.Role.Title, Color.white, Color.white, StartGame, ButtonFace.Primary);
 
             for (int i = 0; i < Tabs.Length; i++)
             {
@@ -260,9 +263,8 @@ namespace IdleRPG.UI
                     return;
 
                 case "BATTLE":
-                    // The fight tab means "leave the lobby and play". Same path as START, so the page closes,
-                    // the borrowed header goes home and the run resumes exactly where it was.
-                    StartGame();
+                    // The BATTLE tab returns to the lobby's centre: the chapter card and START. It must NOT
+                    // begin a run - only the START button does that (owner report 2026-11-22).
                     return;
 
                 case "TRAIN":
@@ -310,6 +312,7 @@ namespace IdleRPG.UI
         private FantasyTabButton BuildFantasyTab(string tab, Vector2 aMin, Vector2 aMax,
             UnityEngine.Events.UnityAction onClick)
         {
+            UiSkin skin = UiSkin.Current;
             RectTransform tabRoot = Rect("Nav" + tab, lobby.transform, aMin, aMax);
 
             RectTransform glowRect = Rect("Glow", tabRoot, Vector2.zero, Vector2.one);
@@ -341,17 +344,28 @@ namespace IdleRPG.UI
             iconColor.a = icon.sprite != null ? 1f : 0f;
             icon.color = iconColor;
 
+            // A dark copy under every icon so gold art still reads on the gold selected face. Not a plate:
+            // an outline that also helps on the slate face.
+            Shadow iconShadow = icon.gameObject.AddComponent<Shadow>();
+            iconShadow.effectColor = new Color(0f, 0f, 0f, 0.55f);
+            iconShadow.effectDistance = new Vector2(0f, -2f);
+            iconShadow.useGraphicAlpha = true;
+
             TextMeshProUGUI text = Text(frameRect, "Label", new Vector2(0.05f, 0.10f), new Vector2(0.95f, 0.32f), tab,
-                UiType.Role.Section, UiTheme.Text);
-            UiType.Apply(text, UiType.Role.Section, 36f);   // slightly under Section (40) for a tighter bar
+                UiType.Role.Small, UiTheme.Text);
+            UiType.Apply(text, UiType.Role.Small);   // a real scale step, not the old hard-coded 36
             text.raycastTarget = false;
 
             Coffee.UIEffects.UIEffect effect = frameRect.gameObject.AddComponent<Coffee.UIEffects.UIEffect>();
 
             FantasyTabButton view = frameRect.gameObject.AddComponent<FantasyTabButton>();
+
+            // Idle = the neutral bar, selected = the gold bar. The icon keeps its own colours (with a shadow),
+            // and the word is BLACK on the gold face (owner: dark, not white, not a ghost).
             view.Bind(tabRoot, frame, glow, text, effect, button,
-                UiTheme.NavIdle, UiTheme.NavSelected, UiTheme.TextMuted, Color.white, icon, TabIconScale(tab),
-                TabIconSelectedScale(tab), TabIconVertical(tab), TabIconSelectedVertical(tab));
+                UiTheme.NavIdle, UiTheme.NavSelected, UiTheme.TextMuted, skin.primaryButtonInk, icon, TabIconScale(tab),
+                TabIconSelectedScale(tab), TabIconVertical(tab), TabIconSelectedVertical(tab),
+                skin.neutralButtonSprite, skin.primaryButtonSprite, skin.buttonBorderScale);
             return view;
         }
 
@@ -360,7 +374,7 @@ namespace IdleRPG.UI
         {
             switch (tab)
             {
-                case "PARTY": return 0.97f;
+                case "PARTY": return 0.88f;   // owner: the three figures read heavy next to the square icons
                 case "ASCEND": return 0.94f;
                 case "TRAIN": return 0.94f;
                 default: return 1f;
@@ -378,14 +392,18 @@ namespace IdleRPG.UI
             }
         }
 
-        /// <summary>Idle vertical nudge (fraction of icon height) to centre an off-balance silhouette.</summary>
+        /// <summary>
+        /// Idle vertical nudge (fraction of icon height). These are MEASURED from a 1080x1920 capture (2026-11-22),
+        /// not guessed: after the common lift, the bag drew 4.5 px high and the arrow 1.5 px low, so each raw
+        /// sprite carries its own offset inside its cell. Re-measure if an icon's art changes.
+        /// </summary>
         private static float TabIconVertical(string tab)
         {
             switch (tab)
             {
-                case "BATTLE": return 0.07f;
-                case "ASCEND": return 0.03f;
-                case "TRAIN": return 0.03f;
+                case "SHOP": return -0.032f;
+                case "ASCEND": return 0.011f;
+                case "TRAIN": return 0.043f;
                 default: return 0f;
             }
         }
@@ -510,7 +528,6 @@ namespace IdleRPG.UI
 
         /// <summary>The tintable bevel frame, loaded once and reused by every lobby panel and button.</summary>
         private static Sprite frameSprite;
-
         private static Sprite Frame
         {
             get
@@ -649,9 +666,9 @@ namespace IdleRPG.UI
         private static UiPlateButton Btn(Transform parent, string name, Vector2 aMin, Vector2 aMax, string label, Color bg,
             UiType.Role role, UnityEngine.Events.UnityAction onClick)
         {
-            // One shared button: plate face, press squash, grayscale disable. idle == active keeps the face
-            // steady for plain action buttons; the tabs are the ones that change colour when chosen.
-            return UiPlateButton.Create(parent, name, aMin, aMax, label, role, bg, bg, onClick);
+            // Every text action button in the lobby pages is a primary action (BUY). The skin owns the art, ink
+            // and border scale, so no page passes a sprite or a colour for the face.
+            return UiPlateButton.Create(parent, name, aMin, aMax, label, role, bg, bg, onClick, ButtonFace.Primary);
         }
     }
 }

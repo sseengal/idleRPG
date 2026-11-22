@@ -2,7 +2,7 @@
 
 > **Everything that describes this game lives here.** One folder, one source of truth per topic.
 > Root `README.md` is the quick start (clone → open → play); everything deeper is in this folder.
-> Last restructured: Step 11e (2026-09-21); Art-Pipeline.md added 2026-09-26; Launch-Plan.md added 2026-10-11; Character-Catalog.md, Stage-Ladder.md and Ability-Map.md added 2026-10-11; UI-Layout.md added 2026-10-14; Combat-Sequencing.md added 2026-10-24; doc consolidation pass 2026-10-24 (one current page per topic); Foundation.md added 2026-10-28; Story canon + node scripts + scene injection system added 2026-10-29; Battle-Log.md added 2026-10-31; Story-Greenwake.md chapter bible added 2026-11-02; Battle-Swirl.md added 2026-11-04; Run-Loop.md (CANON core loop: automated battler + run-end meta) added 2026-11-07.
+> Last restructured: Step 11e (2026-09-21); Art-Pipeline.md added 2026-09-26; Launch-Plan.md added 2026-10-11; Character-Catalog.md, Stage-Ladder.md and Ability-Map.md added 2026-10-11; UI-Layout.md added 2026-10-14; Combat-Sequencing.md added 2026-10-24; doc consolidation pass 2026-10-24 (one current page per topic); Foundation.md added 2026-10-28; Story canon + node scripts + scene injection system added 2026-10-29; Battle-Log.md added 2026-10-31; Story-Greenwake.md chapter bible added 2026-11-02; Battle-Swirl.md added 2026-11-04; Run-Loop.md (CANON core loop: automated battler + run-end meta) added 2026-11-07; **Game-Design-Document.md added 2026-11-22 (top page: product definition, scope, done gates, decision log)**.
 
 ---
 
@@ -34,7 +34,8 @@ the code wins and the page is fixed the same day.
 
 | Question | Document |
 |---|---|
-| What is this game now — what is the core loop? | **`Run-Loop.md`** (canon: automated battler; gold is **permanent**, die, bank Perk Points, restart stage 1) |
+| **What is this game, and what is in v1.0? (start here)** | **`Game-Design-Document.md`** (the top page: pitch, loop, death rule, scope, money, done gates, decision log) |
+| What is this game now — what is the core loop? | **`Run-Loop.md`** (canon detail: automated battler; gold is **permanent**, die, bank Perk Points) |
 | What does every screen and button do, as built? | **`Routes-and-Flows.md`** (routes, states, economy, known defects R1–R18) |
 | What sets up the repeating battle premise? | `Intro-Sequence.md` (**deferred**: the intro film is skipped for v1.0; the two opening scenes still play) |
 | What must be true before the stores accept the build? | **`Release-Checklist.md`** (gated boxes: code, gameplay, device, store, legal, launch) |
@@ -95,6 +96,7 @@ the code wins and the page is fixed the same day.
 ```
 Docs/
   README.md            <- this index
+  Game-Design-Document.md <- TOP PAGE: what the game is, what is in v1.0, gates, decision log
   -- current --
   Run-Loop.md          <- CANON: automated battler, run end, meta progression (the spine)
   Game-Vision.md       <- record: story-campaign vision; now the flavor wrapper (superseded by Run-Loop.md)

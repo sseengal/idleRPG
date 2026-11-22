@@ -373,6 +373,90 @@ Two changes make the plate read as a button rather than a slab:
 `FantasyTabButton` keeps its lift and halo for the bottom tabs. Panels come from `UiRuntime.Plate`; small
 chips stay flat on purpose.
 
+### 12a. Action button art: three faces, one source (2026-11-22)
+
+The owner drew three 89x19 bar faces: **primary** (gold), **danger** (red) and **neutral** (slate).
+They live in `Assets/IdleRPG/Art/UI/Buttons/` and are referenced **only** from the `UiSkin` asset
+(`Assets/IdleRPG/Resources/UiSkin.asset`). That asset is the single source: art, ink colour and border scale.
+
+| Face | Means | Used today |
+|---|---|---|
+| `ButtonFace.Primary` | The main action on a screen | START, RESUME, CLOSE, shop/training BUY (next step) |
+| `ButtonFace.Danger` | An action that costs or ends something | QUIT RUN, END RUN |
+| `ButtonFace.Neutral` | A secondary action | SOUND, RESTORE, PRIVACY, KEEP FIGHTING |
+| `ButtonFace.Plate` | The old tintable plate | Cards, tabs, nodes, every button the skin has no art for |
+
+Rules:
+- `UiPlateButton.Create(..., ButtonFace face = ButtonFace.Plate)`. Callers ask for a **meaning**, never a sprite.
+- **`Image.pixelsPerUnitMultiplier` DIVIDES the slice border.** The art's 1 px highlight and 3 px shade become
+  7 and 21 units at `1f / 7f` (`UiSkin.buttonBorderScale`). A value of 7 made them invisible once - do not repeat it.
+- Art with baked colour is drawn **white-tinted** (`Color.white`); any tint multiplies the artist's colour.
+- Import preset: `Tools > Idle RPG > Art > Apply UI Art Presets` (FullRect, Point, uncompressed, border
+  measured per folder, RGBA32 on Android and iPhone). Never compress these: a 1 px line dies under ASTC 4x4.
+- A missing skin sprite falls back to the plate, so an empty skin never draws an invisible button.
+
+**Bottom tabs (2026-11-22).** `FantasyTabButton` draws the same two faces: **neutral** when idle, **primary**
+when selected. Icons keep their own colours in both states and carry a dark drop shadow (`0.55` at `-2`) so
+gold art still reads on gold. Wide icons are capped at **96%** of the tab width, aspect kept.
+
+Tab clean-ups (2026-11-22), after the owner saw a ghost of text on idle tabs:
+- The word is **hidden outright** when a tab is not selected (`SetActive`, not alpha 0). The old fade left a
+  faint line of text during the transition, and an invisible label still cost a draw.
+- **Idle icons are centred, then lifted**: `(tabH - height) / 2 + height * (iconNudge + IdleIconLift)`. The common
+  lift is **0.09** after the owner asked for the row higher; per-icon `TabIconVertical` values are **measured from
+  a 1080x1920 capture** (bag -0.032, arrow +0.011, dummy +0.043, party 0), because each raw sprite carries its
+  own offset inside its sheet cell. Result: four idle icons within 0.5 px of each other, ~9.5 px above the bar's
+  box centre - about 2.5 px above the centre of the visible face (the face sits high because of the 21 px
+  bottom shade). `IdleIconLift` is the one knob for the whole row.
+- The tab word uses `UiType.Role.Small`; the old hard-coded `36` was off the type scale.
+- The selected halo **switches its Image off** once it has faded to zero, instead of drawing a transparent quad.
+
+**Party tab icon (2026-11-22).** Its own file: `Art/UI/Icons/icon_party.png` (75x58, owner art, third cut -
+the two earlier cuts were 52x19 and 90x50; both read too small). Idle it draws at **88%** of the tab height
+with a **+4% lift** (`TabIconScale` / `TabIconVertical`): the three figures stand on their bottom edge, so a
+true box centre reads low. `MvpSceneBuilder` prefers this file and falls back to the old sheet sprite.
+
+**BATTLE tab (2026-11-22).** The tab returns to the lobby centre. It no longer begins a run - only the START
+button does. Before this, pressing BATTLE started a fight, which the owner reported as wrong.
+
+**Panel face (2026-11-22).** `UiSkin.sheetSprite` holds the owner's 75x75 frame (`Art/UI/Panels/panel_pause.png`,
+5 px rim, baked colour, gold top-left and brown bottom-right shading). The pause/settings sheet draws it white
+at `sheetBorderScale` (`1f / 7f` = 35 units of rim). Other panels still use `ui_frame` until the owner says
+which ones change.
+
+**Pause sheet layout (2026-11-22).**
+- Panel: x 0.10-0.90, y 0.20-0.80. Was y 0.14-0.86 - the empty band at the foot is gone.
+- Ribbon: `UiSkin.bannerSprite` (`Art/UI/Banners/panel_banner.png`, 95x23, border 8/0/8/0, baked colour).
+  It is a child of the panel, anchored to the top edge, pivot centred, height = art height x `bannerScale`
+  (23 x 7 = 161 units), so half sits above the edge and half covers it. Width is **75% of the panel**
+  (anchors 0.125-0.875). It carries **GAME PAUSED** in a run and **SETTINGS** in the lobby; the plain title
+  label stays only as a fallback for a skin with no ribbon.
+- Ribbon shadow: two stacked `UnityEngine.UI.Shadow` copies on the ribbon image (black 0.45 at -10, black
+  0.22 at -24). One hard copy read as a second ribbon; two steps read as depth over the panel's top rim.
+- **Ribbon word centring is measured, not guessed (2026-11-22).** The label box covers the ribbon's **red face**
+  (anchors 0.30-0.96, the face spans art rows 1-16 of 23). TMP centres the full line box, so capitals sit
+  high; `BannerTextDrop(font, size)` derives that gap from the font's own `capLine` / `ascentLine` /
+  `descentLine` and scales it to the size (5.63 units at Abaddon 45). `BannerTextNudge` adds the measured
+  remainder, **2.5**, so the capitals centre on the band. Result: 0.5 px off, measured on a 1080x1920 capture.
+  Both parts scale with the font, so the font step cannot silently break it.
+- Sheet buttons carry the same two-step drop shadow, stronger: black 0.38 at -5, black 0.18 at -12
+  (`ButtonShadowNear` / `ButtonShadowFar`).
+- Clicking **SOUND** writes no status line: the button label already says ON / OFF. The foot of the sheet is
+  reserved for the lobby version and for Restore / Privacy feedback.
+- No body line in a run. The status label hides when empty (`SetActive(false)`); the lobby still shows the
+  version there, at the foot of the sheet.
+- Rows are placed by `Place(index, count)`: run = 3 rows, lobby = 4 rows. The old hand-written anchors put
+  **SOUND and PRIVACY on the same slot in the lobby**; the count now prevents that class of bug.
+- Danger ink is **white** (`236,240,248`) in the skin default and in the asset. White on that red is about
+  3.4:1 - fine for the large bold label, below AA for small text.
+
+**Still on the old plate:** tabs, ability cells, training nodes, camp choice cards and card close buttons.
+They are icon or multi-line components, not text action buttons, so a 19 px bar face does not fit them.
+
+**Not converted yet:** the defeat card (REVIVE / END RUN) and the offline claim dialog are built into
+`Main.unity` by `MvpSceneBuilder.Overlays.cs` and still point at the placeholder `ui_button_gold` /
+`ui_button` sprites. They need a scene rebuild, so they are a separate step.
+
 
 ## 13. Ability strip cells: a card, picture left, words right (2026-11-15)
 

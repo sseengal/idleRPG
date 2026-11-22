@@ -1,7 +1,7 @@
 # Run-Loop — the automated battler (CANON for the core loop)
 
 Status: **CANON for the core loop** — 7 Nov 2026. This page **supersedes `Game-Vision.md` as the spine** of the
-game. `Game-Vision.md` described a short story campaign with a fixed ending; that is now the *flavor wrapper*, not the
+game. Product-level summary and v1.0 scope: **`Game-Design-Document.md`**. `Game-Vision.md` described a short story campaign with a fixed ending; that is now the *flavor wrapper*, not the
 loop. Story canon (`Story-Canon.md`, `Story-Greenwake.md`, `Story-Nodes.md`, `Story-Scenes.md`) stays valid as the
 **binder** that gives the run a reason, but it is no longer a linear campaign that gates content.
 
@@ -62,7 +62,8 @@ A run is measured in **stages reached**, not story nodes.
 > hero stat levels, party XP, boons and camp tokens, but **not** gold. The only gold sink is the **TRAIN** page
 > (`TrainingService`, 1,357 permanent nodes). `GameManager.Stages.cs:190` says so in one line: *"Gold is PERMANENT
 > now (spent on Training) - a run end no longer wipes it."* The "run upgrades, wiped on death" layer in §5.1 is
-> **design, not built**.
+> **design, not built**. The decided mid-run sink is **camp Train paid in gold** (`Game-Design-Document.md` §6,
+> decision 2026-11-22).
 
 - The old ascension reset (**`GameManager.ResetProgressForAscension`**) still exists for debug, but the live run-end
   path is **`EndRun` → `BankRunReward`**, and it keeps gold.

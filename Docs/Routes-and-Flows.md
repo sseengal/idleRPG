@@ -58,7 +58,7 @@ live run reopens into the same fight; it never opens the menu.
 | **START** | `StartGame` | begins a new run (`StartRun(1)`), closes the lobby | live |
 | **SHOP** tab | `OnTab("SHOP")` | closes other pages, highlights SHOP | **Defect R3:** no page yet |
 | **PARTY** tab | `ShowParty` | opens the roster page | live |
-| **BATTLE** tab | `OnTab("BATTLE")` | same as START: closes the lobby and begins the run | live |
+| **BATTLE** tab | `OnTab("BATTLE")` | returns to the lobby centre (chapter card + START). **Does not begin a run** | live |
 | **ASCEND** tab | `ShowPerks` | opens the PERKS page | live |
 | **TRAIN** tab | `ShowTraining` | opens the gold tree | live |
 | Header gear | `HudHeaderUI.OnGearClicked` → `GearMenuUI` | **Between runs: SETTINGS** (sound, restore, privacy, version). **In a fight: PAUSE** (resume, sound, quit → confirm). Never an upgrade screen. | live |
@@ -160,7 +160,8 @@ gear opens a minimal pause with resume, sound and quit — it cannot shop, train
 |---|---|---|---|---|
 | Boot | saved run active | `GameManager.Start` | Combat/Boss | resume the fight, no lobby |
 | Boot | saved run inactive / no save | `GameManager.Start` | **Lobby** | no fight runs |
-| Lobby | START / BATTLE tab | `StartGame` → `StartRun(1)` | Combat | new run, saved `runActive = true` |
+| Lobby | **START button** | `StartGame` → `StartRun(1)` | Combat | new run, saved `runActive = true` |
+| Lobby | BATTLE tab | `OnTab("BATTLE")` → hides pages | Lobby | centre page; **no run starts** (changed 2026-11-22) |
 | Combat | boss wave starts | `OnWaveStarted` | Boss | state reflects the boss |
 | Boss | boss cleared | stage advance | Combat | next stage |
 | Combat/Boss | party wipe | `OnPartyWiped` → `EndRunOnWipe` | Defeat | run stops; card shows; `runActive = false` |
@@ -228,7 +229,7 @@ without touching the game rules. **The surface is live; only the real SDK is mis
 | # | Severity | Defect | Evidence | Fix size |
 |---|---|---|---|---|
 | R1 | ~~P0~~ | ~~START resets the run~~ **FIXED 2026-11-21**: the lobby has no live run; START begins one | verified by code test | done |
-| R2 | ~~P0~~ | ~~BATTLE tab does nothing~~ **FIXED 2026-11-21**: same path as START | verified by code test | done |
+| R2 | ~~P0~~ | ~~BATTLE tab does nothing~~ **FIXED 2026-11-21**; **changed 2026-11-22:** the BATTLE tab returns to the lobby centre; only START begins a run | verified by code test | done |
 | R3 | ~~P1~~ | ~~SHOP tab has no page~~ **FIXED 2026-11-21**: lean SHOP page (No Ads, 30 gems, Starter, Foundry) | `StartScreenUI.Shop.cs` | done |
 | R4 | P1 | No settings sheet: mute, Restore, privacy link | no settings UI; mute keys exist only in code | M |
 | R5 | P1 | No ads or billing package | `Packages/manifest.json` | L |

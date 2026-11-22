@@ -79,7 +79,7 @@
 | [ ] | **Gear in the lobby opens SETTINGS** (sound, restore, privacy, version) | B | all four rows work; privacy URL may be a stub |
 | [ ] | **Gear in a fight opens PAUSE**; resume restores time | B | time stops, resumes at the same wave |
 | [ ] | QUIT RUN asks a second confirm, then ends and banks | B | KEEP FIGHTING returns; END RUN opens the lobby |
-| [ ] | **BATTLE tab** begins the run from the lobby | B | same result as START |
+| [ ] | **BATTLE tab** returns to the lobby centre | B | the chapter card and START show; **no run starts** |
 | [ ] | Party wipe → RUN OVER card → REVIVE once (**Dawn Ward**) → same stage | B | no ad; second wipe hides the button |
 | [ ] | Dawn Ward bought in **ASCEND** (20 tokens, max 1) | B | fourth row; revive available next run |
 | [ ] | Party wipe → **END RUN** banks Perk Points → lobby | B | token count grows by the preview value |
@@ -239,7 +239,7 @@ Full detail and evidence: `Routes-and-Flows.md` §8.
 | # | Defect | Blocks |
 |---|---|---|
 | R1 | ~~START resets the run to stage 1~~ **fixed** (lobby has no live run) | — |
-| R2 | ~~BATTLE tab does nothing~~ **fixed** (same path as START) | — |
+| R2 | ~~BATTLE tab does nothing~~ **fixed**; **changed 2026-11-22**: the tab returns to the lobby, only START begins a run | — |
 | R3 | ~~SHOP tab is a dead end~~ **fixed**: lean shelf built | — |
 | R4 | No settings sheet (mute / Restore / privacy) | §3, §6, §8 |
 | R5 | No ads or billing SDK | §8, money path |

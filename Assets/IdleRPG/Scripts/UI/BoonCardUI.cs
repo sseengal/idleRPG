@@ -295,7 +295,7 @@ namespace IdleRPG.UI
 
             refreshButton = UiPlateButton.Create(panel.transform, "Refresh",
                 new Vector2(0.20f, 0.02f), new Vector2(0.80f, 0.10f), "REFRESH  1/1",
-                UiType.Role.Small, UiTheme.Accent, UiTheme.Accent, OnRerollClicked);
+                UiType.Role.Small, UiTheme.Accent, UiTheme.Accent, OnRerollClicked, ButtonFace.Primary);
 
             refreshLabel = refreshButton.GetComponentInChildren<TextMeshProUGUI>();
         }

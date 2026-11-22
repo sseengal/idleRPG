@@ -42,6 +42,7 @@ namespace IdleRPG.UI
 
         private Color idleFill = UiTheme.ButtonBlue;
         private Color activeFill = UiTheme.SelectedBlue;
+        private Color inkIdle = UiTheme.ActionInk;
         private bool selected, interactable = true;
         private float press;
 
@@ -50,23 +51,48 @@ namespace IdleRPG.UI
 
         /// <summary>Builds one button: plate face + centred label, already wired for all four states.</summary>
         public static UiPlateButton Create(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax,
-            string text, UiType.Role role, Color idle, Color active, UnityEngine.Events.UnityAction onClick)
+            string text, UiType.Role role, Color idle, Color active, UnityEngine.Events.UnityAction onClick,
+            ButtonFace face = ButtonFace.Plate)
         {
-            Image face = UiRuntime.Plate(parent, name, anchorMin, anchorMax, idle, raycast: true);
+            // One source of truth: the skin owns the art, its ink and the border scale. A missing sprite falls
+            // back to the tintable plate, so an empty skin can never leave a button invisible.
+            Sprite art = null;
+            Color artInk = Color.white;
+            float borderScale = 1f;
+            Color tint = idle;
 
-            Button selectable = face.gameObject.AddComponent<Button>();
-            selectable.targetGraphic = face;
+            if (face != ButtonFace.Plate && UiSkin.Current.TryResolveButtonFace(face, out Sprite resolved, out Color resolvedInk))
+            {
+                art = resolved;
+                artInk = resolvedInk;
+                borderScale = UiSkin.Current.buttonBorderScale;
+                tint = Color.white;
+            }
+
+            Image image = UiRuntime.Plate(parent, name, anchorMin, anchorMax, tint, raycast: true);
+
+            if (art != null)
+            {
+                // Art that carries its own colour is drawn untinted at its own border scale.
+                image.sprite = art;
+                image.type = Image.Type.Sliced;
+                image.pixelsPerUnitMultiplier = borderScale;
+            }
+
+            Button selectable = image.gameObject.AddComponent<Button>();
+            selectable.targetGraphic = image;
             selectable.transition = Selectable.Transition.None;
 
-            TextMeshProUGUI labelText = UiRuntime.CreateText(face.transform, "Label", text, role,
+            TextMeshProUGUI labelText = UiRuntime.CreateText(image.transform, "Label", text, role,
                 TextAlignmentOptions.Center, UiTheme.Text);
             UiType.ApplyAuto(labelText, role);
             UiRuntime.Stretch(labelText.rectTransform);
             labelText.raycastTarget = false;
 
-            UIEffect uiEffect = face.gameObject.AddComponent<UIEffect>();
-            UiPlateButton view = face.gameObject.AddComponent<UiPlateButton>();
-            view.Bind(face.rectTransform, face, labelText, uiEffect, selectable, idle, active);
+            UIEffect uiEffect = image.gameObject.AddComponent<UIEffect>();
+            UiPlateButton view = image.gameObject.AddComponent<UiPlateButton>();
+            view.Bind(image.rectTransform, image, labelText, uiEffect, selectable, tint, tint,
+                art == null, art != null ? artInk : (Color?)null);
 
             if (onClick != null)
             {
@@ -77,7 +103,7 @@ namespace IdleRPG.UI
         }
 
         public void Bind(RectTransform rootRect, Image frameImage, TextMeshProUGUI labelText, UIEffect uiEffect,
-            Button buttonRef, Color idle, Color active)
+            Button buttonRef, Color idle, Color active, bool slimBorder = true, Color? ink = null)
         {
             root = rootRect;
             frame = frameImage;
@@ -86,9 +112,11 @@ namespace IdleRPG.UI
             button = buttonRef;
             idleFill = idle;
             activeFill = active;
+            inkIdle = ink ?? UiTheme.ActionInk;
 
             // A slimmer bevel than the raw sprite: 18 px on a 186-unit button reads as a slab, 7 reads as an edge.
-            if (frame != null)
+            // Art with its own tight border (the gold START bar) sets its scale in Create, so it is skipped here.
+            if (frame != null && slimBorder)
             {
                 frame.pixelsPerUnitMultiplier = BorderSlim;
             }
@@ -162,7 +190,7 @@ namespace IdleRPG.UI
 
             if (label != null)
             {
-                Color ink = interactable ? UiTheme.ActionInk : UiTheme.InkOff;
+                Color ink = interactable ? inkIdle : UiTheme.InkOff;
                 Color now = label.color;
                 Color next = Color.Lerp(now, ink, smooth);
 
