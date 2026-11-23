@@ -14,12 +14,12 @@ namespace IdleRPG.UI
     /// screens matched. This file is the fix: pick a role, never a number.
     ///
     /// The scale (reference canvas 1080x1920; on a 1080-wide phone 1 unit is about 0.4 dp):
-    ///   Display   55  Lilita One    currency, hero numbers            cap ~2.2 mm
+    ///   Display   56  Lilita One    currency, hero numbers            cap ~2.2 mm
     ///   Title     48  Lilita One    card / screen / modal titles      cap ~1.9 mm
-    ///   Section   40  Lilita One    section heads, primary buttons    cap ~1.6 mm
-    ///   Sentence  29  Lilita One    running text: settings, item info cap ~1.2 mm
+    ///   Section   40  Lilita One    section heads, button captions    cap ~1.6 mm
+    ///   Sentence  34  Lilita One    running text: settings, item info cap ~1.4 mm
     ///   Small     30  Lilita One    nav, tags, costs, column heads    cap ~1.2 mm
-    ///   Micro     28  Lilita One    captions - never needed to act    cap ~1.1 mm
+    ///   Micro     26  Lilita One    captions - never needed to act    cap ~1.0 mm
     ///   Damage    32  Lilita One    floating damage (crit x1.3)       cap ~1.3 mm
     ///   Dialogue  44  Abaddon Light battle log only                   cap ~1.4 mm
     ///
@@ -28,13 +28,17 @@ namespace IdleRPG.UI
     ///    letters suit a paragraph.
     ///  * <see cref="Micro"/> is the floor. Nothing is smaller.
     ///
+    /// The ladder rule (2026-11-23). Neighbouring steps must be 12-20% apart, or the eye cannot tell them apart.
+    /// Before this pass the bottom of the scale read 29 / 30 / 28 - three names for one visual size - so a caption
+    /// and a body sentence looked the same and the sheet labels felt cramped. The steps are now
+    /// 56 -> 48 -> 40 (17 / 20%), 40 -> 34 (15%), 34 -> 30 (12%), 30 -> 26 (13%).
+    ///
     /// Why the numbers moved again (2026-11-23, Abaddon -> Lilita One). The two faces sit differently on the
     /// body: Lilita's cap height is 0.704 of the size where Abaddon's is 0.625, and its x-height 0.506 where
     /// Abaddon Light's is 0.438. Keeping 62/54/45/... would have drawn every label about 13% taller and wider
     /// and broken the rows that were fitted to Abaddon. Each chrome size is therefore the old size x 0.888
     /// (0.625/0.704), so the letters land on the same measured height; the log keeps its size because its font
-    /// did not change. Micro is the one size that did not shrink to the exact ratio - a heavy face fills in
-    /// below about 28 - so it sits a little larger than the formula asks, on purpose.
+    /// did not change.
     ///
     /// Earlier move, for the record (2026-11-15, Silkscreen/VT323 -> Abaddon): cap height 0.700 -> 0.625 and
     /// x-height 0.400 -> 0.438, so each chrome size was the old size x 0.700/0.625.
@@ -59,12 +63,12 @@ namespace IdleRPG.UI
         // ------------------------------------------------------------------
         // The scale - the ONLY text sizes in the game. Tweak here, nowhere else.
         // ------------------------------------------------------------------
-        public const float Display = 55f;
+        public const float Display = 56f;
         public const float Title = 48f;
         public const float Section = 40f;
-        public const float Sentence = 29f;
+        public const float Sentence = 34f;
         public const float Small = 30f;
-        public const float Micro = 28f;
+        public const float Micro = 26f;
         public const float Damage = 32f;
 
         /// <summary>Story dialogue in the battle log. The one role still on Abaddon Light.</summary>

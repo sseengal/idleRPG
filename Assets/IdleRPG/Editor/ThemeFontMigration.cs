@@ -37,6 +37,23 @@ namespace IdleRPG.EditorTools
         private static TMP_FontAsset oldChrome;
 
         /// <summary>
+        /// Lilita One as it was used before the ladder pass (2026-11-23): 55/48/40/29/30/28/32. Frozen for the
+        /// same reason as the tables below - <see cref="UiType"/> already holds the NEW sizes, so it cannot tell us
+        /// what an old saved label meant. 29 became 34 (Sentence), 28 became 26 (Micro), 55 became 56 (Display).
+        /// 44 is deliberately absent: that size belongs to the log, which is Abaddon Light, not this face.
+        /// </summary>
+        private static readonly Dictionary<float, UiType.Role> OldLoudRoles = new Dictionary<float, UiType.Role>
+        {
+            { 55f, UiType.Role.Display },
+            { 48f, UiType.Role.Title },
+            { 40f, UiType.Role.Section },
+            { 29f, UiType.Role.Sentence },
+            { 30f, UiType.Role.Small },
+            { 28f, UiType.Role.Micro },
+            { 32f, UiType.Role.Damage },
+        };
+
+        /// <summary>
         /// Abaddon Bold as it was used up to 2026-11-23, at the sizes <see cref="UiType"/> held before the
         /// Lilita One move (62/54/45/36/34/29). Frozen here for the same reason as the tables below.
         /// </summary>
@@ -218,6 +235,11 @@ namespace IdleRPG.EditorTools
                         skipped++;
                         continue;
                     }
+                }
+                else if (label.font == UiTheme.Loud && OldLoudRoles.TryGetValue(size, out role))
+                {
+                    // A label already in the chrome face at a size the ladder no longer uses (55, 29, 28 ...).
+                    // Labels already on the new ladder do not match and are left alone.
                 }
                 else
                 {

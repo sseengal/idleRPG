@@ -30,5 +30,35 @@ namespace IdleRPG.UI
         {
             return rows <= 0 ? 0f : rows * RowHeight + (rows - 1) * RowGap;
         }
+
+        // ------------------------------------------------------------------
+        // Sheet buttons - one size for every stacked dialog button (pause, settings, "end this run?").
+        //
+        // ELI5: the buttons on a pop-up sheet all share one height, one gap and one width, so a sheet never looks
+        // home-made. A 2026-11-23 measurement of the pause sheet: 202-tall buttons with 82 between them and 209 of
+        // dead space under the last one - the box was 40% too tall and the caption could never fill it. These four
+        // numbers are the fix, and nothing else may pick its own.
+        // ------------------------------------------------------------------
+
+        /// <summary>The height of one sheet button. The touch minimum is also the standard: bigger is not better.</summary>
+        public const float SheetButtonHeight = MinTarget;
+
+        /// <summary>The gap between two sheet buttons (10% of their height).</summary>
+        public const float SheetButtonGap = UiSpace.Gutter;
+
+        /// <summary>The space under the last sheet button, so the stack never touches the panel's bottom rim.</summary>
+        public const float SheetBottomPad = UiSpace.Large;
+
+        /// <summary>The gap between the sheet's ribbon and its first button.</summary>
+        public const float SheetTopGap = UiSpace.Gutter + UiSpace.Hairline;
+
+        /// <summary>A sheet button's width as a fraction of the sheet: 0.60 of 864 is 518, a 3.6:1 button.</summary>
+        public const float SheetWidthFraction = 0.60f;
+
+        /// <summary>Total height of a stack of sheet buttons, gaps included.</summary>
+        public static float SheetStackHeight(int rows)
+        {
+            return rows <= 0 ? 0f : rows * SheetButtonHeight + (rows - 1) * SheetButtonGap;
+        }
     }
 }

@@ -12,8 +12,21 @@ namespace IdleRPG.UI
     /// </summary>
     public static class UiBanner
     {
-        /// <summary>Owner's width: the ribbon (tails included) spans three quarters of the panel.</summary>
-        public const float WidthFraction = 0.75f;
+        /// <summary>
+        /// Owner's width, tightened 2026-11-23: the ribbon (tails included) spans a little over half the panel.
+        /// At 0.75 it read as a second bar rather than a ribbon pinned to the sheet.
+        /// </summary>
+        public const float WidthFraction = 0.56f;
+
+        /// <summary>The ribbon's height in canvas units, or 0 when the skin has no ribbon art.</summary>
+        public static float Height
+        {
+            get
+            {
+                UiSkin skin = UiSkin.Current;
+                return skin.bannerSprite != null ? skin.bannerSprite.rect.height * skin.bannerScale : 0f;
+            }
+        }
 
         /// <summary>Room above the panel's top edge, above the inner bottom bands, to keep the words centred.</summary>
         private const float TextNudge = 2.5f;

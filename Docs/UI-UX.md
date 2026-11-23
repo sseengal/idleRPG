@@ -58,14 +58,26 @@ Every piece of text picks a **role**, never a number. The roles live in one file
 
 | Role | Size | Font | What it is for |
 |---|---|---|---|
-| Display | 55 | Lilita One | currency values, the reward number |
-| Title | 48 | Lilita One | card / screen / modal titles |
-| Section | 40 | Lilita One | section heads, button captions |
-| Sentence | 29 | Lilita One | effect lines outside the battle log |
-| Dialogue | 44 | Abaddon Light | every battle log line, including combat. Speaker names are gold; body text is near-white |
+| Display | 56 | Lilita One | currency values, the reward number |
+| Title | 48 | Lilita One | card / screen / modal titles, sheet button captions |
+| Section | 40 | Lilita One | section heads, boon rows, list rows |
+| Sentence | 34 | Lilita One | dialog bodies, settings status, item info |
+| Dialogue | 44 | Abaddon Light | every battle log line, including combat. Speaker names and body are the same white ink |
 | Damage | 32 | Lilita One | floating damage (crit text is x1.3) |
-| Small | 30 | Lilita One | nav tabs, tags, costs, column heads |
-| Micro | 28 | Lilita One | captions - never something the player must act on |
+| Small | 30 | Lilita One | nav tabs, tags, costs, column heads, version line |
+| Micro | 26 | Lilita One | captions - never something the player must act on |
+
+**The ladder rule (2026-11-23).** Neighbouring steps must be **12-20 % apart**, or the eye cannot tell them apart.
+Before this pass the bottom read 29 / 30 / 28 - three names for one visual size - so a caption and a body
+sentence looked alike. The steps are now 56 -> 48 -> 40 (17 / 20 %), 40 -> 34 (15 %), 34 -> 30 (12 %),
+30 -> 26 (13 %).
+
+**Sheet buttons (2026-11-23).** Every stacked dialog button takes its numbers from `UiTouch`, never from the
+screen: `SheetButtonHeight` 144 (the touch minimum is also the standard), `SheetButtonGap` 14,
+`SheetBottomPad` 24, `SheetWidthFraction` 0.60, caption role **Title**. The sheet sizes itself to its content, so
+3 rows, 4 rows and the confirm view each get a panel that fits. Measured on the pause sheet: panel 864 x 581
+(0.302 of the screen, was 1152), button 518 x 144 (3.6 : 1), gap 14 (was 82), bottom pad 24 (was 209), caption
+cap 23 % of the button (was 14 %). Ribbon width 0.56 of the panel (was 0.75).
 
 Rules that hold it together:
 - **One chrome face (2026-11-23).** Every label is **Lilita One**; only the battle log keeps **Abaddon Light**,
