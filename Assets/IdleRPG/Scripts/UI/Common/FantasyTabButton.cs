@@ -108,7 +108,9 @@ namespace IdleRPG.UI
                     frame.sprite = selected ? selectedFace : idleFace;
                     frame.type = Image.Type.Sliced;
                     frame.pixelsPerUnitMultiplier = faceBorderScale;
-                    frame.color = Color.white;
+
+                    // Selection reads as "full brightness", not as a gold bar (owner, 2026-11-23).
+                    frame.color = selected ? Color.white : UiTheme.TabIdleInk;
                 }
                 else
                 {
@@ -207,7 +209,8 @@ namespace IdleRPG.UI
             {
                 if (idleFace != null && selectedFace != null)
                 {
-                    // Art with its own colour: swap the sprite by state and keep the tint white.
+                    // Art with its own colour: swap the sprite by state, then tint so the selected tab is the bright
+                    // one and the rest sit back (owner, 2026-11-23: no gold in the tab bar).
                     Sprite wantSprite = selected ? selectedFace : idleFace;
 
                     if (frame.sprite != wantSprite)
@@ -215,8 +218,14 @@ namespace IdleRPG.UI
                         frame.sprite = wantSprite;
                         frame.type = Image.Type.Sliced;
                         frame.pixelsPerUnitMultiplier = faceBorderScale;
-                        frame.color = Color.white;
                     }
+
+                    Color wantInk = selected ? Color.white : UiTheme.TabIdleInk;
+                    Color ink = frame.color;
+                    Color nextInk = Color.Lerp(ink, wantInk, smooth);
+
+                    if (Near(nextInk, wantInk)) { nextInk = wantInk; }
+                    if (!Near(nextInk, ink)) { frame.color = nextInk; }
                 }
                 else
                 {

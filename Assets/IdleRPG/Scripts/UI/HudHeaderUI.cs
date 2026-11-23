@@ -81,6 +81,7 @@ namespace IdleRPG.UI
             {
                 gearMenu = gameObject.AddComponent<GearMenuUI>();
                 gearMenu.Initialize(gameManager);
+                gearMenu.SetCurrencyIcons(CurrencyIcon("GoldChip"), CurrencyIcon("GemChip"), CurrencyIcon("TokenChip"));
             }
 
             if (stageText != null)
@@ -113,6 +114,24 @@ namespace IdleRPG.UI
         /// <summary>
         /// The gear button at the right end of the chip row. It opens SETTINGS between runs and the PAUSE menu in a
         /// fight. One button, one meaning per state; it never opens an upgrade screen during a fight.
+        /// <summary>
+        /// The currency icon the header already draws, so the pause sheet's "you keep" list wears the same three
+        /// pictures as the HUD instead of shipping a second copy of each.
+        /// </summary>
+        private Sprite CurrencyIcon(string chipName)
+        {
+            Transform icon = transform.Find("ChipRow/" + chipName + "/Icon");
+
+            if (icon == null)
+            {
+                return null;
+            }
+
+            Image image = icon.GetComponent<Image>();
+            return image != null ? image.sprite : null;
+        }
+
+
         /// </summary>
         private void BuildMenuButton()
         {

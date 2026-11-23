@@ -282,9 +282,11 @@ namespace IdleRPG.UI
                 UiType.Role.Micro, TextAlignmentOptions.Center, UiTheme.Text);
             UiRuntime.Anchor(subtitle.rectTransform, new Vector2(0.05f, 0.84f), new Vector2(0.95f, 0.90f));
 
-            const float rowHeight = 0.215f;
-            const float rowGap = 0.015f;
-            const float rowTop = 0.80f;
+            // Rows and button on the spacing ladder (owner, 2026-11-23): 32-unit gaps, a 144-unit refresh button and
+            // a 32-unit edge. The fractions below are those units measured against the 1080x1920 canvas.
+            const float rowHeight = 0.200f;
+            const float rowGap = 0.0245f;      // 32 units
+            const float rowTop = 0.808f;
 
             for (int i = 0; i < RowCount; i++)
             {
@@ -293,7 +295,7 @@ namespace IdleRPG.UI
             }
 
             refreshButton = UiPlateButton.Create(panel.transform, "Refresh",
-                new Vector2(0.20f, 0.02f), new Vector2(0.80f, 0.10f), "REFRESH  1/1",
+                new Vector2(0.10f, 0.0245f), new Vector2(0.90f, 0.135f), "REFRESH  1/1",
                 UiType.Role.Small, UiTheme.Accent, UiTheme.Accent, OnRerollClicked, ButtonFace.Neutral);
 
             refreshLabel = refreshButton.GetComponentInChildren<TextMeshProUGUI>();

@@ -1,4 +1,5 @@
 using IdleRPG.Core;
+using IdleRPG.Utils;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -30,7 +31,10 @@ namespace IdleRPG.UI
         private TextMeshProUGUI status;
         private TextMeshProUGUI soundLabel;
         private TextMeshProUGUI confirmTitle;
-        private TextMeshProUGUI confirmBody;
+        private TextMeshProUGUI keepCaption;
+        private readonly TextMeshProUGUI[] keepValues = new TextMeshProUGUI[3];
+        private readonly Image[] keepIcons = new Image[3];
+        private readonly Sprite[] keepSprites = new Sprite[3];
         private UiPlateButton resumeButton;
         private UiPlateButton soundButton;
         private UiPlateButton quitButton;
@@ -47,9 +51,6 @@ namespace IdleRPG.UI
 
         /// <summary>The reference height the anchors are measured against (the canvas is 1080x1920).</summary>
         private const float ScreenHeight = 1920f;
-
-        /// <summary>How many lines the confirm body is allowed, so the sheet reserves the right height.</summary>
-        private const int ConfirmBodyLines = 2;
 
         public bool IsOpen => canvasRoot != null && canvasRoot.activeSelf;
 
@@ -318,8 +319,13 @@ namespace IdleRPG.UI
             confirmTitle = UiRuntime.CreateText(confirmGroup.transform, "Title", "END THIS RUN?",
                 UiType.Role.Title, TextAlignmentOptions.Center, UiTheme.Text);
 
-            confirmBody = UiRuntime.CreateText(confirmGroup.transform, "Body", string.Empty, UiType.Role.Sentence,
-                TextAlignmentOptions.Center, UiTheme.Text);
+            keepCaption = UiRuntime.CreateText(confirmGroup.transform, "KeepCaption", "YOU KEEP:",
+                UiType.Role.Small, TextAlignmentOptions.MidlineLeft, UiTheme.Text);
+
+            for (int i = 0; i < keepIcons.Length; i++)
+            {
+                BuildKeepRow(i);
+            }
 
             endRunButton = MakeButton(confirmGroup.transform, "EndRun", "END RUN", ButtonFace.Danger, OnConfirmEnd);
             keepFightingButton = MakeButton(confirmGroup.transform, "KeepFighting", "KEEP FIGHTING",
@@ -329,43 +335,148 @@ namespace IdleRPG.UI
         }
 
         /// <summary>
-        /// Sizes the sheet for the confirm view and lays out its heading, its two lines of body and its two buttons.
-        /// Same stack as the pause view, so the sheet shrinks to fit instead of leaving a hole at the foot.
+        /// One line of the "you keep" list: an icon and its amount. Built once and re-positioned with the panel, so a
+        /// sheet that grows for another currency needs no new layout code - only a longer array.
+        /// </summary>
+        private void BuildKeepRow(int index)
+        {
+            GameObject row = new GameObject("Keep" + index, typeof(RectTransform));
+            row.transform.SetParent(confirmGroup.transform, false);
+
+            Image icon = UiRuntime.CreatePanel(row.transform, keepSprites[index], Color.white, raycast: false);
+            icon.name = "Icon";
+            icon.preserveAspect = true;
+            keepIcons[index] = icon;
+
+            keepValues[index] = UiRuntime.CreateText(row.transform, "Value", "× 0", UiType.Role.Section,
+                TextAlignmentOptions.MidlineLeft, UiTheme.Text);
+        }
+
+        /// <summary>
+        /// Sizes the sheet for the confirm view: heading, the "you keep" caption, one row per currency, then the two
+        /// buttons. Every space comes from UiTouch/UiSpace, so this panel and the pause panel share one frame.
         /// </summary>
         private void PlaceConfirmSheet()
         {
             float titleLine = UiType.LineHeight(UiType.Role.Title);
-            float bodyBlock = UiType.LineHeight(UiType.Role.Sentence) * ConfirmBodyLines;
-            float text = titleLine + UiSpace.Space16 + bodyBlock;
+            float captionLine = UiType.LineHeight(UiType.Role.Small);
+            float rowsBlock = keepValues.Length * UiTouch.KeepRowHeight +
+                              (keepValues.Length - 1) * UiTouch.KeepRowGap;
 
-            SizeSheet(text + UiSpace.Space16 + UiTouch.SheetStackHeight(2));
-            PlaceConfirmText(titleLine, bodyBlock);
-            PlaceStack(new[] { endRunButton, keepFightingButton }, 0f);
-        }
+            float content = titleLine + UiSpace.Space32 + captionLine + UiSpace.Space8 + rowsBlock +
+                            UiSpace.Space32 + UiTouch.SheetStackHeight(2);
 
-        /// <summary>Heading and body hang from the ribbon, in the same band the pause view leaves empty above its stack.</summary>
-        private void PlaceConfirmText(float titleLine, float bodyBlock)
-        {
+            SizeSheet(content);
+
+            float padX = UiTouch.SheetPadX;
             float top = UiBanner.Height * 0.5f + UiTouch.SheetTopGap;
 
-            if (confirmTitle != null)
+            PlaceTextBlock(confirmTitle, top, titleLine, padX, TextAlignmentOptions.Center);
+
+            float captionTop = top + titleLine + UiSpace.Space32;
+            PlaceTextBlock(keepCaption, captionTop, captionLine, padX, TextAlignmentOptions.MidlineLeft);
+
+            float rowTop = captionTop + captionLine + UiSpace.Space8;
+
+            for (int i = 0; i < keepValues.Length; i++)
             {
-                RectTransform rect = confirmTitle.rectTransform;
-                rect.anchorMin = new Vector2(0.05f, 1f);
-                rect.anchorMax = new Vector2(0.95f, 1f);
-                rect.pivot = new Vector2(0.5f, 1f);
-                rect.sizeDelta = new Vector2(0f, titleLine);
-                rect.anchoredPosition = new Vector2(0f, -top);
+                PlaceKeepRow(i, rowTop);
+                rowTop += UiTouch.KeepRowHeight + UiTouch.KeepRowGap;
             }
 
-            if (confirmBody != null)
+            PlaceStack(new[] { endRunButton, keepFightingButton }, 0f);
+            FillKeepValues();
+        }
+
+        /// <summary>One label hanging from the top of the panel, full inner width, one line tall.</summary>
+        private static void PlaceTextBlock(TextMeshProUGUI label, float top, float height, float padX,
+            TextAlignmentOptions alignment)
+        {
+            if (label == null)
             {
-                RectTransform rect = confirmBody.rectTransform;
-                rect.anchorMin = new Vector2(0.08f, 1f);
-                rect.anchorMax = new Vector2(0.92f, 1f);
-                rect.pivot = new Vector2(0.5f, 1f);
-                rect.sizeDelta = new Vector2(0f, bodyBlock);
-                rect.anchoredPosition = new Vector2(0f, -(top + titleLine + UiSpace.Space16));
+                return;
+            }
+
+            label.alignment = alignment;
+
+            RectTransform rect = label.rectTransform;
+            rect.anchorMin = new Vector2(0f, 1f);
+            rect.anchorMax = new Vector2(1f, 1f);
+            rect.pivot = new Vector2(0.5f, 1f);
+            rect.offsetMin = new Vector2(padX, 0f);
+            rect.offsetMax = new Vector2(-padX, 0f);
+            rect.sizeDelta = new Vector2(rect.sizeDelta.x, height);
+            rect.anchoredPosition = new Vector2(rect.anchoredPosition.x, -top);
+        }
+
+        /// <summary>Icon on the left, amount beside it, both inside the panel's padding.</summary>
+        private void PlaceKeepRow(int index, float top)
+        {
+            if (keepIcons[index] == null)
+            {
+                return;
+            }
+
+            float padX = UiTouch.SheetPadX;
+            RectTransform row = (RectTransform)keepIcons[index].transform.parent;
+
+            row.anchorMin = new Vector2(0f, 1f);
+            row.anchorMax = new Vector2(1f, 1f);
+            row.pivot = new Vector2(0.5f, 1f);
+            row.offsetMin = new Vector2(padX, 0f);
+            row.offsetMax = new Vector2(-padX, 0f);
+            row.sizeDelta = new Vector2(row.sizeDelta.x, UiTouch.KeepRowHeight);
+            row.anchoredPosition = new Vector2(row.anchoredPosition.x, -top);
+
+            RectTransform icon = keepIcons[index].rectTransform;
+            icon.anchorMin = new Vector2(0f, 0.5f);
+            icon.anchorMax = new Vector2(0f, 0.5f);
+            icon.pivot = new Vector2(0f, 0.5f);
+            icon.sizeDelta = new Vector2(UiTouch.KeepIconSize, UiTouch.KeepIconSize);
+            icon.anchoredPosition = Vector2.zero;
+
+            RectTransform value = keepValues[index].rectTransform;
+            value.anchorMin = Vector2.zero;
+            value.anchorMax = Vector2.one;
+            value.pivot = new Vector2(0.5f, 0.5f);
+            value.offsetMin = new Vector2(UiTouch.KeepIconSize + UiSpace.Space16, 0f);
+            value.offsetMax = Vector2.zero;
+        }
+
+        /// <summary>Fills "you keep" from the wallet plus whatever this run banks, so the numbers are the truth.</summary>
+        private void FillKeepValues()
+        {
+            if (manager == null || manager.Economy == null)
+            {
+                return;
+            }
+
+            double tokens = manager.Economy.PrestigeTokens + manager.RunEndPreviewTokens;
+            double[] amounts = { manager.Economy.Gold, manager.Economy.Gems, tokens };
+
+            for (int i = 0; i < keepValues.Length && i < amounts.Length; i++)
+            {
+                if (keepValues[i] != null)
+                {
+                    keepValues[i].SetText("× " + NumberFormatter.Format(amounts[i]));
+                }
+            }
+        }
+
+        /// <summary>The header owns the three currency icons, so the sheet borrows them instead of shipping copies.</summary>
+        public void SetCurrencyIcons(Sprite gold, Sprite gem, Sprite token)
+        {
+            keepSprites[0] = gold;
+            keepSprites[1] = gem;
+            keepSprites[2] = token;
+
+            for (int i = 0; i < keepIcons.Length; i++)
+            {
+                if (keepIcons[i] != null)
+                {
+                    keepIcons[i].sprite = keepSprites[i];
+                    keepIcons[i].enabled = keepSprites[i] != null;
+                }
             }
         }
 
@@ -459,8 +570,7 @@ namespace IdleRPG.UI
                 return;
             }
 
-            int perks = Mathf.RoundToInt((float)manager.RunEndPreviewTokens);
-            confirmBody.SetText("You keep +" + perks + " Perk Points. This ends the run.");
+            // The sheet itself shows what the player keeps: gold, gems and the tokens this run banks.
             normalGroup.SetActive(false);
             confirmGroup.SetActive(true);
             PlaceConfirmSheet();

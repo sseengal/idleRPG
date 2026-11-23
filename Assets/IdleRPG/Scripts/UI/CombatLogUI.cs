@@ -35,10 +35,10 @@ namespace IdleRPG.UI
         [SerializeField] private float lineHeight = UiTheme.LogLineHeight;
 
         [Tooltip("Vertical gap between lines.")]
-        [SerializeField] private float lineSpacing = 4f;
+        [SerializeField] private float lineSpacing = UiSpace.Space4;
 
         [Tooltip("Padding above and below the list.")]
-        [SerializeField] private float contentPadding = 12f;
+        [SerializeField] private float contentPadding = UiSpace.Space16;
 
         [Header("Ink")]
         [Tooltip("One ink for every log line (owner, 2026-11-23): the log is white like the rest of the game. The " +

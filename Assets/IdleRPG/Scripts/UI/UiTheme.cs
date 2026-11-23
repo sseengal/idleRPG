@@ -87,6 +87,13 @@ namespace IdleRPG.UI
         public static readonly Color ContainerFace = new Color32(37, 46, 62, 255);
         /// <summary>The label on a button face.</summary>
         public static readonly Color ActionInk = new Color32(236, 240, 248, 255);
+
+        /// <summary>
+        /// Tint for an UNSELECTED tab when the skin has bar art: the art is already the slate bar, so selection is
+        /// shown by keeping the selected one at full brightness and dimming the rest (owner, 2026-11-23). This
+        /// replaced a gold selected bar - gold now means currency only.
+        /// </summary>
+        public static readonly Color TabIdleInk = new Color32(200, 208, 226, 255);
         // ------------------------------------------------------------------
         // Text inks, brightest to dimmest. Opaque on purpose: the old white-with-alpha inks turned into a
         // different colour on every backdrop. When text sits over art, it sits on a shade (ShadeBar), not on art.

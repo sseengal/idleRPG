@@ -357,12 +357,12 @@ namespace IdleRPG.UI
 
             FantasyTabButton view = frameRect.gameObject.AddComponent<FantasyTabButton>();
 
-            // Idle = the neutral bar, selected = the gold bar. The icon keeps its own colours (with a shadow),
-            // and the word is the one white ink in both states (owner, 2026-11-23: white everywhere, not dark).
+            // Idle = the slate bar, selected = the same bar at full brightness (no gold: gold means currency).
+            // The icon keeps its own colours (with a shadow), and the word is the one white ink in both states.
             view.Bind(tabRoot, frame, glow, text, effect, button,
                 UiTheme.NavIdle, UiTheme.NavSelected, UiTheme.Text, UiTheme.Text, icon, TabIconScale(tab),
                 TabIconSelectedScale(tab), TabIconVertical(tab), TabIconSelectedVertical(tab),
-                skin.neutralButtonSprite, skin.primaryButtonSprite, skin.buttonBorderScale);
+                skin.neutralButtonSprite, skin.neutralButtonSprite, skin.buttonBorderScale);
             return view;
         }
 

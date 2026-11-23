@@ -30,7 +30,7 @@ namespace IdleRPG.EditorTools
         private static HudHeaderUI BuildHeader(RectTransform safeArea)
         {
             Image header = ContainerPanel("Header", safeArea);
-            PinBar(header.rectTransform, top: true, HeaderBandHeight, UiSpace.ScreenMargin, UiSpace.ScreenMargin);
+            PinBar(header.rectTransform, top: true, HeaderBandHeight, UiSpace.PageMargin, UiSpace.PageMargin);
             HudHeaderUI view = header.gameObject.AddComponent<HudHeaderUI>();
 
             // The currency chips and the RANKS button share ONE row driven by a layout group, so they divide the
@@ -93,11 +93,22 @@ namespace IdleRPG.EditorTools
 
             Image icon = UiFactory.Icon("Icon", chip.transform, Color.white);
             icon.sprite = UiFactory.LoadSprite(iconSprite);
-            UiFactory.Anchor(icon.rectTransform, new Vector2(0.04f, 0.12f), new Vector2(0.30f, 0.88f));
+
+            // Padded, not percentage-placed: the icon sits a token in from the chip's left edge, the value starts a
+            // token after it, and the right edge keeps the same token (owner, 2026-11-23).
+            const float iconSize = 40f;
+            RectTransform iconRect = icon.rectTransform;
+            iconRect.anchorMin = new Vector2(0f, 0.5f);
+            iconRect.anchorMax = new Vector2(0f, 0.5f);
+            iconRect.pivot = new Vector2(0f, 0.5f);
+            iconRect.sizeDelta = new Vector2(iconSize, iconSize);
+            iconRect.anchoredPosition = new Vector2(UiSpace.Space16, 0f);
 
             TextMeshProUGUI value = UiFactory.Text("Value", chip.transform, "0", UiType.Role.Display,
                 TextAlignmentOptions.MidlineLeft, UiTheme.Text);
-            UiFactory.Anchor(value.rectTransform, new Vector2(0.32f, 0f), new Vector2(0.98f, 1f));
+            UiFactory.Anchor(value.rectTransform, Vector2.zero, Vector2.one,
+                UiSpace.Space16 + iconSize + UiSpace.Space8, UiSpace.Space4,
+                UiSpace.Space16, UiSpace.Space4);
 
             return value;
         }
@@ -153,7 +164,7 @@ namespace IdleRPG.EditorTools
         {
             GameObject viewport = UiFactory.Node("Viewport", pageRoot);
             viewportRect = viewport.GetComponent<RectTransform>();
-            UiFactory.Anchor(viewportRect, new Vector2(0f, XpBandTop), new Vector2(1f, StageRowMinY), UiSpace.ScreenMargin, UiSpace.Space8, UiSpace.ScreenMargin, UiSpace.Space8);
+            UiFactory.Anchor(viewportRect, new Vector2(0f, XpBandTop), new Vector2(1f, StageRowMinY), UiSpace.PageMargin, UiSpace.Space8, UiSpace.PageMargin, UiSpace.Space8);
 
             // Clips the cover-fitted backdrop so its overflow never draws over the header or combat log.
             viewport.AddComponent<RectMask2D>();
@@ -309,7 +320,7 @@ namespace IdleRPG.EditorTools
             GameObject stripObject = UiFactory.Node("AbilityStrip", pageRoot);
             RectTransform stripRect = stripObject.GetComponent<RectTransform>();
             UiFactory.Anchor(stripRect, new Vector2(0f, LogTop), new Vector2(1f, BattleViewportBottom),
-                UiSpace.ScreenMargin, UiSpace.Space8, UiSpace.ScreenMargin, UiSpace.Space8);
+                UiSpace.PageMargin, UiSpace.Space8, UiSpace.PageMargin, UiSpace.Space8);
 
             AbilityPanelUI panel = stripObject.AddComponent<AbilityPanelUI>();
             int buttons = heroCount < 1 ? 1 : heroCount;
@@ -468,7 +479,7 @@ namespace IdleRPG.EditorTools
         private static CombatLogUI BuildCombatLog(RectTransform pageRoot)
         {
             Image strip = ContainerPanel("CombatLog", pageRoot, raycast: true);
-            UiFactory.Anchor(strip.rectTransform, Vector2.zero, new Vector2(1f, LogTop), UiSpace.ScreenMargin, UiSpace.Space8, UiSpace.ScreenMargin, UiSpace.Space8);
+            UiFactory.Anchor(strip.rectTransform, Vector2.zero, new Vector2(1f, LogTop), UiSpace.PageMargin, UiSpace.Space8, UiSpace.PageMargin, UiSpace.Space8);
             CombatLogUI ui = strip.gameObject.AddComponent<CombatLogUI>();
 
             ScrollRect scroll = UiFactory.CreateScrollView(strip.transform, "Scroll", UiSpace.Space2, UiSpace.Padding(UiSpace.Space8, UiSpace.Space8), out RectTransform content, autoSizeContent: false);

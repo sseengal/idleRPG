@@ -47,16 +47,28 @@ namespace IdleRPG.UI
         public const float SheetButtonGap = UiSpace.Space32;
 
         /// <summary>The space under the last sheet button: the same rung as the side padding, so the stack is framed.</summary>
-        public const float SheetBottomPad = UiSpace.Space32;
+        public const float SheetBottomPad = UiSpace.Space64;
 
         /// <summary>The gap between the sheet's ribbon and its first button.</summary>
-        public const float SheetTopGap = UiSpace.Space16;
+        public const float SheetTopGap = UiSpace.Space32;
 
         /// <summary>
         /// The inset from the sheet's left and right rim to its buttons. Buttons fill what is left, so a sheet can
         /// never end up with a narrow button floating in a wide panel.
         /// </summary>
-        public const float SheetPadX = UiSpace.Space32;
+        public const float SheetPadX = UiSpace.Space64;
+
+        /// <summary>The inset from the sheet's top and bottom rim. Equal to the side inset: one frame, four equal sides.</summary>
+        public const float SheetPadY = UiSpace.Space64;
+
+        /// <summary>One currency row in the "you keep" list: icon plus amount.</summary>
+        public const float KeepRowHeight = 56f;
+
+        /// <summary>The icon in a "you keep" row.</summary>
+        public const float KeepIconSize = 40f;
+
+        /// <summary>The gap between two "you keep" rows.</summary>
+        public const float KeepRowGap = UiSpace.Space8;
 
         /// <summary>Total height of a stack of sheet buttons, gaps included.</summary>
         public static float SheetStackHeight(int rows)

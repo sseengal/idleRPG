@@ -39,6 +39,12 @@ namespace IdleRPG.UI
         /// <summary>The gap from the safe-area edge to a full-width bar, so every bar shares one edge.</summary>
         public const float ScreenMargin = Space16;
 
+        /// <summary>
+        /// The screen edge for the in-game chrome (header, combat log, camp strip, viewport). One rung wider than
+        /// <see cref="ScreenMargin"/> because a 16-unit edge is only ~6 dp on a phone and reads as touching the bezel.
+        /// </summary>
+        public const float PageMargin = Space32;
+
         /// <summary>The gap between two big sections on a page.</summary>
         public const float SectionGap = Space16;
 

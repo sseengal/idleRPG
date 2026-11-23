@@ -421,7 +421,7 @@ namespace IdleRPG.EditorTools
 
             UiFactory.Anchor(bar.GetComponent<RectTransform>(),
                 new Vector2(0f, XpBandBottom), new Vector2(1f, XpBandTop),
-                UiSpace.ScreenMargin, UiSpace.Space2, UiSpace.ScreenMargin, UiSpace.Space2);
+                UiSpace.Space8, UiSpace.Space2, UiSpace.Space8, UiSpace.Space2);
 
             bar.AddComponent<IdleRPG.UI.XpBarUI>();
         }
