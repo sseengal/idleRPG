@@ -419,23 +419,32 @@ true box centre reads low. `MvpSceneBuilder` prefers this file and falls back to
 **BATTLE tab (2026-11-22).** The tab returns to the lobby centre. It no longer begins a run - only the START
 button does. Before this, pressing BATTLE started a fight, which the owner reported as wrong.
 
-**Containers (2026-11-22).** One flat container shape everywhere: the owner's art, turned into a **tintable**
-copy (`Art/UI/Containers/container_panel_tint.png`, 82x17, white face, 30% bottom line, border 0/1/0/0 at
-`1f/7f`). The baked original is kept beside it for reference.
-- `UiRuntime.PlateSprite` now returns `UiSkin.containerSprite`, so **every plate** (panels, cards, the fallback
-  button face, ability cells, shop/training cards) wears the container shape and keeps its own palette tint.
-- `UiTheme.ContainerFace` (`#252E3E`) is the tint for the flat bands; `UiSkin.ApplyContainer(Image, tint?)`
-  paints one, and `MvpSceneBuilder.ContainerPanel(...)` does the same for scene-built bands.
-- Applied: header bar, stage row, combat log, camp strip, plus every runtime plate and card.
+**One component: `UiParts` (2026-11-23).** Every surface goes through it; screens pass a `PanelKind`, never a
+sprite or a colour.
 
-**Banners (2026-11-22).** `UiBanner.Build(panel, text)` is the only ribbon builder: art, width (75%),
-cap-height centring, nudge and the two-step shadow. Used by the pause/settings sheet (GAME PAUSED / SETTINGS)
-and the level-up sheet (LEVEL UP!). Any future sheet with a heading calls it; do not rebuild the ribbon by hand.
+| Kind | Art | Tint |
+|---|---|---|
+| `Frame` | `Art/UI/Frames/frame_panel.png` (the ornate 75x75; was `panel_pause.png`) | white, baked |
+| `Modal` | the blue container (tintable copy) | `UiTheme.ContainerFace` |
+| `Band` | blue container | `UiTheme.ContainerFace` |
+| `Card` | blue container | `UiTheme.SurfaceCard` |
+| `Chip` | blue container | `UiTheme.SurfaceRaised` |
 
-**Panel face (2026-11-22).** `UiSkin.sheetSprite` holds the owner's 75x75 frame (`Art/UI/Panels/panel_pause.png`,
-5 px rim, baked colour, gold top-left and brown bottom-right shading). The pause/settings sheet draws it white
-at `sheetBorderScale` (`1f / 7f` = 35 units of rim). Other panels still use `ui_frame` until the owner says
-which ones change.
+- `UiParts.Panel/Fill/Scrim/Banner` are the only builders a screen should call.
+- `UiSkin` still owns the art, inks and border scales; the skin fields are now `frameSprite` /
+  `frameBorderScale`, `containerSprite` / `containerBorderScale`, `bannerSprite` / `bannerScale`.
+- `ui_frame` (the old Kenney plate) is **gone from code**. `UiRuntime.PlateSprite` returns the container, the
+  lobby's private frame sprite is deleted, and the header no longer has a second fallback.
+
+**Level-up modal (2026-11-23).** Blue modal body + ribbon. Each boon row is the **neutral button** (the
+clickable part); the ornate **frame goes around the icon only** inside that row (owner, 2026-11-23). Panel
+y 0.16-0.84 so the dead band at the foot is gone; rows top 0.80, height 0.215, gap 0.015; REFRESH is neutral
+too. Card text is inset past the icon frame (0.34 left).
+
+**Gate (2026-11-23).** `Tools > Idle RPG > UI > Check UI Parts` scans the open scene and every prefab: an
+Image whose sprite is not a `UiSkin` part is reported to `Temp/ui-parts-report.txt`. Icons (`ui_icon*`) and
+backdrops (`* bg`) are allowed as pictures. Current state: **0 unmapped** (77+ images checked). Run it after
+any UI change; a non-empty report means someone bypassed `UiParts`.
 
 **Pause sheet layout (2026-11-22).**
 - Panel: x 0.10-0.90, y 0.20-0.80. Was y 0.14-0.86 - the empty band at the foot is gone.

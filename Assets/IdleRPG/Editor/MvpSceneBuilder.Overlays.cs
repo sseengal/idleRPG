@@ -38,14 +38,15 @@ namespace IdleRPG.EditorTools
             GameObject dialog = UiFactory.Node("Dialog", scrim.transform);
             UiFactory.Anchor(dialog.GetComponent<RectTransform>(), new Vector2(0.08f, 0.30f), new Vector2(0.92f, 0.74f));
 
-            // Two images: a solid light card, then the bordered frame on top of it. A bordered-only sprite reads as
-            // see-through against the dimmed battlefield.
-            Image background = UiFactory.Panel("Background", dialog.transform, "ui_panel_light",
-                Color.white, raycast: true);
-            UiFactory.Stretch(background.rectTransform);
+            // One container body (the same face as every modal); no second decorative frame over it.
+            Image background = ContainerPanel("Background", dialog.transform, raycast: true);
 
-            Image frame = UiFactory.Panel("Frame", dialog.transform, "ui_panel_bordered", Color.white);
-            UiFactory.Stretch(frame.rectTransform);
+            Sprite primaryFace = UiFactory.LoadSpriteAt("Assets/IdleRPG/Art/UI/Buttons/button_primary.png");
+            Sprite neutralFace = UiFactory.LoadSpriteAt("Assets/IdleRPG/Art/UI/Buttons/button_neutral.png");
+            IdleRPG.UI.UiSkin skin = AssetDatabase.LoadAssetAtPath<IdleRPG.UI.UiSkin>(
+                "Assets/IdleRPG/Resources/UiSkin.asset");
+            Color primaryInk = skin != null ? skin.primaryButtonInk : TextColor;
+            Color neutralInk = skin != null ? skin.neutralButtonInk : TextColor;
 
             TextMeshProUGUI title = UiFactory.Text("Title", dialog.transform, "Welcome back!", UiType.Role.Title,
                 TextAlignmentOptions.Center, TextColor);
@@ -65,11 +66,11 @@ namespace IdleRPG.EditorTools
 
             // Wider than the old pair: "DOUBLE WITH AD" at the section size needs the room, and the label still says
             // an ad is involved (auto-sized as a safety net).
-            Button doubleButton = UiFactory.Button("DoubleButton", dialog.transform, "DOUBLE WITH AD", "ui_button", UiType.Role.Section, TextColor, null);
+            Button doubleButton = UiFactory.ButtonFromSprite("DoubleButton", dialog.transform, "DOUBLE WITH AD", neutralFace, UiType.Role.Section, neutralInk, null);
             UiFactory.Anchor(doubleButton.GetComponent<RectTransform>(), new Vector2(0.04f, 0.07f), new Vector2(0.48f, 0.27f));
             UiType.ApplyAuto(doubleButton.GetComponentInChildren<TextMeshProUGUI>(), UiType.Role.Section);
 
-            Button claimButton = UiFactory.Button("ClaimButton", dialog.transform, "CLAIM", "ui_button_gold", UiType.Role.Section, TextColor, null);
+            Button claimButton = UiFactory.ButtonFromSprite("ClaimButton", dialog.transform, "CLAIM", primaryFace, UiType.Role.Section, primaryInk, null);
             UiFactory.Anchor(claimButton.GetComponent<RectTransform>(), new Vector2(0.52f, 0.07f), new Vector2(0.96f, 0.27f));
 
             title.overflowMode = TextOverflowModes.Ellipsis;
@@ -125,10 +126,15 @@ namespace IdleRPG.EditorTools
             // height (144 units) to be a fair thumb target, and the four text bands need their room above them.
             UiFactory.Anchor(dialog.GetComponent<RectTransform>(), new Vector2(0.08f, 0.30f), new Vector2(0.92f, 0.72f));
 
-            Image background = UiFactory.Panel("Background", dialog.transform, "ui_panel_light", Color.white, raycast: true);
-            UiFactory.Stretch(background.rectTransform);
-            Image frame = UiFactory.Panel("Frame", dialog.transform, "ui_panel_bordered", Color.white);
-            UiFactory.Stretch(frame.rectTransform);
+            // The modal body is the shared container (UiParts.Modal), and the two buttons use the skin's faces.
+            Image background = ContainerPanel("Background", dialog.transform, raycast: true);
+
+            Sprite primaryFace = UiFactory.LoadSpriteAt("Assets/IdleRPG/Art/UI/Buttons/button_primary.png");
+            Sprite dangerFace = UiFactory.LoadSpriteAt("Assets/IdleRPG/Art/UI/Buttons/button_danger.png");
+            IdleRPG.UI.UiSkin skin = AssetDatabase.LoadAssetAtPath<IdleRPG.UI.UiSkin>(
+                "Assets/IdleRPG/Resources/UiSkin.asset");
+            Color primaryInk = skin != null ? skin.primaryButtonInk : TextColor;
+            Color dangerInk = skin != null ? skin.dangerButtonInk : TextColor;
 
             TextMeshProUGUI title = UiFactory.Text("Title", dialog.transform, "RUN OVER", UiType.Role.Title,
                 TextAlignmentOptions.Center, TextColor);
@@ -146,10 +152,10 @@ namespace IdleRPG.EditorTools
                 TextAlignmentOptions.Center, DimTextColor);
             UiFactory.Anchor(countdown.rectTransform, new Vector2(0.06f, 0.22f), new Vector2(0.94f, 0.38f));
 
-            Button ascendButton = UiFactory.Button("AscendButton", dialog.transform, "REVIVE", "ui_button_gold", UiType.Role.Section, TextColor, null);
+            Button ascendButton = UiFactory.ButtonFromSprite("AscendButton", dialog.transform, "REVIVE", primaryFace, UiType.Role.Section, primaryInk, null);
             UiFactory.Anchor(ascendButton.GetComponent<RectTransform>(), new Vector2(0.06f, 0.05f), new Vector2(0.47f, 0.23f));
 
-            Button continueButton = UiFactory.Button("ContinueButton", dialog.transform, "END RUN", "ui_button", UiType.Role.Section, TextColor, null);
+            Button continueButton = UiFactory.ButtonFromSprite("ContinueButton", dialog.transform, "END RUN", dangerFace, UiType.Role.Section, dangerInk, null);
             UiFactory.Anchor(continueButton.GetComponent<RectTransform>(), new Vector2(0.53f, 0.05f), new Vector2(0.94f, 0.23f));
 
             summary.overflowMode = TextOverflowModes.Ellipsis;

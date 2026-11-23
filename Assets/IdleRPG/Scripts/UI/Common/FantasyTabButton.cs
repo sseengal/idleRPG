@@ -97,13 +97,30 @@ namespace IdleRPG.UI
                 glow.color = c;
             }
 
-            // Draw the right face now, so the first frame never flashes the tintable plate.
-            if (frame != null && idleFace != null && selectedFace != null)
+            // Draw the right face now, so the first frame never flashes an empty tab.
+            if (frame != null)
             {
-                frame.sprite = selected ? selectedFace : idleFace;
-                frame.type = Image.Type.Sliced;
-                frame.pixelsPerUnitMultiplier = faceBorderScale;
-                frame.color = Color.white;
+                if (idleFace != null && selectedFace != null)
+                {
+                    frame.sprite = selected ? selectedFace : idleFace;
+                    frame.type = Image.Type.Sliced;
+                    frame.pixelsPerUnitMultiplier = faceBorderScale;
+                    frame.color = Color.white;
+                }
+                else
+                {
+                    // No button art in the skin: fall back to the shared container plate, tinted at runtime.
+                    Sprite plate = UiSkin.Current.containerSprite;
+
+                    if (plate != null)
+                    {
+                        frame.sprite = plate;
+                        frame.type = Image.Type.Sliced;
+                        frame.pixelsPerUnitMultiplier = UiSkin.Current.containerBorderScale;
+                    }
+
+                    frame.color = selected ? activeFill : idleFill;
+                }
             }
 
             Refresh();

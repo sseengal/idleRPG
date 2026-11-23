@@ -17,8 +17,8 @@ MonoBehaviour:
   primaryButtonSprite: {fileID: 21300000, guid: 09edb7b5d091a41f4a4dfea44f461753, type: 3}
   dangerButtonSprite: {fileID: 21300000, guid: a338b3ce9f8eb4615b9dcbaa3466d002, type: 3}
   neutralButtonSprite: {fileID: 21300000, guid: e1623fac113cf4bcbb02c4d32516491b, type: 3}
-  sheetSprite: {fileID: 21300000, guid: 12fb6d836c3054ea69731fa207d70fed, type: 3}
-  sheetBorderScale: 0.14285715
+  frameSprite: {fileID: 21300000, guid: 12fb6d836c3054ea69731fa207d70fed, type: 3}
+  frameBorderScale: 0.14285715
   bannerSprite: {fileID: 21300000, guid: a30e8246a4d0d49868e808bbfede21e1, type: 3}
   bannerScale: 7
   bannerInk: {r: 0.9254902, g: 0.9411765, b: 0.972549, a: 1}

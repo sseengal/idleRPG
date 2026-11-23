@@ -120,11 +120,6 @@ namespace IdleRPG.UI
 
                 plateSprite = UiSkin.Current.containerSprite;
 
-                if (plateSprite == null)
-                {
-                    plateSprite = Resources.Load<Sprite>("ui_frame");
-                }
-
                 return plateSprite;
             }
         }

@@ -160,7 +160,7 @@ namespace IdleRPG.UI
 
             Image card = chapterArt != null
                 ? ArtPanel(lobby.transform, "ChapterCard", new Vector2(0.10f, 0.4144f), new Vector2(0.90f, 0.66f), chapterArt)
-                : Panel(lobby.transform, "ChapterCard", new Vector2(0.10f, 0.38f), new Vector2(0.90f, 0.66f), UiTheme.NavIdle, Frame);
+                : UiParts.Panel(lobby.transform, "ChapterCard", new Vector2(0.10f, 0.38f), new Vector2(0.90f, 0.66f), PanelKind.Card);
 
             // Chapter title: small faded "Chapter 1" over a big "Greenwake". Rect centres sit ~0.02 apart
             // so the two read as ONE tight kicker, and hug the panel top (proximity grouping).
@@ -323,9 +323,6 @@ namespace IdleRPG.UI
 
             RectTransform frameRect = Rect("Frame", tabRoot, Vector2.zero, Vector2.one);
             Image frame = frameRect.gameObject.AddComponent<Image>();
-            frame.sprite = Frame;
-            frame.type = Image.Type.Sliced;
-            frame.color = UiTheme.NavIdle;
             frame.raycastTarget = true;
 
             Button button = frameRect.gameObject.AddComponent<Button>();
@@ -526,21 +523,6 @@ namespace IdleRPG.UI
             return rt;
         }
 
-        /// <summary>The tintable bevel frame, loaded once and reused by every lobby panel and button.</summary>
-        private static Sprite frameSprite;
-        private static Sprite Frame
-        {
-            get
-            {
-                if (frameSprite == null)
-                {
-                    frameSprite = Resources.Load<Sprite>("ui_frame");
-                }
-
-                return frameSprite;
-            }
-        }
-
         // Atmosphere sprites are built in code and cached: no new art, one tiny gradient + two small radial
         // textures. They add depth (light + shadow) without touching the chapter art or the START button.
         private static Sprite gradientSprite;
@@ -622,19 +604,20 @@ namespace IdleRPG.UI
             return img;
         }
 
+        /// <summary>A lobby page surface: through UiParts, so every page shares one container shape.</summary>
         private static Image Panel(Transform parent, string name, Vector2 aMin, Vector2 aMax, Color color,
             Sprite sprite = null)
         {
+            if (sprite == null)
+            {
+                return UiParts.Panel(parent, name, aMin, aMax, PanelKind.Card, tint: color);
+            }
+
             RectTransform rt = Rect(name, parent, aMin, aMax);
             Image img = rt.gameObject.AddComponent<Image>();
             img.color = color;
-
-            if (sprite != null)
-            {
-                img.sprite = sprite;
-                img.type = Image.Type.Sliced;
-            }
-
+            img.sprite = sprite;
+            img.type = Image.Type.Sliced;
             return img;
         }
 

@@ -34,7 +34,7 @@ namespace IdleRPG.EditorTools
             GameObject viewRoot = UiFactory.Node("CampView", viewport);
             UiFactory.Stretch(viewRoot.GetComponent<RectTransform>());
 
-            Image dim = UiFactory.Panel("Dim", viewRoot.transform, "ui_panel",
+            Image dim = UiFactory.Panel("Dim", viewRoot.transform, (string)null,
                 new Color(0f, 0f, 0f, 0.80f), raycast: false);
             UiFactory.Stretch(dim.rectTransform);
 
@@ -50,8 +50,7 @@ namespace IdleRPG.EditorTools
                 UiType.Role.Micro, TextAlignmentOptions.Center, UiTheme.AccentLight);
             UiFactory.Anchor(training.rectTransform, new Vector2(0.20f, 0.75f), new Vector2(0.80f, 0.80f));
 
-            Image fire = UiFactory.Panel("Fire", viewRoot.transform, "ui_panel_bordered",
-                new Color(0.42f, 0.28f, 0.16f, 1f), raycast: false);
+            Image fire = ContainerPanel("Fire", viewRoot.transform, tint: new Color(0.42f, 0.28f, 0.16f, 1f));
             UiFactory.CenterOn(fire.rectTransform, new Vector2(0.5f, CampFireY), new Vector2(240f, 110f));
 
             Image[] actors = new Image[3];

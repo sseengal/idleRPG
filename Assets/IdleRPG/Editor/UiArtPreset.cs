@@ -35,7 +35,7 @@ namespace IdleRPG.EditorTools
             // 75x75 frame: the rim is 5 px on every side (measured: the face starts at 5 and ends at 69).
             new ArtSet
             {
-                Folder = "Assets/IdleRPG/Art/UI/Panels",
+                Folder = "Assets/IdleRPG/Art/UI/Frames",
                 Border = new Vector4(5f, 5f, 5f, 5f),
                 What = "panels"
             },

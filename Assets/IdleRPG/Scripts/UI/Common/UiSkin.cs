@@ -56,12 +56,12 @@ namespace IdleRPG.UI
         [Tooltip("Slate. A secondary action: CANCEL, CLOSE, SOUND.")]
         public Sprite neutralButtonSprite;
 
-        [Header("Panels (75x75 frame, 5/5/5/5 border, baked colour)")]
-        [Tooltip("The sheet/modal face: settings, pause. Drawn white-tinted because the art carries its own colour.")]
-        public Sprite sheetSprite;
+        [Header("Frame (75x75 gold-rimmed sheet frame, 5/5/5/5 border, baked colour)")]
+        [Tooltip("The ornate frame: pause/settings sheet, framed cards. Drawn white-tinted.")]
+        public Sprite frameSprite;
 
         [Tooltip("Image.pixelsPerUnitMultiplier DIVIDES the border. 1/7 shows the 5 px rim as 35 units.")]
-        public float sheetBorderScale = 1f / 7f;
+        public float frameBorderScale = 1f / 7f;
 
         [Header("Banner (95x23 ribbon, 8/0/8/0 border, baked colour)")]
         [Tooltip("The ribbon that sits across a sheet's top edge. Drawn white-tinted at bannerScale.")]

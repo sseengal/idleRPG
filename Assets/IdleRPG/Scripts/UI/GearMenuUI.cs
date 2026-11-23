@@ -136,18 +136,8 @@ namespace IdleRPG.UI
             Image scrim = UiRuntime.CreatePanel(canvasRoot.transform, null, UiTheme.ScrimSoft, raycast: true);
             UiRuntime.Anchor(scrim.rectTransform, Vector2.zero, Vector2.one);
 
-            Image panel = UiRuntime.Plate(canvasRoot.transform, "Panel",
-                new Vector2(0.10f, 0.20f), new Vector2(0.90f, 0.80f), UiTheme.SheetFace, raycast: true);
-
-            // The sheet art carries its own colour, so it is drawn white (no tint) at its own border scale.
-            UiSkin skin = UiSkin.Current;
-            if (skin.sheetSprite != null)
-            {
-                panel.sprite = skin.sheetSprite;
-                panel.type = Image.Type.Sliced;
-                panel.color = Color.white;
-                panel.pixelsPerUnitMultiplier = skin.sheetBorderScale;
-            }
+            Image panel = UiParts.Panel(canvasRoot.transform, "Panel",
+                new Vector2(0.10f, 0.20f), new Vector2(0.90f, 0.80f), PanelKind.Frame, raycast: true);
 
             BuildBanner(panel.transform);
 

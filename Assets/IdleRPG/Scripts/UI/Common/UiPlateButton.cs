@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// The plate button every screen shares: the ui_frame face, a smooth idle/selected colour hand-off, a press
+    /// The plate button every screen shares: the container face, a smooth idle/selected colour hand-off, a press
     /// squash, and a true grayscale when disabled (UIEffect).
     ///
     /// ELI5: the one button recipe. It wears the same 9-slice plate as everything else, but the plate's border is

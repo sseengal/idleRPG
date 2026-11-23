@@ -180,6 +180,58 @@ namespace IdleRPG.EditorTools
         }
 
         /// <summary>Loads a generated placeholder sprite by file name (without extension).</summary>
+        /// <summary>Loads a sprite by full asset path (the UI parts live outside the placeholder folder).</summary>
+        public static Sprite LoadSpriteAt(string assetPath)
+        {
+            if (string.IsNullOrEmpty(assetPath))
+            {
+                return null;
+            }
+
+            Sprite sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+
+            if (sprite == null)
+            {
+                Debug.LogWarning($"[UiFactory] Missing sprite at '{assetPath}'.");
+            }
+
+            return sprite;
+        }
+
+        /// <summary>A sliced panel from a sprite asset (no placeholder lookup).</summary>
+        public static Image PanelFromSprite(string name, Transform parent, Sprite sprite, Color color, bool raycast = false)
+        {
+            Image image = Panel(name, parent, (string)null, color, raycast);
+
+            if (sprite != null)
+            {
+                image.sprite = sprite;
+                image.type = Image.Type.Sliced;
+            }
+
+            return image;
+        }
+
+        /// <summary>A button from a sprite asset, with its own face colour and ink.</summary>
+        public static Button ButtonFromSprite(string name, Transform parent, string label, Sprite sprite,
+            UiType.Role role, Color textColor, UnityAction onClick)
+        {
+            Image background = PanelFromSprite(name, parent, sprite, Color.white, raycast: true);
+            Button button = background.gameObject.AddComponent<Button>();
+            button.targetGraphic = background;
+
+            TextMeshProUGUI text = Text("Label", background.transform, label, role,
+                TextAlignmentOptions.Center, textColor);
+            Stretch(text.rectTransform, UiSpace.LabelPadX, UiSpace.LabelPadY, UiSpace.LabelPadX, UiSpace.LabelPadY);
+
+            if (onClick != null)
+            {
+                button.onClick.AddListener(onClick);
+            }
+
+            return button;
+        }
+
         public static Sprite LoadSprite(string spriteName)
         {
             if (string.IsNullOrEmpty(spriteName))

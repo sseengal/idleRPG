@@ -105,8 +105,9 @@ namespace IdleRPG.UI
             ProgressionTrack track = sku == null ? foundryTrack : default;
             bool isFoundry = sku == null;
 
-            Image card = UiRuntime.Plate(shopPanel.transform, "Card_" + name,
-                new Vector2(0.03f, yMin), new Vector2(0.97f, yMax), UiTheme.InkHint, raycast: true);
+            Image card = UiParts.Panel(shopPanel.transform, "Card_" + name,
+                new Vector2(0.03f, yMin), new Vector2(0.97f, yMax), PanelKind.Card, raycast: true,
+                tint: UiTheme.InkHint);
 
             TextMeshProUGUI nameLabel = UiRuntime.CreateText(card.transform, "Name", name,
                 UiType.Role.Section, TextAlignmentOptions.MidlineLeft, UiTheme.Text);

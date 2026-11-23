@@ -270,61 +270,58 @@ namespace IdleRPG.UI
             UiRuntime.Stretch(rootRect);
 
             // Scrim: also the raycast catcher, so a tap can never reach the fight behind the card.
-            Image scrim = UiRuntime.CreatePanel(root.transform, null, UiTheme.Scrim, raycast: true);
-            UiRuntime.Stretch(scrim.rectTransform);
+            Image scrim = UiParts.Scrim(root.transform);
 
-            Image panel = UiRuntime.Plate(scrim.transform, "Panel",
-                new Vector2(0.04f, 0.06f), new Vector2(0.96f, 0.94f), UiTheme.FaceDim);
+            Image panel = UiParts.Panel(scrim.transform, "Panel",
+                new Vector2(0.04f, 0.16f), new Vector2(0.96f, 0.84f), PanelKind.Modal, raycast: true);
 
             // Same ribbon as the pause sheet: the sheet's heading lives on the banner, not in the body.
-            UiBanner.Build(panel.transform, "LEVEL UP!");
+            UiParts.Banner(panel.transform, "LEVEL UP!");
 
             subtitle = UiRuntime.CreateText(panel.transform, "Subtitle", "CHOOSE A BOON",
                 UiType.Role.Micro, TextAlignmentOptions.Center, UiTheme.TextDim);
-            UiRuntime.Anchor(subtitle.rectTransform, new Vector2(0.05f, 0.83f), new Vector2(0.95f, 0.88f));
+            UiRuntime.Anchor(subtitle.rectTransform, new Vector2(0.05f, 0.84f), new Vector2(0.95f, 0.90f));
 
-            const float rowHeight = 0.235f;
-            const float rowTop = 0.81f;
+            const float rowHeight = 0.215f;
+            const float rowGap = 0.015f;
+            const float rowTop = 0.80f;
 
             for (int i = 0; i < RowCount; i++)
             {
-                float top = rowTop - i * rowHeight;
-                rows.Add(BuildRow(panel.transform, top, top - (rowHeight - 0.02f), i));
+                float top = rowTop - i * (rowHeight + rowGap);
+                rows.Add(BuildRow(panel.transform, top, top - rowHeight, i));
             }
 
             refreshButton = UiPlateButton.Create(panel.transform, "Refresh",
                 new Vector2(0.20f, 0.02f), new Vector2(0.80f, 0.10f), "REFRESH  1/1",
-                UiType.Role.Small, UiTheme.Accent, UiTheme.Accent, OnRerollClicked, ButtonFace.Primary);
+                UiType.Role.Small, UiTheme.Accent, UiTheme.Accent, OnRerollClicked, ButtonFace.Neutral);
 
             refreshLabel = refreshButton.GetComponentInChildren<TextMeshProUGUI>();
         }
 
-        /// <summary>One card: rarity tag, placeholder badge, name, target, effects.</summary>
+        /// <summary>
+        /// One boon card: the CLICKABLE part is the neutral button; the ornate frame goes around the ICON only
+        /// (owner, 2026-11-23). Content is inset past the frame rim.
+        /// </summary>
         private Row BuildRow(Transform parent, float top, float bottom, int index)
         {
             Row row = new Row();
 
-            Image background = UiRuntime.Plate(parent, "Boon" + index,
-                new Vector2(0.05f, bottom), new Vector2(0.95f, top), UiTheme.CardDark, raycast: true);
+            UiPlateButton plate = UiPlateButton.Create(parent, "Boon" + index,
+                new Vector2(0.02f, bottom), new Vector2(0.98f, top), string.Empty, UiType.Role.Micro,
+                Color.white, Color.white, () => OnCardClicked(row), ButtonFace.Neutral);
+
+            Image background = plate.GetComponent<Image>();
             row.Background = background;
             row.Root = background.gameObject;
+            row.Button = plate.Button;
 
-            Button button = background.gameObject.AddComponent<Button>();
-            button.targetGraphic = background;
-            button.onClick.AddListener(() => OnCardClicked(row));
-            row.Button = button;
+            Image iconFrame = UiParts.Panel(background.transform, "IconFrame",
+                new Vector2(0.03f, 0.10f), new Vector2(0.30f, 0.90f), PanelKind.Frame, raycast: false);
 
-            // The row is a plate button too: the same press squash and disabled grayscale as every other button.
-            Coffee.UIEffects.UIEffect effect = background.gameObject.AddComponent<Coffee.UIEffects.UIEffect>();
-            UiPlateButton plate = background.gameObject.AddComponent<UiPlateButton>();
-            plate.Bind(background.rectTransform, background, null, effect, button, UiTheme.CardDark, UiTheme.CardDark);
-
-            row.Rarity = UiRuntime.CreateText(background.transform, "Rarity", "COMMON",
-                UiType.Role.Micro, TextAlignmentOptions.MidlineLeft, UiTheme.TextDim);
-            UiRuntime.Anchor(row.Rarity.rectTransform, new Vector2(0.04f, 0.84f), new Vector2(0.32f, 0.96f));
-
-            row.Icon = UiRuntime.CreatePanel(background.transform, null, UiTheme.IconWell);
-            UiRuntime.Anchor(row.Icon.rectTransform, new Vector2(0.04f, 0.12f), new Vector2(0.26f, 0.78f));
+            row.Icon = UiRuntime.CreatePanel(iconFrame.transform, null, UiTheme.IconWell);
+            row.Icon.gameObject.name = "Icon";
+            UiRuntime.Anchor(row.Icon.rectTransform, new Vector2(0.18f, 0.18f), new Vector2(0.82f, 0.82f));
 
             row.IconArt = UiRuntime.CreateIcon("Art", row.Icon.transform);
             UiRuntime.Stretch(row.IconArt.rectTransform);
@@ -334,17 +331,21 @@ namespace IdleRPG.UI
                 UiType.Role.Section, TextAlignmentOptions.Center, UiTheme.Text);
             UiRuntime.Stretch(row.IconLetter.rectTransform);
 
+            row.Rarity = UiRuntime.CreateText(background.transform, "Rarity", "COMMON",
+                UiType.Role.Micro, TextAlignmentOptions.MidlineLeft, UiTheme.TextDim);
+            UiRuntime.Anchor(row.Rarity.rectTransform, new Vector2(0.34f, 0.74f), new Vector2(0.62f, 0.92f));
+
             row.Name = UiRuntime.CreateText(background.transform, "Name", "Boon",
                 UiType.Role.Small, TextAlignmentOptions.MidlineLeft, UiTheme.Text);
-            UiRuntime.Anchor(row.Name.rectTransform, new Vector2(0.30f, 0.62f), new Vector2(0.97f, 0.88f));
+            UiRuntime.Anchor(row.Name.rectTransform, new Vector2(0.34f, 0.50f), new Vector2(0.96f, 0.74f));
 
             row.Target = UiRuntime.CreateText(background.transform, "Target", "All heroes",
                 UiType.Role.Micro, TextAlignmentOptions.MidlineLeft, UiTheme.TextDim);
-            UiRuntime.Anchor(row.Target.rectTransform, new Vector2(0.30f, 0.46f), new Vector2(0.97f, 0.62f));
+            UiRuntime.Anchor(row.Target.rectTransform, new Vector2(0.34f, 0.36f), new Vector2(0.96f, 0.50f));
 
             row.Description = UiRuntime.CreateText(background.transform, "Description", "+10% attack",
                 UiType.Role.Micro, TextAlignmentOptions.TopLeft, UiTheme.Text);
-            UiRuntime.Anchor(row.Description.rectTransform, new Vector2(0.30f, 0.08f), new Vector2(0.97f, 0.44f));
+            UiRuntime.Anchor(row.Description.rectTransform, new Vector2(0.34f, 0.10f), new Vector2(0.96f, 0.36f));
 
             return row;
         }

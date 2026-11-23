@@ -58,7 +58,7 @@ namespace IdleRPG.EditorTools
 
             // Boost chip: hidden until an ad boost is running. It stays on the HEADER, not in the row - it is an
             // overlay badge, not a fourth currency, so the layout group must not size it.
-            Image boostChip = KitPanel("BoostChip", header.transform, UiTheme.Accent);
+            Image boostChip = ContainerPanel("BoostChip", header.transform, tint: UiTheme.Accent);
             UiFactory.Anchor(boostChip.rectTransform, new Vector2(0.03f, 0.20f), new Vector2(0.53f, 0.92f));
 
             TextMeshProUGUI boostText = UiFactory.Text("BoostLabel", boostChip.transform, "x2", UiType.Role.Section,
@@ -85,7 +85,7 @@ namespace IdleRPG.EditorTools
         /// </summary>
         private static TextMeshProUGUI CreateCurrencyChip(Transform parent, string name, string iconSprite)
         {
-            Image chip = KitPanel(name, parent, UiTheme.PanelLight);
+            Image chip = ContainerPanel(name, parent, tint: UiTheme.PanelLight);
             LayoutElement element = chip.gameObject.AddComponent<LayoutElement>();
             element.flexibleWidth = 1f;
 
@@ -441,7 +441,7 @@ namespace IdleRPG.EditorTools
         /// A flat container band (header, stage row, log, camp strip) in the owner's container art: one face,
         /// one 1 px bottom line, no rivets. Falls back to the old kit plate when the sprite is missing.
         /// </summary>
-        private static Image ContainerPanel(string name, Transform parent, bool raycast = false)
+        private static Image ContainerPanel(string name, Transform parent, bool raycast = false, Color? tint = null)
         {
             Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(
                 "Assets/IdleRPG/Art/UI/Containers/container_panel_tint.png");
@@ -452,7 +452,7 @@ namespace IdleRPG.EditorTools
                 return KitPanel(name, parent, UiTheme.Panel, raycast);
             }
 
-            Image image = UiFactory.Icon(name, parent, UiTheme.ContainerFace, false);
+            Image image = UiFactory.Icon(name, parent, tint ?? UiTheme.ContainerFace, false);
             image.sprite = sprite;
             image.type = Image.Type.Sliced;
             image.pixelsPerUnitMultiplier = 1f / 7f;

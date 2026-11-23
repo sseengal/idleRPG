@@ -124,9 +124,10 @@ namespace IdleRPG.UI
         /// </summary>
         public static AbilityCellView Build(Transform parent, int index)
         {
-            // The cell is a BUTTON with the app's own face: the shared ui_frame plate in ButtonBlue, the colour every
+            // The cell is a BUTTON with the app's own face: the shared container plate in ButtonBlue, the colour every
             // other button in the game wears. It carries the press squash and the grayscale lock for free.
-            Image face = UiRuntime.Plate(parent, "Hero" + index, Vector2.zero, Vector2.one, UiTheme.ButtonBlue, raycast: true);
+            Image face = UiParts.Panel(parent, "Hero" + index, Vector2.zero, Vector2.one, PanelKind.Card,
+                raycast: true, tint: UiTheme.ButtonBlue);
             face.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1f;
 
             Button button = face.gameObject.AddComponent<Button>();

@@ -222,17 +222,6 @@ namespace IdleRPG.UI
             {
                 return;
             }
-
-            Sprite frame = Resources.Load<Sprite>("ui_frame");
-
-            if (frame == null)
-            {
-                return;
-            }
-
-            plate.sprite = frame;
-            plate.type = Image.Type.Sliced;
-            plate.color = UiTheme.NavIdle;
         }
 
         private void OnCurrencyChanged(CurrencyType currencyType, double amount)
