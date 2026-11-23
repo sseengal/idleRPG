@@ -72,7 +72,7 @@ namespace IdleRPG.EditorTools
             viewRoot.SetActive(false);
 
             // The choices replace the ability strip, in the exact same band, so the player's hand does not move.
-            Image strip = KitPanel("CampStrip", battlePage, UiTheme.Panel, raycast: true);
+            Image strip = ContainerPanel("CampStrip", battlePage, raycast: true);
             UiFactory.Anchor(strip.rectTransform, new Vector2(0f, LogTop), new Vector2(1f, BattleViewportBottom),
                 UiSpace.ScreenMargin, UiSpace.Snug, UiSpace.ScreenMargin, UiSpace.Snug);
 

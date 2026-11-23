@@ -208,13 +208,24 @@ namespace IdleRPG.UI
             }
         }
 
-        /// <summary>Gives the header bar the chunky riveted plate used by the lobby, so both pages match.</summary>
+        /// <summary>Gives the header bar the shared container face, so the bar matches the log and camp bands.</summary>
         private void RestyleChunky()
         {
-            Sprite frame = Resources.Load<Sprite>("ui_frame");
             Image plate = GetComponent<Image>();
 
-            if (frame == null || plate == null)
+            if (plate == null)
+            {
+                return;
+            }
+
+            if (UiSkin.Current.ApplyContainer(plate))
+            {
+                return;
+            }
+
+            Sprite frame = Resources.Load<Sprite>("ui_frame");
+
+            if (frame == null)
             {
                 return;
             }

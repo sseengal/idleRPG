@@ -276,9 +276,8 @@ namespace IdleRPG.UI
             Image panel = UiRuntime.Plate(scrim.transform, "Panel",
                 new Vector2(0.04f, 0.06f), new Vector2(0.96f, 0.94f), UiTheme.FaceDim);
 
-            TextMeshProUGUI title = UiRuntime.CreateText(panel.transform, "Title", "LEVEL UP!",
-                UiType.Role.Section, TextAlignmentOptions.Center, UiTheme.AccentLight);
-            UiRuntime.Anchor(title.rectTransform, new Vector2(0.05f, 0.88f), new Vector2(0.95f, 0.97f));
+            // Same ribbon as the pause sheet: the sheet's heading lives on the banner, not in the body.
+            UiBanner.Build(panel.transform, "LEVEL UP!");
 
             subtitle = UiRuntime.CreateText(panel.transform, "Subtitle", "CHOOSE A BOON",
                 UiType.Role.Micro, TextAlignmentOptions.Center, UiTheme.TextDim);

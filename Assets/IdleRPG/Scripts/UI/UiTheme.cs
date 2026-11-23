@@ -77,6 +77,8 @@ namespace IdleRPG.UI
         public static readonly Color ActionFaceSelected = new Color32(51, 70, 106, 255);
         /// <summary>The face of a pressed button: #22304A.</summary>
         public static readonly Color ActionFacePressed = new Color32(34, 48, 74, 255);
+        /// <summary>The flat container face: the owner's blue container art (#252E3E).</summary>
+        public static readonly Color ContainerFace = new Color32(37, 46, 62, 255);
         /// <summary>The label on a button face.</summary>
         public static readonly Color ActionInk = new Color32(236, 240, 248, 255);
         // ------------------------------------------------------------------

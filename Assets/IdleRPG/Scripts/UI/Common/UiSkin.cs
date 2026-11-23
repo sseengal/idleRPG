@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace IdleRPG.UI
 {
@@ -71,6 +72,13 @@ namespace IdleRPG.UI
 
         [Tooltip("Ribbon text ink. White reads on the red face.")]
         public Color bannerInk = new Color32(236, 240, 248, 255);
+
+        [Header("Containers (82x17 flat face, 1 px dark bottom line)")]
+        [Tooltip("Flat container: header bar, combat log, stage row, camp strip. Baked colour, drawn white.")]
+        public Sprite containerSprite;
+
+        [Tooltip("Image.pixelsPerUnitMultiplier DIVIDES the border. 1/7 shows the 1 px line as 7 units.")]
+        public float containerBorderScale = 1f / 7f;
 
         [Tooltip("Image.pixelsPerUnitMultiplier DIVIDES the slice border, so 1/7 shows a 1 px art line as 7 units.")]
         public float buttonBorderScale = 1f / 7f;
@@ -157,6 +165,24 @@ namespace IdleRPG.UI
             }
 
             return sprite != null;
+        }
+
+        /// <summary>
+        /// Paints a flat container (header bar, log band, stage row, camp strip) with the skin's container art.
+        /// Returns false when the skin has none, so the caller can keep its old face.
+        /// </summary>
+        public bool ApplyContainer(Image image, Color? tint = null)
+        {
+            if (image == null || containerSprite == null)
+            {
+                return false;
+            }
+
+            image.sprite = containerSprite;
+            image.type = Image.Type.Sliced;
+            image.color = tint ?? UiTheme.ContainerFace;
+            image.pixelsPerUnitMultiplier = containerBorderScale;
+            return true;
         }
     }
 }

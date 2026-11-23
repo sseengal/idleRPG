@@ -105,9 +105,29 @@ namespace IdleRPG.UI
 
         private static Sprite plateSprite;
 
-        /// <summary>The chunky riveted plate (ui_frame) - the one face for panels and buttons. Runtime-loadable.</summary>
-        public static Sprite PlateSprite =>
-            plateSprite != null ? plateSprite : (plateSprite = Resources.Load<Sprite>("ui_frame"));
+        /// <summary>
+        /// The one flat container face for panels, cards and the fallback plate: the skin's container art,
+        /// with the kit plate as a last resort. Tinted by each caller, so the palette layers still work.
+        /// </summary>
+        public static Sprite PlateSprite
+        {
+            get
+            {
+                if (plateSprite != null)
+                {
+                    return plateSprite;
+                }
+
+                plateSprite = UiSkin.Current.containerSprite;
+
+                if (plateSprite == null)
+                {
+                    plateSprite = Resources.Load<Sprite>("ui_frame");
+                }
+
+                return plateSprite;
+            }
+        }
 
         /// <summary>A 9-sliced chunky plate. Big surfaces wear this; small chips stay flat by design.</summary>
         public static Image Plate(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax,

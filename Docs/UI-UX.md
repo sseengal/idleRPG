@@ -419,6 +419,19 @@ true box centre reads low. `MvpSceneBuilder` prefers this file and falls back to
 **BATTLE tab (2026-11-22).** The tab returns to the lobby centre. It no longer begins a run - only the START
 button does. Before this, pressing BATTLE started a fight, which the owner reported as wrong.
 
+**Containers (2026-11-22).** One flat container shape everywhere: the owner's art, turned into a **tintable**
+copy (`Art/UI/Containers/container_panel_tint.png`, 82x17, white face, 30% bottom line, border 0/1/0/0 at
+`1f/7f`). The baked original is kept beside it for reference.
+- `UiRuntime.PlateSprite` now returns `UiSkin.containerSprite`, so **every plate** (panels, cards, the fallback
+  button face, ability cells, shop/training cards) wears the container shape and keeps its own palette tint.
+- `UiTheme.ContainerFace` (`#252E3E`) is the tint for the flat bands; `UiSkin.ApplyContainer(Image, tint?)`
+  paints one, and `MvpSceneBuilder.ContainerPanel(...)` does the same for scene-built bands.
+- Applied: header bar, stage row, combat log, camp strip, plus every runtime plate and card.
+
+**Banners (2026-11-22).** `UiBanner.Build(panel, text)` is the only ribbon builder: art, width (75%),
+cap-height centring, nudge and the two-step shadow. Used by the pause/settings sheet (GAME PAUSED / SETTINGS)
+and the level-up sheet (LEVEL UP!). Any future sheet with a heading calls it; do not rebuild the ribbon by hand.
+
 **Panel face (2026-11-22).** `UiSkin.sheetSprite` holds the owner's 75x75 frame (`Art/UI/Panels/panel_pause.png`,
 5 px rim, baked colour, gold top-left and brown bottom-right shading). The pause/settings sheet draws it white
 at `sheetBorderScale` (`1f / 7f` = 35 units of rim). Other panels still use `ui_frame` until the owner says

@@ -53,6 +53,13 @@ namespace IdleRPG.EditorTools
                 Border = Vector4.zero,
                 What = "icons"
             },
+            // 82x17 container: flat face with a 1 px dark bottom line. Only that line is a fixed slice.
+            new ArtSet
+            {
+                Folder = "Assets/IdleRPG/Art/UI/Containers",
+                Border = new Vector4(0f, 1f, 0f, 0f),
+                What = "containers"
+            },
         };
 
         private const float PixelsPerUnit = 100f;

@@ -20,13 +20,6 @@ namespace IdleRPG.UI
         /// <summary>TODO: owner supplies the hosted privacy-policy URL. Empty shows a status line, never a dead tap.</summary>
         private const string PrivacyUrl = "";
 
-        /// <summary>
-        /// Owner nudge on top of the measured drop. The drop itself comes from the font's cap line, so it stays
-        /// correct when the font or its size changes. This 2.5 is the measured remainder: with the computed drop
-        /// the capitals landed 2.5 px above the red band's centre (1080x1920 capture, 2026-11-22).
-        /// </summary>
-        private const float BannerTextNudge = 2.5f;
-
         /// <summary>Drop shadow for the sheet's buttons: a close, stronger step and a faint lower one.</summary>
         private const float ButtonShadowNear = -5f;
         private const float ButtonShadowFar = -12f;
@@ -156,7 +149,7 @@ namespace IdleRPG.UI
                 panel.pixelsPerUnitMultiplier = skin.sheetBorderScale;
             }
 
-            BuildBanner(panel.transform, skin);
+            BuildBanner(panel.transform);
 
             normalGroup = new GameObject("Normal", typeof(RectTransform));
             normalGroup.transform.SetParent(panel.transform, false);
@@ -178,57 +171,10 @@ namespace IdleRPG.UI
             canvasRoot.SetActive(false);
         }
 
-        /// <summary>
-        /// The ribbon across the panel's top edge: half above the edge, half on it, drawn after the panel so it
-        /// covers the rim. Its height comes from the art (23 px x bannerScale), so the slice never stretches.
-        /// </summary>
-        private void BuildBanner(Transform panel, UiSkin skin)
+        /// <summary>The ribbon across the panel's top edge. One shared builder, so every sheet's heading matches.</summary>
+        private void BuildBanner(Transform panel)
         {
-            if (skin.bannerSprite == null)
-            {
-                return;
-            }
-
-            GameObject node = new GameObject("Banner", typeof(RectTransform), typeof(Image));
-            node.transform.SetParent(panel, false);
-
-            RectTransform rect = (RectTransform)node.transform;
-            rect.anchorMin = new Vector2(0.125f, 1f);
-            rect.anchorMax = new Vector2(0.875f, 1f);
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.sizeDelta = new Vector2(0f, skin.bannerSprite.rect.height * skin.bannerScale);
-            rect.anchoredPosition = Vector2.zero;
-
-            Image image = node.GetComponent<Image>();
-            image.sprite = skin.bannerSprite;
-            image.type = Image.Type.Sliced;
-            image.color = Color.white;
-            image.pixelsPerUnitMultiplier = 1f / Mathf.Max(0.0001f, skin.bannerScale);
-            image.raycastTarget = false;
-
-            // Two offset copies fake a soft falloff: a close, stronger step and a lower, faint one. One hard
-            // copy read as a second ribbon, not a shadow.
-            Shadow near = node.AddComponent<Shadow>();
-            near.effectColor = new Color(0f, 0f, 0f, 0.45f);
-            near.effectDistance = new Vector2(0f, -10f);
-            near.useGraphicAlpha = true;
-
-            Shadow far = node.AddComponent<Shadow>();
-            far.effectColor = new Color(0f, 0f, 0f, 0.22f);
-            far.effectDistance = new Vector2(0f, -24f);
-            far.useGraphicAlpha = true;
-
-            bannerLabel = UiRuntime.CreateText(node.transform, "Label", "GAME PAUSED", UiType.Role.Section,
-                TextAlignmentOptions.Center, skin.bannerInk);
-            UiRuntime.Anchor(bannerLabel.rectTransform, new Vector2(0f, 0.30f), new Vector2(1f, 0.96f));
-
-            // The label box now covers the ribbon's RED FACE (art rows 1-16 of 23), not the whole sprite, so its
-            // centre matches the band. TMP centres the full line box (ascender to descender), which sits a
-            // capital letter above the visual centre, so the text is dropped by the measured cap-to-line gap.
-            // Both parts scale with the font, so a font or size change cannot silently break the centring.
-            bannerLabel.rectTransform.anchoredPosition =
-                new Vector2(0f, -(BannerTextDrop(bannerLabel.font, bannerLabel.fontSize) + BannerTextNudge));
-            bannerLabel.raycastTarget = false;
+            bannerLabel = UiBanner.Build(panel, "GAME PAUSED");
         }
 
         private void BuildButtons()
@@ -339,30 +285,6 @@ namespace IdleRPG.UI
             far.useGraphicAlpha = true;
 
             return view;
-        }
-
-        /// <summary>
-        /// How far a line of CAPITALS must move down to look centred in its box. TMP centres the full line box
-        /// (ascender to descender); capitals sit higher inside that box. The gap is measured from the font
-        /// itself and scaled to the current size, so no magic number can drift.
-        /// </summary>
-        private static float BannerTextDrop(TMP_FontAsset font, float size)
-        {
-            if (font == null || size <= 0f)
-            {
-                return 0f;
-            }
-
-            UnityEngine.TextCore.FaceInfo info = font.faceInfo;
-
-            if (info.pointSize <= 0f)
-            {
-                return 0f;
-            }
-
-            float capCentre = (info.capLine + info.baseline) * 0.5f;
-            float lineCentre = (info.ascentLine + info.descentLine) * 0.5f;
-            return (capCentre - lineCentre) * (size / info.pointSize);
         }
 
         private void UpdateSoundLabel()

@@ -29,7 +29,7 @@ namespace IdleRPG.EditorTools
         // ------------------------------------------------------------------
         private static HudHeaderUI BuildHeader(RectTransform safeArea)
         {
-            Image header = KitPanel("Header", safeArea, UiTheme.Panel);
+            Image header = ContainerPanel("Header", safeArea);
             PinBar(header.rectTransform, top: true, HeaderBandHeight, UiSpace.ScreenMargin, UiSpace.ScreenMargin);
             HudHeaderUI view = header.gameObject.AddComponent<HudHeaderUI>();
 
@@ -250,7 +250,7 @@ namespace IdleRPG.EditorTools
         /// </summary>
         private static void BuildStageRow(RectTransform pageRoot)
         {
-            Image row = KitPanel("StageRow", pageRoot, UiTheme.Panel);
+            Image row = ContainerPanel("StageRow", pageRoot);
             UiFactory.Anchor(row.rectTransform, new Vector2(0f, StageRowMinY), new Vector2(1f, StageRowMaxY));
 
             JourneyBandUI band = row.gameObject.AddComponent<JourneyBandUI>();
@@ -437,10 +437,34 @@ namespace IdleRPG.EditorTools
             return pool;
         }
 
+        /// <summary>
+        /// A flat container band (header, stage row, log, camp strip) in the owner's container art: one face,
+        /// one 1 px bottom line, no rivets. Falls back to the old kit plate when the sprite is missing.
+        /// </summary>
+        private static Image ContainerPanel(string name, Transform parent, bool raycast = false)
+        {
+            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(
+                "Assets/IdleRPG/Art/UI/Containers/container_panel_tint.png");
+
+            if (sprite == null)
+            {
+                Debug.LogWarning("[MvpSceneBuilder] Missing container sprite - run Tools > Idle RPG > Art > Apply UI Art Presets.");
+                return KitPanel(name, parent, UiTheme.Panel, raycast);
+            }
+
+            Image image = UiFactory.Icon(name, parent, UiTheme.ContainerFace, false);
+            image.sprite = sprite;
+            image.type = Image.Type.Sliced;
+            image.pixelsPerUnitMultiplier = 1f / 7f;
+            image.raycastTarget = raycast;
+            UiFactory.Stretch(image.rectTransform);
+            return image;
+        }
+
         /// <summary>Combat feed strip between the viewport and the control dock.</summary>
         private static CombatLogUI BuildCombatLog(RectTransform pageRoot)
         {
-            Image strip = KitPanel("CombatLog", pageRoot, UiTheme.Panel, raycast: true);
+            Image strip = ContainerPanel("CombatLog", pageRoot, raycast: true);
             UiFactory.Anchor(strip.rectTransform, Vector2.zero, new Vector2(1f, LogTop), UiSpace.ScreenMargin, UiSpace.Snug, UiSpace.ScreenMargin, UiSpace.Snug);
             CombatLogUI ui = strip.gameObject.AddComponent<CombatLogUI>();
 

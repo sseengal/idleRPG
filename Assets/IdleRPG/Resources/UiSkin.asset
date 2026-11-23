@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 135f6a547457145ee9eee193424f2216, type: 3}
   m_Name: UiSkin
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.UI.UiSkin
-  panelSprite: {fileID: 21300000, guid: 9b21d483ff4704037b8fcd64eddb31e2, type: 3}
-  buttonSprite: {fileID: 21300000, guid: 9b21d483ff4704037b8fcd64eddb31e2, type: 3}
+  panelSprite: {fileID: 21300000, guid: ee1be88c7847f4ee7bf809f8f981b271, type: 3}
+  buttonSprite: {fileID: 21300000, guid: ee1be88c7847f4ee7bf809f8f981b271, type: 3}
   primaryButtonSprite: {fileID: 21300000, guid: 09edb7b5d091a41f4a4dfea44f461753, type: 3}
   dangerButtonSprite: {fileID: 21300000, guid: a338b3ce9f8eb4615b9dcbaa3466d002, type: 3}
   neutralButtonSprite: {fileID: 21300000, guid: e1623fac113cf4bcbb02c4d32516491b, type: 3}
@@ -22,6 +22,8 @@ MonoBehaviour:
   bannerSprite: {fileID: 21300000, guid: a30e8246a4d0d49868e808bbfede21e1, type: 3}
   bannerScale: 7
   bannerInk: {r: 0.9254902, g: 0.9411765, b: 0.972549, a: 1}
+  containerSprite: {fileID: 21300000, guid: ee1be88c7847f4ee7bf809f8f981b271, type: 3}
+  containerBorderScale: 0.14285715
   buttonBorderScale: 0.14285715
   primaryButtonInk: {r: 0.22745098, g: 0.14117648, b: 0.0627451, a: 1}
   dangerButtonInk: {r: 0.9254902, g: 0.9411765, b: 0.972549, a: 1}
