@@ -436,10 +436,20 @@ sprite or a colour.
 - `ui_frame` (the old Kenney plate) is **gone from code**. `UiRuntime.PlateSprite` returns the container, the
   lobby's private frame sprite is deleted, and the header no longer has a second fallback.
 
+**Shadows, one standard (2026-11-23).** `UiParts.AddShadow(...)` owns the only shadow: two offset copies,
+black **0.38 at -5** and **0.18 at -12**. Every `UiParts` surface, every `UiPlateButton` and every tab gets it;
+a surface that sits flush inside another (the level-up icon frame) passes `shadow: false`. The ribbon uses the
+same values.
+
+**Pause sheet uses the MODAL (2026-11-23).** It draws `PanelKind.Modal` - the **blue container** - not the
+ornate Frame. The ornate Frame is now used only **around icons** (level-up rows) and as a standalone decoration.
+Verified live: pause panel sprite = `container_panel_tint`, fill `(38,46,61)`.
+
 **Level-up modal (2026-11-23).** Blue modal body + ribbon. Each boon row is the **neutral button** (the
-clickable part); the ornate **frame goes around the icon only** inside that row (owner, 2026-11-23). Panel
-y 0.16-0.84 so the dead band at the foot is gone; rows top 0.80, height 0.215, gap 0.015; REFRESH is neutral
-too. Card text is inset past the icon frame (0.34 left).
+clickable part); the ornate **frame goes around the icon only**, and that frame spans the row's **full height**,
+flush to its **top, left and bottom** edges (owner, 2026-11-23), width 30% of the row, `shadow: false` because
+it sits inside the button. Panel y 0.16-0.84 so the dead band at the foot is gone; rows top 0.80, height 0.215,
+gap 0.015; REFRESH is neutral. Card text starts at 0.34 so it clears the frame.
 
 **Gate (2026-11-23).** `Tools > Idle RPG > UI > Check UI Parts` scans the open scene and every prefab: an
 Image whose sprite is not a `UiSkin` part is reported to `Temp/ui-parts-report.txt`. Icons (`ui_icon*`) and

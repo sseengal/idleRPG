@@ -453,6 +453,7 @@ namespace IdleRPG.EditorTools
             }
 
             Image image = UiFactory.Icon(name, parent, tint ?? UiTheme.ContainerFace, false);
+            IdleRPG.UI.UiParts.AddShadow(image.gameObject);
             image.sprite = sprite;
             image.type = Image.Type.Sliced;
             image.pixelsPerUnitMultiplier = 1f / 7f;

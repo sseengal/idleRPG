@@ -97,6 +97,9 @@ namespace IdleRPG.UI
                 glow.color = c;
             }
 
+            // Shared drop shadow, so a tab sits proud of the bar like every other button.
+            UiParts.AddShadow(frame != null ? frame.gameObject : gameObject);
+
             // Draw the right face now, so the first frame never flashes an empty tab.
             if (frame != null)
             {

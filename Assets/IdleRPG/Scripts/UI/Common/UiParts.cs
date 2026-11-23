@@ -28,11 +28,39 @@ namespace IdleRPG.UI
     /// </summary>
     public static class UiParts
     {
+        /// <summary>
+        /// The one drop shadow for every surface and button. Two offset copies fake a soft falloff: one hard copy
+        /// reads as a duplicate, not a shadow. Values are shared so nothing drifts.
+        /// </summary>
+        public const float ShadowNearAlpha = 0.38f;
+        public const float ShadowNearOffset = -5f;
+        public const float ShadowFarAlpha = 0.18f;
+        public const float ShadowFarOffset = -12f;
+
+        /// <summary>Adds the shared two-step drop shadow to a graphic's GameObject.</summary>
+        public static void AddShadow(GameObject node)
+        {
+            if (node == null)
+            {
+                return;
+            }
+
+            Shadow near = node.AddComponent<Shadow>();
+            near.effectColor = new Color(0f, 0f, 0f, ShadowNearAlpha);
+            near.effectDistance = new Vector2(0f, ShadowNearOffset);
+            near.useGraphicAlpha = true;
+
+            Shadow far = node.AddComponent<Shadow>();
+            far.effectColor = new Color(0f, 0f, 0f, ShadowFarAlpha);
+            far.effectDistance = new Vector2(0f, ShadowFarOffset);
+            far.useGraphicAlpha = true;
+        }
+
         /// <summary>A surface, anchored to a rectangle inside its parent. A tint overrides the kind's colour.</summary>
         public static Image Panel(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax,
-            PanelKind kind, bool raycast = false, Color? tint = null)
+            PanelKind kind, bool raycast = false, Color? tint = null, bool shadow = true)
         {
-            Image image = Build(parent, name, kind, raycast, tint);
+            Image image = Build(parent, name, kind, raycast, tint, shadow);
             UiRuntime.Anchor(image.rectTransform, anchorMin, anchorMax);
             return image;
         }
@@ -40,7 +68,7 @@ namespace IdleRPG.UI
         /// <summary>A surface stretched over its whole parent.</summary>
         public static Image Fill(Transform parent, string name, PanelKind kind, bool raycast = false, Color? tint = null)
         {
-            Image image = Build(parent, name, kind, raycast, tint);
+            Image image = Build(parent, name, kind, raycast, tint, true);
             UiRuntime.Stretch(image.rectTransform);
             return image;
         }
@@ -60,7 +88,8 @@ namespace IdleRPG.UI
             return UiBanner.Build(panel, text);
         }
 
-        private static Image Build(Transform parent, string name, PanelKind kind, bool raycast, Color? tintOverride)
+        private static Image Build(Transform parent, string name, PanelKind kind, bool raycast, Color? tintOverride,
+            bool shadow)
         {
             UiSkin skin = UiSkin.Current;
 
@@ -109,6 +138,12 @@ namespace IdleRPG.UI
             {
                 image.type = Image.Type.Sliced;
                 image.pixelsPerUnitMultiplier = scale;
+            }
+
+            // Every surface stands proud of what is behind it, unless it sits flush inside another one.
+            if (shadow)
+            {
+                AddShadow(image.gameObject);
             }
 
             return image;

@@ -316,8 +316,10 @@ namespace IdleRPG.UI
             row.Root = background.gameObject;
             row.Button = plate.Button;
 
+            // The ornate frame spans the button's FULL height and sits flush to its top, left and bottom edges
+            // (owner, 2026-11-23). Width is about square with the card height, so the icon never floats.
             Image iconFrame = UiParts.Panel(background.transform, "IconFrame",
-                new Vector2(0.03f, 0.10f), new Vector2(0.30f, 0.90f), PanelKind.Frame, raycast: false);
+                new Vector2(0f, 0f), new Vector2(0.30f, 1f), PanelKind.Frame, raycast: false, shadow: false);
 
             row.Icon = UiRuntime.CreatePanel(iconFrame.transform, null, UiTheme.IconWell);
             row.Icon.gameObject.name = "Icon";

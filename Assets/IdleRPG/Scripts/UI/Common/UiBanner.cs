@@ -46,9 +46,8 @@ namespace IdleRPG.UI
             image.pixelsPerUnitMultiplier = 1f / Mathf.Max(0.0001f, skin.bannerScale);
             image.raycastTarget = false;
 
-            // Two offset copies fake a soft falloff over the panel's top rim.
-            AddShadow(node, 0.45f, -10f);
-            AddShadow(node, 0.22f, -24f);
+            // The same two-step shadow every surface and button uses.
+            UiParts.AddShadow(node);
 
             TextMeshProUGUI label = UiRuntime.CreateText(node.transform, "Label", text, UiType.Role.Section,
                 TextAlignmentOptions.Center, skin.bannerInk);
@@ -83,14 +82,6 @@ namespace IdleRPG.UI
             float capCentre = (info.capLine + info.baseline) * 0.5f;
             float lineCentre = (info.ascentLine + info.descentLine) * 0.5f;
             return (capCentre - lineCentre) * (size / info.pointSize);
-        }
-
-        private static void AddShadow(GameObject node, float alpha, float dy)
-        {
-            Shadow shadow = node.AddComponent<Shadow>();
-            shadow.effectColor = new Color(0f, 0f, 0f, alpha);
-            shadow.effectDistance = new Vector2(0f, dy);
-            shadow.useGraphicAlpha = true;
         }
     }
 }

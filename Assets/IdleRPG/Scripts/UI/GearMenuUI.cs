@@ -20,10 +20,6 @@ namespace IdleRPG.UI
         /// <summary>TODO: owner supplies the hosted privacy-policy URL. Empty shows a status line, never a dead tap.</summary>
         private const string PrivacyUrl = "";
 
-        /// <summary>Drop shadow for the sheet's buttons: a close, stronger step and a faint lower one.</summary>
-        private const float ButtonShadowNear = -5f;
-        private const float ButtonShadowFar = -12f;
-
         private GameManager manager;
         private GameObject canvasRoot;
         private GameObject normalGroup;
@@ -137,7 +133,7 @@ namespace IdleRPG.UI
             UiRuntime.Anchor(scrim.rectTransform, Vector2.zero, Vector2.one);
 
             Image panel = UiParts.Panel(canvasRoot.transform, "Panel",
-                new Vector2(0.10f, 0.20f), new Vector2(0.90f, 0.80f), PanelKind.Frame, raycast: true);
+                new Vector2(0.10f, 0.20f), new Vector2(0.90f, 0.80f), PanelKind.Modal, raycast: true);
 
             BuildBanner(panel.transform);
 
@@ -259,22 +255,9 @@ namespace IdleRPG.UI
         private static UiPlateButton MakeButton(Transform parent, string name, string label,
             Vector2 anchorMin, Vector2 anchorMax, ButtonFace face, UnityEngine.Events.UnityAction onClick)
         {
-            UiPlateButton view = UiPlateButton.Create(parent, name, anchorMin, anchorMax, label, UiType.Role.Section,
+            // The shared shadow now comes from UiPlateButton.Create, so every button matches.
+            return UiPlateButton.Create(parent, name, anchorMin, anchorMax, label, UiType.Role.Section,
                 Color.white, Color.white, onClick, face);
-
-            // Two offset copies fake a soft drop shadow under the button, same trick as the ribbon. One hard
-            // copy reads as a second button; two steps read as depth on the sheet.
-            Shadow near = view.gameObject.AddComponent<Shadow>();
-            near.effectColor = new Color(0f, 0f, 0f, 0.38f);
-            near.effectDistance = new Vector2(0f, ButtonShadowNear);
-            near.useGraphicAlpha = true;
-
-            Shadow far = view.gameObject.AddComponent<Shadow>();
-            far.effectColor = new Color(0f, 0f, 0f, 0.18f);
-            far.effectDistance = new Vector2(0f, ButtonShadowFar);
-            far.useGraphicAlpha = true;
-
-            return view;
         }
 
         private void UpdateSoundLabel()

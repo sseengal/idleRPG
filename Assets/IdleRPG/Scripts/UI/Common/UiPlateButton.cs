@@ -83,6 +83,9 @@ namespace IdleRPG.UI
             selectable.targetGraphic = image;
             selectable.transition = Selectable.Transition.None;
 
+            // Shared drop shadow: every button in the game stands proud of its panel.
+            UiParts.AddShadow(image.gameObject);
+
             TextMeshProUGUI labelText = UiRuntime.CreateText(image.transform, "Label", text, role,
                 TextAlignmentOptions.Center, UiTheme.Text);
             UiType.ApplyAuto(labelText, role);

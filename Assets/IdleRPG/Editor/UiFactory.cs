@@ -217,6 +217,7 @@ namespace IdleRPG.EditorTools
             UiType.Role role, Color textColor, UnityAction onClick)
         {
             Image background = PanelFromSprite(name, parent, sprite, Color.white, raycast: true);
+            IdleRPG.UI.UiParts.AddShadow(background.gameObject);
             Button button = background.gameObject.AddComponent<Button>();
             button.targetGraphic = background;
 
