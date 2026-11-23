@@ -90,7 +90,7 @@ namespace IdleRPG.UI
                 UiRuntime.Stretch(rect);
             }
 
-            overlay = UiRuntime.CreatePanel(transform, null, Color.black, raycast: false);
+            overlay = UiRuntime.CreatePanel(transform, null, UiTheme.VeilStrong, raycast: false);
             overlay.gameObject.name = "Black";
             UiRuntime.Stretch(overlay.rectTransform);
             overlay.enabled = false;

@@ -32,7 +32,7 @@ namespace IdleRPG.EditorTools
             UiFactory.Stretch(host.GetComponent<RectTransform>());   // full-screen host: scrim + dialog anchor against it
             OfflineRewardsPopup ui = host.AddComponent<OfflineRewardsPopup>();
 
-            Image scrim = UiFactory.Panel("Scrim", host.transform, null, new Color(0f, 0f, 0f, 0.65f), raycast: true);
+            Image scrim = UiFactory.Panel("Scrim", host.transform, null, UiTheme.VeilSoft, raycast: true);
             UiFactory.Stretch(scrim.rectTransform);
 
             GameObject dialog = UiFactory.Node("Dialog", scrim.transform);
@@ -57,7 +57,7 @@ namespace IdleRPG.EditorTools
             UiFactory.Anchor(timeLabel.rectTransform, new Vector2(0.06f, 0.68f), new Vector2(0.94f, 0.83f));
 
             TextMeshProUGUI goldLabel = UiFactory.Text("Gold", dialog.transform, "+0 gold", UiType.Role.Display,
-                TextAlignmentOptions.Center, new Color(0.98f, 0.82f, 0.30f, 1f));
+                TextAlignmentOptions.Center, UiTheme.Text);
             UiFactory.Anchor(goldLabel.rectTransform, new Vector2(0.06f, 0.47f), new Vector2(0.94f, 0.67f));
 
             TextMeshProUGUI capNote = UiFactory.Text("CapNote", dialog.transform, "", UiType.Role.Sentence,
@@ -118,7 +118,7 @@ namespace IdleRPG.EditorTools
             UiFactory.Stretch(host.GetComponent<RectTransform>());
             DefeatModalUI ui = host.AddComponent<DefeatModalUI>();
 
-            Image scrim = UiFactory.Panel("Scrim", host.transform, null, new Color(0f, 0f, 0f, 0.65f), raycast: true);
+            Image scrim = UiFactory.Panel("Scrim", host.transform, null, UiTheme.VeilSoft, raycast: true);
             UiFactory.Stretch(scrim.rectTransform);
 
             GameObject dialog = UiFactory.Node("Dialog", scrim.transform);
@@ -145,7 +145,7 @@ namespace IdleRPG.EditorTools
             UiFactory.Anchor(summary.rectTransform, new Vector2(0.06f, 0.56f), new Vector2(0.94f, 0.76f));
 
             TextMeshProUGUI ascend = UiFactory.Text("Ascend", dialog.transform, "", UiType.Role.Sentence,
-                TextAlignmentOptions.Center, new Color(0.98f, 0.82f, 0.30f, 1f));
+                TextAlignmentOptions.Center, UiTheme.Text);
             UiFactory.Anchor(ascend.rectTransform, new Vector2(0.06f, 0.40f), new Vector2(0.94f, 0.55f));
 
             TextMeshProUGUI countdown = UiFactory.Text("Countdown", dialog.transform, "", UiType.Role.Sentence,
@@ -184,7 +184,7 @@ namespace IdleRPG.EditorTools
             group.blocksRaycasts = false;
 
             TextMeshProUGUI label = UiFactory.Text("Message", host.transform, "", UiType.Role.Section,
-                TextAlignmentOptions.Center, new Color(1f, 0.92f, 0.6f, 1f));
+                TextAlignmentOptions.Center, UiTheme.Text);
             // Auto-sized: toast messages vary a lot in length ("Not enough gold" vs a long run summary).
             UiType.ApplyAuto(label, UiType.Role.Section);
             UiFactory.Anchor(label.rectTransform, new Vector2(0.05f, 0.32f), new Vector2(0.95f, 0.40f));

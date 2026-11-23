@@ -183,7 +183,7 @@ namespace IdleRPG.UI
             {
                 // Pressed darkens whatever face this button has, so a gold button does not flash navy.
                 Color face = selected ? activeFill : idleFill;
-                Color want = press > 0f ? Color.Lerp(face, Color.black, PressDarken) : face;
+                Color want = press > 0f ? Color.Lerp(face, UiTheme.PressShade, PressDarken) : face;
                 Color now = frame.color;
                 Color next = Color.Lerp(now, want, smooth);
 

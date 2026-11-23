@@ -25,7 +25,7 @@ MonoBehaviour:
   containerSprite: {fileID: 21300000, guid: ee1be88c7847f4ee7bf809f8f981b271, type: 3}
   containerBorderScale: 0.14285715
   buttonBorderScale: 0.14285715
-  primaryButtonInk: {r: 0.22745098, g: 0.14117648, b: 0.0627451, a: 1}
+  primaryButtonInk: {r: 0.9254902, g: 0.9411765, b: 0.972549, a: 1}
   dangerButtonInk: {r: 0.9254902, g: 0.9411765, b: 0.972549, a: 1}
   neutralButtonInk: {r: 0.9254902, g: 0.9411765, b: 0.972549, a: 1}
   scrim: {r: 0, g: 0, b: 0, a: 0.65}

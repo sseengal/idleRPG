@@ -40,16 +40,26 @@ namespace IdleRPG.EditorTools
             public string Message;
         }
 
-        /// <summary>Folders scanned for UI construction code.</summary>
+        /// <summary>Folders scanned for UI construction code. The editor builders place UI, so they are included.</summary>
         private static readonly string[] Roots =
         {
-            "Assets/IdleRPG/Scripts/UI"
+            "Assets/IdleRPG/Scripts/UI",
+            "Assets/IdleRPG/Editor"
         };
 
         /// <summary>Files allowed to write a colour by hand, each with the reason - so the list stays honest.</summary>
         private static readonly Dictionary<string, string> CodeAllowList = new Dictionary<string, string>
         {
-            { "UiTheme.cs", "the palette itself - the one place a colour number is written down" }
+            { "UiTheme.cs", "the palette itself - the one place a colour number is written down" },
+            { "UiColourCheck.cs", "this checker - it only names the pattern it looks for" },
+            { "PlaceholderSpriteGenerator.cs", "draws stand-in art; its pixels are pictures, not chrome" },
+            { "PlaceholderSpriteGenerator.Shapes.cs", "draws stand-in art" },
+            { "PlaceholderSpriteGenerator.CardUnits.cs", "draws stand-in art" },
+            { "UiLabSceneBuilder.cs", "a lab whose whole job is comparing looks" },
+            { "UiCompareSceneBuilder.cs", "a lab whose whole job is comparing looks" },
+            { "DataAssetGenerator.cs", "authors data assets, not a screen" },
+            { "PixelFontAssetGenerator.cs", "writes a font atlas, not a screen" },
+            { "ArtPresetApplier.cs", "import settings, not a screen" }
         };
 
         // new Color(r, g, b) or new Color(r, g, b, a) where EVERY argument is a number. A computed channel

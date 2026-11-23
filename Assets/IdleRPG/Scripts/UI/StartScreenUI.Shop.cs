@@ -69,7 +69,7 @@ namespace IdleRPG.UI
                 "SHOP", UiType.Role.Title, UiTheme.Text);
 
             shopGemsLabel = Text(shopPanel.transform, "Gems", new Vector2(0.04f, 0.80f), new Vector2(0.96f, 0.87f),
-                "GEMS 0", UiType.Role.Sentence, UiTheme.TextMuted);
+                "GEMS 0", UiType.Role.Sentence, UiTheme.Text);
 
             BuildShopCard("NO ADS", "Remove every ad. Camp rest stays free.", "1-TIME",
                 IapCatalog.SkuNoAds, 0.60f, 0.76f);
@@ -89,7 +89,7 @@ namespace IdleRPG.UI
             }
 
             Text(shopPanel.transform, "Note", new Vector2(0.04f, 0.01f), new Vector2(0.96f, 0.07f),
-                "Prices are shown at checkout.", UiType.Role.Small, UiTheme.TextMuted);
+                "Prices are shown at checkout.", UiType.Role.Small, UiTheme.Text);
 
             if (manager != null && manager.Iap != null)
             {
@@ -114,7 +114,7 @@ namespace IdleRPG.UI
             UiRuntime.Anchor(nameLabel.rectTransform, new Vector2(0.04f, 0.58f), new Vector2(0.58f, 0.96f));
 
             TextMeshProUGUI effectLabel = UiRuntime.CreateText(card.transform, "Effect", effect,
-                UiType.Role.Sentence, TextAlignmentOptions.MidlineLeft, UiTheme.TextMuted);
+                UiType.Role.Sentence, TextAlignmentOptions.MidlineLeft, UiTheme.Text);
             UiRuntime.Anchor(effectLabel.rectTransform, new Vector2(0.04f, 0.10f), new Vector2(0.58f, 0.55f));
 
             TextMeshProUGUI valueLabel = UiRuntime.CreateText(card.transform, "Value", value,

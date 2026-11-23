@@ -82,7 +82,7 @@ namespace IdleRPG.EditorTools
                 }
 
                 // Icons and backdrop art are pictures, not surfaces: they are allowed to be their own sprites.
-                if (image.sprite.name.StartsWith("ui_icon") || image.sprite.name.Contains(" bg"))
+                if (string.IsNullOrEmpty(image.sprite.name) || IsPicture(image.sprite.name))
                 {
                     continue;
                 }
@@ -90,6 +90,40 @@ namespace IdleRPG.EditorTools
                 string path = PathOf(image.transform);
                 unmapped.Add((area != null ? area : "SCENE") + " :: " + path + " -> " + image.sprite.name);
             }
+        }
+
+        /// <summary>
+        /// Sprite name families that are PICTURES, never surfaces. A picture may carry its own art; a surface must
+        /// be a <see cref="IdleRPG.UI.UiSkin"/> part so one reskin reaches every panel, button and chip.
+        /// </summary>
+        private static readonly string[] PictureFamilies =
+        {
+            "ui_icon",        // item, stat and currency icons
+            "pxi_",           // pixel currency coins: coin, gem, key
+            "icon_",          // bottom-tab icons
+            "ui_mark_",       // journey trail marks
+            "ui_glow_",       // halos and glows
+            "Ui",             // generated art: UiSoftGlow, UiGear, UiVignette, UiVerticalGradient
+            "FantasyTabGlow",
+            "Greenwake",      // chapter art and title
+            "Knight_",        // character art standing on the unit slots
+            "Soldier_",
+            "Wizard_",
+            " bg"             // backdrops
+        };
+
+        /// <summary>True for a picture sprite, or for a runtime-made texture that never had a name.</summary>
+        private static bool IsPicture(string spriteName)
+        {
+            foreach (string family in PictureFamilies)
+            {
+                if (spriteName.StartsWith(family) || spriteName.Contains(family))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static void Add(HashSet<Sprite> set, Sprite sprite)

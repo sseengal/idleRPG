@@ -69,8 +69,10 @@ namespace IdleRPG.EditorTools
         /// <summary>Modal canvas order. Above the main canvas (0) and the damage canvas (10).</summary>
         private const int ModalSortingOrder = 100;
 
-        private static readonly Color TextColor = new Color(0.94f, 0.96f, 1f, 1f);
-        private static readonly Color DimTextColor = new Color(0.75f, 0.78f, 0.86f, 1f);
+        // Every label in the game is one white ink (owner, 2026-11-23). The name is kept so call sites did not have
+        // to change; the dim variant now points at the same white, because there is no second text ladder.
+        private static readonly Color TextColor = UiTheme.Text;
+        private static readonly Color DimTextColor = UiTheme.Text;
 
         [MenuItem("Tools/Idle RPG/Build MVP Scene", priority = 1)]
 
@@ -259,7 +261,7 @@ namespace IdleRPG.EditorTools
             camera.orthographic = true;
             camera.orthographicSize = 5f;
             camera.clearFlags = CameraClearFlags.SolidColor;
-            camera.backgroundColor = new Color(0.04f, 0.05f, 0.08f, 1f);
+            camera.backgroundColor = UiTheme.SurfaceBase;
             camera.transform.position = new Vector3(0f, 0f, -10f);
         }
 
@@ -304,7 +306,7 @@ namespace IdleRPG.EditorTools
             stageCamera.orthographic = true;
             stageCamera.orthographicSize = 5f;
             stageCamera.clearFlags = CameraClearFlags.SolidColor;
-            stageCamera.backgroundColor = new Color(0.04f, 0.05f, 0.08f, 1f);
+            stageCamera.backgroundColor = UiTheme.SurfaceBase;
             stageCamera.cullingMask = uiLayer >= 0 ? 1 << uiLayer : ~0;
             stageCamera.depth = -2f;
             stageCamera.allowHDR = false;

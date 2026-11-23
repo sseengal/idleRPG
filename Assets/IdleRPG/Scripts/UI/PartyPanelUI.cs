@@ -209,7 +209,7 @@ namespace IdleRPG.UI
         // ------------------------------------------------------------------
         // Shared row builder (the Roster uses the locked-slot look)
         // ------------------------------------------------------------------
-        internal static readonly Color SlotRowTextColor = UiTheme.InkDim;
+        internal static readonly Color SlotRowTextColor = UiTheme.Text;
         internal static readonly Color SlotRowCellColor = UiTheme.SlotBlue;
 
         /// <summary>A caption plus a row of empty, locked slots (abilities, filled by a later step).</summary>

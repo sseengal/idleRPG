@@ -62,7 +62,7 @@ namespace IdleRPG.EditorTools
             UiFactory.Anchor(boostChip.rectTransform, new Vector2(0.03f, 0.20f), new Vector2(0.53f, 0.92f));
 
             TextMeshProUGUI boostText = UiFactory.Text("BoostLabel", boostChip.transform, "x2", UiType.Role.Section,
-                TextAlignmentOptions.Center, UiTheme.InkOnAccent);
+                TextAlignmentOptions.Center, UiTheme.Text);
             UiFactory.Stretch(boostText.rectTransform, UiSpace.Medium, UiSpace.Tight, UiSpace.Medium, UiSpace.Tight);
             boostChip.gameObject.SetActive(false);
 
@@ -85,7 +85,9 @@ namespace IdleRPG.EditorTools
         /// </summary>
         private static TextMeshProUGUI CreateCurrencyChip(Transform parent, string name, string iconSprite)
         {
-            Image chip = ContainerPanel(name, parent, tint: UiTheme.PanelLight);
+            // A flat block, not a plate: a bordered chip inside the bordered header read as a container inside a
+            // container (owner, 2026-11-23). Same footprint, darker grey, no nested frame.
+            Image chip = UiFactory.Panel(name, parent, (string)null, UiTheme.SurfaceChip, raycast: false);
             LayoutElement element = chip.gameObject.AddComponent<LayoutElement>();
             element.flexibleWidth = 1f;
 
@@ -108,11 +110,11 @@ namespace IdleRPG.EditorTools
             GameObject barObject = UiFactory.Node(name, parent);
             HpBarView view = barObject.AddComponent<HpBarView>();
 
-            Image background = UiFactory.Icon("Background", barObject.transform, new Color(0f, 0f, 0f, 0.5f), false);
+            Image background = UiFactory.Icon("Background", barObject.transform, UiTheme.ShadeHalf, false);
             UiFactory.Stretch(background.rectTransform);
 
-            Image ghost = CreateFilledImage("Ghost", background.transform, new Color(1f, 0.85f, 0.35f, 0.5f));
-            Image fill = CreateFilledImage("Fill", background.transform, new Color(0.35f, 0.85f, 0.45f, 1f));
+            Image ghost = CreateFilledImage("Ghost", background.transform, UiTheme.WithAlpha(UiTheme.HpWounded, 0.5f));
+            Image fill = CreateFilledImage("Fill", background.transform, UiTheme.HpHealthy);
 
             TextMeshProUGUI value = UiFactory.Text("Value", barObject.transform, "0 / 0", UiType.Role.Micro,
                 TextAlignmentOptions.Center, UiTheme.Text);
@@ -198,7 +200,7 @@ namespace IdleRPG.EditorTools
             // health numbers, bar) below the sprite, paid for by the log band, not by the art.
             SceneWiringUtility.SetField(formationBoard, "slotSize", new Vector2(160f, 260f));
             // Cleanup pass 2026-09-30: no translucent tiles / row indicators behind heroes on the battle view.
-            SceneWiringUtility.SetField(formationBoard, "slotColor", new Color(1f, 1f, 1f, 0f));
+            SceneWiringUtility.SetField(formationBoard, "slotColor", Color.clear);
 
             // The enemy side is a vertical stack of up to 3 slots, each with its own sprite, name and HP bar.
             // Enemies have no ranks: the stack is presentation only (the sim decides who gets hit).
@@ -424,7 +426,7 @@ namespace IdleRPG.EditorTools
             GameObject template = UiFactory.Node("DamageTextTemplate", damageRoot);
             FloatingDamageTextView textView = template.AddComponent<FloatingDamageTextView>();
             TextMeshProUGUI label = UiFactory.Text("Label", template.transform, "0", UiType.Role.Damage,
-                TextAlignmentOptions.Center, Color.white);
+                TextAlignmentOptions.Center, UiTheme.Text);
             UiFactory.Stretch(label.rectTransform);
 
             SceneWiringUtility.SetField(textView, "label", label);
@@ -498,9 +500,9 @@ namespace IdleRPG.EditorTools
             SceneWiringUtility.SetField(ui, "lineSpacing", 4);
             SceneWiringUtility.SetField(ui, "typewriter", true);
             SceneWiringUtility.SetField(ui, "typewriterCharsPerSecond", 45f);
-            SceneWiringUtility.SetField(ui, "heroHitColor", UiTheme.Text);
-            SceneWiringUtility.SetField(ui, "criticalColor", UiTheme.AccentLight);
-            SceneWiringUtility.SetField(ui, "goldColor", UiTheme.AccentLight);
+
+            // One ink for the whole log (owner, 2026-11-23): white like every other label.
+            SceneWiringUtility.SetField(ui, "ink", UiTheme.Text);
             return ui;
         }
     }

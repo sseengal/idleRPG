@@ -354,7 +354,7 @@ namespace IdleRPG.UI
 
             if (flashImage != null)
             {
-                flashImage.color = new Color(UiTheme.XpFlash.r, UiTheme.XpFlash.g, UiTheme.XpFlash.b, 0f);
+                flashImage.color = UiTheme.WithAlpha(UiTheme.XpFlash, 0f);
             }
 
             if (levelLabel != null)
@@ -373,11 +373,11 @@ namespace IdleRPG.UI
                     flashElapsed += dt;
                     float t = Mathf.Clamp01(flashElapsed / Mathf.Max(0.01f, levelFlashSec));
                     float alpha = Mathf.Sin(t * Mathf.PI) * 0.45f;
-                    flashImage.color = new Color(UiTheme.XpFlash.r, UiTheme.XpFlash.g, UiTheme.XpFlash.b, alpha);
+                    flashImage.color = UiTheme.WithAlpha(UiTheme.XpFlash, alpha);
                 }
                 else if (flashImage.color.a != 0f)
                 {
-                    flashImage.color = new Color(UiTheme.XpFlash.r, UiTheme.XpFlash.g, UiTheme.XpFlash.b, 0f);
+                    flashImage.color = UiTheme.WithAlpha(UiTheme.XpFlash, 0f);
                 }
             }
 
@@ -524,7 +524,7 @@ namespace IdleRPG.UI
             UiRuntime.Stretch(levelLabel.rectTransform);
 
             valueLabel = UiRuntime.CreateText(textGroup, "Value", "0/0", UiType.Role.Micro,
-                TextAlignmentOptions.MidlineLeft, UiTheme.TextDim);
+                TextAlignmentOptions.MidlineLeft, UiTheme.Text);
             UiType.ApplyAuto(valueLabel, UiType.Role.Micro);
             UiRuntime.Stretch(valueLabel.rectTransform);
 
@@ -562,7 +562,7 @@ namespace IdleRPG.UI
             flash.name = "LevelFlash";
             UiRuntime.Stretch(flash.rectTransform);
             flashImage = flash;
-            flashImage.color = new Color(UiTheme.XpFlash.r, UiTheme.XpFlash.g, UiTheme.XpFlash.b, 0f);
+            flashImage.color = UiTheme.WithAlpha(UiTheme.XpFlash, 0f);
 
             SetFill(0f);
         }

@@ -60,6 +60,12 @@ namespace IdleRPG.UI
         public static readonly Color SurfaceRaised = Slate700;
         /// <summary>Cards and list rows that sit on a panel.</summary>
         public static readonly Color SurfaceCard = Slate600;
+        /// <summary>
+        /// A chip that sits ON a panel: the currency blocks and the menu block (owner, 2026-11-23). One step darker
+        /// than <see cref="SurfaceRaised"/> so the header reads as a bar with darker blocks on it, not as a plate
+        /// inside a plate. Never black.
+        /// </summary>
+        public static readonly Color SurfaceChip = Slate800;
 
         /// <summary>A hairline or a quiet edge.</summary>
         public static readonly Color BorderSubtle = Slate600;
@@ -145,14 +151,35 @@ namespace IdleRPG.UI
         // ------------------------------------------------------------------
         // Veils and shades. The alpha belongs to the token, not to each call site.
         // ------------------------------------------------------------------
-        /// <summary>The near-black behind numbers on a nameplate, and inside a bar's track. 75%.</summary>
-        public static readonly Color ShadeBar = new Color(0f, 0f, 0f, 0.75f);
+        /// <summary>
+        /// The darkest thing the UI may use: Slate950 at 75%. Nothing behind a number is pure black (owner,
+        /// 2026-11-23) - a blue-grey reads softer next to the palette and never looks like a hole.
+        /// </summary>
+        public static readonly Color ShadeBar = WithAlpha(Slate950, 0.75f);
         /// <summary>A dimming layer behind a sheet. 65%.</summary>
-        public static readonly Color VeilSoft = new Color(0f, 0f, 0f, 0.65f);
+        public static readonly Color VeilSoft = WithAlpha(Slate950, 0.65f);
         /// <summary>A near-opaque layer behind a modal card. 88%.</summary>
-        public static readonly Color VeilStrong = new Color(0f, 0f, 0f, 0.88f);
+        public static readonly Color VeilStrong = WithAlpha(Slate950, 0.88f);
+        /// <summary>A heavy dim behind a full-screen band (the camp sheet). 80%.</summary>
+        public static readonly Color VeilDeep = WithAlpha(Slate950, 0.80f);
+        /// <summary>A half-shade: behind a bar's fill, behind a small name. 50%.</summary>
+        public static readonly Color ShadeHalf = WithAlpha(Slate950, 0.50f);
+        /// <summary>A dark rim under an icon or a glyph. 55%.</summary>
+        public static readonly Color ShadowInk = WithAlpha(Slate950, 0.55f);
+        /// <summary>What a pressed button's face is pulled toward. Dark grey, never black.</summary>
+        public static readonly Color PressShade = Slate950;
         /// <summary>An invisible raycast blocker.</summary>
-        public static readonly Color VeilTrace = new Color(0f, 0f, 0f, 0.003f);
+        public static readonly Color VeilTrace = WithAlpha(Slate950, 0.003f);
+
+        /// <summary>A copy of a colour with a new alpha. Keeps every veil on one hue, and keeps call sites free of literals.</summary>
+        public static Color WithAlpha(Color colour, float alpha)
+        {
+            colour.a = alpha;
+            return colour;
+        }
+
+        /// <summary>The camp fire's stand-in rectangle: a warm brown, kept here so no builder mixes its own.</summary>
+        public static readonly Color CampFire = new Color32(107, 71, 41, 255);
 
         // ------------------------------------------------------------------
         // Stage backdrop (art, not chrome): the three stops of the arena atmosphere.
@@ -199,8 +226,15 @@ namespace IdleRPG.UI
 
         // Text and inks. The alpha inks keep their alpha because they are drawn over art; the opaque ones move
         // onto the ink ramp.
+        /// <summary>
+        /// THE text colour (owner, 2026-11-23): every label in the game is this white, on every surface, and the
+        /// font's own baked rim gives it its edge. The dim entries below stay for ICONS, fills and disabled states -
+        /// they are not a second text ladder. One exception, on purpose: floating damage numbers keep red / green.
+        /// </summary>
         public static readonly Color Text = InkHigh;
+        /// <summary>Icons, rules and empty states - NOT a text colour since 2026-11-23.</summary>
         public static readonly Color TextDim = InkLow;
+        /// <summary>Icons and hairlines - NOT a text colour since 2026-11-23.</summary>
         public static readonly Color TextMuted = InkMedium;
         public static readonly Color Parchment = InkHigh;
         public static readonly Color InkOnAccent = InkOnGold;

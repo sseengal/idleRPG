@@ -148,7 +148,7 @@ namespace IdleRPG.UI
             title.gameObject.SetActive(bannerLabel == null);
 
             status = UiRuntime.CreateText(normalGroup.transform, "Status", string.Empty, UiType.Role.Sentence,
-                TextAlignmentOptions.Center, UiTheme.TextMuted);
+                TextAlignmentOptions.Center, UiTheme.Text);
             UiRuntime.Anchor(status.rectTransform, new Vector2(0.06f, 0.02f), new Vector2(0.94f, 0.08f));
             status.gameObject.SetActive(false);
 
@@ -241,7 +241,7 @@ namespace IdleRPG.UI
             UiRuntime.Anchor(confirmTitle.rectTransform, new Vector2(0.05f, 0.80f), new Vector2(0.95f, 0.92f));
 
             confirmBody = UiRuntime.CreateText(confirmGroup.transform, "Body", string.Empty, UiType.Role.Sentence,
-                TextAlignmentOptions.Center, UiTheme.TextMuted);
+                TextAlignmentOptions.Center, UiTheme.Text);
             UiRuntime.Anchor(confirmBody.rectTransform, new Vector2(0.08f, 0.56f), new Vector2(0.92f, 0.76f));
 
             MakeButton(confirmGroup.transform, "EndRun", "END RUN",

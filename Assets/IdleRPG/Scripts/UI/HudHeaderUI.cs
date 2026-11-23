@@ -118,7 +118,8 @@ namespace IdleRPG.UI
         {
             Transform parent = chipRow != null ? chipRow : transform;
 
-            Image background = UiRuntime.CreatePanel(parent, null, UiTheme.MenuFace, raycast: true);
+            // Flat block on the header bar, same darker grey as the currency chips (owner, 2026-11-23).
+            Image background = UiRuntime.CreatePanel(parent, null, UiTheme.SurfaceChip, raycast: true);
             background.gameObject.name = "MenuButton";
             UiRuntime.Anchor(background.rectTransform, new Vector2(0.88f, 0.10f), new Vector2(0.985f, 0.90f));
 

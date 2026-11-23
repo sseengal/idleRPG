@@ -40,19 +40,11 @@ namespace IdleRPG.UI
         [Tooltip("Padding above and below the list.")]
         [SerializeField] private float contentPadding = 12f;
 
-        [Header("Colours")]
-        [SerializeField] private Color heroHitColor = UiTheme.Text;
-        [SerializeField] private Color criticalColor = UiTheme.GoldBright;
-        [SerializeField] private Color incomingColor = UiTheme.Danger;
-        [SerializeField] private Color killColor = UiTheme.GreenSoft;
-        [SerializeField] private Color eventColor = UiTheme.EventBlue;
-        [SerializeField] private Color goldColor = UiTheme.GoldLight;
-        [Tooltip("Colour of a heal line.")]
-        [SerializeField] private Color healColor = UiTheme.GreenSoft;
-        [Tooltip("Colour of a guard (shield) line.")]
-        [SerializeField] private Color guardColor = UiTheme.GuardBlue;
-        [Tooltip("Colour of an enemy ability line. Loud on purpose: the player must spot it in the scroll.")]
-        [SerializeField] private Color enemyAbilityColor = UiTheme.OrangeBright;
+        [Header("Ink")]
+        [Tooltip("One ink for every log line (owner, 2026-11-23): the log is white like the rest of the game. The " +
+                 "line's KIND still lives in the entry, so a future skin can colour it again without touching " +
+                 "callers - the kind just does not change the colour today.")]
+        [SerializeField] private Color ink = UiTheme.Text;
 
         [Header("Typewriter")]
         [Tooltip("Reveal story dialogue one character at a time, classic JRPG style. Combat lines stay whole.")]
@@ -133,7 +125,7 @@ namespace IdleRPG.UI
             UiRuntime.Anchor(storyText.rectTransform, new Vector2(0f, 0.18f), Vector2.one);
 
             storyPrompt = UiRuntime.CreateText(panel, "Prompt", "TAP TO CONTINUE",
-                UiType.Role.Small, TextAlignmentOptions.Center, UiTheme.AccentLight);
+                UiType.Role.Small, TextAlignmentOptions.Center, UiTheme.Text);
             UiRuntime.Anchor(storyPrompt.rectTransform, Vector2.zero, new Vector2(1f, 0.16f));
             storyPrompt.gameObject.SetActive(false);
 
@@ -363,8 +355,8 @@ namespace IdleRPG.UI
                 return body;
             }
 
-            string gold = ColorUtility.ToHtmlStringRGB(UiTheme.AccentLight);
-            return $"<color=#{gold}>{speaker}</color>: {body}";
+            // One ink: the speaker is marked by its colon, not by a colour (owner, 2026-11-23).
+            return speaker + ": " + body;
         }
 
         /// <summary>Hides the normal feed and shows the one-line story view in the same log box.</summary>
@@ -635,32 +627,8 @@ namespace IdleRPG.UI
 
         private Color ColorFor(BattleLogKind kind)
         {
-            switch (kind)
-            {
-                case BattleLogKind.Critical:
-                    return criticalColor;
-                case BattleLogKind.Incoming:
-                case BattleLogKind.Defeat:
-                    return incomingColor;
-                case BattleLogKind.EnemyKilled:
-                case BattleLogKind.Gold:
-                    return goldColor;
-                case BattleLogKind.HeroDied:
-                    return killColor;
-                case BattleLogKind.Ability:
-                case BattleLogKind.System:
-                    return eventColor;
-                case BattleLogKind.Dialogue:
-                    return heroHitColor;
-                case BattleLogKind.EnemyAbility:
-                    return enemyAbilityColor;
-                case BattleLogKind.Heal:
-                    return healColor;
-                case BattleLogKind.Guard:
-                    return guardColor;
-                default:
-                    return heroHitColor;
-            }
+            // Kind is kept for the entry's meaning and for future skins; today every line is the one white ink.
+            return ink;
         }
 
     }

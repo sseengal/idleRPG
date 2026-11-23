@@ -46,12 +46,12 @@ namespace IdleRPG.UI
             }
 
             Shadow near = node.AddComponent<Shadow>();
-            near.effectColor = new Color(0f, 0f, 0f, ShadowNearAlpha);
+            near.effectColor = UiTheme.WithAlpha(UiTheme.Slate950, ShadowNearAlpha);
             near.effectDistance = new Vector2(0f, ShadowNearOffset);
             near.useGraphicAlpha = true;
 
             Shadow far = node.AddComponent<Shadow>();
-            far.effectColor = new Color(0f, 0f, 0f, ShadowFarAlpha);
+            far.effectColor = UiTheme.WithAlpha(UiTheme.Slate950, ShadowFarAlpha);
             far.effectDistance = new Vector2(0f, ShadowFarOffset);
             far.useGraphicAlpha = true;
         }

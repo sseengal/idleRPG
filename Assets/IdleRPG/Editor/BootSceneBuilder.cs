@@ -35,7 +35,7 @@ namespace IdleRPG.EditorTools
             GameObject camGO = new GameObject("Main Camera", typeof(Camera), typeof(AudioListener));
             Camera cam = camGO.GetComponent<Camera>();
             cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = new Color(0.05f, 0.06f, 0.09f, 1f);
+            cam.backgroundColor = UiTheme.SurfaceBase;
             camGO.tag = "MainCamera";
 
             GameObject canvasGO = new GameObject("SplashCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
@@ -47,7 +47,7 @@ namespace IdleRPG.EditorTools
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
             scaler.matchWidthOrHeight = 0f;
 
-            Image bg = CreateImage("Background", canvasGO.transform, new Color(0.05f, 0.06f, 0.09f, 1f));
+            Image bg = CreateImage("Background", canvasGO.transform, UiTheme.SurfaceBase);
             Stretch(bg.rectTransform);
 
             TextMeshProUGUI title = CreateText("Title", canvasGO.transform, "Kingsguard: Tiny RPG", UiType.Role.Display, Color.white);
@@ -57,14 +57,14 @@ namespace IdleRPG.EditorTools
             tr.offsetMin = Vector2.zero;
             tr.offsetMax = Vector2.zero;
 
-            Image barBG = CreateImage("BarBG", canvasGO.transform, new Color(1f, 1f, 1f, 0.12f));
+            Image barBG = CreateImage("BarBG", canvasGO.transform, UiTheme.WithAlpha(UiTheme.InkHigh, 0.12f));
             RectTransform brt = barBG.rectTransform;
             brt.anchorMin = new Vector2(0.15f, 0.46f);
             brt.anchorMax = new Vector2(0.85f, 0.50f);
             brt.offsetMin = Vector2.zero;
             brt.offsetMax = Vector2.zero;
 
-            Image fill = CreateImage("BarFill", barBG.transform, new Color(0.96f, 0.80f, 0.28f, 1f));
+            Image fill = CreateImage("BarFill", barBG.transform, UiTheme.AccentBright);
             RectTransform frt = fill.rectTransform;
             frt.anchorMin = Vector2.zero;
             frt.anchorMax = new Vector2(0f, 1f);

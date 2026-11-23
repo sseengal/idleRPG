@@ -35,7 +35,7 @@ namespace IdleRPG.EditorTools
             UiFactory.Stretch(viewRoot.GetComponent<RectTransform>());
 
             Image dim = UiFactory.Panel("Dim", viewRoot.transform, (string)null,
-                new Color(0f, 0f, 0f, 0.80f), raycast: false);
+                UiTheme.VeilDeep, raycast: false);
             UiFactory.Stretch(dim.rectTransform);
 
             TextMeshProUGUI title = UiFactory.Text("Title", viewRoot.transform, "CAMP", UiType.Role.Display,
@@ -43,14 +43,14 @@ namespace IdleRPG.EditorTools
             UiFactory.Anchor(title.rectTransform, new Vector2(0.10f, 0.86f), new Vector2(0.90f, 0.95f));
 
             TextMeshProUGUI token = UiFactory.Text("TokenLabel", viewRoot.transform, "1 LONG-REST TOKEN",
-                UiType.Role.Small, TextAlignmentOptions.Center, UiTheme.TextDim);
+                UiType.Role.Small, TextAlignmentOptions.Center, UiTheme.Text);
             UiFactory.Anchor(token.rectTransform, new Vector2(0.10f, 0.80f), new Vector2(0.90f, 0.85f));
 
             TextMeshProUGUI training = UiFactory.Text("TrainingLabel", viewRoot.transform, "TRAINED +0 ATK · +0 DEF",
-                UiType.Role.Micro, TextAlignmentOptions.Center, UiTheme.AccentLight);
+                UiType.Role.Micro, TextAlignmentOptions.Center, UiTheme.Text);
             UiFactory.Anchor(training.rectTransform, new Vector2(0.20f, 0.75f), new Vector2(0.80f, 0.80f));
 
-            Image fire = ContainerPanel("Fire", viewRoot.transform, tint: new Color(0.42f, 0.28f, 0.16f, 1f));
+            Image fire = ContainerPanel("Fire", viewRoot.transform, tint: UiTheme.CampFire);
             UiFactory.CenterOn(fire.rectTransform, new Vector2(0.5f, CampFireY), new Vector2(240f, 110f));
 
             Image[] actors = new Image[3];
@@ -78,9 +78,9 @@ namespace IdleRPG.EditorTools
             CanvasGroup stripGroup = strip.gameObject.AddComponent<CanvasGroup>();
 
             Button shortFree = BuildCampChoice(strip.transform, 0, 4, "SHORT REST", "10% FREE", string.Empty,
-                UiTheme.PanelLight, UiTheme.Text, UiTheme.TextDim, out _, out _);
+                UiTheme.PanelLight, UiTheme.Text, UiTheme.Text, out _, out _);
             Button shortAd = BuildCampChoice(strip.transform, 1, 4, "SHORT REST+", "20% (AD)", string.Empty,
-                UiTheme.Panel, UiTheme.Text, UiTheme.TextDim, out TextMeshProUGUI shortAdLabel, out _);
+                UiTheme.Panel, UiTheme.Text, UiTheme.Text, out TextMeshProUGUI shortAdLabel, out _);
             Button longRest = BuildCampChoice(strip.transform, 2, 4, "LONG REST", "30% + REVIVE", "1 TOKEN",
                 UiTheme.Accent, UiTheme.Text, UiTheme.Text,
                 out TextMeshProUGUI longRestLabel, out TextMeshProUGUI longNoteLabel);

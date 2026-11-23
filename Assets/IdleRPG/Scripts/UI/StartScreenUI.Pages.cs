@@ -106,10 +106,10 @@ namespace IdleRPG.UI
             perksPanel = CreateLobbyPanel("PerksPanel");
 
             perksTitle = Text(perksPanel.transform, "Title", new Vector2(0.03f, 0.90f), new Vector2(0.97f, 0.98f),
-                "PERK POINTS 0", UiType.Role.Section, UiTheme.Gold);
+                "PERK POINTS 0", UiType.Role.Section, UiTheme.Text);
 
             Text(perksPanel.transform, "Sub", new Vector2(0.03f, 0.845f), new Vector2(0.97f, 0.90f),
-                "Permanent multipliers - never reset", UiType.Role.Micro, UiTheme.TextDim);
+                "Permanent multipliers - never reset", UiType.Role.Micro, UiTheme.Text);
 
             if (manager == null || manager.Ascension == null)
             {
@@ -143,13 +143,13 @@ namespace IdleRPG.UI
             name.alignment = TextAlignmentOptions.MidlineLeft;
 
             TextMeshProUGUI effect = Text(parent, "Effect", new Vector2(0.04f, bottom + 0.012f), new Vector2(0.66f, top - 0.066f),
-                string.Empty, UiType.Role.Small, UiTheme.TextMuted);
+                string.Empty, UiType.Role.Small, UiTheme.Text);
             effect.alignment = TextAlignmentOptions.MidlineLeft;
             effect.textWrappingMode = TextWrappingModes.NoWrap;
             UiType.ApplyAuto(effect, UiType.Role.Small);
 
             TextMeshProUGUI level = Text(parent, "Level", new Vector2(0.56f, top - 0.062f), new Vector2(0.71f, top - 0.008f),
-                string.Empty, UiType.Role.Small, UiTheme.Gold);
+                string.Empty, UiType.Role.Small, UiTheme.Text);
             level.alignment = TextAlignmentOptions.MidlineRight;
             level.textWrappingMode = TextWrappingModes.NoWrap;
             UiType.ApplyAuto(level, UiType.Role.Small);

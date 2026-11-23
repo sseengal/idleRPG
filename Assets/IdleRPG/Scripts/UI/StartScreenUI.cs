@@ -164,7 +164,7 @@ namespace IdleRPG.UI
 
             // Chapter title: small faded "Chapter 1" over a big "Greenwake". Rect centres sit ~0.02 apart
             // so the two read as ONE tight kicker, and hug the panel top (proximity grouping).
-            Text(lobby.transform, "ChapterLabel", new Vector2(0.05f, 0.717f), new Vector2(0.95f, 0.737f), "Chapter 1", UiType.Role.Small, UiTheme.TextDim);
+            Text(lobby.transform, "ChapterLabel", new Vector2(0.05f, 0.717f), new Vector2(0.95f, 0.737f), "Chapter 1", UiType.Role.Small, UiTheme.Text);
             if (chapterTitleArt != null)
             {
                 // Wordmark art (transparent, centred); sized to its aspect so the letters read clean.
@@ -344,7 +344,7 @@ namespace IdleRPG.UI
             // A dark copy under every icon so gold art still reads on the gold selected face. Not a plate:
             // an outline that also helps on the slate face.
             Shadow iconShadow = icon.gameObject.AddComponent<Shadow>();
-            iconShadow.effectColor = new Color(0f, 0f, 0f, 0.55f);
+            iconShadow.effectColor = UiTheme.ShadowInk;
             iconShadow.effectDistance = new Vector2(0f, -2f);
             iconShadow.useGraphicAlpha = true;
 
@@ -358,9 +358,9 @@ namespace IdleRPG.UI
             FantasyTabButton view = frameRect.gameObject.AddComponent<FantasyTabButton>();
 
             // Idle = the neutral bar, selected = the gold bar. The icon keeps its own colours (with a shadow),
-            // and the word is BLACK on the gold face (owner: dark, not white, not a ghost).
+            // and the word is the one white ink in both states (owner, 2026-11-23: white everywhere, not dark).
             view.Bind(tabRoot, frame, glow, text, effect, button,
-                UiTheme.NavIdle, UiTheme.NavSelected, UiTheme.TextMuted, skin.primaryButtonInk, icon, TabIconScale(tab),
+                UiTheme.NavIdle, UiTheme.NavSelected, UiTheme.Text, UiTheme.Text, icon, TabIconScale(tab),
                 TabIconSelectedScale(tab), TabIconVertical(tab), TabIconSelectedVertical(tab),
                 skin.neutralButtonSprite, skin.primaryButtonSprite, skin.buttonBorderScale);
             return view;

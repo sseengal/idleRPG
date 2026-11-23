@@ -371,7 +371,7 @@ namespace IdleRPG.UI
             else
             {
                 Text(cell.transform, "Name", new Vector2(0.06f, 0.18f), new Vector2(0.94f, 0.82f),
-                    "Empty", UiType.Role.Small, UiTheme.TextDim);
+                    "Empty", UiType.Role.Small, UiTheme.Text);
             }
         }
 
@@ -395,7 +395,7 @@ namespace IdleRPG.UI
             button.onClick.AddListener(() => ScrollToColumn(column));
 
             Text(cell.transform, "Title", new Vector2(0.04f, 0.76f), new Vector2(0.96f, 0.99f),
-                "PARTY", UiType.Role.Small, UiTheme.Gold);
+                "PARTY", UiType.Role.Small, UiTheme.Text);
 
             // The three small portraits, so the party track reads as "everyone".
             int count = manager != null && manager.Party != null ? manager.Party.Heroes.Count : 0;

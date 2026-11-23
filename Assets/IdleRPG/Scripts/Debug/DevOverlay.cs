@@ -10,6 +10,7 @@ using IdleRPG.Data;
 using IdleRPG.Debugging;
 using IdleRPG.Economy;
 using IdleRPG.Progression;
+using IdleRPG.UI;
 using IdleRPG.Services;
 using IdleRPG.Sim;
 
@@ -90,9 +91,9 @@ namespace IdleRPG.DebugTools
             panelRect.sizeDelta = new Vector2(PanelWidth, 260f);
 
             Image background = panel.AddComponent<Image>();
-            background.color = new Color(0f, 0f, 0f, 0.72f);
+            background.color = UiTheme.VeilDeep;
 
-            label = CreateLabel(panel.transform, "Label", new Color(0.85f, 1f, 0.85f));
+            label = CreateLabel(panel.transform, "Label", UiTheme.Text);
             hotkeyPanel = CreateHotkeyPanel(canvasObject.transform);
 
             SetVisible(false);
@@ -135,9 +136,9 @@ namespace IdleRPG.DebugTools
             rect.sizeDelta = new Vector2(PanelWidth, 100f);
 
             Image background = host.AddComponent<Image>();
-            background.color = new Color(0f, 0f, 0f, 0.72f);
+            background.color = UiTheme.VeilDeep;
 
-            hotkeyLabel = CreateLabel(host.transform, "Label", new Color(1f, 0.92f, 0.7f));
+            hotkeyLabel = CreateLabel(host.transform, "Label", UiTheme.Text);
             hotkeyLabel.SetText(DebugHotkeyCatalog.BuildLegend("DEV HOTKEYS  (F3 closes this)"));
             return host;
         }

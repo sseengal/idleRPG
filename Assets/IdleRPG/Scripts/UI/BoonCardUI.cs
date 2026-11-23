@@ -180,12 +180,12 @@ namespace IdleRPG.UI
             if (row.Rarity != null)
             {
                 row.Rarity.SetText(RarityLabel(card.Rarity));
-                row.Rarity.color = tint;
+                row.Rarity.color = UiTheme.Text;
             }
 
             if (row.Icon != null)
             {
-                row.Icon.color = new Color(tint.r * 0.45f, tint.g * 0.45f, tint.b * 0.45f, 1f);
+                row.Icon.color = Color.Lerp(tint, UiTheme.PressShade, 0.55f);
             }
 
             Sprite art = card.Icon;
@@ -213,7 +213,7 @@ namespace IdleRPG.UI
             if (row.Target != null)
             {
                 row.Target.SetText(card.TargetLabel);
-                row.Target.color = UiTheme.TextDim;
+                row.Target.color = UiTheme.Text;
             }
 
             if (row.Description != null)
@@ -240,7 +240,7 @@ namespace IdleRPG.UI
                 case PerkRarity.Rare: return UiTheme.RarityRare;
                 case PerkRarity.Epic: return UiTheme.RarityEpic;
                 case PerkRarity.Legendary: return UiTheme.RarityLegendary;
-                default: return UiTheme.TextMuted;
+                default: return UiTheme.Text;
             }
         }
 
@@ -279,7 +279,7 @@ namespace IdleRPG.UI
             UiParts.Banner(panel.transform, "LEVEL UP!");
 
             subtitle = UiRuntime.CreateText(panel.transform, "Subtitle", "CHOOSE A BOON",
-                UiType.Role.Micro, TextAlignmentOptions.Center, UiTheme.TextDim);
+                UiType.Role.Micro, TextAlignmentOptions.Center, UiTheme.Text);
             UiRuntime.Anchor(subtitle.rectTransform, new Vector2(0.05f, 0.84f), new Vector2(0.95f, 0.90f));
 
             const float rowHeight = 0.215f;
@@ -334,7 +334,7 @@ namespace IdleRPG.UI
             UiRuntime.Stretch(row.IconLetter.rectTransform);
 
             row.Rarity = UiRuntime.CreateText(background.transform, "Rarity", "COMMON",
-                UiType.Role.Micro, TextAlignmentOptions.MidlineLeft, UiTheme.TextDim);
+                UiType.Role.Micro, TextAlignmentOptions.MidlineLeft, UiTheme.Text);
             UiRuntime.Anchor(row.Rarity.rectTransform, new Vector2(0.34f, 0.74f), new Vector2(0.62f, 0.92f));
 
             row.Name = UiRuntime.CreateText(background.transform, "Name", "Boon",
@@ -342,7 +342,7 @@ namespace IdleRPG.UI
             UiRuntime.Anchor(row.Name.rectTransform, new Vector2(0.34f, 0.50f), new Vector2(0.96f, 0.74f));
 
             row.Target = UiRuntime.CreateText(background.transform, "Target", "All heroes",
-                UiType.Role.Micro, TextAlignmentOptions.MidlineLeft, UiTheme.TextDim);
+                UiType.Role.Micro, TextAlignmentOptions.MidlineLeft, UiTheme.Text);
             UiRuntime.Anchor(row.Target.rectTransform, new Vector2(0.34f, 0.36f), new Vector2(0.96f, 0.50f));
 
             row.Description = UiRuntime.CreateText(background.transform, "Description", "+10% attack",

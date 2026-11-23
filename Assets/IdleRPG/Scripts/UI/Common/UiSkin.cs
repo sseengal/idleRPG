@@ -71,7 +71,7 @@ namespace IdleRPG.UI
         public float bannerScale = 7f;
 
         [Tooltip("Ribbon text ink. White reads on the red face.")]
-        public Color bannerInk = new Color32(236, 240, 248, 255);
+        public Color bannerInk = UiTheme.Text;
 
         [Header("Containers (82x17 flat face, 1 px dark bottom line)")]
         [Tooltip("Flat container: header bar, combat log, stage row, camp strip. Baked colour, drawn white.")]
@@ -84,9 +84,11 @@ namespace IdleRPG.UI
         public float buttonBorderScale = 1f / 7f;
 
         [Header("Action button ink")]
-        public Color primaryButtonInk = new Color32(58, 36, 16, 255);
-        public Color dangerButtonInk = new Color32(236, 240, 248, 255);
-        public Color neutralButtonInk = new Color32(236, 240, 248, 255);
+        [Tooltip("Every action button is white ink (owner, 2026-11-23); the font's own rim gives it the edge. " +
+                 "Kept per face so a future skin can still differ, but the shipped values are all the same white.")]
+        public Color primaryButtonInk = UiTheme.Text;
+        public Color dangerButtonInk = UiTheme.Text;
+        public Color neutralButtonInk = UiTheme.Text;
 
 
         [Header("Colours")]

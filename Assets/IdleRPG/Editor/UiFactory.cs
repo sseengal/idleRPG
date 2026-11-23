@@ -274,7 +274,7 @@ namespace IdleRPG.EditorTools
             // without this the pointer finds nothing to press: no press means no drag, and a list that cannot be
             // dragged does not scroll. It is a transparent quad behind the rows, so rows and buttons still win
             // their own taps. The ScrollRect lives on this same GameObject, so the drag resolves here.
-            Image hitSurface = Panel("ScrollHit", root.transform, null, new Color(0f, 0f, 0f, 0f), raycast: true);
+            Image hitSurface = Panel("ScrollHit", root.transform, null, Color.clear, raycast: true);
             Stretch(hitSurface.rectTransform);
 
             GameObject viewport = Node("Viewport", root.transform);

@@ -451,6 +451,28 @@ same values.
 ornate Frame. The ornate Frame is now used only **around icons** (level-up rows) and as a standalone decoration.
 Verified live: pause panel sprite = `container_panel_tint`, fill `(38,46,61)`.
 
+**One ink, one white (2026-11-23).** Every label in the game is `UiTheme.Text` (`#ECF0F8`), and the font's baked
+rim gives it its edge. The dark-on-gold ink is gone: `UiSkin.primaryButtonInk` is white, so START, RESUME, CLOSE
+and the selected tab word are white too. The dim tokens (`TextDim`, `TextMuted`, `InkOff`) stay for **icons, fills
+and disabled states** - they are not a second text ladder. One exception, on purpose: **floating damage numbers**
+keep red / green (`FloatingDamageTextView`), because there colour IS the information. Verified live: 152 labels,
+one colour.
+
+**No hard blacks (2026-11-23).** Nothing is `(0,0,0)` any more. `ShadeBar`, `VeilSoft`, `VeilStrong`, `VeilDeep`,
+`ShadeHalf`, `ShadowInk`, `PressShade` and `VeilTrace` are all `Slate950` (`#0B0F15`) at different alphas;
+`UiTheme.WithAlpha(token, a)` makes any of them. The two UI prefabs and both scenes were rewritten to match -
+measured on a live scene: **0 black images out of 368**.
+
+**The header is one bar, not plates inside plates (2026-11-23).** The bar keeps `ContainerFace` (`#252E3E`); the
+three currency chips and the menu block are **flat** rectangles of `UiTheme.SurfaceChip` (`#161C29`), one step
+darker, with no plate art of their own. Verified by pixel: bar `#262E3D`, chips `#161C2A`, text `#ECF0F8`, rim
+`#0B0F15`.
+
+**Colour guard, widened (2026-11-23).** `Check Colours` now scans the editor builders as well as `Scripts/UI`, so
+a scene builder cannot mix its own paint either. Files that must name a colour (the palette, the stand-in art
+generator, the two labs, the data and font generators) are listed with a reason. Current state: **PASS, 0
+hand-written colours**.
+
 **Level-up modal (2026-11-23).** Blue modal body + ribbon. Each boon row is the **neutral button** (the
 clickable part); the ornate **frame goes around the icon only**, and that frame spans the row's **full height**,
 flush to its **top, left and bottom** edges (owner, 2026-11-23), width 30% of the row, `shadow: false` because
