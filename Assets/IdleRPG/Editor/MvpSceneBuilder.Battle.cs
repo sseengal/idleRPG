@@ -96,7 +96,7 @@ namespace IdleRPG.EditorTools
 
             // Padded, not percentage-placed: the icon sits a token in from the chip's left edge, the value starts a
             // token after it, and the right edge keeps the same token (owner, 2026-11-23).
-            const float iconSize = 40f;
+            const float iconSize = 56f;
             RectTransform iconRect = icon.rectTransform;
             iconRect.anchorMin = new Vector2(0f, 0.5f);
             iconRect.anchorMax = new Vector2(0f, 0.5f);

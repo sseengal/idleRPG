@@ -166,7 +166,7 @@ namespace IdleRPG.UI
         /// <summary>A dimming layer behind a sheet. 65%.</summary>
         public static readonly Color VeilSoft = WithAlpha(Slate950, 0.65f);
         /// <summary>A near-opaque layer behind a modal card. 88%.</summary>
-        public static readonly Color VeilStrong = WithAlpha(Slate950, 0.88f);
+        public static readonly Color VeilStrong = WithAlpha(Slate950, 0.92f);
         /// <summary>A heavy dim behind a full-screen band (the camp sheet). 80%.</summary>
         public static readonly Color VeilDeep = WithAlpha(Slate950, 0.80f);
         /// <summary>A half-shade: behind a bar's fill, behind a small name. 50%.</summary>

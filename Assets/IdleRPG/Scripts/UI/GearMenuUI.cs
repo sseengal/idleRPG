@@ -30,7 +30,6 @@ namespace IdleRPG.UI
         private TextMeshProUGUI bannerLabel;
         private TextMeshProUGUI status;
         private TextMeshProUGUI soundLabel;
-        private TextMeshProUGUI confirmTitle;
         private TextMeshProUGUI keepCaption;
         private readonly TextMeshProUGUI[] keepValues = new TextMeshProUGUI[3];
         private readonly Image[] keepIcons = new Image[3];
@@ -145,7 +144,7 @@ namespace IdleRPG.UI
             scaler.referenceResolution = new Vector2(1080f, 1920f);
             scaler.matchWidthOrHeight = 0.5f;
 
-            Image scrim = UiRuntime.CreatePanel(canvasRoot.transform, null, UiTheme.ScrimSoft, raycast: true);
+            Image scrim = UiRuntime.CreatePanel(canvasRoot.transform, null, UiTheme.Scrim, raycast: true);
             scrim.gameObject.name = "Scrim";
             UiRuntime.Anchor(scrim.rectTransform, Vector2.zero, Vector2.one);
 
@@ -187,7 +186,7 @@ namespace IdleRPG.UI
             soundButton = MakeButton(normalGroup.transform, "Sound", "SOUND: ON", ButtonFace.Neutral, OnSound);
             soundLabel = soundButton.GetComponentInChildren<TextMeshProUGUI>();
 
-            quitButton = MakeButton(normalGroup.transform, "QuitRun", "QUIT RUN", ButtonFace.Danger, OnQuit);
+            quitButton = MakeButton(normalGroup.transform, "QuitRun", "END RUN", ButtonFace.Danger, OnQuit);
 
             // Lobby mode reuses the same stack: sound, restore, privacy, close. The pause rows are hidden then.
             restoreButton = MakeButton(normalGroup.transform, "Restore", "RESTORE PURCHASES", ButtonFace.Neutral, OnRestore);
@@ -290,8 +289,8 @@ namespace IdleRPG.UI
             rect.anchorMin = new Vector2(0f, 0f);
             rect.anchorMax = new Vector2(1f, 0f);
             rect.pivot = new Vector2(0.5f, 0f);
-            rect.offsetMin = new Vector2(UiTouch.SheetPadX, UiSpace.Space8);
-            rect.offsetMax = new Vector2(-UiTouch.SheetPadX, UiSpace.Space8 + statusUnits);
+            rect.offsetMin = new Vector2(UiTouch.SheetPadX, UiSpace.Space32);
+            rect.offsetMax = new Vector2(-UiTouch.SheetPadX, UiSpace.Space32 + statusUnits);
         }
 
         /// <summary>The heading fallback sits where the ribbon's face is, so a skin without a ribbon still reads.</summary>
@@ -316,11 +315,10 @@ namespace IdleRPG.UI
             confirmGroup.transform.SetParent(panel, false);
             UiRuntime.Anchor((RectTransform)confirmGroup.transform, Vector2.zero, Vector2.one);
 
-            confirmTitle = UiRuntime.CreateText(confirmGroup.transform, "Title", "END THIS RUN?",
-                UiType.Role.Title, TextAlignmentOptions.Center, UiTheme.Text);
-
+            // No heading label here: the ribbon carries "END THIS RUN?" (owner, 2026-11-23), so the body starts
+            // with the receipt.
             keepCaption = UiRuntime.CreateText(confirmGroup.transform, "KeepCaption", "YOU KEEP:",
-                UiType.Role.Small, TextAlignmentOptions.MidlineLeft, UiTheme.Text);
+                UiType.Role.Section, TextAlignmentOptions.Center, UiTheme.Text);
 
             for (int i = 0; i < keepIcons.Length; i++)
             {
@@ -348,7 +346,7 @@ namespace IdleRPG.UI
             icon.preserveAspect = true;
             keepIcons[index] = icon;
 
-            keepValues[index] = UiRuntime.CreateText(row.transform, "Value", "× 0", UiType.Role.Section,
+            keepValues[index] = UiRuntime.CreateText(row.transform, "Value", "× 0", UiType.Role.Title,
                 TextAlignmentOptions.MidlineLeft, UiTheme.Text);
         }
 
@@ -358,25 +356,22 @@ namespace IdleRPG.UI
         /// </summary>
         private void PlaceConfirmSheet()
         {
-            float titleLine = UiType.LineHeight(UiType.Role.Title);
-            float captionLine = UiType.LineHeight(UiType.Role.Small);
+            float captionLine = UiType.LineHeight(UiType.Role.Section);
             float rowsBlock = keepValues.Length * UiTouch.KeepRowHeight +
                               (keepValues.Length - 1) * UiTouch.KeepRowGap;
 
-            float content = titleLine + UiSpace.Space32 + captionLine + UiSpace.Space8 + rowsBlock +
-                            UiSpace.Space32 + UiTouch.SheetStackHeight(2);
+            float content = captionLine + UiSpace.Space16 + rowsBlock + UiSpace.Space32 +
+                            UiTouch.SheetStackHeight(2);
 
             SizeSheet(content);
 
             float padX = UiTouch.SheetPadX;
             float top = UiBanner.Height * 0.5f + UiTouch.SheetTopGap;
 
-            PlaceTextBlock(confirmTitle, top, titleLine, padX, TextAlignmentOptions.Center);
+            // The receipt is centred on the sheet: caption centred, rows centred as a block.
+            PlaceTextBlock(keepCaption, top, captionLine, padX, TextAlignmentOptions.Center);
 
-            float captionTop = top + titleLine + UiSpace.Space32;
-            PlaceTextBlock(keepCaption, captionTop, captionLine, padX, TextAlignmentOptions.MidlineLeft);
-
-            float rowTop = captionTop + captionLine + UiSpace.Space8;
+            float rowTop = top + captionLine + UiSpace.Space16;
 
             for (int i = 0; i < keepValues.Length; i++)
             {
@@ -570,7 +565,8 @@ namespace IdleRPG.UI
                 return;
             }
 
-            // The sheet itself shows what the player keeps: gold, gems and the tokens this run banks.
+            // The ribbon carries the question, the body carries the receipt (owner, 2026-11-23).
+            SetHeading("END THIS RUN?");
             normalGroup.SetActive(false);
             confirmGroup.SetActive(true);
             PlaceConfirmSheet();
@@ -580,6 +576,7 @@ namespace IdleRPG.UI
         {
             confirmGroup.SetActive(false);
             normalGroup.SetActive(true);
+            SetHeading("GAME PAUSED");
             PlaceSheet(lobby: false);
         }
 

@@ -22,7 +22,8 @@ namespace IdleRPG.UI
     {
         // ------------------------------------------------------------------
         // The ladder - the ONLY gap numbers in the game. Tweak here, nowhere else.
-        // Every rung doubles, so two neighbours are always visibly different.
+        // Every rung doubles except one deliberate odd rung: Space48 is the half-step between 32 and 64, used where
+        // a doubling would read as a gaping hole (the space between two stacked sheet buttons).
         // ------------------------------------------------------------------
         public const float Space0 = 0f;
         public const float Space2 = 2f;
@@ -30,6 +31,7 @@ namespace IdleRPG.UI
         public const float Space8 = 8f;
         public const float Space16 = 16f;
         public const float Space32 = 32f;
+        public const float Space48 = 48f;
         public const float Space64 = 64f;
 
         // ------------------------------------------------------------------
