@@ -26,7 +26,7 @@ namespace IdleRPG.EditorTools
     public static partial class UiCompareSceneBuilder
     {
         private const string RibbonScenePath = "Assets/IdleRPG/Scenes/UiRibbon.unity";
-        private const string RibbonShotPath = "Assets/Screenshots/compare/ribbon-sheet.png";
+        private const string RibbonShotPath = "Assets/Screenshots~/compare/ribbon-sheet.png";
 
         private const float RibbonCanvasWidth = 1080f;
         private const float RibbonCanvasHeight = 640f;

@@ -398,7 +398,7 @@ namespace IdleRPG.EditorTools
                 return;
             }
 
-            const string folder = "Assets/Screenshots/ui-lab";
+            const string folder = "Assets/Screenshots~/ui-lab";
             EnsureFolder(folder);
 
             Camera camera = canvas.worldCamera != null

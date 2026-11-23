@@ -34,7 +34,7 @@ namespace IdleRPG.EditorTools
         private const string FontRoot = "Assets/IdleRPG/Resources/Fonts/";
         private const string PlaceholderArt = "Assets/IdleRPG/Art/Placeholder/";
         private const string BackdropPath = "Assets/IdleRPG/Art/Backdrops/forest bg.png";
-        private const string ShotFolder = "Assets/Screenshots/compare";
+        private const string ShotFolder = "Assets/Screenshots~/compare";
 
         // One phone screen. The row holds three of them plus two gutters.
         private const float ScreenWidth = 1080f;
