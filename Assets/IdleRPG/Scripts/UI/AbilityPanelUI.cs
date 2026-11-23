@@ -109,8 +109,8 @@ namespace IdleRPG.UI
             }
 
             // Equal cells, one gap size: 1, 2 or 3 heroes can never drift apart.
-            strip.spacing = UiSpace.Small;
-            strip.padding = UiSpace.Padding(UiSpace.Small);
+            strip.spacing = UiSpace.Space8;
+            strip.padding = UiSpace.Padding(UiSpace.Space8);
             strip.childAlignment = TextAnchor.MiddleCenter;
             strip.childControlWidth = true;
             strip.childControlHeight = true;

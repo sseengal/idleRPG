@@ -53,10 +53,7 @@ namespace IdleRPG.EditorTools
 
         private static readonly FontSource[] Fonts =
         {
-            new FontSource { Path = ThirdPartyFolder + "/PixelFonts/Silkscreen-Regular.ttf", OutputName = "Silkscreen Pixel" },
-            new FontSource { Path = ThirdPartyFolder + "/PixelFonts/VT323-Regular.ttf", OutputName = "VT323 Pixel" },
             new FontSource { Path = ThirdPartyFolder + "/PixelFonts/Jersey10-Regular.ttf", OutputName = "Jersey10 Pixel" },
-            new FontSource { Path = ThirdPartyFolder + "/Abaddon_Fonts_v1.2/Abaddon Bold.ttf", OutputName = "Abaddon Bold Pixel" },
             new FontSource { Path = ThirdPartyFolder + "/Abaddon_Fonts_v1.2/Abaddon Light.ttf", OutputName = "Abaddon Light Pixel" },
 
             // The chrome face (2026-11-23). Tall and wide: cap height 0.704 em against Abaddon's 0.625, so the

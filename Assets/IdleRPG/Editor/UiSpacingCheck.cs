@@ -194,8 +194,8 @@ namespace IdleRPG.EditorTools
             }
 
             Debug.Log($"[UiSpace] Checked {callCount} layout call(s) in {fileCount} file(s). " +
-                      $"The ladder: {UiSpace.Hairline}/{UiSpace.Tight}/{UiSpace.Snug}/{UiSpace.Small}/" +
-                      $"{UiSpace.Base}/{UiSpace.Medium}/{UiSpace.Gutter}/{UiSpace.Large}, " +
+                      $"The ladder: {UiSpace.Space2}/{UiSpace.Space4}/{UiSpace.Space8}/{UiSpace.Space8}/" +
+                      $"{UiSpace.Space8}/{UiSpace.Space16}/{UiSpace.Space16}/{UiSpace.Space32}, " +
                       $"screen margin {UiSpace.ScreenMargin}.");
 
             bool ok = true;

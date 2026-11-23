@@ -17,6 +17,13 @@ namespace IdleRPG.EditorTools
     {
         private const float CampActorY = 0.55f;
         private const float CampFireY = 0.38f;
+
+        /// <summary>The camp fire's box: the 36x48 art at 3.5x, so the flame reads at phone size.</summary>
+        private const float CampFireWidth = 126f;
+        private const float CampFireHeight = 168f;
+
+        /// <summary>Frames per second for the fire. Ten reads as a flicker, not a strobe.</summary>
+        private const float CampFireFps = 10f;
         private const string CampChoicePrefabPath =
             "Assets/IdleRPG/Prefabs/UI/Battle/CampChoiceCard.prefab";
 
@@ -50,8 +57,24 @@ namespace IdleRPG.EditorTools
                 UiType.Role.Micro, TextAlignmentOptions.Center, UiTheme.Text);
             UiFactory.Anchor(training.rectTransform, new Vector2(0.20f, 0.75f), new Vector2(0.80f, 0.80f));
 
-            Image fire = ContainerPanel("Fire", viewRoot.transform, tint: UiTheme.CampFire);
-            UiFactory.CenterOn(fire.rectTransform, new Vector2(0.5f, CampFireY), new Vector2(240f, 110f));
+            // The camp fire: six frames of the owner's sheet, flipped at 10 fps. The sheet's cells are cut without
+            // trimming, so the flame flickers instead of bobbing (owner art, 2026-11-23).
+            Image fire = UiFactory.Icon("Campfire", viewRoot.transform, Color.white, true);
+            UiFactory.CenterOn(fire.rectTransform, new Vector2(0.5f, CampFireY), new Vector2(CampFireWidth, CampFireHeight));
+
+            Sprite[] campfireFrames = CampfireSlicer.LoadFrames();
+
+            if (campfireFrames.Length > 0)
+            {
+                fire.sprite = campfireFrames[0];
+                fire.gameObject.AddComponent<UiSpriteSequence>().Bind(fire, campfireFrames, CampFireFps, loopFrames: true);
+            }
+            else
+            {
+                // Not sliced yet: keep the flat marker so the camp never draws an empty hole.
+                fire.color = UiTheme.CampFire;
+                Debug.LogWarning("[MvpSceneBuilder] Camp fire sheet is not sliced - run Tools > Idle RPG > Art > Slice Campfire.");
+            }
 
             Image[] actors = new Image[3];
             TextMeshProUGUI[] hpLabels = new TextMeshProUGUI[3];
@@ -73,7 +96,7 @@ namespace IdleRPG.EditorTools
             // The choices replace the ability strip, in the exact same band, so the player's hand does not move.
             Image strip = ContainerPanel("CampStrip", battlePage, raycast: true);
             UiFactory.Anchor(strip.rectTransform, new Vector2(0f, LogTop), new Vector2(1f, BattleViewportBottom),
-                UiSpace.ScreenMargin, UiSpace.Snug, UiSpace.ScreenMargin, UiSpace.Snug);
+                UiSpace.ScreenMargin, UiSpace.Space8, UiSpace.ScreenMargin, UiSpace.Space8);
 
             CanvasGroup stripGroup = strip.gameObject.AddComponent<CanvasGroup>();
 
@@ -146,7 +169,7 @@ namespace IdleRPG.EditorTools
 
             UiFactory.Anchor((RectTransform)cell.transform,
                 new Vector2(index / (float)total, 0f), new Vector2((index + 1) / (float)total, 1f),
-                UiSpace.Small, UiSpace.Tight, UiSpace.Small, UiSpace.Tight);
+                UiSpace.Space8, UiSpace.Space4, UiSpace.Space8, UiSpace.Space4);
 
             subLabel = cell.SubLabel;
             noteLabel = cell.NoteLabel;

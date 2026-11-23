@@ -79,7 +79,7 @@ namespace IdleRPG.EditorTools
         {
             new Look
             {
-                Caption = "A  ·  SILKSCREEN  ·  slate + gold", Font = "Silkscreen Pixel",
+                Caption = "A  ·  LILITA  ·  slate + gold", Font = "Lilita One",
                 LogSize = 24f, ChunkySize = 32f, LabelSize = 24f, NumberSize = 40f, TitleSize = 16f,
 
                 Panel = new Color32(37, 43, 62, 255),
@@ -93,7 +93,7 @@ namespace IdleRPG.EditorTools
             },
             new Look
             {
-                Caption = "B  ·  VT323  ·  dark parchment + amber", Font = "VT323 Pixel",
+                Caption = "B  ·  ABADDON LIGHT  ·  dark parchment + amber", Font = "Abaddon Light Pixel",
                 LogSize = 32f, ChunkySize = 48f, LabelSize = 32f, NumberSize = 48f, TitleSize = 24f,
 
                 Panel = new Color32(58, 46, 32, 255),
@@ -122,7 +122,7 @@ namespace IdleRPG.EditorTools
             // D/E: same slate + gold palette as A, only the frame changes, so the bevel is the single variable.
             new Look
             {
-                Caption = "D  ·  CHUNKY  ·  single bevel", Font = "Silkscreen Pixel",
+                Caption = "D  ·  CHUNKY  ·  single bevel", Font = "Lilita One",
                 LogSize = 24f, ChunkySize = 32f, LabelSize = 24f, NumberSize = 40f, TitleSize = 16f,
                 Frame = "ui_chunky_a",
 
@@ -137,7 +137,7 @@ namespace IdleRPG.EditorTools
             },
             new Look
             {
-                Caption = "E  ·  CHUNKY  ·  double bevel", Font = "Silkscreen Pixel",
+                Caption = "E  ·  CHUNKY  ·  double bevel", Font = "Lilita One",
                 LogSize = 24f, ChunkySize = 32f, LabelSize = 24f, NumberSize = 40f, TitleSize = 16f,
                 Frame = "ui_chunky_b",
 
@@ -398,7 +398,7 @@ namespace IdleRPG.EditorTools
                 return;
             }
 
-            const string folder = "Assets/Screenshots~/ui-lab";
+            const string folder = "Docs/Screenshots/ui-lab";
             EnsureFolder(folder);
 
             Camera camera = canvas.worldCamera != null

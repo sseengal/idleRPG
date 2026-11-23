@@ -116,7 +116,7 @@ namespace IdleRPG.UI
         {
             RectTransform panel = UiRuntime.CreateNode("StoryMode", transform).GetComponent<RectTransform>();
             storyPanel = panel.gameObject;
-            UiRuntime.Stretch(panel, UiSpace.Medium, UiSpace.Small, UiSpace.Medium, UiSpace.Base);
+            UiRuntime.Stretch(panel, UiSpace.Space16, UiSpace.Space8, UiSpace.Space16, UiSpace.Space8);
 
             storyText = UiRuntime.CreateText(panel, "Line", string.Empty,
                 UiType.Role.Dialogue, TextAlignmentOptions.TopLeft, UiTheme.Text);

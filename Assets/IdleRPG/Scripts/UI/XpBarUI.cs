@@ -496,8 +496,8 @@ namespace IdleRPG.UI
             UiRuntime.Stretch(row);
 
             HorizontalLayoutGroup rowLayout = rowNode.AddComponent<HorizontalLayoutGroup>();
-            rowLayout.padding = new RectOffset((int)UiSpace.Small, 0, 0, 0);
-            rowLayout.spacing = UiSpace.Medium;
+            rowLayout.padding = new RectOffset((int)UiSpace.Space8, 0, 0, 0);
+            rowLayout.spacing = UiSpace.Space16;
             rowLayout.childAlignment = TextAnchor.MiddleLeft;
             rowLayout.childControlWidth = true;
             rowLayout.childControlHeight = false;
@@ -511,7 +511,7 @@ namespace IdleRPG.UI
 
             HorizontalLayoutGroup textLayout = textNode.AddComponent<HorizontalLayoutGroup>();
             textLayout.padding = new RectOffset(0, 0, 0, 0);
-            textLayout.spacing = UiSpace.Small;
+            textLayout.spacing = UiSpace.Space8;
             textLayout.childAlignment = TextAnchor.MiddleLeft;
             textLayout.childControlWidth = true;
             textLayout.childControlHeight = false;

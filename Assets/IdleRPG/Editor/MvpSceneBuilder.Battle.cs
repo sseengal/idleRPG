@@ -39,10 +39,10 @@ namespace IdleRPG.EditorTools
             // how a long currency value ended up sliding under the button.
             GameObject row = UiFactory.Node("ChipRow", header.transform);
             RectTransform rowRect = row.GetComponent<RectTransform>();
-            UiFactory.Stretch(rowRect, UiSpace.Large, UiSpace.Medium, UiSpace.Large, UiSpace.Medium);
+            UiFactory.Stretch(rowRect, UiSpace.Space32, UiSpace.Space16, UiSpace.Space32, UiSpace.Space16);
 
             HorizontalLayoutGroup layout = row.AddComponent<HorizontalLayoutGroup>();
-            layout.spacing = UiSpace.Small;
+            layout.spacing = UiSpace.Space8;
             layout.childAlignment = TextAnchor.MiddleLeft;
             layout.childControlWidth = true;
             layout.childControlHeight = true;
@@ -63,7 +63,7 @@ namespace IdleRPG.EditorTools
 
             TextMeshProUGUI boostText = UiFactory.Text("BoostLabel", boostChip.transform, "x2", UiType.Role.Section,
                 TextAlignmentOptions.Center, UiTheme.Text);
-            UiFactory.Stretch(boostText.rectTransform, UiSpace.Medium, UiSpace.Tight, UiSpace.Medium, UiSpace.Tight);
+            UiFactory.Stretch(boostText.rectTransform, UiSpace.Space16, UiSpace.Space4, UiSpace.Space16, UiSpace.Space4);
             boostChip.gameObject.SetActive(false);
 
             SceneWiringUtility.SetField(view, "goldText", goldText);
@@ -153,7 +153,7 @@ namespace IdleRPG.EditorTools
         {
             GameObject viewport = UiFactory.Node("Viewport", pageRoot);
             viewportRect = viewport.GetComponent<RectTransform>();
-            UiFactory.Anchor(viewportRect, new Vector2(0f, XpBandTop), new Vector2(1f, StageRowMinY), UiSpace.ScreenMargin, UiSpace.Snug, UiSpace.ScreenMargin, UiSpace.Snug);
+            UiFactory.Anchor(viewportRect, new Vector2(0f, XpBandTop), new Vector2(1f, StageRowMinY), UiSpace.ScreenMargin, UiSpace.Space8, UiSpace.ScreenMargin, UiSpace.Space8);
 
             // Clips the cover-fitted backdrop so its overflow never draws over the header or combat log.
             viewport.AddComponent<RectMask2D>();
@@ -309,7 +309,7 @@ namespace IdleRPG.EditorTools
             GameObject stripObject = UiFactory.Node("AbilityStrip", pageRoot);
             RectTransform stripRect = stripObject.GetComponent<RectTransform>();
             UiFactory.Anchor(stripRect, new Vector2(0f, LogTop), new Vector2(1f, BattleViewportBottom),
-                UiSpace.ScreenMargin, UiSpace.Snug, UiSpace.ScreenMargin, UiSpace.Snug);
+                UiSpace.ScreenMargin, UiSpace.Space8, UiSpace.ScreenMargin, UiSpace.Space8);
 
             AbilityPanelUI panel = stripObject.AddComponent<AbilityPanelUI>();
             int buttons = heroCount < 1 ? 1 : heroCount;
@@ -317,8 +317,8 @@ namespace IdleRPG.EditorTools
 
             // Equal cells and one gap size: the same layout the running game applies, so a rebuild cannot differ.
             HorizontalLayoutGroup layout = stripObject.AddComponent<HorizontalLayoutGroup>();
-            layout.spacing = UiSpace.Small;
-            layout.padding = UiSpace.Padding(UiSpace.Small);
+            layout.spacing = UiSpace.Space8;
+            layout.padding = UiSpace.Padding(UiSpace.Space8);
             layout.childAlignment = TextAnchor.MiddleCenter;
             layout.childControlWidth = true;
             layout.childControlHeight = true;
@@ -468,10 +468,10 @@ namespace IdleRPG.EditorTools
         private static CombatLogUI BuildCombatLog(RectTransform pageRoot)
         {
             Image strip = ContainerPanel("CombatLog", pageRoot, raycast: true);
-            UiFactory.Anchor(strip.rectTransform, Vector2.zero, new Vector2(1f, LogTop), UiSpace.ScreenMargin, UiSpace.Snug, UiSpace.ScreenMargin, UiSpace.Snug);
+            UiFactory.Anchor(strip.rectTransform, Vector2.zero, new Vector2(1f, LogTop), UiSpace.ScreenMargin, UiSpace.Space8, UiSpace.ScreenMargin, UiSpace.Space8);
             CombatLogUI ui = strip.gameObject.AddComponent<CombatLogUI>();
 
-            ScrollRect scroll = UiFactory.CreateScrollView(strip.transform, "Scroll", UiSpace.Hairline, UiSpace.Padding(UiSpace.Base, UiSpace.Snug), out RectTransform content, autoSizeContent: false);
+            ScrollRect scroll = UiFactory.CreateScrollView(strip.transform, "Scroll", UiSpace.Space2, UiSpace.Padding(UiSpace.Space8, UiSpace.Space8), out RectTransform content, autoSizeContent: false);
 
         // The feed drives its own scroll position, so the ScrollRect must never spring the content back:
         // Clamped, no inertia.

@@ -94,18 +94,23 @@ namespace IdleRPG.EditorTools
             TMP_FontAsset oldSentence = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(OldSentencePath);
             oldChrome = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(OldChromePath);
 
-            if (oldDisplay == null || oldSentence == null)
-            {
-                Debug.LogError("[ThemeFontMigration] An old font asset is missing, so nothing can be matched. " +
-                               "Expected: " + OldDisplayPath);
-                return;
-            }
-
             if (UiTheme.Loud == null || UiTheme.Sentence == null)
             {
                 Debug.LogError("[ThemeFontMigration] The theme fonts are not loaded. " +
                                "Run Tools > Idle RPG > Art > Generate Pixel Fonts first.");
                 return;
+            }
+
+            // A retired face that is no longer on disk is not an error (2026-11-23): its table simply never
+            // matches, and the labels still using it were migrated long ago.
+            if (oldDisplay == null)
+            {
+                Debug.Log("[ThemeFontMigration] Silkscreen is gone from the project - that table is skipped.");
+            }
+
+            if (oldSentence == null)
+            {
+                Debug.Log("[ThemeFontMigration] VT323 is gone from the project - that table is skipped.");
             }
 
             int changed = 0;

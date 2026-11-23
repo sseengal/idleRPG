@@ -563,7 +563,7 @@ namespace IdleRPG.UI
 
             bubbleText = UiRuntime.CreateText(bubble.transform, "Text", string.Empty,
                 UiType.Role.Display, TextAlignmentOptions.Center, UiTheme.Text);
-            UiRuntime.Stretch(bubbleText.rectTransform, UiSpace.Small, UiSpace.Tight, UiSpace.Small, UiSpace.Tight);
+            UiRuntime.Stretch(bubbleText.rectTransform, UiSpace.Space8, UiSpace.Space4, UiSpace.Space8, UiSpace.Space4);
             bubble.gameObject.SetActive(false);
         }
 

@@ -117,6 +117,13 @@ Full record: `Checklist.md` §1af.
 
 ### 1c. Containers and gaps - one ruler, no hand-written numbers (2026-10-14)
 
+**The ladder is now a doubling scale (2026-11-23): `0 · 2 · 4 · 8 · 16 · 32 · 64`.** Every UI gap in the game
+comes from `UiSpace.Space0/2/4/8/16/32/64`; the old half-steps are gone, and the call sites that used them snapped
+to the nearer rung (6 → 8, 10 → 8, 12 → 16, 14 → 16, 24 → 32). The point was **standardisation, not airiness**:
+values already on the ladder kept their value, so no screen grew just because the tokens changed. Roles
+(`ScreenMargin` 16, `CardPadding` 16, `RowGap` 8, `SectionGap` 16, `LabelPadX/Y` 8/4, `ChipPadX/Y` 8/4) are the
+only names a screen should pass, and `Tools > Idle RPG > UI > Check Spacing` fails on a hand-written gap.
+
 The same idea as the type scale, applied to the space between things. Every gap picks a **role** from
 `Scripts/UI/UiSpace.cs` (the ladder: None 0, Hairline 2, Tight 4, Snug 6, Small 8, Base 10, Medium 12,
 Gutter 14, Large 24; plus roles such as `ScreenMargin` 14, `CardPadding` 12, `RowGap` 8).

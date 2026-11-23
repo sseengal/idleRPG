@@ -43,17 +43,20 @@ namespace IdleRPG.UI
         /// <summary>The height of one sheet button. The touch minimum is also the standard: bigger is not better.</summary>
         public const float SheetButtonHeight = MinTarget;
 
-        /// <summary>The gap between two sheet buttons (10% of their height).</summary>
-        public const float SheetButtonGap = UiSpace.Gutter;
+        /// <summary>The gap between two sheet buttons: one full rung, so two rows can never read as one block.</summary>
+        public const float SheetButtonGap = UiSpace.Space32;
 
-        /// <summary>The space under the last sheet button, so the stack never touches the panel's bottom rim.</summary>
-        public const float SheetBottomPad = UiSpace.Large;
+        /// <summary>The space under the last sheet button: the same rung as the side padding, so the stack is framed.</summary>
+        public const float SheetBottomPad = UiSpace.Space32;
 
         /// <summary>The gap between the sheet's ribbon and its first button.</summary>
-        public const float SheetTopGap = UiSpace.Gutter + UiSpace.Hairline;
+        public const float SheetTopGap = UiSpace.Space16;
 
-        /// <summary>A sheet button's width as a fraction of the sheet: 0.60 of 864 is 518, a 3.6:1 button.</summary>
-        public const float SheetWidthFraction = 0.60f;
+        /// <summary>
+        /// The inset from the sheet's left and right rim to its buttons. Buttons fill what is left, so a sheet can
+        /// never end up with a narrow button floating in a wide panel.
+        /// </summary>
+        public const float SheetPadX = UiSpace.Space32;
 
         /// <summary>Total height of a stack of sheet buttons, gaps included.</summary>
         public static float SheetStackHeight(int rows)

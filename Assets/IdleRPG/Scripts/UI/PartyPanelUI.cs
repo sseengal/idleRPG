@@ -217,11 +217,11 @@ namespace IdleRPG.UI
         {
             TextMeshProUGUI label = UiRuntime.CreateText(root, caption + "Caption", caption, UiType.Role.Small,
                 TextAlignmentOptions.MidlineLeft, SlotRowTextColor);
-            UiRuntime.Anchor(label.rectTransform, new Vector2(0.48f, yMax), new Vector2(0.72f, yMax + 0.035f), UiSpace.Tight, UiSpace.None, UiSpace.None, UiSpace.None);
+            UiRuntime.Anchor(label.rectTransform, new Vector2(0.48f, yMax), new Vector2(0.72f, yMax + 0.035f), UiSpace.Space4, UiSpace.Space0, UiSpace.Space0, UiSpace.Space0);
 
             TextMeshProUGUI note = UiRuntime.CreateText(root, caption + "Note", "(coming soon)", UiType.Role.Small,
                 TextAlignmentOptions.MidlineRight, SlotRowTextColor);
-            UiRuntime.Anchor(note.rectTransform, new Vector2(0.60f, yMax), new Vector2(0.97f, yMax + 0.035f), UiSpace.None, UiSpace.None, UiSpace.Tight, UiSpace.None);
+            UiRuntime.Anchor(note.rectTransform, new Vector2(0.60f, yMax), new Vector2(0.97f, yMax + 0.035f), UiSpace.Space0, UiSpace.Space0, UiSpace.Space4, UiSpace.Space0);
 
             const float xMin = 0.48f;
             const float xMax = 0.97f;

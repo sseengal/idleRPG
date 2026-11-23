@@ -407,7 +407,7 @@ namespace IdleRPG.EditorTools
         {
             GameObject page = UiFactory.Node(name, safeArea);
             UiFactory.Anchor(page.GetComponent<RectTransform>(), Vector2.zero, Vector2.one,
-                0f, UiSpace.Large, 0f, HeaderBandHeight);
+                0f, UiSpace.Space32, 0f, HeaderBandHeight);
             return page;
         }
 
@@ -421,7 +421,7 @@ namespace IdleRPG.EditorTools
 
             UiFactory.Anchor(bar.GetComponent<RectTransform>(),
                 new Vector2(0f, XpBandBottom), new Vector2(1f, XpBandTop),
-                UiSpace.ScreenMargin, UiSpace.Hairline, UiSpace.ScreenMargin, UiSpace.Hairline);
+                UiSpace.ScreenMargin, UiSpace.Space2, UiSpace.ScreenMargin, UiSpace.Space2);
 
             bar.AddComponent<IdleRPG.UI.XpBarUI>();
         }

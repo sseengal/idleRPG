@@ -34,7 +34,7 @@ namespace IdleRPG.EditorTools
         private const string FontRoot = "Assets/IdleRPG/Resources/Fonts/";
         private const string PlaceholderArt = "Assets/IdleRPG/Art/Placeholder/";
         private const string BackdropPath = "Assets/IdleRPG/Art/Backdrops/forest bg.png";
-        private const string ShotFolder = "Assets/Screenshots~/compare";
+        private const string ShotFolder = "Docs/Screenshots/compare";
 
         // One phone screen. The row holds three of them plus two gutters.
         private const float ScreenWidth = 1080f;
@@ -93,7 +93,7 @@ namespace IdleRPG.EditorTools
             {
                 Letter = "A",
                 Caption = "STORYBOOK NIGHT  -  leather, parchment, amber",
-                Font = "Silkscreen Pixel",
+                Font = "Lilita One",
                 Border = 3f, LogSize = 36f, NumberSize = 56f, TitleSize = 20f, LabelSize = 28f,
                 Deep = Hex("171310"), Panel = Hex("221B15"), PanelLight = Hex("2E251C"),
                 BorderColor = Hex("0B0908"), Text = Hex("E7D8B8"), Dim = Hex("A08F72"),
@@ -106,7 +106,7 @@ namespace IdleRPG.EditorTools
             {
                 Letter = "B",
                 Caption = "ARCADE CABINET  -  near-black, gold, hard edges",
-                Font = "Silkscreen Pixel",
+                Font = "Lilita One",
                 Border = 4f, LogSize = 44f, NumberSize = 64f, TitleSize = 24f, LabelSize = 30f,
                 Deep = Hex("0E1118"), Panel = Hex("1A2130"), PanelLight = Hex("26324A"),
                 BorderColor = Hex("05070C"), Text = Hex("EFF4FF"), Dim = Hex("93A0BD"),

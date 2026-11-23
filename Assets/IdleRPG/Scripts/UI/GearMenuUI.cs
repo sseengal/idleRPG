@@ -41,9 +41,9 @@ namespace IdleRPG.UI
         private UiPlateButton keepFightingButton;
         private bool pausedByMenu;
 
-        /// <summary>The sheet's left and right edges, as a fraction of the screen. One width for every sheet view.</summary>
-        private const float SheetLeft = 0.10f;
-        private const float SheetRight = 0.90f;
+        /// <summary>The sheet's left and right edges, as a fraction of the screen: a dialog, not a full-bleed band.</summary>
+        private const float SheetLeft = 0.14f;
+        private const float SheetRight = 0.86f;
 
         /// <summary>The reference height the anchors are measured against (the canvas is 1080x1920).</summary>
         private const float ScreenHeight = 1920f;
@@ -217,7 +217,7 @@ namespace IdleRPG.UI
         private void ArrangeSheet(UiPlateButton[] buttons, bool withStatus)
         {
             float statusUnits = withStatus ? UiType.LineHeight(UiType.Role.Small) : 0f;
-            float statusBlock = withStatus ? statusUnits + UiSpace.Small : 0f;
+            float statusBlock = withStatus ? statusUnits + UiSpace.Space8 : 0f;
 
             SizeSheet(UiTouch.SheetStackHeight(buttons.Length) + statusBlock);
             PlaceStack(buttons, statusBlock);
@@ -244,11 +244,9 @@ namespace IdleRPG.UI
             panelRect.offsetMax = Vector2.zero;
         }
 
-        /// <summary>One height, one width and one gap for every sheet button, stacked up from the bottom pad.</summary>
+        /// <summary>One height, one padding and one gap for every sheet button, stacked up from the bottom pad.</summary>
         private void PlaceStack(UiPlateButton[] buttons, float extraBottom)
         {
-            float halfWidth = UiTouch.SheetWidthFraction * 0.5f;
-
             for (int i = 0; i < buttons.Length; i++)
             {
                 UiPlateButton button = buttons[i];
@@ -259,14 +257,16 @@ namespace IdleRPG.UI
                 }
 
                 RectTransform rect = (RectTransform)button.transform;
-                rect.anchorMin = new Vector2(0.5f - halfWidth, 0f);
-                rect.anchorMax = new Vector2(0.5f + halfWidth, 0f);
-                rect.pivot = new Vector2(0.5f, 0f);
-                rect.sizeDelta = new Vector2(0f, UiTouch.SheetButtonHeight);
-
                 float fromBottom = UiTouch.SheetBottomPad + extraBottom +
                                    (buttons.Length - 1 - i) * (UiTouch.SheetButtonHeight + UiTouch.SheetButtonGap);
-                rect.anchoredPosition = new Vector2(0f, fromBottom);
+
+                // Full inner width: the panel's own padding decides the button's edges, so the air on the left
+                // always equals the air on the right and always matches the bottom (owner, 2026-11-23).
+                rect.anchorMin = new Vector2(0f, 0f);
+                rect.anchorMax = new Vector2(1f, 0f);
+                rect.pivot = new Vector2(0.5f, 0.5f);
+                rect.offsetMin = new Vector2(UiTouch.SheetPadX, fromBottom);
+                rect.offsetMax = new Vector2(-UiTouch.SheetPadX, fromBottom + UiTouch.SheetButtonHeight);
             }
         }
 
@@ -286,11 +286,11 @@ namespace IdleRPG.UI
             }
 
             RectTransform rect = status.rectTransform;
-            rect.anchorMin = new Vector2(0.06f, 0f);
-            rect.anchorMax = new Vector2(0.94f, 0f);
+            rect.anchorMin = new Vector2(0f, 0f);
+            rect.anchorMax = new Vector2(1f, 0f);
             rect.pivot = new Vector2(0.5f, 0f);
-            rect.sizeDelta = new Vector2(0f, statusUnits);
-            rect.anchoredPosition = new Vector2(0f, UiSpace.Small);
+            rect.offsetMin = new Vector2(UiTouch.SheetPadX, UiSpace.Space8);
+            rect.offsetMax = new Vector2(-UiTouch.SheetPadX, UiSpace.Space8 + statusUnits);
         }
 
         /// <summary>The heading fallback sits where the ribbon's face is, so a skin without a ribbon still reads.</summary>
@@ -336,9 +336,9 @@ namespace IdleRPG.UI
         {
             float titleLine = UiType.LineHeight(UiType.Role.Title);
             float bodyBlock = UiType.LineHeight(UiType.Role.Sentence) * ConfirmBodyLines;
-            float text = titleLine + UiSpace.Medium + bodyBlock;
+            float text = titleLine + UiSpace.Space16 + bodyBlock;
 
-            SizeSheet(text + UiSpace.Medium + UiTouch.SheetStackHeight(2));
+            SizeSheet(text + UiSpace.Space16 + UiTouch.SheetStackHeight(2));
             PlaceConfirmText(titleLine, bodyBlock);
             PlaceStack(new[] { endRunButton, keepFightingButton }, 0f);
         }
@@ -365,7 +365,7 @@ namespace IdleRPG.UI
                 rect.anchorMax = new Vector2(0.92f, 1f);
                 rect.pivot = new Vector2(0.5f, 1f);
                 rect.sizeDelta = new Vector2(0f, bodyBlock);
-                rect.anchoredPosition = new Vector2(0f, -(top + titleLine + UiSpace.Medium));
+                rect.anchoredPosition = new Vector2(0f, -(top + titleLine + UiSpace.Space16));
             }
         }
 

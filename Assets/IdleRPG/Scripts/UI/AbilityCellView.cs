@@ -42,14 +42,14 @@ namespace IdleRPG.UI
         private static readonly float NumbersHeight = UiType.LineHeight(UiType.Role.Micro);
 
         /// <summary>Numbers to bar. They belong to the bar, so they sit closer to it than to the words.</summary>
-        private const float NumbersGap = UiSpace.Hairline;
+        private const float NumbersGap = UiSpace.Space2;
 
         /// <summary>
         /// The card's inset. The picture and the words both start this far inside the plate, so neither touches the
         /// plate's 9-slice border. Base (10), not CardPadding (12): at 12 the words column falls to 134 units and the
         /// health pair needs 133 - one unit of margin is not enough.
         /// </summary>
-        private const float CellInset = UiSpace.Base;
+        private const float CellInset = UiSpace.Space8;
 
         /// <summary>The words' left edge: the inset, the picture, then one gap - so the gap is the same all round.</summary>
         private const float ColumnLeft = CellInset + IconSize + CellInset;
@@ -61,7 +61,7 @@ namespace IdleRPG.UI
         /// The gap between the hero's name and the health block. It is the only gap between words and numbers, so it
         /// is one step wider than the hairline the two text lines used to share.
         /// </summary>
-        private const float GroupGap = UiSpace.Base;
+        private const float GroupGap = UiSpace.Space8;
 
         /// <summary>
         /// The whole words block plus its health block, measured from the bottom of the bar to the top of the name.

@@ -103,6 +103,7 @@ namespace IdleRPG.EditorTools
             "icon_",          // bottom-tab icons
             "ui_mark_",       // journey trail marks
             "ui_glow_",       // halos and glows
+            "campfire_",      // the camp fire's six frames
             "Ui",             // generated art: UiSoftGlow, UiGear, UiVignette, UiVerticalGradient
             "FantasyTabGlow",
             "Greenwake",      // chapter art and title
