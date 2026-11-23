@@ -14,24 +14,30 @@ namespace IdleRPG.UI
     /// screens matched. This file is the fix: pick a role, never a number.
     ///
     /// The scale (reference canvas 1080x1920; on a 1080-wide phone 1 unit is about 0.4 dp):
-    ///   Display   62  Abaddon Bold   currency, hero numbers            cap ~2.2 mm
-    ///   Title     54  Abaddon Bold   card / screen / modal titles      cap ~1.9 mm
-    ///   Section   45  Abaddon Bold   section heads, primary buttons    cap ~1.6 mm
-    ///   Sentence  33  Abaddon Light  running text: log, effects        x-height ~1.3 mm
-    ///   Small     34  Abaddon Bold   nav, tags, costs, column heads    cap ~1.2 mm
-    ///   Micro     29  Abaddon Bold   captions - never needed to act    cap ~1.0 mm
-    ///   Damage    36  Abaddon Bold   floating damage (crit x1.3)       cap ~1.3 mm
+    ///   Display   55  Lilita One    currency, hero numbers            cap ~2.2 mm
+    ///   Title     48  Lilita One    card / screen / modal titles      cap ~1.9 mm
+    ///   Section   40  Lilita One    section heads, primary buttons    cap ~1.6 mm
+    ///   Sentence  29  Lilita One    running text: settings, item info cap ~1.2 mm
+    ///   Small     30  Lilita One    nav, tags, costs, column heads    cap ~1.2 mm
+    ///   Micro     28  Lilita One    captions - never needed to act    cap ~1.1 mm
+    ///   Damage    32  Lilita One    floating damage (crit x1.3)       cap ~1.3 mm
+    ///   Dialogue  44  Abaddon Light battle log only                   cap ~1.4 mm
     ///
     /// Two rules keep it honest:
-    ///  * chrome (numbers, headings, buttons, labels) is Abaddon Bold; running sentences are Abaddon Light, the
-    ///    lighter cut, so a paragraph never shouts.
+    ///  * every label is the one chrome face, Lilita One; only the battle log keeps Abaddon Light, whose smaller
+    ///    letters suit a paragraph.
     ///  * <see cref="Micro"/> is the floor. Nothing is smaller.
     ///
-    /// Why the numbers moved (2026-11-15, Silkscreen/VT323 -> Abaddon). Abaddon's letters are shorter at the same
-    /// number: cap height 0.625 of the size where Silkscreen's is 0.700, x-height 0.438 where VT323's is 0.400.
-    /// Keeping 56/48/40/... would have made every label silently about 11% smaller. Each chrome size is therefore
-    /// the old size x 0.700/0.625, and each sentence size the old size x 0.400/0.438, so the letters land on the
-    /// same measured height as before and no screen has to be re-laid out by eye.
+    /// Why the numbers moved again (2026-11-23, Abaddon -> Lilita One). The two faces sit differently on the
+    /// body: Lilita's cap height is 0.704 of the size where Abaddon's is 0.625, and its x-height 0.506 where
+    /// Abaddon Light's is 0.438. Keeping 62/54/45/... would have drawn every label about 13% taller and wider
+    /// and broken the rows that were fitted to Abaddon. Each chrome size is therefore the old size x 0.888
+    /// (0.625/0.704), so the letters land on the same measured height; the log keeps its size because its font
+    /// did not change. Micro is the one size that did not shrink to the exact ratio - a heavy face fills in
+    /// below about 28 - so it sits a little larger than the formula asks, on purpose.
+    ///
+    /// Earlier move, for the record (2026-11-15, Silkscreen/VT323 -> Abaddon): cap height 0.700 -> 0.625 and
+    /// x-height 0.400 -> 0.438, so each chrome size was the old size x 0.700/0.625.
     /// </summary>
     public static class UiType
     {
@@ -53,15 +59,15 @@ namespace IdleRPG.UI
         // ------------------------------------------------------------------
         // The scale - the ONLY text sizes in the game. Tweak here, nowhere else.
         // ------------------------------------------------------------------
-        public const float Display = 62f;
-        public const float Title = 54f;
-        public const float Section = 45f;
-        public const float Sentence = 33f;
-        public const float Small = 34f;
-        public const float Micro = 29f;
-        public const float Damage = 36f;
+        public const float Display = 55f;
+        public const float Title = 48f;
+        public const float Section = 40f;
+        public const float Sentence = 29f;
+        public const float Small = 30f;
+        public const float Micro = 28f;
+        public const float Damage = 32f;
 
-        /// <summary>Story dialogue in the battle log. One size up from Sentence, same readable font.</summary>
+        /// <summary>Story dialogue in the battle log. The one role still on Abaddon Light.</summary>
         public const float Dialogue = 44f;
 
         /// <summary>Crit damage text is this much bigger than <see cref="Damage"/>.</summary>
@@ -72,7 +78,7 @@ namespace IdleRPG.UI
 
         /// <summary>
         /// Leading as a multiple of the size. Chrome keeps the line box it had under Silkscreen (1.28 / 1.12 = 1.15),
-        /// so a fixed-height band cannot start clipping. Sentences use Abaddon's own 1.125 line plus a little air;
+        /// so a fixed-height band cannot start clipping. The log uses Abaddon's own 1.125 line plus a little air;
         /// each log line is therefore shorter than before and the same band shows about one more line.
         /// </summary>
         public const float LeadingChrome = 1.15f;
@@ -103,10 +109,12 @@ namespace IdleRPG.UI
             }
         }
 
-        /// <summary>The font for a role: Abaddon Light for running sentences, Abaddon Bold for everything else.</summary>
+        /// <summary>
+        /// The font for a role: the chrome face for everything except the battle log, which keeps Abaddon Light.
+        /// </summary>
         public static TMP_FontAsset Font(Role role)
         {
-            return role == Role.Sentence || role == Role.Dialogue ? UiTheme.Sentence : UiTheme.Display;
+            return role == Role.Dialogue ? UiTheme.Sentence : UiTheme.Loud;
         }
 
         /// <summary>How tall one line of this role is, in canvas units.</summary>

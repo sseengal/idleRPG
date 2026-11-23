@@ -285,14 +285,17 @@ namespace IdleRPG.UI
         // ------------------------------------------------------------------
         // Fonts (in a Resources folder; paths relative to it)
         // ------------------------------------------------------------------
-        private static TMP_FontAsset cachedDisplay;
+        private static TMP_FontAsset cachedLoud;
         private static TMP_FontAsset cachedSentence;
 
-        /// <summary>Chunky font for numbers, buttons, currency and damage/crits. Abaddon Bold.</summary>
-        public static TMP_FontAsset Display =>
-            cachedDisplay != null ? cachedDisplay : (cachedDisplay = Resources.Load<TMP_FontAsset>("Fonts/Abaddon Bold Pixel"));
+        /// <summary>
+        /// The chrome face: headings, buttons, numbers, labels. Lilita One (2026-11-23), with a thin dark rim baked
+        /// into its material so white text holds its edge on a lit panel.
+        /// </summary>
+        public static TMP_FontAsset Loud =>
+            cachedLoud != null ? cachedLoud : (cachedLoud = Resources.Load<TMP_FontAsset>("Fonts/Lilita One"));
 
-        /// <summary>Readable font for sentences, e.g. the battle log. Abaddon Light.</summary>
+        /// <summary>Readable font for running sentences, e.g. the battle log. Abaddon Light - the log keeps its retro face.</summary>
         public static TMP_FontAsset Sentence =>
             cachedSentence != null ? cachedSentence : (cachedSentence = Resources.Load<TMP_FontAsset>("Fonts/Abaddon Light Pixel"));
 

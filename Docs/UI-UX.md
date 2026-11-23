@@ -2,7 +2,7 @@
 
 > Owns: everything the player sees and taps.
 > Parent: `Architecture.md` (AD8, E7, E10, C7, D6) and `.clinerules`.
-> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** 2026-10-11 (the type scale, §1b - every label on one list, plus the guard that keeps it there).
+> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** 2026-11-23 (the chrome face moved to Lilita One, §1b - measured sizes, one rim, the log left on Abaddon Light).
 > Specs the UI side of Steps 10, 11, 13, 15, 17, 20.
 
 ---
@@ -58,25 +58,31 @@ Every piece of text picks a **role**, never a number. The roles live in one file
 
 | Role | Size | Font | What it is for |
 |---|---|---|---|
-| Display | 56 | Silkscreen | currency values, the reward number |
-| Title | 48 | Silkscreen | card / screen / modal titles |
-| Section | 40 | Silkscreen | section heads, button captions |
-| Sentence | 36 | VT323 | effect lines outside the battle log |
-| Dialogue | 48 | VT323 | every battle log line, including combat. Speaker names are gold; body text is near-white |
-| Damage | 32 | Silkscreen | floating damage (crit text is x1.3) |
-| Small | 30 | Silkscreen | nav tabs, tags, costs, column heads |
-| Micro | 26 | Silkscreen | captions - never something the player must act on |
+| Display | 55 | Lilita One | currency values, the reward number |
+| Title | 48 | Lilita One | card / screen / modal titles |
+| Section | 40 | Lilita One | section heads, button captions |
+| Sentence | 29 | Lilita One | effect lines outside the battle log |
+| Dialogue | 44 | Abaddon Light | every battle log line, including combat. Speaker names are gold; body text is near-white |
+| Damage | 32 | Lilita One | floating damage (crit text is x1.3) |
+| Small | 30 | Lilita One | nav tabs, tags, costs, column heads |
+| Micro | 28 | Lilita One | captions - never something the player must act on |
 
-Two rules hold it together:
-- **Chrome is Silkscreen, sentences are VT323.** VT323's x-height is only 0.41 of its size, so it reads smaller
-  than Silkscreen at the same number; it never carries a label the player reads at a glance.
-- **The battle log is all Dialogue 48.** Speaker names are gold (`AccentLight`), the words are near-white, and
+Rules that hold it together:
+- **One chrome face (2026-11-23).** Every label is **Lilita One**; only the battle log keeps **Abaddon Light**,
+  whose smaller letters suit a paragraph. Abaddon Bold is no longer used anywhere.
+- **Sizes are measured, not guessed.** Lilita's cap height is 0.704 of the size and Abaddon's was 0.625, so each
+  chrome size is the old number x 0.888 - same letter height on screen, not smaller text. Micro is the exception:
+  it stays a little above the ratio because a heavy face fills in below about 28.
+- **The chrome face carries its own rim.** `PixelFontAssetGenerator` bakes a 0.2 outline in `Slate950` into the
+  font's material, so white text holds its edge on a lit panel. Because it lives on the material, every label
+  that uses the face gets it - nothing has to remember to ask. Cost: the rim also lands on gold and dim text.
+- **The battle log is all Dialogue 44.** Speaker names are gold (`AccentLight`), the words are near-white, and
   lines have a 4-unit gap. The name is stored apart from the words so only the name changes colour.
 - **Story text types.** The log switches to one-line story mode. The speaker name appears at once; the words
   reveal at 45 characters per second in real time. `TAP TO CONTINUE` completes the line; the next tap advances. `SKIP SCENE` is a separate button. Combat lines never type. A scene end or skip shows the rest.
   The store, view, colours and layout contract live in `Battle-Log.md`.
 - **Micro is the floor.** Nothing is smaller. On a 1080-wide phone one canvas unit is about 0.4 dp, so Micro's
-  cap height is about 1.0 mm - the smallest text a phone can carry.
+  cap height is about 1.1 mm - the smallest text a phone can carry.
 
 How a screen asks for text:
 - Building the scene: `UiFactory.Text(parent, name, text, UiType.Role.Section, ...)`.
@@ -169,8 +175,8 @@ close is always top-left, primary button reachable one-handed (1080x1920 referen
   tab lifts, wears the brighter blue face and shows icon + label centred (see §2b). Opening TRAIN highlights TRAIN;
   going back to BATTLE highlights BATTLE.
 - **Runtime menus use the type scale and the touch rule.** Every label picks a `UiType` role and every control clears
-  `UiTouch.MinTarget` (144) - no hand-written sizes, and the fonts come from `UiTheme` (Silkscreen chrome, VT323
-  sentences), not the TMP default. Glyphs are drawn as sprites when the font lacks one (arrows).
+  `UiTouch.MinTarget` (144) - no hand-written sizes, and the fonts come from `UiTheme` (Lilita One chrome, Abaddon
+  Light for the battle log), not the TMP default. Glyphs are drawn as sprites when the font lacks one (arrows).
 - **The party XP bar sits between the arena and the ability strip**: one 44-unit band built by the scene builder.
   `LV n` and `xp/needed` are packed together on the left (`UiSpace.Small` between them, `UiSpace.Medium` before
   the bar), and the blue bar takes every unit that is left, up to the shared right margin. The numbers always show;
@@ -468,7 +474,8 @@ any UI change; a non-empty report means someone bypassed `UiParts`.
 - **Ribbon word centring is measured, not guessed (2026-11-22).** The label box covers the ribbon's **red face**
   (anchors 0.30-0.96, the face spans art rows 1-16 of 23). TMP centres the full line box, so capitals sit
   high; `BannerTextDrop(font, size)` derives that gap from the font's own `capLine` / `ascentLine` /
-  `descentLine` and scales it to the size (5.63 units at Abaddon 45). `BannerTextNudge` adds the measured
+  `descentLine` and scales it to the size (5.63 units at Abaddon 45, before the 2026-11-23 face change).
+  `BannerTextNudge` adds the measured
   remainder, **2.5**, so the capitals centre on the band. Result: 0.5 px off, measured on a 1080x1920 capture.
   Both parts scale with the font, so the font step cannot silently break it.
 - Sheet buttons carry the same two-step drop shadow, stronger: black 0.38 at -5, black 0.18 at -12

@@ -9,13 +9,16 @@ using IdleRPG.UI;
 namespace IdleRPG.EditorTools
 {
     /// <summary>
-    /// Moves the labels that are SAVED INSIDE scenes and prefabs from the old pixel fonts to Abaddon.
+    /// Moves the labels that are SAVED INSIDE scenes and prefabs onto the current theme fonts.
     ///
     /// ELI5: a token only repaints text the code builds while the game runs. Text saved in a scene keeps its own
     /// copy of the font and the size in the file, so those copies must be edited once. This is that one edit.
     ///
     /// It matches on the PAIR (old font, old size), never the size alone: 48 is both Title (Silkscreen) and
     /// Dialogue (VT323), so the number by itself would put a heading in the sentence face.
+    ///
+    /// Three tables, one per face that has been retired: Silkscreen, VT323, and - since 2026-11-23 - Abaddon Bold,
+    /// which Lilita One replaced for every role except the battle log.
     ///
     /// Menu: Tools &gt; Idle RPG &gt; Art &gt; Migrate Theme Fonts
     /// Run once, after the Abaddon assets exist. A second run reports 0 changed, because no label still uses an
@@ -26,6 +29,26 @@ namespace IdleRPG.EditorTools
     {
         private const string OldDisplayPath = "Assets/IdleRPG/Resources/Fonts/Silkscreen Pixel.asset";
         private const string OldSentencePath = "Assets/IdleRPG/Resources/Fonts/VT323 Pixel.asset";
+
+        /// <summary>The chrome face up to 2026-11-23, when Lilita One replaced it.</summary>
+        private const string OldChromePath = "Assets/IdleRPG/Resources/Fonts/Abaddon Bold Pixel.asset";
+
+        /// <summary>Set by <see cref="Migrate"/> so the label walk can recognise the old chrome face.</summary>
+        private static TMP_FontAsset oldChrome;
+
+        /// <summary>
+        /// Abaddon Bold as it was used up to 2026-11-23, at the sizes <see cref="UiType"/> held before the
+        /// Lilita One move (62/54/45/36/34/29). Frozen here for the same reason as the tables below.
+        /// </summary>
+        private static readonly Dictionary<float, UiType.Role> OldChromeRoles = new Dictionary<float, UiType.Role>
+        {
+            { 62f, UiType.Role.Display },
+            { 54f, UiType.Role.Title },
+            { 45f, UiType.Role.Section },
+            { 36f, UiType.Role.Damage },
+            { 34f, UiType.Role.Small },
+            { 29f, UiType.Role.Micro },
+        };
 
         /// <summary>
         /// The scale as it stood before the font change (2026-11-15), frozen here on purpose: <see cref="UiType"/>
@@ -52,6 +75,7 @@ namespace IdleRPG.EditorTools
         {
             TMP_FontAsset oldDisplay = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(OldDisplayPath);
             TMP_FontAsset oldSentence = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(OldSentencePath);
+            oldChrome = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(OldChromePath);
 
             if (oldDisplay == null || oldSentence == null)
             {
@@ -60,7 +84,7 @@ namespace IdleRPG.EditorTools
                 return;
             }
 
-            if (UiTheme.Display == null || UiTheme.Sentence == null)
+            if (UiTheme.Loud == null || UiTheme.Sentence == null)
             {
                 Debug.LogError("[ThemeFontMigration] The theme fonts are not loaded. " +
                                "Run Tools > Idle RPG > Art > Generate Pixel Fonts first.");
@@ -87,8 +111,7 @@ namespace IdleRPG.EditorTools
 
             AssetDatabase.SaveAssets();
 
-            Debug.Log($"[ThemeFontMigration] {changed} label(s) moved to Abaddon, {skipped} left alone. " +
-                      "On this project a first run is 26 in Main, 1 in Boot and 7 across the prefabs (34).");
+            Debug.Log($"[ThemeFontMigration] {changed} label(s) moved to the theme fonts, {skipped} left alone.");
         }
 
         /// <summary>Opens a prefab, rewrites its labels, saves it back - nested prefabs stay intact.</summary>
@@ -181,6 +204,15 @@ namespace IdleRPG.EditorTools
                 else if (label.font == oldSentence)
                 {
                     if (!OldSentenceRoles.TryGetValue(size, out role))
+                    {
+                        Report(area, label, size);
+                        skipped++;
+                        continue;
+                    }
+                }
+                else if (label.font == oldChrome)
+                {
+                    if (!OldChromeRoles.TryGetValue(size, out role))
                     {
                         Report(area, label, size);
                         skipped++;

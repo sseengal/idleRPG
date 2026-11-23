@@ -39,6 +39,16 @@ namespace IdleRPG.EditorTools
         {
             public string Path;
             public string OutputName;
+
+            /// <summary>Atlas edge in pixels; 0 keeps <see cref="AtlasSize"/>.</summary>
+            public int Atlas;
+
+            /// <summary>
+            /// A dark rim drawn with the glyphs, 0 for none. It lives on the font's own material, so every label
+            /// that uses the font gets it without a second place to wire. 0.2 is about one screen pixel at the
+            /// section size - a rim, not a weight.
+            /// </summary>
+            public float OutlineWidth;
         }
 
         private static readonly FontSource[] Fonts =
@@ -48,6 +58,17 @@ namespace IdleRPG.EditorTools
             new FontSource { Path = ThirdPartyFolder + "/PixelFonts/Jersey10-Regular.ttf", OutputName = "Jersey10 Pixel" },
             new FontSource { Path = ThirdPartyFolder + "/Abaddon_Fonts_v1.2/Abaddon Bold.ttf", OutputName = "Abaddon Bold Pixel" },
             new FontSource { Path = ThirdPartyFolder + "/Abaddon_Fonts_v1.2/Abaddon Light.ttf", OutputName = "Abaddon Light Pixel" },
+
+            // The chrome face (2026-11-23). Tall and wide: cap height 0.704 em against Abaddon's 0.625, so the
+            // sizes in UiType are smaller than they were - same letter height, not smaller text. 2048 because the
+            // face is large on the body and now carries a rim.
+            new FontSource
+            {
+                Path = ThirdPartyFolder + "/LilitaOne/LilitaOne-Regular.ttf",
+                OutputName = "Lilita One",
+                Atlas = 2048,
+                OutlineWidth = 0.2f,
+            },
         };
 
         [MenuItem("Tools/Idle RPG/Art/Generate Pixel Fonts", priority = 22)]
@@ -98,13 +119,15 @@ namespace IdleRPG.EditorTools
                     AssetDatabase.DeleteAsset(assetPath);
                 }
 
+                int atlas = entry.Atlas > 0 ? entry.Atlas : AtlasSize;
+
                 TMP_FontAsset fontAsset = TMP_FontAsset.CreateFontAsset(
                     source,
                     SamplingPointSize,
                     7,                                  // SDF padding (TMP default for SDFAA)
                     GlyphRenderMode.SDFAA,
-                    AtlasSize,
-                    AtlasSize,
+                    atlas,
+                    atlas,
                     AtlasPopulationMode.Dynamic,
                     true);
 
@@ -116,6 +139,17 @@ namespace IdleRPG.EditorTools
 
                 fontAsset.name = entry.OutputName;
                 fontAsset.isMultiAtlasTexturesEnabled = true;
+
+                if (entry.OutlineWidth > 0f)
+                {
+                    // Set on the font's own material, before the asset is written, so every label that uses the
+                    // font draws the rim and nothing has to remember to ask for it.
+                    Material material = fontAsset.material;
+                    material.EnableKeyword(ShaderUtilities.Keyword_Outline);
+                    material.SetFloat(ShaderUtilities.ID_OutlineWidth, entry.OutlineWidth);
+                    material.SetColor(ShaderUtilities.ID_OutlineColor, IdleRPG.UI.UiTheme.Slate950);
+                    EditorUtility.SetDirty(material);
+                }
 
                 // Textures and the material are separate objects; they must be added to the same asset
                 // file or the font asset saves with dangling references.

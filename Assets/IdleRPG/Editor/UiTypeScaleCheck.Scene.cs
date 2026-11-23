@@ -123,11 +123,11 @@ namespace IdleRPG.EditorTools
                 return;
             }
 
-            bool themeFont = label.font == UiTheme.Display || label.font == UiTheme.Sentence;
+            bool themeFont = label.font == UiTheme.Loud || label.font == UiTheme.Sentence;
 
             if (!themeFont)
             {
-                Add(Severity.Error, area, path + ": font is '" + fontName + "', not a theme font (Abaddon Bold or Abaddon Light).");
+                Add(Severity.Error, area, path + ": font is '" + fontName + "', not a theme font (Lilita One or Abaddon Light).");
             }
 
             if (!IsOnScale(roleSize))
