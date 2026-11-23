@@ -142,6 +142,21 @@ namespace IdleRPG.EditorTools
                     continue;
                 }
 
+                // A hex colour inside rich text is the same offence in a different place: the label is white, but
+                // a <color=#RRGGBB> tag paints part of it from outside the palette.
+                if (line.Contains("<color=#"))
+                {
+                    colourCount++;
+                    Issues.Add(new Issue
+                    {
+                        Severity = Severity.Error,
+                        Area = path,
+                        Message = $"{path}:{i + 1} paints text with a <color=#> tag. Use one ink (UiTheme.Text). " +
+                                  $"Line: {line.Trim()}"
+                    });
+                    continue;
+                }
+
                 Match match = ConstantColour.Match(line);
                 if (!match.Success)
                 {

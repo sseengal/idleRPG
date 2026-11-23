@@ -322,7 +322,9 @@ namespace IdleRPG.UI
                 return;
             }
 
-            stageText.SetText(string.Format(isBossWave ? "Stage {0}  <size=75%><color=#FF6B6B>BOSS</color></size>" : "Stage {0}  <size=75%>wave {1}</size>", stage, wave));
+            // One ink: BOSS is marked by the word and its size, not by a red that the palette does not own
+            // (owner, 2026-11-23).
+            stageText.SetText(string.Format(isBossWave ? "Stage {0}  <size=75%>BOSS</size>" : "Stage {0}  <size=75%>wave {1}</size>", stage, wave));
         }
 
         private void OnGoldBoostChanged(bool active, float remainingSeconds, double multiplier)
