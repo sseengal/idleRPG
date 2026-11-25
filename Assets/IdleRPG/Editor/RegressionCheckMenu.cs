@@ -67,7 +67,11 @@ namespace IdleRPG.EditorTools
             //    eight-numbers-in-60-places problem can come back one call site at a time.
             ok &= UiSpacingCheck.RunCheckWithResult();
 
-            // 6) UI colours: every constant colour in the UI code must come from UiTheme. Without this, the
+            // 6) UI header: the top bar's golden numbers (one bar on every screen, icon inside its chip, menu button
+            //    at the touch minimum). It is measured in the built scene, which is what actually drifted.
+            ok &= UiHeaderSpecCheck.RunCheckWithResult();
+
+            // 7) UI colours: every constant colour in the UI code must come from UiTheme. Without this, the
             //    114-colours-in-35-files problem can come back one line at a time.
             ok &= UiColourCheck.RunCheckWithResult();
 

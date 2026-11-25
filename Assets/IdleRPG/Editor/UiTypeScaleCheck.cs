@@ -48,7 +48,7 @@ namespace IdleRPG.EditorTools
         /// <summary>The roles, in scale order. Used to build the lookup tables below.</summary>
         private static readonly UiType.Role[] Roles =
         {
-            UiType.Role.Display, UiType.Role.Title, UiType.Role.Section, UiType.Role.Sentence,
+            UiType.Role.Hero, UiType.Role.Display, UiType.Role.Title, UiType.Role.Section, UiType.Role.Sentence,
             UiType.Role.Small, UiType.Role.Micro, UiType.Role.Damage, UiType.Role.Dialogue
         };
 

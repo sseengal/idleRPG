@@ -37,8 +37,10 @@ namespace IdleRPG.EditorTools
         // Why: a fraction makes the bars change size with the screen. On a tall phone the extra height was split
         // between the bars and the page, and on a short screen the top bar could fall below the 56-unit currency
         // numbers. One rule now: extra height belongs to the page, the bars never move.
-        // The values reproduce the 1080x1920 design (header 6% and nav 12% of 1920), so nothing shifts on 9:16.
-        private const float HeaderBandHeight = 115f;   // top bar: the currency chips + boost, pinned to the top
+        //
+        // 2026-11-25: the band comes from UiSpace (32 gap + 96 bar + nothing else), because the same header is
+        // borrowed by the lobby and had grown to 163 units there. One number, one bar, every screen.
+        private const float HeaderBandHeight = UiSpace.HeaderBandHeight;
 
         // Party XP bar band: a thin strip between the bottom of the arena and the top of the ability strip.
         // The arena starts at XP band top, so the bar can never sit over the fight or hide the hero buttons.

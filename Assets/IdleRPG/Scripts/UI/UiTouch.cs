@@ -3,9 +3,10 @@ namespace IdleRPG.UI
     /// <summary>
     /// Mobile sizing rules for the upgrade-style screens (one upgrade per row).
     ///
-    /// ELI5: a finger is about 1.6-2 cm wide, so every button must be at least 1 cm across or players will
-    /// miss it. The canvas is built at 1080x1920, so on a 1080p phone one unit is about a third of a
-    /// device-independent pixel: 1 cm is roughly 114 units and Material's 48 dp is about 144. We use 144.
+    /// ELI5: a finger is about 1.6-2 cm wide, so every button must be about 1 cm across or players will miss it.
+    /// The canvas is built at 1080x1920, so on a 1080-wide phone (about 7 cm of glass) one unit is about 0.4 dp:
+    /// 48 dp is about 120 units, 1 cm is about 155 units. We use 144 (about 58 dp, 0.9 cm), which clears both the
+    /// Android 48 dp and the iOS 44 pt minimums with room to spare.
     ///
     /// Why this file exists: the hero upgrade page used to fit five stat tiles - with a +1 and +10 button each -
     /// into one 320-unit row, which left every button about 28 units tall (roughly 9 dp, a quarter of a
@@ -60,6 +61,17 @@ namespace IdleRPG.UI
 
         /// <summary>The inset from the sheet's top and bottom rim. Equal to the side inset: one frame, four equal sides.</summary>
         public const float SheetPadY = UiSpace.Space64;
+
+        // ------------------------------------------------------------------
+        // The top bar's menu button.
+        //
+        // ELI5: the gear carries no plate (2026-11-25) - it is an icon on the page background, at the end of the
+        // currency row. The touch target is still finger-sized: an invisible square under it, three chips wide,
+        // centred on the icon.
+        // ------------------------------------------------------------------
+
+        /// <summary>The width and height of the gear's invisible tap square: the touch minimum, both ways.</summary>
+        public const float IconButtonHitSize = MinTarget;
 
         /// <summary>One currency row in the "you keep" list: icon plus amount.</summary>
         public const float KeepRowHeight = 64f;

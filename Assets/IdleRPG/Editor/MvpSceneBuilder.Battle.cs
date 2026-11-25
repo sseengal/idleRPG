@@ -24,22 +24,45 @@ namespace IdleRPG.EditorTools
         private const string HeroUnitSlotPrefabPath =
             "Assets/IdleRPG/Prefabs/UI/Battle/HeroUnitSlot.prefab";
 
+        /// <summary>The currency plate art, cropped from the owner's 100 x 100 export to its 30 x 30 block.</summary>
+        private const string CurrencyPlatePath = "Assets/IdleRPG/Art/UI/Containers/CurrencyContainer.png";
+
+        /// <summary>The green plus on a currency plate: cropped from the owner's 100 x 100 export to its 32 x 32 mark.</summary>
+        private const string CurrencyPlusPath = "Assets/IdleRPG/Art/UI/Icons/currency_plus.png";
+
+        /// <summary>
+        /// 1 art pixel = 2 canvas units. The art is 30 px for a 64-unit icon, so a plate drawn at 1:1 would be half
+        /// the height of the chip; at 1/2 it is 60 units and its 4 px rim is 8 units, the same air the icon leaves.
+        /// </summary>
+        private const float CurrencyPlateScale = 0.5f;
+
         // ------------------------------------------------------------------
         // Header
         // ------------------------------------------------------------------
         private static HudHeaderUI BuildHeader(RectTransform safeArea)
         {
-            Image header = ContainerPanel("Header", safeArea);
-            PinBar(header.rectTransform, top: true, HeaderBandHeight, UiSpace.PageMargin, UiSpace.PageMargin);
-            HudHeaderUI view = header.gameObject.AddComponent<HudHeaderUI>();
+            // The bar draws NOTHING (owner, 2026-11-25): the currency plates are the only surfaces left on it. It is
+            // exactly one plate tall, pinned one page margin under the safe-area top, so the air around the plates is
+            // PageMargin above and beside and SectionGap below - the same margins as the page under it.
+            GameObject header = UiFactory.Node("Header", safeArea);
+            RectTransform headerRect = header.GetComponent<RectTransform>();
+            headerRect.anchorMin = new Vector2(0f, 1f);
+            headerRect.anchorMax = new Vector2(1f, 1f);
+            headerRect.pivot = new Vector2(0.5f, 1f);
+            headerRect.anchoredPosition = new Vector2(0f, -UiSpace.PageMargin);
+            headerRect.sizeDelta = new Vector2(-2f * UiSpace.PageMargin, UiSpace.HeaderBarHeight);
+            HudHeaderUI view = header.AddComponent<HudHeaderUI>();
 
-            // The currency chips and the RANKS button share ONE row driven by a layout group, so they divide the
-            // width and can never overlap. They used to be placed by hand - chips at 0.03 / 0.35 / 0.65 and the
-            // runtime RANKS button at 0.88 - and the token chip and the button collided by about 95 units, which is
-            // how a long currency value ended up sliding under the button.
+            // The currency chips and the menu button share ONE row driven by a layout group, so they divide the
+            // width and can never overlap. They used to be placed by hand - chips at 0.03 / 0.35 / 0.65 and a
+            // button at 0.88 - and the token chip and the button collided by about 95 units, which is how a long
+            // currency value ended up sliding under the button.
+            //
+            // The row stops where the menu zone starts: one icon plus one page margin, which is exactly the space the
+            // menu icon is centred in between the last plate and the screen edge (owner, 2026-11-25).
             GameObject row = UiFactory.Node("ChipRow", header.transform);
             RectTransform rowRect = row.GetComponent<RectTransform>();
-            UiFactory.Stretch(rowRect, UiSpace.Space32, UiSpace.Space16, UiSpace.Space32, UiSpace.Space16);
+            UiFactory.Stretch(rowRect, 0f, 0f, UiSpace.ChipIconSize + UiSpace.PageMargin, 0f);
 
             HorizontalLayoutGroup layout = row.AddComponent<HorizontalLayoutGroup>();
             layout.spacing = UiSpace.Space8;
@@ -49,27 +72,31 @@ namespace IdleRPG.EditorTools
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = true;
 
-            // Currency chips (icon + value). The row divides the width between them; the RANKS button (built at
+            // Currency chips (icon + value). The row divides the width between them; the menu button (built at
             // runtime by HudHeaderUI) takes a fixed slice at the end.
             TextMeshProUGUI goldText = CreateCurrencyChip(row.transform, "GoldChip", "ui_icon_gold");
             TextMeshProUGUI gemText = CreateCurrencyChip(row.transform, "GemChip", "ui_icon_gem");
             TextMeshProUGUI tokenText = CreateCurrencyChip(row.transform, "TokenChip", "ui_icon_token");
 
 
-            // Boost chip: hidden until an ad boost is running. It stays on the HEADER, not in the row - it is an
-            // overlay badge, not a fourth currency, so the layout group must not size it.
-            Image boostChip = ContainerPanel("BoostChip", header.transform, tint: UiTheme.Accent);
-            UiFactory.Anchor(boostChip.rectTransform, new Vector2(0.03f, 0.20f), new Vector2(0.53f, 0.92f));
+            // Boost badge: hidden until an ad boost is running. It is a ROW item, not a floating overlay - it used to
+            // sit at fixed fractions over the header, which put it on top of the gold chip whenever the badge
+            // appeared. While it shows, the token chip hides, so the row keeps four items and the chips never
+            // change width.
+            Image boostChip = CreateCurrencyPlate(row.transform, "BoostChip");
+            LayoutElement boostElement = boostChip.gameObject.AddComponent<LayoutElement>();
+            boostElement.flexibleWidth = 1f;
 
             TextMeshProUGUI boostText = UiFactory.Text("BoostLabel", boostChip.transform, "x2", UiType.Role.Section,
                 TextAlignmentOptions.Center, UiTheme.Text);
-            UiFactory.Stretch(boostText.rectTransform, UiSpace.Space16, UiSpace.Space4, UiSpace.Space16, UiSpace.Space4);
+            UiFactory.Stretch(boostText.rectTransform, UiSpace.ChipIconInset, UiSpace.LabelPadY,
+                UiSpace.ChipIconInset, UiSpace.LabelPadY);
             boostChip.gameObject.SetActive(false);
 
             SceneWiringUtility.SetField(view, "goldText", goldText);
             SceneWiringUtility.SetField(view, "gemsText", gemText);
             SceneWiringUtility.SetField(view, "tokensText", tokenText);
-            SceneWiringUtility.SetField(view, "chipRow", rowRect);
+            SceneWiringUtility.SetField(view, "tokenChip", tokenText.transform.parent.gameObject);
             SceneWiringUtility.SetField(view, "boostChip", boostChip.gameObject);
             SceneWiringUtility.SetField(view, "boostText", boostText);
 
@@ -82,35 +109,84 @@ namespace IdleRPG.EditorTools
         /// The row's layout group sizes it, so the chip carries a <see cref="LayoutElement"/> instead of a
         /// hand-picked fraction. Two independently tuned fractions are exactly how the token chip and the RANKS
         /// button ended up overlapping.
+        ///
+        /// The icon is <see cref="UiSpace.ChipIconSize"/> (the chip minus one inset above and below), so the picture
+        /// can never be taller than its chip. The value shrinks instead of spilling: an idle game reaches six-digit
+        /// numbers early, and a fixed 56 in a 176-wide box cut them off.
         /// </summary>
         private static TextMeshProUGUI CreateCurrencyChip(Transform parent, string name, string iconSprite)
         {
-            // A flat block, not a plate: a bordered chip inside the bordered header read as a container inside a
-            // container (owner, 2026-11-23). Same footprint, darker grey, no nested frame.
-            Image chip = UiFactory.Panel(name, parent, (string)null, UiTheme.SurfaceChip, raycast: false);
+            Image chip = CreateCurrencyPlate(parent, name);
             LayoutElement element = chip.gameObject.AddComponent<LayoutElement>();
             element.flexibleWidth = 1f;
 
             Image icon = UiFactory.Icon("Icon", chip.transform, Color.white);
             icon.sprite = UiFactory.LoadSprite(iconSprite);
 
-            // Padded, not percentage-placed: the icon sits a token in from the chip's left edge, the value starts a
-            // token after it, and the right edge keeps the same token (owner, 2026-11-23).
-            const float iconSize = 56f;
+            // Padded, not percentage-placed: the icon centres in its slot one inset in from the plate's left edge, the
+            // value centres in the space that is left, and the right edge keeps the same inset (owner, 2026-11-25).
+            // The slot is wider than the icon so a wide gem and a narrow key share one centre line.
             RectTransform iconRect = icon.rectTransform;
             iconRect.anchorMin = new Vector2(0f, 0.5f);
             iconRect.anchorMax = new Vector2(0f, 0.5f);
             iconRect.pivot = new Vector2(0f, 0.5f);
-            iconRect.sizeDelta = new Vector2(iconSize, iconSize);
-            iconRect.anchoredPosition = new Vector2(UiSpace.Space16, 0f);
+            iconRect.sizeDelta = new Vector2(UiSpace.ChipIconSlot, UiSpace.ChipIconSize);
+            iconRect.anchoredPosition = new Vector2(UiSpace.ChipIconInset, 0f);
+            icon.preserveAspect = true;
 
             TextMeshProUGUI value = UiFactory.Text("Value", chip.transform, "0", UiType.Role.Display,
-                TextAlignmentOptions.MidlineLeft, UiTheme.Text);
+                TextAlignmentOptions.Midline, UiTheme.Text);
+            // No vertical inset: the display font's own line box is taller than the chip, so an inset would make
+            // TMP shrink the number to fit the BOX instead of only shrinking a too-long number. A zero inset is not
+            // a spacing choice, so it does not need a role.
             UiFactory.Anchor(value.rectTransform, Vector2.zero, Vector2.one,
-                UiSpace.Space16 + iconSize + UiSpace.Space8, UiSpace.Space4,
-                UiSpace.Space16, UiSpace.Space4);
+                UiSpace.ChipIconInset + UiSpace.ChipIconSlot + UiSpace.Space8, 0f,
+                UiSpace.ChipIconInset, 0f);
+            UiType.ApplyAuto(value, UiType.Role.Display);
+
+            // Buy badge: a tiny green plus on the icon's bottom-right corner (owner, 2026-11-25). It sits ON the
+            // icon's slot corner, not beside it, so it overlaps the icon. It is decoration: the whole plate is the
+            // button in the lobby, so the badge never takes a tap. HudHeaderUI shows it only between runs.
+            Image badge = UiFactory.Icon("BuyBadge", chip.transform, Color.white, false);
+            badge.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(CurrencyPlusPath);
+            badge.raycastTarget = false;
+            RectTransform badgeRect = badge.rectTransform;
+            badgeRect.anchorMin = new Vector2(0f, 0.5f);
+            badgeRect.anchorMax = new Vector2(0f, 0.5f);
+            badgeRect.pivot = new Vector2(1f, 0f);
+            badgeRect.sizeDelta = new Vector2(UiSpace.ChipBadgeSize, UiSpace.ChipBadgeSize);
+            badgeRect.anchoredPosition = new Vector2(
+                UiSpace.ChipIconInset + UiSpace.ChipIconSlot, -UiSpace.ChipIconSize * 0.5f);
+            badge.gameObject.SetActive(false);
 
             return value;
+        }
+
+        /// <summary>
+        /// The plate every currency item sits on: the owner's CurrencyContainer art (a 30 x 30 bevelled block).
+        ///
+        /// It was exported on a 100 x 100 canvas with the block at x 34-63, y 38-67, so the asset HERE is that block
+        /// cropped out (the source PNG at the project root is untouched). The 4 px rim is a 9-slice border, so the
+        /// bevel stays 1 art pixel at any width instead of smearing when a chip grows.
+        ///
+        /// The plate is drawn at 2x: 1 art pixel = 2 canvas units, so the 30 px art is 60 units tall inside a 64-unit
+        /// chip and the 4 px rim reads as 8 units - the same air the icon leaves.
+        /// </summary>
+        private static Image CreateCurrencyPlate(Transform parent, string name)
+        {
+            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(CurrencyPlatePath);
+
+            if (sprite == null)
+            {
+                Debug.LogWarning($"[MvpSceneBuilder] Missing {CurrencyPlatePath}; the chip falls back to a flat block.");
+                return UiFactory.Panel(name, parent, (string)null, UiTheme.SurfaceChip, raycast: false);
+            }
+
+            Image plate = UiFactory.Icon(name, parent, Color.white, false);
+            plate.sprite = sprite;
+            plate.type = Image.Type.Sliced;
+            plate.pixelsPerUnitMultiplier = CurrencyPlateScale;
+            return plate;
         }
 
         // ------------------------------------------------------------------

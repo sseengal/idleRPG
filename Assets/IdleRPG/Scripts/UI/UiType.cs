@@ -14,6 +14,7 @@ namespace IdleRPG.UI
     /// screens matched. This file is the fix: pick a role, never a number.
     ///
     /// The scale (reference canvas 1080x1920; on a 1080-wide phone 1 unit is about 0.4 dp):
+    ///   Hero      72  Lilita One    the one primary action (START)      cap ~2.8 mm  (+28% step, deliberate)
     ///   Display   56  Lilita One    currency, hero numbers            cap ~2.2 mm
     ///   Title     48  Lilita One    card / screen / modal titles      cap ~1.9 mm
     ///   Section   40  Lilita One    section heads, button captions    cap ~1.6 mm
@@ -48,6 +49,8 @@ namespace IdleRPG.UI
         /// <summary>What a piece of text is for. Pick the role, never a number.</summary>
         public enum Role
         {
+            /// <summary>The one primary action on a screen (START). Bigger than every other label on purpose.</summary>
+            Hero,
             Display,
             Title,
             Section,
@@ -63,6 +66,11 @@ namespace IdleRPG.UI
         // ------------------------------------------------------------------
         // The scale - the ONLY text sizes in the game. Tweak here, nowhere else.
         // ------------------------------------------------------------------
+        /// <summary>
+        /// The primary action's label: 72 units (about 29 dp). It is a deliberate +28% above Display, outside the
+        /// 12-20% step band, because it has to beat every other word on the screen and it appears once per screen.
+        /// </summary>
+        public const float Hero = 72f;
         public const float Display = 56f;
         public const float Title = 48f;
         public const float Section = 40f;
@@ -93,6 +101,8 @@ namespace IdleRPG.UI
         {
             switch (role)
             {
+                case Role.Hero:
+                    return Hero;
                 case Role.Display:
                     return Display;
                 case Role.Title:

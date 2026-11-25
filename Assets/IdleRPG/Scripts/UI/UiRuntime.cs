@@ -168,51 +168,60 @@ namespace IdleRPG.UI
             }
         }
 
-        private static Sprite gearSprite;
+        private static Sprite hamburgerSprite;
 
         /// <summary>
-        /// A simple eight-tooth gear silhouette, drawn once and cached. It is the settings / pause button until real
-        /// art lands. White, so it tints like every other icon.
+        /// The top bar's menu icon: three stacked bars, drawn once and cached (owner, 2026-11-25 replaced the gear).
+        ///
+        /// ELI5: the "menu" lines every phone app uses. White, so it tints like every other icon, and hard-edged
+        /// (Point filter) so the bars stay crisp at any size. Drawn on a 64 grid: 40-wide bars, 8 thick, 8 apart.
         /// </summary>
-        public static Sprite GearSprite
+        public static Sprite HamburgerSprite
         {
             get
             {
-                if (gearSprite != null) { return gearSprite; }
+                if (hamburgerSprite != null) { return hamburgerSprite; }
 
                 const int size = 64;
+                const int barWidth = 40;
+                const int barHeight = 8;
+                const int barGap = 8;
+                const int bars = 3;
+
                 Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
                 tex.wrapMode = TextureWrapMode.Clamp;
-                tex.filterMode = FilterMode.Bilinear;
+                tex.filterMode = FilterMode.Point;
 
-                Vector2 centre = new Vector2((size - 1) * 0.5f, (size - 1) * 0.5f);
-                const float bodyRadius = 20f;
-                const float toothRadius = 28f;
-                const float holeRadius = 7f;
-                const float sector = Mathf.PI * 2f / 8f;
+                int left = (size - barWidth) / 2;
+                int stackHeight = barHeight * bars + barGap * (bars - 1);
+                int bottom = (size - stackHeight) / 2;
 
                 for (int y = 0; y < size; y++)
                 {
+                    bool onBar = false;
+
+                    for (int bar = 0; bar < bars; bar++)
+                    {
+                        int barBottom = bottom + bar * (barHeight + barGap);
+
+                        if (y >= barBottom && y < barBottom + barHeight)
+                        {
+                            onBar = true;
+                            break;
+                        }
+                    }
+
                     for (int x = 0; x < size; x++)
                     {
-                        Vector2 delta = new Vector2(x, y) - centre;
-                        float distance = delta.magnitude;
-                        float angle = Mathf.Atan2(delta.y, delta.x);
-                        float local = Mathf.Repeat(angle, sector) - sector * 0.5f;
-
-                        bool tooth = Mathf.Abs(local) <= sector * 0.24f && distance <= toothRadius;
-                        bool body = distance <= bodyRadius;
-                        bool hole = distance <= holeRadius;
-                        float alpha = (body || tooth) && !hole ? 1f : 0f;
-
-                        tex.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                        bool ink = onBar && x >= left && x < left + barWidth;
+                        tex.SetPixel(x, y, new Color(1f, 1f, 1f, ink ? 1f : 0f));
                     }
                 }
 
                 tex.Apply();
-                gearSprite = Sprite.Create(tex, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f), 100f);
-                gearSprite.name = "UiGear";
-                return gearSprite;
+                hamburgerSprite = Sprite.Create(tex, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f), 100f);
+                hamburgerSprite.name = "UiHamburger";
+                return hamburgerSprite;
             }
         }
 

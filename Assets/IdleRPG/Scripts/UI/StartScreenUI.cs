@@ -19,6 +19,44 @@ namespace IdleRPG.UI
         private GameManager manager;
         private GameObject lobby;
 
+        // The box the lobby's centre and tab bar live in (owner, 2026-11-25). The notch and the home bar cut this box,
+        // so the content moves instead of hiding under them.
+        private RectTransform lobbySafe;
+
+        // ---- The lobby centre (chapter kicker, wordmark, card, START) ----
+        // Sizes are fixed canvas units at the 1080 reference, so the block looks the same on every phone and only the
+        // air above and below it grows. The two art aspects keep their pictures un-letterboxed.
+        private const float ChapterArtAspect = 1400f / 764f;      // Greenwake1-clean 1.png
+        private const float TitleArtAspect = 1258f / 208f;        // greenwake_title.png, cropped to its letters
+
+        /// <summary>
+        /// The chapter card's width. Narrower than the page column on purpose: the 76-unit gutter each side is where
+        /// the carousel's left and right arrows will live once there is a second chapter (owner, 2026-11-25). START
+        /// shares the card's edges, so the picture and the action read as one unit.
+        /// </summary>
+        private const float ChapterCardWidth = 864f;
+
+        /// <summary>The wordmark's width: 70% of the card, which prints its letters about 40 dp tall.</summary>
+        private const float ChapterTitleWidth = 605f;
+
+        /// <summary>
+        /// START's width: three quarters of the card. Narrower than the picture, so the action reads as a button under
+        /// the hero instead of a second slab (owner, 2026-11-25).
+        /// </summary>
+        private const float LobbyActionWidth = 648f;
+
+        /// <summary>Letter spacing on the kicker, so a two-word label reads as a label (TMP units).</summary>
+        private const float KickerTracking = 8f;
+
+        /// <summary>The heavy-rim font variant (outline 0.3, the shared one is 0.2), inside a Resources folder.</summary>
+        private const string HeavyOutlineMaterialPath = "Fonts/Lilita One Heavy";
+
+        /// <summary>START's height: 61 dp, comfortable for a thumb.</summary>
+        private const float LobbyActionHeight = 154f;
+
+        private const float TabBandTopFraction = 0.14f;           // the tab bar's top edge, as a fraction of the box
+        private const float TabBandBottomFraction = 0.03f;
+
         [Tooltip("Chapter art for the lobby centre panel. Null falls back to the plain plate.")]
         [SerializeField] private Sprite chapterArt;
 
@@ -42,11 +80,8 @@ namespace IdleRPG.UI
         // The shared battle header (HudHeaderUI), borrowed while the lobby is open, put back when a run starts.
         private RectTransform sharedHeader;
         private Transform sharedHeaderHome;
-        private Vector2 sharedHeaderAnchorMin;
-        private Vector2 sharedHeaderAnchorMax;
-        private Vector2 sharedHeaderOffsetMin;
-        private Vector2 sharedHeaderOffsetMax;
         private int sharedHeaderSibling;
+        private GameObject sharedHeaderBox;
 
         private GameObject trainingPanel;
 
@@ -156,43 +191,141 @@ namespace IdleRPG.UI
 
             Atmosphere(lobby.transform, "BG", Vector2.zero, Vector2.one, VerticalGradient, Color.white);
             Atmosphere(lobby.transform, "Vignette", Vector2.zero, Vector2.one, Vignette, Color.white);
-            Atmosphere(lobby.transform, "ChapterGlow", new Vector2(0.06f, 0.38f), new Vector2(0.94f, 0.70f), SoftGlow, UiTheme.HaloGreen);
 
-            Image card = chapterArt != null
-                ? ArtPanel(lobby.transform, "ChapterCard", new Vector2(0.10f, 0.4144f), new Vector2(0.90f, 0.66f), chapterArt)
-                : UiParts.Panel(lobby.transform, "ChapterCard", new Vector2(0.10f, 0.38f), new Vector2(0.90f, 0.66f), PanelKind.Card);
+            // Everything between the top bar and the tab bar lives in ONE safe box, on one column, at fixed sizes
+            // (owner, 2026-11-25). The notch and the home bar now cut the box instead of the artwork.
+            lobbySafe = Rect("LobbySafeArea", lobby.transform, Vector2.zero, Vector2.one);
+            lobbySafe.gameObject.AddComponent<SafeAreaFitter>();
 
-            // Chapter title: small faded "Chapter 1" over a big "Greenwake". Rect centres sit ~0.02 apart
-            // so the two read as ONE tight kicker, and hug the panel top (proximity grouping).
-            Text(lobby.transform, "ChapterLabel", new Vector2(0.05f, 0.717f), new Vector2(0.95f, 0.737f), "Chapter 1", UiType.Role.Small, UiTheme.Text);
-            if (chapterTitleArt != null)
-            {
-                // Wordmark art (transparent, centred); sized to its aspect so the letters read clean.
-                ArtPanel(lobby.transform, "ChapterTitle", new Vector2(0.32f, 0.6361f), new Vector2(0.68f, 0.7465f), chapterTitleArt);
-            }
-            else
-            {
-                Text(lobby.transform, "ChapterTitle", new Vector2(0.05f, 0.669f), new Vector2(0.95f, 0.701f), "Greenwake", UiType.Role.Title, UiTheme.Text);
-            }
-
-            Atmosphere(lobby.transform, "StartGlow", new Vector2(0.14f, 0.21f), new Vector2(0.86f, 0.39f), SoftGlow, UiTheme.HaloGold);
-
-            // The gold bar art carries its own colour, so it is drawn white (no tint) at its own border scale.
-            UiPlateButton.Create(lobby.transform, "StartButton", new Vector2(0.20f, 0.26f), new Vector2(0.80f, 0.34f),
-                "START", UiType.Role.Title, Color.white, Color.white, StartGame, ButtonFace.Primary);
+            BuildLobbyCentre(lobbySafe);
 
             for (int i = 0; i < Tabs.Length; i++)
             {
                 float width = 1f / Tabs.Length;
                 float xMin = i * width;
                 string tab = Tabs[i];
-                navTabs[tab] = BuildFantasyTab(tab, new Vector2(xMin, 0.03f), new Vector2(xMin + width, 0.14f), () => OnTab(tab));
+                navTabs[tab] = BuildFantasyTab(tab, new Vector2(xMin, TabBandBottomFraction),
+                    new Vector2(xMin + width, TabBandTopFraction), () => OnTab(tab));
             }
 
             HighlightNav("BATTLE");
 
             // The old top-right MENU button is retired (2026-11-14): the header's three-bar menu returns to the
             // lobby now, so there is one menu affordance instead of two overlapping ones.
+        }
+
+        /// <summary>
+        /// The lobby's centre: chapter kicker, wordmark, chapter card and START, on ONE column, centred between the top
+        /// bar and the tab bar so the air above and below is the same number (owner, 2026-11-25).
+        ///
+        /// ELI5: three things stacked in the middle of the screen: a small "Chapter 1", the big chapter name, the
+        /// picture, and the START button. They are all the same width and all 32 units from each edge, so the eye sees
+        /// one column instead of four different margins. Their sizes never change; on a taller phone only the empty
+        /// space above and below the column grows, equally.
+        /// </summary>
+        private void BuildLobbyCentre(RectTransform safe)
+        {
+            float safeW = safe.rect.width;
+            float safeH = safe.rect.height;
+            float column = safeW - 2f * UiSpace.PageMargin;
+
+            float kickerH = UiType.LineHeight(UiType.Role.Title);
+            float titleW = Mathf.Min(ChapterTitleWidth, column);
+            float titleH = titleW / TitleArtAspect;
+            float cardW = Mathf.Min(ChapterCardWidth, column);
+            float cardH = cardW / ChapterArtAspect;
+
+            // Gap hierarchy: 8 inside the title unit, then ONE air gap used twice - 64 between the name and the
+            // picture and 64 between the picture and the action - so the two breathers match (owner, 2026-11-25).
+            float blockH = kickerH + UiSpace.Space8 + titleH + UiSpace.Space64
+                + cardH + UiSpace.Space64 + LobbyActionHeight;
+
+            float available = safeH - UiSpace.HeaderBandHeight - safeH * TabBandTopFraction;
+            float gap = Mathf.Max(0f, (available - blockH) * 0.5f);
+
+            RectTransform block = Rect("LobbyCentre", safe, new Vector2(0f, 1f), new Vector2(1f, 1f));
+            block.pivot = new Vector2(0.5f, 1f);
+            block.sizeDelta = new Vector2(0f, blockH);
+            block.anchoredPosition = new Vector2(0f, -(UiSpace.HeaderBandHeight + gap));
+
+            // A vertical band inside the block, measured from the block's top edge in canvas units.
+            Vector2 Y(float top, float height)
+            {
+                return new Vector2(1f - (top + height) / blockH, 1f - top / blockH);
+            }
+
+            // The card and START share these edges; the gutters outside them are the carousel's arrow room.
+            float cardX0 = (safeW - cardW) * 0.5f / safeW;
+            float cardX1 = 1f - cardX0;
+
+            float titleTop = kickerH + UiSpace.Space8;
+            float cardTop = titleTop + titleH + UiSpace.Space64;
+            float startTop = cardTop + cardH + UiSpace.Space64;
+
+            // Glows first, so they draw behind the art they light instead of over it.
+            Vector2 cardGlow = Y(cardTop - UiSpace.Space32, cardH + 2f * UiSpace.Space32);
+            Atmosphere(block, "ChapterGlow", new Vector2(0f, cardGlow.x), new Vector2(1f, cardGlow.y),
+                SoftGlow, UiTheme.HaloGreen);
+
+            Vector2 startGlow = Y(startTop - UiSpace.Space32, LobbyActionHeight + 2f * UiSpace.Space32);
+            Atmosphere(block, "StartGlow", new Vector2(0f, startGlow.x), new Vector2(1f, startGlow.y),
+                SoftGlow, UiTheme.HaloGold);
+
+            // "Chapter 1" is a label, not a sentence: a type step up from the old size, spaced letters, quieter ink.
+            Vector2 kickerY = Y(0f, kickerH);
+            TextMeshProUGUI kicker = Text(block, "ChapterLabel", new Vector2(cardX0, kickerY.x),
+                new Vector2(cardX1, kickerY.y), "Chapter 1", UiType.Role.Title, UiTheme.InkSoft);
+            kicker.characterSpacing = KickerTracking;
+
+            Vector2 titleY = Y(titleTop, titleH);
+            float titleX0 = (safeW - titleW) * 0.5f / safeW;
+
+            if (chapterTitleArt != null)
+            {
+                ArtPanel(block, "ChapterTitle", new Vector2(titleX0, titleY.x), new Vector2(1f - titleX0, titleY.y),
+                    chapterTitleArt);
+            }
+            else
+            {
+                Text(block, "ChapterTitle", new Vector2(cardX0, titleY.x), new Vector2(cardX1, titleY.y),
+                    "Greenwake", UiType.Role.Title, UiTheme.Text);
+            }
+
+            Vector2 cardY = Y(cardTop, cardH);
+
+            if (chapterArt != null)
+            {
+                Image card = ArtPanel(block, "ChapterCard", new Vector2(cardX0, cardY.x),
+                    new Vector2(cardX1, cardY.y), chapterArt);
+
+                // The shared two-step shadow lifts the picture off the background, the same way every panel does.
+                UiParts.AddShadow(card.gameObject);
+            }
+            else
+            {
+                UiParts.Panel(block, "ChapterCard", new Vector2(cardX0, cardY.x), new Vector2(cardX1, cardY.y),
+                    PanelKind.Card);
+            }
+
+            // The gold bar art carries its own colour, so it is drawn white (no tint) at its own border scale. It is
+            // narrower than the card, so the action reads as a button under the hero, not a second slab.
+            Vector2 startY = Y(startTop, LobbyActionHeight);
+            float actionW = Mathf.Min(LobbyActionWidth, cardW);
+            float startX0 = (safeW - actionW) * 0.5f / safeW;
+
+            UiPlateButton start = UiPlateButton.Create(block, "StartButton", new Vector2(startX0, startY.x),
+                new Vector2(1f - startX0, startY.y), "START", UiType.Role.Hero, Color.white, Color.white,
+                StartGame, ButtonFace.Primary);
+
+            // A slightly heavier dark rim than the shared font material (0.3 against 0.2): enough for the primary
+            // action to hold its edge on the bright gold bar without looking inked-on.
+            TextMeshProUGUI startLabel = start.GetComponentInChildren<TextMeshProUGUI>(true);
+            Material heavyInk = Resources.Load<Material>(HeavyOutlineMaterialPath);
+
+            if (startLabel != null && heavyInk != null)
+            {
+                startLabel.fontSharedMaterial = heavyInk;
+            }
         }
 
         /// <summary>
@@ -228,6 +361,22 @@ namespace IdleRPG.UI
             }
 
             Time.timeScale = 1f;
+        }
+
+        /// <summary>
+        /// Opens the lobby's SHOP page. The header's currency plates call this (owner, 2026-11-25), so a tap on gold,
+        /// gems or tokens lands on the shelf. It refuses when the lobby is not on screen: there is no way to shop in
+        /// a fight.
+        /// </summary>
+        public void OpenShopFromHeader()
+        {
+            if (lobby == null || !lobby.activeSelf)
+            {
+                return;
+            }
+
+            // OnTab closes every lobby page first, so this is the same path the SHOP tab takes.
+            OnTab("SHOP");
         }
 
         /// <summary>
@@ -313,7 +462,8 @@ namespace IdleRPG.UI
             UnityEngine.Events.UnityAction onClick)
         {
             UiSkin skin = UiSkin.Current;
-            RectTransform tabRoot = Rect("Nav" + tab, lobby.transform, aMin, aMax);
+            // The tab bar lives in the same safe box as the centre, so the home bar never sits on top of it.
+            RectTransform tabRoot = Rect("Nav" + tab, lobbySafe != null ? lobbySafe : lobby.transform, aMin, aMax);
 
             RectTransform glowRect = Rect("Glow", tabRoot, Vector2.zero, Vector2.one);
             glowRect.offsetMin = new Vector2(-16f, -16f);
@@ -430,6 +580,11 @@ namespace IdleRPG.UI
         // ------------------------------------------------------------------
         // Shared header: the battle page's HudHeaderUI, borrowed while the lobby is open.
         // Reparented, never rebuilt - so both pages show one header and one source of truth.
+        //
+        // The RECT IS NOT TOUCHED. It used to be re-stretched to 0.03-0.97 x 0.90-0.985 of the screen, which turned
+        // the same header into a 163-tall bar in the lobby and an 83-tall one in battle. One bar, one size, every
+        // screen (2026-11-25). A safe box keeps the notch behaving as it does in battle, because this canvas is not
+        // safe-area fitted the way the HUD canvas is.
         // ------------------------------------------------------------------
         private void AttachSharedHeader()
         {
@@ -448,18 +603,14 @@ namespace IdleRPG.UI
 
             sharedHeader = headerRect;
             sharedHeaderHome = headerRect.parent;
-            sharedHeaderAnchorMin = headerRect.anchorMin;
-            sharedHeaderAnchorMax = headerRect.anchorMax;
-            sharedHeaderOffsetMin = headerRect.offsetMin;
-            sharedHeaderOffsetMax = headerRect.offsetMax;
             sharedHeaderSibling = headerRect.GetSiblingIndex();
 
-            headerRect.SetParent(lobby.transform, false);
-            headerRect.anchorMin = new Vector2(0.03f, 0.90f);
-            headerRect.anchorMax = new Vector2(0.97f, 0.985f);
-            headerRect.offsetMin = Vector2.zero;
-            headerRect.offsetMax = Vector2.zero;
-            headerRect.SetAsLastSibling();
+            RectTransform box = Rect("HeaderSafeBox", lobby.transform, Vector2.zero, Vector2.one);
+            box.gameObject.AddComponent<SafeAreaFitter>();
+            sharedHeaderBox = box.gameObject;
+
+            headerRect.SetParent(box, false);
+            box.SetAsLastSibling();
         }
 
         private void DetachSharedHeader()
@@ -470,12 +621,14 @@ namespace IdleRPG.UI
             }
 
             sharedHeader.SetParent(sharedHeaderHome, false);
-            sharedHeader.anchorMin = sharedHeaderAnchorMin;
-            sharedHeader.anchorMax = sharedHeaderAnchorMax;
-            sharedHeader.offsetMin = sharedHeaderOffsetMin;
-            sharedHeader.offsetMax = sharedHeaderOffsetMax;
             sharedHeader.SetSiblingIndex(sharedHeaderSibling);
             sharedHeader = null;
+
+            if (sharedHeaderBox != null)
+            {
+                Destroy(sharedHeaderBox);
+                sharedHeaderBox = null;
+            }
         }
 
         private void EnsureManager()

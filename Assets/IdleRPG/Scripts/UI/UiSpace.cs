@@ -62,11 +62,57 @@ namespace IdleRPG.UI
         /// <summary>The top/bottom inset for a label inside a button.</summary>
         public const float LabelPadY = Space4;
 
-        /// <summary>The left/right inset for a label inside a small chip (currency, boost).</summary>
-        public const float ChipPadX = Space8;
+        // ------------------------------------------------------------------
+        // The top bar - one chip size, one icon size, one bar height. The header is on every screen (the lobby
+        // borrows it), so these three numbers travel further than any other gap.
+        //
+        // 2026-11-25 (second pass): the ICON is the anchor, the plate hugs it. A currency glyph has to read at a
+        // glance, and on a 1080-wide phone (about 432 dp) 48 units is only 19 dp - small for a HUD. 64 units is
+        // about 26 dp, the size mobile HUD icons settle on. The plate is therefore the icon plus one inset above
+        // and below, not a fixed height the icon has to fit inside.
+        // ------------------------------------------------------------------
 
-        /// <summary>The top/bottom inset for a label inside a small chip (currency, boost).</summary>
-        public const float ChipPadY = Space4;
+        /// <summary>
+        /// The size of the currency icon, and of the top bar's gear: 64 units, about 26 dp. This is the anchor - the
+        /// plate is built around it.
+        /// </summary>
+        public const float ChipIconSize = Space64;
+
+        /// <summary>
+        /// The height of one item in the top bar: a currency chip, the boost badge. The icon plus one inset above and
+        /// below, so the art never touches the plate's rim (96 = 64 + 8 + 8).
+        /// </summary>
+        public const float ChipHeight = ChipIconSize + 2f * Space8;
+
+        /// <summary>
+        /// The inset from a chip's side edge to its icon, and from the value's right edge to the chip's. The value
+        /// starts one <see cref="Space8"/> after the icon's slot, so a chip is framed by one number.
+        /// </summary>
+        public const float ChipIconInset = Space16;
+
+        /// <summary>
+        /// The horizontal slot an icon sits in: the icon plus one inset. Icons are cropped to their visible art, so
+        /// their widths differ (a key is narrow, a gem is wide); the slot lets each one centre on the same axis.
+        /// </summary>
+        public const float ChipIconSlot = ChipIconSize + Space16;
+
+        /// <summary>
+        /// The buy badge in a currency plate's corner: a tiny green plus, 32 units (about 13 dp). It overlaps the
+        /// icon's bottom-right because it sits ON the icon's slot corner, not beside it.
+        /// </summary>
+        public const float ChipBadgeSize = Space32;
+
+        /// <summary>
+        /// The height of the top bar. The bar IS the plate row now - there is no container behind it (2026-11-25),
+        /// so a taller bar would only add air around the plates.
+        /// </summary>
+        public const float HeaderBarHeight = ChipHeight;
+
+        /// <summary>
+        /// The band: the page margin above the bar, the bar, and one section gap under it. The page starts here.
+        /// 128 = 32 + 80 + 16, so the air is PageMargin above and beside, SectionGap below.
+        /// </summary>
+        public const float HeaderBandHeight = PageMargin + HeaderBarHeight + SectionGap;
 
         /// <summary>
         /// The height of a health bar: tall enough to hold one line of Micro numbers INSIDE it, so the bar says

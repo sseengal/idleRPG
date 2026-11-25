@@ -18,14 +18,10 @@ namespace IdleRPG.UI
         [SerializeField] private TextMeshProUGUI gemsText;
         [SerializeField] private TextMeshProUGUI tokensText;
 
-        [Tooltip("The horizontal row the currency chips and the RANKS button share, so the layout group divides " +
-                 "the width and they cannot overlap. Null falls back to the header itself (an older scene).")]
-        [SerializeField] private RectTransform chipRow;
-
-        [Header("Progress")]
-        [SerializeField] private TextMeshProUGUI stageText;
-
         [Header("Boost chip")]
+        [Tooltip("The token chip. Hidden while the boost badge shows: both are row items, so hiding one keeps the " +
+                 "three visible blocks the same width all the time.")]
+        [SerializeField] private GameObject tokenChip;
         [SerializeField] private GameObject boostChip;
         [SerializeField] private TextMeshProUGUI boostText;
 
@@ -73,9 +69,9 @@ namespace IdleRPG.UI
                 return;
             }
 
-            RestyleChunky();
             RestyleCurrencyIcons();
             BuildMenuButton();
+            ApplyLobbyState(gameManager == null || gameManager.State == GameState.Lobby);
 
             if (gameManager != null)
             {
@@ -84,18 +80,12 @@ namespace IdleRPG.UI
                 gearMenu.SetCurrencyIcons(CurrencyIcon("GoldChip"), CurrencyIcon("GemChip"), CurrencyIcon("TokenChip"));
             }
 
-            if (stageText != null)
-            {
-                stageText.gameObject.SetActive(gameManager == null || gameManager.State != GameState.Lobby);
-            }
-
             RefreshAll();
         }
 
         private void OnEnable()
         {
             GameEvents.CurrencyChanged += OnCurrencyChanged;
-            GameEvents.StageChanged += OnStageChanged;
             GameEvents.GoldBoostChanged += OnGoldBoostChanged;
             GameEvents.GameStateChanged += OnGameStateChanged;
         }
@@ -103,17 +93,95 @@ namespace IdleRPG.UI
         private void OnDisable()
         {
             GameEvents.CurrencyChanged -= OnCurrencyChanged;
-            GameEvents.StageChanged -= OnStageChanged;
             GameEvents.GoldBoostChanged -= OnGoldBoostChanged;
             GameEvents.GameStateChanged -= OnGameStateChanged;
         }
 
-        /// <summary>Width of the menu button, in canvas units. A size, not a gap, so it is not on the UiSpace ladder.</summary>
-        private const float MenuButtonWidth = 110f;
+        /// <summary>The buy affordance belongs to the lobby only, so the plates follow the game state (owner, 2026-11-25).</summary>
+        private void OnGameStateChanged(GameState previous, GameState next)
+        {
+            ApplyLobbyState(next == GameState.Lobby);
+        }
 
         /// <summary>
-        /// The gear button at the right end of the chip row. It opens SETTINGS between runs and the PAUSE menu in a
-        /// fight. One button, one meaning per state; it never opens an upgrade screen during a fight.
+        /// Turns the three currency plates into shop buttons between runs, and shows their green plus. In a fight the
+        /// same plates are inert: no plus, no button, and the raycast is off so a tap falls through to the battle.
+        /// </summary>
+        private void ApplyLobbyState(bool isLobby)
+        {
+            ApplyPlateState(goldText, isLobby);
+            ApplyPlateState(gemsText, isLobby);
+            ApplyPlateState(tokensText, isLobby);
+        }
+
+        /// <summary>One plate: badge on or off, and the button made live or dead.</summary>
+        private void ApplyPlateState(TextMeshProUGUI value, bool isBuyable)
+        {
+            if (value == null)
+            {
+                return;
+            }
+
+            Transform plate = value.transform.parent;
+            Transform badge = plate.Find("BuyBadge");
+
+            if (badge != null)
+            {
+                badge.gameObject.SetActive(isBuyable);
+            }
+
+            Image face = plate.GetComponent<Image>();
+
+            if (face != null)
+            {
+                face.raycastTarget = isBuyable;
+            }
+
+            Button button = plate.GetComponent<Button>();
+
+            if (button == null)
+            {
+                button = plate.gameObject.AddComponent<Button>();
+                button.targetGraphic = face;
+                button.transition = Selectable.Transition.ColorTint;
+
+                ColorBlock colours = button.colors;
+                colours.normalColor = Color.white;
+                colours.highlightedColor = Color.white;
+                colours.selectedColor = Color.white;
+                colours.pressedColor = new Color(0.92f, 0.92f, 0.92f, 1f);
+                colours.disabledColor = Color.white;
+                button.colors = colours;
+                button.onClick.AddListener(OnPlateClicked);
+            }
+
+            button.interactable = isBuyable;
+        }
+
+        /// <summary>
+        /// A plate tap opens the lobby's SHOP page. Refused mid-fight and while a story scene owns the screen, so the
+        /// buy affordance can never appear where it cannot be honoured.
+        /// </summary>
+        private void OnPlateClicked()
+        {
+            if (gameManager == null || gameManager.State != GameState.Lobby)
+            {
+                return;
+            }
+
+            if (gameManager.Story != null && gameManager.Story.IsPlaying)
+            {
+                return;
+            }
+
+            StartScreenUI lobby = StartScreenUI.Instance;
+
+            if (lobby != null)
+            {
+                lobby.OpenShopFromHeader();
+            }
+        }
+
         /// <summary>
         /// The currency icon the header already draws, so the pause sheet's "you keep" list wears the same three
         /// pictures as the HUD instead of shipping a second copy of each.
@@ -131,33 +199,52 @@ namespace IdleRPG.UI
             return image != null ? image.sprite : null;
         }
 
-
+        /// <summary>
+        /// The menu button at the right end of the chip row. It opens SETTINGS between runs and the PAUSE menu in a
+        /// fight. One button, one meaning per state; it never opens an upgrade screen during a fight.
+        ///
+        /// Two rects, on purpose: the DRAWN block is one chip tall and one touch minimum wide, and an invisible pad
+        /// under it is what actually takes the tap, reaching from the bar's bottom up to the safe-area edge. The old
+        /// button was 110 x 51 (about 44 x 20 dp - half a finger) and its position came from fractions the layout
+        /// group then overwrote.
         /// </summary>
         private void BuildMenuButton()
         {
-            Transform parent = chipRow != null ? chipRow : transform;
+            // The menu sits OUTSIDE the plate row, pinned to the bar's right edge. The row stops one icon plus one
+            // page margin short of it, so the icon lands exactly halfway between the last plate and the screen edge
+            // (owner, 2026-11-25).
+            GameObject block = UiRuntime.CreateNode("MenuButton", transform);
+            RectTransform blockRect = (RectTransform)block.transform;
+            blockRect.anchorMin = new Vector2(1f, 0.5f);
+            blockRect.anchorMax = new Vector2(1f, 0.5f);
+            blockRect.pivot = new Vector2(1f, 0.5f);
+            blockRect.sizeDelta = new Vector2(UiSpace.ChipIconSize, UiSpace.ChipHeight);
+            blockRect.anchoredPosition = Vector2.zero;
 
-            // Flat block on the header bar, same darker grey as the currency chips (owner, 2026-11-23).
-            Image background = UiRuntime.CreatePanel(parent, null, UiTheme.SurfaceChip, raycast: true);
-            background.gameObject.name = "MenuButton";
-            UiRuntime.Anchor(background.rectTransform, new Vector2(0.88f, 0.10f), new Vector2(0.985f, 0.90f));
+            // The tap pad: the touch minimum square. Its right edge sits on the screen edge (one page margin past the
+            // bar), so the whole target is on the glass; that leaves it 8 units off the icon's centre, which the eye
+            // cannot see.
+            Image pad = UiRuntime.CreatePanel(block.transform, null, Color.clear, raycast: true);
+            pad.gameObject.name = "HitPad";
+            RectTransform padRect = pad.rectTransform;
+            padRect.anchorMin = new Vector2(1f, 0.5f);
+            padRect.anchorMax = new Vector2(1f, 0.5f);
+            padRect.pivot = new Vector2(1f, 0.5f);
+            padRect.sizeDelta = new Vector2(UiTouch.IconButtonHitSize, UiTouch.IconButtonHitSize);
+            padRect.anchoredPosition = new Vector2(UiSpace.PageMargin, 0f);
 
-            Button button = background.gameObject.AddComponent<Button>();
-            button.targetGraphic = background;
+            Button button = pad.gameObject.AddComponent<Button>();
+            button.targetGraphic = pad;
+            button.transition = Selectable.Transition.None;
             button.onClick.AddListener(OnGearClicked);
 
-            if (chipRow != null)
-            {
-                LayoutElement element = background.gameObject.AddComponent<LayoutElement>();
-                element.preferredWidth = MenuButtonWidth;
-                element.flexibleWidth = 0f;
-            }
-
-            Image icon = UiRuntime.CreateIcon("Gear", background.transform);
-            icon.sprite = UiRuntime.GearSprite;
+            // The menu icon carries NO plate (owner, 2026-11-25): it is three bars on the page background.
+            Image icon = UiRuntime.CreateIcon("Menu", block.transform);
+            icon.sprite = UiRuntime.HamburgerSprite;
             icon.preserveAspect = true;
             icon.color = UiTheme.Text;
-            UiRuntime.Anchor(icon.rectTransform, new Vector2(0.20f, 0.16f), new Vector2(0.80f, 0.84f));
+            UiRuntime.CenterOn(icon.rectTransform, new Vector2(0.5f, 0.5f),
+                new Vector2(UiSpace.ChipIconSize, UiSpace.ChipIconSize));
         }
 
         /// <summary>Swaps the currency chip icons for the skin's art (the scene keeps placeholder icons).</summary>
@@ -217,31 +304,6 @@ namespace IdleRPG.UI
             }
 
             gearMenu.Toggle();
-        }
-
-        /// <summary>The stage chip belongs to a run; the lobby has none, so it is hidden there.</summary>
-        private void OnGameStateChanged(GameState previous, GameState next)
-        {
-            if (stageText != null)
-            {
-                stageText.gameObject.SetActive(next != GameState.Lobby);
-            }
-        }
-
-        /// <summary>Gives the header bar the shared container face, so the bar matches the log and camp bands.</summary>
-        private void RestyleChunky()
-        {
-            Image plate = GetComponent<Image>();
-
-            if (plate == null)
-            {
-                return;
-            }
-
-            if (UiSkin.Current.ApplyContainer(plate))
-            {
-                return;
-            }
         }
 
         private void OnCurrencyChanged(CurrencyType currencyType, double amount)
@@ -334,23 +396,17 @@ namespace IdleRPG.UI
             }
         }
 
-        private void OnStageChanged(int stage, int wave, bool isBossWave)
-        {
-            if (stageText == null)
-            {
-                return;
-            }
-
-            // One ink: BOSS is marked by the word and its size, not by a red that the palette does not own
-            // (owner, 2026-11-23).
-            stageText.SetText(string.Format(isBossWave ? "Stage {0}  <size=75%>BOSS</size>" : "Stage {0}  <size=75%>wave {1}</size>", stage, wave));
-        }
-
         private void OnGoldBoostChanged(bool active, float remainingSeconds, double multiplier)
         {
             if (boostChip != null)
             {
                 boostChip.SetActive(active);
+            }
+
+            // One badge at a time: the row shows three blocks, so hiding the token chip keeps every width fixed.
+            if (tokenChip != null)
+            {
+                tokenChip.SetActive(!active);
             }
 
             if (boostText != null)
@@ -369,6 +425,11 @@ namespace IdleRPG.UI
             if (boostChip != null)
             {
                 boostChip.SetActive(false);
+            }
+
+            if (tokenChip != null)
+            {
+                tokenChip.SetActive(true);
             }
         }
 

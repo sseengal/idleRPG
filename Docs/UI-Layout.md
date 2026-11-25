@@ -2,7 +2,7 @@
 
 > Owns: the structure under the UI (layers, safe boxes, bands) and every gap number.
 > Parent: `UI-UX.md` (screens, patterns, type scale) and `Architecture.md`.
-> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** 2026-10-28 (live scene, measured).
+> **Location:** `Docs/` (folder index: `README.md`). **Last verified:** 2026-11-25 (live scene, measured).
 > Companions: `UiType.cs` (text), `UiTouch.cs` (fingers), `UiSpace.cs` (gaps).
 
 ---
@@ -39,22 +39,44 @@ At runtime the fitter tightens it to `Screen.safeArea` (and only re-applies when
 `anchor.parent` — the battle viewport, which is already inside the main safe box. Only the idle pool sits on
 the damage canvas, and nobody sees it. Adding a box there would change the coordinate space for no gain.
 
-**The main safe box holds five children:** `Header`, `BattlePage`, `ManagementPage`, `NavBar`, `Toast`.
+**The main safe box holds four children:** `Header`, `BattlePage`, `Toast` (and the header is borrowed by the
+lobby, which puts it in its own safe box). The old `ManagementPage` and `NavBar` are retired — the lobby owns
+navigation since 2026-11-12.
 
-### 2a. The two chrome bars are fixed heights
+### 2a. The chrome bands are fixed heights (re-measured 2026-11-25)
 
-| Band | Anchor | Height (units) | Rect height |
+| Band | Anchor | Band (units) | Rect height |
 |---|---|---|---|
-| Header | pinned to the top, 14-unit gap | 115 | 101 |
-| Page | stretched **between** the bars | — | 1575 |
-| NavBar | pinned to the bottom, 10-unit gap | 230 | 220 |
+| Header | pinned to the top, 32-unit gap (`PageMargin`) | 128 | **80** |
+| Page | stretched from the header band to the bottom margin | — | **1760** on 1080 × 1920 |
+| NavBar | retired (the lobby owns navigation) | — | — |
 
-The values reproduce the 1080 × 1920 design, so nothing shifted on a 9:16 screen (measured before/after:
-header 101.2 → 101, nav 214.4 → 220, page 1574.4 → 1575). The nav gained 6 units because its odd 6-unit top
-inset was dropped.
+**The bar draws nothing.** The light-blue header container is gone: `Header` is a bare rect node with no `Image`,
+so the currency plates are the only surfaces on it. The bar is exactly one plate tall, which is why the air around
+the plates is even - **32 above, 32 beside, 16 below** - instead of the 48 / 64 / 16 sandwich the old container
+produced (a page margin stacked on a bar inset).
+
+**The header is one size on every screen.** The lobby borrows the same `HudHeaderUI`, and it used to re-stretch
+it to 0.03–0.97 × 0.90–0.985 of the screen — which made the same object **163 units tall in the lobby and 83 in
+battle**. It is now reparented without touching the rect, into its own safe box.
+
+The header's own numbers, all from `UiSpace`:
+
+| Part | Value | Source |
+|---|---|---|
+| ICON (the anchor) | 64 (≈26 dp), in an **80-wide slot** | `ChipIconSize`, `ChipIconSlot` — a HUD glyph reads at 24–26 dp; 48 was 19 dp |
+| Plate height | 80 (≈32 dp) | `ChipHeight` = icon + 8 above and below |
+| Bar height | 80 | `HeaderBarHeight` = the plate, no extra inset |
+| Plate art | `CurrencyContainer.png`, 30 × 30, 9-slice border 4, drawn at 2× (`pixelsPerUnitMultiplier` 0.5) | cropped from the owner's 100 × 100 export; the rim stays 1 art pixel at any chip width |
+| Icons | cropped to their visible art: gold 30 × 30, gem 36 × 31, token 36 × 39 | `Assets/IdleRPG/Art/UI/Icons/currency_*.png` — one height, so a round coin no longer reads smaller than a tall key |
+| Chip value | Display 56, **centred** in the space beside the icon, auto-shrinks to 26 | `UiType.ApplyAuto` |
+| Menu | **three bars, no plate**; icon at the bar's right edge, so it sits halfway between the last plate and the screen edge | `UiRuntime.HamburgerSprite` |
+| Menu tap square | 144 × 144, right edge on the screen edge | `UiTouch.IconButtonHitSize` |
+| Row | 920 wide (stops one icon + one page margin short of the bar's right edge); 8 gaps | `MvpSceneBuilder.Battle.cs` |
+| Boost badge | a fourth row item; the token chip hides while it shows | `HudHeaderUI.OnGoldBoostChanged` |
 
 **One rule now: extra height belongs to the page, the bars never move.** `PinBar` in `MvpSceneBuilder.cs`
-builds both, so neither can change size with the screen.
+builds the header from `UiSpace.HeaderBandHeight`, so it cannot change size with the screen.
 
 ### 2b. Bands inside the battle page
 
@@ -182,10 +204,12 @@ view wants, so no screen writes `new RectOffset(...)` by hand.
 |---|---|---|
 | Type scale | `Tools > Idle RPG > UI > Check Type Scale` | every label's size and font; no hand-written `fontSize` |
 | Spacing | `Tools > Idle RPG > UI > Check Spacing` | no hand-written gap: a non-zero inset, a hand-built `RectOffset`, or a numeric scroll / stack spacing |
+| Header | `Tools > Idle RPG > UI > Check Header` | the top bar's golden numbers, measured in the built scene: bar 1016 × 80 (one plate tall, no bar image), plate 80, icon 64 in an 80 slot inset 16, value 56 centred (auto to 26), plates 9-sliced on `CurrencyContainer`, row 920 wide, gear 144 × 144 tap square; and the lobby must not re-anchor the borrowed header |
 
-Both are registered in **`Run All Checks (regression)`**, so either fault fails the run instead of shipping
+All three are registered in **`Run All Checks (regression)`**, so a fault fails the run instead of shipping
 quietly. The spacing guard was seen to fire: a temporary probe with `9f` as an inset produced
-`SPACING: FAIL - 1 hand-written gap(s) found`.
+`SPACING: FAIL - 1 hand-written gap(s) found`. The header guard was seen to fire too: its first run caught the
+menu button's hit area at 128 units against the 144 touch minimum.
 
 **Gotcha — run the type-scale check OUT of Play Mode.** It reads the live scene, which in Play Mode contains
 the runtime-built `DevOverlayCanvas` (the F3 debug overlay), so it reports false errors (size 13, Liberation

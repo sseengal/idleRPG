@@ -58,6 +58,7 @@ Every piece of text picks a **role**, never a number. The roles live in one file
 
 | Role | Size | Font | What it is for |
 |---|---|---|---|
+| Hero | 72 | Lilita One | the one primary action on a screen (START) - added 2026-11-25 |
 | Display | 56 | Lilita One | currency values, the reward number |
 | Title | 48 | Lilita One | card / screen / modal titles, sheet button captions |
 | Section | 40 | Lilita One | section heads, boon rows, list rows |
@@ -71,6 +72,10 @@ Every piece of text picks a **role**, never a number. The roles live in one file
 Before this pass the bottom read 29 / 30 / 28 - three names for one visual size - so a caption and a body
 sentence looked alike. The steps are now 56 -> 48 -> 40 (17 / 20 %), 40 -> 34 (15 %), 34 -> 30 (12 %),
 30 -> 26 (13 %).
+
+**Hero is a deliberate exception (2026-11-25).** 72 is +28 % above Display, outside that band. It exists for one
+label only - the screen's primary action - which has to beat every other word on the screen. If a second label ever
+reaches for Hero, that is a sign it should be Display instead.
 
 **Sheet buttons (2026-11-23).** Every stacked dialog button takes its numbers from `UiTouch`, never from the
 screen: `SheetButtonHeight` 144 (the touch minimum is also the standard), `SheetButtonGap` 14,
