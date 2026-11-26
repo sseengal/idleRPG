@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using IdleRPG.Core;
 using IdleRPG.Data;
+using IdleRPG.Progression;
 
 namespace IdleRPG.UI
 {
@@ -48,15 +49,18 @@ namespace IdleRPG.UI
         private const float StepSize = 20f;
         private const float CampSize = 24f;
         private const float BossSize = 30f;
-        private const float Gap = 12f;
-        private const float CampGap = 20f;
-        private const float RingPadding = 6f;
 
-        /// <summary>One mark on the trail, with the two images that colour it.</summary>
+        /// <summary>One gap for every pair of marks, from the ladder. A camp is not further away than a wave.</summary>
+        private const float Gap = UiSpace.Space16;
+
+        /// <summary>The mark you are ON is 1.25x bigger, so "here" reads without relying on colour alone.</summary>
+        private const float HereScale = 1.25f;
+
+        /// <summary>One mark on the trail, with the halo that can breathe behind it.</summary>
         private sealed class MarkView
         {
             public RectTransform Node;
-            public Image Ring;
+            public Image Halo;
             public Image Body;
             public GlowView Glow;
             public int Step;
@@ -64,6 +68,7 @@ namespace IdleRPG.UI
         }
 
         private readonly List<MarkView> views = new List<MarkView>();
+        private CampService camp;
         private int builtSteps = -1;
         private int builtCamps = -1;
         private int lastStage = -1;
@@ -72,14 +77,52 @@ namespace IdleRPG.UI
         private void OnEnable()
         {
             GameEvents.StageChanged += OnStageChanged;
+            BindCamp();
         }
 
         private void OnDisable()
         {
             GameEvents.StageChanged -= OnStageChanged;
+
+            if (camp != null)
+            {
+                camp.Opened -= OnCampChanged;
+                camp.Closed -= OnCampChanged;
+                camp = null;
+            }
         }
 
         private void Start()
+        {
+            BindCamp();
+            Refresh();
+        }
+
+        /// <summary>
+        /// The camp panel is the only honest signal for "you are ON the camp": no stage change fires when it takes the
+        /// screen, so the band listens to the panel itself. One subscription, one refresh.
+        /// </summary>
+        private void BindCamp()
+        {
+            if (camp != null)
+            {
+                return;
+            }
+
+            HudController hud = HudController.Instance;
+            GameManager manager = hud != null ? hud.GameManager : null;
+            camp = manager != null ? manager.Camp : null;
+
+            if (camp == null)
+            {
+                return;
+            }
+
+            camp.Opened += OnCampChanged;
+            camp.Closed += OnCampChanged;
+        }
+
+        private void OnCampChanged()
         {
             Refresh();
         }
@@ -108,13 +151,13 @@ namespace IdleRPG.UI
                 : Mathf.Max(1, fallbackCampEvery);
 
             JourneyLabel label = JourneyResolver.Resolve(catalog, stage, step);
-            bool onBoss = step > normalSteps;
 
-            string title = onBoss && !string.IsNullOrEmpty(label.Boss) ? label.Boss : label.Display;
-            landLabel.SetText(title.ToUpperInvariant());
+            // The band names the LAND, always (owner, 2026-11-26). The old rule swapped the boss name in for the last
+            // step, so the signpost read "SLIME KING" while the party was still in Greenwake.
+            landLabel.SetText(label.Display.ToUpperInvariant());
 
             EnsureBuilt(normalSteps, campEvery);
-            Apply(JourneyResolver.BuildTrail(normalSteps, step, campEvery));
+            Apply(JourneyResolver.BuildTrail(normalSteps, step, campEvery), camp != null && camp.IsOpen, step);
 
             // A cleared step flashes once. Only on a single-step advance inside the same stage, so a
             // stage change, a debug jump or a reload never fires a stray flash.
@@ -133,6 +176,8 @@ namespace IdleRPG.UI
             {
                 if (views[i].Kind == TrailMarkKind.Step && views[i].Step == step)
                 {
+                    // A finished step pops once. Its halo is normally asleep, so wake it for the pop.
+                    views[i].Halo.enabled = true;
                     Juice.Flash(views[i].Glow);
                     return;
                 }
@@ -170,7 +215,7 @@ namespace IdleRPG.UI
 
                 if (i > 0)
                 {
-                    total += GapBetween(marks[i - 1].Kind, marks[i].Kind);
+                    total += Gap;
                 }
             }
 
@@ -180,7 +225,7 @@ namespace IdleRPG.UI
             {
                 if (i > 0)
                 {
-                    cursor += GapBetween(marks[i - 1].Kind, marks[i].Kind);
+                    cursor += Gap;
                 }
 
                 float size = SizeOf(marks[i].Kind);
@@ -207,10 +252,8 @@ namespace IdleRPG.UI
             CenterOn(halo.rectTransform, SizeOf(kind) * (glowStyle != null ? glowStyle.HaloScale : 2.6f));
             halo.rectTransform.SetAsFirstSibling();
 
-            Image ring = UiRuntime.CreateIcon("Ring", rect);
-            ring.sprite = ringSprite;
-            CenterOn(ring.rectTransform, SizeOf(kind) + RingPadding);
-            ring.gameObject.SetActive(false);
+            // Asleep until this mark is the one you are on, so a trail of 13 marks costs 13 draws, not 26.
+            halo.enabled = false;
 
             Image body = UiRuntime.CreateIcon("Body", rect);
             body.sprite = BodySpriteFor(kind);
@@ -229,7 +272,7 @@ namespace IdleRPG.UI
 
             return new MarkView
             {
-                Node = rect, Ring = ring, Body = body, Glow = glow, Step = step, Kind = kind
+                Node = rect, Halo = halo, Body = body, Glow = glow, Step = step, Kind = kind
             };
         }
 
@@ -247,8 +290,18 @@ namespace IdleRPG.UI
             rect.sizeDelta = new Vector2(size, size);
         }
 
-        private void Apply(List<TrailMark> marks)
+        /// <summary>
+        /// Paints the trail. One rule for every mark (owner, 2026-11-25):
+        ///   colour = have I done it?  passed or here is gold; ahead keeps the default dim dot;
+        ///   shape  = what is it?      filled dot, hollow ring (camp), diamond (boss);
+        ///   motion = where am I?      exactly one mark is 1.25x bigger and breathes.
+        ///
+        /// A camp is "here" only while its panel owns the screen, and then nothing else breathes - so the trail can
+        /// never show two places at once (the old fault: a camp turned gold the moment you reached its wave).
+        /// </summary>
+        private void Apply(List<TrailMark> marks, bool onCamp, int currentStep)
         {
+            int campStep = onCamp ? CampStepOn(marks, currentStep) : -1;
             int count = Mathf.Min(marks.Count, views.Count);
 
             for (int i = 0; i < count; i++)
@@ -256,33 +309,35 @@ namespace IdleRPG.UI
                 TrailMark mark = marks[i];
                 MarkView view = views[i];
 
-                Color on = UiTheme.Accent;
-                Color off = Muted(UiTheme.TextDim, 0.35f);
+                // The wave a camp sits on counts as finished the moment the camp screen opens.
+                bool passed = mark.Cleared
+                    || (mark.Kind == TrailMarkKind.Step && mark.Step == campStep);
 
-                switch (mark.Kind)
+                bool here = mark.Kind == TrailMarkKind.Camp
+                    ? onCamp && mark.Step == campStep
+                    : mark.Current && !onCamp;
+
+                view.Body.color = passed || here ? UiTheme.Accent : Muted(UiTheme.TextDim, 0.35f);
+                view.Node.localScale = here ? new Vector3(HereScale, HereScale, 1f) : Vector3.one;
+                view.Halo.enabled = here;
+                Juice.Glow(view.Glow, here ? GlowState.Pulse : GlowState.Off);
+            }
+        }
+
+        /// <summary>The camp you are standing on: the last camp at or behind the current wave, or -1 when closed.</summary>
+        private static int CampStepOn(List<TrailMark> marks, int currentStep)
+        {
+            int best = -1;
+
+            for (int i = 0; i < marks.Count; i++)
+            {
+                if (marks[i].Kind == TrailMarkKind.Camp && marks[i].Step <= currentStep)
                 {
-                    case TrailMarkKind.Camp:
-                        view.Body.color = mark.Cleared || mark.Available ? on : off;
-                        view.Ring.gameObject.SetActive(mark.Available);
-                        view.Ring.color = Muted(UiTheme.Accent, 0.35f);
-                        Juice.Glow(view.Glow, mark.Available ? GlowState.Steady : GlowState.Off);
-                        break;
-
-                    case TrailMarkKind.Boss:
-                        view.Body.color = mark.Cleared ? on : off;
-                        view.Ring.gameObject.SetActive(mark.Current);
-                        view.Ring.color = UiTheme.AccentLight;
-                        Juice.Glow(view.Glow, mark.Current ? GlowState.Pulse : GlowState.Off);
-                        break;
-
-                    default:
-                        view.Body.color = mark.Cleared ? on : off;
-                        view.Ring.gameObject.SetActive(mark.Current);
-                        view.Ring.color = UiTheme.AccentLight;
-                        Juice.Glow(view.Glow, mark.Current ? GlowState.Pulse : GlowState.Off);
-                        break;
+                    best = marks[i].Step;
                 }
             }
+
+            return best;
         }
 
         private void Clear()
@@ -309,11 +364,6 @@ namespace IdleRPG.UI
                 default:
                     return StepSize;
             }
-        }
-
-        private static float GapBetween(TrailMarkKind left, TrailMarkKind right)
-        {
-            return left == TrailMarkKind.Camp || right == TrailMarkKind.Camp ? CampGap : Gap;
         }
 
         private static Color Muted(Color color, float alpha)

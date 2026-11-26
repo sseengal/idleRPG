@@ -49,13 +49,14 @@ The title band is 100 units tall, between the header and the arena.
 | Part | Size | Rule |
 |---|---|---|
 | Land name | 40 (Section) | Centred, one line, upper case |
-| Trail | 20 px step marks, 12 px gaps (20 px beside a camp) | Centred under the name |
-| Band frame | 3 px lighter edge (`PanelLight`) | A dark ink edge on a dark page is invisible - use a lighter edge |
-| Boss step | The name slot swaps to the boss name | Same font, same place |
+| Stage band | **110 fixed** at the top of the page | name line 46 + `Space8` + trail 32 + `SectionGap` + `Space8` under the dots; the arena starts at the band's bottom |
+| Trail | 20 px step marks, one 16 px gap everywhere | Centred under the name |
+| Band | **no plate** (2026-11-25) | The name and the trail sit on the page. A grey bar here was a second frame that meant nothing |
+| Boss step | The band still names the **land** (2026-11-26) | The old swap to the boss name was wrong: the party is still in Greenwake |
 
 
-There is no separate "boss" banner. On the boss step the land name is replaced by the boss name. One
-slot, two states. That is the cheapest story the band can carry.
+There is no separate "boss" banner, and no boss name in the band. The land name is one fact and it stays put;
+the boss is marked by the last mark on the trail, not by renaming the place.
 
 ---
 
@@ -63,27 +64,30 @@ slot, two states. That is the cheapest story the band can carry.
 
 Marks appear in fight order, left to right:
 
-| Mark | Shape | Size | Off | On |
-|---|---|---|---|---|
-| Step, cleared | filled circle | 20 | - | amber |
-| Step, ahead | filled circle | 20 | muted | - |
-| Step, current | circle + ring behind | 20 (ring 26) | ring | amber ring |
-| Camp (placeholder) | hollow circle | 24 | muted | amber |
-| Boss (placeholder) | diamond (rotated square) | 30 | muted | amber + ring |
-
-
+| Mark | Shape | Size | Passed | Here | Ahead |
+|---|---|---|---|---|---|
+| Step | filled circle | 20 | amber, still | **amber, 1.25x, breathing** | muted dot (default) |
+| Camp (placeholder) | hollow circle | 24 | amber, still | amber, breathing while its panel is open | muted |
+| Boss (placeholder) | diamond (rotated square) | 30 | amber, still | amber, 1.25x, breathing | muted |
 
 Rules:
 
-1. **At most two lit marks, and only this pair.** The current step (ring) and an open camp (ring)
-   may show together, because a camp opens on the step that was just cleared. Nothing else lights up.
-2. Shape carries the meaning, not colour: filled, empty, hollow ring, diamond.
-3. The trail is **not a button**. It never takes a tap.
-4. The trail is built from the stage plan and `campEveryWaves`. Never from a fixed count of ten.
+1. **Exactly one mark breathes, and it is where you are** (2026-11-25). In a fight that is the current
+   step. While the camp panel owns the screen it is that camp, and the current step goes still (it stays
+   amber - the wave is finished). The old rule allowed two lit marks; that is what made a camp look like
+   the next step had been reached.
+2. A camp is amber only once it is **passed**. Being at its wave does not light it.
+3. Shape carries the meaning, colour answers "have I done it": filled, hollow ring, diamond.
+4. The trail is **not a button**. It never takes a tap.
+5. The trail is built from the stage plan and `campEveryWaves`. Never from a fixed count of ten.
 
 Placeholders: the camp is a hollow circle and the boss is a rotated square. Both are drawn from one
 white dot sprite and plain rectangles, so **no art is needed** to run the band. Real 16 x 16 pixel
 icons replace them later: the mark is a builder call, not an asset.
+
+**The glow is its own recipe** (2026-11-25): `GlowStyle_Trail.asset` runs at full strength because the
+halo art peaks at 30 % opacity. The shared dot style (peak 0.55) made the breath invisible - 0.30 x 0.55
+is 17 % on screen. Only the current mark's halo is enabled, so a 13-mark trail costs 13 draws, not 26.
 
 ---
 
@@ -92,17 +96,18 @@ icons replace them later: the mark is a builder call, not an asset.
 | Moment | Motion | Time |
 |---|---|---|
 | Step cleared | mark scales 0.7 -> 1.15 -> 1, flashes amber | 0.18 s |
-| Camp becomes available | flame brightens, one soft ring | 0.25 s, then still |
-| Camp used | flame settles to dim | 0.20 s |
-| Boss arrives | diamond pulses once; name swaps | 0.25 s |
+| Camp reaches its wave | nothing - it stays muted until the camp is **passed** | - |
+| Camp panel opens | that camp ring breathes; the current step stops breathing | 1.6 s loop |
+| Camp used | ring settles to still amber | - |
+| Boss arrives | diamond breathes; name swaps | 0.25 s + 1.6 s loop |
 | Leg starts | marks draw left to right | 0.30 s |
-| Idle | **nothing** | - |
+| Idle | only the mark you are on breathes | 1.6 s loop |
 
 Rules:
 
-1. Scale and colour only. Never animate a width: that forces a layout rebuild during a fight.
+1. Alpha and scale only. Never animate a width: that forces a layout rebuild during a fight.
 2. One pulse at a time.
-3. The **reduced motion** setting turns every scale and ring off. State changes still land, instantly.
+3. The **reduced motion** setting turns every pulse into a still state. State changes still land, instantly.
 4. The arena owns the loud motion. The band owns at most one beat.
 
 ---

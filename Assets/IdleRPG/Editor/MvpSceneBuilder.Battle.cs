@@ -240,7 +240,10 @@ namespace IdleRPG.EditorTools
         {
             GameObject viewport = UiFactory.Node("Viewport", pageRoot);
             viewportRect = viewport.GetComponent<RectTransform>();
-            UiFactory.Anchor(viewportRect, new Vector2(0f, XpBandTop), new Vector2(1f, StageRowMinY), UiSpace.PageMargin, UiSpace.Space8, UiSpace.PageMargin, UiSpace.Space8);
+            // The arena's top follows the fixed stage band, so the air under the dots is the band's own gap and a
+            // taller phone grows the arena instead (2026-11-26).
+            UiFactory.Anchor(viewportRect, new Vector2(0f, XpBandTop), new Vector2(1f, 1f),
+                UiSpace.PageMargin, UiSpace.Space8, UiSpace.PageMargin, StageBandHeight);
 
             // Clips the cover-fitted backdrop so its overflow never draws over the header or combat log.
             viewport.AddComponent<RectMask2D>();
@@ -339,26 +342,44 @@ namespace IdleRPG.EditorTools
         /// </summary>
         private static void BuildStageRow(RectTransform pageRoot)
         {
-            Image row = ContainerPanel("StageRow", pageRoot);
-            UiFactory.Anchor(row.rectTransform, new Vector2(0f, StageRowMinY), new Vector2(1f, StageRowMaxY));
+            // No plate behind the trail (owner, 2026-11-25): the land name and the marks sit straight on the page.
+            // A grey bar here was a second frame above the fight that meant nothing.
+            GameObject rowObject = UiFactory.Node("StageRow", pageRoot);
+            RectTransform row = rowObject.GetComponent<RectTransform>();
+            row.anchorMin = new Vector2(0f, 1f);
+            row.anchorMax = new Vector2(1f, 1f);
+            row.pivot = new Vector2(0.5f, 1f);
+            row.sizeDelta = new Vector2(0f, StageBandHeight);
+            row.anchoredPosition = Vector2.zero;
 
-            JourneyBandUI band = row.gameObject.AddComponent<JourneyBandUI>();
+            JourneyBandUI band = rowObject.AddComponent<JourneyBandUI>();
 
-            TextMeshProUGUI land = UiFactory.Text("LandLabel", row.transform, "GREENWAKE", UiType.Role.Section,
+            TextMeshProUGUI land = UiFactory.Text("LandLabel", row, "GREENWAKE", UiType.Role.Section,
                 TextAlignmentOptions.Center, UiTheme.Text);
-            UiFactory.Anchor(land.rectTransform, new Vector2(0f, 0.5f), new Vector2(1f, 1f));
+            land.rectTransform.anchorMin = new Vector2(0f, 1f);
+            land.rectTransform.anchorMax = new Vector2(1f, 1f);
+            land.rectTransform.pivot = new Vector2(0.5f, 1f);
+            land.rectTransform.sizeDelta = new Vector2(0f, StageNameLine);
+            land.rectTransform.anchoredPosition = Vector2.zero;
 
-            GameObject trail = UiFactory.Node("Trail", row.transform);
+            GameObject trail = UiFactory.Node("Trail", row);
             RectTransform trailRect = trail.GetComponent<RectTransform>();
-            UiFactory.Anchor(trailRect, new Vector2(0f, 0f), new Vector2(1f, 0.5f));
+            trailRect.anchorMin = new Vector2(0f, 1f);
+            trailRect.anchorMax = new Vector2(1f, 1f);
+            trailRect.pivot = new Vector2(0.5f, 1f);
+            trailRect.sizeDelta = new Vector2(0f, StageTrailHeight);
+            trailRect.anchoredPosition = new Vector2(0f, -(StageNameLine + UiSpace.Space8));
 
             const string catalogPath = "Assets/IdleRPG/Data/Config/JourneyCatalog.asset";
             JourneyCatalog catalog = AssetDatabase.LoadAssetAtPath<JourneyCatalog>(catalogPath);
             Sprite dot = AssetDatabase.LoadAssetAtPath<Sprite>(UiFactory.ArtFolder + "/ui_mark_dot.png");
             Sprite ring = AssetDatabase.LoadAssetAtPath<Sprite>(UiFactory.ArtFolder + "/ui_mark_ring.png");
             Sprite halo = AssetDatabase.LoadAssetAtPath<Sprite>(UiFactory.ArtFolder + "/ui_glow_steps.png");
+
+            // The trail's own glow recipe: the halo art is faint (30% at its brightest), so this style runs at full
+            // strength. Sharing the dot style would make the breath invisible (0.30 x 0.55 = 17% on screen).
             GlowStyle glowStyle = AssetDatabase.LoadAssetAtPath<GlowStyle>(
-                "Assets/IdleRPG/Data/Config/GlowStyle_Dot.asset");
+                "Assets/IdleRPG/Data/Config/GlowStyle_Trail.asset");
 
             if (catalog == null)
             {

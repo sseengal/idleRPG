@@ -80,9 +80,20 @@ builds the header from `UiSpace.HeaderBandHeight`, so it cannot change size with
 
 ### 2b. Bands inside the battle page
 
-Fractions of the page (so they follow whatever height the page gets): stage/wave row **0.93–0.99**, arena
-**0.373–0.93**, party XP strip **0.346–0.373**, ability strip **0.226–0.346**, log **0–0.226**.
+Fractions of the page (so they follow whatever height the page gets): arena **0.373–top**, party XP strip
+**0.346–0.373**, ability strip **0.226–0.346**, log **0–0.226**.
 Source: `LogTop = 0.226f`, `BattleViewportBottom = 0.346f`, `XpBandTop = 0.373f` in `MvpSceneBuilder.cs`.
+
+**The stage band is a fixed 110-unit strip, not a fraction (2026-11-26).** Top of the page: the land name on its
+own line (46), one `Space8` above the trail (32), then `SectionGap` + `Space8` of air under the dots. The header
+band already supplies a `SectionGap` above the name, so the air above "GREENWAKE" and the air under the dots read
+equal (measured before: 46 above the name against 19 under the dots). The arena's top follows the band, so a taller
+phone grows the arena instead of the band.
+
+**The stage row draws no plate (2026-11-25).** The land name and the journey trail sit straight on the page, so
+the header and this band are the two plate-less surfaces at the top of the fight. A grey bar there was a second
+frame that carried no meaning, and it forced the trail's own dim state to fight a lighter background. The header
+check asserts the row carries no `Image`, so the bar cannot creep back.
 
 **The log pays for the arena nameplates (2026-11-15).** Each arena slot is 160 × 260: a 95-unit nameplate band at
 the bottom (name, health numbers, health bar), the sprite above it, and a 5-unit top margin. The sprite keeps the

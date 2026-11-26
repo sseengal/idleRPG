@@ -54,6 +54,16 @@ namespace IdleRPG.EditorTools
         // Bands inside the battle page (page coords): log 0..LogTop, ability strip 0.226..0.346, party XP bar
         // 0.346..0.373, viewport 0.373..StageRowMinY, stage/wave row 0.93..0.99.
         //
+        // 2026-11-26: the stage band is no longer a page fraction. It is a fixed strip at the top of the page - the
+        // land name on its own line, one Space8 above the trail, and SectionGap + Space8 of air under the trail. The
+        // header band already provides a SectionGap above the name, so the two breathers read equal (measured before:
+        // 46 units above the name against 19 under the dots). The arena's top follows the band, so a taller phone
+        // grows the arena, not the band.
+        private const float StageNameLine = UiType.Section * UiType.LeadingChrome;
+        private const float StageTrailHeight = UiSpace.Space32;
+        private const float StageBandHeight = StageNameLine + UiSpace.Space8 + StageTrailHeight
+            + UiSpace.SectionGap + UiSpace.Space8;
+
         // LogTop used to be 0.34, with a 79-unit tab bar above the log. The bar is gone and the hero cards live in
         // its place, so the band had to grow. It grew again when the cards became picture-left cards: the move's
         // picture is now 170 units tall (34-pixel art zoomed 5x), the tallest whole-number zoom that still leaves
@@ -65,8 +75,6 @@ namespace IdleRPG.EditorTools
         // scrollback keeps every line, the feed just shows about one and a half fewer at a time.
         private const float LogTop = 0.226f;
         private const float BattleViewportBottom = 0.346f;
-        private const float StageRowMinY = 0.93f;
-        private const float StageRowMaxY = 0.99f;
 
         /// <summary>Modal canvas order. Above the main canvas (0) and the damage canvas (10).</summary>
         private const int ModalSortingOrder = 100;

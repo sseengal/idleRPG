@@ -48,6 +48,12 @@ namespace IdleRPG.EditorTools
         /// <summary>The band: page margin + bar + one section gap. The page starts here.</summary>
         private const float SpecBandHeight = 128f;
 
+        /// <summary>
+        /// The stage band: land name line (46) + Space8 + trail (32) + SectionGap + Space8 of air under the dots.
+        /// Its bottom edge is where the arena starts, so this number is the padding above the fight (2026-11-26).
+        /// </summary>
+        private const float SpecStageBandHeight = 110f;
+
         /// <summary>The green plus in a plate's corner: 32 units (about 13 dp).</summary>
         private const float SpecBadgeSize = 32f;
 
@@ -181,6 +187,22 @@ namespace IdleRPG.EditorTools
             if (page != null && Mathf.Abs(page.offsetMax.y + SpecBandHeight) > Tolerance)
             {
                 Add("BattlePage", $"The page starts {Mathf.Abs(page.offsetMax.y):0.#} units from the safe-area top; the header band is {SpecBandHeight}.");
+            }
+
+            // The stage band is the other surface at the top of the battle page, and it draws nothing: the land name
+            // and the trail sit straight on the page (owner, 2026-11-25). A plate here means the grey bar came back.
+            RectTransform stageRow = Find("/HUD/Canvas/SafeArea/BattlePage/StageRow");
+
+            if (stageRow != null)
+            {
+                Expect("StageRow height", stageRow.rect.height, SpecStageBandHeight);
+
+                UnityEngine.UI.Image stagePlate = stageRow.GetComponent<UnityEngine.UI.Image>();
+
+                if (stagePlate != null && stagePlate.enabled)
+                {
+                    Add("StageRow", "The stage band draws a plate again. The land name and the trail sit on the page.");
+                }
             }
 
             if (Find("/HUD/Canvas/SafeArea/Header/ChipRow/BoostChip") == null)
