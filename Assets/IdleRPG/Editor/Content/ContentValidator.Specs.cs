@@ -299,7 +299,7 @@ namespace IdleRPG.EditorTools.Content
                     Add(Severity.Error, "upgrades", $"{upgrade.id}: baseCostTokens must be > 0.");
                 }
 
-                // A utility unlock is a one-time purchase with no per-level gain (Dawn Ward). Everything else is a
+                // A utility unlock is a one-time purchase with no per-level gain (Revive). Everything else is a
                 // multiplier and must actually multiply.
                 if (IsUtilityEffect(upgrade.effectType))
                 {

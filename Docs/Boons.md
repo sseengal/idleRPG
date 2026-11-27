@@ -283,7 +283,7 @@ inheriting them. Until then a run still caps at level 20 and the first pick stil
   the only written record of the hand a run is building.
 - A boon heal reads `Knight healed for 1  (239/240)`: the feed drops the "by ..." part when no ability is behind the
   heal, instead of printing an empty source.
-- No list page. If clarity suffers, add a count to the XP bar (`LV 4 - 6 boons`) before anything bigger.
+- No list page. If clarity suffers, add a count to the XP bar (`4 boons`) before anything bigger.
 - Sound: `SfxCue.LevelUp` already exists; a card tap should reuse the purchase sound.
 
 ## 11. Phasing

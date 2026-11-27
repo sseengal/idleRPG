@@ -101,7 +101,7 @@ Target run length: **5-8 minutes**. A strong player can clear one location in on
 | Step | Rule | Built today? |
 |---|---|---|
 | Wipe | Party falls. RUN OVER card. No bounce, no auto-restart | Yes (`GameManager.EndRunOnWipe`) |
-| Revive | **Dawn Ward** perk: one revive per run, full heal, same stage. Never an ad, never an IAP | Yes (`Prestige_Revive.asset`, 20 Perk Points, max 1) |
+| Revive | **Revive** perk: one revive per run, full heal, same stage. Never an ad, never an IAP | Yes (`Prestige_Revive.asset`, 20 Perk Points, max 1) |
 | Bank | END RUN banks **Perk Points** (scaled by depth). A run that cleared no stage pays nothing | Yes (`BankRunReward`) |
 | Return | Lobby. No fight runs behind it | Yes (`GameState.Lobby`) |
 | Pick | **Carousel of unlocked locations.** Any unlocked location may be started | **No.** `StartScreenUI` has a *placeholder* carousel and calls `StartRun(1)` — always stage 1 |
@@ -116,24 +116,20 @@ If they want to push, they pick the deepest one.
 
 | Currency | On screen name | Earned | Spent on | After a run end |
 |---|---|---|---|---|
-| Gold | Gold | Every kill | **TRAINING** (permanent) + **camp Train** (mid-run, planned) | **Kept** — `GameManager.Stages.cs:224` |
-| Perk Points | Perk Points | Banked at run end, scaled by depth | **ASCEND** perks (War, Gold, Vitality, Dawn Ward) | Kept, added |
+| Gold | Gold | Every kill | **TRAINING** (permanent) | **Kept** — `GameManager.Stages.cs:224` |
+| Perk Points | Perk Points | Banked at run end, scaled by depth | **ASCEND** perks (War, Gold, Vitality, Revive) | Kept, added |
 | Gems | Gems | Milestones, streak, IAP | Shop shortcuts and cosmetics | Kept |
 
 What a run end **does** reset (`BankRunReward`): hero stat levels, party progression, camp state, run
 counters (`CurrentStage`, kills, stages cleared), and `runActive`.
 
 What it **does not** reset: gold, gems, Perk Points, Training nodes, and unlocked locations (when they
-exist). The Dawn Ward "used this run" flag clears for the next run.
+exist). The Revive "used this run" flag clears for the next run.
 
-> **DECIDED 2026-11-22 — gold is permanent, with two sinks.**
+> **DECIDED 2026-11-27 — gold is permanent; TRAINING is the only gold sink.**
 > 1. **TRAINING** in the lobby: permanent nodes. The long game.
-> 2. **Camp Train** during a run: +1 ATK / +1 DEF, run only, **paid in gold**. The short game.
->
-> The choice is real: spend now to go deeper, or bank it for permanent power. The plan is not built yet;
-> camp Train is free today (`Camp.md` §2). Downside, said plainly: a new player can spend all gold at camp
-> and still lose, then feel they wasted it. The price curve must be gentle, and the camp button must show
-> the cost before the tap.
+> 2. **Camp Train** is **free**: +1 ATK / +1 DEF, run only. The camp choice is heal HP (Short/Long Rest) or raise
+>    party stats (Train). The earlier "camp Train paid in gold" plan is cancelled.
 
 ---
 
@@ -145,11 +141,11 @@ exist). The Dawn Ward "used this run" flag clears for the next run.
 | TRAINING tree | **Permanent** | `Training.md` | Gold sink. The long-term growth |
 | ASCEND perks | **Permanent** | `Progression.md` | Bought with Perk Points. Four rows |
 | Boons | **One run** | `Boons.md` | Offered during the run. Reset at run end |
-| Camp Train | **One run** | `Camp.md` | +1 ATK / +1 DEF per camp. **Paid in gold** (planned) |
+| Camp Train | **One run** | `Camp.md` | +1 ATK / +1 DEF per camp. **Free** (heal vs stats choice) |
 | Party XP | **One run** | `Run-Loop.md` | Reset at run end |
 
-Design rule: **the player must always see one upgrade they can buy.** Training is the lobby answer; camp
-Train is the mid-run answer. Both take gold, so the player weighs "now" against "forever" at every camp.
+Design rule: **the player must always see one upgrade they can buy.** Training is the lobby answer (gold);
+camp Train is the mid-run answer (free). The camp choice is heal HP (Short/Long Rest) or raise party stats.
 
 ---
 
@@ -201,7 +197,7 @@ Rules:
 
 - **Never sell raw power.** No product may grant a stat the free player cannot reach.
 - **A rewarded ad is always optional.** It never gates a stage, a revive, or progress.
-- **Revive is a perk, not an ad, not an IAP** (Dawn Ward, 20 Perk Points, one per run). Decision
+- **Revive is a perk, not an ad, not an IAP** (Revive, 20 Perk Points, one per run). Decision
   2026-11-21, built.
 - Ads and billing must sit behind the existing seams (`IAdService`, `IIapService`), so a mock and a real
   store can never disagree.
@@ -251,7 +247,7 @@ Source of truth: `Monetisation.md` §3a and `IapCatalog.cs`.
 | # | Question | Why it matters | Recommended answer |
 |---|---|---|---|
 | 11.1 | How many story lines per location? | Sets writing, voice and localisation cost | 12 lines: open, turn, close, boss line |
-| 11.2 | ~~Does gold survive a run end?~~ **DECIDED 2026-11-22:** gold is permanent; camp Train costs gold as the mid-run sink | Closed | See §6 |
+| 11.2 | ~~Does gold survive a run end?~~ **DECIDED 2026-11-27:** gold is permanent; Camp Train is free; Training is the only gold sink | Closed | See §6 |
 | 11.3 | What does the rewarded ad give? | Consent, fairness, store rules | Bonus gold on the run-over card. Never a revive |
 | 11.4 | How many locations does the full story need? | Sets the real ending's cost | Decide after location 1 ships |
 | 11.5 | Can the player farm an easy location forever? | Economy runaway, or a boring safety net | Yes, with a reduced gold rate after 3 clears |
@@ -322,11 +318,11 @@ These are **not** bugs. They are cuts. They ship later, if the game earns it.
 |---|---|---|---|
 | 2026-11-21 | Name: **Kingsguard: Tiny RPG** | Owner | `Run-Loop.md` §9 |
 | 2026-11-21 | Monetisation is required at v1.0 (lean shop + IAP + ads) | Owner | `Checklist.md` §0 |
-| 2026-11-21 | Revive is **Dawn Ward**, a Perk Point perk. Never an ad or an IAP | Owner | `Checklist.md` §0, built |
+| 2026-11-21 | The run-over revive is the **Revive** perk (Perk Points). Never an ad or an IAP | Owner | `Checklist.md` §0, built |
 | 2026-11-21 | Story scope: opening scenes + flavour lines. Intro film skipped | Owner | `Intro-Sequence.md` |
 | 2026-11-22 | Shape: run-based battler, story locations on top. A run ends at death | Owner | §4 |
 | 2026-11-22 | Death returns to the lobby. A carousel picks any unlocked location | Owner | §5 |
-| 2026-11-22 | **Gold stays permanent.** Two sinks: permanent TRAINING, and camp Train paid in gold (mid-run, run-only) | Owner | §6, `Camp.md` §2 |
+| 2026-11-27 | **Gold stays permanent. One sink: permanent TRAINING.** Camp Train is free (heal vs stats choice) | Owner | §6, `Camp.md` §2 |
 | 2026-11-22 | Ending: real ending at the final boss, then endless. MVP = 3 locations + "coming soon" | Owner | §8 |
 | 2026-11-22 | **Chapter = one location = one stage.** Own boss, own mini arc. Greenwake first | Owner | §8.1 |
 | 2026-11-22 | "Done" bar: story + balance + final look and sound + clean checks + real-phone run | Owner | §12.1 |
@@ -367,7 +363,7 @@ One step at a time. Each step ends with a manual test in Unity, per `.clinerules
 
 1. **Answer §11.1.** It blocks the story writing for locations 2 and 3.
 2. **Greenwake story:** build `S03_Wall`, `S04_King`, `S05_Outro`, `S06_Defeat`.
-3. **Camp Train costs gold:** price curve, cost shown on the button, no free farming on a wipe.
+3. **Camp choices:** three neutral cards; Short Rest 10%, Long Rest 20% for a rewarded ad, Train free. Camp heals revive the fallen at the healed fraction.
 4. **Boss feel:** make the Slime King read as the knot around the shard.
 5. **Balance:** first runs lose, run 2-3 wins, run 5-8 minutes.
 6. **Look:** paid pack swap, Greenwake backdrop, key art booked.

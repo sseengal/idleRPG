@@ -103,7 +103,7 @@
       "id": "Prestige_Revive",
       "asset": "Prestige_Revive",
       "effectType": "revive",
-      "displayName": "Dawn Ward",
+      "displayName": "Revive",
       "description": "One revive per run. Refills every new run.",
       "baseCostTokens": 20.0,
       "costGrowth": 1.0,

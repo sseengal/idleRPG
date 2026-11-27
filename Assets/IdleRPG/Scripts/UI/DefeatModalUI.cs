@@ -100,7 +100,7 @@ namespace IdleRPG.UI
                 ascendLabel.SetText(string.Format("+{0} Perk Points if you end the run now", NumberFormatter.Format(manager.RunEndPreviewTokens)));
             }
 
-            // Two choices: REVIVE (Dawn Ward perk, one per run) or END RUN. A revive button that cannot be used is
+            // Two choices: REVIVE (Revive perk, one per run) or END RUN. A revive button that cannot be used is
             // hidden, not greyed - a dim button on a defeat card reads as a nag.
             if (ascendButton != null)
             {

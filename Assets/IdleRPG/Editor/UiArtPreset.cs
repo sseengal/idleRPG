@@ -25,11 +25,11 @@ namespace IdleRPG.EditorTools
 
         private static readonly ArtSet[] Sets =
         {
-            // 89x19 bar: 1 px highlight, 15 px face, 3 px shade, 1 px right edge.
+            // 88x30 bar: 2 px chamfered edge all round (1 px outline + 1 px highlight/shade), 26 px face.
             new ArtSet
             {
                 Folder = "Assets/IdleRPG/Art/UI/Buttons",
-                Border = new Vector4(1f, 3f, 1f, 1f),
+                Border = new Vector4(2f, 2f, 2f, 2f),
                 What = "action buttons"
             },
             // 75x75 frame: the rim is 5 px on every side (measured: the face starts at 5 and ends at 69).

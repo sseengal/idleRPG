@@ -8,7 +8,7 @@ using IdleRPG.Utils;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// Top bar: gold, gems, tokens, stage/wave and the active gold-boost chip.
+    /// Top bar: gold, gems and the active gold-boost chip.
     /// Updates only when a relevant event fires — no per-frame polling.
     /// </summary>
     public sealed class HudHeaderUI : MonoBehaviour
@@ -16,12 +16,9 @@ namespace IdleRPG.UI
         [Header("Currency")]
         [SerializeField] private TextMeshProUGUI goldText;
         [SerializeField] private TextMeshProUGUI gemsText;
-        [SerializeField] private TextMeshProUGUI tokensText;
 
         [Header("Boost chip")]
-        [Tooltip("The token chip. Hidden while the boost badge shows: both are row items, so hiding one keeps the " +
-                 "three visible blocks the same width all the time.")]
-        [SerializeField] private GameObject tokenChip;
+        [Tooltip("Hidden until an ad boost is running. It is a row item, so it takes a third block beside the chips.")]
         [SerializeField] private GameObject boostChip;
         [SerializeField] private TextMeshProUGUI boostText;
 
@@ -77,7 +74,7 @@ namespace IdleRPG.UI
             {
                 gearMenu = gameObject.AddComponent<GearMenuUI>();
                 gearMenu.Initialize(gameManager);
-                gearMenu.SetCurrencyIcons(CurrencyIcon("GoldChip"), CurrencyIcon("GemChip"), CurrencyIcon("TokenChip"));
+                gearMenu.SetCurrencyIcons(CurrencyIcon("GoldChip"), CurrencyIcon("GemChip"), UiSkin.Current.tokenIcon);
             }
 
             RefreshAll();
@@ -104,14 +101,13 @@ namespace IdleRPG.UI
         }
 
         /// <summary>
-        /// Turns the three currency plates into shop buttons between runs, and shows their green plus. In a fight the
+        /// Turns the two currency plates into shop buttons between runs, and shows their green plus. In a fight the
         /// same plates are inert: no plus, no button, and the raycast is off so a tap falls through to the battle.
         /// </summary>
         private void ApplyLobbyState(bool isLobby)
         {
             ApplyPlateState(goldText, isLobby);
             ApplyPlateState(gemsText, isLobby);
-            ApplyPlateState(tokensText, isLobby);
         }
 
         /// <summary>One plate: badge on or off, and the button made live or dead.</summary>
@@ -149,7 +145,7 @@ namespace IdleRPG.UI
                 colours.normalColor = Color.white;
                 colours.highlightedColor = Color.white;
                 colours.selectedColor = Color.white;
-                colours.pressedColor = new Color(0.92f, 0.92f, 0.92f, 1f);
+                colours.pressedColor = UiTheme.Text;
                 colours.disabledColor = Color.white;
                 button.colors = colours;
                 button.onClick.AddListener(OnPlateClicked);
@@ -253,7 +249,6 @@ namespace IdleRPG.UI
             UiSkin skin = UiSkin.Current;
             SetChipIcon("GoldChip", skin.goldIcon);
             SetChipIcon("GemChip", skin.gemIcon);
-            SetChipIcon("TokenChip", skin.tokenIcon);
         }
 
         private void SetChipIcon(string chipName, Sprite sprite)
@@ -315,9 +310,6 @@ namespace IdleRPG.UI
                     break;
                 case CurrencyType.Gems:
                     SetText(gemsText, amount);
-                    break;
-                case CurrencyType.PrestigeTokens:
-                    SetText(tokensText, amount);
                     break;
             }
         }
@@ -403,12 +395,7 @@ namespace IdleRPG.UI
                 boostChip.SetActive(active);
             }
 
-            // One badge at a time: the row shows three blocks, so hiding the token chip keeps every width fixed.
-            if (tokenChip != null)
-            {
-                tokenChip.SetActive(!active);
-            }
-
+            // The boost takes the third row block while it runs; the two chips share the row the rest of the time.
             if (boostText != null)
             {
                 boostText.SetText(string.Format("x{0}  {1}", multiplier.ToString("0.#"), NumberFormatter.FormatCountdown(remainingSeconds)));
@@ -420,16 +407,10 @@ namespace IdleRPG.UI
             displayedGold = economy.Gold;
             SetText(goldText, economy.Gold);
             SetText(gemsText, economy.Gems);
-            SetText(tokensText, economy.PrestigeTokens);
 
             if (boostChip != null)
             {
                 boostChip.SetActive(false);
-            }
-
-            if (tokenChip != null)
-            {
-                tokenChip.SetActive(true);
             }
         }
 

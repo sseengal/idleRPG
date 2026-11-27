@@ -56,7 +56,7 @@ D1, D4 and D5 hurt most: all three sit on the **reward moment**, the one the pla
 |---|---|---|
 | Card opens with motion | the card scales in from 92% and fades, ~0.18 s, fight already stopped | no jarring pop; the fight stays frozen while it animates |
 | Rarity reveal | the tag and frame flash their rarity colour once as the card lands | a legendary reads as different before you read a word |
-| XP bar pulses on level (D4) | the bar flashes blue and the level label scales once | a level-up is visible without reading a number |
+| XP bar pulses on level (D4) | the bar flashes blue once | a level-up is visible without reading a number |
 | Card tap feedback | the tapped card lifts and brightens, then the next hand deals | no tap feels ignored, even when the next deal is instant |
 | Sound on open / pick / reveal (D1) | open plays the level chime, a pick plays the purchase sound, a legendary adds one extra note | three distinct cues, checked with sound on |
 
@@ -68,7 +68,7 @@ D1, D4 and D5 hurt most: all three sit on the **reward moment**, the one the pla
 | D5 clarity half | a card whose effect rounds to nothing says so: `reflects 20% (min 1)` | Thorned Mail at stage 1 still shows a number |
 | Camp box (D2) | the middle of the camp view has a purpose, or it is gone | no unexplained rectangle |
 | Feed de-duplication (D3) | a resumed run prints its wave line once | relaunch, resume, count the lines |
-| Boon count on the bar | `LV 7 - 4 boons`, so the run's build is readable at a glance | no list page needed; the count is always in sight |
+| Boon count on the bar | `4 boons`, so the run's build is readable at a glance | no list page needed; the count is always in sight |
 
 ### W3 - Consistency: one kit, one ruler
 

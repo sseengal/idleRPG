@@ -46,7 +46,7 @@ namespace IdleRPG.UI
         [Tooltip("Button face. Leave empty to reuse the panel face.")]
         public Sprite buttonSprite;
 
-        [Header("Action buttons (89x19 bar art, 1/3/1/1 border)")]
+        [Header("Action buttons (88x30 bar art, 2/2/2/2 border)")]
         [Tooltip("Gold. The main action on a screen: START, REVIVE.")]
         public Sprite primaryButtonSprite;
 

@@ -12,16 +12,16 @@
 
 | Field | Value |
 |---|---|
-| Current step | **Dawn Ward revive built, 2026-11-22 (owner test pending).** The ad revive is **removed**. The one revive per run is **Dawn Ward**: a one-time ASCEND perk (20 Perk Points, max 1), full heal, same stage. The used flag is saved, so a relaunch cannot grant a second revive. **Gold Hoarder** is removed, so ASCEND has four rows: War / Gold / Vitality / Dawn Ward. The lean SHOP and the gear settings/pause are live. Content validator: clean. |
+| Current step | **Revive perk built, 2026-11-22 (owner test pending).** The ad revive is **removed**. The one revive per run is **Revive**: a one-time ASCEND perk (20 Perk Points, max 1), full heal, same stage. The used flag is saved, so a relaunch cannot grant a second revive. **Gold Hoarder** is removed, so ASCEND has four rows: War / Gold / Vitality / Revive. The lean SHOP and the gear settings/pause are live. Content validator: clean. |
 | Story slice (new, 29 Oct 2026) | **Steps 1-4, transitions, intro rewrite, rupture scene, wave plan and log fixes built (2 Nov).** `S01_Intro` and `S02_Rupture` play before wave 1. First wave is bats through the stage wave plan. One-line story box with tap-to-continue. `Run All Checks` currently fails on 4 DevOverlay type-scale labels (unrelated to this pass); story assets imported, runtime QA pending. **Open: phone aspect, real device background, force battle page.** Canon: `Story-Canon.md`. Chapter story: `Story-Greenwake.md`. System: `Story-Scenes.md`. Script: `Story-Nodes.md` |
 | Dropped | ranged enemy archetype / "11f" - deleted 2026-09-21 (content depth, no loop or money path). See `Roadmap.md` §2 |
 | v1.0 gate | **the loop + money**, and **MVP = store-submittable** (§1p). The gate stands for NEW systems: abilities, gear and the roster swap shipped after it, so read it as "no zones / affixes / relics before the base is done" |
 | Parked (v1.1) | Steps 12, 13, 15b, 17, 18, 22 + the rest of 19/21 - plan kept in `Roadmap.md` §3 |
 | Open route defects | **Fixed 2026-11-21:** R1 (START begins a run), R2 (BATTLE tab), R3 (SHOP page), R4 (settings sheet), R6 (hints off), R7 (pause → quit). **Open:** R8 (level-up sound), R12 (TRAIN first-open freeze). Full list: `Routes-and-Flows.md` §8 |
-| Last completed | **Dawn Ward revive** - ad revive removed; ascension perk (20 tokens, max 1, one per run, saved flag); Gold Hoarder removed; content validator clean (2026-11-22) |
-| Next after this | **Owner test of Dawn Ward** (buy, die, revive, die again, relaunch, new run). Then **cleanup/reliability** (crash log, TRAIN frame-slice, cut the offline popup, bank on boot, level-up sound) → **balance pass** → **UI pass**. The intro film is **skipped for v1.0**. |
+| Last completed | **Revive perk** - ad revive removed; ascension perk (20 tokens, max 1, one per run, saved flag); Gold Hoarder removed; content validator clean (2026-11-22) |
+| Next after this | **Owner test of Revive** (buy, die, revive, die again, relaunch, new run). Then **cleanup/reliability** (crash log, TRAIN frame-slice, cut the offline popup, bank on boot, level-up sound) → **balance pass** → **UI pass**. The intro film is **skipped for v1.0**. |
 | MVP decisions (owner, 2026-09-27) | gate = **store-submittable**; **3 playable heroes** (a 4th needs the v1.1 roster UI); both stores at once; **art + audio = the final pass before submission**; no analytics SDK; full record + cuts in §1p |
-| Release decisions (owner, 2026-11-21) | **Name: Kingsguard: Tiny RPG** · **monetisation required at v1.0** (lean SHOP + IAP + ads, `Monetisation.md` §3a) · **revive: Dawn Ward ascension perk (20 tokens, one per run), never an ad or IAP** · **story: opening scenes + four flavour lines; intro film skipped** (`Intro-Sequence.md`) · **device work deferred to the end** — but store accounts and the Play closed-test clock start now · **all current art is commercial-use, no attribution** |
+| Release decisions (owner, 2026-11-21) | **Name: Kingsguard: Tiny RPG** · **monetisation required at v1.0** (lean SHOP + IAP + ads, `Monetisation.md` §3a) · **revive: Revive ascension perk (20 tokens, one per run), never an ad or IAP** · **story: opening scenes + four flavour lines; intro film skipped** (`Intro-Sequence.md`) · **device work deferred to the end** — but store accounts and the Play closed-test clock start now · **all current art is commercial-use, no attribution** |
 | Save schema | **v12** (`SaveData.cs:32`). v4 `runBestStage`; v5 keyed `levels`; v6 gear; v7 abilities; v8 Archer -> Soldier; v9 Fireball -> Shatter; v10 Charge -> Holy Slash; v11 Shield Wall -> Guard; **v12 party XP/boons + `runActive`** (additive: boot resumes only when a run is active). Additive migrations, no data loss |
 | Golden numbers | **VOID as a gate** until the full rebalance after feature complete (`Content.md` §10). `Run All Checks` fails those four lines by design; the baseline is not re-recorded now |
 | Shipped build | `Builds/IdleRPG-mac.app` verified (boot, save, offline, combat) |
@@ -1854,9 +1854,8 @@ throwaway prefab with a 21-unit label in the default font, plus one `fontSize = 
 and a FAIL. An auto-sized label is judged by its role (`fontSizeMax`), because `fontSize` holds the last size it
 shrank to.
 
-**Known, and left alone - a separate job:** the header is crowded. The RANKS button sits on top of the token chip's
-panel, and a long currency value (like `1.25M`) can slide under the button. That belongs to a header layout pass,
-not to the type scale.
+**Header (2026-11-27):** the key/prestige chip is removed. The header shows **gold and gems**; the menu sits at
+the end, and the boost takes a third block only while it runs. Perk Points are shown on ASCEND as `PERK POINTS n`.
 
 
 ## 1ag. UI layout: containers, the spacing ladder, mobile scaling  ·  **built + verified 2026-10-14**

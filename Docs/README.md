@@ -106,7 +106,7 @@ Docs/
   Story-Scenes.md      <- how a scene is injected, timed, skipped, resumed
   Battle-Swirl.md      <- the arena whirl that starts a fight: timing, gate, knobs
   Battle-Log.md        <- log store, view, colours, typewriter, wrapping
-  Camp.md              <- the wave interlude: Short/Long Rest, Train, token, save, risks
+  Camp.md              <- the wave interlude: Short/Long Rest, Train, save, risks
   Checklist.md         <- master status: what is done, what is left
   Release-Checklist.md <- gate list: every check before the stores accept the build
   Routes-and-Flows.md  <- as-built: every screen, button, state and known defect

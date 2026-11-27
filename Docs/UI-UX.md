@@ -202,11 +202,12 @@ close is always top-left, primary button reachable one-handed (1080x1920 referen
   `UiTouch.MinTarget` (144) - no hand-written sizes, and the fonts come from `UiTheme` (Lilita One chrome, Abaddon
   Light for the battle log), not the TMP default. Glyphs are drawn as sprites when the font lacks one (arrows).
 - **The party XP bar sits between the arena and the ability strip**: one 44-unit band built by the scene builder.
-  `LV n` and `xp/needed` are packed together on the left (`UiSpace.Small` between them, `UiSpace.Medium` before
-  the bar), and the blue bar takes every unit that is left, up to the shared right margin. The numbers always show;
-  the level-up card owns the pick count. The fill glides, steps up as blue motes land from the enemy that paid (3-5
-  per kill, coin-sized), and flashes once when a level lands. The arena starts above the band, so the bar can never
-  sit over the fight.
+  The band sits in the shared 32-unit column (`UiSpace.PageMargin`), the same edge as the arena and the cards, and
+  pads one `Space8` inside. `EXP` and `xp / needed` are packed together on the left (`UiSpace.Space8` between them,
+  `UiSpace.Space16` before the bar), both at `UiType.Micro`; the blue bar takes every unit that is left, up to the
+  band's right padding. The numbers always show; the level-up card owns the pick count. The fill glides, steps up
+  as blue motes land from the enemy that paid (3-5 per kill, coin-sized), and flashes once when a level lands. The
+  level number is not shown in the HUD. The arena starts above the band, so the bar can never sit over the fight.
 - **One page at a time.** Every tab closes the other lobby pages before it opens its own, so two pages can
   never stack. All of them sit in the same box (`0.02-0.98` x `0.13-0.885`) and are opaque, so the lobby card
   behind them cannot show through.
@@ -257,7 +258,7 @@ close is always top-left, primary button reachable one-handed (1080x1920 referen
   **attack clip on the announcement** and runs in at the same time, so the strike frame lands on the hit instead of
   the hit starting the animation. The clip finishes during the pose, then the unit blinks home.
 - Defeat feedback: a party wipe **ends the run**. The run-over card shows the depth and the Perk Points, with
-  **REVIVE** only when Dawn Ward is owned and unused, and **END RUN** always. No countdown, no auto-resume, no ad.
+  **REVIVE** only when Revive is owned and unused, and **END RUN** always. No countdown, no auto-resume, no ad.
 
 ## 4. Return hub & offline claim (B1)
 
@@ -405,7 +406,8 @@ chips stay flat on purpose.
 
 ### 12a. Action button art: three faces, one source (2026-11-22)
 
-The owner drew three 89x19 bar faces: **primary** (gold), **danger** (red) and **neutral** (slate).
+The owner drew three bar faces: **primary** (gold), **danger** (red) and **neutral** (slate). Each is 88x30
+with a 2 px chamfered edge (1 px outline + 1 px highlight/shade), so the 9-slice border is 2/2/2/2.
 They live in `Assets/IdleRPG/Art/UI/Buttons/` and are referenced **only** from the `UiSkin` asset
 (`Assets/IdleRPG/Resources/UiSkin.asset`). That asset is the single source: art, ink colour and border scale.
 
@@ -418,8 +420,9 @@ They live in `Assets/IdleRPG/Art/UI/Buttons/` and are referenced **only** from t
 
 Rules:
 - `UiPlateButton.Create(..., ButtonFace face = ButtonFace.Plate)`. Callers ask for a **meaning**, never a sprite.
-- **`Image.pixelsPerUnitMultiplier` DIVIDES the slice border.** The art's 1 px highlight and 3 px shade become
-  7 and 21 units at `1f / 7f` (`UiSkin.buttonBorderScale`). A value of 7 made them invisible once - do not repeat it.
+- **`Image.pixelsPerUnitMultiplier` DIVIDES the slice border.** The art's 2 px chamfered edge becomes 14 units
+  top and bottom at `1f / 7f` (`UiSkin.buttonBorderScale`) - the same 28-unit total bevel as the old art. A
+  value of 7 made it invisible once - do not repeat it.
 - Art with baked colour is drawn **white-tinted** (`Color.white`); any tint multiplies the artist's colour.
 - Import preset: `Tools > Idle RPG > Art > Apply UI Art Presets` (FullRect, Point, uncompressed, border
   measured per folder, RGBA32 on Android and iPhone). Never compress these: a 1 px line dies under ASTC 4x4.
@@ -488,7 +491,7 @@ one colour.
 measured on a live scene: **0 black images out of 368**.
 
 **The header is one bar, not plates inside plates (2026-11-23).** The bar keeps `ContainerFace` (`#252E3E`); the
-three currency chips and the menu block are **flat** rectangles of `UiTheme.SurfaceChip` (`#161C29`), one step
+two currency chips and the menu block are **flat** rectangles of `UiTheme.SurfaceChip` (`#161C29`), one step
 darker, with no plate art of their own. Verified by pixel: bar `#262E3D`, chips `#161C2A`, text `#ECF0F8`, rim
 `#0B0F15`.
 

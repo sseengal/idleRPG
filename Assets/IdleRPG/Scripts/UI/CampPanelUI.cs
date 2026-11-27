@@ -29,19 +29,17 @@ namespace IdleRPG.UI
         [Header("Camp view")]
         [SerializeField] private Image[] actorImages;
         [SerializeField] private TextMeshProUGUI[] hpLabels;
-        [SerializeField] private TextMeshProUGUI tokenLabel;
-        [SerializeField] private TextMeshProUGUI trainingLabel;
+        [SerializeField] private HpBarView[] hpBars;
 
         [Header("Camp strip")]
         [SerializeField] private Button shortFreeButton;
-        [SerializeField] private Button shortAdButton;
         [SerializeField] private Button longRestButton;
         [SerializeField] private Button trainButton;
-        [SerializeField] private TextMeshProUGUI shortAdLabel;
         [SerializeField] private TextMeshProUGUI longRestLabel;
-        [SerializeField] private TextMeshProUGUI longNoteLabel;
         [SerializeField] private TextMeshProUGUI trainButtonLabel;
-        [SerializeField] private TextMeshProUGUI trainNextLabel;
+
+        /// <summary>Seconds between the three camp idle starts, so they never breathe in lockstep.</summary>
+        private const float CampPhaseStep = 0.12f;
 
         private GameManager manager;
         private CampService camp;
@@ -165,7 +163,10 @@ namespace IdleRPG.UI
                 }
 
                 animator.SetSlotSize(actor.rectTransform.sizeDelta);
-                animator.FacingLeft = false;
+                // The left hero faces right; the mage (third) is flipped to face the fire; the centre keeps its
+                // native facing (side-view art cannot look down at a fire below it).
+                animator.FacingLeft = i == 2;
+                animator.PhaseOffset = i * CampPhaseStep;
 
                 HeroData hero = manager.Party.GetHero(i);
 
@@ -176,47 +177,13 @@ namespace IdleRPG.UI
             }
         }
 
-        /// <summary>Gives the camp choice buttons the chunky plate face.</summary>
-        private void RestylePlates()
-        {
-            RestylePlate(shortFreeButton);
-            RestylePlate(shortAdButton);
-            RestylePlate(longRestButton);
-            RestylePlate(trainButton);
-        }
-
-        private static void RestylePlate(Button target)
-        {
-            Image face = target != null ? target.targetGraphic as Image : null;
-
-            if (face != null && face.sprite != UiRuntime.PlateSprite)
-            {
-                face.sprite = UiRuntime.PlateSprite;
-                face.type = Image.Type.Sliced;
-            }
-
-            if (target != null && target.GetComponent<UiPlateButton>() == null)
-            {
-                Color fill = face != null ? face.color : UiTheme.RowLight;
-                Coffee.UIEffects.UIEffect fx = target.gameObject.AddComponent<Coffee.UIEffects.UIEffect>();
-                UiPlateButton plate = target.gameObject.AddComponent<UiPlateButton>();
-                plate.Bind((RectTransform)target.transform, face, null, fx, target, fill, fill);
-            }
-        }
-
         private void WireButtons()
         {
             RemoveButtonListeners();
-            RestylePlates();
 
             if (shortFreeButton != null)
             {
-                shortFreeButton.onClick.AddListener(() => camp?.ChooseShortRest(false));
-            }
-
-            if (shortAdButton != null)
-            {
-                shortAdButton.onClick.AddListener(() => camp?.ChooseShortRest(true));
+                shortFreeButton.onClick.AddListener(() => camp?.ChooseShortRest());
             }
 
             if (longRestButton != null)
@@ -235,11 +202,6 @@ namespace IdleRPG.UI
             if (shortFreeButton != null)
             {
                 shortFreeButton.onClick.RemoveAllListeners();
-            }
-
-            if (shortAdButton != null)
-            {
-                shortAdButton.onClick.RemoveAllListeners();
             }
 
             if (longRestButton != null)
@@ -270,8 +232,22 @@ namespace IdleRPG.UI
                         hpLabels[i].SetText(hero == null
                             ? "-"
                             : hero.IsAlive
-                                ? $"{hero.DisplayName}  {hero.CurrentHealth:0}/{hero.MaxHealth:0}"
-                                : $"{hero.DisplayName}  FALLEN");
+                                ? hero.DisplayName.ToUpperInvariant()
+                                : "FALLEN");
+                    }
+
+                    if (hpBars != null && i < hpBars.Length && hpBars[i] != null)
+                    {
+                        if (hero != null && hero.MaxHealth > 0d)
+                        {
+                            hpBars[i].SetFill((float)(hero.CurrentHealth / hero.MaxHealth), instant: true);
+                            hpBars[i].SetValueLabel(hero.CurrentHealth, hero.MaxHealth);
+                        }
+                        else
+                        {
+                            hpBars[i].SetFill(0f, instant: true);
+                            hpBars[i].SetLabel("-");
+                        }
                     }
 
                     if (actorImages != null && i < actorImages.Length && actorImages[i] != null)
@@ -283,62 +259,15 @@ namespace IdleRPG.UI
                 }
             }
 
-            if (tokenLabel != null && camp != null)
+            if (longRestLabel != null)
             {
-                tokenLabel.SetText(camp.Tokens == 1
-                    ? "1 LONG-REST TOKEN"
-                    : $"{camp.Tokens} LONG-REST TOKENS");
+                bool free = monetization != null && monetization.AdsDisabledByNoAds;
+                longRestLabel.SetText(free ? "+20% HP (Free)" : "+20% HP (Ad)");
             }
 
-            if (trainingLabel != null && manager != null)
+            if (camp != null && trainButtonLabel != null)
             {
-                trainingLabel.SetText($"TRAINED +{manager.RunTrainAttackBonus} ATK | +{manager.RunTrainDefenseBonus} DEF");
-            }
-
-            if (longRestButton != null && camp != null)
-            {
-                UiPlateButton longRestPlate = longRestButton.GetComponent<UiPlateButton>();
-
-                if (longRestPlate != null)
-                {
-                    longRestPlate.SetInteractable(camp.CanLongRest);
-                }
-                else
-                {
-                    longRestButton.interactable = camp.CanLongRest;
-                }
-
-                if (longRestLabel != null)
-                {
-                    longRestLabel.SetText(camp.CanLongRest ? "30% + REVIVE" : "TOKEN SPENT");
-                }
-
-                if (longNoteLabel != null)
-                {
-                    longNoteLabel.SetText(camp.Tokens == 1 ? "1 TOKEN" : $"{camp.Tokens} TOKENS");
-                }
-            }
-
-            if (shortAdLabel != null)
-            {
-                shortAdLabel.SetText(monetization != null && monetization.AdsDisabledByNoAds
-                    ? "20% FREE"
-                    : "20% (AD)");
-            }
-
-            if (camp != null)
-            {
-                bool nextAttack = camp.TrainNextIsAttack;
-
-                if (trainButtonLabel != null)
-                {
-                    trainButtonLabel.SetText(nextAttack ? "+1 ATK" : "+1 DEF");
-                }
-
-                if (trainNextLabel != null)
-                {
-                    trainNextLabel.SetText(nextAttack ? "NEXT: DEF" : "NEXT: ATK");
-                }
+                trainButtonLabel.SetText(camp.TrainNextIsAttack ? "+1 ATK" : "+1 DEF");
             }
         }
     }

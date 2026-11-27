@@ -84,7 +84,7 @@ gear opens a minimal pause with resume, sound and quit — it cannot shop, train
 
 - One row per token track from `AscensionManager.TokenUpgrades`.
 - **Live tracks:** **War Mastery** (+20% damage/level), **Gold Mastery** (+20% gold/level), **Vitality Mastery**
-  (+20% HP/level), and **Dawn Ward** (one revive per run; 20 tokens, max 1). One level per tap.
+  (+20% HP/level), and **Revive** (one revive per run; 20 tokens, max 1). One level per tap.
 - Header reads `PERK POINTS <n>`.
 - Button states: `Buy <cost>`, `MAX`, or disabled with `Need <cost> tokens - you have <n>`.
 - There is **no** END RUN button here (the old `AscensionPanelUI` is retired and not in the scene).
@@ -144,7 +144,7 @@ gear opens a minimal pause with resume, sound and quit — it cannot shop, train
 | Overlay | Opens on | Choices |
 |---|---|---|
 | `BoonCardUI` | `PartyLevelGained` with picks owed | pick 1 of 3, reroll |
-| `DefeatModalUI` | `GameEvents.DefeatShown` | **REVIVE** (Dawn Ward perk, once per run) or **END RUN** (bank + lobby) |
+| `DefeatModalUI` | `GameEvents.DefeatShown` | **REVIVE** (Revive perk, once per run) or **END RUN** (bank + lobby) |
 | `GearMenuUI` (pause) | header gear during a fight | **RESUME**, **SOUND: ON/OFF**, **QUIT RUN** → second confirm (**END RUN** / **KEEP FIGHTING**) |
 | `OfflineRewardsPopup` | `GameEvents.OfflineRewardsReady` | **unreachable today**: only the debug key / editor menu calls `EvaluateOffline` (defect R9) |
 | `ToastUI` | most events | one line, no input |
@@ -165,7 +165,7 @@ gear opens a minimal pause with resume, sound and quit — it cannot shop, train
 | Combat | boss wave starts | `OnWaveStarted` | Boss | state reflects the boss |
 | Boss | boss cleared | stage advance | Combat | next stage |
 | Combat/Boss | party wipe | `OnPartyWiped` → `EndRunOnWipe` | Defeat | run stops; card shows; `runActive = false` |
-| Defeat | REVIVE | `ReviveFromDefeat` (Dawn Ward) | Combat | same stage; `runActive = true`; revive flag saved |
+| Defeat | REVIVE | `ReviveFromDefeat` (Revive) | Combat | same stage; `runActive = true`; revive flag saved |
 | Defeat | END RUN | `ConfirmEndRun` → `EndRun` | **Lobby** | bank tokens, reset run |
 | Combat/Boss | header gear → **PAUSE** → QUIT RUN → confirm | `GearMenuUI` → `EndRun` | **Lobby** | banks, resets, no rejoin |
 | any | F1 debug | `EndRun` | Lobby | same as QUIT RUN |
@@ -185,7 +185,7 @@ gear opens a minimal pause with resume, sound and quit — it cannot shop, train
 |---|---|
 | Gold, Training nodes | Party XP and level |
 | Perk Points, perk levels | Boons taken this run |
-| Gems, daily streak day | Camp tokens and camp checkpoint |
+| Gems, daily streak day | Camp checkpoint |
 | Highest stage, lifetime totals | Hero stat levels bought with gold |
 | Ability assignments | Revive-used flag (saved with the run) |
 | Save schema **v12** (`runActive` is additive) | — |
@@ -207,7 +207,7 @@ lost. The card says END RUN banks them. Banking a pending wipe on boot is the fo
 | **Perk Points** (tokens) | `EndRun`, scaled by depth | **ASCEND** tracks, TRAIN **party** column | **Yes** | ASCEND + TRAIN |
 | **Gems** | daily streak, first clear every 5th stage | **Golden Foundry** (+5% gold per level) | **Yes** | SHOP |
 | **Party XP** | kills | party levels → boon picks | **No** | XP bar |
-| **Camp tokens** | one per run | Long Rest, camp training | **No** | camp strip |
+| **Camp choices** | every camp | Short Rest (10%), Long Rest (20%, ad), Train (free stats) | **No** | camp strip |
 | **Highest stage / lifetime totals** | play | — | **Yes** | header / debug |
 
 ### 7.1 Money path today

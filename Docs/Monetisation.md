@@ -64,7 +64,7 @@ existing `IIapService` / `IAdService` / `AdCapsService` seams, so real SDKs swap
 | Gem income | Daily streak + first clear of every 5th stage | live | keep |
 | Gem sinks | Offline cap +1h, Fast-Forward (+1h income) | code exists in the dead shop | **cut** (idle-era, out of the loop) |
 
-**Revive is not monetised.** The one revive per run is **Dawn Ward**, an ASCEND perk bought with 20 Perk Points
+**Revive is not monetised.** The one revive per run is **Revive**, an ASCEND perk bought with 20 Perk Points
 (max 1). There is no rewarded-ad revive, no revive IAP, and No Ads does not affect it.
 
 ### Rules that do not bend

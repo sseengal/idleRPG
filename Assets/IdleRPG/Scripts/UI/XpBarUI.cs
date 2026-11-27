@@ -8,11 +8,12 @@ using UnityEngine.UI;
 namespace IdleRPG.UI
 {
     /// <summary>
-    /// The party XP bar: every label on the left, a blue fill on the right, and the fill that moves as XP lands.
+    /// The party XP bar: the EXP word and the numbers on the left, a blue fill on the right, and the fill that moves
+    /// as XP lands.
     ///
-    /// ELI5: the shared experience bar for the three heroes. Level and numbers sit together on the left so the eye
-    /// finds them in one place. The blue part grows in steps while blue motes fly in from the enemy that paid. When
-    /// the bar fills, it flashes and starts the next level from empty.
+    /// ELI5: the shared experience bar for the three heroes. The word and the numbers sit together on the left so the
+    /// eye finds them in one place. The blue part grows in steps while blue motes fly in from the enemy that paid.
+    /// When the bar fills, it flashes and starts the next level from empty.
     ///
     /// It draws only what the game tells it: <see cref="GameManager.Progression"/> owns the maths and publishes a
     /// receipt per payment (<see cref="GameEvents.PartyXpGained"/>). The receipt carries the start and end points,
@@ -69,7 +70,6 @@ namespace IdleRPG.UI
 
         private readonly List<GainPacket> gains = new List<GainPacket>();
 
-        private TextMeshProUGUI levelLabel;
         private TextMeshProUGUI valueLabel;
         private RectTransform trackRect;
         private RectTransform fillRect;
@@ -84,7 +84,6 @@ namespace IdleRPG.UI
         private bool atMax;
 
         private float flashElapsed = 99f;
-        private float punchElapsed = 99f;
 
         private void Awake()
         {
@@ -138,7 +137,6 @@ namespace IdleRPG.UI
 
             displayedProgress = targetProgress = ProgressFor(playLevel, playXp);
 
-            UpdateLevelLabel();
             UpdateValueLabel();
             SetFill(displayedProgress);
             SnapEffects();
@@ -277,7 +275,6 @@ namespace IdleRPG.UI
                 FlashLevelUp();
             }
 
-            UpdateLevelLabel();
             UpdateValueLabel();
             targetProgress = ProgressFor(playLevel, playXp);
         }
@@ -294,7 +291,6 @@ namespace IdleRPG.UI
             playXp = xp < 0d ? 0d : xp;
             atMax = max;
 
-            UpdateLevelLabel();
             UpdateValueLabel();
             targetProgress = ProgressFor(playLevel, playXp);
         }
@@ -316,14 +312,6 @@ namespace IdleRPG.UI
             return (float)(progress < 0d ? 0d : (progress > 1d ? 1d : progress));
         }
 
-        private void UpdateLevelLabel()
-        {
-            if (levelLabel != null)
-            {
-                levelLabel.SetText("LV " + playLevel);
-            }
-        }
-
         private void UpdateValueLabel()
         {
             if (valueLabel == null)
@@ -338,28 +326,21 @@ namespace IdleRPG.UI
             }
 
             double required = progression.RequiredXpFor(playLevel);
-            valueLabel.SetText(Utils.NumberFormatter.Format(playXp) + "/" + Utils.NumberFormatter.Format(required));
+            valueLabel.SetText(Utils.NumberFormatter.Format(playXp) + " / " + Utils.NumberFormatter.Format(required));
         }
 
         private void FlashLevelUp()
         {
             flashElapsed = 0f;
-            punchElapsed = 0f;
         }
 
         private void SnapEffects()
         {
             flashElapsed = 99f;
-            punchElapsed = 99f;
 
             if (flashImage != null)
             {
                 flashImage.color = UiTheme.WithAlpha(UiTheme.XpFlash, 0f);
-            }
-
-            if (levelLabel != null)
-            {
-                levelLabel.rectTransform.localScale = Vector3.one;
             }
         }
 
@@ -378,22 +359,6 @@ namespace IdleRPG.UI
                 else if (flashImage.color.a != 0f)
                 {
                     flashImage.color = UiTheme.WithAlpha(UiTheme.XpFlash, 0f);
-                }
-            }
-
-            // Level label punch: a single small scale beat, so the new level is seen before it is read.
-            if (levelLabel != null)
-            {
-                if (punchElapsed < levelFlashSec)
-                {
-                    punchElapsed += dt;
-                    float t = Mathf.Clamp01(punchElapsed / Mathf.Max(0.01f, levelFlashSec));
-                    float scale = 1f + 0.12f * Mathf.Sin(t * Mathf.PI);
-                    levelLabel.rectTransform.localScale = new Vector3(scale, scale, 1f);
-                }
-                else if (levelLabel.rectTransform.localScale.x != 1f)
-                {
-                    levelLabel.rectTransform.localScale = Vector3.one;
                 }
             }
         }
@@ -477,7 +442,7 @@ namespace IdleRPG.UI
         // ------------------------------------------------------------------
         private void Build()
         {
-            if (levelLabel != null)
+            if (valueLabel != null)
             {
                 return;
             }
@@ -496,7 +461,7 @@ namespace IdleRPG.UI
             UiRuntime.Stretch(row);
 
             HorizontalLayoutGroup rowLayout = rowNode.AddComponent<HorizontalLayoutGroup>();
-            rowLayout.padding = new RectOffset((int)UiSpace.Space8, 0, 0, 0);
+            rowLayout.padding = new RectOffset((int)UiSpace.Space8, (int)UiSpace.Space8, 0, 0);
             rowLayout.spacing = UiSpace.Space16;
             rowLayout.childAlignment = TextAnchor.MiddleLeft;
             rowLayout.childControlWidth = true;
@@ -504,7 +469,8 @@ namespace IdleRPG.UI
             rowLayout.childForceExpandWidth = false;
             rowLayout.childForceExpandHeight = false;
 
-            // Level and numbers travel together with their own, tighter gap.
+            // The word and the numbers travel together with their own, tighter gap. Both use the same small role:
+            // the word is a label, the numbers are the data.
             GameObject textNode = UiRuntime.CreateNode("Text", row);
             RectTransform textGroup = (RectTransform)textNode.transform;
             UiRuntime.Stretch(textGroup);
@@ -518,12 +484,12 @@ namespace IdleRPG.UI
             textLayout.childForceExpandWidth = false;
             textLayout.childForceExpandHeight = false;
 
-            levelLabel = UiRuntime.CreateText(textGroup, "Level", "LV 1", UiType.Role.Small,
+            TextMeshProUGUI expLabel = UiRuntime.CreateText(textGroup, "Exp", "EXP", UiType.Role.Micro,
                 TextAlignmentOptions.MidlineLeft, UiTheme.Text);
-            UiType.ApplyAuto(levelLabel, UiType.Role.Small);
-            UiRuntime.Stretch(levelLabel.rectTransform);
+            UiType.ApplyAuto(expLabel, UiType.Role.Micro);
+            UiRuntime.Stretch(expLabel.rectTransform);
 
-            valueLabel = UiRuntime.CreateText(textGroup, "Value", "0/0", UiType.Role.Micro,
+            valueLabel = UiRuntime.CreateText(textGroup, "Value", "0 / 0", UiType.Role.Micro,
                 TextAlignmentOptions.MidlineLeft, UiTheme.Text);
             UiType.ApplyAuto(valueLabel, UiType.Role.Micro);
             UiRuntime.Stretch(valueLabel.rectTransform);

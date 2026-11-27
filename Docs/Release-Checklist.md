@@ -80,8 +80,8 @@
 | [ ] | **Gear in a fight opens PAUSE**; resume restores time | B | time stops, resumes at the same wave |
 | [ ] | QUIT RUN asks a second confirm, then ends and banks | B | KEEP FIGHTING returns; END RUN opens the lobby |
 | [ ] | **BATTLE tab** returns to the lobby centre | B | the chapter card and START show; **no run starts** |
-| [ ] | Party wipe → RUN OVER card → REVIVE once (**Dawn Ward**) → same stage | B | no ad; second wipe hides the button |
-| [ ] | Dawn Ward bought in **ASCEND** (20 tokens, max 1) | B | fourth row; revive available next run |
+| [ ] | Party wipe → RUN OVER card → REVIVE once (**Revive**) → same stage | B | no ad; second wipe hides the button |
+| [ ] | Revive bought in **ASCEND** (20 tokens, max 1) | B | fourth row; revive available next run |
 | [ ] | Party wipe → **END RUN** banks Perk Points → lobby | B | token count grows by the preview value |
 | [ ] | Run-over card reads **END RUN** and returns to the lobby | B | label matches what happens |
 | [ ] | Revive used, app killed mid-fight, reopen → revive still used | B | flag saved; no free second revive |

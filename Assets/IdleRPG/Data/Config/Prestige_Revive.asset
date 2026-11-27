@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Prestige_Revive
   m_EditorClassIdentifier: IdleRPG.Runtime::IdleRPG.Data.PrestigeUpgradeData
   upgradeID: Prestige_Revive
-  displayName: Dawn Ward
+  displayName: Revive
   description: One revive per run. Refills every new run.
   effectType: 5
   costCurrency: 2

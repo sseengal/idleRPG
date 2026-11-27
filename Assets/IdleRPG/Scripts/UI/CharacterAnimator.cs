@@ -60,6 +60,12 @@ namespace IdleRPG.UI
         /// <summary>Whose look is wanted: true = face left (enemies). Combined with the art's own facing.</summary>
         public bool FacingLeft { get; set; }
 
+        /// <summary>
+        /// Seconds to hold the first frame of a LOOPING clip. Three camp actors with 0 / 0.12 / 0.24 start on
+        /// different frames, so they no longer breathe in lockstep. One-shot clips ignore it.
+        /// </summary>
+        public float PhaseOffset { get; set; }
+
         private Action onDone;
 
         public bool HasArt => art != null && art.HasAnimation;
@@ -239,7 +245,7 @@ namespace IdleRPG.UI
             clip = frames;
             this.loop = loop;
             frameDuration = Mathf.Max(0.01f, duration);
-            timer = 0f;
+            timer = loop ? -Mathf.Max(0f, PhaseOffset) : 0f;
             cursor = 0;
 
             ApplyClipSize();

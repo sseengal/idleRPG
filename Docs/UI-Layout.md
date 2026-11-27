@@ -73,7 +73,7 @@ The header's own numbers, all from `UiSpace`:
 | Menu | **three bars, no plate**; icon at the bar's right edge, so it sits halfway between the last plate and the screen edge | `UiRuntime.HamburgerSprite` |
 | Menu tap square | 144 × 144, right edge on the screen edge | `UiTouch.IconButtonHitSize` |
 | Row | 920 wide (stops one icon + one page margin short of the bar's right edge); 8 gaps | `MvpSceneBuilder.Battle.cs` |
-| Boost badge | a fourth row item; the token chip hides while it shows | `HudHeaderUI.OnGoldBoostChanged` |
+| Boost badge | a third row item; hidden until an ad boost runs | `HudHeaderUI.OnGoldBoostChanged` |
 
 **One rule now: extra height belongs to the page, the bars never move.** `PinBar` in `MvpSceneBuilder.cs`
 builds the header from `UiSpace.HeaderBandHeight`, so it cannot change size with the screen.
@@ -103,20 +103,17 @@ one and a half fewer lines at once; the 100-line scrollback is unchanged.
 ### 2c. The header is a row, not hand-placed chips (2026-10-14)
 
 The currency chips and a three-bar (hamburger) menu button live in one `ChipRow` under the header, driven by a
-`HorizontalLayoutGroup`. The three chips carry `LayoutElement.flexibleWidth = 1` and divide the width; the menu
-button takes a fixed 110-unit slice at the end. **2026-11-12:** RANKS (the leaderboard button) is switched off;
-the hamburger replaces it, and its tap action is intentionally not wired yet. The header bar now wears the
-chunky `ui_frame` plate (the same riveted look as the lobby panels).
+`HorizontalLayoutGroup`. The **two** chips (gold, gems) carry `LayoutElement.flexibleWidth = 1` and divide the
+width; the menu button takes a fixed slice at the end. **2026-11-27:** the key/prestige chip is removed; Perk
+Points live on ASCEND. The boost chip is a row item, shown only while an ad boost runs.
 
 Why: they used to be placed by hand — the chips at 0.03 / 0.35 / 0.65 of the header, and the runtime button
-at 0.88 — and the token chip and the button **overlapped by about 95 units**. That is how a long currency value
-ended up sliding under the button. Two numbers, tuned separately, never compared.
+at 0.88 — and an earlier token chip and the button **overlapped by about 95 units**. That is how a long currency
+value ended up sliding under the button. Two numbers, tuned separately, never compared.
 
-Measured in Play (row width 1004): Gold 38–328, Gems 336–626, Tokens 634–924, menu 932–1042 — all 8 units
-apart, 77 tall, no overlap.
+Gold and Gems share the row; the menu takes its fixed slice. No overlap.
 
-The boost chip stays on the **header**, not in the row: it is an overlay badge, not a fourth currency, so the
-layout group must not size it.
+The boost chip is a row item, hidden until an ad boost runs; it takes the third block while active.
 
 **Lobby centre (2026-11-12).** The centre panel is the chapter illustration (`Art/Greenwake1-clean 1.png`),
 sized to its own 1400x764 aspect so there is no letterbox. The chapter name is a pixel wordmark image

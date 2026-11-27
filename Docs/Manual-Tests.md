@@ -491,17 +491,17 @@ Run on the battle page, fresh save or after F9 (delete save). Everything else is
 
 ---
 
-## 2p. Dawn Ward revive — one per run (added 2026-11-22)
+## 2p. Revive perk — one per run (added 2026-11-22)
 
-Setup: ASCEND shows four rows: War Mastery, Gold Mastery, Vitality Mastery, **Dawn Ward**. Grant 20 tokens if needed.
+Setup: ASCEND shows four rows: War Mastery, Gold Mastery, Vitality Mastery, **Revive**. Grant 20 tokens if needed.
 
-- [ ] Dawn Ward costs **20**, shows `0/1`, and becomes `MAX` after one purchase.
+- [ ] Revive costs **20**, shows `0/1`, and becomes `MAX` after one purchase.
 - [ ] Start a run and die. The card shows **REVIVE** and "One revive left this run."; **END RUN** is always there.
 - [ ] Tap REVIVE. The party is healed and the **same stage** resumes.
 - [ ] Die again in the same run. The REVIVE button is **gone**; the card says "Revive used this run - END RUN to go again."
 - [ ] Revive, then stop/reopen the app mid-fight. The run resumes and REVIVE is still used (the flag is saved).
 - [ ] END RUN, then START a new run. REVIVE is available again.
-- [ ] With no Dawn Ward, the card shows no REVIVE button and the line "Revive is an ASCEND perk."
+- [ ] With no Revive, the card shows no REVIVE button and the line "Revive is an ASCEND perk."
 - [ ] No ad appears anywhere in this flow. Buying No Ads changes nothing about the revive.
 
 ---
@@ -567,22 +567,22 @@ Setup: ASCEND shows four rows: War Mastery, Gold Mastery, Vitality Mastery, **Da
 The run build. Everything here is dev-testable with the keys `X` (+a quarter of the bar) and `V` (+one whole level).
 
 ### XP and levels
-- [ ] A kill moves the XP bar between the arena and the ability buttons (blue fill; `LV n` and `xp/needed` together
+- [ ] A kill moves the XP bar between the arena and the ability buttons (blue fill; `EXP` and `xp / needed` together
       on the left).
 - [ ] The kill's blue motes are coin-sized, 3-5 of them, and fly from the dead enemy into the bar. The blue part
       moves forward as each mote lands, not all at once.
-- [ ] A level-up makes the bar flash blue and the level label beat once; the new level starts from empty.
+- [ ] A level-up makes the bar flash blue once; the new level starts from empty.
 - [ ] XP paid with no enemy (the `X` and `V` keys) still fills, in a few visible steps, without motes.
-- [ ] The bar always reads `xp/needed`; no pick text appears on it. The level-up card carries the pick count.
+- [ ] The bar always reads `xp / needed`; no pick text appears on it. The level-up card carries the pick count.
 - [ ] The gap between the numbers and the blue bar stays the same as the numbers grow, and the bar reaches the
-      right margin.
+      band's right padding.
 - [ ] The **first** pick lands around wave 2, not after four kills: the feature should arrive as a surprise, not
       instantly.
 - [ ] After that, picks keep coming but stretch: a run should land roughly **10-12** of them, with the last ones close
       to where the party dies. If picks stop dead while the run continues, the curve (not a cap) needs re-fitting.
 - [ ] `V` **opens the level-up card** and the fight stops dead: no hero and no enemy acts while it is up.
 - [ ] Quit and relaunch mid-run: level, XP and queued picks come back.
-- [ ] End the run (or ascend): level, XP and picks reset to `LV 1`.
+- [ ] End the run (or ascend): level, XP and picks reset (level 1, 0 XP, no picks).
 - [ ] The bar **never** freezes on `MAX` mid-run (there is no level cap; see Docs/Boons.md section 9).
 
 ### The card

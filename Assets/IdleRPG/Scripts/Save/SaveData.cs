@@ -60,7 +60,7 @@ namespace IdleRPG.Save
         public bool runActive;
 
         /// <summary>
-        /// True when this run's one Dawn Ward revive has been used (additive; older saves read false). Persisted so
+        /// True when this run's one Revive revive has been used (additive; older saves read false). Persisted so
         /// closing the app after a revive cannot restore a second free revive.
         /// </summary>
         public bool runReviveUsed;

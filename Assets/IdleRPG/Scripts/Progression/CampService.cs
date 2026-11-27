@@ -9,8 +9,9 @@ namespace IdleRPG.Progression
     /// The camp interlude: three choices between waves, then the fight resumes.
     ///
     /// ELI5: after waves 3, 6 and 9 the party stops at a fire. Short Rest is a small free heal, Long Rest is the
-    /// big heal plus revive (one token per run), and Train alternates +1 ATK / +1 DEF for the rest of the run.
-    /// The camp only decides; healing and stats belong to the game, not to this class.
+    /// bigger heal after a rewarded ad, and Train alternates +1 ATK / +1 DEF for the rest of the run. A camp heal
+    /// also brings a fallen hero back at the healed fraction. The camp only decides; healing and stats belong to
+    /// the game, not to this class.
     /// </summary>
     public sealed class CampService
     {
@@ -35,10 +36,6 @@ namespace IdleRPG.Progression
 
         /// <summary>The camp handed the screen back. The director resumes the wave.</summary>
         public event Action Closed;
-
-        public int Tokens => manager != null ? manager.RunCampTokens : 0;
-
-        public bool CanLongRest => Tokens > 0;
 
         /// <summary>Train alternates ATK and DEF, based on the two run bonuses.</summary>
         public bool TrainNextIsAttack =>
@@ -80,31 +77,47 @@ namespace IdleRPG.Progression
             pendingStage = stage;
             pendingWave = clearedWave;
             IsOpen = true;
+            AnnounceCamp();
             Opened?.Invoke();
             return true;
+        }
+
+        /// <summary>
+        /// The camp owns the log while it is open: the fight's history is wiped and one line says why the screen
+        /// stopped. The rest/train lines are written only after the choice closes the camp.
+        /// </summary>
+        private static void AnnounceCamp()
+        {
+            BattleLog.Clear();
+            BattleLog.Append("The party camps for the night..", BattleLogKind.Heal);
         }
 
         /// <summary>True while the rewarded ad is playing; the camp ignores taps until it ends.</summary>
         public bool IsAdPending { get; private set; }
 
-        /// <summary>Free 10%, or 20% after the ad (free for No Ads). Does not spend the token.</summary>
-        public void ChooseShortRest(bool useAd)
+        /// <summary>Free 10% heal. The fallen come back at the same fraction.</summary>
+        public void ChooseShortRest()
         {
             if (!IsOpen || IsAdPending)
             {
                 return;
             }
 
-            if (!useAd || monetization == null)
+            ApplyShortRest(manager.Balance.CampShortRestPercent + TrainingCampHealBonus());
+        }
+
+        /// <summary>20% heal after a rewarded ad. The fallen come back at the same fraction. Every camp.</summary>
+        public void ChooseLongRest()
+        {
+            if (!IsOpen || IsAdPending)
             {
-                ApplyShortRest(manager.Balance.CampShortRestPercent + TrainingCampHealBonus());
                 return;
             }
 
             IsAdPending = true;
 
-            bool started = monetization.WatchAdForCampRest(
-                () => ApplyShortRest(manager.Balance.CampShortRestAdPercent + TrainingCampHealBonus()),
+            bool started = monetization != null && monetization.WatchAdForCampRest(
+                ApplyLongRest,
                 () => IsAdPending = false);
 
             if (!started)
@@ -113,17 +126,10 @@ namespace IdleRPG.Progression
             }
         }
 
-        /// <summary>30% + revive. Spends the one run token.</summary>
-        public void ChooseLongRest()
+        private void ApplyLongRest()
         {
-            if (!IsOpen || IsAdPending || !manager.TryConsumeCampToken())
-            {
-                return;
-            }
-
-            manager.HealPartyFraction(manager.Balance.CampLongRestPercent + TrainingCampHealBonus(), manager.Balance.CampRevivePercent);
-            BattleLog.Append($"The party makes camp (+{manager.Balance.CampLongRestPercent * 100f:0}% HP, fallen revived).",
-                BattleLogKind.Heal);
+            double fraction = manager.Balance.CampLongRestPercent + TrainingCampHealBonus();
+            manager.HealPartyFraction(fraction, fraction);
             Finish();
         }
 
@@ -154,6 +160,7 @@ namespace IdleRPG.Progression
             IsOpen = true;
             pausedCombatForDebug = true;
             manager.Combat.Pause(CombatManager.PauseReasons.Camp);
+            AnnounceCamp();
             Opened?.Invoke();
         }
 
@@ -173,8 +180,8 @@ namespace IdleRPG.Progression
             }
 
             IsAdPending = false;
-            manager.HealPartyFraction(fraction, 0d);
-            BattleLog.Append($"The party takes a short rest (+{fraction * 100f:0}% HP).", BattleLogKind.Heal);
+            manager.HealPartyFraction(fraction, fraction);
+            BattleLog.Append("The party takes a short rest.", BattleLogKind.Heal);
             Finish();
         }
 

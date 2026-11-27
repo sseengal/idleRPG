@@ -422,8 +422,10 @@ namespace IdleRPG.EditorTools
         }
 
         /// <summary>
-        /// The party XP bar: a thin band between the header and the page. Built here, not hand-placed, so a scene
-        /// rebuild can never drop it; <see cref="IdleRPG.UI.XpBarUI"/> draws its own level / fill / numbers.
+        /// The party XP bar: a thin band between the arena and the ability strip. Built here, not hand-placed, so a
+        /// scene rebuild can never drop it; <see cref="IdleRPG.UI.XpBarUI"/> draws the EXP word, the fill and the
+        /// numbers. The band sits in the same 32-unit column as the arena and the cards, and the row inside it pads
+        /// one Space8, so the words and the bar share one edge at both sides.
         /// </summary>
         private static void BuildXpBar(RectTransform page)
         {
@@ -431,7 +433,7 @@ namespace IdleRPG.EditorTools
 
             UiFactory.Anchor(bar.GetComponent<RectTransform>(),
                 new Vector2(0f, XpBandBottom), new Vector2(1f, XpBandTop),
-                UiSpace.Space8, UiSpace.Space2, UiSpace.Space8, UiSpace.Space2);
+                UiSpace.PageMargin, UiSpace.Space2, UiSpace.PageMargin, UiSpace.Space2);
 
             bar.AddComponent<IdleRPG.UI.XpBarUI>();
         }

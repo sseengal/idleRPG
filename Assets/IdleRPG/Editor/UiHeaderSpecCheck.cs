@@ -151,6 +151,16 @@ namespace IdleRPG.EditorTools
             RectTransform safeArea = header.parent as RectTransform;
             float canvasWidth = safeArea != null ? safeArea.rect.width : 1080f;
 
+            // A freshly built scene has not run the row's layout group yet: the chips still hold their default
+            // 100x100 rect. Force one pass so the check measures what the player sees.
+            Canvas.ForceUpdateCanvases();
+            RectTransform layoutRow = Find("/HUD/Canvas/SafeArea/Header/ChipRow");
+
+            if (layoutRow != null)
+            {
+                UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(layoutRow);
+            }
+
             // The bar draws NOTHING (owner, 2026-11-25): the plates are the only surfaces. A bar image means the old
             // light-blue container came back.
             UnityEngine.UI.Image bar = header.GetComponent<UnityEngine.UI.Image>();
@@ -213,7 +223,7 @@ namespace IdleRPG.EditorTools
 
         private static void CheckChips()
         {
-            string[] chips = { "GoldChip", "GemChip", "TokenChip" };
+            string[] chips = { "GoldChip", "GemChip" };
 
             foreach (string chipName in chips)
             {
@@ -221,7 +231,7 @@ namespace IdleRPG.EditorTools
 
                 if (chip == null)
                 {
-                    Add("Header", $"No {chipName}. The row must hold three currency chips.");
+                    Add("Header", $"No {chipName}. The row must hold two currency chips.");
                     continue;
                 }
 

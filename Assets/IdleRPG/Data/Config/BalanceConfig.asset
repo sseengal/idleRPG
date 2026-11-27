@@ -45,7 +45,7 @@ MonoBehaviour:
   campEveryWaves: 3
   campShortRestPercent: 0.1
   campShortRestAdPercent: 0.2
-  campLongRestPercent: 0.3
+  campLongRestPercent: 0.2
   campRevivePercent: 0.2
   campTokensPerRun: 1
   campTrainAttackPerTrain: 1

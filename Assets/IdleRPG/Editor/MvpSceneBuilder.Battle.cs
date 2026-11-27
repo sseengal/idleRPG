@@ -76,13 +76,10 @@ namespace IdleRPG.EditorTools
             // runtime by HudHeaderUI) takes a fixed slice at the end.
             TextMeshProUGUI goldText = CreateCurrencyChip(row.transform, "GoldChip", "ui_icon_gold");
             TextMeshProUGUI gemText = CreateCurrencyChip(row.transform, "GemChip", "ui_icon_gem");
-            TextMeshProUGUI tokenText = CreateCurrencyChip(row.transform, "TokenChip", "ui_icon_token");
-
 
             // Boost badge: hidden until an ad boost is running. It is a ROW item, not a floating overlay - it used to
             // sit at fixed fractions over the header, which put it on top of the gold chip whenever the badge
-            // appeared. While it shows, the token chip hides, so the row keeps four items and the chips never
-            // change width.
+            // appeared. While it shows, the row has three items instead of two.
             Image boostChip = CreateCurrencyPlate(row.transform, "BoostChip");
             LayoutElement boostElement = boostChip.gameObject.AddComponent<LayoutElement>();
             boostElement.flexibleWidth = 1f;
@@ -95,8 +92,6 @@ namespace IdleRPG.EditorTools
 
             SceneWiringUtility.SetField(view, "goldText", goldText);
             SceneWiringUtility.SetField(view, "gemsText", gemText);
-            SceneWiringUtility.SetField(view, "tokensText", tokenText);
-            SceneWiringUtility.SetField(view, "tokenChip", tokenText.transform.parent.gameObject);
             SceneWiringUtility.SetField(view, "boostChip", boostChip.gameObject);
             SceneWiringUtility.SetField(view, "boostText", boostText);
 

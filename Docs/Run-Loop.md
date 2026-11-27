@@ -59,11 +59,10 @@ A run is measured in **stages reached**, not story nodes.
 | Gems | milestones, IAP, streak | shortcuts, cosmetics | Yes | `CurrencyType.Gems` |
 
 > **Status correction, 2026-11-21 (code wins):** the built game keeps **gold across a run end**. The run reset wipes
-> hero stat levels, party XP, boons and camp tokens, but **not** gold. The only gold sink is the **TRAIN** page
+> hero stat levels, party XP and boons, but **not** gold. The only gold sink is the **TRAIN** page
 > (`TrainingService`, 1,357 permanent nodes). `GameManager.Stages.cs:190` says so in one line: *"Gold is PERMANENT
-> now (spent on Training) - a run end no longer wipes it."* The "run upgrades, wiped on death" layer in §5.1 is
-> **design, not built**. The decided mid-run sink is **camp Train paid in gold** (`Game-Design-Document.md` §6,
-> decision 2026-11-22).
+> now (spent on Training) - a run end no longer wipes it."* Camp Train is **free** (owner, 2026-11-27); the earlier
+> "paid in gold" plan is cancelled. Camp tokens are retired; the Long Rest is a rewarded ad.
 
 - The old ascension reset (**`GameManager.ResetProgressForAscension`**) still exists for debug, but the live run-end
   path is **`EndRun` → `BankRunReward`**, and it keeps gold.
@@ -104,7 +103,7 @@ Rules to lock:
 - **Closing the app does not end the run.** A live run reopens into the same fight, with no lobby and no upgrade
   window. Between runs, the app reopens into the lobby.
 - **Summary is always free.** It never costs anything to see the run.
-- **Revive is the Dawn Ward perk, once per run.** Bought once in ASCEND for Perk Points (20, max 1). It is not an
+- **The run-over revive is the Revive perk, once per run.** Bought once in ASCEND for Perk Points (20, max 1). It is not an
   ad, not an IAP, and it refills on every new run. The used flag is saved, so relaunching cannot grant a second one.
 - **Banking happens on death; there is no auto-resume.** The reward is granted when the run ends and the card then
   WAITS for **END RUN**. No countdown, no automatic restart.
@@ -169,7 +168,7 @@ build step** (do not batch).
 After each stage clear, show 3 cards drawn from the run-buff pool; picking one applies it free for this run. Pool =
 Attack Speed, Lifesteal, Gold Find, +ATK %, +HP %, heal-now, and later ability tiers. One skip/reroll allowed.
 
-### 5.4 Revive perk (`Dawn Ward`)
+### 5.4 Revive perk (`Prestige_Revive`)
 
 | Field | v1 value |
 |---|---|

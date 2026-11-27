@@ -77,7 +77,7 @@ permanent ladder, and what makes each run a different build.
 
 **There is no boon list page (decision 2026-11-09).** The hand is shown only on the level-up card - what you hold is
 felt in the fight, not read off a screen. The trade-off is real: a player cannot look up "what did I take in wave 2".
-If playtesting shows confusion, the cheap fix is a one-line count on the XP bar (`LV 4 - 6 boons`) before any list.
+If playtesting shows confusion, the cheap fix is a one-line count on the XP bar (`4 boons`) before any list.
 
 **A boon is a stat bonus today, not a new mechanic.** The seven ops (`AttackPercent`, `HealthPercent`, `DefensePercent`,
 `GoldPercent`, `AttackSpeedPercent`, `CritChanceFlat`, `CritDamageFlat`) all land on getters `StatResolver` already

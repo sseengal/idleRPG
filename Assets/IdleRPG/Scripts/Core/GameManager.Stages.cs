@@ -96,10 +96,10 @@ namespace IdleRPG.Core
             return true;
         }
 
-        /// <summary>True when the Dawn Ward perk (one revive per run) is owned.</summary>
+        /// <summary>True when the Revive perk (one revive per run) is owned.</summary>
         public bool HasRevivePerk => Ascension != null && Ascension.HasPermanentRevive;
 
-        /// <summary>True while Dawn Ward is owned and this run has not used its one revive.</summary>
+        /// <summary>True while Revive is owned and this run has not used its one revive.</summary>
         public bool CanRevive => !reviveUsedThisRun && HasRevivePerk;
 
         private bool reviveUsedThisRun;
@@ -172,7 +172,7 @@ namespace IdleRPG.Core
             SetState(State, GameState.Defeat);
             RaiseStageChanged();
 
-            // Do NOT bank yet: the card offers REVIVE (Dawn Ward perk) or END RUN (which banks + returns to the
+            // Do NOT bank yet: the card offers REVIVE (Revive perk) or END RUN (which banks + returns to the
             // lobby). Banking only when the run truly ends keeps the revive from ever double-paying.
             GameEvents.RaiseDefeatShown(CurrentStage, CurrentStage);
             LogFlow($"RUN OVER on stage {CurrentStage} (REVIVE or END RUN).");
@@ -184,7 +184,7 @@ namespace IdleRPG.Core
             EndRun();
         }
 
-        /// <summary>Run-over card REVIVE: Dawn Ward only. Resumes the SAME stage and spends this run's revive.</summary>
+        /// <summary>Run-over card REVIVE: Revive only. Resumes the SAME stage and spends this run's revive.</summary>
         public bool ReviveFromDefeat()
         {
             if (!CanRevive)
@@ -204,7 +204,7 @@ namespace IdleRPG.Core
         {
             reviveUsedThisRun = true;
             StartRun(CurrentStage);
-            LogFlow($"REVIVED on stage {CurrentStage} (Dawn Ward).");
+            LogFlow($"REVIVED on stage {CurrentStage} (Revive).");
         }
 
         /// <summary>
